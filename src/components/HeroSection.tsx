@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Image } from 'lucide-react';
 
 interface HeroSectionProps {
   language: 'en' | 'es';
@@ -58,10 +57,11 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
           <div className="relative w-full md:w-1/2 mt-8 md:mt-0">
             <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-indigo-600/40 rounded-xl z-10"></div>
             <div className="relative overflow-hidden rounded-xl shadow-2xl">
-              <div className="bg-white aspect-[4/3] flex items-center justify-center">
-                <Image className="w-20 h-20 text-gray-300" />
-                <span className="sr-only">Product screenshot</span>
-              </div>
+              <img 
+                src="/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png" 
+                alt="Motion AI project management interface" 
+                className="w-full h-auto object-cover"
+              />
             </div>
           </div>
         </div>
