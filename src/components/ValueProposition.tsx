@@ -10,7 +10,7 @@ export const ValueProposition = ({ language }: ValuePropositionProps) => {
   const translations = {
     en: {
       title: "Why choose Motion?",
-      subtitle: "Designed to empower cultural creators, political organizations, and small businesses in emerging markets.",
+      subtitle: "Designed to empower creators, organizations, and small businesses anywhere in the world.",
       benefits: [
         {
           title: "Save time and resources",
@@ -26,13 +26,13 @@ export const ValueProposition = ({ language }: ValuePropositionProps) => {
         },
         {
           title: "Custom solution",
-          description: "Adapted to the specific needs of creators and organizations in Latin America."
+          description: "Adapted to the specific needs of creators and organizations globally."
         }
       ]
     },
     es: {
       title: "¿Por qué elegir Motion?",
-      subtitle: "Diseñado para empoderar a creadores culturales, organizaciones políticas y pequeños negocios en mercados emergentes.",
+      subtitle: "Diseñado para empoderar a creadores, organizaciones y pequeños negocios en cualquier parte del mundo.",
       benefits: [
         {
           title: "Ahorra tiempo y recursos",
@@ -48,7 +48,7 @@ export const ValueProposition = ({ language }: ValuePropositionProps) => {
         },
         {
           title: "Solución personalizada",
-          description: "Adaptada a las necesidades específicas de creadores y organizaciones en Latinoamérica."
+          description: "Adaptada a las necesidades específicas de creadores y organizaciones en todo el mundo."
         }
       ]
     }

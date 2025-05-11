@@ -12,13 +12,13 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
   const translations = {
     en: {
       title: "Your virtual team powered by AI",
-      subtitle: "AI copilots that automate administrative tasks, boost your growth, and improve your communication. Designed for creators, organizations, and entrepreneurs in Latin America.",
+      subtitle: "AI copilots that automate administrative tasks, boost your growth, and improve your communication. Designed for creators, organizations, and entrepreneurs worldwide.",
       waitlist: "Join the waitlist",
       learnMore: "Learn more"
     },
     es: {
       title: "Tu equipo virtual impulsado por IA",
-      subtitle: "Copilots de inteligencia artificial que automatizan tareas administrativas, impulsan tu crecimiento y mejoran tu comunicación. Diseñado para creadores, organizaciones y emprendedores en Latinoamérica.",
+      subtitle: "Copilots de inteligencia artificial que automatizan tareas administrativas, impulsan tu crecimiento y mejoran tu comunicación. Diseñado para creadores, organizaciones y emprendedores de todo el mundo.",
       waitlist: "Unirse a la lista de espera",
       learnMore: "Conocer más"
     }
