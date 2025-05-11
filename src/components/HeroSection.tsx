@@ -76,7 +76,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
                     {language === 'en'
-                      ? '"Sure, I've generated a quote based on your previous rates. Should I include technical equipment or just fees?"'
+                      ? `"Sure, I've generated a quote based on your previous rates. Should I include technical equipment or just fees?"`
                       : '"Claro, he generado un presupuesto según tus tarifas anteriores. ¿Incluyo los equipos técnicos o sólo honorarios?"'}
                   </p>
                 </div>
@@ -94,12 +94,12 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
                 <div className="space-y-3 text-sm">
                   <p className="py-2 px-3 bg-white rounded-md border border-slate-100">
                     {language === 'en'
-                      ? '"Prepare a message for the attendees of Saturday\'s event"'
+                      ? `"Prepare a message for the attendees of Saturday's event"`
                       : '"Prepara un mensaje para los asistentes al evento del sábado"'}
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
                     {language === 'en'
-                      ? '"I\'ve created a reminder with map, schedule and FAQs. Would you like me to schedule it to send tomorrow?"'
+                      ? `"I've created a reminder with map, schedule and FAQs. Would you like me to schedule it to send tomorrow?"`
                       : '"He creado un recordatorio con mapa, horarios y preguntas frecuentes. ¿Quieres que lo programe para enviarlo mañana?"'}
                   </p>
                 </div>
