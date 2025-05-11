@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { MessageSquare, Calendar, Users, Star, Send, Plus, X, ArrowRight, Check 
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ProductMaturityMeter } from '@/components/ProductMaturityMeter';
 
 const Dashboard = () => {
   const { language } = useLanguage();
@@ -305,6 +305,11 @@ const Dashboard = () => {
               </Card>
             </div>
             
+            {/* Product Maturity Meter */}
+            <div className="mb-8">
+              <ProductMaturityMeter />
+            </div>
+            
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
               <h2 className="text-xl font-semibold mb-4">{t.selectCopilot}</h2>
               <p className="text-gray-600 mb-6">
@@ -487,6 +492,9 @@ const Dashboard = () => {
                   </Button>
                 </CardContent>
               </Card>
+              
+              {/* The Product Maturity Meter when in chat mode */}
+              <ProductMaturityMeter />
             </div>
           </div>
         )}
