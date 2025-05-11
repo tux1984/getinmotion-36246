@@ -81,20 +81,24 @@ const Index = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950">
-      <header className="container mx-auto py-6 px-4 flex justify-between items-center">
-        <MotionLogo />
-        <div className="flex items-center gap-4">
-          <LanguageSwitcher />
-          <div className="flex gap-2 ml-4">
-            <Button variant="ghost" className="hidden md:flex text-indigo-200 hover:text-white hover:bg-indigo-800/30">{t.navAbout}</Button>
-            <Button variant="ghost" className="hidden md:flex text-indigo-200 hover:text-white hover:bg-indigo-800/30">{t.navCases}</Button>
-            <Button 
-              variant="outline" 
-              className="border-pink-500 text-pink-200 hover:bg-pink-900/20 hover:text-pink-100"
-              onClick={() => document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              {t.navAccess}
-            </Button>
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
+        <div className="container mx-auto py-4 px-4 flex justify-between items-center">
+          <MotionLogo />
+          <div className="flex items-center gap-4">
+            <div className="bg-indigo-900/40 p-2 rounded-lg">
+              <LanguageSwitcher />
+            </div>
+            <div className="flex gap-2 ml-4">
+              <Button variant="ghost" className="hidden md:flex text-indigo-100 hover:text-white hover:bg-indigo-800/50">{t.navAbout}</Button>
+              <Button variant="ghost" className="hidden md:flex text-indigo-100 hover:text-white hover:bg-indigo-800/50">{t.navCases}</Button>
+              <Button 
+                variant="outline" 
+                className="border-pink-500 text-pink-200 hover:bg-pink-900/30 hover:text-pink-100"
+                onClick={() => document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {t.navAccess}
+              </Button>
+            </div>
           </div>
         </div>
       </header>

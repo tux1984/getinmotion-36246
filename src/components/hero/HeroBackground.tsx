@@ -6,7 +6,7 @@ export const HeroBackground: React.FC = () => {
     <>
       {/* Sophisticated artistic background elements */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-10 w-60 h-60 rounded-full bg-pink-500/30 blur-[100px]"></div>
+        <div className="absolute top-[20%] left-10 w-60 h-60 rounded-full bg-pink-500/30 blur-[100px]"></div>
         <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-blue-500/30 blur-[120px]"></div>
         <div className="absolute top-1/2 left-1/3 w-96 h-96 rounded-full bg-purple-500/30 blur-[150px]"></div>
       </div>
@@ -35,7 +35,7 @@ export const HeroBackground: React.FC = () => {
         <div className="absolute top-40 right-1/4 w-20 h-20 border border-purple-300/20 rounded-full"></div>
         
         {/* Dotted grid pattern */}
-        <div className="absolute inset-0 opacity-10" 
+        <div className="absolute inset-0 opacity-10 pt-24" 
              style={{ 
                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)', 
                backgroundSize: '30px 30px' 

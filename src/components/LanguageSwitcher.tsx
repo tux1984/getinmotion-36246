@@ -13,15 +13,16 @@ export const LanguageSwitcher = () => {
   
   return (
     <div className="flex items-center space-x-2">
-      <Label htmlFor="language-toggle" className="cursor-pointer">
+      <Label htmlFor="language-toggle" className="cursor-pointer text-indigo-100 font-medium">
         {language === 'en' ? 'EN' : 'ES'}
       </Label>
       <Switch
         id="language-toggle"
         checked={language === 'es'}
         onCheckedChange={handleChange}
+        className="data-[state=checked]:bg-pink-500"
       />
-      <Label htmlFor="language-toggle" className="cursor-pointer">
+      <Label htmlFor="language-toggle" className="cursor-pointer text-indigo-100 font-medium">
         {language === 'en' ? 'ES' : 'EN'}
       </Label>
     </div>
