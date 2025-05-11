@@ -16,7 +16,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
       waitlist: "Join the waitlist",
       learnMore: "Learn more",
       whatIsMotion: "What is Motion?",
-      motionDescription: "Motion is a platform that helps artists, musicians, and artisans build and manage their creative business — from contracts and payments to publishing and outreach — with tailored AI tools that grow with them.",
+      motionDescription: "Motion also assesses the creator's digital and operational maturity to recommend only the copilots they actually need, when they need them. As the creator grows, Motion adapts—activating new agents, unlocking features and guiding the journey step by step.",
       motionPurpose: "Motion empowers cultural creators to build sustainable careers without sacrificing their creative energy.",
       creativePlatform: "AI-Powered Creative Platform",
       creativePlatformDesc: "A comprehensive platform designed specifically for creators.",
@@ -33,7 +33,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
       waitlist: "Unirse a la lista de espera",
       learnMore: "Conocer más",
       whatIsMotion: "¿Qué es Motion?",
-      motionDescription: "Motion es una plataforma que ayuda a artistas, músicos y artesanos a construir y gestionar su negocio creativo — desde contratos y pagos hasta publicación y difusión — con herramientas de IA personalizadas que crecen con ellos.",
+      motionDescription: "Motion también evalúa la madurez digital y operativa del creador para recomendar solo los copilotos que realmente necesitan, cuando los necesitan. A medida que el creador crece, Motion se adapta: activando nuevos agentes, desbloqueando funciones y guiando el viaje paso a paso.",
       motionPurpose: "Motion empodera a los creadores culturales para construir carreras sostenibles sin sacrificar su energía creativa.",
       creativePlatform: "Plataforma Creativa con IA",
       creativePlatformDesc: "Una plataforma integral diseñada específicamente para creadores.",
@@ -107,8 +107,8 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur-sm opacity-70 z-0"></div>
             <div className="relative overflow-hidden rounded-xl shadow-2xl z-20">
               <img 
-                src="/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png" 
-                alt="Motion AI project management interface" 
+                src="/lovable-uploads/e2faf820-4987-4cf2-a69b-0b534fbbecbd.png" 
+                alt="Motion for artists, musicians and artisans" 
                 className="w-full h-auto object-cover bg-indigo-900/80"
               />
             </div>
