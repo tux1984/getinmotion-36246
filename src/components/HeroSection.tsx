@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Palette, Briefcase, Clock, Rocket } from 'lucide-react';
 
 interface HeroSectionProps {
   language: 'en' | 'es';
@@ -13,13 +14,35 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
       title: "Your virtual team powered by AI",
       subtitle: "AI copilots that automate administrative tasks, boost your growth, and improve your communication. Designed for creators, organizations, and entrepreneurs worldwide.",
       waitlist: "Join the waitlist",
-      learnMore: "Learn more"
+      learnMore: "Learn more",
+      whatIsMotion: "What is Motion?",
+      motionDescription: "Motion is a platform that helps artists, musicians, and artisans build and manage their creative business — from contracts and payments to publishing and outreach — with tailored AI tools that grow with them.",
+      motionPurpose: "Motion empowers cultural creators to build sustainable careers without sacrificing their creative energy.",
+      creativePlatform: "AI-Powered Creative Platform",
+      creativePlatformDesc: "A comprehensive platform designed specifically for creators.",
+      businessSuite: "Business Management Suite",
+      businessSuiteDesc: "Simplifies contracts, payments, publishing, and outreach.",
+      timeProtector: "Creative Time Protector",
+      timeProtectorDesc: "Removes daily business friction so creators can focus on their art and impact.",
+      growthPartner: "Growth Partner",
+      growthPartnerDesc: "Adaptive tools that evolve alongside creators' journeys and expanding needs."
     },
     es: {
       title: "Tu equipo virtual impulsado por IA",
       subtitle: "Copilots de inteligencia artificial que automatizan tareas administrativas, impulsan tu crecimiento y mejoran tu comunicación. Diseñado para creadores, organizaciones y emprendedores de todo el mundo.",
       waitlist: "Unirse a la lista de espera",
-      learnMore: "Conocer más"
+      learnMore: "Conocer más",
+      whatIsMotion: "¿Qué es Motion?",
+      motionDescription: "Motion es una plataforma que ayuda a artistas, músicos y artesanos a construir y gestionar su negocio creativo — desde contratos y pagos hasta publicación y difusión — con herramientas de IA personalizadas que crecen con ellos.",
+      motionPurpose: "Motion empodera a los creadores culturales para construir carreras sostenibles sin sacrificar su energía creativa.",
+      creativePlatform: "Plataforma Creativa con IA",
+      creativePlatformDesc: "Una plataforma integral diseñada específicamente para creadores.",
+      businessSuite: "Suite de Gestión de Negocios",
+      businessSuiteDesc: "Simplifica contratos, pagos, publicación y difusión.",
+      timeProtector: "Protector del Tiempo Creativo",
+      timeProtectorDesc: "Elimina la fricción diaria del negocio para que los creadores puedan centrarse en su arte e impacto.",
+      growthPartner: "Socio de Crecimiento",
+      growthPartnerDesc: "Herramientas adaptativas que evolucionan junto a los creadores y sus necesidades en expansión."
     }
   };
 
@@ -118,6 +141,58 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* What is Motion section */}
+      <div className="mt-24 bg-indigo-950 py-16 text-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-pink-300">{t.whatIsMotion}</h2>
+          
+          <p className="text-xl mb-12 max-w-4xl">
+            {t.motionDescription}
+          </p>
+          
+          <div className="grid md:grid-cols-4 gap-6 relative">
+            {/* Arrow connector for desktop */}
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-indigo-800 -z-1"></div>
+            
+            <div className="relative bg-indigo-900/50 p-6 rounded-lg">
+              <div className="w-16 h-16 rounded-full bg-indigo-800 flex items-center justify-center mb-4">
+                <Palette className="w-8 h-8 text-pink-300" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{t.creativePlatform}</h3>
+              <p className="text-indigo-200">{t.creativePlatformDesc}</p>
+            </div>
+            
+            <div className="relative bg-indigo-900/50 p-6 rounded-lg">
+              <div className="w-16 h-16 rounded-full bg-indigo-800 flex items-center justify-center mb-4">
+                <Briefcase className="w-8 h-8 text-pink-300" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{t.businessSuite}</h3>
+              <p className="text-indigo-200">{t.businessSuiteDesc}</p>
+            </div>
+            
+            <div className="relative bg-indigo-900/50 p-6 rounded-lg">
+              <div className="w-16 h-16 rounded-full bg-indigo-800 flex items-center justify-center mb-4">
+                <Clock className="w-8 h-8 text-pink-300" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{t.timeProtector}</h3>
+              <p className="text-indigo-200">{t.timeProtectorDesc}</p>
+            </div>
+            
+            <div className="relative bg-indigo-900/50 p-6 rounded-lg">
+              <div className="w-16 h-16 rounded-full bg-indigo-800 flex items-center justify-center mb-4">
+                <Rocket className="w-8 h-8 text-pink-300" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">{t.growthPartner}</h3>
+              <p className="text-indigo-200">{t.growthPartnerDesc}</p>
+            </div>
+          </div>
+          
+          <div className="mt-12 text-center">
+            <p className="text-2xl italic text-indigo-100">{t.motionPurpose}</p>
           </div>
         </div>
       </div>
