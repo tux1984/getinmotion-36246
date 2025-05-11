@@ -80,15 +80,19 @@ const Index = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950">
       <header className="container mx-auto py-6 px-4 flex justify-between items-center">
         <MotionLogo />
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
           <div className="flex gap-2 ml-4">
-            <Button variant="ghost" className="hidden md:flex">{t.navAbout}</Button>
-            <Button variant="ghost" className="hidden md:flex">{t.navCases}</Button>
-            <Button variant="outline" onClick={() => document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' })}>
+            <Button variant="ghost" className="hidden md:flex text-indigo-200 hover:text-white hover:bg-indigo-800/30">{t.navAbout}</Button>
+            <Button variant="ghost" className="hidden md:flex text-indigo-200 hover:text-white hover:bg-indigo-800/30">{t.navCases}</Button>
+            <Button 
+              variant="outline" 
+              className="border-pink-500 text-pink-200 hover:bg-pink-900/20 hover:text-pink-100"
+              onClick={() => document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               {t.navAccess}
             </Button>
           </div>
@@ -103,46 +107,61 @@ const Index = () => {
             {showWaitlistForm ? (
               <WaitlistForm language={language} onSubmit={handleWaitlistSubmitted} />
             ) : (
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-center mb-6">{t.formTitle}</h2>
-                  
-                  <Tabs defaultValue="waitlist" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6">
-                      <TabsTrigger value="waitlist" onClick={() => setShowWaitlistForm(true)}>{t.waitlist}</TabsTrigger>
-                      <TabsTrigger value="access">{t.accessCode}</TabsTrigger>
-                    </TabsList>
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                <div className="bg-indigo-950/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden relative border border-indigo-800/30">
+                  <div className="p-6 md:p-8">
+                    <h2 className="text-2xl font-bold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">{t.formTitle}</h2>
                     
-                    <TabsContent value="waitlist">
-                      <Button 
-                        onClick={() => setShowWaitlistForm(true)}
-                        className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-                      >
-                        {t.waitlist}
-                      </Button>
-                    </TabsContent>
-                    
-                    <TabsContent value="access">
-                      <form onSubmit={handleAccessSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Input
-                            type="text"
-                            placeholder={t.accessCodePlaceholder}
-                            value={accessCode}
-                            onChange={(e) => setAccessCode(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <Button 
-                          type="submit" 
-                          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-                          disabled={isLoading}
+                    <Tabs defaultValue="waitlist" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 mb-6 bg-indigo-900/50">
+                        <TabsTrigger 
+                          value="waitlist" 
+                          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                          onClick={() => setShowWaitlistForm(true)}
                         >
-                          {isLoading ? t.verifying : t.accessButton}
+                          {t.waitlist}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="access"
+                          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                        >
+                          {t.accessCode}
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="waitlist">
+                        <Button 
+                          onClick={() => setShowWaitlistForm(true)}
+                          className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none"
+                        >
+                          {t.waitlist}
                         </Button>
-                      </form>
-                    </TabsContent>
-                  </Tabs>
+                      </TabsContent>
+                      
+                      <TabsContent value="access">
+                        <form onSubmit={handleAccessSubmit} className="space-y-4">
+                          <div className="space-y-2">
+                            <Input
+                              type="text"
+                              placeholder={t.accessCodePlaceholder}
+                              value={accessCode}
+                              onChange={(e) => setAccessCode(e.target.value)}
+                              required
+                              className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
+                            />
+                          </div>
+                          <Button 
+                            type="submit" 
+                            className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none"
+                            disabled={isLoading}
+                          >
+                            {isLoading ? t.verifying : t.accessButton}
+                          </Button>
+                        </form>
+                      </TabsContent>
+                    </Tabs>
+                  </div>
                 </div>
               </div>
             )}
