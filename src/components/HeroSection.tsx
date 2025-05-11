@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Image } from 'lucide-react';
 
 interface HeroSectionProps {
   language: 'en' | 'es';
@@ -28,28 +29,40 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
   return (
     <div className="bg-gradient-to-br from-violet-500/10 to-indigo-500/10 py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
-            {t.title}
-          </h1>
-          <p className="text-xl text-gray-700 mb-8">
-            {t.subtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-              onClick={onJoinWaitlist}
-            >
-              {t.waitlist}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              {t.learnMore}
-            </Button>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-xl text-center md:text-left">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
+              {t.title}
+            </h1>
+            <p className="text-xl text-gray-700 mb-8">
+              {t.subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+                onClick={onJoinWaitlist}
+              >
+                {t.waitlist}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {t.learnMore}
+              </Button>
+            </div>
+          </div>
+          
+          <div className="relative w-full md:w-1/2 mt-8 md:mt-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-indigo-600/40 rounded-xl z-10"></div>
+            <div className="relative overflow-hidden rounded-xl shadow-2xl">
+              <div className="bg-white aspect-[4/3] flex items-center justify-center">
+                <Image className="w-20 h-20 text-gray-300" />
+                <span className="sr-only">Product screenshot</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -71,13 +84,13 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
                 <div className="space-y-3 text-sm">
                   <p className="py-2 px-3 bg-white rounded-md border border-slate-100">
                     {language === 'en' 
-                      ? '"I need to send a quote for 3 shows in October"' 
-                      : '"Necesito enviar un presupuesto para 3 shows en octubre"'}
+                      ? `"I need to send a quote for 3 shows in October"` 
+                      : `"Necesito enviar un presupuesto para 3 shows en octubre"`}
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
                     {language === 'en'
                       ? `"Sure, I've generated a quote based on your previous rates. Should I include technical equipment or just fees?"`
-                      : '"Claro, he generado un presupuesto según tus tarifas anteriores. ¿Incluyo los equipos técnicos o sólo honorarios?"'}
+                      : `"Claro, he generado un presupuesto según tus tarifas anteriores. ¿Incluyo los equipos técnicos o sólo honorarios?"`}
                   </p>
                 </div>
               </div>
@@ -95,12 +108,12 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
                   <p className="py-2 px-3 bg-white rounded-md border border-slate-100">
                     {language === 'en'
                       ? `"Prepare a message for the attendees of Saturday's event"`
-                      : '"Prepara un mensaje para los asistentes al evento del sábado"'}
+                      : `"Prepara un mensaje para los asistentes al evento del sábado"`}
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
                     {language === 'en'
                       ? `"I've created a reminder with map, schedule and FAQs. Would you like me to schedule it to send tomorrow?"`
-                      : '"He creado un recordatorio con mapa, horarios y preguntas frecuentes. ¿Quieres que lo programe para enviarlo mañana?"'}
+                      : `"He creado un recordatorio con mapa, horarios y preguntas frecuentes. ¿Quieres que lo programe para enviarlo mañana?"`}
                   </p>
                 </div>
               </div>
