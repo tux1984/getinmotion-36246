@@ -2,38 +2,72 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
-export const ValueProposition = () => {
-  const benefits = [
-    {
-      title: "Ahorra tiempo y recursos",
-      description: "Automatiza tareas repetitivas y administrativas para que puedas enfocarte en lo que realmente importa."
+interface ValuePropositionProps {
+  language: 'en' | 'es';
+}
+
+export const ValueProposition = ({ language }: ValuePropositionProps) => {
+  const translations = {
+    en: {
+      title: "Why choose Motion?",
+      subtitle: "Designed to empower cultural creators, political organizations, and small businesses in emerging markets.",
+      benefits: [
+        {
+          title: "Save time and resources",
+          description: "Automate repetitive and administrative tasks so you can focus on what really matters."
+        },
+        {
+          title: "Operate like a large team",
+          description: "Your copilots work 24/7 managing tasks, communications and processes like a professional team."
+        },
+        {
+          title: "Grow without technical knowledge",
+          description: "You don't need to know about technology to harness the power of AI in your project."
+        },
+        {
+          title: "Custom solution",
+          description: "Adapted to the specific needs of creators and organizations in Latin America."
+        }
+      ]
     },
-    {
-      title: "Opera como un equipo grande",
-      description: "Tus copilots trabajan 24/7 gestionando tareas, comunicaciones y procesos como un equipo profesional."
-    },
-    {
-      title: "Crece sin conocimientos técnicos",
-      description: "No necesitas saber de tecnología para aprovechar el poder de la IA en tu proyecto."
-    },
-    {
-      title: "Solución personalizada",
-      description: "Adaptada a las necesidades específicas de creadores y organizaciones en Latinoamérica."
+    es: {
+      title: "¿Por qué elegir Motion?",
+      subtitle: "Diseñado para empoderar a creadores culturales, organizaciones políticas y pequeños negocios en mercados emergentes.",
+      benefits: [
+        {
+          title: "Ahorra tiempo y recursos",
+          description: "Automatiza tareas repetitivas y administrativas para que puedas enfocarte en lo que realmente importa."
+        },
+        {
+          title: "Opera como un equipo grande",
+          description: "Tus copilots trabajan 24/7 gestionando tareas, comunicaciones y procesos como un equipo profesional."
+        },
+        {
+          title: "Crece sin conocimientos técnicos",
+          description: "No necesitas saber de tecnología para aprovechar el poder de la IA en tu proyecto."
+        },
+        {
+          title: "Solución personalizada",
+          description: "Adaptada a las necesidades específicas de creadores y organizaciones en Latinoamérica."
+        }
+      ]
     }
-  ];
+  };
+
+  const t = translations[language];
 
   return (
     <section className="py-16 bg-white" id="benefits">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">¿Por qué elegir Motion?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t.title}</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Diseñado para empoderar a creadores culturales, organizaciones políticas y pequeños negocios en mercados emergentes.
+            {t.subtitle}
           </p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {benefits.map((benefit, index) => (
+          {t.benefits.map((benefit, index) => (
             <div key={index} className="flex p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <div className="mr-4 mt-1">
                 <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">

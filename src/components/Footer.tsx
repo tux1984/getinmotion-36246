@@ -1,7 +1,40 @@
 
 import React from 'react';
 
-export const Footer = () => {
+interface FooterProps {
+  language: 'en' | 'es';
+}
+
+export const Footer = ({ language }: FooterProps) => {
+  const translations = {
+    en: {
+      tagline: "AI copilots to empower creators and organizations in Latin America.",
+      product: "Product",
+      copilots: "Copilots",
+      benefits: "Benefits",
+      betaAccess: "Beta Access",
+      company: "Company",
+      aboutUs: "About Us",
+      contact: "Contact",
+      privacyPolicy: "Privacy Policy",
+      copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`
+    },
+    es: {
+      tagline: "Copilots de IA para empoderar a creadores y organizaciones en Latinoamérica.",
+      product: "Producto",
+      copilots: "Copilots",
+      benefits: "Beneficios",
+      betaAccess: "Acceso Beta",
+      company: "Empresa",
+      aboutUs: "Sobre Nosotros",
+      contact: "Contacto",
+      privacyPolicy: "Política de Privacidad",
+      copyright: `© ${new Date().getFullYear()} Motion Project. Todos los derechos reservados.`
+    }
+  };
+
+  const t = translations[language];
+
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">
@@ -28,26 +61,26 @@ export const Footer = () => {
               </span>
             </div>
             <p className="text-gray-400 mt-2 max-w-xs">
-              Copilots de IA para empoderar a creadores y organizaciones en Latinoamérica.
+              {t.tagline}
             </p>
           </div>
           
           <div className="grid grid-cols-2 gap-8 sm:gap-16">
             <div>
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Producto</h3>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">{t.product}</h3>
               <ul className="space-y-2">
-                <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">Copilots</a></li>
-                <li><a href="#benefits" className="text-gray-300 hover:text-white transition-colors">Beneficios</a></li>
-                <li><a href="#access" className="text-gray-300 hover:text-white transition-colors">Acceso Beta</a></li>
+                <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">{t.copilots}</a></li>
+                <li><a href="#benefits" className="text-gray-300 hover:text-white transition-colors">{t.benefits}</a></li>
+                <li><a href="#access" className="text-gray-300 hover:text-white transition-colors">{t.betaAccess}</a></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Empresa</h3>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">{t.company}</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Sobre Nosotros</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contacto</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Política de Privacidad</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.aboutUs}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.contact}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.privacyPolicy}</a></li>
               </ul>
             </div>
           </div>
@@ -55,7 +88,7 @@ export const Footer = () => {
         
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Motion Project. Todos los derechos reservados.
+            {t.copyright}
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-gray-400 hover:text-white transition-colors">

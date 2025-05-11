@@ -2,33 +2,53 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  language: 'en' | 'es';
+  onJoinWaitlist: () => void;
+}
+
+export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
+  const translations = {
+    en: {
+      title: "Your virtual team powered by AI",
+      subtitle: "AI copilots that automate administrative tasks, boost your growth, and improve your communication. Designed for creators, organizations, and entrepreneurs in Latin America.",
+      waitlist: "Join the waitlist",
+      learnMore: "Learn more"
+    },
+    es: {
+      title: "Tu equipo virtual impulsado por IA",
+      subtitle: "Copilots de inteligencia artificial que automatizan tareas administrativas, impulsan tu crecimiento y mejoran tu comunicación. Diseñado para creadores, organizaciones y emprendedores en Latinoamérica.",
+      waitlist: "Unirse a la lista de espera",
+      learnMore: "Conocer más"
+    }
+  };
+
+  const t = translations[language];
+
   return (
     <div className="bg-gradient-to-br from-violet-500/10 to-indigo-500/10 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
-            Tu equipo virtual impulsado por IA
+            {t.title}
           </h1>
           <p className="text-xl text-gray-700 mb-8">
-            Copilots de inteligencia artificial que automatizan tareas administrativas, 
-            impulsan tu crecimiento y mejoran tu comunicación. Diseñado para creadores, 
-            organizaciones y emprendedores en Latinoamérica.
+            {t.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
               className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-              onClick={() => document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={onJoinWaitlist}
             >
-              Unirse a la lista de espera
+              {t.waitlist}
             </Button>
             <Button 
               variant="outline" 
               size="lg"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Conocer más
+              {t.learnMore}
             </Button>
           </div>
         </div>
@@ -46,14 +66,18 @@ export const HeroSection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                   </div>
-                  <h3 className="font-medium text-lg">Asistente de Ventas</h3>
+                  <h3 className="font-medium text-lg">{language === 'en' ? 'Sales Assistant' : 'Asistente de Ventas'}</h3>
                 </div>
                 <div className="space-y-3 text-sm">
                   <p className="py-2 px-3 bg-white rounded-md border border-slate-100">
-                    "Necesito enviar un presupuesto para 3 shows en octubre"
+                    {language === 'en' 
+                      ? '"I need to send a quote for 3 shows in October"' 
+                      : '"Necesito enviar un presupuesto para 3 shows en octubre"'}
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
-                    "Claro, he generado un presupuesto según tus tarifas anteriores. ¿Incluyo los equipos técnicos o sólo honorarios?"
+                    {language === 'en'
+                      ? '"Sure, I've generated a quote based on your previous rates. Should I include technical equipment or just fees?"'
+                      : '"Claro, he generado un presupuesto según tus tarifas anteriores. ¿Incluyo los equipos técnicos o sólo honorarios?"'}
                   </p>
                 </div>
               </div>
@@ -65,14 +89,18 @@ export const HeroSection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path>
                     </svg>
                   </div>
-                  <h3 className="font-medium text-lg">Organizador de Eventos</h3>
+                  <h3 className="font-medium text-lg">{language === 'en' ? 'Event Organizer' : 'Organizador de Eventos'}</h3>
                 </div>
                 <div className="space-y-3 text-sm">
                   <p className="py-2 px-3 bg-white rounded-md border border-slate-100">
-                    "Prepara un mensaje para los asistentes al evento del sábado"
+                    {language === 'en'
+                      ? '"Prepare a message for the attendees of Saturday\'s event"'
+                      : '"Prepara un mensaje para los asistentes al evento del sábado"'}
                   </p>
                   <p className="py-2 px-3 bg-indigo-50 rounded-md border border-indigo-100">
-                    "He creado un recordatorio con mapa, horarios y preguntas frecuentes. ¿Quieres que lo programe para enviarlo mañana?"
+                    {language === 'en'
+                      ? '"I\'ve created a reminder with map, schedule and FAQs. Would you like me to schedule it to send tomorrow?"'
+                      : '"He creado un recordatorio con mapa, horarios y preguntas frecuentes. ¿Quieres que lo programe para enviarlo mañana?"'}
                   </p>
                 </div>
               </div>
