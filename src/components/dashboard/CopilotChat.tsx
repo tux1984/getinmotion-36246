@@ -4,11 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X, Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/context/LanguageContext';
-
-interface Message {
-  type: 'user' | 'agent';
-  content: string;
-}
+import { Message } from '@/types/chat';
 
 interface CopilotChatProps {
   activeCopilot: string;
@@ -28,10 +24,7 @@ export const CopilotChat = ({
   initialMessages 
 }: CopilotChatProps) => {
   const { language } = useLanguage();
-  const [messages, setMessages] = useState<Message[]>(initialMessages.map(msg => ({
-    ...msg,
-    type: msg.type === 'copilot' ? 'agent' : 'user'
-  })));
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   

@@ -10,11 +10,7 @@ import { CopilotSelector } from '@/components/dashboard/CopilotSelector';
 import { CopilotChat } from '@/components/dashboard/CopilotChat';
 import { TaskManager } from '@/components/dashboard/TaskManager';
 import { QuickActions } from '@/components/dashboard/QuickActions';
-
-interface Message {
-  type: 'user' | 'copilot';
-  content: string;
-}
+import { Message } from '@/types/chat';
 
 const Dashboard = () => {
   const { language } = useLanguage();
@@ -69,7 +65,7 @@ const Dashboard = () => {
     const selectedAgent = agents.find(c => c.id === id);
     if (selectedAgent) {
       setMessages([
-        { type: 'copilot', content: selectedAgent.greeting }
+        { type: 'agent', content: selectedAgent.greeting }
       ]);
     }
   };
