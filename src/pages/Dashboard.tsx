@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { MessageSquare, Calendar, Users, Star } from 'lucide-react';
+import { FileText, Calculator, FileSpreadsheet, Receipt } from 'lucide-react';
 import { ProductMaturityMeter } from '@/components/ProductMaturityMeter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
@@ -21,65 +21,65 @@ const Dashboard = () => {
   const [activeCopilot, setActiveCopilot] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const copilots = [
+  const agents = [
     { 
-      id: "sales", 
-      name: language === 'en' ? "Sales Assistant" : "Asistente de Ventas",
-      icon: <MessageSquare className="w-5 h-5" />, 
+      id: "admin", 
+      name: language === 'en' ? "Administrative Assistant" : "Asistente Administrativo",
+      icon: <FileText className="w-5 h-5" />, 
       color: "bg-violet-100 text-violet-700", 
       soon: false,
       greeting: language === 'en' 
-        ? "Hi there! I'm your Sales Assistant. I can help you manage inquiries, create quotes, and track potential clients. How can I assist you today?"
-        : "¡Hola! Soy tu Asistente de Ventas. Puedo ayudarte a gestionar consultas, crear presupuestos y hacer seguimiento a clientes potenciales. ¿Cómo puedo ayudarte hoy?"
+        ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
+        : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?"
     },
     { 
-      id: "events", 
-      name: language === 'en' ? "Event Organizer" : "Organizador de Eventos", 
-      icon: <Calendar className="w-5 h-5" />, 
+      id: "accounting", 
+      name: language === 'en' ? "Accounting Agent" : "Agente Contable", 
+      icon: <Calculator className="w-5 h-5" />, 
       color: "bg-indigo-100 text-indigo-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hello! I'm your Event Organizer. I can help you schedule events, manage attendees, send reminders, and track responses. What event are you planning?"
-        : "¡Hola! Soy tu Organizador de Eventos. Puedo ayudarte a programar eventos, gestionar asistentes, enviar recordatorios y hacer seguimiento de respuestas. ¿Qué evento estás planeando?"
+        ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
+        : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
     },
     { 
-      id: "community", 
-      name: language === 'en' ? "Community Manager" : "Gestor de Comunidad", 
-      icon: <Users className="w-5 h-5" />, 
+      id: "contracts", 
+      name: language === 'en' ? "Contract Manager" : "Gestor de Contratos", 
+      icon: <FileSpreadsheet className="w-5 h-5" />, 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hi! I'm your Community Manager. I can help you engage with your audience, analyze feedback, and maintain consistent communication. How would you like to connect with your community today?"
-        : "¡Hola! Soy tu Gestor de Comunidad. Puedo ayudarte a interactuar con tu audiencia, analizar feedback y mantener una comunicación constante. ¿Cómo te gustaría conectar con tu comunidad hoy?"
+        ? "Hi! I'm your Contract Manager. I can help you draft agreements, review terms, and manage your contract deadlines. What contract needs do you have today?"
+        : "¡Hola! Soy tu Gestor de Contratos. Puedo ayudarte a redactar acuerdos, revisar términos y gestionar los plazos de tus contratos. ¿Qué necesidades contractuales tienes hoy?"
     },
     { 
-      id: "content", 
-      name: language === 'en' ? "Content Advisor" : "Asesor de Contenido", 
-      icon: <Star className="w-5 h-5" />, 
+      id: "invoices", 
+      name: language === 'en' ? "Invoice Processor" : "Procesador de Facturas", 
+      icon: <Receipt className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
       soon: true,
       greeting: language === 'en'
-        ? "This copilot is coming soon! Check back for updates."
-        : "¡Este copilot estará disponible pronto! Vuelve para ver actualizaciones."
+        ? "This agent is coming soon! Check back for updates."
+        : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones."
     }
   ];
 
   const handleSelectCopilot = (id: string) => {
     setActiveCopilot(id);
-    const selectedCopilot = copilots.find(c => c.id === id);
-    if (selectedCopilot) {
+    const selectedAgent = agents.find(c => c.id === id);
+    if (selectedAgent) {
       setMessages([
-        { type: 'copilot', content: selectedCopilot.greeting }
+        { type: 'copilot', content: selectedAgent.greeting }
       ]);
     }
   };
 
-  const getCopilotDetails = () => {
-    const copilot = copilots.find(c => c.id === activeCopilot);
+  const getAgentDetails = () => {
+    const agent = agents.find(c => c.id === activeCopilot);
     return {
-      name: copilot?.name || '',
-      icon: copilot?.icon,
-      color: copilot?.color || '',
+      name: agent?.name || '',
+      icon: agent?.icon,
+      color: agent?.color || '',
     };
   };
   
@@ -106,9 +106,9 @@ const Dashboard = () => {
               <CopilotChat 
                 activeCopilot={activeCopilot} 
                 onClose={() => setActiveCopilot(null)}
-                copilotIcon={getCopilotDetails().icon}
-                copilotColor={getCopilotDetails().color}
-                copilotName={getCopilotDetails().name}
+                copilotIcon={getAgentDetails().icon}
+                copilotColor={getAgentDetails().color}
+                copilotName={getAgentDetails().name}
                 initialMessages={messages}
               />
             </div>

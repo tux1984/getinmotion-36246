@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const Index = () => {
       navAbout: "About Us",
       navCases: "Case Studies",
       navAccess: "Access",
-      formTitle: "Join Motion",
+      formTitle: "Join GET IN MOTION",
       waitlist: "Waitlist",
       accessCode: "I have a code",
       accessCodePlaceholder: "Access code",
@@ -39,7 +38,7 @@ const Index = () => {
       navAbout: "Nosotros",
       navCases: "Casos",
       navAccess: "Acceder",
-      formTitle: "Únete a Motion",
+      formTitle: "Únete a GET IN MOTION",
       waitlist: "Lista de espera",
       accessCode: "Tengo un código",
       accessCodePlaceholder: "Código de acceso",

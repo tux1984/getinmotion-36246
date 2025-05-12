@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MessageSquare, Calendar, Users, Star } from 'lucide-react';
+import { FileText, Receipt, Calculator, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -23,22 +23,22 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
   
   const translations = {
     en: {
-      selectCopilot: "Select a copilot to get started",
-      selectCopilotText: "Choose between different specialized copilots according to your needs.",
-      salesAssistant: "Sales Assistant",
-      eventOrganizer: "Event Organizer",
-      communityManager: "Community Manager",
-      contentAdvisor: "Content Advisor",
+      selectCopilot: "Select an agent to get started",
+      selectCopilotText: "Choose between different specialized agents according to your needs.",
+      adminAssistant: "Administrative Assistant",
+      accountingAgent: "Accounting Agent",
+      contractManager: "Contract Manager",
+      invoiceProcessor: "Invoice Processor",
       betaVersion: "Beta version",
       comingSoon: "Coming soon"
     },
     es: {
-      selectCopilot: "Selecciona un copilot para comenzar",
-      selectCopilotText: "Elige entre diferentes copilots especializados según tus necesidades.",
-      salesAssistant: "Asistente de Ventas",
-      eventOrganizer: "Organizador de Eventos",
-      communityManager: "Gestor de Comunidad",
-      contentAdvisor: "Asesor de Contenido",
+      selectCopilot: "Selecciona un agente para comenzar",
+      selectCopilotText: "Elige entre diferentes agentes especializados según tus necesidades.",
+      adminAssistant: "Asistente Administrativo",
+      accountingAgent: "Agente Contable",
+      contractManager: "Gestor de Contratos",
+      invoiceProcessor: "Procesador de Facturas",
       betaVersion: "Versión beta",
       comingSoon: "Próximamente"
     }
@@ -48,44 +48,44 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
   
   const copilots: Copilot[] = [
     { 
-      id: "sales", 
-      name: t.salesAssistant, 
-      icon: <MessageSquare className="w-5 h-5" />, 
+      id: "admin", 
+      name: t.adminAssistant, 
+      icon: <FileText className="w-5 h-5" />, 
       color: "bg-violet-100 text-violet-700", 
       soon: false,
       greeting: language === 'en' 
-        ? "Hi there! I'm your Sales Assistant. I can help you manage inquiries, create quotes, and track potential clients. How can I assist you today?"
-        : "¡Hola! Soy tu Asistente de Ventas. Puedo ayudarte a gestionar consultas, crear presupuestos y hacer seguimiento a clientes potenciales. ¿Cómo puedo ayudarte hoy?"
+        ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
+        : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?"
     },
     { 
-      id: "events", 
-      name: t.eventOrganizer, 
-      icon: <Calendar className="w-5 h-5" />, 
+      id: "accounting", 
+      name: t.accountingAgent, 
+      icon: <Calculator className="w-5 h-5" />, 
       color: "bg-indigo-100 text-indigo-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hello! I'm your Event Organizer. I can help you schedule events, manage attendees, send reminders, and track responses. What event are you planning?"
-        : "¡Hola! Soy tu Organizador de Eventos. Puedo ayudarte a programar eventos, gestionar asistentes, enviar recordatorios y hacer seguimiento de respuestas. ¿Qué evento estás planeando?"
+        ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
+        : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
     },
     { 
-      id: "community", 
-      name: t.communityManager, 
-      icon: <Users className="w-5 h-5" />, 
+      id: "contracts", 
+      name: t.contractManager, 
+      icon: <FileSpreadsheet className="w-5 h-5" />, 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hi! I'm your Community Manager. I can help you engage with your audience, analyze feedback, and maintain consistent communication. How would you like to connect with your community today?"
-        : "¡Hola! Soy tu Gestor de Comunidad. Puedo ayudarte a interactuar con tu audiencia, analizar feedback y mantener una comunicación constante. ¿Cómo te gustaría conectar con tu comunidad hoy?"
+        ? "Hi! I'm your Contract Manager. I can help you draft agreements, review terms, and manage your contract deadlines. What contract needs do you have today?"
+        : "¡Hola! Soy tu Gestor de Contratos. Puedo ayudarte a redactar acuerdos, revisar términos y gestionar los plazos de tus contratos. ¿Qué necesidades contractuales tienes hoy?"
     },
     { 
-      id: "content", 
-      name: t.contentAdvisor, 
-      icon: <Star className="w-5 h-5" />, 
+      id: "invoices", 
+      name: t.invoiceProcessor, 
+      icon: <Receipt className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
       soon: true,
       greeting: language === 'en'
-        ? "This copilot is coming soon! Check back for updates."
-        : "¡Este copilot estará disponible pronto! Vuelve para ver actualizaciones."
+        ? "This agent is coming soon! Check back for updates."
+        : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones."
     }
   ];
 
@@ -94,8 +94,8 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
       toast({
         title: language === 'en' ? 'Coming Soon' : 'Próximamente',
         description: language === 'en' 
-          ? 'This copilot is still in development and will be available soon!'
-          : '¡Este copilot está aún en desarrollo y estará disponible pronto!',
+          ? 'This agent is still in development and will be available soon!'
+          : '¡Este agente está aún en desarrollo y estará disponible pronto!',
       });
       return;
     }

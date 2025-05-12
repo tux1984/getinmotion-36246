@@ -7,12 +7,12 @@ export const WelcomeSection = () => {
   
   const translations = {
     en: {
-      welcome: "Welcome to Motion MVP!",
-      welcomeText: "This is an early version of the dashboard. You can now interact with your copilots."
+      welcome: "Welcome to GET IN MOTION MVP!",
+      welcomeText: "This is an early version of the dashboard. You can now interact with your back office agents."
     },
     es: {
-      welcome: "¡Bienvenido al MVP de Motion!",
-      welcomeText: "Esta es una versión temprana del dashboard. Ahora puedes interactuar con tus copilots."
+      welcome: "¡Bienvenido al MVP de GET IN MOTION!",
+      welcomeText: "Esta es una versión temprana del dashboard. Ahora puedes interactuar con tus agentes de oficina."
     }
   };
   

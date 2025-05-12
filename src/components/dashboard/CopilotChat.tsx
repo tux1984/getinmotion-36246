@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface Message {
-  type: 'user' | 'copilot';
+  type: 'user' | 'agent';
   content: string;
 }
 
@@ -28,7 +28,10 @@ export const CopilotChat = ({
   initialMessages 
 }: CopilotChatProps) => {
   const { language } = useLanguage();
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages.map(msg => ({
+    ...msg,
+    type: msg.type === 'copilot' ? 'agent' : 'user'
+  })));
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   
@@ -53,25 +56,25 @@ export const CopilotChat = ({
     setInputMessage('');
     setIsTyping(true);
     
-    // Simulate copilot response
+    // Simulate agent response
     setTimeout(() => {
       let response = '';
       
-      if (activeCopilot === 'sales') {
+      if (activeCopilot === 'admin') {
         response = language === 'en'
-          ? "I understand you need help with sales. I've analyzed your recent inquiries and can help you create a response. Would you like me to generate a quote based on your standard rates?"
-          : "Entiendo que necesitas ayuda con ventas. He analizado tus consultas recientes y puedo ayudarte a crear una respuesta. ¿Quieres que genere un presupuesto basado en tus tarifas estándar?";
-      } else if (activeCopilot === 'events') {
+          ? "I can help you organize your administrative tasks. Would you like me to create a filing system for your documents or help manage your calendar appointments?"
+          : "Puedo ayudarte a organizar tus tareas administrativas. ¿Te gustaría que creara un sistema de archivo para tus documentos o que te ayudara a gestionar tus citas en el calendario?";
+      } else if (activeCopilot === 'accounting') {
         response = language === 'en'
-          ? "I can help you organize your upcoming event. Would you like me to create a schedule template, send out invitations, or perhaps set up automated reminders for attendees?"
-          : "Puedo ayudarte a organizar tu próximo evento. ¿Quieres que cree una plantilla de horario, envíe invitaciones o quizás configure recordatorios automatizados para los asistentes?";
-      } else if (activeCopilot === 'community') {
+          ? "I've analyzed your recent expenses. Would you like me to categorize them for tax purposes or prepare a monthly financial summary?"
+          : "He analizado tus gastos recientes. ¿Te gustaría que los categorizara para fines fiscales o preparara un resumen financiero mensual?";
+      } else if (activeCopilot === 'contracts') {
         response = language === 'en'
-          ? "I've analyzed your community engagement metrics from last week. Your latest post received 43% more interaction than average. Would you like me to suggest topics for your next content series?"
-          : "He analizado las métricas de participación de tu comunidad de la semana pasada. Tu última publicación recibió un 43% más de interacción que el promedio. ¿Quieres que te sugiera temas para tu próxima serie de contenidos?";
+          ? "I can help manage your contracts and agreements. Would you like me to draft a new contract template or review an existing agreement for any potential issues?"
+          : "Puedo ayudarte a gestionar tus contratos y acuerdos. ¿Te gustaría que redactara una nueva plantilla de contrato o revisara un acuerdo existente en busca de posibles problemas?";
       }
       
-      setMessages(prev => [...prev, { type: 'copilot', content: response }]);
+      setMessages(prev => [...prev, { type: 'agent', content: response }]);
       setIsTyping(false);
     }, 1500);
   };
