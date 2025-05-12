@@ -42,18 +42,18 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <h3 className="font-medium text-xl text-indigo-200">{language === 'en' ? 'Accounting Agent' : 'Agente Contable'}</h3>
+                <h3 className="font-medium text-xl text-indigo-200">{language === 'en' ? 'Legal Advisor' : 'Asesor Legal'}</h3>
               </div>
               <div className="space-y-3 text-sm">
                 <p className="py-2 px-3 bg-indigo-800/50 rounded-md border border-indigo-700/30 text-indigo-100">
                   {language === 'en'
-                    ? `"Create a summary of my business expenses for the last quarter"`
-                    : `"Crea un resumen de mis gastos comerciales para el último trimestre"`}
+                    ? `"Review this contract for any legal issues before I sign it"`
+                    : `"Revisa este contrato por cualquier problema legal antes de que lo firme"`}
                 </p>
                 <p className="py-2 px-3 bg-purple-900/30 rounded-md border border-purple-700/30 text-purple-100">
                   {language === 'en'
-                    ? `"I've analyzed your expenses and created a report with categories and tax deduction opportunities. Your highest expense category was equipment at 35% of total spend."`
-                    : `"He analizado tus gastos y creado un informe con categorías y oportunidades de deducción de impuestos. Tu categoría de gastos más alta fue equipo con un 35% del gasto total."`}
+                    ? `"I've reviewed the contract and found several clauses that need attention. The termination clause is too vague and the payment terms don't include late payment penalties."`
+                    : `"He revisado el contrato y encontrado varias cláusulas que necesitan atención. La cláusula de terminación es demasiado vaga y los términos de pago no incluyen penalizaciones por pagos tardíos."`}
                 </p>
               </div>
             </div>

@@ -61,10 +61,14 @@ export const CopilotChat = ({
         response = language === 'en'
           ? "I've analyzed your recent expenses. Would you like me to categorize them for tax purposes or prepare a monthly financial summary?"
           : "He analizado tus gastos recientes. ¿Te gustaría que los categorizara para fines fiscales o preparara un resumen financiero mensual?";
-      } else if (activeCopilot === 'contracts') {
+      } else if (activeCopilot === 'legal') {
         response = language === 'en'
-          ? "I can help manage your contracts and agreements. Would you like me to draft a new contract template or review an existing agreement for any potential issues?"
-          : "Puedo ayudarte a gestionar tus contratos y acuerdos. ¿Te gustaría que redactara una nueva plantilla de contrato o revisara un acuerdo existente en busca de posibles problemas?";
+          ? "I can help with your legal documentation needs. Would you like me to review your existing contracts or create a new template for your upcoming business partnerships?"
+          : "Puedo ayudarte con tus necesidades de documentación legal. ¿Te gustaría que revisara tus contratos existentes o creara una nueva plantilla para tus próximas asociaciones comerciales?";
+      } else if (activeCopilot === 'operations') {
+        response = language === 'en'
+          ? "As your Operations Manager, I can help streamline your business processes. What operational challenges are you facing today?"
+          : "Como tu Gerente de Operaciones, puedo ayudarte a optimizar tus procesos de negocio. ¿Qué desafíos operativos estás enfrentando hoy?";
       }
       
       setMessages(prev => [...prev, { type: 'agent', content: response }]);

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { FileText, Calculator, FileSpreadsheet, Receipt } from 'lucide-react';
+import { FileText, Calculator, FileSpreadsheet, Receipt, Briefcase } from 'lucide-react';
 import { ProductMaturityMeter } from '@/components/ProductMaturityMeter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
@@ -39,19 +39,19 @@ const Dashboard = () => {
         : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
     },
     { 
-      id: "contracts", 
-      name: language === 'en' ? "Contract Manager" : "Gestor de Contratos", 
+      id: "legal", 
+      name: language === 'en' ? "Legal Advisor" : "Asesor Legal", 
       icon: <FileSpreadsheet className="w-5 h-5" />, 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hi! I'm your Contract Manager. I can help you draft agreements, review terms, and manage your contract deadlines. What contract needs do you have today?"
-        : "¡Hola! Soy tu Gestor de Contratos. Puedo ayudarte a redactar acuerdos, revisar términos y gestionar los plazos de tus contratos. ¿Qué necesidades contractuales tienes hoy?"
+        ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
+        : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?"
     },
     { 
-      id: "invoices", 
-      name: language === 'en' ? "Invoice Processor" : "Procesador de Facturas", 
-      icon: <Receipt className="w-5 h-5" />, 
+      id: "operations", 
+      name: language === 'en' ? "Operations Manager" : "Gerente de Operaciones", 
+      icon: <Briefcase className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
       soon: true,
       greeting: language === 'en'

@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { FileText, Receipt, Calculator, FileSpreadsheet } from 'lucide-react';
+import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
 
-interface Copilot {
+interface Agent {
   id: string;
   name: string;
   icon: React.ReactNode;
@@ -24,21 +24,21 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
   const translations = {
     en: {
       selectCopilot: "Select an agent to get started",
-      selectCopilotText: "Choose between different specialized agents according to your needs.",
+      selectCopilotText: "Choose between different specialized back office agents according to your needs.",
       adminAssistant: "Administrative Assistant",
       accountingAgent: "Accounting Agent",
-      contractManager: "Contract Manager",
-      invoiceProcessor: "Invoice Processor",
+      legalAdvisor: "Legal Advisor",
+      operationsManager: "Operations Manager",
       betaVersion: "Beta version",
       comingSoon: "Coming soon"
     },
     es: {
       selectCopilot: "Selecciona un agente para comenzar",
-      selectCopilotText: "Elige entre diferentes agentes especializados según tus necesidades.",
+      selectCopilotText: "Elige entre diferentes agentes especializados de back office según tus necesidades.",
       adminAssistant: "Asistente Administrativo",
       accountingAgent: "Agente Contable",
-      contractManager: "Gestor de Contratos",
-      invoiceProcessor: "Procesador de Facturas",
+      legalAdvisor: "Asesor Legal",
+      operationsManager: "Gerente de Operaciones",
       betaVersion: "Versión beta",
       comingSoon: "Próximamente"
     }
@@ -46,7 +46,7 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
   
   const t = translations[language];
   
-  const copilots: Copilot[] = [
+  const agents: Agent[] = [
     { 
       id: "admin", 
       name: t.adminAssistant, 
@@ -68,19 +68,19 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
         : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
     },
     { 
-      id: "contracts", 
-      name: t.contractManager, 
+      id: "legal", 
+      name: t.legalAdvisor, 
       icon: <FileSpreadsheet className="w-5 h-5" />, 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       greeting: language === 'en'
-        ? "Hi! I'm your Contract Manager. I can help you draft agreements, review terms, and manage your contract deadlines. What contract needs do you have today?"
-        : "¡Hola! Soy tu Gestor de Contratos. Puedo ayudarte a redactar acuerdos, revisar términos y gestionar los plazos de tus contratos. ¿Qué necesidades contractuales tienes hoy?"
+        ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
+        : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?"
     },
     { 
-      id: "invoices", 
-      name: t.invoiceProcessor, 
-      icon: <Receipt className="w-5 h-5" />, 
+      id: "operations", 
+      name: t.operationsManager, 
+      icon: <Briefcase className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
       soon: true,
       greeting: language === 'en'
@@ -90,7 +90,7 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
   ];
 
   const handleSelectCopilot = (id: string) => {
-    if (copilots.find(c => c.id === id)?.soon) {
+    if (agents.find(c => c.id === id)?.soon) {
       toast({
         title: language === 'en' ? 'Coming Soon' : 'Próximamente',
         description: language === 'en' 
@@ -111,17 +111,17 @@ export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
       </p>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {copilots.map((copilot) => (
+        {agents.map((agent) => (
           <div 
-            key={copilot.id}
-            className={`p-5 rounded-lg border ${copilot.soon ? 'border-gray-200 opacity-70' : 'border-violet-200 cursor-pointer hover:border-violet-300 hover:shadow-sm transition-all'}`}
-            onClick={() => handleSelectCopilot(copilot.id)}
+            key={agent.id}
+            className={`p-5 rounded-lg border ${agent.soon ? 'border-gray-200 opacity-70' : 'border-violet-200 cursor-pointer hover:border-violet-300 hover:shadow-sm transition-all'}`}
+            onClick={() => handleSelectCopilot(agent.id)}
           >
-            <div className={`w-10 h-10 rounded-full ${copilot.color} flex items-center justify-center mb-3`}>
-              {copilot.icon}
+            <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
+              {agent.icon}
             </div>
-            <h3 className="font-medium mb-1">{copilot.name}</h3>
-            {copilot.soon ? (
+            <h3 className="font-medium mb-1">{agent.name}</h3>
+            {agent.soon ? (
               <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
             ) : (
               <span className="text-sm text-gray-500">{t.betaVersion}</span>
