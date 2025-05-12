@@ -10,7 +10,7 @@ export const MotionLogo = () => {
         className="h-10 w-auto mr-2 filter drop-shadow-lg"
       />
       <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-300 to-indigo-200 drop-shadow-sm">
-        Motion
+        Get in Motion
       </span>
     </div>
   );
