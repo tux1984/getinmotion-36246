@@ -2,7 +2,7 @@
 export const heroTranslations = {
   en: {
     title: "What is GET IN MOTION?",
-    subtitle: "GET IN MOTION is a platform that helps artists, musicians, and artisans build and manage their creative business — from contracts and payments to publishing and outreach — with tailored AI tools that grow with them.",
+    subtitle: "GET IN MOTION is a platform that helps artists, musicians, and artisans build and manage their creative business — from contracts and payments to publishing and outreach — with tailored AI agents that grow with them.",
     waitlist: "Join the Waitlist – Let's GET IN MOTION",
     learnMore: "Learn more",
     whatIsMotion: "What is GET IN MOTION?",
