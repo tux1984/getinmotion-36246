@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { Slider } from '@/components/ui/slider';
-import { ChartBarIcon, Gauge } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Gauge, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { ProductMaturityCalculator } from './ProductMaturityCalculator';
 
 interface MaturityCategory {
   name: { en: string; es: string };
@@ -13,8 +14,8 @@ interface MaturityCategory {
 
 export const ProductMaturityMeter = () => {
   const { language } = useLanguage();
-  
-  const categories: MaturityCategory[] = [
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const [categories, setCategories] = useState<MaturityCategory[]>([
     {
       name: { en: 'Idea Validation', es: 'Validación de Idea' },
       score: 90,
@@ -35,7 +36,7 @@ export const ProductMaturityMeter = () => {
       score: 30,
       color: 'bg-amber-500'
     }
-  ];
+  ]);
 
   const overallScore = Math.round(
     categories.reduce((acc, category) => acc + category.score, 0) / categories.length
@@ -50,20 +51,43 @@ export const ProductMaturityMeter = () => {
 
   const translations = {
     en: {
-      title: "Product Maturity",
+      title: "Project Maturity",
       overallMaturity: "Overall Maturity",
       level: "Level",
-      categories: "Categories"
+      categories: "Categories",
+      calculate: "Calculate Your Maturity",
+      recalculate: "Recalculate",
+      calculateDesc: "Answer questions to get a personalized assessment"
     },
     es: {
-      title: "Madurez del Producto",
+      title: "Madurez del Proyecto",
       overallMaturity: "Madurez General",
       level: "Nivel",
-      categories: "Categorías"
+      categories: "Categorías",
+      calculate: "Calcula Tu Madurez",
+      recalculate: "Recalcular",
+      calculateDesc: "Responde preguntas para obtener una evaluación personalizada"
     }
   };
 
   const t = translations[language];
+  
+  const handleCalculatorComplete = (scores: {
+    ideaValidation: number;
+    userExperience: number;
+    marketFit: number;
+    monetization: number;
+  }) => {
+    // Update the categories with the new scores
+    const updatedCategories = [...categories];
+    
+    updatedCategories[0].score = scores.ideaValidation;
+    updatedCategories[1].score = scores.userExperience;
+    updatedCategories[2].score = scores.marketFit;
+    updatedCategories[3].score = scores.monetization;
+    
+    setCategories(updatedCategories);
+  };
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -98,7 +122,7 @@ export const ProductMaturityMeter = () => {
         </div>
       </div>
       
-      <div>
+      <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-sm font-medium">{t.categories}</h3>
           <span className="text-xs text-slate-500">{t.level}</span>
@@ -116,6 +140,24 @@ export const ProductMaturityMeter = () => {
           ))}
         </div>
       </div>
+      
+      <Button 
+        onClick={() => setCalculatorOpen(true)}
+        className="w-full flex justify-between items-center"
+        variant="outline"
+      >
+        <span>{overallScore > 0 ? t.recalculate : t.calculate}</span>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span>{t.calculateDesc}</span>
+          <ArrowRight className="h-3 w-3" />
+        </div>
+      </Button>
+      
+      <ProductMaturityCalculator 
+        open={calculatorOpen}
+        onOpenChange={setCalculatorOpen}
+        onComplete={handleCalculatorComplete}
+      />
     </div>
   );
 };
