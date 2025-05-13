@@ -7,12 +7,12 @@ interface HeroChatBoxesProps {
 
 export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
   return (
-    <div className="mt-24 max-w-5xl mx-auto px-4 relative z-10">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">
+    <div className="mt-12 md:mt-24 max-w-5xl mx-auto px-4 relative z-10">
+      <div className="text-center mb-8 md:mb-12">
+        <h2 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">
           {language === 'en' ? 'Back Office Agents for Every Need' : 'Agentes de Back Office para Cada Necesidad'}
         </h2>
-        <p className="text-lg text-indigo-100 max-w-3xl mx-auto">
+        <p className="text-base md:text-lg text-indigo-100 max-w-3xl mx-auto">
           {language === 'en' 
             ? 'Each agent specializes in solving different back office challenges faced by creative businesses.' 
             : 'Cada agente se especializa en resolver diferentes desafíos de back office que enfrentan los negocios creativos.'}
@@ -21,18 +21,18 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
       
       <div className="relative rounded-xl overflow-hidden shadow-2xl backdrop-blur-md">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-800/50 to-purple-900/50 z-10 rounded-xl"></div>
-        <div className="bg-black/30 p-6 md:p-8 rounded-xl border border-indigo-500/20 backdrop-blur-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-            <div className="flex-1 bg-indigo-900/50 rounded-lg p-5 border border-indigo-700/30 backdrop-blur-sm">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <div className="bg-black/30 p-4 md:p-8 rounded-xl border border-indigo-500/20 backdrop-blur-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10">
+            <div className="flex-1 bg-indigo-900/50 rounded-lg p-3 md:p-5 border border-indigo-700/30 backdrop-blur-sm">
+              <div className="flex items-center mb-3 md:mb-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <h3 className="font-medium text-xl text-indigo-200">{language === 'en' ? 'Accounting Agent' : 'Agente Contable'}</h3>
+                <h3 className="font-medium text-lg md:text-xl text-indigo-200">{language === 'en' ? 'Accounting Agent' : 'Agente Contable'}</h3>
               </div>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
                 <p className="py-2 px-3 bg-indigo-800/50 rounded-md border border-indigo-700/30 text-indigo-100">
                   {language === 'en'
                     ? `"I need help categorizing my expenses for tax season"`
@@ -46,16 +46,16 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
               </div>
             </div>
             
-            <div className="flex-1 bg-indigo-900/50 rounded-lg p-5 border border-indigo-700/30 backdrop-blur-sm">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex-1 bg-indigo-900/50 rounded-lg p-3 md:p-5 border border-indigo-700/30 backdrop-blur-sm">
+              <div className="flex items-center mb-3 md:mb-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                 </div>
-                <h3 className="font-medium text-xl text-pink-200">{language === 'en' ? 'Operations Manager' : 'Gerente de Operaciones'}</h3>
+                <h3 className="font-medium text-lg md:text-xl text-pink-200">{language === 'en' ? 'Operations Manager' : 'Gerente de Operaciones'}</h3>
               </div>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
                 <p className="py-2 px-3 bg-indigo-800/50 rounded-md border border-indigo-700/30 text-indigo-100">
                   {language === 'en' 
                     ? `"We need to streamline our client onboarding process"` 
@@ -70,17 +70,17 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-6">
-            <div className="flex-1 bg-indigo-900/50 rounded-lg p-5 border border-indigo-700/30 backdrop-blur-sm">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 mt-4 md:mt-6">
+            <div className="flex-1 bg-indigo-900/50 rounded-lg p-3 md:p-5 border border-indigo-700/30 backdrop-blur-sm">
+              <div className="flex items-center mb-3 md:mb-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
                 </div>
-                <h3 className="font-medium text-xl text-blue-200">{language === 'en' ? 'Legal Advisor' : 'Asesor Legal'}</h3>
+                <h3 className="font-medium text-lg md:text-xl text-blue-200">{language === 'en' ? 'Legal Advisor' : 'Asesor Legal'}</h3>
               </div>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
                 <p className="py-2 px-3 bg-indigo-800/50 rounded-md border border-indigo-700/30 text-indigo-100">
                   {language === 'en'
                     ? `"I need a contract template for new client projects"`
@@ -94,16 +94,16 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
               </div>
             </div>
             
-            <div className="flex-1 bg-indigo-900/50 rounded-lg p-5 border border-indigo-700/30 backdrop-blur-sm">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex-1 bg-indigo-900/50 rounded-lg p-3 md:p-5 border border-indigo-700/30 backdrop-blur-sm">
+              <div className="flex items-center mb-3 md:mb-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                   </svg>
                 </div>
-                <h3 className="font-medium text-xl text-emerald-200">{language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo'}</h3>
+                <h3 className="font-medium text-lg md:text-xl text-emerald-200">{language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo'}</h3>
               </div>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
                 <p className="py-2 px-3 bg-indigo-800/50 rounded-md border border-indigo-700/30 text-indigo-100">
                   {language === 'en'
                     ? `"Can you help me organize my calendar and emails for the next project launch?"`

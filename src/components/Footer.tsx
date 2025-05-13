@@ -8,7 +8,7 @@ interface FooterProps {
 export const Footer = ({ language }: FooterProps) => {
   const translations = {
     en: {
-      tagline: "AI agents to empower creators and organizations in Latin America.",
+      tagline: "AI agents for back office management to empower creators and organizations in Latin America.",
       product: "Product",
       agents: "Agents",
       benefits: "Benefits",
@@ -20,7 +20,7 @@ export const Footer = ({ language }: FooterProps) => {
       copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`
     },
     es: {
-      tagline: "Agentes de IA para empoderar a creadores y organizaciones en Latinoamérica.",
+      tagline: "Agentes de IA para gestión de back office para empoderar a creadores y organizaciones en Latinoamérica.",
       product: "Producto",
       agents: "Agentes",
       benefits: "Beneficios",
