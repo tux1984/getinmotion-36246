@@ -8,9 +8,9 @@ interface FooterProps {
 export const Footer = ({ language }: FooterProps) => {
   const translations = {
     en: {
-      tagline: "AI copilots to empower creators and organizations in Latin America.",
+      tagline: "AI agents to empower creators and organizations in Latin America.",
       product: "Product",
-      copilots: "Copilots",
+      agents: "Agents",
       benefits: "Benefits",
       betaAccess: "Beta Access",
       company: "Company",
@@ -20,9 +20,9 @@ export const Footer = ({ language }: FooterProps) => {
       copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`
     },
     es: {
-      tagline: "Copilots de IA para empoderar a creadores y organizaciones en Latinoamérica.",
+      tagline: "Agentes de IA para empoderar a creadores y organizaciones en Latinoamérica.",
       product: "Producto",
-      copilots: "Copilots",
+      agents: "Agentes",
       benefits: "Beneficios",
       betaAccess: "Acceso Beta",
       company: "Empresa",
@@ -69,7 +69,7 @@ export const Footer = ({ language }: FooterProps) => {
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">{t.product}</h3>
               <ul className="space-y-2">
-                <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">{t.copilots}</a></li>
+                <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">{t.agents}</a></li>
                 <li><a href="#benefits" className="text-gray-300 hover:text-white transition-colors">{t.benefits}</a></li>
                 <li><a href="#access" className="text-gray-300 hover:text-white transition-colors">{t.betaAccess}</a></li>
               </ul>
