@@ -170,7 +170,8 @@ const OnePager = () => {
     setSelectedLanguage(value);
   };
 
-  const renderSection = (icon, title, content, bullets) => (
+  // Fixed the renderSection function to properly handle null content/bullets
+  const renderSection = (icon, title, content, bullets = null) => (
     <div className="bg-gradient-to-br from-indigo-950 to-purple-950 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all border border-indigo-800/30">
       <div className="flex items-center mb-4">
         {icon}
