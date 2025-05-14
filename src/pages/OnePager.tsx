@@ -16,12 +16,12 @@ import { OnePagerLayout } from './onePager/OnePagerLayout';
 
 const OnePager = () => {
   const { language } = useLanguage();
-  const [selectedLanguage, setSelectedLanguage] = useState(language);
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'es'>(language as 'en' | 'es');
   
   const t = onePagerTranslations[selectedLanguage];
 
-  const handleTabChange = (value) => {
-    setSelectedLanguage(value);
+  const handleTabChange = (value: string) => {
+    setSelectedLanguage(value as 'en' | 'es');
   };
 
   return (

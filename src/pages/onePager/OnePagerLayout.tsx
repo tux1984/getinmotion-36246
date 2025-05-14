@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer';
 import { ArrowRight } from 'lucide-react';
 
 interface OnePagerLayoutProps {
-  selectedLanguage: string;
+  selectedLanguage: 'en' | 'es';  // Update the type here to be more specific
   title: string;
   subtitle: string;
   backText: string;
@@ -71,7 +71,7 @@ export const OnePagerLayout = ({
         {children}
       </main>
 
-      <Footer language={selectedLanguage} />
+      <Footer language={selectedLanguage as 'en' | 'es'} />
     </div>
   );
 };
