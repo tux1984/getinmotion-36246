@@ -17,6 +17,7 @@ export const Footer = ({ language }: FooterProps) => {
       aboutUs: "About Us",
       contact: "Contact",
       privacyPolicy: "Privacy Policy",
+      onePager: "One",
       copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`
     },
     es: {
@@ -29,6 +30,7 @@ export const Footer = ({ language }: FooterProps) => {
       aboutUs: "Sobre Nosotros",
       contact: "Contacto",
       privacyPolicy: "Política de Privacidad",
+      onePager: "One",
       copyright: `© ${new Date().getFullYear()} Motion Project. Todos los derechos reservados.`
     }
   };
@@ -81,6 +83,7 @@ export const Footer = ({ language }: FooterProps) => {
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.aboutUs}</a></li>
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.contact}</a></li>
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.privacyPolicy}</a></li>
+                <li><a href="/one-pager" className="text-gray-300 hover:text-white transition-colors">{t.onePager}</a></li>
               </ul>
             </div>
           </div>
