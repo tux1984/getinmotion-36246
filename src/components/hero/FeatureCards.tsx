@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Palette, Briefcase, Clock, Rocket } from 'lucide-react';
-
 interface FeatureCardsProps {
   whatIsMotion: string;
   motionDescription: string;
@@ -15,7 +13,6 @@ interface FeatureCardsProps {
   growthPartner: string;
   growthPartnerDesc: string;
 }
-
 export const FeatureCards: React.FC<FeatureCardsProps> = ({
   whatIsMotion,
   motionDescription,
@@ -29,8 +26,7 @@ export const FeatureCards: React.FC<FeatureCardsProps> = ({
   growthPartner,
   growthPartnerDesc
 }) => {
-  return (
-    <div className="mt-24 bg-gradient-to-br from-indigo-950 to-purple-950 py-16 text-white relative">
+  return <div className="mt-24 bg-gradient-to-br from-indigo-950 to-purple-950 py-16 text-white relative">
       {/* Abstract art elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full bg-indigo-500 mix-blend-soft-light blur-3xl"></div>
@@ -38,7 +34,7 @@ export const FeatureCards: React.FC<FeatureCardsProps> = ({
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">{whatIsMotion}</h2>
+        <h2 className="text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif text-center">{whatIsMotion}</h2>
         
         <p className="text-xl mb-16 max-w-4xl leading-relaxed text-indigo-100">
           {motionDescription}
@@ -97,6 +93,5 @@ export const FeatureCards: React.FC<FeatureCardsProps> = ({
           <p className="text-2xl italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">{motionPurpose}</p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
