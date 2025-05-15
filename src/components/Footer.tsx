@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface FooterProps {
@@ -83,7 +82,9 @@ export const Footer = ({ language }: FooterProps) => {
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.aboutUs}</a></li>
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.contact}</a></li>
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors">{t.privacyPolicy}</a></li>
-                <li><a href="/one-pager" className="text-gray-300 hover:text-white transition-colors">{t.onePager}</a></li>
+                <li><a href="/one-pager" className="text-gray-300 hover:text-white transition-colors">One</a></li>
+                <li><a href="/two-pager" className="text-gray-300 hover:text-white transition-colors">Two</a></li>
+                <li><a href="/three-pager" className="text-gray-300 hover:text-white transition-colors">Three</a></li>
               </ul>
             </div>
           </div>
