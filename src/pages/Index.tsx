@@ -12,6 +12,7 @@ import { WaitlistForm } from '@/components/WaitlistForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ProfileSelector } from '@/components/ProfileSelector';
 
 const Index = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const Index = () => {
   const [accessCode, setAccessCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
+  const [userProfile, setUserProfile] = useState<'idea' | 'solo' | 'team' | null>(null);
   const isMobile = useIsMobile();
   
   // Translations object
@@ -80,6 +82,12 @@ const Index = () => {
     setShowWaitlistForm(false);
   };
   
+  const handleProfileSelect = (profileType: 'idea' | 'solo' | 'team' | null) => {
+    setUserProfile(profileType);
+    // Here you would normally store this in localStorage or in a backend
+    localStorage.setItem('userProfile', profileType || '');
+  };
+  
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950">
       <header className="sticky top-0 z-50 backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
@@ -106,6 +114,8 @@ const Index = () => {
       
       <main className="flex-grow">
         <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
+        
+        <ProfileSelector onProfileSelected={handleProfileSelect} />
         
         <div className="container mx-auto px-4 py-8 md:py-16" id="access">
           <div className="max-w-4xl mx-auto">
