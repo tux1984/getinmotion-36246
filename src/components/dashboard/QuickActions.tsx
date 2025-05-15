@@ -1,32 +1,90 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, MessageSquare, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/context/LanguageContext';
+import { 
+  FileText, 
+  Download, 
+  Share2, 
+  Bot,
+  ExternalLink 
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const QuickActions = () => {
   const { language } = useLanguage();
-
+  
+  const translations = {
+    en: {
+      quickActions: "Quick Actions",
+      documents: "Documents",
+      onePager: "One Pager",
+      aiAgent: "AI Assistant",
+      downloadPortfolio: "Download Portfolio",
+      shareProject: "Share Project",
+      new: "NEW"
+    },
+    es: {
+      quickActions: "Acciones Rápidas",
+      documents: "Documentos",
+      onePager: "One Pager",
+      aiAgent: "Asistente IA",
+      downloadPortfolio: "Descargar Portfolio",
+      shareProject: "Compartir Proyecto",
+      new: "NUEVO"
+    }
+  };
+  
+  const t = translations[language];
+  
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{language === 'en' ? 'Quick Actions' : 'Acciones Rápidas'}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <Button variant="outline" className="w-full justify-start">
-          <Calendar className="w-4 h-4 mr-2" />
-          {language === 'en' ? 'Schedule New Event' : 'Programar Nuevo Evento'}
-        </Button>
-        <Button variant="outline" className="w-full justify-start">
-          <MessageSquare className="w-4 h-4 mr-2" />
-          {language === 'en' ? 'Create Message Template' : 'Crear Plantilla de Mensaje'}
-        </Button>
-        <Button variant="outline" className="w-full justify-start">
-          <Users className="w-4 h-4 mr-2" />
-          {language === 'en' ? 'Audience Analysis' : 'Análisis de Audiencia'}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+      <h3 className="text-lg font-medium mb-4">{t.quickActions}</h3>
+      
+      <div className="space-y-3">
+        <Link to="/one-pager" className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+              <FileText className="w-4 h-4" />
+            </div>
+            <span>{t.onePager}</span>
+          </div>
+          <ExternalLink className="w-4 h-4 text-slate-400" />
+        </Link>
+        
+        <Link to="/ai-agent" className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center mr-3">
+              <Bot className="w-4 h-4" />
+            </div>
+            <span>{t.aiAgent}</span>
+          </div>
+          <div className="flex items-center">
+            <Badge variant="outline" className="bg-pink-100 text-pink-700 border-pink-200 text-xs mr-2">
+              {t.new}
+            </Badge>
+            <ExternalLink className="w-4 h-4 text-slate-400" />
+          </div>
+        </Link>
+        
+        <button className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3">
+              <Download className="w-4 h-4" />
+            </div>
+            <span>{t.downloadPortfolio}</span>
+          </div>
+        </button>
+        
+        <button className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mr-3">
+              <Share2 className="w-4 h-4" />
+            </div>
+            <span>{t.shareProject}</span>
+          </div>
+        </button>
+      </div>
+    </div>
   );
 };

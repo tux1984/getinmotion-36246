@@ -8,6 +8,7 @@ import { LanguageProvider } from "./context/LanguageContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import OnePager from "./pages/OnePager";
+import AIAgent from "./pages/AIAgent";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/one-pager" element={<OnePager />} />
+            <Route path="/ai-agent" element={<AIAgent />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
