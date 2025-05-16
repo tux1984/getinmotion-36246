@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { MotionLogo } from '@/components/MotionLogo';
 import { HeroSection } from '@/components/HeroSection';
 import { ValueProposition } from '@/components/ValueProposition';
 import { Footer } from '@/components/Footer';
-import { WaitlistForm } from '@/components/WaitlistForm';
+import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
