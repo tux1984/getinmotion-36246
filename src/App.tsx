@@ -11,6 +11,7 @@ import OnePager from "./pages/OnePager";
 import TwoPager from "./pages/TwoPager";
 import ThreePager from "./pages/ThreePager";
 import AIAgent from "./pages/AIAgent";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/two-pager" element={<TwoPager />} />
             <Route path="/three-pager" element={<ThreePager />} />
             <Route path="/ai-agent" element={<AIAgent />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

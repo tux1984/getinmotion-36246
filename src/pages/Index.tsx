@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ProfileSelector } from '@/components/ProfileSelector';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const { toast } = useToast();
@@ -107,6 +107,20 @@ const Index = () => {
               >
                 {t.navAccess}
               </Button>
+              <Link to="/admin">
+                <Button 
+                  variant="ghost"
+                  size="icon"
+                  className="text-indigo-300 hover:text-white hover:bg-indigo-800/50 hidden sm:flex"
+                >
+                  <span className="sr-only">Admin</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="m22 12-3-3m0 0-3 3m3-3v9"></path>
+                  </svg>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
