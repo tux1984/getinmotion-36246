@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabaseClient } from '@/lib/supabase-client';
 
 interface WaitlistFormProps {
   onSubmit?: () => void;
@@ -135,20 +135,51 @@ export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Insert data into Supabase waitlist table
+      const { error } = await supabaseClient
+        .from('waitlist')
+        .insert([
+          {
+            full_name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            city: formData.city,
+            country: formData.country,
+            sector: formData.sector,
+            description: formData.description,
+            copilots_interest: formData.copilotsInterest,
+            problem_to_solve: formData.problemToSolve,
+            language: language
+          }
+        ]);
+      
+      if (error) throw error;
+      
       toast({
         title: t.successMessage,
         description: t.successDescription,
       });
+      
       setFormData(initialFormData);
       if (onSubmit) onSubmit();
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting waitlist form:', error);
+      toast({
+        title: language === 'en' ? 'Error' : 'Error',
+        description: language === 'en' 
+          ? 'There was a problem submitting your information. Please try again.' 
+          : 'Hubo un problema al enviar tu información. Por favor intenta nuevamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (

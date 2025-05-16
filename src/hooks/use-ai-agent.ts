@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Message } from '@/types/chat';
 import { useToast } from '@/hooks/use-toast';
+import { supabaseClient } from '@/lib/supabase-client';
 
 export function useAIAgent() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,14 +19,27 @@ export function useAIAgent() {
     setIsProcessing(true);
     
     try {
-      // In a production app, you would call an API here
-      // For this demo, we'll simulate a response
-      setTimeout(() => {
-        const aiResponse = generateSimpleResponse(content);
-        const aiMessage: Message = { type: 'ai', content: aiResponse };
-        setMessages(prev => [...prev, aiMessage]);
-        setIsProcessing(false);
-      }, 1000);
+      // Call Supabase Edge Function for OpenAI integration
+      const { data, error } = await supabaseClient.functions.invoke('openai-chat', {
+        body: {
+          messages: [
+            ...messages.map(msg => ({
+              role: msg.type === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            })),
+            { role: 'user', content }
+          ]
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Add AI response
+      const aiResponse = data.choices?.[0]?.message?.content || 'Lo siento, no pude generar una respuesta.';
+      const aiMessage: Message = { type: 'ai', content: aiResponse };
+      setMessages(prev => [...prev, aiMessage]);
       
     } catch (error) {
       console.error('Error generating AI response:', error);
@@ -34,35 +48,13 @@ export function useAIAgent() {
         description: 'No se pudo generar una respuesta. Por favor intenta de nuevo.',
         variant: 'destructive',
       });
+    } finally {
       setIsProcessing(false);
     }
   };
 
   const clearMessages = () => {
     setMessages([]);
-  };
-
-  // Simple response generator - replace with actual AI API call
-  const generateSimpleResponse = (userMessage: string): string => {
-    const lowerCaseMessage = userMessage.toLowerCase();
-    
-    if (lowerCaseMessage.includes('hola') || lowerCaseMessage.includes('hi') || lowerCaseMessage.includes('hello')) {
-      return '¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte hoy?';
-    }
-    
-    if (lowerCaseMessage.includes('ayuda') || lowerCaseMessage.includes('help')) {
-      return 'Estoy aquí para ayudarte. Puedes preguntarme sobre tus proyectos, tareas o cualquier otra cosa que necesites.';
-    }
-    
-    if (lowerCaseMessage.includes('gracias') || lowerCaseMessage.includes('thanks')) {
-      return '¡De nada! Estoy aquí para lo que necesites.';
-    }
-
-    if (lowerCaseMessage.includes('proyecto') || lowerCaseMessage.includes('project')) {
-      return 'Para gestionar tus proyectos de manera eficiente, te recomendaría establecer metas claras, dividir el trabajo en tareas pequeñas y usar herramientas de seguimiento. ¿Te gustaría que profundice en algún aspecto específico?';
-    }
-    
-    return '¡Interesante! ¿Puedes decirme más sobre eso para poder ayudarte mejor?';
   };
 
   return {

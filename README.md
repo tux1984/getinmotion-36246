@@ -1,73 +1,53 @@
-# Welcome to your Lovable project
 
-## Project info
+# Instrucciones para configurar Supabase
 
-**URL**: https://lovable.dev/projects/938e37d0-e9b2-4c6a-8b03-ce8a552dfb07
+## Tablas necesarias
 
-## How can I edit this code?
+### Tabla `waitlist`
 
-There are several ways of editing your application.
+Crea una tabla `waitlist` con la siguiente estructura:
 
-**Use Lovable**
+```sql
+create table public.waitlist (
+  id uuid not null default uuid_generate_v4(),
+  created_at timestamp with time zone not null default now(),
+  full_name text not null,
+  email text not null,
+  phone text,
+  role text,
+  city text,
+  country text,
+  sector text,
+  description text,
+  copilots_interest text[],
+  problem_to_solve text,
+  language text,
+  
+  constraint waitlist_pkey primary key (id),
+  constraint waitlist_email_key unique (email)
+);
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/938e37d0-e9b2-4c6a-8b03-ce8a552dfb07) and start prompting.
+-- Configurar acceso a la tabla
+alter table public.waitlist enable row level security;
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+-- Política que permite la inserción para todos
+create policy "Allow public access for insert" on public.waitlist
+  for insert
+  to anon
+  with check (true);
 ```
 
-**Edit a file directly in GitHub**
+## Funciones Edge
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Función `openai-chat`
 
-**Use GitHub Codespaces**
+1. Ve a Supabase Dashboard > Edge Functions
+2. Crea una nueva función llamada `openai-chat`
+3. Sube el contenido del archivo `supabase/functions/openai-chat/index.ts` creado
+4. En los secretos de la función, agrega:
+   - `OPENAI_API_KEY`: Tu clave de API de OpenAI
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Secretos
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/938e37d0-e9b2-4c6a-8b03-ce8a552dfb07) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+1. Ve a Project Settings > API > Edge Function Secrets
+2. Añade la variable secreta `OPENAI_API_KEY` con tu clave de API de OpenAI
