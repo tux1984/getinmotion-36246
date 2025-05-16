@@ -1,6 +1,15 @@
 
 # Instrucciones para configurar Supabase
 
+## Configuración de Variables de Entorno
+
+Para que la aplicación funcione correctamente, necesitas configurar las siguientes variables de entorno en Lovable:
+
+1. Ve a Lovable > Project Settings > Environment Variables
+2. Agrega las siguientes variables:
+   - `VITE_SUPABASE_URL`: La URL de tu proyecto en Supabase (ej: https://xyzcompany.supabase.co)
+   - `VITE_SUPABASE_ANON_KEY`: La clave anónima de tu proyecto (encontrada en Project Settings > API)
+
 ## Tablas necesarias
 
 ### Tabla `waitlist`
