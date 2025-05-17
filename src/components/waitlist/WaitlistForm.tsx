@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { translations } from './translations';
 import { TextField, TextAreaField, SelectField } from './FormField';
 import { CheckboxGroup } from './CheckboxGroup';
@@ -17,11 +18,32 @@ export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
     handleSubmit
   } = useWaitlistForm(language, onSubmit);
   
+  const [submitted, setSubmitted] = useState(false);
   const t = translations[language];
   
+  const onFormSubmit = async (e: React.FormEvent) => {
+    await handleSubmit(e);
+    setSubmitted(true);
+    
+    // Reset the submitted state after 5 seconds to allow for another submission
+    setTimeout(() => {
+      setSubmitted(false);
+    }, 5000);
+  };
+  
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
+    <form onSubmit={onFormSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
       <h3 className="text-xl font-semibold text-center mb-6">{t.title}</h3>
+      
+      {submitted && (
+        <Alert className="bg-green-50 border-green-200">
+          <AlertDescription className="text-green-800">
+            {language === 'en' ? 
+              'Your information has been submitted. Thank you!' : 
+              '¡Tu información ha sido enviada. Gracias!'}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="space-y-4">
         <TextField
@@ -115,9 +137,9 @@ export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
       <Button 
         type="submit" 
         className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
-        disabled={isLoading}
+        disabled={isLoading || submitted}
       >
-        {isLoading ? t.submitting : t.submitButton}
+        {isLoading ? t.submitting : submitted ? (language === 'en' ? 'Submitted!' : '¡Enviado!') : t.submitButton}
       </Button>
     </form>
   );
