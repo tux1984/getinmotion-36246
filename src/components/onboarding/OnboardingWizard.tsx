@@ -22,6 +22,7 @@ export type RecommendedAgents = {
   accounting: boolean;
   legal: boolean;
   operations: boolean;
+  cultural: boolean; // Añadimos la propiedad cultural
 };
 
 interface OnboardingWizardProps {
@@ -105,7 +106,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
       admin: false, // Todos necesitan asistente administrativo
       accounting: false,
       legal: false,
-      operations: false
+      operations: false,
+      cultural: false // Inicializamos la nueva propiedad
     };
     
     // Por defecto, siempre se recomienda el asistente administrativo
@@ -116,25 +118,34 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
       if (profileType === 'idea') {
         // Para personas con ideas iniciales, enfocarse en validación
         recommendedAgents.legal = maturityScores.ideaValidation > 30;
+        // Añadir recomendación para cultural si aplica
+        recommendedAgents.cultural = maturityScores.ideaValidation > 20;
       } else if (profileType === 'solo') {
         // Para emprendedores solitarios, enfocarse en eficiencia
         recommendedAgents.accounting = maturityScores.monetization > 20;
         recommendedAgents.legal = maturityScores.marketFit > 40;
+        // Añadir recomendación para cultural si aplica
+        recommendedAgents.cultural = maturityScores.marketFit > 30;
       } else if (profileType === 'team') {
         // Para equipos, enfocarse en coordinación
         recommendedAgents.accounting = true;
         recommendedAgents.legal = maturityScores.marketFit > 30;
         recommendedAgents.operations = maturityScores.marketFit > 50;
+        // Añadir recomendación para cultural si aplica
+        recommendedAgents.cultural = maturityScores.marketFit > 40;
       }
     } else {
       // Recomendaciones por defecto si no hay puntuaciones
       if (profileType === 'idea') {
         recommendedAgents.legal = true;
+        recommendedAgents.cultural = true; // Sugerir agente cultural por defecto
       } else if (profileType === 'solo') {
         recommendedAgents.accounting = true;
+        recommendedAgents.cultural = true; // Sugerir agente cultural por defecto
       } else if (profileType === 'team') {
         recommendedAgents.accounting = true;
         recommendedAgents.legal = true;
+        recommendedAgents.cultural = true; // Sugerir agente cultural por defecto
       }
     }
     
