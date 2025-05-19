@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,6 +10,15 @@ export type RecommendedAgents = {
   legal: boolean;
   operations: boolean;
 };
+
+interface Agent {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+  soon: boolean;
+  greeting: string;
+}
 
 interface CopilotSelectorProps {
   onSelectCopilot: (id: string) => void;
