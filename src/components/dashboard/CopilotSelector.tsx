@@ -1,23 +1,21 @@
-
 import React from 'react';
 import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
 
-interface Agent {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-  soon: boolean;
-  greeting: string;
-}
+export type RecommendedAgents = {
+  admin: boolean;
+  accounting: boolean;
+  legal: boolean;
+  operations: boolean;
+};
 
 interface CopilotSelectorProps {
   onSelectCopilot: (id: string) => void;
+  recommendedAgents?: RecommendedAgents;
 }
 
-export const CopilotSelector = ({ onSelectCopilot }: CopilotSelectorProps) => {
+export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotSelectorProps) => {
   const { language } = useLanguage();
   const { toast } = useToast();
   

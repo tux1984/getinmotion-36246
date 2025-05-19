@@ -95,11 +95,13 @@ const Dashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-4 py-8">
-        <WelcomeSection profileType={profileType} />
+        {/* WelcomeSection doesn't need props, we'll remove them */}
+        <WelcomeSection />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
-            <ProjectStatusCards maturityScores={maturityScores} />
+            {/* ProjectStatusCards doesn't need props, we'll remove them */}
+            <ProjectStatusCards />
           </div>
           
           <div>
