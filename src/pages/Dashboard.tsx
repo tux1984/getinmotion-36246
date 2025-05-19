@@ -9,6 +9,8 @@ import { TaskManager } from '@/components/dashboard/TaskManager';
 import { CopilotSelector } from '@/components/dashboard/CopilotSelector';
 import { CopilotChat } from '@/components/dashboard/CopilotChat';
 import { OnboardingWizard, RecommendedAgents } from '@/components/onboarding/OnboardingWizard';
+import { CulturalCreatorAgents } from '@/components/cultural/CulturalCreatorAgents';
+import { CostCalculatorAgent } from '@/components/cultural/CostCalculatorAgent';
 
 type ProfileType = 'idea' | 'solo' | 'team';
 
@@ -26,10 +28,13 @@ const Dashboard = () => {
     admin: true,
     accounting: false,
     legal: false,
-    operations: false
+    operations: false,
+    cultural: false
   });
   const [selectedCopilot, setSelectedCopilot] = useState<string | null>(null);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
+  const [showCulturalAgents, setShowCulturalAgents] = useState(false);
+  const [selectedCulturalAgent, setSelectedCulturalAgent] = useState<string | null>(null);
   const location = useLocation();
   
   // Verificar si se debe iniciar el onboarding
@@ -71,10 +76,25 @@ const Dashboard = () => {
     if (agents.admin) setSelectedCopilot('admin');
     else if (agents.accounting) setSelectedCopilot('accounting');
     else if (agents.legal) setSelectedCopilot('legal');
+    else if (agents.cultural) setSelectedCopilot('cultural');
   };
   
   const handleSelectCopilot = (id: string) => {
-    setSelectedCopilot(id);
+    if (id === 'cultural') {
+      setShowCulturalAgents(true);
+      setSelectedCopilot(null);
+    } else {
+      setSelectedCopilot(id);
+    }
+  };
+
+  const handleSelectCulturalAgent = (id: string) => {
+    setSelectedCulturalAgent(id);
+  };
+
+  const handleBackFromCulturalAgents = () => {
+    setShowCulturalAgents(false);
+    setSelectedCulturalAgent(null);
   };
 
   // Mostrar onboarding si es necesario
@@ -95,12 +115,10 @@ const Dashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-4 py-8">
-        {/* WelcomeSection doesn't need props, we'll remove them */}
         <WelcomeSection />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
-            {/* ProjectStatusCards doesn't need props, we'll remove them */}
             <ProjectStatusCards />
           </div>
           
@@ -109,15 +127,46 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {!selectedCopilot ? (
+        {!selectedCopilot && !showCulturalAgents && !selectedCulturalAgent && (
           <>
             <CopilotSelector 
               onSelectCopilot={handleSelectCopilot} 
               recommendedAgents={recommendedAgents}
+              showCategories={true}
             />
             <TaskManager />
           </>
-        ) : (
+        )}
+
+        {showCulturalAgents && !selectedCulturalAgent && (
+          <div className="mb-8">
+            <div className="mb-4">
+              <button 
+                onClick={() => setShowCulturalAgents(false)} 
+                className="text-sm flex items-center text-gray-500 hover:text-gray-700"
+              >
+                ← Back to main agents
+              </button>
+            </div>
+            <CulturalCreatorAgents />
+          </div>
+        )}
+
+        {selectedCulturalAgent === 'cost-calculator' && (
+          <div className="mb-8">
+            <div className="mb-4">
+              <button 
+                onClick={() => setSelectedCulturalAgent(null)} 
+                className="text-sm flex items-center text-gray-500 hover:text-gray-700"
+              >
+                ← Back to cultural agents
+              </button>
+            </div>
+            <CostCalculatorAgent />
+          </div>
+        )}
+        
+        {selectedCopilot && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <CopilotChat 
               agentId={selectedCopilot} 

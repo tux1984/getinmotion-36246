@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase } from 'lucide-react';
+import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase, Palette, Music, Globe, Users } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -9,6 +9,7 @@ export type RecommendedAgents = {
   accounting: boolean;
   legal: boolean;
   operations: boolean;
+  cultural: boolean; // New agent type for cultural creators
 };
 
 interface Agent {
@@ -18,14 +19,16 @@ interface Agent {
   color: string;
   soon: boolean;
   greeting: string;
+  category?: string; // Optional category for grouping
 }
 
 interface CopilotSelectorProps {
   onSelectCopilot: (id: string) => void;
   recommendedAgents?: RecommendedAgents;
+  showCategories?: boolean; // Option to show agent categories
 }
 
-export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotSelectorProps) => {
+export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCategories = false }: CopilotSelectorProps) => {
   const { language } = useLanguage();
   const { toast } = useToast();
   
@@ -37,8 +40,14 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       accountingAgent: "Accounting Agent",
       legalAdvisor: "Legal Advisor",
       operationsManager: "Operations Manager",
+      culturalCreatorAgent: "Cultural Creator Agent",
       betaVersion: "Beta version",
-      comingSoon: "Coming soon"
+      comingSoon: "Coming soon",
+      // Categories
+      backOfficeCategory: "Back Office",
+      culturalCategory: "Cultural Sector",
+      financialCategory: "Financial Management",
+      legalCategory: "Legal Support"
     },
     es: {
       selectCopilot: "Selecciona un agente para comenzar",
@@ -47,8 +56,14 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       accountingAgent: "Agente Contable",
       legalAdvisor: "Asesor Legal",
       operationsManager: "Gerente de Operaciones",
+      culturalCreatorAgent: "Agente para Creadores Culturales",
       betaVersion: "Versión beta",
-      comingSoon: "Próximamente"
+      comingSoon: "Próximamente",
+      // Categories
+      backOfficeCategory: "Back Office",
+      culturalCategory: "Sector Cultural",
+      financialCategory: "Gestión Financiera",
+      legalCategory: "Soporte Legal"
     }
   };
   
@@ -61,6 +76,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       icon: <FileText className="w-5 h-5" />, 
       color: "bg-violet-100 text-violet-700", 
       soon: false,
+      category: t.backOfficeCategory,
       greeting: language === 'en' 
         ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
         : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?"
@@ -71,6 +87,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       icon: <Calculator className="w-5 h-5" />, 
       color: "bg-indigo-100 text-indigo-700", 
       soon: false,
+      category: t.financialCategory,
       greeting: language === 'en'
         ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
         : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
@@ -81,6 +98,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       icon: <FileSpreadsheet className="w-5 h-5" />, 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
+      category: t.legalCategory,
       greeting: language === 'en'
         ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
         : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?"
@@ -91,11 +109,35 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
       icon: <Briefcase className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
       soon: true,
+      category: t.backOfficeCategory,
       greeting: language === 'en'
         ? "This agent is coming soon! Check back for updates."
         : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones."
+    },
+    { 
+      id: "cultural", 
+      name: t.culturalCreatorAgent, 
+      icon: <Palette className="w-5 h-5" />, 
+      color: "bg-pink-100 text-pink-700", 
+      soon: false,
+      category: t.culturalCategory,
+      greeting: language === 'en'
+        ? "Hi there! I'm your Cultural Creator Agent. I can help you with contracts, cost calculations, portfolio creation, and export strategies specific to cultural creators. How can I assist you today?"
+        : "¡Hola! Soy tu Agente para Creadores Culturales. Puedo ayudarte con contratos, cálculos de costos, creación de portafolios y estrategias de exportación específicas para creadores culturales. ¿Cómo puedo ayudarte hoy?"
     }
   ];
+
+  // Group agents by category if showCategories is true
+  const groupedAgents = showCategories 
+    ? agents.reduce((acc, agent) => {
+        const category = agent.category || 'Other';
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(agent);
+        return acc;
+      }, {} as Record<string, Agent[]>)
+    : { 'All': agents };
 
   const handleSelectCopilot = (id: string) => {
     if (agents.find(c => c.id === id)?.soon) {
@@ -118,25 +160,54 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents }: CopilotS
         {t.selectCopilotText}
       </p>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {agents.map((agent) => (
-          <div 
-            key={agent.id}
-            className={`p-5 rounded-lg border ${agent.soon ? 'border-gray-200 opacity-70' : 'border-violet-200 cursor-pointer hover:border-violet-300 hover:shadow-sm transition-all'}`}
-            onClick={() => handleSelectCopilot(agent.id)}
-          >
-            <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
-              {agent.icon}
+      {showCategories ? (
+        // Display agents grouped by category
+        Object.entries(groupedAgents).map(([category, categoryAgents]) => (
+          <div key={category} className="mb-6 last:mb-0">
+            <h3 className="text-sm uppercase tracking-wider text-gray-500 mb-3">{category}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {categoryAgents.map((agent) => (
+                <div 
+                  key={agent.id}
+                  className={`p-5 rounded-lg border ${agent.soon ? 'border-gray-200 opacity-70' : 'border-violet-200 cursor-pointer hover:border-violet-300 hover:shadow-sm transition-all'}`}
+                  onClick={() => handleSelectCopilot(agent.id)}
+                >
+                  <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
+                    {agent.icon}
+                  </div>
+                  <h3 className="font-medium mb-1">{agent.name}</h3>
+                  {agent.soon ? (
+                    <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
+                  ) : (
+                    <span className="text-sm text-gray-500">{t.betaVersion}</span>
+                  )}
+                </div>
+              ))}
             </div>
-            <h3 className="font-medium mb-1">{agent.name}</h3>
-            {agent.soon ? (
-              <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
-            ) : (
-              <span className="text-sm text-gray-500">{t.betaVersion}</span>
-            )}
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        // Display agents without categories (original layout)
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {agents.map((agent) => (
+            <div 
+              key={agent.id}
+              className={`p-5 rounded-lg border ${agent.soon ? 'border-gray-200 opacity-70' : 'border-violet-200 cursor-pointer hover:border-violet-300 hover:shadow-sm transition-all'}`}
+              onClick={() => handleSelectCopilot(agent.id)}
+            >
+              <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
+                {agent.icon}
+              </div>
+              <h3 className="font-medium mb-1">{agent.name}</h3>
+              {agent.soon ? (
+                <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
+              ) : (
+                <span className="text-sm text-gray-500">{t.betaVersion}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
