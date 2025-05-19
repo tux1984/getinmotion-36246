@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { AdminHeader } from '@/components/admin/AdminHeader';
-import { supabaseClient } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
 
@@ -32,7 +32,7 @@ const Admin = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('waitlist')
         .select('*')
         .order('created_at', { ascending: false });
