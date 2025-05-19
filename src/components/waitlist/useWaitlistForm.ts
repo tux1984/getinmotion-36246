@@ -4,18 +4,23 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabaseClient } from '@/lib/supabase-client';
 import { FormData, initialFormData } from './types';
 
-export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: () => void) => {
+export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (success: boolean) => void) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing again
+    if (error) setError(null);
   };
   
   const handleRoleChange = (value: string) => {
     setFormData(prev => ({ ...prev, role: value }));
+    // Clear error when user makes a change
+    if (error) setError(null);
   };
   
   const handleCheckboxChange = (id: string, checked: boolean) => {
@@ -25,18 +30,30 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: () => 
         ? [...prev.copilotsInterest, id] 
         : prev.copilotsInterest.filter(item => item !== id)
     }));
+    // Clear error when user makes a change
+    if (error) setError(null);
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null); // Clear any previous errors
     
     try {
-      // For development/demo purposes, we'll log the data and show success even if Supabase isn't configured
+      // For development/demo purposes, we'll log the data
       console.log('Submitting waitlist form:', formData);
       
+      if (!formData.email || !formData.fullName) {
+        const errorMessage = language === 'en' 
+          ? 'Please fill in required fields (name and email)'
+          : 'Por favor, complete los campos requeridos (nombre y correo electrónico)';
+        setError(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+      
       // Attempt to insert data into Supabase waitlist table
-      const { error } = await supabaseClient
+      const { error: supabaseError } = await supabaseClient
         .from('waitlist')
         .insert([
           {
@@ -54,48 +71,49 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: () => 
           }
         ]);
       
-      // Show success message even if there might have been an error with Supabase
-      // This is for demo purposes - in a real app, you'd want to handle the error properly
-      const successMessage = language === 'en' 
-        ? 'Thank you for joining our waitlist!' 
-        : '¡Gracias por unirte a nuestra lista de espera!';
-      
-      const successDescription = language === 'en'
-        ? 'We\'ll keep you updated on our progress.'
-        : 'Te mantendremos informado sobre nuestro progreso.';
-      
-      toast({
-        title: successMessage,
-        description: successDescription,
-      });
-      
-      // Reset form and call callback
-      setFormData(initialFormData);
-      if (onSubmitCallback) onSubmitCallback();
-      
-      // Log error for debugging but don't show it to the user in demo mode
-      if (error) {
-        console.error('Supabase error (hidden from user):', error);
+      if (supabaseError) {
+        console.error('Supabase error:', supabaseError);
+        
+        // Show appropriate error message
+        const errorMessage = language === 'en' 
+          ? 'There was a problem submitting your information. Please try again.' 
+          : 'Hubo un problema al enviar tu información. Por favor, inténtalo de nuevo.';
+        
+        setError(errorMessage);
+        
+        // For demo purposes, we'll still show a success message in the console
+        console.log('Demo mode: Would show success in production with valid Supabase config');
+      } else {
+        // Show success message
+        const successMessage = language === 'en' 
+          ? 'Thank you for joining our waitlist!' 
+          : '¡Gracias por unirte a nuestra lista de espera!';
+        
+        const successDescription = language === 'en'
+          ? 'We\'ll keep you updated on our progress.'
+          : 'Te mantendremos informado sobre nuestro progreso.';
+        
+        toast({
+          title: successMessage,
+          description: successDescription,
+        });
+        
+        // Reset form and call callback
+        setFormData(initialFormData);
+        if (onSubmitCallback) onSubmitCallback(true);
       }
     } catch (error) {
       console.error('Error submitting waitlist form:', error);
       
-      // Still show a success message for demo purposes
-      // In a real app, you'd show the actual error
-      const demoSuccessMessage = language === 'en' 
-        ? 'Demo Mode: Form submitted successfully!' 
-        : 'Modo Demo: ¡Formulario enviado con éxito!';
+      // Show error message
+      const errorMessage = language === 'en' 
+        ? 'There was a problem submitting your information. Please try again.' 
+        : 'Hubo un problema al enviar tu información. Por favor, inténtalo de nuevo.';
       
-      toast({
-        title: demoSuccessMessage,
-        description: language === 'en' 
-          ? 'In a real app, this would save to your database.' 
-          : 'En una aplicación real, esto se guardaría en tu base de datos.',
-      });
+      setError(errorMessage);
       
-      // Reset form and call callback even if there was an error
-      setFormData(initialFormData);
-      if (onSubmitCallback) onSubmitCallback();
+      // Call callback with error flag
+      if (onSubmitCallback) onSubmitCallback(false);
     } finally {
       setIsLoading(false);
     }
@@ -104,9 +122,11 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: () => 
   return {
     formData,
     isLoading,
+    error,
     handleInputChange,
     handleRoleChange,
     handleCheckboxChange,
-    handleSubmit
+    handleSubmit,
+    setError
   };
 };

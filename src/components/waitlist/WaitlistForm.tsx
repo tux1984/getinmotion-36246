@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import { translations } from './translations';
 import { TextField, TextAreaField, SelectField } from './FormField';
 import { CheckboxGroup } from './CheckboxGroup';
@@ -12,35 +13,46 @@ export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
   const {
     formData,
     isLoading,
+    error,
     handleInputChange,
     handleRoleChange,
     handleCheckboxChange,
     handleSubmit
-  } = useWaitlistForm(language, onSubmit);
+  } = useWaitlistForm(language, (success) => {
+    if (success) {
+      setSubmitted(true);
+      // Reset the submitted state after 5 seconds to allow for another submission
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    }
+    
+    if (onSubmit) onSubmit();
+  });
   
   const [submitted, setSubmitted] = useState(false);
   const t = translations[language];
   
-  const onFormSubmit = async (e: React.FormEvent) => {
-    await handleSubmit(e);
-    setSubmitted(true);
-    
-    // Reset the submitted state after 5 seconds to allow for another submission
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 5000);
-  };
-  
   return (
-    <form onSubmit={onFormSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
       <h3 className="text-xl font-semibold text-center mb-6">{t.title}</h3>
       
       {submitted && (
         <Alert className="bg-green-50 border-green-200">
+          <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             {language === 'en' ? 
               'Your information has been submitted. Thank you!' : 
               '¡Tu información ha sido enviada. Gracias!'}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert className="bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            {error}
           </AlertDescription>
         </Alert>
       )}
