@@ -8,6 +8,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 type ProfileType = 'idea' | 'solo' | 'team' | null;
 
@@ -19,6 +20,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
   const [selectedProfile, setSelectedProfile] = useState<ProfileType>(null);
   const { toast } = useToast();
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
   const translations = {
     en: {
@@ -56,10 +58,17 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
   const handleConfirm = () => {
     if (selectedProfile) {
       onProfileSelected(selectedProfile);
+      
+      // Guardamos el perfil seleccionado en localStorage
+      localStorage.setItem('userProfile', selectedProfile);
+      
       toast({
         title: t.selectedMessage,
         description: new Date().toLocaleTimeString(),
       });
+      
+      // Redireccionamos al onboarding con el tipo de perfil
+      navigate('/dashboard', { state: { startOnboarding: true, profileType: selectedProfile } });
     }
   };
 
@@ -202,4 +211,3 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
     </div>
   );
 };
-

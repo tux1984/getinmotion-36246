@@ -1,124 +1,129 @@
 
-import React, { useState } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
-import { FileText, Calculator, FileSpreadsheet, Receipt, Briefcase } from 'lucide-react';
-import { ProductMaturityMeter } from '@/components/ProductMaturityMeter';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
 import { ProjectStatusCards } from '@/components/dashboard/ProjectStatusCards';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { TaskManager } from '@/components/dashboard/TaskManager';
 import { CopilotSelector } from '@/components/dashboard/CopilotSelector';
 import { CopilotChat } from '@/components/dashboard/CopilotChat';
-import { TaskManager } from '@/components/dashboard/TaskManager';
-import { QuickActions } from '@/components/dashboard/QuickActions';
-import { Message } from '@/types/chat';
+import { OnboardingWizard, RecommendedAgents } from '@/components/onboarding/OnboardingWizard';
+
+type ProfileType = 'idea' | 'solo' | 'team';
+
+type CategoryScore = {
+  ideaValidation: number;
+  userExperience: number;
+  marketFit: number;
+  monetization: number;
+};
 
 const Dashboard = () => {
-  const { language } = useLanguage();
-  const [activeCopilot, setActiveCopilot] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  const agents = [
-    { 
-      id: "admin", 
-      name: language === 'en' ? "Administrative Assistant" : "Asistente Administrativo",
-      icon: <FileText className="w-5 h-5" />, 
-      color: "bg-violet-100 text-violet-700", 
-      soon: false,
-      greeting: language === 'en' 
-        ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
-        : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?"
-    },
-    { 
-      id: "accounting", 
-      name: language === 'en' ? "Accounting Agent" : "Agente Contable", 
-      icon: <Calculator className="w-5 h-5" />, 
-      color: "bg-indigo-100 text-indigo-700", 
-      soon: false,
-      greeting: language === 'en'
-        ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
-        : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
-    },
-    { 
-      id: "legal", 
-      name: language === 'en' ? "Legal Advisor" : "Asesor Legal", 
-      icon: <FileSpreadsheet className="w-5 h-5" />, 
-      color: "bg-blue-100 text-blue-700", 
-      soon: false,
-      greeting: language === 'en'
-        ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
-        : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?"
-    },
-    { 
-      id: "operations", 
-      name: language === 'en' ? "Operations Manager" : "Gerente de Operaciones", 
-      icon: <Briefcase className="w-5 h-5" />, 
-      color: "bg-emerald-100 text-emerald-700", 
-      soon: true,
-      greeting: language === 'en'
-        ? "This agent is coming soon! Check back for updates."
-        : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones."
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [profileType, setProfileType] = useState<ProfileType>('idea');
+  const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents>({
+    admin: true,
+    accounting: false,
+    legal: false,
+    operations: false
+  });
+  const [selectedCopilot, setSelectedCopilot] = useState<string | null>(null);
+  const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
+  const location = useLocation();
+  
+  // Verificar si se debe iniciar el onboarding
+  useEffect(() => {
+    const startOnboarding = location.state?.startOnboarding;
+    const storedProfileType = localStorage.getItem('userProfile');
+    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+    
+    if (startOnboarding && location.state?.profileType) {
+      setProfileType(location.state.profileType);
+      setShowOnboarding(true);
+      
+      // Limpiar el estado después de usarlo
+      window.history.replaceState({}, document.title);
+    } else if (storedProfileType && !onboardingCompleted) {
+      setProfileType(storedProfileType as ProfileType);
+      setShowOnboarding(true);
     }
-  ];
-
-  const handleSelectCopilot = (id: string) => {
-    setActiveCopilot(id);
-    const selectedAgent = agents.find(c => c.id === id);
-    if (selectedAgent) {
-      setMessages([
-        { type: 'agent', content: selectedAgent.greeting }
-      ]);
+    
+    // Cargar agentes recomendados si existen
+    const storedAgents = localStorage.getItem('recommendedAgents');
+    if (storedAgents) {
+      setRecommendedAgents(JSON.parse(storedAgents));
     }
-  };
-
-  const getAgentDetails = () => {
-    const agent = agents.find(c => c.id === activeCopilot);
-    return {
-      name: agent?.name || '',
-      icon: agent?.icon,
-      color: agent?.color || '',
-    };
+    
+    // Cargar puntuaciones de madurez si existen
+    const storedScores = localStorage.getItem('maturityScores');
+    if (storedScores) {
+      setMaturityScores(JSON.parse(storedScores));
+    }
+  }, [location]);
+  
+  const handleOnboardingComplete = (scores: CategoryScore, agents: RecommendedAgents) => {
+    setMaturityScores(scores);
+    setRecommendedAgents(agents);
+    setShowOnboarding(false);
+    
+    // Seleccionar el primer agente recomendado por defecto
+    if (agents.admin) setSelectedCopilot('admin');
+    else if (agents.accounting) setSelectedCopilot('accounting');
+    else if (agents.legal) setSelectedCopilot('legal');
   };
   
+  const handleSelectCopilot = (id: string) => {
+    setSelectedCopilot(id);
+  };
+
+  // Mostrar onboarding si es necesario
+  if (showOnboarding) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader />
+        <OnboardingWizard 
+          profileType={profileType} 
+          onComplete={handleOnboardingComplete} 
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gray-50">
       <DashboardHeader />
       
-      <main className="container mx-auto px-4 py-8">
-        {!activeCopilot ? (
+      <div className="container mx-auto px-4 py-8">
+        <WelcomeSection profileType={profileType} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <ProjectStatusCards maturityScores={maturityScores} />
+          </div>
+          
+          <div>
+            <QuickActions />
+          </div>
+        </div>
+        
+        {!selectedCopilot ? (
           <>
-            <WelcomeSection />
-            <ProjectStatusCards />
-            
-            {/* Product Maturity Meter */}
-            <div className="mb-8">
-              <ProductMaturityMeter />
-            </div>
-            
-            <CopilotSelector onSelectCopilot={handleSelectCopilot} />
+            <CopilotSelector 
+              onSelectCopilot={handleSelectCopilot} 
+              recommendedAgents={recommendedAgents}
+            />
+            <TaskManager />
           </>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <CopilotChat 
-                activeCopilot={activeCopilot} 
-                onClose={() => setActiveCopilot(null)}
-                copilotIcon={getAgentDetails().icon}
-                copilotColor={getAgentDetails().color}
-                copilotName={getAgentDetails().name}
-                initialMessages={messages}
-              />
-            </div>
-            
-            <div className="space-y-6">
-              <TaskManager />
-              <QuickActions />
-              
-              {/* The Product Maturity Meter when in chat mode */}
-              <ProductMaturityMeter />
-            </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <CopilotChat 
+              agentId={selectedCopilot} 
+              onBack={() => setSelectedCopilot(null)}
+            />
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };
