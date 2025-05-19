@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
 import { ProjectStatusCards } from '@/components/dashboard/ProjectStatusCards';
@@ -11,6 +11,8 @@ import { CopilotChat } from '@/components/dashboard/CopilotChat';
 import { OnboardingWizard, RecommendedAgents } from '@/components/onboarding/OnboardingWizard';
 import { CulturalCreatorAgents } from '@/components/cultural/CulturalCreatorAgents';
 import { CostCalculatorAgent } from '@/components/cultural/CostCalculatorAgent';
+import { Button } from '@/components/ui/button';
+import { BarChart3, Calculator, FileText } from 'lucide-react';
 
 type ProfileType = 'idea' | 'solo' | 'team';
 
@@ -35,7 +37,10 @@ const Dashboard = () => {
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
   const [showCulturalAgents, setShowCulturalAgents] = useState(false);
   const [selectedCulturalAgent, setSelectedCulturalAgent] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string>('dashboard');
+  
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Verificar si se debe iniciar el onboarding
   useEffect(() => {
@@ -71,6 +76,9 @@ const Dashboard = () => {
     setMaturityScores(scores);
     setRecommendedAgents(agents);
     setShowOnboarding(false);
+    localStorage.setItem('onboardingCompleted', 'true');
+    localStorage.setItem('maturityScores', JSON.stringify(scores));
+    localStorage.setItem('recommendedAgents', JSON.stringify(agents));
     
     // Seleccionar el primer agente recomendado por defecto
     if (agents.admin) setSelectedCopilot('admin');
@@ -83,20 +91,30 @@ const Dashboard = () => {
     if (id === 'cultural') {
       setShowCulturalAgents(true);
       setSelectedCopilot(null);
+      setActiveSection('cultural');
     } else {
       setSelectedCopilot(id);
+      setActiveSection('chat');
     }
   };
 
   const handleSelectCulturalAgent = (id: string) => {
     setSelectedCulturalAgent(id);
+    if (id === 'cost-calculator') {
+      setActiveSection('cost-calculator');
+    }
   };
 
   const handleBackFromCulturalAgents = () => {
     setShowCulturalAgents(false);
     setSelectedCulturalAgent(null);
+    setActiveSection('dashboard');
   };
 
+  const handleNavigateToMaturityCalculator = () => {
+    navigate('/maturity-calculator', { state: { profileType } });
+  };
+  
   // Mostrar onboarding si es necesario
   if (showOnboarding) {
     return (
@@ -115,62 +133,100 @@ const Dashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-4 py-8">
-        <WelcomeSection />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2">
-            <ProjectStatusCards />
-          </div>
-          
-          <div>
-            <QuickActions />
+        {/* Barra de navegación del Dashboard */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant={activeSection === 'dashboard' ? "default" : "ghost"} 
+              size="sm"
+              onClick={() => setActiveSection('dashboard')}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Dashboard
+            </Button>
+            <Button 
+              variant={activeSection === 'maturity' ? "default" : "ghost"} 
+              size="sm"
+              onClick={handleNavigateToMaturityCalculator}
+              className="flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Calculadora de Madurez
+            </Button>
           </div>
         </div>
-        
-        {!selectedCopilot && !showCulturalAgents && !selectedCulturalAgent && (
+
+        {activeSection === 'dashboard' && !selectedCopilot && !showCulturalAgents && (
           <>
-            <CopilotSelector 
-              onSelectCopilot={handleSelectCopilot} 
-              recommendedAgents={recommendedAgents}
-              showCategories={true}
-            />
-            <TaskManager />
+            <WelcomeSection />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="lg:col-span-2">
+                <ProjectStatusCards />
+              </div>
+              
+              <div>
+                <QuickActions />
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <CopilotSelector 
+                onSelectCopilot={handleSelectCopilot} 
+                recommendedAgents={recommendedAgents}
+                showCategories={true}
+              />
+            </div>
+
+            <div className="mb-8">
+              <TaskManager />
+            </div>
           </>
         )}
 
-        {showCulturalAgents && !selectedCulturalAgent && (
-          <div className="mb-8">
+        {activeSection === 'cultural' && !selectedCulturalAgent && (
+          <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="mb-4">
               <button 
-                onClick={() => setShowCulturalAgents(false)} 
+                onClick={() => {
+                  setShowCulturalAgents(false);
+                  setActiveSection('dashboard');
+                }} 
                 className="text-sm flex items-center text-gray-500 hover:text-gray-700"
               >
-                ← Back to main agents
+                ← Volver a agentes principales
               </button>
             </div>
-            <CulturalCreatorAgents />
+            <CulturalCreatorAgents onSelectAgent={handleSelectCulturalAgent} />
           </div>
         )}
 
-        {selectedCulturalAgent === 'cost-calculator' && (
-          <div className="mb-8">
+        {activeSection === 'cost-calculator' && selectedCulturalAgent === 'cost-calculator' && (
+          <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="mb-4">
               <button 
-                onClick={() => setSelectedCulturalAgent(null)} 
+                onClick={() => {
+                  setSelectedCulturalAgent(null);
+                  setActiveSection('cultural');
+                }} 
                 className="text-sm flex items-center text-gray-500 hover:text-gray-700"
               >
-                ← Back to cultural agents
+                ← Volver a agentes culturales
               </button>
             </div>
             <CostCalculatorAgent />
           </div>
         )}
         
-        {selectedCopilot && (
+        {activeSection === 'chat' && selectedCopilot && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <CopilotChat 
               agentId={selectedCopilot} 
-              onBack={() => setSelectedCopilot(null)}
+              onBack={() => {
+                setSelectedCopilot(null);
+                setActiveSection('dashboard');
+              }}
             />
           </div>
         )}
