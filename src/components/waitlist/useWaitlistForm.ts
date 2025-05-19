@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { supabaseClient } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { FormData, initialFormData } from './types';
 
 export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (success: boolean) => void) => {
@@ -40,7 +40,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
     setError(null); // Clear any previous errors
     
     try {
-      // For development/demo purposes, we'll log the data
+      // Log the data being submitted
       console.log('Submitting waitlist form:', formData);
       
       if (!formData.email || !formData.fullName) {
@@ -53,7 +53,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
       }
       
       // Attempt to insert data into Supabase waitlist table
-      const { error: supabaseError } = await supabaseClient
+      const { error: supabaseError } = await supabase
         .from('waitlist')
         .insert([
           {
@@ -75,14 +75,19 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
         console.error('Supabase error:', supabaseError);
         
         // Show appropriate error message
-        const errorMessage = language === 'en' 
-          ? 'There was a problem submitting your information. Please try again.' 
-          : 'Hubo un problema al enviar tu información. Por favor, inténtalo de nuevo.';
+        let errorMessage = '';
+        if (supabaseError.code === '23505') { // Código para violación de restricción única
+          errorMessage = language === 'en' 
+            ? 'This email is already registered in our waitlist.'
+            : 'Este correo electrónico ya está registrado en nuestra lista de espera.';
+        } else {
+          errorMessage = language === 'en' 
+            ? 'There was a problem submitting your information. Please try again.' 
+            : 'Hubo un problema al enviar tu información. Por favor, inténtalo de nuevo.';
+        }
         
         setError(errorMessage);
-        
-        // For demo purposes, we'll still show a success message in the console
-        console.log('Demo mode: Would show success in production with valid Supabase config');
+        if (onSubmitCallback) onSubmitCallback(false);
       } else {
         // Show success message
         const successMessage = language === 'en' 

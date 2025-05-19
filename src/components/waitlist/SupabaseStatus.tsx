@@ -2,17 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
-import { checkSupabaseConnection } from '@/lib/supabase-client';
+import { AlertCircle, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ConnectionStatus {
   connected: boolean;
   message: string;
   error?: any;
-  missing?: {
-    url: boolean;
-    key: boolean;
-  };
 }
 
 export const SupabaseStatus = () => {
@@ -22,12 +18,27 @@ export const SupabaseStatus = () => {
   const checkConnection = async () => {
     setChecking(true);
     try {
-      const result = await checkSupabaseConnection();
-      setStatus(result);
+      // Intentar realizar una consulta simple para verificar la conexión
+      const { error } = await supabase
+        .from('waitlist')
+        .select('count', { count: 'exact', head: true });
+      
+      if (error) {
+        setStatus({
+          connected: false,
+          message: `Error de conexión: ${error.message}`,
+          error
+        });
+      } else {
+        setStatus({
+          connected: true,
+          message: 'Conexión establecida con Supabase'
+        });
+      }
     } catch (error) {
       setStatus({
         connected: false,
-        message: `Error checking connection: ${error.message}`,
+        message: `Error de conexión: ${error.message}`,
         error
       });
     } finally {
@@ -44,7 +55,7 @@ export const SupabaseStatus = () => {
       <Alert className="bg-indigo-900/40 border-indigo-700/50">
         <AlertCircle className="h-4 w-4 text-indigo-300" />
         <AlertDescription className="text-indigo-300">
-          Checking Supabase connection...
+          Verificando conexión con Supabase...
         </AlertDescription>
       </Alert>
     );
@@ -65,20 +76,7 @@ export const SupabaseStatus = () => {
           {status.message}
         </AlertDescription>
         
-        {!status.connected && status.missing && (
-          <div className="text-sm text-orange-300/80">
-            <p>Missing environment variables:</p>
-            <ul className="list-disc pl-5 mt-1">
-              {status.missing.url && <li>VITE_SUPABASE_URL</li>}
-              {status.missing.key && <li>VITE_SUPABASE_ANON_KEY</li>}
-            </ul>
-            <p className="mt-2">
-              Set these in Project Settings &gt; Environment Variables
-            </p>
-          </div>
-        )}
-        
-        <div className="text-right">
+        <div className="flex justify-between items-center">
           <Button 
             variant="outline" 
             size="sm" 
@@ -87,8 +85,25 @@ export const SupabaseStatus = () => {
             className="text-xs border-current text-inherit hover:bg-current hover:text-black"
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${checking ? 'animate-spin' : ''}`} />
-            {checking ? 'Checking...' : 'Check Again'}
+            {checking ? 'Verificando...' : 'Verificar conexión'}
           </Button>
+          
+          {status.connected && (
+            <a 
+              href="https://supabase.com/dashboard/project/ylooqmqmoufqtxvetxuj/editor/table/waitlist?sort=created_at-desc" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs border-green-700 text-green-300 hover:bg-green-800/30"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Ver datos
+              </Button>
+            </a>
+          )}
         </div>
       </div>
     </Alert>
