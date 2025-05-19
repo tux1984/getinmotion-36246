@@ -5,6 +5,7 @@ import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { supabaseClient } from '@/lib/supabase-client';
 import { useToast } from '@/components/ui/use-toast';
+import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -86,14 +87,23 @@ const Admin = () => {
         {!isAuthenticated ? (
           <div className="max-w-md mx-auto mt-16">
             <AdminLogin onLogin={handleLogin} />
+            <div className="mt-4">
+              <SupabaseStatus />
+            </div>
           </div>
         ) : (
-          <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
-            <WaitlistTable 
-              data={waitlistData} 
-              isLoading={isLoading} 
-              onRefresh={handleRefresh} 
-            />
+          <div className="space-y-6">
+            <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
+              <SupabaseStatus />
+            </div>
+            
+            <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
+              <WaitlistTable 
+                data={waitlistData} 
+                isLoading={isLoading} 
+                onRefresh={handleRefresh} 
+              />
+            </div>
           </div>
         )}
       </div>

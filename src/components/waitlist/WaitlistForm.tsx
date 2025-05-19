@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -8,6 +8,8 @@ import { TextField, TextAreaField, SelectField } from './FormField';
 import { CheckboxGroup } from './CheckboxGroup';
 import { useWaitlistForm } from './useWaitlistForm';
 import { WaitlistFormProps } from './types';
+import { checkSupabaseConnection } from '@/lib/supabase-client';
+import { SupabaseStatus } from './SupabaseStatus';
 
 export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
   const {
@@ -31,11 +33,28 @@ export const WaitlistForm = ({ onSubmit, language }: WaitlistFormProps) => {
   });
   
   const [submitted, setSubmitted] = useState(false);
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false);
   const t = translations[language];
+  
+  useEffect(() => {
+    // Only show connection status in admin view or if there's an error
+    const checkIfMockMode = async () => {
+      const status = await checkSupabaseConnection();
+      setShowConnectionStatus(!status.connected);
+    };
+    
+    checkIfMockMode();
+  }, []);
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
       <h3 className="text-xl font-semibold text-center mb-6">{t.title}</h3>
+      
+      {showConnectionStatus && (
+        <div className="mb-4">
+          <SupabaseStatus />
+        </div>
+      )}
       
       {submitted && (
         <Alert className="bg-green-50 border-green-200">

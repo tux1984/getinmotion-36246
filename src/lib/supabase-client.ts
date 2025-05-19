@@ -11,11 +11,19 @@ let supabaseClient;
 // Only create the client if we have valid URL and key
 if (supabaseUrl && supabaseAnonKey) {
   supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-  console.log('Supabase client initialized successfully');
+  console.log('Supabase client initialized successfully with URL:', supabaseUrl);
 } else {
   // Create a mock client for development
-  console.warn('Supabase credentials not found! Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
-  console.info('Running in development mode with mock Supabase client.');
+  console.warn('⚠️ Supabase credentials not found! Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
+  console.info('✅ Running in development mode with mock Supabase client.');
+  
+  // Check which environment variables are missing
+  if (!supabaseUrl) {
+    console.error('❌ Missing VITE_SUPABASE_URL environment variable');
+  }
+  if (!supabaseAnonKey) {
+    console.error('❌ Missing VITE_SUPABASE_ANON_KEY environment variable');
+  }
   
   // Mock data for testing
   const mockWaitlist = [];
@@ -125,5 +133,43 @@ if (supabaseUrl && supabaseAnonKey) {
     },
   };
 }
+
+// Export a function to check connection status
+export const checkSupabaseConnection = async () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { 
+      connected: false, 
+      message: 'Missing Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.',
+      missing: {
+        url: !supabaseUrl,
+        key: !supabaseAnonKey
+      }
+    };
+  }
+  
+  try {
+    // Try to make a simple request to test the connection
+    const { error } = await supabaseClient.from('waitlist').select('count', { count: 'exact', head: true });
+    
+    if (error) {
+      return { 
+        connected: false, 
+        message: `Connection error: ${error.message}`,
+        error
+      };
+    }
+    
+    return { 
+      connected: true, 
+      message: 'Successfully connected to Supabase' 
+    };
+  } catch (e) {
+    return { 
+      connected: false, 
+      message: `Connection error: ${e.message}`,
+      error: e
+    };
+  }
+};
 
 export { supabaseClient };
