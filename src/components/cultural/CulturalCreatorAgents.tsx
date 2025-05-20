@@ -16,7 +16,6 @@ interface CulturalAgentProps {
   color: string;
   profiles: CreatorProfile[];
   priority: number;
-  onSelect: (id: string) => void;
 }
 
 interface CulturalCreatorAgentsProps {
@@ -120,8 +119,7 @@ export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ on
       icon: <Calculator className="w-6 h-6" />,
       color: "bg-emerald-100 text-emerald-700",
       profiles: ['visual-artist', 'textile-artisan', 'indigenous-artisan'],
-      priority: 1,
-      onSelect: handleAgentSelect
+      priority: 1
     },
     {
       id: "contract-generator",
@@ -130,8 +128,7 @@ export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ on
       icon: <FileText className="w-6 h-6" />,
       color: "bg-blue-100 text-blue-700",
       profiles: ['musician', 'visual-artist', 'indigenous-artisan'],
-      priority: 1,
-      onSelect: handleAgentSelect
+      priority: 1
     },
     {
       id: "maturity-evaluator",
@@ -140,8 +137,7 @@ export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ on
       icon: <HelpCircle className="w-6 h-6" />,
       color: "bg-violet-100 text-violet-700",
       profiles: ['musician', 'visual-artist', 'textile-artisan', 'indigenous-artisan'],
-      priority: 1,
-      onSelect: handleAgentSelect
+      priority: 1
     },
     {
       id: "export-advisor",
@@ -150,8 +146,7 @@ export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ on
       icon: <Globe className="w-6 h-6" />,
       color: "bg-indigo-100 text-indigo-700",
       profiles: ['musician', 'visual-artist', 'textile-artisan'],
-      priority: 2,
-      onSelect: handleAgentSelect
+      priority: 2
     },
     {
       id: "portfolio-catalog",
@@ -160,8 +155,7 @@ export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ on
       icon: <Palette className="w-6 h-6" />,
       color: "bg-pink-100 text-pink-700",
       profiles: ['visual-artist', 'textile-artisan', 'indigenous-artisan'],
-      priority: 2,
-      onSelect: handleAgentSelect
+      priority: 2
     },
   ];
 
