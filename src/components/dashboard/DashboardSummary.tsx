@@ -41,19 +41,19 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ language }) 
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 md:grid-cols-3">
       {stats.map((stat, index) => (
         <div 
           key={index} 
-          className="bg-white p-4 rounded-lg border border-gray-100"
+          className="bg-white p-3 sm:p-4 rounded-lg border border-gray-100 shadow-sm"
         >
           <div className="flex items-center">
-            <div className={`w-10 h-10 rounded-full ${stat.color} flex items-center justify-center mr-3`}>
-              <span className="text-lg">{stat.icon}</span>
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${stat.color} flex items-center justify-center mr-2 sm:mr-3`}>
+              <span className="text-base sm:text-lg">{stat.icon}</span>
             </div>
             <div>
-              <p className="text-gray-500 text-sm">{stat.title}</p>
-              <p className="text-2xl font-semibold">{stat.value}</p>
+              <p className="text-xs sm:text-sm text-gray-500">{stat.title}</p>
+              <p className="text-lg sm:text-2xl font-semibold">{stat.value}</p>
             </div>
           </div>
         </div>

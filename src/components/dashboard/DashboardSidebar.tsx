@@ -17,6 +17,7 @@ import { MotionLogo } from '@/components/MotionLogo';
 import { Home, BarChart3, Calendar, Settings } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardSidebarProps {
   activeSection: string;
@@ -30,6 +31,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   onMaturityCalculatorClick
 }) => {
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
   
   const t = {
     en: {
@@ -77,26 +79,27 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
   return (
     <Sidebar variant="inset" className="w-[280px]">
-      <SidebarHeader className="flex items-center justify-between p-4">
+      <SidebarHeader className="flex items-center justify-between p-3 sm:p-4">
         <MotionLogo />
       </SidebarHeader>
       
       <SidebarContent>
-        <div className="px-4 mb-4">
+        <div className="px-3 sm:px-4 mb-3 sm:mb-4">
           <Input
             placeholder={t[language].search}
-            className="bg-gray-50"
+            className="bg-gray-50 h-8 sm:h-9"
           />
         </div>
         
         <SidebarGroup>
-          <SidebarGroupLabel>{t[language].dashboard}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs">{t[language].dashboard}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton 
                     isActive={activeSection === item.id}
+                    size={isMobile ? "sm" : "default"}
                     onClick={() => {
                       if (item.id === 'maturity') {
                         onMaturityCalculatorClick();
@@ -105,8 +108,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                       }
                     }}
                   >
-                    <item.icon className="w-5 h-5 mr-2" />
-                    <span>{item.title}</span>
+                    <item.icon className="w-4 h-4 mr-2" />
+                    <span className="text-sm">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -115,8 +118,8 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4">
-        <Button variant="outline" size="sm" className="w-full text-sm">
+      <SidebarFooter className="p-3 sm:p-4">
+        <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm">
           {t[language].help}
         </Button>
       </SidebarFooter>

@@ -4,6 +4,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { AgentsList } from './AgentsList';
 import { Agent } from '@/types/dashboard';
 import { DashboardSummary } from './DashboardSummary';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -15,6 +16,7 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
   agents
 }) => {
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
   
   const t = {
     en: {
@@ -44,13 +46,13 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Welcome section */}
       <div>
-        <h1 className="text-2xl font-medium mb-2">
+        <h1 className="text-xl sm:text-2xl font-medium mb-1 sm:mb-2">
           {t[language].greeting}
         </h1>
-        <p className="text-gray-500">
+        <p className="text-sm sm:text-base text-gray-500">
           {t[language].agentsReady}
         </p>
       </div>
@@ -60,7 +62,7 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
       
       {/* Agents section */}
       <div>
-        <h2 className="text-lg font-medium mb-4 flex items-center">
+        <h2 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 flex items-center">
           <span className="mr-2">🧠</span>
           {t[language].myAgents}
         </h2>

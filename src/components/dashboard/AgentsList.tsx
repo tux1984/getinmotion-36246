@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import { AgentCard } from './AgentCard';
 import { Agent } from '@/types/dashboard';
 import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AgentsListProps {
   agents: Agent[];
@@ -18,13 +19,15 @@ export const AgentsList: React.FC<AgentsListProps> = ({
   addNewAgentText,
   language
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div className="relative">
         <Input 
           type="text" 
           placeholder={language === 'en' ? "Search agents..." : "Buscar agentes..."}
-          className="pl-8 bg-gray-50"
+          className="pl-8 bg-gray-50 h-9 sm:h-10"
         />
         <div className="absolute left-2.5 top-2.5">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -34,7 +37,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2 sm:gap-3">
         {agents.map((agent) => (
           <AgentCard 
             key={agent.id}
@@ -46,13 +49,13 @@ export const AgentsList: React.FC<AgentsListProps> = ({
         
         {/* Add new agent card */}
         <div 
-          className="flex items-center p-4 border border-dashed border-gray-200 rounded-lg hover:border-violet-300 hover:bg-violet-50 cursor-pointer transition-all"
+          className="flex items-center p-3 sm:p-4 border border-dashed border-gray-200 rounded-lg hover:border-violet-300 hover:bg-violet-50 cursor-pointer transition-all"
           onClick={() => onAgentAction('new', 'create')}
         >
-          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mr-3">
-            <Plus className="w-5 h-5 text-gray-400" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-50 flex items-center justify-center mr-2 sm:mr-3">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           </div>
-          <p className="font-medium text-gray-600">{addNewAgentText}</p>
+          <p className="font-medium text-sm sm:text-base text-gray-600">{addNewAgentText}</p>
         </div>
       </div>
     </div>

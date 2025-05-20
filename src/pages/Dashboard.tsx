@@ -11,11 +11,13 @@ import { DashboardMain } from '@/components/dashboard/DashboardMain';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Dashboard = () => {
   const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const {
     agents,
@@ -67,7 +69,7 @@ const Dashboard = () => {
         />
         
         <SidebarInset>
-          <div className="px-6 py-4">
+          <div className="px-3 py-3 sm:px-6 sm:py-4">
             {activeSection === 'dashboard' && (
               <DashboardMain 
                 onSelectAgent={handleSelectAgent}
@@ -76,15 +78,15 @@ const Dashboard = () => {
             )}
 
             {activeSection === 'agent-details' && selectedAgent && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="mb-4">
+              <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                <div className="mb-3 sm:mb-4">
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={handleBackFromAgentDetails}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 h-8 text-sm"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
                     {language === 'en' ? 'Back' : 'Volver'}
                   </Button>
                 </div>
