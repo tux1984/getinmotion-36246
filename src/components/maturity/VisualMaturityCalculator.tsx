@@ -125,7 +125,7 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'team',
           question: 'How organized is your team?',
           options: [
-            { id: 'team-1', text: 'We're figuring it out', value: 1 },
+            { id: 'team-1', text: "We're figuring it out", value: 1 },
             { id: 'team-2', text: 'Some structure but could improve', value: 2 },
             { id: 'team-3', text: 'Clear roles and responsibilities', value: 3 }
           ]
