@@ -1,37 +1,72 @@
+
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/components/ui/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useToast } from '@/components/ui/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Gauge } from 'lucide-react';
+import { ProgressBar } from '@/components/maturity/ProgressBar';
+import { getQuestions } from '@/components/maturity/getQuestions';
+import { QuestionCard } from '@/components/maturity/QuestionCard';
+import { CompletionScreen } from '@/components/maturity/CompletionScreen';
+import { MaturityResults } from '@/components/maturity/MaturityResults';
+import { Link } from 'react-router-dom';
+import { CalculatorStep, Language, ProfileType, CategoryScore } from '@/components/maturity/types';
 
-type CategoryScore = {
-  ideaValidation: number;
-  userExperience: number;
-  marketFit: number;
-  monetization: number;
-};
+// Sample agent data (this would come from your backend in a real application)
+const sampleAgents = [
+  {
+    id: "agent1",
+    name: "Vision Copilot",
+    description: "Helps you define and refine your project vision",
+    icon: "🧠",
+    category: "planning",
+    recommended: true
+  },
+  {
+    id: "agent2",
+    name: "Audience Analyzer",
+    description: "Identifies and understands your target audience",
+    icon: "👥",
+    category: "research",
+    recommended: true
+  },
+  {
+    id: "agent3",
+    name: "Schedule Manager",
+    description: "Organizes your calendar and manages deadlines",
+    icon: "📅",
+    category: "productivity",
+    recommended: true
+  },
+  {
+    id: "agent4",
+    name: "Content Creator",
+    description: "Helps generate and optimize content",
+    icon: "✍️",
+    category: "content",
+    recommended: false
+  },
+  {
+    id: "agent5",
+    name: "Financial Advisor",
+    description: "Manages budget and financial planning",
+    icon: "💰",
+    category: "finance",
+    recommended: false
+  },
+  {
+    id: "agent6",
+    name: "Marketing Assistant",
+    description: "Develops and executes marketing strategies",
+    icon: "📢",
+    category: "marketing",
+    recommended: false
+  }
+];
 
-type ProfileType = 'idea' | 'solo' | 'team';
-
+// Artisan types for the initialization step
 const artisanTypes = {
   en: [
     { value: 'visual', label: 'Visual Artist (painting, photography, etc.)' },
@@ -53,63 +88,46 @@ const artisanTypes = {
   ]
 };
 
-const questions = {
+// Questions for enhanced maturity assessment
+const enhancedQuestions = {
   ideaValidation: {
     en: [
       {
+        id: 'concept',
         question: "How clear is your product/service concept?",
         options: [
-          { value: "1", label: "Just a vague idea" },
-          { value: "2", label: "Basic concept with some details" },
-          { value: "3", label: "Well-defined concept with clear features" },
-          { value: "4", label: "Comprehensive, detailed product specification" }
+          { id: 'concept-1', value: 1, text: "Just a vague idea" },
+          { id: 'concept-2', value: 2, text: "Basic concept with some details" },
+          { id: 'concept-3', value: 3, text: "Well-defined concept with clear features" }
         ]
       },
       {
+        id: 'validation',
         question: "Have you validated your idea with potential customers?",
         options: [
-          { value: "1", label: "No validation yet" },
-          { value: "2", label: "Informal feedback from friends/family" },
-          { value: "3", label: "Structured feedback from target audience" },
-          { value: "4", label: "Extensive customer interviews and testing" }
-        ]
-      },
-      {
-        question: "How unique is your offering compared to existing options?",
-        options: [
-          { value: "1", label: "Similar to many existing products" },
-          { value: "2", label: "Some unique elements" },
-          { value: "3", label: "Distinct approach or features" },
-          { value: "4", label: "Highly innovative and unique" }
+          { id: 'validation-1', value: 1, text: "No validation yet" },
+          { id: 'validation-2', value: 2, text: "Informal feedback from friends/family" },
+          { id: 'validation-3', value: 3, text: "Structured feedback from target audience" }
         ]
       }
     ],
     es: [
       {
+        id: 'concept',
         question: "¿Qué tan claro es el concepto de tu producto/servicio?",
         options: [
-          { value: "1", label: "Solo una idea vaga" },
-          { value: "2", label: "Concepto básico con algunos detalles" },
-          { value: "3", label: "Concepto bien definido con características claras" },
-          { value: "4", label: "Especificación completa y detallada del producto" }
+          { id: 'concept-1', value: 1, text: "Solo una idea vaga" },
+          { id: 'concept-2', value: 2, text: "Concepto básico con algunos detalles" },
+          { id: 'concept-3', value: 3, text: "Concepto bien definido con características claras" }
         ]
       },
       {
+        id: 'validation',
         question: "¿Has validado tu idea con clientes potenciales?",
         options: [
-          { value: "1", label: "Sin validación aún" },
-          { value: "2", label: "Comentarios informales de amigos/familia" },
-          { value: "3", label: "Comentarios estructurados del público objetivo" },
-          { value: "4", label: "Entrevistas y pruebas extensas con clientes" }
-        ]
-      },
-      {
-        question: "¿Qué tan única es tu oferta en comparación con las opciones existentes?",
-        options: [
-          { value: "1", label: "Similar a muchos productos existentes" },
-          { value: "2", label: "Algunos elementos únicos" },
-          { value: "3", label: "Enfoque o características distintivas" },
-          { value: "4", label: "Altamente innovador y único" }
+          { id: 'validation-1', value: 1, text: "Sin validación aún" },
+          { id: 'validation-2', value: 2, text: "Comentarios informales de amigos/familia" },
+          { id: 'validation-3', value: 3, text: "Comentarios estructurados del público objetivo" }
         ]
       }
     ]
@@ -117,59 +135,41 @@ const questions = {
   userExperience: {
     en: [
       {
+        id: 'ux',
         question: "How developed is your product's user experience?",
         options: [
-          { value: "1", label: "Not considered yet" },
-          { value: "2", label: "Basic consideration of user needs" },
-          { value: "3", label: "Designed with user feedback" },
-          { value: "4", label: "Extensively tested and refined" }
+          { id: 'ux-1', value: 1, text: "Not considered yet" },
+          { id: 'ux-2', value: 2, text: "Basic consideration of user needs" },
+          { id: 'ux-3', value: 3, text: "Designed with user feedback" }
         ]
       },
       {
+        id: 'brand',
         question: "Do you have a consistent brand identity?",
         options: [
-          { value: "1", label: "No brand elements yet" },
-          { value: "2", label: "Basic logo and colors" },
-          { value: "3", label: "Consistent visual identity" },
-          { value: "4", label: "Comprehensive brand guidelines" }
-        ]
-      },
-      {
-        question: "How do customers interact with your product/service?",
-        options: [
-          { value: "1", label: "Interaction pathway not defined" },
-          { value: "2", label: "Basic interaction flow" },
-          { value: "3", label: "Well-designed customer journey" },
-          { value: "4", label: "Optimized, multi-channel experience" }
+          { id: 'brand-1', value: 1, text: "No brand elements yet" },
+          { id: 'brand-2', value: 2, text: "Basic logo and colors" },
+          { id: 'brand-3', value: 3, text: "Comprehensive brand guidelines" }
         ]
       }
     ],
     es: [
       {
+        id: 'ux',
         question: "¿Qué tan desarrollada está la experiencia de usuario de tu producto?",
         options: [
-          { value: "1", label: "Aún no considerada" },
-          { value: "2", label: "Consideración básica de las necesidades del usuario" },
-          { value: "3", label: "Diseñada con retroalimentación de usuarios" },
-          { value: "4", label: "Ampliamente probada y refinada" }
+          { id: 'ux-1', value: 1, text: "Aún no considerada" },
+          { id: 'ux-2', value: 2, text: "Consideración básica de las necesidades del usuario" },
+          { id: 'ux-3', value: 3, text: "Diseñada con retroalimentación de usuarios" }
         ]
       },
       {
+        id: 'brand',
         question: "¿Tienes una identidad de marca consistente?",
         options: [
-          { value: "1", label: "Aún sin elementos de marca" },
-          { value: "2", label: "Logo y colores básicos" },
-          { value: "3", label: "Identidad visual consistente" },
-          { value: "4", label: "Guías de marca comprensivas" }
-        ]
-      },
-      {
-        question: "¿Cómo interactúan los clientes con tu producto/servicio?",
-        options: [
-          { value: "1", label: "Camino de interacción no definido" },
-          { value: "2", label: "Flujo de interacción básico" },
-          { value: "3", label: "Recorrido del cliente bien diseñado" },
-          { value: "4", label: "Experiencia optimizada y multicanal" }
+          { id: 'brand-1', value: 1, text: "Aún sin elementos de marca" },
+          { id: 'brand-2', value: 2, text: "Logo y colores básicos" },
+          { id: 'brand-3', value: 3, text: "Guías de marca comprensivas" }
         ]
       }
     ]
@@ -177,59 +177,41 @@ const questions = {
   marketFit: {
     en: [
       {
+        id: 'target',
         question: "How well do you understand your target market?",
         options: [
-          { value: "1", label: "General idea of potential customers" },
-          { value: "2", label: "Basic customer segments identified" },
-          { value: "3", label: "Detailed customer personas" },
-          { value: "4", label: "Deep insights into customer needs and behaviors" }
+          { id: 'target-1', value: 1, text: "General idea of potential customers" },
+          { id: 'target-2', value: 2, text: "Basic customer segments identified" },
+          { id: 'target-3', value: 3, text: "Detailed customer personas" }
         ]
       },
       {
+        id: 'competition',
         question: "Have you identified your competitive advantage?",
         options: [
-          { value: "1", label: "No clear differentiation" },
-          { value: "2", label: "Some unique selling points" },
-          { value: "3", label: "Clear value proposition" },
-          { value: "4", label: "Strongly defensible competitive advantage" }
-        ]
-      },
-      {
-        question: "How developed is your marketing strategy?",
-        options: [
-          { value: "1", label: "No marketing plan yet" },
-          { value: "2", label: "Basic marketing ideas" },
-          { value: "3", label: "Defined marketing channels" },
-          { value: "4", label: "Comprehensive marketing strategy with metrics" }
+          { id: 'competition-1', value: 1, text: "No clear differentiation" },
+          { id: 'competition-2', value: 2, text: "Some unique selling points" },
+          { id: 'competition-3', value: 3, text: "Strong competitive advantage" }
         ]
       }
     ],
     es: [
       {
+        id: 'target',
         question: "¿Qué tan bien entiendes tu mercado objetivo?",
         options: [
-          { value: "1", label: "Idea general de clientes potenciales" },
-          { value: "2", label: "Segmentos básicos de clientes identificados" },
-          { value: "3", label: "Perfiles detallados de clientes" },
-          { value: "4", label: "Conocimiento profundo de necesidades y comportamientos" }
+          { id: 'target-1', value: 1, text: "Idea general de clientes potenciales" },
+          { id: 'target-2', value: 2, text: "Segmentos básicos de clientes identificados" },
+          { id: 'target-3', value: 3, text: "Perfiles detallados de clientes" }
         ]
       },
       {
+        id: 'competition',
         question: "¿Has identificado tu ventaja competitiva?",
         options: [
-          { value: "1", label: "Sin diferenciación clara" },
-          { value: "2", label: "Algunos puntos de venta únicos" },
-          { value: "3", label: "Propuesta de valor clara" },
-          { value: "4", label: "Ventaja competitiva fuertemente defendible" }
-        ]
-      },
-      {
-        question: "¿Qué tan desarrollada está tu estrategia de marketing?",
-        options: [
-          { value: "1", label: "Aún sin plan de marketing" },
-          { value: "2", label: "Ideas básicas de marketing" },
-          { value: "3", label: "Canales de marketing definidos" },
-          { value: "4", label: "Estrategia integral de marketing con métricas" }
+          { id: 'competition-1', value: 1, text: "Sin diferenciación clara" },
+          { id: 'competition-2', value: 2, text: "Algunos puntos de venta únicos" },
+          { id: 'competition-3', value: 3, text: "Ventaja competitiva fuerte" }
         ]
       }
     ]
@@ -237,310 +219,245 @@ const questions = {
   monetization: {
     en: [
       {
+        id: 'business',
         question: "How developed is your business model?",
         options: [
-          { value: "1", label: "No clear revenue strategy" },
-          { value: "2", label: "Basic pricing model" },
-          { value: "3", label: "Defined revenue streams" },
-          { value: "4", label: "Optimized business model with multiple revenue sources" }
+          { id: 'business-1', value: 1, text: "No clear revenue strategy" },
+          { id: 'business-2', value: 2, text: "Basic pricing model" },
+          { id: 'business-3', value: 3, text: "Multiple revenue streams" }
         ]
       },
       {
+        id: 'finance',
         question: "What is the current state of your financial planning?",
         options: [
-          { value: "1", label: "No financial projections" },
-          { value: "2", label: "Basic cost estimates" },
-          { value: "3", label: "Detailed financial model" },
-          { value: "4", label: "Comprehensive financial planning with scenarios" }
-        ]
-      },
-      {
-        question: "How sustainable is your business financially?",
-        options: [
-          { value: "1", label: "Not generating revenue yet" },
-          { value: "2", label: "Some revenue but not profitable" },
-          { value: "3", label: "Breaking even or small profit" },
-          { value: "4", label: "Consistently profitable" }
+          { id: 'finance-1', value: 1, text: "No financial projections" },
+          { id: 'finance-2', value: 2, text: "Basic cost estimates" },
+          { id: 'finance-3', value: 3, text: "Detailed financial model" }
         ]
       }
     ],
     es: [
       {
+        id: 'business',
         question: "¿Qué tan desarrollado está tu modelo de negocio?",
         options: [
-          { value: "1", label: "Sin estrategia clara de ingresos" },
-          { value: "2", label: "Modelo básico de precios" },
-          { value: "3", label: "Fuentes de ingresos definidas" },
-          { value: "4", label: "Modelo de negocio optimizado con múltiples fuentes de ingresos" }
+          { id: 'business-1', value: 1, text: "Sin estrategia clara de ingresos" },
+          { id: 'business-2', value: 2, text: "Modelo básico de precios" },
+          { id: 'business-3', value: 3, text: "Múltiples fuentes de ingresos" }
         ]
       },
       {
+        id: 'finance',
         question: "¿Cuál es el estado actual de tu planificación financiera?",
         options: [
-          { value: "1", label: "Sin proyecciones financieras" },
-          { value: "2", label: "Estimaciones básicas de costos" },
-          { value: "3", label: "Modelo financiero detallado" },
-          { value: "4", label: "Planificación financiera integral con escenarios" }
+          { id: 'finance-1', value: 1, text: "Sin proyecciones financieras" },
+          { id: 'finance-2', value: 2, text: "Estimaciones básicas de costos" },
+          { id: 'finance-3', value: 3, text: "Modelo financiero detallado" }
         ]
-      },
-      {
-        question: "¿Qué tan sostenible es tu negocio financieramente?",
-        options: [
-          { value: "1", label: "Aún no genera ingresos" },
-          { value: "2", label: "Algunos ingresos pero no rentable" },
-          { value: "3", label: "Punto de equilibrio o pequeña ganancia" },
-          { value: "4", label: "Consistentemente rentable" }
-        ]
-      }
-    ]
-  },
-  initialization: {
-    en: [
-      {
-        question: "What type of artisan are you?",
-        field: "artisanType",
-        type: "select"
-      },
-      {
-        question: "Describe your project or business idea in a few sentences:",
-        field: "projectDescription",
-        type: "textarea"
-      },
-      {
-        question: "What is your name or business name?",
-        field: "businessName",
-        type: "input"
-      }
-    ],
-    es: [
-      {
-        question: "¿Qué tipo de artesano eres?",
-        field: "artisanType",
-        type: "select"
-      },
-      {
-        question: "Describe tu proyecto o idea de negocio en unas pocas frases:",
-        field: "projectDescription",
-        type: "textarea"
-      },
-      {
-        question: "¿Cuál es tu nombre o el nombre de tu negocio?",
-        field: "businessName",
-        type: "input"
       }
     ]
   }
 };
 
-const formSchema = z.object({
-  artisanType: z.string().optional(),
-  projectDescription: z.string().optional(),
-  businessName: z.string().optional(),
-  answers: z.array(z.string()).optional(),
-  currentStep: z.string(),
-  hasProject: z.boolean().optional()
-});
+const getEnhancedCategoryQuestions = (category: keyof typeof enhancedQuestions, language: Language) => {
+  return enhancedQuestions[category][language];
+};
 
-export const MaturityCalculator = () => {
+const MaturityCalculator = () => {
   const { language } = useLanguage();
   const { toast } = useToast();
-  const [step, setStep] = useState<string>("start");
-  const [progress, setProgress] = useState(0);
-  const [scores, setScores] = useState<CategoryScore>({
+  const [currentStep, setCurrentStep] = useState<CalculatorStep>('start');
+  const [userProfile, setUserProfile] = useState<ProfileType | null>(null);
+  const [basicQuestions, setBasicQuestions] = useState(getQuestions(language));
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showMaturityResults, setShowMaturityResults] = useState(false);
+  const [maturityScores, setMaturityScores] = useState<CategoryScore>({
     ideaValidation: 0,
     userExperience: 0,
     marketFit: 0,
     monetization: 0
   });
-  const [hasProject, setHasProject] = useState<boolean | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const profileType = (location.state?.profileType as ProfileType) || 'idea';
+  const [progress, setProgress] = useState(0);
+  const [currentCategoryQuestions, setCurrentCategoryQuestions] = useState<any[]>([]);
+  const [userDetails, setUserDetails] = useState({
+    artisanType: '',
+    projectDescription: '',
+    businessName: ''
+  });
 
   const t = {
     en: {
-      startTitle: "Project Maturity Calculator",
-      startDesc: "Let's evaluate your project's maturity level or help you define your business idea.",
+      title: "Project Maturity Calculator",
+      subtitle: "Evaluate your project's maturity level and get personalized recommendations",
       startQuestion: "Do you already have a project or business?",
       yes: "Yes, I want to evaluate my existing project",
       no: "No, I need help defining my business idea",
       next: "Next",
       back: "Back",
-      skip: "Skip this step",
-      submit: "Submit",
-      generating: "Generating results...",
-      projectPromptTitle: "Let's Define Your Project",
-      projectPromptDesc: "Answer a few questions to help structure your business idea",
-      evaluationTitle: "Project Evaluation",
-      evaluationDesc: "Let's assess your project's current maturity level",
-      finalStep: "Final Step",
       complete: "Complete",
-      resultsTitle: "Your Project Maturity Analysis",
-      resultsDesc: "Here's an assessment of your project's maturity in key areas",
+      skip: "Skip this step",
+      pleaseSelect: "Please select an option",
+      pleaseSelectMessage: "Select whether you have an existing project or need help defining your idea",
+      initialization: "Let's Define Your Project",
+      artisanType: "What type of artisan are you?",
+      projectDescription: "Describe your project or business idea in a few sentences:",
+      businessName: "What is your name or business name?",
+      selectType: "Select type",
+      describePlaceholder: "Describe your project or idea...",
+      namePlaceholder: "Your name or business name",
+      missingInfo: "Missing information",
+      missingInfoMsg: "Please fill all fields before continuing",
       ideaValidation: "Idea Validation",
       userExperience: "User Experience",
       marketFit: "Market Fit",
       monetization: "Monetization",
-      overallMaturity: "Overall Maturity",
-      thankYou: "Thank you for completing the assessment!",
-      generatePrompt: "Generate Business Development Guide",
-      promptGenerated: "Business Development Guide Generated!",
+      evaluationTitle: "Project Evaluation",
+      evaluationDesc: "Let's assess your project's current maturity level",
+      finalStep: "Final Step",
       invalidAnswers: "Please answer all questions before continuing",
-      backToDashboard: "Back to Dashboard"
+      backToHome: "Back to Home",
+      toDashboard: "Go to Dashboard",
+      progressText: "Step %current% of %total%"
     },
     es: {
-      startTitle: "Calculadora de Madurez del Proyecto",
-      startDesc: "Vamos a evaluar el nivel de madurez de tu proyecto o ayudarte a definir tu idea de negocio.",
+      title: "Calculadora de Madurez del Proyecto",
+      subtitle: "Evalúa el nivel de madurez de tu proyecto y obtén recomendaciones personalizadas",
       startQuestion: "¿Ya tienes un proyecto o negocio?",
       yes: "Sí, quiero evaluar mi proyecto existente",
       no: "No, necesito ayuda para definir mi idea de negocio",
       next: "Siguiente",
       back: "Atrás",
-      skip: "Omitir este paso",
-      submit: "Enviar",
-      generating: "Generando resultados...",
-      projectPromptTitle: "Definamos Tu Proyecto",
-      projectPromptDesc: "Responde algunas preguntas para ayudar a estructurar tu idea de negocio",
-      evaluationTitle: "Evaluación del Proyecto",
-      evaluationDesc: "Vamos a evaluar el nivel actual de madurez de tu proyecto",
-      finalStep: "Último Paso",
       complete: "Completar",
-      resultsTitle: "Análisis de Madurez de Tu Proyecto",
-      resultsDesc: "Aquí está una evaluación de la madurez de tu proyecto en áreas clave",
+      skip: "Omitir este paso",
+      pleaseSelect: "Por favor haz una selección",
+      pleaseSelectMessage: "Selecciona si tienes un proyecto existente o necesitas ayuda para definir tu idea",
+      initialization: "Definamos Tu Proyecto",
+      artisanType: "¿Qué tipo de artesano eres?",
+      projectDescription: "Describe tu proyecto o idea de negocio en unas pocas frases:",
+      businessName: "¿Cuál es tu nombre o el nombre de tu negocio?",
+      selectType: "Seleccionar tipo",
+      describePlaceholder: "Describe tu proyecto o idea...",
+      namePlaceholder: "Tu nombre o nombre del negocio",
+      missingInfo: "Información faltante",
+      missingInfoMsg: "Por favor completa todos los campos antes de continuar",
       ideaValidation: "Validación de Idea",
       userExperience: "Experiencia de Usuario",
       marketFit: "Ajuste al Mercado",
       monetization: "Monetización",
-      overallMaturity: "Madurez General",
-      thankYou: "¡Gracias por completar la evaluación!",
-      generatePrompt: "Generar Guía de Desarrollo de Negocio",
-      promptGenerated: "¡Guía de Desarrollo de Negocio Generada!",
+      evaluationTitle: "Evaluación del Proyecto",
+      evaluationDesc: "Vamos a evaluar el nivel actual de madurez de tu proyecto",
+      finalStep: "Último Paso",
       invalidAnswers: "Por favor responde todas las preguntas antes de continuar",
-      backToDashboard: "Volver al Dashboard"
+      backToHome: "Volver al Inicio",
+      toDashboard: "Ir al Dashboard",
+      progressText: "Paso %current% de %total%"
     }
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      currentStep: "start",
-      answers: [],
-    },
-  });
-
-  const currentAnswers = form.watch("answers") || [];
-  
-  const updateProgress = () => {
-    const totalSteps = hasProject ? 5 : 2;
-    let currentStepNumber = 0;
-    
-    switch (step) {
-      case "start":
-        currentStepNumber = 1;
-        break;
-      case "initialization":
-        currentStepNumber = 2;
-        break;
-      case "ideaValidation":
-        currentStepNumber = hasProject ? 2 : 3;
-        break;
-      case "userExperience":
-        currentStepNumber = 3;
-        break;
-      case "marketFit":
-        currentStepNumber = 4;
-        break;
-      case "monetization":
-        currentStepNumber = 5;
-        break;
-      case "results":
-        currentStepNumber = totalSteps;
-        break;
-    }
-    
-    setProgress(Math.round((currentStepNumber / totalSteps) * 100));
-  };
-  
+  // Update progress based on current step
   React.useEffect(() => {
-    updateProgress();
-  }, [step, hasProject]);
+    let totalSteps = 0;
+    let currentStepNumber = 0;
 
-  const calculateCategoryScore = (answers: string[], category: keyof CategoryScore) => {
-    if (!answers || answers.length === 0) return 0;
-    
-    const categoryStartIndex = getCategoryStartIndex(category);
-    if (categoryStartIndex === -1) return 0;
-    
-    const categoryAnswers = answers.slice(categoryStartIndex, categoryStartIndex + 3);
-    const totalPoints = categoryAnswers.reduce((sum, answer) => sum + parseInt(answer || "0"), 0);
-    
-    return Math.round((totalPoints / 12) * 100);
-  };
-  
-  const getCategoryStartIndex = (category: string): number => {
-    switch (category) {
-      case "ideaValidation": return 0;
-      case "userExperience": return 3;
-      case "marketFit": return 6;
-      case "monetization": return 9;
-      default: return -1;
+    if (userProfile === null) {
+      totalSteps = 1;
+      currentStepNumber = 1;
+    } else if (userProfile) {
+      // For existing project path
+      totalSteps = 5; // start + 4 categories
+      
+      switch (currentStep) {
+        case 'start': currentStepNumber = 1; break;
+        case 'ideaValidation': currentStepNumber = 2; break;
+        case 'userExperience': currentStepNumber = 3; break;
+        case 'marketFit': currentStepNumber = 4; break;
+        case 'monetization': currentStepNumber = 5; break;
+        case 'results': currentStepNumber = 5; break;
+        default: currentStepNumber = 1;
+      }
+    } else {
+      // For new idea path
+      totalSteps = 2; // start + initialization
+      
+      switch (currentStep) {
+        case 'start': currentStepNumber = 1; break;
+        case 'initialization': currentStepNumber = 2; break;
+        case 'results': currentStepNumber = 2; break;
+        default: currentStepNumber = 1;
+      }
     }
+
+    setProgress(Math.round((currentStepNumber / totalSteps) * 100));
+
+    // Update current category questions when step changes
+    if (['ideaValidation', 'userExperience', 'marketFit', 'monetization'].includes(currentStep)) {
+      setCurrentCategoryQuestions(getEnhancedCategoryQuestions(currentStep as keyof typeof enhancedQuestions, language));
+    }
+  }, [currentStep, userProfile, language]);
+
+  const handleSelectProfile = (profile: ProfileType | null) => {
+    setUserProfile(profile);
   };
-  
+
+  const handleSelectOption = (questionId: string, value: number) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+
   const handleNext = () => {
-    if (step === "start") {
-      if (hasProject === null) {
+    if (currentStep === 'start') {
+      if (userProfile === null) {
         toast({
-          title: language === 'en' ? "Please make a selection" : "Por favor haz una selección",
-          description: language === 'en' 
-            ? "Select whether you have an existing project or need help defining your idea" 
-            : "Selecciona si tienes un proyecto existente o necesitas ayuda para definir tu idea",
+          title: t[language].pleaseSelect,
+          description: t[language].pleaseSelectMessage,
           variant: "destructive"
         });
         return;
       }
       
-      setStep(hasProject ? "ideaValidation" : "initialization");
+      if (userProfile) {
+        setCurrentStep('ideaValidation');
+      } else {
+        setCurrentStep('initialization');
+      }
       return;
     }
-    
-    if (step === "initialization") {
-      const artisanType = form.getValues("artisanType");
-      const projectDescription = form.getValues("projectDescription");
-      const businessName = form.getValues("businessName");
-      
-      if (!artisanType || !projectDescription || !businessName) {
+
+    if (currentStep === 'initialization') {
+      if (!userDetails.artisanType || !userDetails.projectDescription || !userDetails.businessName) {
         toast({
-          title: language === 'en' ? "Missing information" : "Información faltante",
-          description: language === 'en' 
-            ? "Please fill all fields before continuing" 
-            : "Por favor completa todos los campos antes de continuar",
+          title: t[language].missingInfo,
+          description: t[language].missingInfoMsg,
           variant: "destructive"
         });
         return;
       }
       
-      setStep("results");
-      
+      // Generate basic scores for new projects
       const newScores = {
-        ideaValidation: 20,
+        ideaValidation: 20, // Starting point for a new idea
         userExperience: 10,
         marketFit: 15,
         monetization: 5
       };
       
-      setScores(newScores);
-      saveResultsAndNavigate(newScores);
+      setMaturityScores(newScores);
+      setShowMaturityResults(true);
+      setCurrentStep('results');
       return;
     }
-    
-    if (["ideaValidation", "userExperience", "marketFit", "monetization"].includes(step)) {
-      const currentCategoryQuestions = questions[step as keyof typeof questions][language];
-      const startIndex = getCategoryStartIndex(step);
-      const categoryAnswers = currentAnswers.slice(startIndex, startIndex + currentCategoryQuestions.length);
+
+    // Handle category questions
+    if (['ideaValidation', 'userExperience', 'marketFit', 'monetization'].includes(currentStep)) {
+      // Check if all questions in this step are answered
+      const currentQuestions = getEnhancedCategoryQuestions(currentStep as keyof typeof enhancedQuestions, language);
+      const allAnswered = currentQuestions.every(q => answers[q.id] !== undefined);
       
-      if (categoryAnswers.length < currentCategoryQuestions.length || 
-          categoryAnswers.some(answer => !answer)) {
+      if (!allAnswered) {
         toast({
           title: t[language].invalidAnswers,
           variant: "destructive"
@@ -548,357 +465,319 @@ export const MaturityCalculator = () => {
         return;
       }
       
-      if (step === "ideaValidation") {
-        setStep("userExperience");
-      } else if (step === "userExperience") {
-        setStep("marketFit");
-      } else if (step === "marketFit") {
-        setStep("monetization");
-      } else if (step === "monetization") {
-        const finalScores = {
-          ideaValidation: calculateCategoryScore(currentAnswers, "ideaValidation"),
-          userExperience: calculateCategoryScore(currentAnswers, "userExperience"),
-          marketFit: calculateCategoryScore(currentAnswers, "marketFit"),
-          monetization: calculateCategoryScore(currentAnswers, "monetization")
-        };
-        
-        setScores(finalScores);
-        setStep("results");
-        saveResultsAndNavigate(finalScores);
+      // Calculate score for current category
+      const calculateCategoryScore = () => {
+        const questions = getEnhancedCategoryQuestions(currentStep as keyof typeof enhancedQuestions, language);
+        const maxPossibleScore = questions.length * 3; // 3 is max value
+        const totalScore = questions.reduce((sum, q) => sum + (answers[q.id] || 0), 0);
+        return Math.round((totalScore / maxPossibleScore) * 100);
+      };
+      
+      // Move to next category or results
+      if (currentStep === 'ideaValidation') {
+        setMaturityScores(prev => ({ ...prev, ideaValidation: calculateCategoryScore() }));
+        setCurrentStep('userExperience');
+      } else if (currentStep === 'userExperience') {
+        setMaturityScores(prev => ({ ...prev, userExperience: calculateCategoryScore() }));
+        setCurrentStep('marketFit');
+      } else if (currentStep === 'marketFit') {
+        setMaturityScores(prev => ({ ...prev, marketFit: calculateCategoryScore() }));
+        setCurrentStep('monetization');
+      } else if (currentStep === 'monetization') {
+        setMaturityScores(prev => ({ ...prev, monetization: calculateCategoryScore() }));
+        setShowMaturityResults(true);
+        setCurrentStep('results');
       }
     }
   };
 
-  const saveResultsAndNavigate = (finalScores: CategoryScore) => {
-    const recommendedAgents = {
-      admin: true,
-      accounting: false,
-      legal: false,
-      operations: false,
-      cultural: false
-    };
-
-    if (profileType === 'idea') {
-      recommendedAgents.legal = finalScores.ideaValidation > 30;
-      recommendedAgents.cultural = finalScores.ideaValidation > 20;
-    } else if (profileType === 'solo') {
-      recommendedAgents.accounting = finalScores.monetization > 20;
-      recommendedAgents.legal = finalScores.marketFit > 40;
-      recommendedAgents.cultural = finalScores.marketFit > 30;
-    } else if (profileType === 'team') {
-      recommendedAgents.accounting = true;
-      recommendedAgents.legal = finalScores.marketFit > 30;
-      recommendedAgents.operations = finalScores.marketFit > 50;
-      recommendedAgents.cultural = finalScores.marketFit > 40;
-    }
-
-    localStorage.setItem('maturityScores', JSON.stringify(finalScores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
-    localStorage.setItem('onboardingCompleted', 'true');
-  };
-  
   const handleBack = () => {
-    if (step === "initialization" || (step === "ideaValidation" && !hasProject)) {
-      setStep("start");
-    } else if (step === "ideaValidation") {
-      setStep("start");
-    } else if (step === "userExperience") {
-      setStep("ideaValidation");
-    } else if (step === "marketFit") {
-      setStep("userExperience");
-    } else if (step === "monetization") {
-      setStep("marketFit");
-    } else if (step === "results") {
-      if (hasProject) {
-        setStep("monetization");
+    if (currentStep === 'initialization' || currentStep === 'ideaValidation') {
+      setCurrentStep('start');
+    } else if (currentStep === 'userExperience') {
+      setCurrentStep('ideaValidation');
+    } else if (currentStep === 'marketFit') {
+      setCurrentStep('userExperience');
+    } else if (currentStep === 'monetization') {
+      setCurrentStep('marketFit');
+    } else if (currentStep === 'results') {
+      setShowMaturityResults(false);
+      if (!userProfile) {
+        setCurrentStep('initialization');
       } else {
-        setStep("initialization");
+        setCurrentStep('monetization');
       }
     }
   };
-  
-  const handleGeneratePrompt = () => {
-    toast({
-      title: t[language].promptGenerated,
-      description: language === 'en'
-        ? "Check your email for a detailed business development guide tailored to your project."
-        : "Revisa tu correo para obtener una guía detallada de desarrollo de negocios adaptada a tu proyecto."
-    });
-  };
-  
-  const handleBackToDashboard = () => {
-    navigate('/dashboard');
+
+  const renderStartStep = () => {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium">{t[language].startQuestion}</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Button
+            type="button"
+            variant={userProfile === true ? "default" : "outline"}
+            className={`h-auto py-6 px-4 ${userProfile === true ? "ring-2 ring-primary" : ""}`}
+            onClick={() => handleSelectProfile(true as unknown as ProfileType)}
+          >
+            <div className="text-left">
+              <div className="font-medium">{t[language].yes}</div>
+            </div>
+          </Button>
+          
+          <Button
+            type="button"
+            variant={userProfile === false ? "default" : "outline"}
+            className={`h-auto py-6 px-4 ${userProfile === false ? "ring-2 ring-primary" : ""}`}
+            onClick={() => handleSelectProfile(false as unknown as ProfileType)}
+          >
+            <div className="text-left">
+              <div className="font-medium">{t[language].no}</div>
+            </div>
+          </Button>
+        </div>
+      </div>
+    );
   };
 
-  const renderCurrentStep = () => {
-    switch (step) {
-      case "start":
-        return (
-          <div className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-medium">{t[language].startQuestion}</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button
-                type="button"
-                variant={hasProject === true ? "default" : "outline"}
-                className={`h-auto py-6 px-4 ${hasProject === true ? "ring-2 ring-primary" : ""}`}
-                onClick={() => setHasProject(true)}
-              >
-                <div className="text-left">
-                  <div className="font-medium">{t[language].yes}</div>
-                </div>
-              </Button>
-              
-              <Button
-                type="button"
-                variant={hasProject === false ? "default" : "outline"}
-                className={`h-auto py-6 px-4 ${hasProject === false ? "ring-2 ring-primary" : ""}`}
-                onClick={() => setHasProject(false)}
-              >
-                <div className="text-left">
-                  <div className="font-medium">{t[language].no}</div>
-                </div>
-              </Button>
-            </div>
-          </div>
-        );
+  const renderInitializationStep = () => {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium">{t[language].initialization}</h3>
         
-      case "initialization":
-        return (
-          <div className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-medium">{t[language].projectPromptTitle}</h3>
-            <p className="text-sm text-muted-foreground">{t[language].projectPromptDesc}</p>
-            
-            <div className="space-y-4">
-              {questions.initialization[language].map((q, index) => (
-                <div key={index} className="space-y-2">
-                  <FormLabel>{q.question}</FormLabel>
-                  
-                  {q.type === 'select' && (
-                    <Select
-                      value={form.watch("artisanType")}
-                      onValueChange={(value) => form.setValue("artisanType", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={language === 'en' ? "Select type" : "Seleccionar tipo"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {artisanTypes[language].map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  
-                  {q.type === 'textarea' && (
-                    <Textarea 
-                      value={form.watch("projectDescription") || ""}
-                      onChange={(e) => form.setValue("projectDescription", e.target.value)}
-                      placeholder={language === 'en' 
-                        ? "Describe your project or idea..."
-                        : "Describe tu proyecto o idea..."
-                      }
-                      className="min-h-[100px]"
-                    />
-                  )}
-                  
-                  {q.type === 'input' && (
-                    <Input 
-                      value={form.watch("businessName") || ""}
-                      onChange={(e) => form.setValue("businessName", e.target.value)}
-                      placeholder={language === 'en' ? "Your name or business name" : "Tu nombre o nombre del negocio"}
-                    />
-                  )}
-                </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t[language].artisanType}</label>
+            <select 
+              value={userDetails.artisanType}
+              onChange={(e) => setUserDetails(prev => ({ ...prev, artisanType: e.target.value }))}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">{t[language].selectType}</option>
+              {artisanTypes[language].map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
-        );
-        
-      case "ideaValidation":
-      case "userExperience":
-      case "marketFit":
-      case "monetization":
-        const currentCategory = step as keyof typeof questions;
-        const categoryQuestions = questions[currentCategory][language];
-        const startIndex = getCategoryStartIndex(currentCategory);
-        
-        return (
-          <div className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-medium">{t[language].evaluationTitle}</h3>
-            <p className="text-sm text-muted-foreground">
-              {currentCategory === "monetization" 
-                ? t[language].finalStep 
-                : t[language].evaluationDesc}
-            </p>
-            
-            <div className="space-y-6">
-              {categoryQuestions.map((q, qIndex) => {
-                const formIndex = startIndex + qIndex;
-                return (
-                  <div key={qIndex} className="space-y-3">
-                    <FormLabel className="text-base">{q.question}</FormLabel>
-                    <RadioGroup 
-                      value={currentAnswers[formIndex] || ""}
-                      onValueChange={(value) => {
-                        const newAnswers = [...currentAnswers];
-                        newAnswers[formIndex] = value;
-                        form.setValue("answers", newAnswers);
-                      }}
-                      className="space-y-1"
-                    >
-                      {q.options!.map((option) => (
-                        <div key={option.value} className="flex items-center space-x-2">
-                          <RadioGroupItem value={option.value} id={`q${formIndex}-${option.value}`} />
-                          <label 
-                            htmlFor={`q${formIndex}-${option.value}`}
-                            className="text-sm cursor-pointer"
-                          >
-                            {option.label}
-                          </label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                );
-              })}
-            </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t[language].projectDescription}</label>
+            <textarea 
+              value={userDetails.projectDescription}
+              onChange={(e) => setUserDetails(prev => ({ ...prev, projectDescription: e.target.value }))}
+              placeholder={t[language].describePlaceholder}
+              className="w-full p-2 border border-gray-300 rounded-md min-h-[100px]"
+            />
           </div>
-        );
-        
-      case "results":
-        const overallScore = Math.round(
-          Object.values(scores).reduce((acc, score) => acc + score, 0) / Object.keys(scores).length
-        );
-        
-        return (
-          <div className="space-y-6 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-medium">{t[language].resultsTitle}</h3>
-            <p className="text-sm text-muted-foreground">{t[language].resultsDesc}</p>
-            
-            <div className="space-y-6">
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t[language].businessName}</label>
+            <input 
+              type="text"
+              value={userDetails.businessName}
+              onChange={(e) => setUserDetails(prev => ({ ...prev, businessName: e.target.value }))}
+              placeholder={t[language].namePlaceholder}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCategoryStep = () => {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium">
+          {currentStep === 'monetization' 
+            ? t[language].finalStep 
+            : t[language].evaluationTitle}
+        </h3>
+
+        <div className="space-y-6">
+          {currentCategoryQuestions.map((q, index) => (
+            <div key={index} className="space-y-3">
+              <label className="text-base font-medium">{q.question}</label>
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{t[language].overallMaturity}</span>
-                  <span className="text-lg font-bold">{overallScore}%</span>
-                </div>
-                <Progress value={overallScore} className="h-3" />
-              </div>
-              
-              <div className="space-y-4 pt-4">
-                {Object.entries(scores).map(([category, score]) => (
-                  <div key={category} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span>{t[language][category as keyof typeof t.en]}</span>
-                      <span className="font-medium">{score}%</span>
-                    </div>
-                    <Progress 
-                      value={score} 
-                      className="h-2"
-                      indicatorClassName={
-                        category === 'ideaValidation' ? 'bg-emerald-500' :
-                        category === 'userExperience' ? 'bg-violet-500' :
-                        category === 'marketFit' ? 'bg-blue-500' : 'bg-amber-500'
-                      }
+                {q.options.map((option: any) => (
+                  <div 
+                    key={option.id}
+                    className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all
+                      ${answers[q.id] === option.value 
+                        ? 'border-purple-400 bg-purple-50' 
+                        : 'border-gray-200 hover:border-purple-200'}`}
+                    onClick={() => handleSelectOption(q.id, option.value)}
+                  >
+                    <input 
+                      type="radio"
+                      id={option.id}
+                      checked={answers[q.id] === option.value}
+                      onChange={() => handleSelectOption(q.id, option.value)}
+                      className="mr-3"
                     />
+                    <label htmlFor={option.id} className="flex-1 cursor-pointer">
+                      {option.text}
+                    </label>
+                    {answers[q.id] === option.value && (
+                      <CheckCircle2 className="h-5 w-5 text-purple-600" />
+                    )}
                   </div>
                 ))}
               </div>
-              
-              <div className="flex flex-col space-y-2 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={handleGeneratePrompt}
-                  className="w-full"
-                >
-                  {t[language].generatePrompt}
-                </Button>
-                
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={handleBackToDashboard}
-                  className="w-full"
-                >
-                  {t[language].backToDashboard}
-                </Button>
-              </div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 'start':
+        return renderStartStep();
+      case 'initialization':
+        return renderInitializationStep();
+      case 'ideaValidation':
+      case 'userExperience':
+      case 'marketFit':
+      case 'monetization':
+        return renderCategoryStep();
+      case 'results':
+        return (
+          <MaturityResults 
+            language={language}
+            score={Object.values(maturityScores).reduce((acc, val) => acc + val, 0) / 4}
+            profileType={userProfile ? 'idea' : 'team'}
+            agents={sampleAgents}
+          />
         );
-        
       default:
         return null;
     }
   };
 
+  const getStepTitle = () => {
+    if (currentStep === 'start') return t[language].title;
+    if (currentStep === 'initialization') return t[language].initialization;
+    if (currentStep === 'ideaValidation') return t[language].ideaValidation;
+    if (currentStep === 'userExperience') return t[language].userExperience;
+    if (currentStep === 'marketFit') return t[language].marketFit;
+    if (currentStep === 'monetization') return t[language].monetization;
+    if (currentStep === 'results') return t[language].title;
+    return '';
+  };
+
+  const getTotalSteps = () => {
+    if (userProfile === null) return 1;
+    if (userProfile) return 5; // start + 4 categories
+    return 2; // start + initialization
+  };
+
+  const getCurrentStepNumber = () => {
+    if (userProfile === null) return 1;
+    
+    if (userProfile) {
+      switch (currentStep) {
+        case 'start': return 1;
+        case 'ideaValidation': return 2;
+        case 'userExperience': return 3;
+        case 'marketFit': return 4;
+        case 'monetization': return 5;
+        case 'results': return 5;
+        default: return 1;
+      }
+    } else {
+      switch (currentStep) {
+        case 'start': return 1;
+        case 'initialization': return 2;
+        case 'results': return 2;
+        default: return 1;
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleBackToDashboard}
-              className="mr-2"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              {t[language].backToDashboard}
-            </Button>
-          </div>
-          
-          <div className="flex items-center">
-            <BarChart3 className="h-5 w-5 mr-2 text-violet-500" />
-            <h1 className="text-xl font-semibold text-gray-800">
-              {t[language].startTitle}
-            </h1>
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm">
+        <div className="container mx-auto py-4 px-4 flex justify-between items-center">
+          <Link to="/" className="flex items-center">
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            <span>{t[language].backToHome}</span>
+          </Link>
+          <div>
+            <div className="bg-indigo-100/80 p-2 rounded-lg">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
-        
-        <div className="mb-6">
-          <Progress value={progress} className="h-2" />
-          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-            <span>{progress}%</span>
-            <span>{language === 'en' ? 'Complete' : 'Completado'}</span>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 md:py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="flex justify-center items-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center">
+                <Gauge className="w-7 h-7 text-white" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">{getStepTitle()}</h1>
+            <p className="text-gray-600">{t[language].subtitle}</p>
           </div>
-        </div>
-        
-        <Form {...form}>
-          <form className="space-y-6">
-            {renderCurrentStep()}
-            
-            {step !== "results" && (
-              <div className="flex justify-between pt-4">
-                {step !== "start" && (
+
+          <Card className="border-2 border-indigo-100 shadow-lg bg-white">
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-lg font-medium">
+                    {t[language].progressText
+                      .replace('%current%', getCurrentStepNumber().toString())
+                      .replace('%total%', getTotalSteps().toString())}
+                  </h3>
+                </div>
+                <ProgressBar current={getCurrentStepNumber()} total={getTotalSteps()} />
+              </div>
+
+              {renderCurrentStep()}
+
+              <div className="flex justify-between pt-8">
+                {currentStep !== 'start' && (
                   <Button
-                    type="button"
                     variant="outline"
                     onClick={handleBack}
+                    className="flex items-center"
                   >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     {t[language].back}
                   </Button>
                 )}
-                
-                {step === "start" && (
-                  <div></div>
+
+                {currentStep !== 'results' ? (
+                  <Button
+                    onClick={handleNext}
+                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 ml-auto"
+                  >
+                    {t[language].next}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Link to="/dashboard" className="ml-auto">
+                    <Button
+                      className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                    >
+                      {t[language].toDashboard}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
                 )}
-                
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                >
-                  {t[language].next}
-                </Button>
               </div>
-            )}
-          </form>
-        </Form>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 };

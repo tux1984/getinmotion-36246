@@ -13,61 +13,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UserProfileTypes } from '@/components/user-types/UserProfileTypes';
-import { VisualMaturityCalculator } from '@/components/maturity/VisualMaturityCalculator';
-import { MaturityResults } from '@/components/maturity/MaturityResults';
 import { Link } from 'react-router-dom';
-
-// Sample agent data (this would come from your backend in a real application)
-const sampleAgents = [
-  {
-    id: "agent1",
-    name: "Vision Copilot",
-    description: "Helps you define and refine your project vision",
-    icon: "🧠",
-    category: "planning",
-    recommended: true
-  },
-  {
-    id: "agent2",
-    name: "Audience Analyzer",
-    description: "Identifies and understands your target audience",
-    icon: "👥",
-    category: "research",
-    recommended: true
-  },
-  {
-    id: "agent3",
-    name: "Schedule Manager",
-    description: "Organizes your calendar and manages deadlines",
-    icon: "📅",
-    category: "productivity",
-    recommended: true
-  },
-  {
-    id: "agent4",
-    name: "Content Creator",
-    description: "Helps generate and optimize content",
-    icon: "✍️",
-    category: "content",
-    recommended: false
-  },
-  {
-    id: "agent5",
-    name: "Financial Advisor",
-    description: "Manages budget and financial planning",
-    icon: "💰",
-    category: "finance",
-    recommended: false
-  },
-  {
-    id: "agent6",
-    name: "Marketing Assistant",
-    description: "Develops and executes marketing strategies",
-    icon: "📢",
-    category: "marketing",
-    recommended: false
-  }
-];
 
 const Index = () => {
   const { toast } = useToast();
@@ -76,11 +22,6 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [validCode, setValidCode] = useState(false);
-  const [showMaturityCalculator, setShowMaturityCalculator] = useState(false);
-  const [showMaturityResults, setShowMaturityResults] = useState(false);
-  const [maturityScore, setMaturityScore] = useState(0);
-  const [userProfile, setUserProfile] = useState<'idea' | 'solo' | 'team' | null>(null);
-  const [maturityAnswers, setMaturityAnswers] = useState<Record<string, number>>({});
   const isMobile = useIsMobile();
   
   // Translations object
@@ -96,7 +37,9 @@ const Index = () => {
       verifying: "Verifying...",
       accessButton: "Access MVP",
       incorrectCode: "Incorrect code",
-      invalidCodeMessage: "The access code you entered is invalid."
+      invalidCodeMessage: "The access code you entered is invalid.",
+      maturityCalculator: "Project Maturity Calculator",
+      maturityCalculatorDesc: "Evaluate your project's maturity and get personalized recommendations"
     },
     es: {
       navAbout: "Nosotros",
@@ -109,7 +52,9 @@ const Index = () => {
       verifying: "Verificando...",
       accessButton: "Acceder al MVP",
       incorrectCode: "Código incorrecto",
-      invalidCodeMessage: "El código de acceso que has introducido no es válido."
+      invalidCodeMessage: "El código de acceso que has introducido no es válido.",
+      maturityCalculator: "Calculadora de Madurez del Proyecto",
+      maturityCalculatorDesc: "Evalúa la madurez de tu proyecto y obtén recomendaciones personalizadas"
     }
   };
   
@@ -123,8 +68,8 @@ const Index = () => {
       setIsLoading(false);
       if (accessCode === "motionproject") {
         setValidCode(true);
-        setShowMaturityCalculator(true);
-        document.getElementById('maturity-calculator')?.scrollIntoView({ behavior: 'smooth' });
+        // Redirect to maturity calculator
+        window.location.href = "/maturity-calculator";
       } else {
         toast({
           title: t.incorrectCode,
@@ -147,25 +92,9 @@ const Index = () => {
   const handleCodeSubmitted = (code: string) => {
     if (code === "motionproject") {
       setValidCode(true);
-      setShowMaturityCalculator(true);
-      
-      // Scroll to the maturity calculator section
-      setTimeout(() => {
-        document.getElementById('maturity-calculator')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      // Redirect to maturity calculator
+      window.location.href = "/maturity-calculator";
     }
-  };
-  
-  const handleMaturityComplete = (answers: Record<string, number>, score: number) => {
-    setMaturityAnswers(answers);
-    setMaturityScore(score);
-    setShowMaturityResults(true);
-    setShowMaturityCalculator(false);
-    
-    // Scroll to the results section
-    setTimeout(() => {
-      document.getElementById('maturity-results')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
   
   return (
@@ -274,41 +203,29 @@ const Index = () => {
                         </form>
                       </TabsContent>
                     </Tabs>
+                    
+                    {validCode && (
+                      <div className="mt-6 pt-6 border-t border-indigo-800/30">
+                        <Link to="/maturity-calculator">
+                          <Button
+                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-none flex items-center gap-2"
+                          >
+                            {t.maturityCalculator}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                              <path d="M5 12h14"></path>
+                              <path d="m12 5 7 7-7 7"></path>
+                            </svg>
+                          </Button>
+                        </Link>
+                        <p className="text-center text-xs text-indigo-300 mt-2">{t.maturityCalculatorDesc}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             )}
           </div>
         </div>
-        
-        {showMaturityCalculator && (
-          <div className="container mx-auto px-4 py-8 md:py-16" id="maturity-calculator">
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-indigo-100">
-                <VisualMaturityCalculator 
-                  language={language}
-                  profileType={userProfile} 
-                  onComplete={handleMaturityComplete}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {showMaturityResults && (
-          <div className="container mx-auto px-4 py-8 md:py-16" id="maturity-results">
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-indigo-100">
-                <MaturityResults 
-                  language={language}
-                  score={maturityScore}
-                  profileType={userProfile}
-                  agents={sampleAgents}
-                />
-              </div>
-            </div>
-          </div>
-        )}
         
         <ValueProposition language={language} />
       </main>
