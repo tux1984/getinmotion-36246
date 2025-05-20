@@ -666,7 +666,7 @@ const MaturityCalculator = () => {
     if (currentStep === 'ideaValidation') return t[language].ideaValidation;
     if (currentStep === 'userExperience') return t[language].userExperience;
     if (currentStep === 'marketFit') return t[language].marketFit;
-    if (currentStep === 'monetization') return t[language].monetization;
+    if (currentStep === 'monetization') return t[language].monetización;
     if (currentStep === 'results') return t[language].title;
     return '';
   };
