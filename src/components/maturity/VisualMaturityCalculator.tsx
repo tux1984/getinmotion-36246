@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -14,7 +13,7 @@ interface Question {
     id: string;
     text: string;
     value: number;
-    icon?: React.ReactNode;
+    icon?: React.ReactNode;  // Make icon optional with the "?" modifier
   }[];
 }
 
