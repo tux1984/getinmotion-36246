@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,9 +77,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'research',
           question: 'Have you done market research?',
           options: [
-            { id: 'research-1', text: 'Not yet', value: 1 },
-            { id: 'research-2', text: 'Some basic research', value: 2 },
-            { id: 'research-3', text: 'Extensive research', value: 3 }
+            { id: 'research-1', text: 'Not yet', value: 1, icon: undefined },
+            { id: 'research-2', text: 'Some basic research', value: 2, icon: undefined },
+            { id: 'research-3', text: 'Extensive research', value: 3, icon: undefined }
           ]
         }
       ],
@@ -87,9 +88,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'research',
           question: '¿Has realizado investigación de mercado?',
           options: [
-            { id: 'research-1', text: 'Todavía no', value: 1 },
-            { id: 'research-2', text: 'Algo de investigación básica', value: 2 },
-            { id: 'research-3', text: 'Investigación extensa', value: 3 }
+            { id: 'research-1', text: 'Todavía no', value: 1, icon: undefined },
+            { id: 'research-2', text: 'Algo de investigación básica', value: 2, icon: undefined },
+            { id: 'research-3', text: 'Investigación extensa', value: 3, icon: undefined }
           ]
         }
       ]
@@ -100,9 +101,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'processes',
           question: 'Do you have defined workflows?',
           options: [
-            { id: 'processes-1', text: 'Ad-hoc as I go', value: 1 },
-            { id: 'processes-2', text: 'Some processes defined', value: 2 },
-            { id: 'processes-3', text: 'Well-documented processes', value: 3 }
+            { id: 'processes-1', text: 'Ad-hoc as I go', value: 1, icon: undefined },
+            { id: 'processes-2', text: 'Some processes defined', value: 2, icon: undefined },
+            { id: 'processes-3', text: 'Well-documented processes', value: 3, icon: undefined }
           ]
         }
       ],
@@ -111,9 +112,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'processes',
           question: '¿Tienes flujos de trabajo definidos?',
           options: [
-            { id: 'processes-1', text: 'Improvisados sobre la marcha', value: 1 },
-            { id: 'processes-2', text: 'Algunos procesos definidos', value: 2 },
-            { id: 'processes-3', text: 'Procesos bien documentados', value: 3 }
+            { id: 'processes-1', text: 'Improvisados sobre la marcha', value: 1, icon: undefined },
+            { id: 'processes-2', text: 'Algunos procesos definidos', value: 2, icon: undefined },
+            { id: 'processes-3', text: 'Procesos bien documentados', value: 3, icon: undefined }
           ]
         }
       ]
@@ -124,9 +125,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'team',
           question: 'How organized is your team?',
           options: [
-            { id: 'team-1', text: "We're figuring it out", value: 1 },
-            { id: 'team-2', text: 'Some structure but could improve', value: 2 },
-            { id: 'team-3', text: 'Clear roles and responsibilities', value: 3 }
+            { id: 'team-1', text: "We're figuring it out", value: 1, icon: undefined },
+            { id: 'team-2', text: 'Some structure but could improve', value: 2, icon: undefined },
+            { id: 'team-3', text: 'Clear roles and responsibilities', value: 3, icon: undefined }
           ]
         }
       ],
@@ -135,9 +136,9 @@ const getQuestions = (language: 'en' | 'es', profileType?: 'idea' | 'solo' | 'te
           id: 'team',
           question: '¿Qué tan organizado está tu equipo?',
           options: [
-            { id: 'team-1', text: 'Estamos resolviéndolo', value: 1 },
-            { id: 'team-2', text: 'Algo de estructura pero podríamos mejorar', value: 2 },
-            { id: 'team-3', text: 'Roles y responsabilidades claras', value: 3 }
+            { id: 'team-1', text: 'Estamos resolviéndolo', value: 1, icon: undefined },
+            { id: 'team-2', text: 'Algo de estructura pero podríamos mejorar', value: 2, icon: undefined },
+            { id: 'team-3', text: 'Roles y responsabilidades claras', value: 3, icon: undefined }
           ]
         }
       ]
