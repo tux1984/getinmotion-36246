@@ -67,6 +67,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
             description: formData.description,
             copilots_interest: formData.copilotsInterest,
             problem_to_solve: formData.problemToSolve,
+            access_code: formData.accessCode,
             language: language
           }
         ]);

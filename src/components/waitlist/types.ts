@@ -1,5 +1,11 @@
 
-export interface FormData {
+export interface WaitlistFormProps {
+  onSubmit?: () => void;
+  onCodeSubmit?: (code: string) => void;
+  language: 'en' | 'es';
+}
+
+export type FormData = {
   fullName: string;
   email: string;
   phone: string;
@@ -10,22 +16,19 @@ export interface FormData {
   description: string;
   copilotsInterest: string[];
   problemToSolve: string;
-}
+  accessCode?: string;
+};
 
 export const initialFormData: FormData = {
   fullName: '',
   email: '',
   phone: '',
-  role: '',
+  role: 'artist',
   city: '',
   country: '',
   sector: '',
   description: '',
   copilotsInterest: [],
   problemToSolve: '',
+  accessCode: '',
 };
-
-export interface WaitlistFormProps {
-  onSubmit?: () => void;
-  language: 'en' | 'es';
-}

@@ -33,6 +33,11 @@ export const translations = {
     submitting: 'Submitting...',
     successMessage: 'Thank you for joining our waitlist!',
     successDescription: 'We\'ll keep you updated on our progress.',
+    accessCode: 'Access Code',
+    accessCodePlaceholder: 'Enter your access code',
+    haveAccessCode: 'Have an access code?',
+    validCode: 'Valid code!',
+    invalidCode: 'Invalid code'
   },
   es: {
     title: 'Únete a la Lista de Espera',
@@ -67,5 +72,10 @@ export const translations = {
     submitting: 'Enviando...',
     successMessage: '¡Gracias por unirte a nuestra lista de espera!',
     successDescription: 'Te mantendremos informado sobre nuestro progreso.',
+    accessCode: 'Código de Acceso',
+    accessCodePlaceholder: 'Ingresa tu código de acceso',
+    haveAccessCode: '¿Tienes un código de acceso?',
+    validCode: '¡Código válido!',
+    invalidCode: 'Código inválido'
   }
 };

@@ -12,8 +12,62 @@ import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ProfileSelector } from '@/components/ProfileSelector';
+import { UserProfileTypes } from '@/components/user-types/UserProfileTypes';
+import { VisualMaturityCalculator } from '@/components/maturity/VisualMaturityCalculator';
+import { MaturityResults } from '@/components/maturity/MaturityResults';
 import { Link } from 'react-router-dom';
+
+// Sample agent data (this would come from your backend in a real application)
+const sampleAgents = [
+  {
+    id: "agent1",
+    name: "Vision Copilot",
+    description: "Helps you define and refine your project vision",
+    icon: "🧠",
+    category: "planning",
+    recommended: true
+  },
+  {
+    id: "agent2",
+    name: "Audience Analyzer",
+    description: "Identifies and understands your target audience",
+    icon: "👥",
+    category: "research",
+    recommended: true
+  },
+  {
+    id: "agent3",
+    name: "Schedule Manager",
+    description: "Organizes your calendar and manages deadlines",
+    icon: "📅",
+    category: "productivity",
+    recommended: true
+  },
+  {
+    id: "agent4",
+    name: "Content Creator",
+    description: "Helps generate and optimize content",
+    icon: "✍️",
+    category: "content",
+    recommended: false
+  },
+  {
+    id: "agent5",
+    name: "Financial Advisor",
+    description: "Manages budget and financial planning",
+    icon: "💰",
+    category: "finance",
+    recommended: false
+  },
+  {
+    id: "agent6",
+    name: "Marketing Assistant",
+    description: "Develops and executes marketing strategies",
+    icon: "📢",
+    category: "marketing",
+    recommended: false
+  }
+];
 
 const Index = () => {
   const { toast } = useToast();
@@ -21,7 +75,12 @@ const Index = () => {
   const [accessCode, setAccessCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
+  const [validCode, setValidCode] = useState(false);
+  const [showMaturityCalculator, setShowMaturityCalculator] = useState(false);
+  const [showMaturityResults, setShowMaturityResults] = useState(false);
+  const [maturityScore, setMaturityScore] = useState(0);
   const [userProfile, setUserProfile] = useState<'idea' | 'solo' | 'team' | null>(null);
+  const [maturityAnswers, setMaturityAnswers] = useState<Record<string, number>>({});
   const isMobile = useIsMobile();
   
   // Translations object
@@ -63,7 +122,9 @@ const Index = () => {
     setTimeout(() => {
       setIsLoading(false);
       if (accessCode === "motionproject") {
-        window.location.href = "/dashboard";
+        setValidCode(true);
+        setShowMaturityCalculator(true);
+        document.getElementById('maturity-calculator')?.scrollIntoView({ behavior: 'smooth' });
       } else {
         toast({
           title: t.incorrectCode,
@@ -83,10 +144,28 @@ const Index = () => {
     setShowWaitlistForm(false);
   };
   
-  const handleProfileSelect = (profileType: 'idea' | 'solo' | 'team' | null) => {
-    setUserProfile(profileType);
-    // Here you would normally store this in localStorage or in a backend
-    localStorage.setItem('userProfile', profileType || '');
+  const handleCodeSubmitted = (code: string) => {
+    if (code === "motionproject") {
+      setValidCode(true);
+      setShowMaturityCalculator(true);
+      
+      // Scroll to the maturity calculator section
+      setTimeout(() => {
+        document.getElementById('maturity-calculator')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+  
+  const handleMaturityComplete = (answers: Record<string, number>, score: number) => {
+    setMaturityAnswers(answers);
+    setMaturityScore(score);
+    setShowMaturityResults(true);
+    setShowMaturityCalculator(false);
+    
+    // Scroll to the results section
+    setTimeout(() => {
+      document.getElementById('maturity-results')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
   
   return (
@@ -130,12 +209,16 @@ const Index = () => {
       <main className="flex-grow">
         <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
         
-        <ProfileSelector onProfileSelected={handleProfileSelect} />
+        <UserProfileTypes />
         
         <div className="container mx-auto px-4 py-8 md:py-16" id="access">
           <div className="max-w-4xl mx-auto">
             {showWaitlistForm ? (
-              <WaitlistForm language={language} onSubmit={handleWaitlistSubmitted} />
+              <WaitlistForm 
+                language={language} 
+                onSubmit={handleWaitlistSubmitted} 
+                onCodeSubmit={handleCodeSubmitted}
+              />
             ) : (
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition duration-300"></div>
@@ -197,6 +280,35 @@ const Index = () => {
             )}
           </div>
         </div>
+        
+        {showMaturityCalculator && (
+          <div className="container mx-auto px-4 py-8 md:py-16" id="maturity-calculator">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-md border border-indigo-100">
+                <VisualMaturityCalculator 
+                  language={language}
+                  profileType={userProfile} 
+                  onComplete={handleMaturityComplete}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {showMaturityResults && (
+          <div className="container mx-auto px-4 py-8 md:py-16" id="maturity-results">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-md border border-indigo-100">
+                <MaturityResults 
+                  language={language}
+                  score={maturityScore}
+                  profileType={userProfile}
+                  agents={sampleAgents}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         <ValueProposition language={language} />
       </main>
