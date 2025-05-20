@@ -7,9 +7,10 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AgentDetails } from '@/components/dashboard/AgentDetails';
 import { useLanguage } from '@/context/LanguageContext';
-import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation';
 import { DashboardMain } from '@/components/dashboard/DashboardMain';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 
 const Dashboard = () => {
   const { language } = useLanguage();
@@ -57,46 +58,46 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
-      
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Dashboard Navigation */}
-        <DashboardNavigation 
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-gray-50 w-full">
+        <DashboardSidebar 
           activeSection={activeSection}
           onSectionChange={setActiveSection}
           onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-          language={language}
         />
+        
+        <SidebarInset>
+          <div className="px-6 py-4">
+            {activeSection === 'dashboard' && (
+              <DashboardMain 
+                onSelectAgent={handleSelectAgent}
+                agents={agents}
+              />
+            )}
 
-        {activeSection === 'dashboard' && (
-          <DashboardMain 
-            onSelectAgent={handleSelectAgent}
-            agents={agents}
-          />
-        )}
-
-        {activeSection === 'agent-details' && selectedAgent && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="mb-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleBackFromAgentDetails}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {language === 'en' ? 'Back' : 'Volver'}
-              </Button>
-            </div>
-            <AgentDetails 
-              agentId={selectedAgent}
-              language={language}
-            />
+            {activeSection === 'agent-details' && selectedAgent && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="mb-4">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleBackFromAgentDetails}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    {language === 'en' ? 'Back' : 'Volver'}
+                  </Button>
+                </div>
+                <AgentDetails 
+                  agentId={selectedAgent}
+                  language={language}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

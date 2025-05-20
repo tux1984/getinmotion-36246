@@ -1,13 +1,9 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { BarChart3, Plus } from 'lucide-react';
+import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { useNavigate } from 'react-router-dom';
-import { AgentCard } from './AgentCard';
-import { DashboardSummary } from './DashboardSummary';
 import { AgentsList } from './AgentsList';
-import { Agent, AgentStatus } from '@/types/dashboard';
+import { Agent } from '@/types/dashboard';
+import { DashboardSummary } from './DashboardSummary';
 
 interface DashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -19,18 +15,19 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
   agents
 }) => {
   const { language } = useLanguage();
-  const navigate = useNavigate();
   
   const t = {
     en: {
-      greeting: "Hello, Manu! Your agents are ready 👇",
+      greeting: "Hello, Manu!",
+      agentsReady: "Your agents are ready",
       configureAccount: "Configure account",
       myAgents: "My Agents",
       addNewAgent: "Add new agent",
       maturityCalculator: "Maturity Calculator"
     },
     es: {
-      greeting: "¡Hola, Manu! Tus agentes están listos 👇",
+      greeting: "¡Hola, Manu!",
+      agentsReady: "Tus agentes están listos",
       configureAccount: "Configurar cuenta",
       myAgents: "Mis Agentes",
       addNewAgent: "Agregar agente nuevo",
@@ -46,22 +43,26 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
     // Here you would implement the actual agent status changes
   };
 
-  const handleNavigateToMaturityCalculator = () => {
-    navigate('/maturity-calculator');
-  };
-
   return (
     <div className="space-y-8">
       {/* Welcome section */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h1 className="text-2xl font-medium mb-6">
+      <div>
+        <h1 className="text-2xl font-medium mb-2">
           {t[language].greeting}
         </h1>
-        
-        <DashboardSummary language={language} />
-        
-        <h2 className="text-xl font-medium mb-4">
-          🧠 {t[language].myAgents}
+        <p className="text-gray-500">
+          {t[language].agentsReady}
+        </p>
+      </div>
+      
+      {/* Dashboard summary */}
+      <DashboardSummary language={language} />
+      
+      {/* Agents section */}
+      <div>
+        <h2 className="text-lg font-medium mb-4 flex items-center">
+          <span className="mr-2">🧠</span>
+          {t[language].myAgents}
         </h2>
         
         <AgentsList 

@@ -8,43 +8,56 @@ interface DashboardSummaryProps {
 export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ language }) => {
   const t = {
     en: {
-      generalActivity: "General Activity",
-      activeAgents: "Active agents",
-      tasksInProgress: "Tasks in progress",
-      lastDeliverable: "Last deliverable generated",
-      daysAgo: "days ago",
-      mostUsedAgent: "Most used agent",
-      estimatedCostPerMonth: "Estimated cost per month"
+      activeAgents: "Active Agents",
+      completedTasks: "Completed Tasks",
+      pendingTasks: "Pending Tasks"
     },
     es: {
-      generalActivity: "Actividad general",
-      activeAgents: "Agentes activos",
-      tasksInProgress: "Tareas en curso",
-      lastDeliverable: "Último entregable generado",
-      daysAgo: "días atrás",
-      mostUsedAgent: "Agente más usado",
-      estimatedCostPerMonth: "Costo estimado por mes"
+      activeAgents: "Agentes Activos",
+      completedTasks: "Tareas Completadas",
+      pendingTasks: "Tareas Pendientes"
     }
   };
 
+  const stats = [
+    {
+      title: t[language].activeAgents,
+      value: "2",
+      icon: "🤖",
+      color: "bg-violet-50 text-violet-700"
+    },
+    {
+      title: t[language].completedTasks,
+      value: "12",
+      icon: "✅",
+      color: "bg-green-50 text-green-700"
+    },
+    {
+      title: t[language].pendingTasks,
+      value: "3",
+      icon: "⏱️",
+      color: "bg-amber-50 text-amber-700"
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 bg-gray-50 p-4 rounded-lg">
-      <div>
-        <h2 className="text-sm font-medium text-gray-500">{t[language].generalActivity}</h2>
-        <ul className="mt-2 space-y-1">
-          <li className="text-sm">• {t[language].activeAgents}: 2</li>
-          <li className="text-sm">• {t[language].tasksInProgress}: 4</li>
-          <li className="text-sm">• {t[language].lastDeliverable}: 1 {t[language].daysAgo}</li>
-        </ul>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-gray-500">{t[language].mostUsedAgent}</h2>
-        <p className="mt-2 text-sm">A2 - Contrato cultural</p>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-gray-500">{t[language].estimatedCostPerMonth}</h2>
-        <p className="mt-2 text-sm font-medium">$42</p>
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {stats.map((stat, index) => (
+        <div 
+          key={index} 
+          className="bg-white p-4 rounded-lg border border-gray-100"
+        >
+          <div className="flex items-center">
+            <div className={`w-10 h-10 rounded-full ${stat.color} flex items-center justify-center mr-3`}>
+              <span className="text-lg">{stat.icon}</span>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">{stat.title}</p>
+              <p className="text-2xl font-semibold">{stat.value}</p>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
