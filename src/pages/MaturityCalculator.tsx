@@ -345,7 +345,7 @@ const MaturityCalculator = () => {
       ideaValidation: "Validación de Idea",
       userExperience: "Experiencia de Usuario",
       marketFit: "Ajuste al Mercado",
-      monetización: "Monetización",
+      monetization: "Monetización",
       evaluationTitle: "Evaluación del Proyecto",
       evaluationDesc: "Vamos a evaluar el nivel actual de madurez de tu proyecto",
       finalStep: "Último Paso",
@@ -666,7 +666,7 @@ const MaturityCalculator = () => {
     if (currentStep === 'ideaValidation') return t[language].ideaValidation;
     if (currentStep === 'userExperience') return t[language].userExperience;
     if (currentStep === 'marketFit') return t[language].marketFit;
-    if (currentStep === 'monetization') return t[language].monetización;
+    if (currentStep === 'monetization') return t[language].monetization;
     if (currentStep === 'results') return t[language].title;
     return '';
   };
