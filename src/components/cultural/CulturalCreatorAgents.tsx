@@ -19,7 +19,11 @@ interface CulturalAgentProps {
   onSelect: (id: string) => void;
 }
 
-export const CulturalCreatorAgents = () => {
+interface CulturalCreatorAgentsProps {
+  onSelectAgent: (id: string) => void;
+}
+
+export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ onSelectAgent }) => {
   const { language } = useLanguage();
   const [selectedProfile, setSelectedProfile] = useState<CreatorProfile>('visual-artist');
   
@@ -104,7 +108,7 @@ export const CulturalCreatorAgents = () => {
 
   const handleAgentSelect = (id: string) => {
     console.log(`Selected agent: ${id} for profile ${selectedProfile}`);
-    // Here you would implement the logic to navigate to the agent interface
+    onSelectAgent(id);
   };
 
   // Define cultural agents based on the plan
@@ -196,7 +200,7 @@ export const CulturalCreatorAgents = () => {
                   </CardHeader>
                   <CardFooter>
                     <Button 
-                      onClick={() => agent.onSelect(agent.id)}
+                      onClick={() => handleAgentSelect(agent.id)}
                       variant="default" 
                       className="w-full"
                     >
