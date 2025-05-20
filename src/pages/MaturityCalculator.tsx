@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,6 +12,7 @@ import { CompletionScreen } from '@/components/maturity/CompletionScreen';
 import { MaturityResults } from '@/components/maturity/MaturityResults';
 import { Link } from 'react-router-dom';
 import { CalculatorStep, Language, ProfileType, CategoryScore } from '@/components/maturity/types';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 // Sample agent data (this would come from your backend in a real application)
 const sampleAgents = [
@@ -345,7 +345,7 @@ const MaturityCalculator = () => {
       ideaValidation: "Validación de Idea",
       userExperience: "Experiencia de Usuario",
       marketFit: "Ajuste al Mercado",
-      monetization: "Monetización",
+      monetización: "Monetización",
       evaluationTitle: "Evaluación del Proyecto",
       evaluationDesc: "Vamos a evaluar el nivel actual de madurez de tu proyecto",
       finalStep: "Último Paso",
@@ -502,10 +502,10 @@ const MaturityCalculator = () => {
       setCurrentStep('marketFit');
     } else if (currentStep === 'results') {
       setShowMaturityResults(false);
-      if (!userProfile) {
-        setCurrentStep('initialization');
-      } else {
+      if (userProfile === 'idea' || userProfile === 'solo' || userProfile === 'team') {
         setCurrentStep('monetization');
+      } else {
+        setCurrentStep('initialization');
       }
     }
   };
@@ -518,9 +518,9 @@ const MaturityCalculator = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button
             type="button"
-            variant={userProfile === true ? "default" : "outline"}
-            className={`h-auto py-6 px-4 ${userProfile === true ? "ring-2 ring-primary" : ""}`}
-            onClick={() => handleSelectProfile(true as unknown as ProfileType)}
+            variant={userProfile === 'idea' ? "default" : "outline"}
+            className={`h-auto py-6 px-4 ${userProfile === 'idea' ? "ring-2 ring-primary" : ""}`}
+            onClick={() => handleSelectProfile('idea')}
           >
             <div className="text-left">
               <div className="font-medium">{t[language].yes}</div>
@@ -529,9 +529,9 @@ const MaturityCalculator = () => {
           
           <Button
             type="button"
-            variant={userProfile === false ? "default" : "outline"}
-            className={`h-auto py-6 px-4 ${userProfile === false ? "ring-2 ring-primary" : ""}`}
-            onClick={() => handleSelectProfile(false as unknown as ProfileType)}
+            variant={userProfile === 'solo' ? "default" : "outline"}
+            className={`h-auto py-6 px-4 ${userProfile === 'solo' ? "ring-2 ring-primary" : ""}`}
+            onClick={() => handleSelectProfile('solo')}
           >
             <div className="text-left">
               <div className="font-medium">{t[language].no}</div>
