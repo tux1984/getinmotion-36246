@@ -14,7 +14,7 @@ export const AdminHeader = ({ onLogout, isAuthenticated }: AdminHeaderProps) => 
     <header className="sticky top-0 z-50 backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
       <div className="container mx-auto py-4 px-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <MotionLogo />
+          <MotionLogo variant="light" />
           <div className="bg-pink-500/20 px-3 py-1 rounded-full flex items-center gap-1">
             <Database size={16} />
             <span className="text-pink-200 font-medium text-sm">Admin Panel</span>

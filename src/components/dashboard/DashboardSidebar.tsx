@@ -80,7 +80,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   return (
     <Sidebar variant="inset" className="w-[280px]">
       <SidebarHeader className="flex items-center justify-between p-3 sm:p-4">
-        <MotionLogo />
+        <MotionLogo variant="dark" />
       </SidebarHeader>
       
       <SidebarContent>

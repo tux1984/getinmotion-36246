@@ -1,17 +1,39 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { useTheme } from '@/hooks/useTheme';
 
-export const MotionLogo = () => {
+interface MotionLogoProps {
+  variant?: 'auto' | 'light' | 'dark';
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export const MotionLogo: React.FC<MotionLogoProps> = ({ 
+  variant = 'auto', 
+  className = '',
+  size = 'md'
+}) => {
+  // This hook will determine if we're on a dark or light background
+  const { isDark } = useTheme();
+  
+  // Determine which logo to show based on variant and theme
+  const shouldUseLightLogo = variant === 'light' || (variant === 'auto' && isDark);
+  
+  // Set size based on prop
+  const sizeClasses = {
+    sm: 'h-6 w-auto',
+    md: 'h-8 w-auto',
+    lg: 'h-10 w-auto'
+  };
+  
   return (
-    <div className="flex items-center bg-indigo-900/40 px-3 py-2 rounded-lg">
+    <Link to="/" className={`inline-flex items-center ${className}`}>
       <img 
         src="/lovable-uploads/f8038b45-1f3e-4034-9af0-f7c1fd90dcab.png" 
         alt="Motion Logo" 
-        className="h-10 w-auto mr-2 filter drop-shadow-lg"
+        className={`${sizeClasses[size]} filter ${shouldUseLightLogo ? 'brightness-100' : 'brightness-[0.2]'} ${shouldUseLightLogo ? 'drop-shadow-lg' : ''}`}
       />
-      <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-300 to-indigo-200 drop-shadow-sm">
-        GET IN MOTION
-      </span>
-    </div>
+    </Link>
   );
 };

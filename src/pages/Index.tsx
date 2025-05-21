@@ -101,7 +101,7 @@ const Index = () => {
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950">
       <header className="sticky top-0 z-50 backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
         <div className="container mx-auto py-4 px-4 flex justify-between items-center">
-          <MotionLogo />
+          <MotionLogo variant="light" size="lg" />
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="bg-indigo-900/40 p-2 rounded-lg">
               <LanguageSwitcher />
