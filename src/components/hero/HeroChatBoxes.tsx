@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Megaphone, ShoppingCart } from 'lucide-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { 
   Carousel, 
   CarouselContent, 
@@ -173,6 +174,15 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
     }
   ];
 
+  // Create a plugin array with autoplay configuration
+  const plugins = [
+    Autoplay({
+      delay: 4000, // 4 seconds delay between slides
+      stopOnInteraction: true, // stop autoplay when user interacts with carousel
+      stopOnMouseEnter: true, // pause on mouse hover
+    }),
+  ];
+
   return (
     <div className="mt-12 md:mt-24 max-w-5xl mx-auto px-4 relative z-10">
       <div className="text-center mb-8 md:mb-12">
@@ -194,6 +204,7 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
               align: "start",
               loop: true,
             }}
+            plugins={plugins}
             className="w-full"
           >
             <CarouselContent className="-ml-4">
@@ -221,8 +232,8 @@ export const HeroChatBoxes: React.FC<HeroChatBoxesProps> = ({ language }) => {
               ))}
             </CarouselContent>
             <div className="flex items-center justify-center mt-4 gap-2">
-              <CarouselPrevious className="relative static hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
-              <CarouselNext className="relative static hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
+              <CarouselPrevious className="relative hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
+              <CarouselNext className="relative hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
             </div>
           </Carousel>
         </div>
