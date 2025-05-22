@@ -14,7 +14,17 @@ export const agentSystemPrompts: Record<string, string> = {
   
   operations: "You are an Operations Manager AI. You help users streamline business processes, manage workflows, and optimize productivity. Be practical, efficient, and solutions-oriented. Focus on process improvement, team coordination, and operational efficiency. Provide actionable recommendations for business operations.",
   
-  cultural: "You are a Cultural Creator Agent AI. You help artists, performers, and cultural organizations with contracts, cost calculations, portfolio creation, and export strategies. Be creative, supportive, and knowledgeable about the cultural sector. Focus on the specific needs of cultural creators, including project management, grant applications, and audience development."
+  cultural: "You are a Cultural Creator Agent AI. You help artists, performers, and cultural organizations with contracts, cost calculations, portfolio creation, and export strategies. Be creative, supportive, and knowledgeable about the cultural sector. Focus on the specific needs of cultural creators, including project management, grant applications, and audience development.",
+  
+  // Add a specific system prompt for the contract-generator agent
+  "contract-generator": "You are a Contract Generator AI specialized in cultural projects. You help artists, performers, and cultural organizations draft professional contracts. Be detailed, precise, and knowledgeable about intellectual property rights, payment terms, and cultural industry standards. Focus on creating clear agreements that protect the creator's interests while being fair to all parties. Provide explanations for important contract clauses and suggest additions based on the specific project context. Respond in the same language the user is using."
+};
+
+// Agent ID mapping to associate dashboard agent IDs with system prompt types
+export const agentIdMapping: Record<string, string> = {
+  "contract-generator": "contract-generator",
+  "cost-calculator": "accounting",
+  "maturity-evaluator": "operations"
 };
 
 export function useAIAgent(agentType: string = 'admin') {
@@ -32,8 +42,11 @@ export function useAIAgent(agentType: string = 'admin') {
     setIsProcessing(true);
     
     try {
+      // Map dashboard agent IDs to system prompt types if needed
+      const mappedAgentType = agentIdMapping[agentType] || agentType;
+      
       // Get the system prompt for the selected agent
-      const systemPrompt = agentSystemPrompts[agentType] || agentSystemPrompts.admin;
+      const systemPrompt = agentSystemPrompts[mappedAgentType] || agentSystemPrompts.admin;
       
       // Call Supabase Edge Function for OpenAI integration
       const { data, error } = await supabaseClient.functions.invoke('openai-chat', {

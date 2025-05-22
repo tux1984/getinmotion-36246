@@ -49,51 +49,76 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   const t = translations[language];
 
   useEffect(() => {
-    // Set initial greeting message based on agent type
-    let greeting = '';
-    
-    if (agentId === 'admin') {
-      setCopilotName(language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo');
-      setCopilotColor('bg-violet-100 text-violet-700');
-      setCopilotIcon(<FileText className="w-5 h-5" />);
-      greeting = language === 'en' 
-        ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
-        : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?";
-    } else if (agentId === 'accounting') {
-      setCopilotName(language === 'en' ? 'Accounting Agent' : 'Agente Contable');
-      setCopilotColor('bg-indigo-100 text-indigo-700');
-      setCopilotIcon(<Calculator className="w-5 h-5" />);
-      greeting = language === 'en'
-        ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
-        : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?";
-    } else if (agentId === 'legal') {
-      setCopilotName(language === 'en' ? 'Legal Advisor' : 'Asesor Legal');
-      setCopilotColor('bg-blue-100 text-blue-700');
-      setCopilotIcon(<FileSpreadsheet className="w-5 h-5" />);
-      greeting = language === 'en'
-        ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
-        : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?";
-    } else if (agentId === 'operations') {
-      setCopilotName(language === 'en' ? 'Operations Manager' : 'Gerente de Operaciones');
-      setCopilotColor('bg-emerald-100 text-emerald-700');
-      setCopilotIcon(<Briefcase className="w-5 h-5" />);
-      greeting = language === 'en'
-        ? "Hello! I'm your Operations Manager. I'm here to help streamline your business processes and optimize your workflows. What operational challenges can I help you with today?"
-        : "¡Hola! Soy tu Gerente de Operaciones. Estoy aquí para ayudarte a optimizar tus procesos de negocio y mejorar tus flujos de trabajo. ¿En qué desafíos operativos puedo ayudarte hoy?";
-    } else if (agentId === 'cultural') {
-      setCopilotName(language === 'en' ? 'Cultural Creator Agent' : 'Agente para Creadores Culturales');
-      setCopilotColor('bg-pink-100 text-pink-700');
-      setCopilotIcon(<Palette className="w-5 h-5" />);
-      greeting = language === 'en'
-        ? "Hi there! I'm your Cultural Creator Agent. I can help you with contracts, cost calculations, portfolio creation, and export strategies specific to cultural creators. How can I assist you today?"
-        : "¡Hola! Soy tu Agente para Creadores Culturales. Puedo ayudarte con contratos, cálculos de costos, creación de portafolios y estrategias de exportación específicas para creadores culturales. ¿Cómo puedo ayudarte hoy?";
+    // Set initial chat configurations based on agent type
+    switch(agentId) {
+      case 'contract-generator':
+        setCopilotName(language === 'en' ? 'Contract Generator' : 'Generador de Contratos');
+        setCopilotColor('bg-blue-100 text-blue-700');
+        setCopilotIcon(<FileSpreadsheet className="w-5 h-5" />);
+        break;
+      case 'cost-calculator':
+        setCopilotName(language === 'en' ? 'Cost Calculator' : 'Calculador de Costos');
+        setCopilotColor('bg-emerald-100 text-emerald-700');
+        setCopilotIcon(<Calculator className="w-5 h-5" />);
+        break;
+      case 'maturity-evaluator':
+        setCopilotName(language === 'en' ? 'Maturity Evaluator' : 'Evaluador de Madurez');
+        setCopilotColor('bg-violet-100 text-violet-700');
+        setCopilotIcon(<FileText className="w-5 h-5" />);
+        break;
+      case 'admin':
+        setCopilotName(language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo');
+        setCopilotColor('bg-violet-100 text-violet-700');
+        setCopilotIcon(<FileText className="w-5 h-5" />);
+        break;
+      case 'accounting':
+        setCopilotName(language === 'en' ? 'Accounting Agent' : 'Agente Contable');
+        setCopilotColor('bg-indigo-100 text-indigo-700');
+        setCopilotIcon(<Calculator className="w-5 h-5" />);
+        break;
+      case 'legal':
+        setCopilotName(language === 'en' ? 'Legal Advisor' : 'Asesor Legal');
+        setCopilotColor('bg-blue-100 text-blue-700');
+        setCopilotIcon(<FileSpreadsheet className="w-5 h-5" />);
+        break;
+      case 'operations':
+        setCopilotName(language === 'en' ? 'Operations Manager' : 'Gerente de Operaciones');
+        setCopilotColor('bg-emerald-100 text-emerald-700');
+        setCopilotIcon(<Briefcase className="w-5 h-5" />);
+        break;
+      case 'cultural':
+        setCopilotName(language === 'en' ? 'Cultural Creator Agent' : 'Agente para Creadores Culturales');
+        setCopilotColor('bg-pink-100 text-pink-700');
+        setCopilotIcon(<Palette className="w-5 h-5" />);
+        break;
+      default:
+        setCopilotName(language === 'en' ? 'Assistant' : 'Asistente');
+        setCopilotColor('bg-slate-100 text-slate-700');
+        setCopilotIcon(<FileText className="w-5 h-5" />);
     }
     
-    // Add initial greeting if we have one and there are no messages
-    if (greeting && messages.length === 0) {
-      sendMessage(greeting);
+    // Send an initial greeting if there are no messages
+    if (messages.length === 0) {
+      let greeting = '';
+      
+      if (agentId === 'contract-generator') {
+        greeting = language === 'en' 
+          ? "Hello! I'm your Contract Generator for cultural projects. I can help you create contracts for exhibitions, performances, commissions, and other cultural activities. What type of contract do you need assistance with today?"
+          : "¡Hola! Soy tu Generador de Contratos para proyectos culturales. Puedo ayudarte a crear contratos para exposiciones, performances, comisiones y otras actividades culturales. ¿Con qué tipo de contrato necesitas ayuda hoy?";
+      }
+      
+      if (greeting) {
+        // We're using the hook's sendMessage for the system message
+        // but we don't want it to appear as user input
+        setTimeout(() => {
+          const systemMessage: Message = { type: 'agent', content: greeting };
+          clearMessages(); // Clear any existing messages
+          // @ts-ignore - we're directly manipulating messages here
+          useAIAgent(agentId).setMessages([systemMessage]);
+        }, 100);
+      }
     }
-  }, [agentId, language]);
+  }, [agentId, language, messages.length]);
 
   const handleSendMessage = () => {
     if (!inputMessage.trim() || isProcessing) return;
@@ -102,7 +127,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-[600px] flex flex-col">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center">
           <div className={`w-8 h-8 rounded-full ${copilotColor} flex items-center justify-center mr-3`}>
@@ -118,16 +143,19 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
               onClick={clearMessages}
               className="text-slate-500 hover:text-slate-700"
             >
-              <span className="text-xs">{language === 'en' ? t.reset : t.reset}</span>
+              <span className="text-xs">{t.reset}</span>
             </Button>
           )}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          {onBack && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onBack}
+              className="hidden" // Hide back button in AgentDetails context
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
       
@@ -155,9 +183,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></div>
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse delay-150"></div>
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse delay-300"></div>
-                <span className="text-xs text-slate-400 ml-2">
-                  {language === 'en' ? t.thinking : t.thinking}
-                </span>
+                <span className="text-xs text-slate-400 ml-2">{t.thinking}</span>
               </div>
             </div>
           </div>
@@ -170,7 +196,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={language === 'en' ? t.enterMessage : t.enterMessage}
+            placeholder={t.enterMessage}
             className="flex-grow"
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             disabled={isProcessing}
@@ -180,7 +206,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
             disabled={!inputMessage.trim() || isProcessing}
           >
             <Send className="w-4 h-4 mr-2" />
-            {language === 'en' ? t.send : t.send}
+            {t.send}
           </Button>
         </div>
       </div>

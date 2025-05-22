@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CopilotChat } from './CopilotChat';
 
 interface AgentDetailsProps {
   agentId: string;
@@ -15,12 +16,7 @@ interface AgentDetailsProps {
 }
 
 export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language }) => {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<{type: 'user' | 'agent', content: string}[]>([
-    {type: 'user', content: 'Necesito un contrato para una obra visual'},
-    {type: 'agent', content: '¿La obra será vendida, licenciada o expuesta?'}
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const isMobile = useIsMobile();
   
   // Determine agent name based on ID
@@ -70,29 +66,15 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
     }
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-    
-    // Add user message
-    setMessages([...messages, { type: 'user', content: message }]);
-    setMessage('');
-    setIsTyping(true);
-    
-    // Simulate agent response
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        type: 'agent', 
-        content: 'Entiendo. Para una obra visual expuesta, necesitaré algunos detalles adicionales. ¿Puedes proporcionarme información sobre la duración de la exposición y el lugar donde se exhibirá?' 
-      }]);
-      setIsTyping(false);
-    }, 1500);
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
   return (
     <div>
       <h1 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">{getAgentName()}</h1>
 
-      <Tabs defaultValue="chat" className="mb-4 sm:mb-6">
+      <Tabs defaultValue="chat" className="mb-4 sm:mb-6" onValueChange={handleTabChange}>
         <TabsList className="w-full mb-2 h-auto p-1">
           <TabsTrigger className="text-xs sm:text-sm py-1.5" value="chat">💬 {t[language].chatWithAgent}</TabsTrigger>
           <TabsTrigger className="text-xs sm:text-sm py-1.5" value="tasks">📋 {t[language].generatedTasks}</TabsTrigger>
@@ -100,44 +82,15 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
         </TabsList>
         
         <TabsContent value="chat" className="mt-3 sm:mt-4">
-          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 h-60 sm:h-80 overflow-y-auto mb-3 sm:mb-4 space-y-3 sm:space-y-4">
-            {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] sm:max-w-[80%] p-2 sm:p-3 rounded-lg ${
-                  msg.type === 'user' 
-                    ? 'bg-violet-600 text-white' 
-                    : 'bg-white border border-gray-200 text-gray-800'
-                }`}>
-                  <p className="text-sm">{msg.content}</p>
-                </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] sm:max-w-[80%] p-2 sm:p-3 rounded-lg bg-white border border-gray-200">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-150"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-300"></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex gap-2">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t[language].typeYourMessage}
-              className="flex-grow h-9 sm:h-10 text-sm"
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            />
-            <Button size={isMobile ? "sm" : "default"} onClick={handleSendMessage}>
-              <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">{t[language].send}</span>
-            </Button>
-          </div>
+          {/* Use CopilotChat for OpenAI integration */}
+          {activeTab === 'chat' && (
+            <div className="h-[400px]">
+              <CopilotChat 
+                agentId={agentId} 
+                onBack={() => {}} 
+              />
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="tasks" className="mt-3 sm:mt-4 space-y-3">
