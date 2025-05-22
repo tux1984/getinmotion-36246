@@ -22,19 +22,19 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
   onChange 
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {options.map((option) => {
         const isSelected = selectedValues.includes(option.id);
         return (
           <motion.div
             key={option.id}
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             layout
-            className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
               isSelected 
-                ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-50 shadow-md' 
-                : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/30'
+                ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-100 shadow-md' 
+                : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/30'
             }`}
             onClick={() => onChange(option.id)}
           >
@@ -44,7 +44,7 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
                   id={option.id}
                   checked={isSelected}
                   onCheckedChange={() => onChange(option.id)}
-                  className="h-5 w-5 border-2"
+                  className="h-5 w-5 border-2 border-emerald-200 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
                 />
                 {isSelected && (
                   <motion.div
@@ -59,9 +59,9 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
               </div>
               
               {option.icon && (
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   isSelected 
-                    ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white' 
+                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' 
                     : 'bg-gray-100 text-gray-500'
                 }`}>
                   {option.icon}
@@ -70,11 +70,20 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
               
               <Label
                 htmlFor={option.id}
-                className={`flex-1 cursor-pointer ${isSelected ? 'text-purple-900 font-medium' : 'text-gray-700'}`}
+                className={`flex-1 cursor-pointer text-lg ${isSelected ? 'text-emerald-900 font-medium' : 'text-gray-700'}`}
               >
                 {option.label}
               </Label>
             </div>
+            
+            {isSelected && (
+              <motion.div 
+                className="absolute -inset-px rounded-2xl bg-emerald-300/10 blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+              />
+            )}
           </motion.div>
         );
       })}
