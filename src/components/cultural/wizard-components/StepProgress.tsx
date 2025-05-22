@@ -30,22 +30,36 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   };
   
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-2">
+    <div className="mb-10">
+      <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-purple-700 font-semibold">{t[language].step}</span>
-          <div className="flex items-center justify-center w-8 h-8 bg-purple-600 text-white rounded-full font-bold text-lg">
+          <span className="text-purple-700 font-semibold text-lg">{t[language].step}</span>
+          <motion.div 
+            className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full font-bold text-xl shadow-md shadow-purple-200"
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            key={currentStep}
+          >
             {Math.ceil(currentStep)}
-          </div>
-          <span className="text-gray-500">{t[language].of} {totalSteps}</span>
+          </motion.div>
+          <span className="text-gray-500 text-lg">{t[language].of} {totalSteps}</span>
         </div>
         
-        <span className="font-medium text-purple-700">{Math.round(progress)}%</span>
+        <motion.span 
+          className="font-medium text-lg text-purple-700"
+          key={progress}
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {Math.round(progress)}%
+        </motion.span>
       </div>
       
       <div className="relative">
         {/* Progress bar track */}
-        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
           <motion.div 
             className="h-full bg-gradient-to-r from-purple-500 to-indigo-600"
             initial={{ width: 0 }}
@@ -56,19 +70,19 @@ export const StepProgress: React.FC<StepProgressProps> = ({
         
         {/* Step indicators - only showing if we have step labels */}
         {stepLabels && (
-          <div className="absolute top-0 left-0 w-full flex justify-between mt-4 px-[1%]">
+          <div className="absolute top-0 left-0 w-full flex justify-between mt-6 px-[1%]">
             {Array.from({ length: totalSteps }).map((_, i) => {
-              const isCompleted = i < currentStep;
+              const isCompleted = i < currentStep - 1;
               const isCurrent = i === Math.floor(currentStep - 1);
               
               return (
                 <div key={i} className="flex flex-col items-center">
                   <motion.div 
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       isCompleted 
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600' 
+                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md' 
                         : isCurrent 
-                          ? 'bg-purple-100 border-2 border-purple-400' 
+                          ? 'bg-purple-100 border-2 border-purple-400 shadow-sm' 
                           : 'bg-gray-100 border-2 border-gray-200'
                     }`}
                     initial={false}
@@ -82,16 +96,16 @@ export const StepProgress: React.FC<StepProgressProps> = ({
                     transition={{ duration: 0.3 }}
                   >
                     {isCompleted ? (
-                      <Check className="w-3 h-3 text-white" />
+                      <Check className="w-4 h-4 text-white" />
                     ) : (
-                      <span className={`text-xs ${isCurrent ? 'text-purple-600' : 'text-gray-500'}`}>
+                      <span className={`text-sm ${isCurrent ? 'text-purple-600' : 'text-gray-500'}`}>
                         {i + 1}
                       </span>
                     )}
                   </motion.div>
                   
                   {stepLabels[i] && (
-                    <span className={`text-xs mt-1 ${
+                    <span className={`text-xs mt-2 ${
                       isCompleted 
                         ? 'text-purple-600 font-medium' 
                         : isCurrent 

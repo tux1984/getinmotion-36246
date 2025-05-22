@@ -8,6 +8,7 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/questions';
+import { ProfileStep } from '../wizard-steps/ProfileStep';
 
 interface WizardStepContentProps {
   currentStepId: WizardStepId;
@@ -28,19 +29,30 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   getRecommendedAgents,
   onComplete
 }) => {
-  // Animation variants
+  // Enhanced animation variants
   const pageVariants = {
-    enter: {
-      x: 100,
-      opacity: 0
+    initial: {
+      opacity: 0,
+      x: 50,
+      scale: 0.95
     },
-    center: {
+    animate: {
+      opacity: 1,
       x: 0,
-      opacity: 1
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
     },
     exit: {
-      x: -100,
-      opacity: 0
+      opacity: 0,
+      x: -50,
+      scale: 0.95,
+      transition: {
+        duration: 0.2
+      }
     }
   };
 
@@ -62,6 +74,17 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       );
     }
     
+    // Special handling for profile step
+    if (currentStepId === 'industry' || currentStepId === 'activities' || currentStepId === 'experience') {
+      return (
+        <ProfileStep 
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+        />
+      );
+    }
+    
     // Render individual question
     if (questionConfig) {
       return (
@@ -79,15 +102,15 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   };
 
   return (
-    <div className="min-h-[500px]">
+    <div className="w-full min-h-[400px] flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStepId}
-          initial="enter"
-          animate="center"
+          initial="initial"
+          animate="animate"
           exit="exit"
           variants={pageVariants}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="w-full"
         >
           {renderStepContent()}
         </motion.div>

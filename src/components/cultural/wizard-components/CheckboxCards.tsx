@@ -33,14 +33,14 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             layout
-            className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+            className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative overflow-hidden ${
               isSelected 
                 ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-100 shadow-md' 
                 : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/30'
             }`}
             onClick={() => onChange(option.id, !isSelected)}
           >
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 relative z-10">
               <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
                 <Checkbox
                   id={option.id}
@@ -63,7 +63,7 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
               {option.icon && withIcons && (
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   isSelected 
-                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' 
+                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md' 
                     : 'bg-gray-100 text-gray-500'
                 }`}>
                   {option.icon}
@@ -78,13 +78,25 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
               </Label>
             </div>
             
+            {/* Enhanced visual feedback */}
             {isSelected && (
-              <motion.div 
-                className="absolute -inset-px rounded-2xl bg-emerald-300/10 blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                exit={{ opacity: 0 }}
-              />
+              <>
+                <motion.div 
+                  className="absolute -inset-px rounded-2xl bg-emerald-300/10 blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.7 }}
+                  exit={{ opacity: 0 }}
+                />
+                
+                <motion.div 
+                  className="absolute -bottom-8 right-0 w-32 h-32 rounded-full bg-gradient-to-r from-emerald-400/10 to-teal-400/20 blur-xl"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 5, 0], 
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+              </>
             )}
           </motion.div>
         );
