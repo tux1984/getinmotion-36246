@@ -7,7 +7,7 @@ interface IconOptionProps {
   icon: React.ReactNode;
   label: string;
   selected: boolean;
-  onSelect: (id: string) => void;
+  onClick: (id: string) => void;
 }
 
 export const IconOption: React.FC<IconOptionProps> = ({ 
@@ -15,7 +15,7 @@ export const IconOption: React.FC<IconOptionProps> = ({
   icon, 
   label, 
   selected, 
-  onSelect 
+  onClick 
 }) => {
   return (
     <motion.div
@@ -26,7 +26,7 @@ export const IconOption: React.FC<IconOptionProps> = ({
           ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-100 shadow-lg shadow-purple-100/40' 
           : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/30'
       }`}
-      onClick={() => onSelect(id)}
+      onClick={() => onClick(id)}
       layout
     >
       <div className="flex flex-col items-center text-center">

@@ -13,13 +13,15 @@ interface Option {
 interface CheckboxCardsProps {
   options: Option[];
   selectedValues: string[];
-  onChange: (value: string) => void;
+  onChange: (value: string, isChecked: boolean) => void;
+  withIcons?: boolean;
 }
 
 export const CheckboxCards: React.FC<CheckboxCardsProps> = ({ 
   options, 
   selectedValues, 
-  onChange 
+  onChange,
+  withIcons 
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -36,14 +38,14 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
                 ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-100 shadow-md' 
                 : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/30'
             }`}
-            onClick={() => onChange(option.id)}
+            onClick={() => onChange(option.id, !isSelected)}
           >
             <div className="flex items-center space-x-3">
               <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
                 <Checkbox
                   id={option.id}
                   checked={isSelected}
-                  onCheckedChange={() => onChange(option.id)}
+                  onCheckedChange={() => onChange(option.id, !isSelected)}
                   className="h-5 w-5 border-2 border-emerald-200 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
                 />
                 {isSelected && (
@@ -58,7 +60,7 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
                 )}
               </div>
               
-              {option.icon && (
+              {option.icon && withIcons && (
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   isSelected 
                     ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' 

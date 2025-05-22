@@ -89,7 +89,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
                 label={option.label}
                 icon={option.icon}
                 selected={profileData[question.fieldName as keyof UserProfileData] === option.id}
-                onClick={() => handleSingleSelect(option.id)}
+                onClick={handleSingleSelect}
               />
             ))}
           </div>
