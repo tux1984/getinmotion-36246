@@ -29,7 +29,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       subtitle: "Based on your responses, we've prepared these insights",
       overallMaturity: "Overall Project Maturity",
       maturityLabel: "Maturity Level",
-      categories: "Categories",
+      categoriesTitle: "Categories",
       recommendedAgents: "Recommended Agents",
       agentRecommendation: "Agent Recommendations",
       whyRecommended: "Why recommended:",
@@ -39,7 +39,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         growing: "Growing",
         advanced: "Advanced"
       },
-      categories: {
+      categoryLabels: {
         ideaValidation: "Idea Validation",
         userExperience: "User Experience",
         marketFit: "Market Fit",
@@ -67,7 +67,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       subtitle: "Basados en tus respuestas, hemos preparado estos análisis",
       overallMaturity: "Madurez General del Proyecto",
       maturityLabel: "Nivel de Madurez",
-      categories: "Categorías",
+      categoriesTitle: "Categorías",
       recommendedAgents: "Agentes Recomendados",
       agentRecommendation: "Recomendaciones de Agentes",
       whyRecommended: "Por qué lo recomendamos:",
@@ -77,7 +77,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         growing: "Creciendo",
         advanced: "Avanzado"
       },
-      categories: {
+      categoryLabels: {
         ideaValidation: "Validación de Idea",
         userExperience: "Experiencia de Usuario",
         marketFit: "Ajuste al Mercado",
@@ -152,32 +152,32 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
           
           <div>
-            <h3 className="text-sm font-medium mb-4">{t[language].categories}</h3>
+            <h3 className="text-sm font-medium mb-4">{t[language].categoriesTitle}</h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm">{t[language].categories.ideaValidation}</span>
+                  <span className="text-sm">{t[language].categoryLabels.ideaValidation}</span>
                   <span className="text-xs font-medium">{scores.ideaValidation}%</span>
                 </div>
                 <Progress value={scores.ideaValidation} className={`h-2 ${getCategoryColor(scores.ideaValidation)}`} />
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm">{t[language].categories.userExperience}</span>
+                  <span className="text-sm">{t[language].categoryLabels.userExperience}</span>
                   <span className="text-xs font-medium">{scores.userExperience}%</span>
                 </div>
                 <Progress value={scores.userExperience} className={`h-2 ${getCategoryColor(scores.userExperience)}`} />
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm">{t[language].categories.marketFit}</span>
+                  <span className="text-sm">{t[language].categoryLabels.marketFit}</span>
                   <span className="text-xs font-medium">{scores.marketFit}%</span>
                 </div>
                 <Progress value={scores.marketFit} className={`h-2 ${getCategoryColor(scores.marketFit)}`} />
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm">{t[language].categories.monetization}</span>
+                  <span className="text-sm">{t[language].categoryLabels.monetization}</span>
                   <span className="text-xs font-medium">{scores.monetization}%</span>
                 </div>
                 <Progress value={scores.monetization} className={`h-2 ${getCategoryColor(scores.monetization)}`} />
