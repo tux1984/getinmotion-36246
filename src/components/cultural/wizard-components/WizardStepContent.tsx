@@ -33,8 +33,8 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   const pageVariants = {
     initial: {
       opacity: 0,
-      x: 50,
-      scale: 0.95
+      x: 30,
+      scale: 0.98
     },
     animate: {
       opacity: 1,
@@ -48,8 +48,8 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
     },
     exit: {
       opacity: 0,
-      x: -50,
-      scale: 0.95,
+      x: -30,
+      scale: 0.98,
       transition: {
         duration: 0.2
       }

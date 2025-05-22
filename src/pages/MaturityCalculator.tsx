@@ -32,15 +32,15 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen h-screen w-full overflow-hidden bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-800 flex items-center justify-center">
+    <div className="min-h-screen h-screen w-full overflow-hidden bg-gradient-to-br from-white via-white to-purple-50 flex items-center justify-center">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Enhanced abstract background elements with purple theme */}
+        {/* Subtle animated background elements */}
         <motion.div 
-          className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-300 to-indigo-400 opacity-20 blur-3xl"
+          className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-100 to-purple-200 opacity-20 blur-3xl"
           animate={{ 
-            scale: [1, 1.1, 1],
-            x: [0, 20, 0],
-            y: [0, -20, 0], 
+            scale: [1, 1.05, 1],
+            x: [0, 10, 0],
+            y: [0, -10, 0], 
           }}
           transition={{ 
             duration: 15,
@@ -50,11 +50,11 @@ const MaturityCalculator = () => {
         />
         
         <motion.div 
-          className="absolute bottom-0 left-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-tr from-violet-400 to-purple-300 opacity-20 blur-3xl"
+          className="absolute bottom-0 left-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-tr from-purple-100 to-purple-200 opacity-10 blur-3xl"
           animate={{ 
-            scale: [1, 1.2, 1],
-            x: [0, -30, 0],
-            y: [0, 30, 0], 
+            scale: [1, 1.1, 1],
+            x: [0, -15, 0],
+            y: [0, 15, 0], 
           }}
           transition={{ 
             duration: 18,
@@ -64,27 +64,13 @@ const MaturityCalculator = () => {
         />
 
         <motion.div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vh] rounded-full bg-gradient-to-r from-pink-300 to-indigo-300 opacity-10 blur-3xl"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vh] rounded-full bg-gradient-to-r from-purple-50 to-purple-100 opacity-10 blur-3xl"
           animate={{ 
-            scale: [1, 1.3, 1],
-            rotate: [0, 5, 0, -5, 0],
+            scale: [1, 1.15, 1],
+            rotate: [0, 3, 0, -3, 0],
           }}
           transition={{ 
             duration: 20,
-            repeat: Infinity,
-            repeatType: "reverse" 
-          }}
-        />
-
-        <motion.div 
-          className="absolute bottom-1/4 right-1/4 w-[30vw] h-[30vh] rounded-full bg-gradient-to-tl from-indigo-300 to-purple-400 opacity-15 blur-3xl"
-          animate={{ 
-            scale: [1, 1.2, 1],
-            x: [0, -15, 0],
-            y: [0, 15, 0], 
-          }}
-          transition={{ 
-            duration: 25,
             repeat: Infinity,
             repeatType: "reverse" 
           }}

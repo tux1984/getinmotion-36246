@@ -66,7 +66,7 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
   };
   
   return (
-    <div className="p-8 pb-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white border-b border-purple-400 shadow-md">
+    <div className="p-8 pb-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white">
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -4,7 +4,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { WizardHeader } from './wizard-components/WizardHeader';
 import { StepProgress } from './wizard-components/StepProgress';
-import { WizardBackground } from './wizard-components/WizardBackground';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { WizardNavigation } from './wizard-components/WizardNavigation';
@@ -35,7 +34,7 @@ export const CulturalMaturityWizard: React.FC<{
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="w-full mx-auto h-full flex flex-col"
+      className="w-full h-full flex flex-col bg-white shadow-xl rounded-none overflow-hidden"
     >
       <WizardHeader 
         step={currentStepNumber} 
@@ -44,14 +43,14 @@ export const CulturalMaturityWizard: React.FC<{
         industry={profileData.industry} 
       />
       
-      <div className="flex-1 flex flex-col p-4 md:p-8">
+      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-auto">
         <StepProgress 
           currentStep={currentStepNumber}
           totalSteps={totalSteps}
           language={language}
         />
         
-        <div className="flex-1 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 flex items-center justify-center my-4">
           <WizardStepContent
             currentStepId={currentStepId}
             profileData={profileData}

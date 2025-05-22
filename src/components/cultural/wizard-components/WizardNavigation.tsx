@@ -68,22 +68,22 @@ export const WizardNavigation: React.FC<WizardNavigationProps> = ({
         variant="outline"
         onClick={onPrevious}
         disabled={isFirstStep}
-        className="gap-2 border-purple-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 py-6 px-8 text-base rounded-xl"
+        className="gap-2 border-gray-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 px-6 py-2 text-base rounded-lg"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-4 h-4" />
         {t[language].previous}
       </Button>
       
       <motion.div
-        whileHover={{ scale: 1.03, y: -2 }}
-        whileTap={{ scale: 0.97 }}
+        whileHover={{ scale: 1.02, y: -1 }}
+        whileTap={{ scale: 0.98 }}
       >
         <Button
           onClick={handleNext}
-          className="gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-lg shadow-purple-200/40 px-8 py-6 text-lg rounded-xl"
+          className="gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-md px-6 py-2 text-base rounded-lg"
         >
           {t[language].next}
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </motion.div>
     </motion.div>

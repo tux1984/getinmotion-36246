@@ -30,10 +30,10 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   };
   
   return (
-    <div className="mb-10">
+    <div className="mb-8">
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-purple-700 font-semibold text-lg">{t[language].step}</span>
+          <span className="text-purple-800 font-semibold text-lg">{t[language].step}</span>
           <motion.div 
             className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full font-bold text-xl shadow-md shadow-purple-200"
             initial={{ scale: 0.8 }}
@@ -59,7 +59,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({
       
       <div className="relative">
         {/* Progress bar track */}
-        <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+        <div className="h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
           <motion.div 
             className="h-full bg-gradient-to-r from-purple-500 to-indigo-600"
             initial={{ width: 0 }}

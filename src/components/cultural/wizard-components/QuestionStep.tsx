@@ -81,7 +81,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       
       case 'icon-select':
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
             {question.options.map(option => (
               <IconOption
                 key={option.id}
@@ -100,11 +100,14 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     }
   };
 
+  const placeholderImageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&h=200&q=80";
+
   return (
     <StepContainer
       title={question.title}
       subtitle={question.subtitle}
       industry={industry}
+      illustration={placeholderImageUrl}
       fullWidth={true}
     >
       <motion.div
@@ -113,7 +116,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         transition={{ duration: 0.3 }}
         className="w-full"
       >
-        <div className="backdrop-blur-sm rounded-lg p-4">
+        <div className="rounded-lg p-4">
           {renderQuestionInput()}
         </div>
       </motion.div>

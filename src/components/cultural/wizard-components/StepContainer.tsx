@@ -27,18 +27,28 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className={`w-full max-w-4xl mx-auto flex flex-col ${className}`}
+      className={`w-full max-w-4xl mx-auto ${className}`}
     >
       <div className="mb-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 mb-4">
+        <h2 className="text-2xl md:text-3xl font-bold text-purple-800 mb-2">
           {title}
         </h2>
-        {subtitle && <p className="text-white/90 text-lg md:text-xl">{subtitle}</p>}
+        {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
       </div>
       
-      <div className="w-full backdrop-blur-sm">
+      <div className="w-full">
         {children}
       </div>
+      
+      {illustration && (
+        <div className="mt-6 flex justify-center">
+          <img 
+            src={illustration} 
+            alt="Step illustration"
+            className="max-h-40 opacity-70" 
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
