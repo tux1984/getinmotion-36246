@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UserProfileData } from '../CulturalMaturityWizard';
+import { UserProfileData } from '../types/wizardTypes';
 import { IconOption } from '../wizard-components/IconOption';
 import { CheckboxCards } from '../wizard-components/CheckboxCards';
 import { RadioCards } from '../wizard-components/RadioCards';

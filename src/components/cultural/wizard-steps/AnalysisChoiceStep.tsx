@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UserProfileData } from '../CulturalMaturityWizard';
+import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, Brain, ArrowRight } from 'lucide-react';

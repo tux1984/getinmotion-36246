@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { UserProfileData } from '../CulturalMaturityWizard';
+import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

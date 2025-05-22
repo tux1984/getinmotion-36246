@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UserProfileData } from '../CulturalMaturityWizard';
+import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { Separator } from '@/components/ui/separator';
 import { StepContainer } from '../wizard-components/StepContainer';
