@@ -66,17 +66,17 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
   };
   
   return (
-    <div className="p-8 pb-6 bg-gradient-to-r from-emerald-50 to-teal-100 border-b border-emerald-100">
+    <div className="p-8 pb-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white border-b border-purple-400 shadow-md">
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-1">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
             {t[language].title}
           </h1>
-          <p className="text-emerald-700 md:text-lg">
+          <p className="text-purple-100 md:text-lg">
             {t[language].subtitle}
           </p>
         </motion.div>
@@ -88,15 +88,15 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
             transition={{ delay: 0.3, duration: 0.4 }}
             className="mt-4 md:mt-0"
           >
-            <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-xl shadow-sm">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center">
+            <div className="flex items-center gap-3 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-300 to-indigo-400 text-white flex items-center justify-center">
                 {getIndustryIcon()}
               </div>
               <div>
-                <div className="text-sm text-emerald-600 font-medium uppercase tracking-wide">
+                <div className="text-sm text-purple-200 font-medium uppercase tracking-wide">
                   {language === 'en' ? 'Your Industry' : 'Tu Industria'}
                 </div>
-                <div className="text-lg font-semibold text-emerald-900">
+                <div className="text-lg font-semibold text-white">
                   {getIndustryText()}
                 </div>
               </div>

@@ -32,7 +32,7 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen h-screen w-full overflow-hidden bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600 flex items-center justify-center">
+    <div className="min-h-screen h-screen w-full overflow-hidden bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-800 flex items-center justify-center">
       <div className="absolute inset-0 overflow-hidden">
         {/* Enhanced abstract background elements with purple theme */}
         <motion.div 
@@ -71,6 +71,20 @@ const MaturityCalculator = () => {
           }}
           transition={{ 
             duration: 20,
+            repeat: Infinity,
+            repeatType: "reverse" 
+          }}
+        />
+
+        <motion.div 
+          className="absolute bottom-1/4 right-1/4 w-[30vw] h-[30vh] rounded-full bg-gradient-to-tl from-indigo-300 to-purple-400 opacity-15 blur-3xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            x: [0, -15, 0],
+            y: [0, 15, 0], 
+          }}
+          transition={{ 
+            duration: 25,
             repeat: Infinity,
             repeatType: "reverse" 
           }}

@@ -113,7 +113,9 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         transition={{ duration: 0.3 }}
         className="w-full"
       >
-        {renderQuestionInput()}
+        <div className="backdrop-blur-sm rounded-lg p-4">
+          {renderQuestionInput()}
+        </div>
       </motion.div>
     </StepContainer>
   );

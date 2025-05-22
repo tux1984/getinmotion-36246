@@ -63,16 +63,18 @@ export const CulturalMaturityWizard: React.FC<{
           />
         </div>
         
-        <WizardNavigation
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          isFirstStep={currentStepNumber === 1}
-          isLastStep={currentStepId === 'results'}
-          language={language}
-          currentStepId={currentStepId}
-          profileData={profileData}
-          isValid={isCurrentStepValid()}
-        />
+        <div className="z-10">
+          <WizardNavigation
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            isFirstStep={currentStepNumber === 1}
+            isLastStep={currentStepId === 'results'}
+            language={language}
+            currentStepId={currentStepId}
+            profileData={profileData}
+            isValid={isCurrentStepValid()}
+          />
+        </div>
       </div>
     </motion.div>
   );

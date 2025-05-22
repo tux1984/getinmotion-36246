@@ -36,7 +36,7 @@ export const StepContainer: React.FC<StepContainerProps> = ({
         {subtitle && <p className="text-white/90 text-lg md:text-xl">{subtitle}</p>}
       </div>
       
-      <div className="w-full">
+      <div className="w-full backdrop-blur-sm">
         {children}
       </div>
     </motion.div>
