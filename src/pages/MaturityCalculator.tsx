@@ -32,11 +32,11 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-teal-100">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Abstract background elements */}
+        {/* Abstract background elements with purple theme */}
         <motion.div 
-          className="absolute top-20 right-20 w-96 h-96 rounded-full bg-gradient-to-br from-emerald-200 to-teal-300 opacity-20 blur-3xl"
+          className="absolute top-20 right-20 w-96 h-96 rounded-full bg-gradient-to-br from-purple-200 to-indigo-300 opacity-20 blur-3xl"
           animate={{ 
             scale: [1, 1.1, 1],
             x: [0, 20, 0],
@@ -50,7 +50,7 @@ const MaturityCalculator = () => {
         />
         
         <motion.div 
-          className="absolute bottom-20 left-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-300 to-teal-200 opacity-20 blur-3xl"
+          className="absolute bottom-20 left-20 w-80 h-80 rounded-full bg-gradient-to-tr from-violet-300 to-purple-200 opacity-20 blur-3xl"
           animate={{ 
             scale: [1, 1.2, 1],
             x: [0, -30, 0],

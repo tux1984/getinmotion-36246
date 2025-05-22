@@ -47,7 +47,7 @@ export const StepContainer: React.FC<StepContainerProps> = ({
     >
       <div className="lg:col-span-3 space-y-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-600 mb-3">
+          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600 mb-3">
             {title}
           </h2>
           <p className="text-gray-600 text-lg">{subtitle}</p>
@@ -58,10 +58,10 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       </div>
 
       <div className="hidden lg:block lg:col-span-2">
-        <div className="sticky top-6 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-emerald-50 to-teal-100">
+        <div className="sticky top-6 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-purple-50 to-indigo-100">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-3xl">
             <motion.div
-              className="absolute inset-0 bg-gradient-to-t from-emerald-900/20 to-transparent"
+              className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent"
               animate={{ opacity: [0.4, 0.6, 0.4] }}
               transition={{ 
                 repeat: Infinity, 
