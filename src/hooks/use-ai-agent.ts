@@ -33,21 +33,38 @@ export function useAIAgent() {
       });
       
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error.message || 'Error communicating with AI service');
+      }
+      
+      if (!data || !data.choices || !data.choices[0]?.message) {
+        throw new Error('Invalid response from AI service');
       }
       
       // Add AI response
-      const aiResponse = data.choices?.[0]?.message?.content || 'Lo siento, no pude generar una respuesta.';
+      const aiResponse = data.choices[0].message.content || 'Lo siento, no pude generar una respuesta.';
       const aiMessage: Message = { type: 'ai', content: aiResponse };
       setMessages(prev => [...prev, aiMessage]);
       
     } catch (error) {
       console.error('Error generating AI response:', error);
+      
+      // More descriptive error messages
+      let errorMessage = 'No se pudo generar una respuesta. Por favor intenta de nuevo.';
+      
+      if (error.message?.includes('API key')) {
+        errorMessage = 'API key error. Please check your OpenAI API key configuration.';
+      } else if (error.message?.includes('429')) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+      
       toast({
         title: 'Error',
-        description: 'No se pudo generar una respuesta. Por favor intenta de nuevo.',
+        description: errorMessage,
         variant: 'destructive',
       });
+      
     } finally {
       setIsProcessing(false);
     }

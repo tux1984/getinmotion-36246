@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Bot, User, X } from 'lucide-react';
+import { Send, Bot, User, X, RefreshCcw } from 'lucide-react';
 import { Message } from '@/types/chat';
 import { useAIAgent } from '@/hooks/use-ai-agent';
 import { useLanguage } from '@/context/LanguageContext';
@@ -14,7 +14,7 @@ interface AIAssistantProps {
 
 export const AIAssistant = ({ onClose, showHeader = true }: AIAssistantProps) => {
   const [inputMessage, setInputMessage] = useState('');
-  const { messages, isProcessing, sendMessage } = useAIAgent();
+  const { messages, isProcessing, sendMessage, clearMessages } = useAIAgent();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
   
@@ -24,12 +24,20 @@ export const AIAssistant = ({ onClose, showHeader = true }: AIAssistantProps) =>
       placeholder: "Type your message...",
       send: "Send",
       thinking: "Thinking...",
+      reset: "Reset Chat",
+      emptyState: "Hello! How can I help you today?",
+      apiErrorTitle: "Connection Issue",
+      apiErrorDescription: "There might be an issue with the AI service. Please try again later."
     },
     es: {
       title: "Asistente IA",
       placeholder: "Escribe tu mensaje...",
       send: "Enviar",
       thinking: "Pensando...",
+      reset: "Reiniciar Chat",
+      emptyState: "¡Hola! ¿Cómo puedo ayudarte hoy?",
+      apiErrorTitle: "Problema de Conexión",
+      apiErrorDescription: "Puede haber un problema con el servicio de IA. Por favor, inténtalo más tarde."
     }
   };
 
@@ -59,15 +67,28 @@ export const AIAssistant = ({ onClose, showHeader = true }: AIAssistantProps) =>
             </div>
             <h2 className="font-medium">{language === 'en' ? t.en.title : t.es.title}</h2>
           </div>
-          {onClose && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClose}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {messages.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearMessages}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <RefreshCcw className="w-3 h-3 mr-1" />
+                <span className="text-xs">{language === 'en' ? t.en.reset : t.es.reset}</span>
+              </Button>
+            )}
+            {onClose && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onClose}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       )}
       
@@ -76,7 +97,7 @@ export const AIAssistant = ({ onClose, showHeader = true }: AIAssistantProps) =>
           <div className="h-full flex items-center justify-center text-slate-400">
             <div className="text-center">
               <Bot className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>{language === 'en' ? "Hello! How can I help you today?" : "¡Hola! ¿Cómo puedo ayudarte hoy?"}</p>
+              <p>{language === 'en' ? t.en.emptyState : t.es.emptyState}</p>
             </div>
           </div>
         )}
