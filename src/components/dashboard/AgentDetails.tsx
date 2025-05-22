@@ -75,16 +75,22 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
       <h1 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">{getAgentName()}</h1>
 
       <Tabs defaultValue="chat" className="mb-4 sm:mb-6" onValueChange={handleTabChange}>
-        <TabsList className="w-full mb-2 h-auto p-1">
-          <TabsTrigger className="text-xs sm:text-sm py-1.5" value="chat">💬 {t[language].chatWithAgent}</TabsTrigger>
-          <TabsTrigger className="text-xs sm:text-sm py-1.5" value="tasks">📋 {t[language].generatedTasks}</TabsTrigger>
-          <TabsTrigger className="text-xs sm:text-sm py-1.5" value="deliverables">📄 {t[language].deliverables}</TabsTrigger>
+        <TabsList className="w-full mb-2 h-auto p-1 bg-slate-100">
+          <TabsTrigger className="text-xs sm:text-sm py-1.5 data-[state=active]:bg-white" value="chat">
+            💬 {t[language].chatWithAgent}
+          </TabsTrigger>
+          <TabsTrigger className="text-xs sm:text-sm py-1.5 data-[state=active]:bg-white" value="tasks">
+            📋 {t[language].generatedTasks}
+          </TabsTrigger>
+          <TabsTrigger className="text-xs sm:text-sm py-1.5 data-[state=active]:bg-white" value="deliverables">
+            📄 {t[language].deliverables}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="chat" className="mt-3 sm:mt-4">
           {/* Use CopilotChat for OpenAI integration */}
           {activeTab === 'chat' && (
-            <div className="h-[400px]">
+            <div className="h-[500px]">
               <CopilotChat 
                 agentId={agentId} 
                 onBack={() => {}} 
@@ -94,19 +100,25 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
         </TabsContent>
         
         <TabsContent value="tasks" className="mt-3 sm:mt-4 space-y-3">
-          <Card>
-            <CardContent className="pt-3 sm:pt-4">
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex items-center gap-2 py-1">
-                  <span className="text-green-600">☑️</span>
+          <Card className="border border-slate-200 shadow-sm">
+            <CardContent className="pt-4 sm:pt-5">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <span className="text-green-600 text-sm">✓</span>
+                  </div>
                   <span className="text-sm">{t[language].contractReady}</span>
                 </div>
-                <div className="flex items-center gap-2 py-1">
-                  <span className="text-green-600">📅</span>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <span className="text-amber-600 text-sm">✓</span>
+                  </div>
                   <span className="text-sm">{t[language].paymentTerms}</span>
                 </div>
-                <div className="flex items-center gap-2 py-1">
-                  <span className="text-green-600">👁</span>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-blue-600 text-sm">✓</span>
+                  </div>
                   <span className="text-sm">{t[language].rightsClause}</span>
                 </div>
               </div>
@@ -115,22 +127,29 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
         </TabsContent>
         
         <TabsContent value="deliverables" className="mt-3 sm:mt-4 space-y-3">
-          <Card>
-            <CardContent className="pt-3 sm:pt-4">
+          <Card className="border border-slate-200 shadow-sm">
+            <CardContent className="pt-4 sm:pt-5">
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-600 text-xl sm:text-2xl">🗂</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 text-lg">📄</span>
+                    </div>
                     <span className="font-medium text-sm">{t[language].contractFile}</span>
                   </div>
-                  <Button size="sm" variant="ghost">
+                  <Button size="sm" variant="outline" className="gap-1">
                     <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="text-xs">PDF</span>
                   </Button>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600">📬 {t[language].sentEmail}</p>
+                <p className="text-xs sm:text-sm text-gray-600 flex items-center gap-2">
+                  <span>📬</span>
+                  {t[language].sentEmail}
+                </p>
                 <div className="pt-1 sm:pt-2">
                   <Button variant="link" size="sm" className="p-0 h-auto text-xs sm:text-sm">
-                    🔁 {t[language].viewDeliveryHistory}
+                    <span className="mr-1">🔁</span>
+                    {t[language].viewDeliveryHistory}
                   </Button>
                 </div>
               </div>
@@ -141,10 +160,13 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({ agentId, language })
       
       <Collapsible className="w-full">
         <div className="flex justify-between items-center">
-          <h3 className="text-base sm:text-lg font-medium">🕑 {t[language].completeHistory}</h3>
+          <h3 className="text-base sm:text-lg font-medium">
+            <span className="mr-2">🕑</span>
+            {t[language].completeHistory}
+          </h3>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            <Button variant="ghost" size="sm" className="h-8 gap-1">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="text-xs sm:text-sm">{t[language].viewMore}</span>
             </Button>
           </CollapsibleTrigger>
