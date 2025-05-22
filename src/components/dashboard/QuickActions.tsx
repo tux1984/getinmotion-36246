@@ -5,8 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { 
   FileText, 
   Download, 
-  Share2, 
-  Bot,
+  Share2,
   ExternalLink 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,7 +18,6 @@ export const QuickActions = () => {
       quickActions: "Quick Actions",
       documents: "Documents",
       onePager: "One Pager",
-      aiAgent: "AI Assistant",
       downloadPortfolio: "Download Portfolio",
       shareProject: "Share Project",
       new: "NEW"
@@ -28,7 +26,6 @@ export const QuickActions = () => {
       quickActions: "Acciones Rápidas",
       documents: "Documentos",
       onePager: "One Pager",
-      aiAgent: "Asistente IA",
       downloadPortfolio: "Descargar Portfolio",
       shareProject: "Compartir Proyecto",
       new: "NUEVO"
@@ -50,21 +47,6 @@ export const QuickActions = () => {
             <span>{t.onePager}</span>
           </div>
           <ExternalLink className="w-4 h-4 text-slate-400" />
-        </Link>
-        
-        <Link to="/ai-agent" className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center mr-3">
-              <Bot className="w-4 h-4" />
-            </div>
-            <span>{t.aiAgent}</span>
-          </div>
-          <div className="flex items-center">
-            <Badge variant="outline" className="bg-pink-100 text-pink-700 border-pink-200 text-xs mr-2">
-              {t.new}
-            </Badge>
-            <ExternalLink className="w-4 h-4 text-slate-400" />
-          </div>
         </Link>
         
         <button className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
