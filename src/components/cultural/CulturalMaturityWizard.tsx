@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProfileStep } from './wizard-steps/ProfileStep';
 import { BusinessStep } from './wizard-steps/BusinessStep';
@@ -14,6 +13,7 @@ import { ResultsStep } from './wizard-steps/ResultsStep';
 import { WizardHeader } from './wizard-components/WizardHeader';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type WizardStep = 
   | 'profile' 
@@ -131,6 +131,22 @@ export const CulturalMaturityWizard: React.FC<{
           setCurrentStep('analysis-choice');
         }
         break;
+    }
+  };
+  
+  // Animation variants
+  const pageVariants = {
+    enter: {
+      x: 100,
+      opacity: 0
+    },
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: {
+      x: -100,
+      opacity: 0
     }
   };
   
@@ -356,52 +372,87 @@ export const CulturalMaturityWizard: React.FC<{
   };
   
   return (
-    <div className="w-full max-w-5xl mx-auto p-4">
-      <Card className="border-0 shadow-lg overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-50">
-        <CardContent className="p-0">
-          <WizardHeader 
-            step={currentStepNumber} 
-            totalSteps={totalSteps} 
-            language={language} 
-            industry={profileData.industry} 
-          />
-          
-          <div className="p-6 md:p-8">
-            <div className="mb-8">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>{t[language].step} {currentStepNumber} {t[language].of} {totalSteps}</span>
-                <span className="font-medium">{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="h-2 bg-gray-200" />
-            </div>
+    <div className="w-full max-w-5xl mx-auto p-4 relative">
+      {/* Background shapes */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-b from-purple-50 to-transparent opacity-70 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-t from-indigo-50 to-transparent opacity-70 rounded-full blur-3xl"></div>
+      </div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-0">
+            <WizardHeader 
+              step={currentStepNumber} 
+              totalSteps={totalSteps} 
+              language={language} 
+              industry={profileData.industry} 
+            />
             
-            <div className="min-h-[400px]">
-              {renderStepContent()}
-            </div>
-            
-            {currentStep !== 'results' && (
-              <div className="flex justify-between mt-8">
-                <Button
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentStep === 'profile'}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  {t[language].previous}
-                </Button>
-                <Button
-                  onClick={handleNext}
-                  className="gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                >
-                  {t[language].next}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+            <div className="p-6 md:p-8">
+              <div className="mb-8">
+                <div className="flex justify-between text-sm text-gray-500 mb-2">
+                  <span>{t[language].step} {currentStepNumber} {t[language].of} {totalSteps}</span>
+                  <span className="font-medium">{Math.round(progress)}%</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-indigo-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              
+              <div className="min-h-[400px]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    variants={pageVariants}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    {renderStepContent()}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              
+              {currentStep !== 'results' && (
+                <motion.div 
+                  className="flex justify-between mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentStep === 'profile'}
+                    className="gap-2 border-gray-300"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    {t[language].previous}
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 shadow-md"
+                  >
+                    {t[language].next}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
