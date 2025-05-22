@@ -81,7 +81,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       
       case 'icon-select':
         return (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
             {question.options.map(option => (
               <IconOption
                 key={option.id}
@@ -105,7 +105,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       title={question.title}
       subtitle={question.subtitle}
       industry={industry}
-      fullWidth={false}
+      fullWidth={true}
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
