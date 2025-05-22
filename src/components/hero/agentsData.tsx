@@ -26,7 +26,8 @@ export const getAgents = (): Agent[] => {
         en: "I've analyzed your expenses and created categories based on tax deduction opportunities. Would you like me to generate monthly financial reports for your business?",
         es: "He analizado tus gastos y creado categorías basadas en oportunidades de deducción de impuestos. ¿Te gustaría que generara informes financieros mensuales para tu negocio?"
       },
-      responseColor: "bg-purple-900/30 border-purple-700/30 text-purple-100"
+      responseColor: "bg-purple-900/30 border-purple-700/30 text-purple-100",
+      chatEnabled: true
     },
     
     // Operations Manager
@@ -50,7 +51,8 @@ export const getAgents = (): Agent[] => {
         en: "I've analyzed your current workflow and identified 3 bottlenecks. Let me create a new process map with automated notifications and document collection to reduce onboarding time by 40%.",
         es: "He analizado tu flujo de trabajo actual y he identificado 3 cuellos de botella. Permíteme crear un nuevo mapa de procesos con notificaciones automatizadas y recopilación de documentos para reducir el tiempo de incorporación en un 40%."
       },
-      responseColor: "bg-pink-900/30 border-pink-700/30 text-pink-100"
+      responseColor: "bg-pink-900/30 border-pink-700/30 text-pink-100",
+      chatEnabled: true
     },
     
     // Legal Advisor
@@ -74,7 +76,8 @@ export const getAgents = (): Agent[] => {
         en: "Based on your industry and project scope, I've drafted a comprehensive contract with clear payment terms, intellectual property clauses, and milestone deliverables. Would you like me to add specific confidentiality requirements?",
         es: "Basado en tu industria y alcance del proyecto, he redactado un contrato integral con términos de pago claros, cláusulas de propiedad intelectual y entregables por hitos. ¿Te gustaría que agregara requisitos específicos de confidencialidad?"
       },
-      responseColor: "bg-blue-900/30 border-blue-700/30 text-blue-100"
+      responseColor: "bg-blue-900/30 border-blue-700/30 text-blue-100",
+      chatEnabled: true
     },
     
     // Administrative Assistant
@@ -98,7 +101,8 @@ export const getAgents = (): Agent[] => {
         en: "I've sorted your emails by priority and created calendar blocks for focused work. I've also drafted response templates for common inquiries and scheduled weekly team status updates.",
         es: "He ordenado tus correos electrónicos por prioridad y creado bloques en el calendario para trabajo enfocado. También he redactado plantillas de respuesta para consultas comunes y programado actualizaciones semanales de estado del equipo."
       },
-      responseColor: "bg-emerald-900/30 border-emerald-700/30 text-emerald-100"
+      responseColor: "bg-emerald-900/30 border-emerald-700/30 text-emerald-100",
+      chatEnabled: true
     },
     
     // Marketing & Social Media Agent
@@ -118,7 +122,8 @@ export const getAgents = (): Agent[] => {
         en: "I've analyzed your audience demographics and engagement patterns. Here's a 3-month content calendar with themes, posting times, and campaign ideas tailored to increase your reach by 35%.",
         es: "He analizado la demografía de tu audiencia y patrones de engagement. Aquí tienes un calendario de contenido de 3 meses con temas, horarios de publicación e ideas de campaña diseñadas para aumentar tu alcance en un 35%."
       },
-      responseColor: "bg-amber-900/30 border-amber-700/30 text-amber-100"
+      responseColor: "bg-amber-900/30 border-amber-700/30 text-amber-100",
+      chatEnabled: false
     },
     
     // Catalog & Inventory Manager
@@ -138,7 +143,33 @@ export const getAgents = (): Agent[] => {
         en: "I've set up an automated inventory tracking system that syncs across all your sales platforms. You'll get real-time updates and low stock alerts, plus I can generate forecasting reports based on seasonal trends.",
         es: "He configurado un sistema automatizado de seguimiento de inventario que se sincroniza en todas tus plataformas de venta. Recibirás actualizaciones en tiempo real y alertas de stock bajo, además puedo generar informes de pronóstico basados en tendencias estacionales."
       },
-      responseColor: "bg-violet-900/30 border-violet-700/30 text-violet-100"
+      responseColor: "bg-violet-900/30 border-violet-700/30 text-violet-100",
+      chatEnabled: false
+    },
+    
+    // Cultural Creator Agent
+    {
+      id: "cultural",
+      icon: (
+        <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+        </svg>
+      ),
+      color: "bg-gradient-to-br from-pink-500 to-rose-600",
+      title: {
+        en: "Cultural Creator Agent",
+        es: "Agente para Creadores Culturales"
+      },
+      question: {
+        en: "I need help pricing my artwork for an upcoming exhibition",
+        es: "Necesito ayuda para fijar el precio de mi obra para una próxima exposición"
+      },
+      response: {
+        en: "I've analyzed comparable works in your market segment and considered your exhibition history. Here's a pricing strategy that accounts for materials, production time, and your growing reputation in the art world.",
+        es: "He analizado obras comparables en tu segmento de mercado y considerado tu historial de exposiciones. Aquí tienes una estrategia de precios que tiene en cuenta los materiales, el tiempo de producción y tu creciente reputación en el mundo del arte."
+      },
+      responseColor: "bg-rose-900/30 border-rose-700/30 text-rose-100",
+      chatEnabled: true
     }
   ];
 };

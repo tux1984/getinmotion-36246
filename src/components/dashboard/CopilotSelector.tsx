@@ -3,6 +3,7 @@ import React from 'react';
 import { FileText, Receipt, Calculator, FileSpreadsheet, Briefcase, Palette, Music, Globe, Users } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import { agentSystemPrompts } from '@/hooks/use-ai-agent';
 
 export type RecommendedAgents = {
   admin: boolean;
@@ -20,6 +21,7 @@ interface Agent {
   soon: boolean;
   greeting: string;
   category?: string; // Optional category for grouping
+  chatEnabled?: boolean; // Whether this agent can chat using OpenAI
 }
 
 interface CopilotSelectorProps {
@@ -43,6 +45,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       culturalCreatorAgent: "Cultural Creator Agent",
       betaVersion: "Beta version",
       comingSoon: "Coming soon",
+      aiEnabled: "AI enabled",
       // Categories
       backOfficeCategory: "Back Office",
       culturalCategory: "Cultural Sector",
@@ -59,6 +62,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       culturalCreatorAgent: "Agente para Creadores Culturales",
       betaVersion: "Versión beta",
       comingSoon: "Próximamente",
+      aiEnabled: "IA habilitada",
       // Categories
       backOfficeCategory: "Back Office",
       culturalCategory: "Sector Cultural",
@@ -69,6 +73,11 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
   
   const t = translations[language];
   
+  // Check if agent has a system prompt (indicating it can chat)
+  const isChatEnabled = (id: string) => {
+    return Boolean(agentSystemPrompts[id]);
+  };
+  
   const agents: Agent[] = [
     { 
       id: "admin", 
@@ -77,6 +86,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       color: "bg-violet-100 text-violet-700", 
       soon: false,
       category: t.backOfficeCategory,
+      chatEnabled: isChatEnabled("admin"),
       greeting: language === 'en' 
         ? "Hi there! I'm your Administrative Assistant. I can help you organize your files, manage appointments, and handle correspondence. How can I assist you today?"
         : "¡Hola! Soy tu Asistente Administrativo. Puedo ayudarte a organizar tus archivos, gestionar citas y manejar correspondencia. ¿Cómo puedo ayudarte hoy?"
@@ -88,6 +98,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       color: "bg-indigo-100 text-indigo-700", 
       soon: false,
       category: t.financialCategory,
+      chatEnabled: isChatEnabled("accounting"),
       greeting: language === 'en'
         ? "Hello! I'm your Accounting Agent. I can help you track expenses, prepare for tax filings, and manage your financial records. What financial tasks are you working on?"
         : "¡Hola! Soy tu Agente Contable. Puedo ayudarte a seguir gastos, preparar declaraciones de impuestos y gestionar tus registros financieros. ¿En qué tareas financieras estás trabajando?"
@@ -99,6 +110,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       category: t.legalCategory,
+      chatEnabled: isChatEnabled("legal"),
       greeting: language === 'en'
         ? "Hi! I'm your Legal Advisor. I can help you understand legal requirements, review contracts, and manage compliance issues. What legal matters can I assist you with today?"
         : "¡Hola! Soy tu Asesor Legal. Puedo ayudarte a entender requisitos legales, revisar contratos y gestionar temas de cumplimiento. ¿En qué asuntos legales puedo ayudarte hoy?"
@@ -108,11 +120,12 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       name: t.operationsManager, 
       icon: <Briefcase className="w-5 h-5" />, 
       color: "bg-emerald-100 text-emerald-700", 
-      soon: true,
+      soon: false,
       category: t.backOfficeCategory,
+      chatEnabled: isChatEnabled("operations"),
       greeting: language === 'en'
-        ? "This agent is coming soon! Check back for updates."
-        : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones."
+        ? "Hello! I'm your Operations Manager. I can help streamline your business processes, manage workflows, and optimize productivity. What operational challenges are you facing today?"
+        : "¡Hola! Soy tu Gerente de Operaciones. Puedo ayudar a optimizar tus procesos de negocio, gestionar flujos de trabajo y mejorar la productividad. ¿Qué desafíos operativos enfrentas hoy?"
     },
     { 
       id: "cultural", 
@@ -121,6 +134,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
       color: "bg-pink-100 text-pink-700", 
       soon: false,
       category: t.culturalCategory,
+      chatEnabled: isChatEnabled("cultural"),
       greeting: language === 'en'
         ? "Hi there! I'm your Cultural Creator Agent. I can help you with contracts, cost calculations, portfolio creation, and export strategies specific to cultural creators. How can I assist you today?"
         : "¡Hola! Soy tu Agente para Creadores Culturales. Puedo ayudarte con contratos, cálculos de costos, creación de portafolios y estrategias de exportación específicas para creadores culturales. ¿Cómo puedo ayudarte hoy?"
@@ -176,11 +190,22 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
                     {agent.icon}
                   </div>
                   <h3 className="font-medium mb-1">{agent.name}</h3>
-                  {agent.soon ? (
-                    <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
-                  ) : (
-                    <span className="text-sm text-gray-500">{t.betaVersion}</span>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {agent.soon ? (
+                      <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">
+                        {t.comingSoon}
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">
+                        {t.betaVersion}
+                      </span>
+                    )}
+                    {agent.chatEnabled && (
+                      <span className="text-xs bg-emerald-100 text-emerald-700 py-0.5 px-2 rounded-full">
+                        {t.aiEnabled}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -199,11 +224,22 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
                 {agent.icon}
               </div>
               <h3 className="font-medium mb-1">{agent.name}</h3>
-              {agent.soon ? (
-                <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{t.comingSoon}</span>
-              ) : (
-                <span className="text-sm text-gray-500">{t.betaVersion}</span>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {agent.soon ? (
+                  <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">
+                    {t.comingSoon}
+                  </span>
+                ) : (
+                  <span className="text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">
+                    {t.betaVersion}
+                  </span>
+                )}
+                {agent.chatEnabled && (
+                  <span className="text-xs bg-emerald-100 text-emerald-700 py-0.5 px-2 rounded-full">
+                    {t.aiEnabled}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>

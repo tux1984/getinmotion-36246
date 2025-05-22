@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Send, FileText, Calculator, FileSpreadsheet, Briefcase } from 'lucide-react';
+import { X, Send, FileText, Calculator, FileSpreadsheet, Briefcase, Palette } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/context/LanguageContext';
 import { Message } from '@/types/chat';
+import { useAIAgent } from '@/hooks/use-ai-agent';
 
 interface CopilotChatProps {
   agentId: string;
@@ -13,21 +14,35 @@ interface CopilotChatProps {
 
 export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   const { language } = useLanguage();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [copilotName, setCopilotName] = useState('');
   const [copilotColor, setCopilotColor] = useState('');
   const [copilotIcon, setCopilotIcon] = useState<React.ReactNode>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use our AI agent hook with the specific agent type
+  const { messages, isProcessing, sendMessage, clearMessages } = useAIAgent(agentId);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
   
   const translations = {
     en: {
       enterMessage: "Type your message...",
-      send: "Send"
+      send: "Send",
+      reset: "Reset Chat",
+      thinking: "Thinking..."
     },
     es: {
       enterMessage: "Escribe tu mensaje...",
-      send: "Enviar"
+      send: "Enviar",
+      reset: "Reiniciar Chat",
+      thinking: "Pensando..."
     }
   };
   
@@ -63,49 +78,27 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
       setCopilotColor('bg-emerald-100 text-emerald-700');
       setCopilotIcon(<Briefcase className="w-5 h-5" />);
       greeting = language === 'en'
-        ? "This agent is coming soon! Check back for updates."
-        : "¡Este agente estará disponible pronto! Vuelve para ver actualizaciones.";
+        ? "Hello! I'm your Operations Manager. I'm here to help streamline your business processes and optimize your workflows. What operational challenges can I help you with today?"
+        : "¡Hola! Soy tu Gerente de Operaciones. Estoy aquí para ayudarte a optimizar tus procesos de negocio y mejorar tus flujos de trabajo. ¿En qué desafíos operativos puedo ayudarte hoy?";
+    } else if (agentId === 'cultural') {
+      setCopilotName(language === 'en' ? 'Cultural Creator Agent' : 'Agente para Creadores Culturales');
+      setCopilotColor('bg-pink-100 text-pink-700');
+      setCopilotIcon(<Palette className="w-5 h-5" />);
+      greeting = language === 'en'
+        ? "Hi there! I'm your Cultural Creator Agent. I can help you with contracts, cost calculations, portfolio creation, and export strategies specific to cultural creators. How can I assist you today?"
+        : "¡Hola! Soy tu Agente para Creadores Culturales. Puedo ayudarte con contratos, cálculos de costos, creación de portafolios y estrategias de exportación específicas para creadores culturales. ¿Cómo puedo ayudarte hoy?";
     }
     
-    // Add initial greeting if we have one
-    if (greeting) {
-      setMessages([{ type: 'agent', content: greeting }]);
+    // Add initial greeting if we have one and there are no messages
+    if (greeting && messages.length === 0) {
+      sendMessage(greeting);
     }
   }, [agentId, language]);
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-    
-    // Add user message
-    setMessages(prev => [...prev, { type: 'user', content: inputMessage }]);
+    if (!inputMessage.trim() || isProcessing) return;
+    sendMessage(inputMessage);
     setInputMessage('');
-    setIsTyping(true);
-    
-    // Simulate agent response
-    setTimeout(() => {
-      let response = '';
-      
-      if (agentId === 'admin') {
-        response = language === 'en'
-          ? "I can help you organize your administrative tasks. Would you like me to create a filing system for your documents or help manage your calendar appointments?"
-          : "Puedo ayudarte a organizar tus tareas administrativas. ¿Te gustaría que creara un sistema de archivo para tus documentos o que te ayudara a gestionar tus citas en el calendario?";
-      } else if (agentId === 'accounting') {
-        response = language === 'en'
-          ? "I've analyzed your recent expenses. Would you like me to categorize them for tax purposes or prepare a monthly financial summary?"
-          : "He analizado tus gastos recientes. ¿Te gustaría que los categorizara para fines fiscales o preparara un resumen financiero mensual?";
-      } else if (agentId === 'legal') {
-        response = language === 'en'
-          ? "I can help with your legal documentation needs. Would you like me to review your existing contracts or create a new template for your upcoming business partnerships?"
-          : "Puedo ayudarte con tus necesidades de documentación legal. ¿Te gustaría que revisara tus contratos existentes o creara una nueva plantilla para tus próximas asociaciones comerciales?";
-      } else if (agentId === 'operations') {
-        response = language === 'en'
-          ? "As your Operations Manager, I can help streamline your business processes. What operational challenges are you facing today?"
-          : "Como tu Gerente de Operaciones, puedo ayudarte a optimizar tus procesos de negocio. ¿Qué desafíos operativos estás enfrentando hoy?";
-      }
-      
-      setMessages(prev => [...prev, { type: 'agent', content: response }]);
-      setIsTyping(false);
-    }, 1500);
   };
 
   return (
@@ -117,13 +110,25 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
           </div>
           <h2 className="font-medium">{copilotName}</h2>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack}
-        >
-          <X className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {messages.length > 1 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearMessages}
+              className="text-slate-500 hover:text-slate-700"
+            >
+              <span className="text-xs">{language === 'en' ? t.reset : t.reset}</span>
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
@@ -143,17 +148,21 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
             </div>
           </div>
         ))}
-        {isTyping && (
+        {isProcessing && (
           <div className="flex justify-start">
             <div className="max-w-[80%] p-3 rounded-lg bg-slate-100 text-slate-800">
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 items-center">
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></div>
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse delay-150"></div>
                 <div className="w-2 h-2 rounded-full bg-slate-300 animate-pulse delay-300"></div>
+                <span className="text-xs text-slate-400 ml-2">
+                  {language === 'en' ? t.thinking : t.thinking}
+                </span>
               </div>
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
       
       <div className="p-4 border-t border-slate-100">
@@ -161,13 +170,17 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={t.enterMessage}
+            placeholder={language === 'en' ? t.enterMessage : t.enterMessage}
             className="flex-grow"
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            disabled={isProcessing}
           />
-          <Button onClick={handleSendMessage}>
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={!inputMessage.trim() || isProcessing}
+          >
             <Send className="w-4 h-4 mr-2" />
-            {t.send}
+            {language === 'en' ? t.send : t.send}
           </Button>
         </div>
       </div>

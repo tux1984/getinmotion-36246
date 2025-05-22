@@ -19,5 +19,5 @@ export interface Agent {
     es: string;
   };
   responseColor: string;
-  chatEnabled?: boolean; // New property to indicate if this agent can chat
+  chatEnabled?: boolean; // Property to indicate if this agent can chat
 }
