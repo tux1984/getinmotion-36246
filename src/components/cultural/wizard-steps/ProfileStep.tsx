@@ -112,17 +112,15 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({
     updateProfileData({ industry });
   };
   
-  const handleActivityToggle = (activity: string) => {
+  const handleActivityToggle = (activity: string, isChecked: boolean) => {
     const currentActivities = [...(profileData.activities || [])];
-    const index = currentActivities.indexOf(activity);
     
-    if (index === -1) {
+    if (isChecked && !currentActivities.includes(activity)) {
       // Add the activity
       updateProfileData({ activities: [...currentActivities, activity] });
-    } else {
+    } else if (!isChecked && currentActivities.includes(activity)) {
       // Remove the activity
-      currentActivities.splice(index, 1);
-      updateProfileData({ activities: currentActivities });
+      updateProfileData({ activities: currentActivities.filter(item => item !== activity) });
     }
   };
   
@@ -146,7 +144,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({
                 icon={option.icon}
                 label={option.label}
                 selected={profileData.industry === option.id}
-                onSelect={handleIndustrySelect}
+                onClick={handleIndustrySelect}
               />
             ))}
           </div>
@@ -160,6 +158,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({
             options={activityOptions}
             selectedValues={profileData.activities || []}
             onChange={handleActivityToggle}
+            withIcons={false}
           />
         </div>
         
