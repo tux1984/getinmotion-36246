@@ -8,7 +8,6 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/questions';
-import { ProfileStep } from '../wizard-steps/ProfileStep';
 
 interface WizardStepContentProps {
   currentStepId: WizardStepId;
@@ -59,6 +58,9 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   // Get question configuration based on current step
   const questions = getQuestions(language);
   const questionConfig = questions[currentStepId];
+  
+  // Placeholder image URL for all questions
+  const placeholderImageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&h=750&q=80";
 
   // Render active step content
   const renderStepContent = () => {
@@ -74,18 +76,7 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       );
     }
     
-    // Special handling for profile step
-    if (currentStepId === 'industry' || currentStepId === 'activities' || currentStepId === 'experience') {
-      return (
-        <ProfileStep 
-          profileData={profileData}
-          updateProfileData={updateProfileData}
-          language={language}
-        />
-      );
-    }
-    
-    // Render individual question
+    // Handle all question steps individually
     if (questionConfig) {
       return (
         <QuestionStep 
@@ -94,6 +85,7 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
           updateProfileData={updateProfileData}
           language={language}
           industry={profileData.industry}
+          illustration={placeholderImageUrl}
         />
       );
     }

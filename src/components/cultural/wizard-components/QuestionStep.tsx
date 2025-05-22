@@ -27,6 +27,7 @@ interface QuestionStepProps {
   updateProfileData: (data: Partial<UserProfileData>) => void;
   language: 'en' | 'es';
   industry?: string;
+  illustration?: string;
 }
 
 export const QuestionStep: React.FC<QuestionStepProps> = ({
@@ -34,7 +35,8 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   profileData,
   updateProfileData,
   language,
-  industry
+  industry,
+  illustration
 }) => {
   const handleSingleSelect = (value: string) => {
     // For radio buttons and icon selects
@@ -100,14 +102,12 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     }
   };
 
-  const placeholderImageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&h=200&q=80";
-
   return (
     <StepContainer
       title={question.title}
       subtitle={question.subtitle}
       industry={industry}
-      illustration={placeholderImageUrl}
+      illustration={illustration}
       fullWidth={true}
     >
       <motion.div
@@ -116,7 +116,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         transition={{ duration: 0.3 }}
         className="w-full"
       >
-        <div className="rounded-lg p-4">
+        <div className="rounded-lg">
           {renderQuestionInput()}
         </div>
       </motion.div>

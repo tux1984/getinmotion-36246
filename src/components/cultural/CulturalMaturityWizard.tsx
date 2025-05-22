@@ -44,13 +44,17 @@ export const CulturalMaturityWizard: React.FC<{
       />
       
       <div className="flex-1 flex flex-col p-4 md:p-6 overflow-auto">
-        <StepProgress 
-          currentStep={currentStepNumber}
-          totalSteps={totalSteps}
-          language={language}
-        />
+        {/* Step progress is now positioned before the content */}
+        <div className="mb-6">
+          <StepProgress 
+            currentStep={currentStepNumber}
+            totalSteps={totalSteps}
+            language={language}
+          />
+        </div>
         
-        <div className="flex-1 flex items-center justify-center my-4">
+        {/* Main content area */}
+        <div className="flex-1">
           <WizardStepContent
             currentStepId={currentStepId}
             profileData={profileData}
@@ -62,7 +66,8 @@ export const CulturalMaturityWizard: React.FC<{
           />
         </div>
         
-        <div className="z-10">
+        {/* Navigation now appears outside of the step content at the bottom of the page */}
+        <div className="mt-8">
           <WizardNavigation
             onNext={handleNext}
             onPrevious={handlePrevious}

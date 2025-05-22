@@ -31,7 +31,7 @@ export const IconOption: React.FC<IconOptionProps> = ({
     >
       <div className="flex flex-col items-center text-center">
         <motion.div 
-          className={`w-20 h-20 mb-4 rounded-lg flex items-center justify-center relative ${
+          className={`w-16 h-16 mb-4 rounded-lg flex items-center justify-center relative ${
             selected 
               ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md' 
               : 'bg-gray-100 text-gray-600'
@@ -40,10 +40,7 @@ export const IconOption: React.FC<IconOptionProps> = ({
           transition={selected ? { 
             duration: 0.5, 
             ease: "easeInOut", 
-            delay: 0.1,
-            repeatDelay: 5,
-            repeat: Infinity,
-            repeatType: "loop"
+            delay: 0.1
           } : {}}
         >
           <div className="text-2xl">

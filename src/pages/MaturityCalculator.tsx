@@ -32,45 +32,35 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen h-screen w-full overflow-hidden bg-gradient-to-br from-white via-white to-purple-50 flex items-center justify-center">
+    <div className="min-h-screen h-screen w-full overflow-hidden bg-white flex items-center justify-center">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Subtle animated background elements */}
+        {/* Very subtle gradient background - barely visible purple tint */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/40"></div>
+        
+        {/* Extremely subtle animated background elements with very low opacity */}
         <motion.div 
-          className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-100 to-purple-200 opacity-20 blur-3xl"
+          className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-100/20 to-purple-200/10 opacity-10 blur-3xl"
           animate={{ 
-            scale: [1, 1.05, 1],
-            x: [0, 10, 0],
-            y: [0, -10, 0], 
+            scale: [1, 1.03, 1],
+            x: [0, 5, 0],
+            y: [0, -5, 0], 
           }}
           transition={{ 
-            duration: 15,
+            duration: 20,
             repeat: Infinity,
             repeatType: "reverse" 
           }}
         />
         
         <motion.div 
-          className="absolute bottom-0 left-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-tr from-purple-100 to-purple-200 opacity-10 blur-3xl"
+          className="absolute bottom-0 left-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-tr from-purple-100/20 to-purple-200/10 opacity-5 blur-3xl"
           animate={{ 
-            scale: [1, 1.1, 1],
-            x: [0, -15, 0],
-            y: [0, 15, 0], 
+            scale: [1, 1.05, 1],
+            x: [0, -8, 0],
+            y: [0, 8, 0], 
           }}
           transition={{ 
-            duration: 18,
-            repeat: Infinity,
-            repeatType: "reverse" 
-          }}
-        />
-
-        <motion.div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vh] rounded-full bg-gradient-to-r from-purple-50 to-purple-100 opacity-10 blur-3xl"
-          animate={{ 
-            scale: [1, 1.15, 1],
-            rotate: [0, 3, 0, -3, 0],
-          }}
-          transition={{ 
-            duration: 20,
+            duration: 25,
             repeat: Infinity,
             repeatType: "reverse" 
           }}
