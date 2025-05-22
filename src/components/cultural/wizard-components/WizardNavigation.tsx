@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import { UserProfileData } from '../types/wizardTypes';
 
 interface WizardNavigationProps {
   onNext: () => void;
@@ -10,6 +12,9 @@ interface WizardNavigationProps {
   isFirstStep: boolean;
   isLastStep: boolean;
   language: 'en' | 'es';
+  currentStepId: string;
+  profileData: UserProfileData;
+  isValid: boolean;
 }
 
 export const WizardNavigation: React.FC<WizardNavigationProps> = ({
@@ -17,17 +22,35 @@ export const WizardNavigation: React.FC<WizardNavigationProps> = ({
   onPrevious,
   isFirstStep,
   isLastStep,
-  language
+  language,
+  currentStepId,
+  profileData,
+  isValid
 }) => {
+  const { toast } = useToast();
+  
   const t = {
     en: {
       next: 'Continue',
       previous: 'Back',
+      validationError: 'Please answer this question before continuing'
     },
     es: {
       next: 'Continuar',
       previous: 'Atrás',
+      validationError: 'Por favor responde esta pregunta antes de continuar'
     }
+  };
+
+  const handleNext = () => {
+    if (!isValid) {
+      toast({
+        title: t[language].validationError,
+        variant: "destructive"
+      });
+      return;
+    }
+    onNext();
   };
 
   if (isLastStep) {
@@ -51,7 +74,7 @@ export const WizardNavigation: React.FC<WizardNavigationProps> = ({
         {t[language].previous}
       </Button>
       <Button
-        onClick={onNext}
+        onClick={handleNext}
         className="gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-md px-6 py-6 text-lg rounded-xl"
       >
         {t[language].next}

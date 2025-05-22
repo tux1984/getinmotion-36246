@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 
 interface StepContainerProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: ReactNode;
   className?: string;
   illustration?: string;
   industry?: string;
+  fullWidth?: boolean;
 }
 
 export const StepContainer: React.FC<StepContainerProps> = ({ 
@@ -17,7 +18,8 @@ export const StepContainer: React.FC<StepContainerProps> = ({
   children,
   className = "",
   illustration,
-  industry
+  industry,
+  fullWidth = false
 }) => {
   // Determine which 3D illustration to show based on industry
   const get3dIllustration = () => {
@@ -37,27 +39,49 @@ export const StepContainer: React.FC<StepContainerProps> = ({
     }
   };
 
+  if (fullWidth) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
+        className={`w-full space-y-8 ${className}`}
+      >
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600 mb-3">
+            {title}
+          </h2>
+          {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
+        </div>
+        <div className="space-y-6 w-full">
+          {children}
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className={`grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10 ${className}`}
+      className={`flex flex-col lg:flex-row gap-8 lg:gap-12 ${className}`}
     >
-      <div className="lg:col-span-3 space-y-8">
-        <div className="mb-8">
+      <div className="flex-1 space-y-8 max-w-xl">
+        <div className="mb-6">
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600 mb-3">
             {title}
           </h2>
-          <p className="text-gray-600 text-lg">{subtitle}</p>
+          {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
         </div>
         <div className="space-y-6">
           {children}
         </div>
       </div>
 
-      <div className="hidden lg:block lg:col-span-2">
+      <div className="hidden lg:block flex-1 max-w-md">
         <div className="sticky top-6 rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-purple-50 to-indigo-100">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-3xl">
             <motion.div

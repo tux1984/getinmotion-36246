@@ -1,19 +1,16 @@
 
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ProfileStep } from '../wizard-steps/ProfileStep';
-import { BusinessStep } from '../wizard-steps/BusinessStep';
-import { ManagementStep } from '../wizard-steps/ManagementStep';
-import { AnalysisChoiceStep } from '../wizard-steps/AnalysisChoiceStep';
-import { DetailedAnalysisStep } from '../wizard-steps/DetailedAnalysisStep';
 import { ResultsStep } from '../wizard-steps/ResultsStep';
 import { UserProfileData } from '../types/wizardTypes';
-import { WizardStep } from '../hooks/useMaturityWizard';
+import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
+import { QuestionStep } from './QuestionStep';
+import { getQuestions } from '../wizard-questions/questions';
 
 interface WizardStepContentProps {
-  currentStep: WizardStep;
+  currentStepId: WizardStepId;
   profileData: UserProfileData;
   updateProfileData: (data: Partial<UserProfileData>) => void;
   language: 'en' | 'es';
@@ -23,7 +20,7 @@ interface WizardStepContentProps {
 }
 
 export const WizardStepContent: React.FC<WizardStepContentProps> = ({
-  currentStep,
+  currentStepId,
   profileData,
   updateProfileData,
   language,
@@ -47,69 +44,45 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
     }
   };
 
+  // Get question configuration based on current step
+  const questions = getQuestions(language);
+  const questionConfig = questions[currentStepId];
+
   // Render active step content
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 'profile':
-        return (
-          <ProfileStep 
-            profileData={profileData} 
-            updateProfileData={updateProfileData} 
-            language={language}
-          />
-        );
-      case 'business':
-        return (
-          <BusinessStep 
-            profileData={profileData} 
-            updateProfileData={updateProfileData} 
-            language={language}
-          />
-        );
-      case 'management':
-        return (
-          <ManagementStep 
-            profileData={profileData} 
-            updateProfileData={updateProfileData} 
-            language={language}
-          />
-        );
-      case 'analysis-choice':
-        return (
-          <AnalysisChoiceStep 
-            profileData={profileData} 
-            updateProfileData={updateProfileData} 
-            language={language}
-          />
-        );
-      case 'detailed-analysis':
-        return (
-          <DetailedAnalysisStep 
-            profileData={profileData} 
-            updateProfileData={updateProfileData} 
-            language={language}
-          />
-        );
-      case 'results':
-        return (
-          <ResultsStep 
-            profileData={profileData}
-            scores={calculateMaturityScores()}
-            recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
-            language={language}
-            onComplete={onComplete}
-          />
-        );
-      default:
-        return null;
+    if (currentStepId === 'results') {
+      return (
+        <ResultsStep 
+          profileData={profileData}
+          scores={calculateMaturityScores()}
+          recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
+          language={language}
+          onComplete={onComplete}
+        />
+      );
     }
+    
+    // Render individual question
+    if (questionConfig) {
+      return (
+        <QuestionStep 
+          question={questionConfig}
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          industry={profileData.industry}
+        />
+      );
+    }
+    
+    return null;
   };
 
   return (
     <div className="min-h-[500px]">
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentStep}
+          key={currentStepId}
           initial="enter"
           animate="center"
           exit="exit"

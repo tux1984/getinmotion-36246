@@ -52,6 +52,7 @@ export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
     <StepContainer
       title={t[language].title}
       subtitle={t[language].subtitle}
+      fullWidth={true}
     >
       <motion.div 
         className="flex flex-col lg:flex-row gap-8 pt-6"
@@ -62,7 +63,12 @@ export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
         <motion.div 
           whileHover={{ y: -5, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 bg-indigo-50 rounded-2xl p-8 border border-indigo-100 hover:border-indigo-300 hover:shadow-xl transition-all"
+          className={`flex-1 bg-indigo-50 rounded-2xl p-8 border-2 ${
+            profileData.analysisPreference === 'quick' 
+              ? 'border-indigo-400 shadow-lg' 
+              : 'border-indigo-100 hover:border-indigo-300 hover:shadow-xl'
+          } transition-all`}
+          onClick={handleQuickChoice}
         >
           <div className="flex flex-col h-full">
             <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
@@ -71,7 +77,11 @@ export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
             <h3 className="text-2xl font-bold mb-4 text-indigo-800">{t[language].quickTitle}</h3>
             <p className="text-gray-600 mb-8 flex-grow text-lg">{t[language].quickDesc}</p>
             <Button 
-              className="mt-auto gap-3 bg-indigo-600 hover:bg-indigo-700 text-lg py-6 px-8 rounded-xl"
+              className={`mt-auto gap-3 ${
+                profileData.analysisPreference === 'quick'
+                  ? 'bg-indigo-700 hover:bg-indigo-800'
+                  : 'bg-indigo-600 hover:bg-indigo-700'
+              } text-lg py-6 px-8 rounded-xl`}
               onClick={handleQuickChoice}
             >
               {t[language].quickButton}
@@ -83,7 +93,12 @@ export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
         <motion.div 
           whileHover={{ y: -5, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 bg-purple-50 rounded-2xl p-8 border border-purple-100 hover:border-purple-300 hover:shadow-xl transition-all"
+          className={`flex-1 bg-purple-50 rounded-2xl p-8 border-2 ${
+            profileData.analysisPreference === 'detailed' 
+              ? 'border-purple-400 shadow-lg' 
+              : 'border-purple-100 hover:border-purple-300 hover:shadow-xl'
+          } transition-all`}
+          onClick={handleDetailedChoice}
         >
           <div className="flex flex-col h-full">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
@@ -92,7 +107,11 @@ export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
             <h3 className="text-2xl font-bold mb-4 text-purple-800">{t[language].detailedTitle}</h3>
             <p className="text-gray-600 mb-8 flex-grow text-lg">{t[language].detailedDesc}</p>
             <Button 
-              className="mt-auto gap-3 bg-purple-600 hover:bg-purple-700 text-lg py-6 px-8 rounded-xl"
+              className={`mt-auto gap-3 ${
+                profileData.analysisPreference === 'detailed'
+                  ? 'bg-purple-700 hover:bg-purple-800'
+                  : 'bg-purple-600 hover:bg-purple-700'
+              } text-lg py-6 px-8 rounded-xl`}
               onClick={handleDetailedChoice}
             >
               {t[language].detailedButton}

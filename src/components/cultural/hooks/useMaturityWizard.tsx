@@ -1,22 +1,34 @@
-
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { UserProfileData } from '../types/wizardTypes';
+import { getQuestions } from '../wizard-questions/questions';
 
 // Define the wizard step types
-export type WizardStep = 
-  | 'profile' 
-  | 'business' 
-  | 'management' 
-  | 'analysis-choice'
-  | 'detailed-analysis'
+export type WizardStepId = 
+  | 'industry' 
+  | 'activities' 
+  | 'experience'
+  | 'paymentMethods'
+  | 'brandIdentity'
+  | 'financialControl'
+  | 'teamStructure'
+  | 'taskOrganization'
+  | 'decisionMaking'
+  | 'analysisChoice'
+  | 'pricingMethod'
+  | 'internationalSales'
+  | 'formalizedBusiness'
+  | 'collaboration'
+  | 'economicSustainability'
   | 'results';
 
 export const useMaturityWizard = (
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void
 ) => {
-  const [currentStep, setCurrentStep] = useState<WizardStep>('profile');
+  // Initial step is industry selection
+  const [currentStepId, setCurrentStepId] = useState<WizardStepId>('industry');
+  
   const [profileData, setProfileData] = useState<UserProfileData>({
     industry: '',
     activities: [],
@@ -29,19 +41,86 @@ export const useMaturityWizard = (
     decisionMaking: '',
   });
   
-  // Track progress
-  const totalSteps = 5; // Profile, Business, Management, Analysis Choice, Results
-  const currentStepNumber = (() => {
-    switch (currentStep) {
-      case 'profile': return 1;
-      case 'business': return 2;
-      case 'management': return 3;
-      case 'analysis-choice': return 4;
-      case 'detailed-analysis': return 4.5; // This is a branch
-      case 'results': return 5;
-      default: return 1;
+  // Define the sequence of steps
+  const baseSteps: WizardStepId[] = [
+    'industry', 
+    'activities', 
+    'experience',
+    'paymentMethods',
+    'brandIdentity',
+    'financialControl',
+    'teamStructure',
+    'taskOrganization',
+    'decisionMaking',
+    'analysisChoice',
+    'results'
+  ];
+  
+  const detailedSteps: WizardStepId[] = [
+    'pricingMethod',
+    'internationalSales',
+    'formalizedBusiness',
+    'collaboration',
+    'economicSustainability'
+  ];
+  
+  // Calculate current step number and total steps dynamically
+  const getCurrentStepInfo = () => {
+    let steps = [...baseSteps];
+    
+    // If user chose detailed analysis and hasn't reached results yet
+    if (
+      profileData.analysisPreference === 'detailed' &&
+      currentStepId !== 'results' &&
+      baseSteps.indexOf(currentStepId) > baseSteps.indexOf('analysisChoice')
+    ) {
+      // Insert detailed steps before results
+      steps = [
+        ...baseSteps.slice(0, baseSteps.indexOf('results')),
+        ...detailedSteps,
+        'results'
+      ];
     }
-  })();
+    
+    // If user reached one of the detailed analysis steps
+    if (detailedSteps.includes(currentStepId as any)) {
+      steps = [
+        ...baseSteps.slice(0, baseSteps.indexOf('results')),
+        ...detailedSteps,
+        'results'
+      ];
+    }
+    
+    const currentStepIndex = steps.indexOf(currentStepId);
+    const totalSteps = steps.length;
+    
+    return {
+      currentStepNumber: currentStepIndex + 1,
+      totalSteps,
+      steps
+    };
+  };
+  
+  const { currentStepNumber, totalSteps, steps } = getCurrentStepInfo();
+  
+  // Check if current step is valid (has been answered)
+  const isCurrentStepValid = () => {
+    const language = 'en'; // Default to English
+    const questions = getQuestions(language);
+    const question = questions[currentStepId];
+    
+    if (!question || currentStepId === 'results') return true;
+    
+    switch (question.type) {
+      case 'radio':
+      case 'icon-select':
+        return !!profileData[question.fieldName as keyof UserProfileData];
+      case 'checkbox':
+        return (profileData[question.fieldName as keyof UserProfileData] as string[] || []).length > 0;
+      default:
+        return true;
+    }
+  };
   
   // Update profile data
   const updateProfileData = (data: Partial<UserProfileData>) => {
@@ -50,56 +129,31 @@ export const useMaturityWizard = (
   
   // Handle navigation
   const handleNext = () => {
-    switch (currentStep) {
-      case 'profile':
-        setCurrentStep('business');
-        break;
-      case 'business':
-        setCurrentStep('management');
-        break;
-      case 'management':
-        setCurrentStep('analysis-choice');
-        break;
-      case 'analysis-choice':
-        if (profileData.analysisPreference === 'detailed') {
-          setCurrentStep('detailed-analysis');
-        } else {
-          setCurrentStep('results');
-        }
-        break;
-      case 'detailed-analysis':
-        setCurrentStep('results');
-        break;
-      case 'results':
-        // We're done - we don't navigate further
-        break;
+    const { steps } = getCurrentStepInfo();
+    const currentIndex = steps.indexOf(currentStepId);
+    
+    // If we're at analysis choice, determine next step based on user choice
+    if (currentStepId === 'analysisChoice') {
+      if (profileData.analysisPreference === 'detailed') {
+        // Go to first detailed question
+        setCurrentStepId('pricingMethod');
+      } else {
+        // Skip detailed analysis and go to results
+        setCurrentStepId('results');
+      }
+    } 
+    // Otherwise go to next step in sequence
+    else if (currentIndex < steps.length - 1) {
+      setCurrentStepId(steps[currentIndex + 1]);
     }
   };
   
   const handlePrevious = () => {
-    switch (currentStep) {
-      case 'profile':
-        // We're at the beginning - we don't navigate back
-        break;
-      case 'business':
-        setCurrentStep('profile');
-        break;
-      case 'management':
-        setCurrentStep('business');
-        break;
-      case 'analysis-choice':
-        setCurrentStep('management');
-        break;
-      case 'detailed-analysis':
-        setCurrentStep('analysis-choice');
-        break;
-      case 'results':
-        if (profileData.analysisPreference === 'detailed') {
-          setCurrentStep('detailed-analysis');
-        } else {
-          setCurrentStep('analysis-choice');
-        }
-        break;
+    const { steps } = getCurrentStepInfo();
+    const currentIndex = steps.indexOf(currentStepId);
+    
+    if (currentIndex > 0) {
+      setCurrentStepId(steps[currentIndex - 1]);
     }
   };
 
@@ -252,7 +306,7 @@ export const useMaturityWizard = (
   };
 
   return {
-    currentStep,
+    currentStepId,
     profileData,
     totalSteps,
     currentStepNumber,
@@ -261,6 +315,7 @@ export const useMaturityWizard = (
     handlePrevious,
     calculateMaturityScores,
     getRecommendedAgents,
-    handleCompleteWizard
+    handleCompleteWizard,
+    isCurrentStepValid
   };
 };

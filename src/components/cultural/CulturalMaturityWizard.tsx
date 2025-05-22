@@ -18,7 +18,7 @@ export const CulturalMaturityWizard: React.FC<{
   const { language } = useLanguage();
   
   const {
-    currentStep,
+    currentStepId,
     profileData,
     totalSteps,
     currentStepNumber,
@@ -27,17 +27,18 @@ export const CulturalMaturityWizard: React.FC<{
     handlePrevious,
     calculateMaturityScores,
     getRecommendedAgents,
-    handleCompleteWizard
+    handleCompleteWizard,
+    isCurrentStepValid
   } = useMaturityWizard(onComplete);
   
-  // Step labels
-  const stepLabels = {
-    en: ['Profile', 'Business', 'Management', 'Analysis', 'Results'],
-    es: ['Perfil', 'Negocio', 'Gestión', 'Análisis', 'Resultados']
+  // Step labels - simplified since we now have many steps
+  const stepTypes = {
+    en: ['Profile', 'Business', 'Management', 'Analysis', 'Details', 'Results'],
+    es: ['Perfil', 'Negocio', 'Gestión', 'Análisis', 'Detalles', 'Resultados']
   };
   
   return (
-    <div className="w-full max-w-6xl mx-auto relative">
+    <div className="w-full max-w-7xl mx-auto relative">
       <WizardBackground />
       
       <motion.div
@@ -57,12 +58,11 @@ export const CulturalMaturityWizard: React.FC<{
             <StepProgress 
               currentStep={currentStepNumber}
               totalSteps={totalSteps}
-              stepLabels={stepLabels[language]}
               language={language}
             />
             
             <WizardStepContent
-              currentStep={currentStep}
+              currentStepId={currentStepId}
               profileData={profileData}
               updateProfileData={updateProfileData}
               language={language}
@@ -74,9 +74,12 @@ export const CulturalMaturityWizard: React.FC<{
             <WizardNavigation
               onNext={handleNext}
               onPrevious={handlePrevious}
-              isFirstStep={currentStep === 'profile'}
-              isLastStep={currentStep === 'results'}
+              isFirstStep={currentStepNumber === 1}
+              isLastStep={currentStepId === 'results'}
               language={language}
+              currentStepId={currentStepId}
+              profileData={profileData}
+              isValid={isCurrentStepValid()}
             />
           </CardContent>
         </Card>
