@@ -88,7 +88,7 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
         initial="hidden"
         animate="show"
       >
-        {t.items.map((item, index) => (
+        {t.items.map((text, index) => (
           <motion.div 
             key={index}
             variants={item}
@@ -97,7 +97,7 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
             <div className="h-8 w-8 rounded-full bg-green-200 flex items-center justify-center mr-4">
               <CheckCircle className="h-5 w-5 text-green-700" />
             </div>
-            <span className="text-green-800">{item}</span>
+            <span className="text-green-800">{text}</span>
           </motion.div>
         ))}
       </motion.div>
