@@ -38,6 +38,7 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
 
   const t = translations[language];
   
+  // Define the animation variants with proper typing
   const container: Variants = {
     hidden: { opacity: 0 },
     show: {
