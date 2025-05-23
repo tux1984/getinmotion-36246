@@ -51,13 +51,13 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       transition={{ duration: 0.4 }}
       className={`w-full h-full flex flex-col ${className}`}
     >
-      <div className="flex-1 flex flex-col md:flex-row gap-8 m-4">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 p-4">
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">
-          <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
             {/* Step progress indicator at the top if provided */}
             {currentStep && totalSteps && (
-              <div className="mb-4">
+              <div className="mb-6">
                 <StepProgress 
                   currentStep={currentStep}
                   totalSteps={totalSteps}
@@ -67,10 +67,10 @@ export const StepContainer: React.FC<StepContainerProps> = ({
             )}
             
             <div className="text-left mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-purple-800 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-purple-800 mb-2">
                 {title}
               </h2>
-              {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
+              {subtitle && <p className="text-gray-600 text-base">{subtitle}</p>}
             </div>
             
             <div className="flex-1">
@@ -97,14 +97,24 @@ export const StepContainer: React.FC<StepContainerProps> = ({
         
         {/* Right column with illustration */}
         {illustration && (
-          <div className="w-full md:w-2/5 h-auto">
-            <div className="rounded-2xl overflow-hidden shadow-sm h-full">
+          <div className="w-full md:w-2/5 h-auto flex justify-center items-center">
+            <motion.div 
+              className="relative"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                duration: 0.5,
+                delay: 0.2,
+                type: "spring",
+                stiffness: 100
+              }}
+            >
               <img 
                 src={illustration} 
                 alt="Step illustration"
-                className="w-full h-full object-cover" 
+                className="max-h-[350px] object-contain" 
               />
-            </div>
+            </motion.div>
           </div>
         )}
       </div>

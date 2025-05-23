@@ -9,11 +9,15 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/questions';
 
-// Define the image rotation array
-const illustrationImages = [
-  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80"
+// Define the cute monster images array
+const characterImages = [
+  "/lovable-uploads/cfd16f14-72a3-4b55-bfd2-67adcd44eb78.png", // Community monster
+  "/lovable-uploads/a2ebe4fd-31ed-43ec-9f9f-35fe6b529ad2.png", // Creative monster
+  "/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png", // Design monster
+  "/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png", // Finance monster
+  "/lovable-uploads/c131a30d-0ce5-4b65-ae3c-5715f73e4f4c.png", // Planning monster
+  "/lovable-uploads/aad610ec-9f67-4ed0-93dc-8c2b3e8f98d3.png", // Business monster
+  "/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png", // Analytics monster
 ];
 
 interface WizardStepContentProps {
@@ -76,17 +80,32 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   const questions = getQuestions(language);
   const questionConfig = questions[currentStepId];
   
-  // Select an image based on the current step (rotate through the array)
+  // Select an image based on the current step
   const getStepImage = () => {
     if (currentStepId === 'results') {
-      return illustrationImages[2]; // Always use the third image for results
+      return characterImages[2]; // Use design monster for results
     }
     
     const stepKeys = Object.keys(questions);
     const stepIndex = stepKeys.indexOf(currentStepId);
-    const imageIndex = stepIndex % illustrationImages.length;
     
-    return illustrationImages[imageIndex];
+    // Map different steps to different character images
+    switch (currentStepId) {
+      case 'profile':
+        return characterImages[0]; // Community monster
+      case 'business':
+        return characterImages[5]; // Business monster
+      case 'analysisChoice':
+        return characterImages[6]; // Analytics monster
+      case 'management':
+        return characterImages[4]; // Planning monster
+      case 'detailedAnalysis':
+        return characterImages[1]; // Creative monster
+      default:
+        // Fallback to rotating through the array
+        const imageIndex = stepIndex % characterImages.length;
+        return characterImages[imageIndex];
+    }
   };
 
   // Render active step content

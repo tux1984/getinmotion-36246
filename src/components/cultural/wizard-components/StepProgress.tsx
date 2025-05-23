@@ -15,9 +15,9 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   language 
 }) => {
   return (
-    <div className="mb-4 py-2">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500 font-medium mb-2">
+    <div className="py-2">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-sm text-gray-500 font-medium">
           {currentStep} of {totalSteps}
         </p>
       </div>
@@ -38,10 +38,8 @@ export const StepProgress: React.FC<StepProgressProps> = ({
               <motion.div 
                 className={`h-2 w-2 rounded-full ${
                   isCompleted || isCurrent 
-                    ? 'bg-green-800' 
-                    : i === currentStep 
-                      ? 'bg-green-400'
-                      : 'bg-gray-200'
+                    ? 'bg-teal-500' 
+                    : 'bg-gray-200'
                 }`}
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
@@ -53,7 +51,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({
                 <div className="flex-1 h-[2px] mx-1">
                   <motion.div 
                     className={`h-full ${
-                      isCompleted ? 'bg-green-800' : 'bg-gray-200'
+                      isCompleted ? 'bg-teal-500' : 'bg-gray-200'
                     }`}
                     initial={{ scaleX: 0, originX: 0 }}
                     animate={{ scaleX: 1 }}
