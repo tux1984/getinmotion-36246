@@ -91,15 +91,15 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
     
     // Map different steps to different character images
     switch (currentStepId) {
-      case 'profile':
+      case 'industry': // Changed from 'profile' to 'industry'
         return characterImages[0]; // Community monster
-      case 'business':
+      case 'activities': // Changed from 'business' to 'activities'
         return characterImages[5]; // Business monster
       case 'analysisChoice':
         return characterImages[6]; // Analytics monster
-      case 'management':
+      case 'taskOrganization': // Changed from 'management' to 'taskOrganization'
         return characterImages[4]; // Planning monster
-      case 'detailedAnalysis':
+      case 'pricingMethod': // Changed from 'detailedAnalysis' to 'pricingMethod'
         return characterImages[1]; // Creative monster
       default:
         // Fallback to rotating through the array
