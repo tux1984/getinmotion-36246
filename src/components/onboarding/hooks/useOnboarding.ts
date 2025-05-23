@@ -14,6 +14,7 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
   const [currentStep, setCurrentStep] = useState(0);
   const [showMaturityCalculator, setShowMaturityCalculator] = useState(true);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
+  const [initialRecommendations, setInitialRecommendations] = useState<RecommendedAgents | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -27,52 +28,48 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
   };
   
   const handleComplete = () => {
-    // Determinar los agentes recomendados según el perfil y las puntuaciones de madurez
+    // Determine recommended agents based on profile type and maturity scores
     const recommendedAgents: RecommendedAgents = {
-      admin: false,
+      admin: true, // Always recommend the administrative assistant
       accounting: false,
       legal: false,
       operations: false,
       cultural: false
     };
     
-    // Por defecto, siempre se recomienda el asistente administrativo
-    recommendedAgents.admin = true;
-    
-    if (maturityScores) {
-      // Recomendaciones basadas en la puntuación de madurez
-      if (profileType === 'idea') {
-        // Para personas con ideas iniciales, enfocarse en validación
-        recommendedAgents.legal = maturityScores.ideaValidation > 30;
-        recommendedAgents.cultural = maturityScores.ideaValidation > 20;
-      } else if (profileType === 'solo') {
-        // Para emprendedores solitarios, enfocarse en eficiencia
-        recommendedAgents.accounting = maturityScores.monetization > 20;
-        recommendedAgents.legal = maturityScores.marketFit > 40;
-        recommendedAgents.cultural = maturityScores.marketFit > 30;
-      } else if (profileType === 'team') {
-        // Para equipos, enfocarse en coordinación
-        recommendedAgents.accounting = true;
-        recommendedAgents.legal = maturityScores.marketFit > 30;
-        recommendedAgents.operations = maturityScores.marketFit > 50;
-        recommendedAgents.cultural = maturityScores.marketFit > 40;
-      }
-    } else {
-      // Recomendaciones por defecto si no hay puntuaciones
-      if (profileType === 'idea') {
-        recommendedAgents.legal = true;
-        recommendedAgents.cultural = true;
-      } else if (profileType === 'solo') {
-        recommendedAgents.accounting = true;
-        recommendedAgents.cultural = true;
-      } else if (profileType === 'team') {
-        recommendedAgents.accounting = true;
-        recommendedAgents.legal = true;
-        recommendedAgents.cultural = true;
-      }
+    // Profile-based recommendations
+    if (profileType === 'idea') {
+      recommendedAgents.cultural = true;
+    } else if (profileType === 'solo') {
+      recommendedAgents.accounting = true;
+      recommendedAgents.cultural = true;
+    } else if (profileType === 'team') {
+      recommendedAgents.accounting = true;
+      recommendedAgents.operations = true;
+      recommendedAgents.cultural = true;
     }
     
-    // Guardar las recomendaciones en localStorage
+    // Maturity score-based adjustments
+    if (maturityScores) {
+      if (maturityScores.monetization > 20) {
+        recommendedAgents.accounting = true;
+      }
+      
+      if (maturityScores.marketFit > 35) {
+        recommendedAgents.legal = true;
+      }
+      
+      if (maturityScores.marketFit > 50) {
+        recommendedAgents.operations = true;
+      }
+    } else if (initialRecommendations) {
+      // Use initial recommendations if no maturity scores
+      Object.keys(initialRecommendations).forEach((key) => {
+        recommendedAgents[key as keyof RecommendedAgents] = initialRecommendations[key as keyof RecommendedAgents];
+      });
+    }
+    
+    // Save recommendations and maturity scores to localStorage
     localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
     localStorage.setItem('onboardingCompleted', 'true');
     
@@ -80,7 +77,7 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
       localStorage.setItem('maturityScores', JSON.stringify(maturityScores));
     }
     
-    // Notificar al componente padre
+    // Notify parent component
     onComplete(maturityScores || {
       ideaValidation: 20,
       userExperience: 15,
@@ -88,7 +85,7 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
       monetization: 5
     }, recommendedAgents);
     
-    // Mostrar un mensaje de completado
+    // Show completion toast
     toast({
       title: language === 'en' ? "Setup Completed!" : "¡Configuración Completada!",
       description: language === 'en' 
@@ -96,7 +93,7 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
         : "Tu espacio de trabajo está listo con las herramientas recomendadas según el estado de tu proyecto."
     });
     
-    // Redirigir al dashboard
+    // Navigate to dashboard
     navigate('/dashboard');
   };
   
@@ -124,6 +121,8 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     showMaturityCalculator,
     setShowMaturityCalculator,
     maturityScores,
+    initialRecommendations,
+    setInitialRecommendations,
     handleMaturityComplete,
     handleNext,
     handlePrevious,

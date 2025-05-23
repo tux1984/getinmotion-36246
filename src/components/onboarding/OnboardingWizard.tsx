@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Steps } from '@/components/ui/steps';
 import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
@@ -9,6 +9,7 @@ import { MaturityStep } from './components/MaturityStep';
 import { RecommendedAgentsStep } from './components/RecommendedAgentsStep';
 import { CompletionStep } from './components/CompletionStep';
 import { NavigationButtons } from './components/NavigationButtons';
+import { ProfileQuestions } from './components/ProfileQuestions';
 
 interface OnboardingWizardProps {
   profileType: ProfileType;
@@ -17,6 +18,7 @@ interface OnboardingWizardProps {
 
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType, onComplete }) => {
   const { language } = useLanguage();
+  const [showExtendedQuestions, setShowExtendedQuestions] = useState(false);
   
   const {
     currentStep,
@@ -27,13 +29,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
     handleMaturityComplete,
     handleNext,
     handlePrevious,
-    handleSkip
+    handleSkip,
+    initialRecommendations,
+    setInitialRecommendations
   } = useOnboarding({ profileType, onComplete });
   
   const translations = {
     en: {
       welcome: "Welcome to GET IN MOTION",
       welcomeDesc: "Let's set up your workspace based on your project status.",
+      profileQuestions: "Tell us about your project",
+      profileQuestionsDesc: `Let's learn more about your ${profileType === 'idea' ? 'idea' : profileType === 'team' ? 'team' : 'solo project'}.`,
       calculatingMaturity: "Calculating Project Maturity",
       calculatingMaturityDesc: "Let's evaluate your project's current state to recommend the best tools.",
       recommendingAgents: "Recommending Agents",
@@ -44,6 +50,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
     es: {
       welcome: "Bienvenido a GET IN MOTION",
       welcomeDesc: "Configuremos tu espacio de trabajo según el estado de tu proyecto.",
+      profileQuestions: "Cuéntanos sobre tu proyecto",
+      profileQuestionsDesc: `Conozcamos más sobre tu ${profileType === 'idea' ? 'idea' : profileType === 'team' ? 'equipo' : 'proyecto individual'}.`,
       calculatingMaturity: "Calculando Madurez del Proyecto",
       calculatingMaturityDesc: "Evaluemos el estado actual de tu proyecto para recomendar las mejores herramientas.",
       recommendingAgents: "Recomendando Agentes",
@@ -61,8 +69,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
       description: t.welcomeDesc
     },
     {
-      title: t.calculatingMaturity,
-      description: t.calculatingMaturityDesc
+      title: t.profileQuestions,
+      description: t.profileQuestionsDesc
     },
     {
       title: t.recommendingAgents,
@@ -86,10 +94,14 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
         )}
         
         {currentStep === 1 && (
-          <MaturityStep
-            showCalculator={showMaturityCalculator}
-            setShowCalculator={setShowMaturityCalculator}
-            onComplete={handleMaturityComplete}
+          <ProfileQuestions
+            profileType={profileType}
+            onComplete={(initialRecs) => {
+              setInitialRecommendations(initialRecs);
+              handleNext();
+            }}
+            showExtendedQuestions={showExtendedQuestions}
+            language={language}
           />
         )}
         
@@ -97,6 +109,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
           <RecommendedAgentsStep 
             profileType={profileType}
             maturityScores={maturityScores}
+            initialRecommendations={initialRecommendations}
+            onExtendedAnalysisRequested={() => {
+              setShowExtendedQuestions(true);
+              handlePrevious();
+            }}
           />
         )}
         
@@ -105,14 +122,16 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
         )}
       </div>
       
-      <NavigationButtons
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        onSkip={handleSkip}
-        showMaturityStep={currentStep === 1 && showMaturityCalculator}
-      />
+      {currentStep !== 1 && (
+        <NavigationButtons
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          onSkip={handleSkip}
+          showMaturityStep={false}
+        />
+      )}
     </div>
   );
 };

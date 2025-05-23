@@ -1,31 +1,34 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { LanguageProvider } from '@/context/LanguageContext';
-import Index from '@/pages/Index';
-import Dashboard from '@/pages/Dashboard';
-import NotFound from '@/pages/NotFound';
-import OnePager from '@/pages/OnePager';
-import TwoPager from '@/pages/TwoPager';
-import ThreePager from '@/pages/ThreePager';
-import Admin from '@/pages/Admin';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import './App.css';
 import { Toaster } from '@/components/ui/toaster';
-import MaturityCalculator from '@/pages/MaturityCalculator';
+import { LanguageProvider } from '@/context/LanguageContext';
+import Index from './pages/Index';
+import Dashboard from './pages/Dashboard';
+import MaturityCalculator from './pages/MaturityCalculator';
+import NotFound from './pages/NotFound';
+import Admin from './pages/Admin';
+import OnePager from './pages/OnePager';
+import TwoPager from './pages/TwoPager';
+import ThreePager from './pages/ThreePager';
 
 function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/maturity-calculator" element={<MaturityCalculator />} />
-          <Route path="/onepager" element={<OnePager />} />
-          <Route path="/twopager" element={<TwoPager />} />
-          <Route path="/threepager" element={<ThreePager />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="min-h-screen">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/maturity-calculator" element={<MaturityCalculator />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/one-pager" element={<OnePager />} />
+            <Route path="/two-pager" element={<TwoPager />} />
+            <Route path="/three-pager" element={<ThreePager />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
         <Toaster />
       </BrowserRouter>
     </LanguageProvider>
