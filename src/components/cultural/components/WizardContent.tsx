@@ -79,13 +79,13 @@ export const WizardContent: React.FC<WizardContentProps> = ({
           </div>
           
           {/* Navigation at bottom of left column */}
-          {currentStepId !== 'results' && (
+          {currentStepId !== "results" && (
             <div className="mt-8">
               <WizardNavigation
                 onNext={handleNext}
                 onPrevious={handlePrevious}
                 isFirstStep={currentStepNumber === 1}
-                isLastStep={currentStepId === 'results'}
+                isLastStep={false}
                 language={language}
                 currentStepId={currentStepId}
                 profileData={profileData}
