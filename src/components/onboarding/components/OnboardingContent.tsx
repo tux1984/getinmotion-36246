@@ -74,7 +74,7 @@ export const OnboardingContent: React.FC<OnboardingContentProps> = ({
         <ProfileQuestions
           profileType={profileType}
           onComplete={(extendedRecs) => {
-            // Fix this part - Create a new recommendations object instead of using a updater function
+            // Create a new recommendations object with the extended property
             if (initialRecommendations) {
               const updatedRecommendations: RecommendedAgents = {
                 ...initialRecommendations,

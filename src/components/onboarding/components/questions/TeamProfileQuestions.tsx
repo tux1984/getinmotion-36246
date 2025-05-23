@@ -29,22 +29,40 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
       id: 'teamSize',
       question: language === 'en' ? 'How many people are in your team?' : '¿Cuántas personas hay en tu equipo?',
       component: (
-        <div className="space-y-3">
-          <Input 
-            type="number" 
-            placeholder={language === 'en' ? 'Enter team size' : 'Ingresa el tamaño del equipo'}
+        <div className="space-y-4">
+          <RadioGroup
             value={answers.teamSize || ''}
-            onChange={(e) => onAnswer('teamSize', e.target.value)}
-            min={1}
-            max={100}
-            className="max-w-xs"
-          />
+            onValueChange={(value) => onAnswer('teamSize', value)}
+            className="flex flex-col space-y-3"
+          >
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="2-3" id="size-small" />
+              <Label htmlFor="size-small" className="flex items-center">
+                <Users className="mr-2 h-5 w-5 text-indigo-500" />
+                {language === 'en' ? '2-3 people' : '2-3 personas'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="4-6" id="size-medium" />
+              <Label htmlFor="size-medium" className="flex items-center">
+                <Users className="mr-2 h-5 w-5 text-purple-500" />
+                {language === 'en' ? '4-6 people' : '4-6 personas'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="7+" id="size-large" />
+              <Label htmlFor="size-large" className="flex items-center">
+                <Users className="mr-2 h-5 w-5 text-pink-500" />
+                {language === 'en' ? 'More than 6' : 'Más de 6'}
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
       )
     },
     {
       id: 'definedRoles',
-      question: language === 'en' ? 'Do team members have defined roles?' : '¿Los miembros del equipo tienen roles definidos?',
+      question: language === 'en' ? 'Do team members have defined roles?' : '¿Tienen roles definidos o todos hacen de todo?',
       component: (
         <div className="space-y-4">
           <RadioGroup
@@ -56,21 +74,21 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
               <RadioGroupItem value="yes" id="roles-yes" />
               <Label htmlFor="roles-yes" className="flex items-center">
                 <Users className="mr-2 h-5 w-5 text-green-500" />
-                {language === 'en' ? 'Yes, clear roles and responsibilities' : 'Sí, roles y responsabilidades claras'}
+                {language === 'en' ? 'Yes, each person knows their role' : 'Sí, cada quien sabe su rol'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
               <RadioGroupItem value="somewhat" id="roles-somewhat" />
               <Label htmlFor="roles-somewhat" className="flex items-center">
                 <Users className="mr-2 h-5 w-5 text-amber-500" />
-                {language === 'en' ? 'Somewhat, but roles overlap' : 'En cierto modo, pero los roles se superponen'}
+                {language === 'en' ? 'Somewhat, but roles overlap' : 'Más o menos'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
               <RadioGroupItem value="no" id="roles-no" />
               <Label htmlFor="roles-no" className="flex items-center">
                 <Users className="mr-2 h-5 w-5 text-gray-400" />
-                {language === 'en' ? 'No, we all do everything' : 'No, todos hacemos todo'}
+                {language === 'en' ? 'Everyone does everything' : 'Todos hacen de todo'}
               </Label>
             </div>
           </RadioGroup>
@@ -79,7 +97,7 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
     },
     {
       id: 'taskOrganization',
-      question: language === 'en' ? 'How do you organize tasks and decisions?' : '¿Cómo organizan las tareas y decisiones?',
+      question: language === 'en' ? 'How does your team organize work?' : '¿Cómo se organizan?',
       component: (
         <div className="space-y-4">
           <RadioGroup
@@ -88,24 +106,31 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
             className="flex flex-col space-y-3"
           >
             <div className="flex items-center space-x-3 rounded-lg border p-4">
-              <RadioGroupItem value="formal" id="tasks-formal" />
-              <Label htmlFor="tasks-formal" className="flex items-center">
-                <ClipboardList className="mr-2 h-5 w-5 text-purple-500" />
-                {language === 'en' ? 'Formal process with tools (Jira, Asana, etc.)' : 'Proceso formal con herramientas (Jira, Asana, etc.)'}
+              <RadioGroupItem value="meetings" id="tasks-meetings" />
+              <Label htmlFor="tasks-meetings" className="flex items-center">
+                <MessagesSquare className="mr-2 h-5 w-5 text-purple-500" />
+                {language === 'en' ? 'Through meetings' : 'Reuniones'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
-              <RadioGroupItem value="basic" id="tasks-basic" />
-              <Label htmlFor="tasks-basic" className="flex items-center">
-                <ClipboardList className="mr-2 h-5 w-5 text-blue-500" />
-                {language === 'en' ? 'Basic tools (Trello, spreadsheet, etc.)' : 'Herramientas básicas (Trello, hoja de cálculo, etc.)'}
+              <RadioGroupItem value="chats" id="tasks-chats" />
+              <Label htmlFor="tasks-chats" className="flex items-center">
+                <MessagesSquare className="mr-2 h-5 w-5 text-blue-500" />
+                {language === 'en' ? 'Chat groups' : 'Chats'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="tools" id="tasks-tools" />
+              <Label htmlFor="tasks-tools" className="flex items-center">
+                <ClipboardList className="mr-2 h-5 w-5 text-green-500" />
+                {language === 'en' ? 'Notion/Trello/Other tools' : 'Notion/Trello'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
               <RadioGroupItem value="informal" id="tasks-informal" />
               <Label htmlFor="tasks-informal" className="flex items-center">
-                <ClipboardList className="mr-2 h-5 w-5 text-green-500" />
-                {language === 'en' ? 'Informal (meetings, WhatsApp, etc.)' : 'Informal (reuniones, WhatsApp, etc.)'}
+                <ClipboardList className="mr-2 h-5 w-5 text-gray-400" />
+                {language === 'en' ? 'Whatever comes up' : 'Lo que sale'}
               </Label>
             </div>
           </RadioGroup>
@@ -113,86 +138,46 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
       )
     },
     {
-      id: 'communication',
-      question: language === 'en' ? 'What tools do you use for team communication?' : '¿Qué herramientas usan para la comunicación del equipo?',
+      id: 'decisionMaking',
+      question: language === 'en' ? 'How do you make key decisions?' : '¿Cómo toman decisiones clave?',
       component: (
-        <div className="grid gap-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="comm-whatsapp" 
-              checked={answers.communication?.includes('whatsapp')}
-              onCheckedChange={(checked) => {
-                const current = answers.communication || [];
-                const newValue = checked 
-                  ? [...current, 'whatsapp'] 
-                  : current.filter((item: string) => item !== 'whatsapp');
-                onAnswer('communication', newValue);
-              }} 
-            />
-            <Label htmlFor="comm-whatsapp">WhatsApp</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="comm-slack" 
-              checked={answers.communication?.includes('slack')}
-              onCheckedChange={(checked) => {
-                const current = answers.communication || [];
-                const newValue = checked 
-                  ? [...current, 'slack'] 
-                  : current.filter((item: string) => item !== 'slack');
-                onAnswer('communication', newValue);
-              }} 
-            />
-            <Label htmlFor="comm-slack">Slack</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="comm-email" 
-              checked={answers.communication?.includes('email')}
-              onCheckedChange={(checked) => {
-                const current = answers.communication || [];
-                const newValue = checked 
-                  ? [...current, 'email'] 
-                  : current.filter((item: string) => item !== 'email');
-                onAnswer('communication', newValue);
-              }} 
-            />
-            <Label htmlFor="comm-email">Email</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="comm-meetings" 
-              checked={answers.communication?.includes('meetings')}
-              onCheckedChange={(checked) => {
-                const current = answers.communication || [];
-                const newValue = checked 
-                  ? [...current, 'meetings'] 
-                  : current.filter((item: string) => item !== 'meetings');
-                onAnswer('communication', newValue);
-              }} 
-            />
-            <Label htmlFor="comm-meetings">{language === 'en' ? 'In-person meetings' : 'Reuniones presenciales'}</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="comm-video" 
-              checked={answers.communication?.includes('video')}
-              onCheckedChange={(checked) => {
-                const current = answers.communication || [];
-                const newValue = checked 
-                  ? [...current, 'video'] 
-                  : current.filter((item: string) => item !== 'video');
-                onAnswer('communication', newValue);
-              }} 
-            />
-            <Label htmlFor="comm-video">{language === 'en' ? 'Video calls' : 'Videollamadas'}</Label>
-          </div>
+        <div className="space-y-4">
+          <RadioGroup
+            value={answers.decisionMaking || ''}
+            onValueChange={(value) => onAnswer('decisionMaking', value)}
+            className="flex flex-col space-y-3"
+          >
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="together" id="decisions-together" />
+              <Label htmlFor="decisions-together">
+                {language === 'en' ? 'Together as a team' : 'Juntos'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="leader" id="decisions-leader" />
+              <Label htmlFor="decisions-leader">
+                {language === 'en' ? 'One person decides' : 'Lo decide uno'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="improvise" id="decisions-improvise" />
+              <Label htmlFor="decisions-improvise">
+                {language === 'en' ? 'We improvise' : 'Improvisan'}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4">
+              <RadioGroupItem value="unclear" id="decisions-unclear" />
+              <Label htmlFor="decisions-unclear">
+                {language === 'en' ? 'Still not clear' : 'Aún no tienen claridad'}
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
       )
     },
     {
       id: 'goals',
-      question: language === 'en' ? 'Do you have clear goals or KPIs?' : '¿Tienen metas claras o KPIs?',
+      question: language === 'en' ? 'Do you have clear goals or growth indicators?' : '¿Tienen metas claras o indicadores de crecimiento?',
       component: (
         <div className="space-y-4">
           <RadioGroup
@@ -204,21 +189,21 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
               <RadioGroupItem value="yes" id="goals-yes" />
               <Label htmlFor="goals-yes" className="flex items-center">
                 <Target className="mr-2 h-5 w-5 text-green-500" />
-                {language === 'en' ? 'Yes, we have clear metrics we track' : 'Sí, tenemos métricas claras que seguimos'}
+                {language === 'en' ? 'Yes, we do' : 'Sí'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
               <RadioGroupItem value="somewhat" id="goals-somewhat" />
               <Label htmlFor="goals-somewhat" className="flex items-center">
                 <Target className="mr-2 h-5 w-5 text-amber-500" />
-                {language === 'en' ? 'We have general goals but not specific metrics' : 'Tenemos metas generales pero no métricas específicas'}
+                {language === 'en' ? 'Somewhat, but not specific' : 'Más o menos'}
               </Label>
             </div>
             <div className="flex items-center space-x-3 rounded-lg border p-4">
               <RadioGroupItem value="no" id="goals-no" />
               <Label htmlFor="goals-no" className="flex items-center">
                 <Target className="mr-2 h-5 w-5 text-gray-400" />
-                {language === 'en' ? 'No clear goals yet' : 'Aún no hay metas claras'}
+                {language === 'en' ? 'No clear goals yet' : 'No'}
               </Label>
             </div>
           </RadioGroup>
@@ -265,34 +250,66 @@ export const TeamProfileQuestions: React.FC<TeamProfileQuestionsProps> = ({
       )
     },
     {
-      id: 'decisionMaking',
-      question: language === 'en' ? 'How are decisions made in your team?' : '¿Cómo se toman las decisiones en tu equipo?',
+      id: 'teamCommunication',
+      question: language === 'en' ? 'How do team members communicate?' : '¿Cómo se comunican los miembros del equipo?',
       component: (
-        <div className="space-y-4">
-          <RadioGroup
-            value={answers.decisionMaking || ''}
-            onValueChange={(value) => onAnswer('decisionMaking', value)}
-            className="flex flex-col space-y-3"
-          >
-            <div className="flex items-center space-x-3 rounded-lg border p-4">
-              <RadioGroupItem value="hierarchical" id="decision-hierarchical" />
-              <Label htmlFor="decision-hierarchical">
-                {language === 'en' ? 'One person makes most decisions' : 'Una persona toma la mayoría de las decisiones'}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3 rounded-lg border p-4">
-              <RadioGroupItem value="collaborative" id="decision-collaborative" />
-              <Label htmlFor="decision-collaborative">
-                {language === 'en' ? 'Collaborative decision-making process' : 'Proceso de toma de decisiones colaborativo'}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3 rounded-lg border p-4">
-              <RadioGroupItem value="specialized" id="decision-specialized" />
-              <Label htmlFor="decision-specialized">
-                {language === 'en' ? 'Decisions made by those with relevant expertise' : 'Decisiones tomadas por aquellos con experiencia relevante'}
-              </Label>
-            </div>
-          </RadioGroup>
+        <div className="space-y-4 grid md:grid-cols-2 gap-3">
+          <div className="flex items-center space-x-2 rounded-lg border p-3">
+            <Checkbox 
+              id="comm-whatsapp" 
+              checked={answers.teamCommunication?.includes('whatsapp')}
+              onCheckedChange={(checked) => {
+                const current = answers.teamCommunication || [];
+                const newValue = checked 
+                  ? [...current, 'whatsapp'] 
+                  : current.filter((item: string) => item !== 'whatsapp');
+                onAnswer('teamCommunication', newValue);
+              }} 
+            />
+            <Label htmlFor="comm-whatsapp">WhatsApp</Label>
+          </div>
+          <div className="flex items-center space-x-2 rounded-lg border p-3">
+            <Checkbox 
+              id="comm-slack" 
+              checked={answers.teamCommunication?.includes('slack')}
+              onCheckedChange={(checked) => {
+                const current = answers.teamCommunication || [];
+                const newValue = checked 
+                  ? [...current, 'slack'] 
+                  : current.filter((item: string) => item !== 'slack');
+                onAnswer('teamCommunication', newValue);
+              }} 
+            />
+            <Label htmlFor="comm-slack">Slack</Label>
+          </div>
+          <div className="flex items-center space-x-2 rounded-lg border p-3">
+            <Checkbox 
+              id="comm-email" 
+              checked={answers.teamCommunication?.includes('email')}
+              onCheckedChange={(checked) => {
+                const current = answers.teamCommunication || [];
+                const newValue = checked 
+                  ? [...current, 'email'] 
+                  : current.filter((item: string) => item !== 'email');
+                onAnswer('teamCommunication', newValue);
+              }} 
+            />
+            <Label htmlFor="comm-email">Email</Label>
+          </div>
+          <div className="flex items-center space-x-2 rounded-lg border p-3">
+            <Checkbox 
+              id="comm-meetings" 
+              checked={answers.teamCommunication?.includes('meetings')}
+              onCheckedChange={(checked) => {
+                const current = answers.teamCommunication || [];
+                const newValue = checked 
+                  ? [...current, 'meetings'] 
+                  : current.filter((item: string) => item !== 'meetings');
+                onAnswer('teamCommunication', newValue);
+              }} 
+            />
+            <Label htmlFor="comm-meetings">{language === 'en' ? 'In-person meetings' : 'Reuniones presenciales'}</Label>
+          </div>
         </div>
       )
     },

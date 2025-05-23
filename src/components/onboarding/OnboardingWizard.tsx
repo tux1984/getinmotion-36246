@@ -24,7 +24,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
     handleNext,
     initialRecommendations,
     setInitialRecommendations
-  } = useOnboarding({ profileType, onComplete });
+  } = useOnboarding({ 
+    profileType, 
+    onComplete, 
+    showExtendedQuestions 
+  });
   
   // Build steps based on current state
   const steps = buildOnboardingSteps(profileType, language, showExtendedQuestions);

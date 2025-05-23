@@ -96,7 +96,7 @@ export const ComparisonStep: React.FC<ComparisonStepProps> = ({
             </h3>
             <div className="space-y-3">
               {copilotItems.map(copilot => {
-                const isRecommended = initialRecommendations?.[copilot.id as keyof RecommendedAgents];
+                const isRecommended = initialRecommendations?.[copilot.id as keyof Omit<RecommendedAgents, 'extended'>];
                 
                 return (
                   <div key={copilot.id} className="flex items-center justify-between">
@@ -119,8 +119,8 @@ export const ComparisonStep: React.FC<ComparisonStepProps> = ({
             </h3>
             <div className="space-y-3">
               {copilotItems.map(copilot => {
-                const isRecommended = extendedRecommendations?.[copilot.id as keyof RecommendedAgents];
-                const wasRecommended = initialRecommendations?.[copilot.id as keyof RecommendedAgents];
+                const isRecommended = extendedRecommendations?.[copilot.id as keyof Omit<RecommendedAgents, 'extended'>];
+                const wasRecommended = initialRecommendations?.[copilot.id as keyof Omit<RecommendedAgents, 'extended'>];
                 const hasChanged = isRecommended !== wasRecommended;
                 
                 return (

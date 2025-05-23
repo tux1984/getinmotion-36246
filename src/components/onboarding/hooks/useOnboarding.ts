@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,9 +8,10 @@ import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard
 interface UseOnboardingProps {
   profileType: ProfileType;
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
+  showExtendedQuestions?: boolean;
 }
 
-export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) => {
+export const useOnboarding = ({ profileType, onComplete, showExtendedQuestions: externalShowExtendedQuestions }: UseOnboardingProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showMaturityCalculator, setShowMaturityCalculator] = useState(true);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
@@ -123,6 +125,11 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
       setCurrentStep(currentStep - 1);
     }
   };
+  
+  // If the external state for showExtendedQuestions changes, sync it
+  if (externalShowExtendedQuestions !== undefined && externalShowExtendedQuestions !== showExtendedQuestions) {
+    setShowExtendedQuestions(externalShowExtendedQuestions);
+  }
   
   return {
     currentStep,
