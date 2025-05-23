@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -42,8 +43,9 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     if (initialRecommendations?.extended) {
       // Extract extended recommendations but exclude the 'extended' property itself
       Object.keys(initialRecommendations.extended).forEach((key) => {
-        const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
-        if (typedKey !== 'extended') {
+        // Make sure the key is a valid property of RecommendedAgents (excluding 'extended')
+        if (key !== 'extended' && key in recommendedAgents) {
+          const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
           recommendedAgents[typedKey] = initialRecommendations.extended?.[typedKey] ?? false;
         }
       });
@@ -51,7 +53,8 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     // Otherwise use initial recommendations or fallback to profile-based recommendations
     else if (initialRecommendations) {
       Object.keys(initialRecommendations).forEach((key) => {
-        if (key !== 'extended') {  // Skip the 'extended' property
+        // Make sure the key is a valid property of RecommendedAgents
+        if (key !== 'extended' && key in recommendedAgents) {
           const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
           recommendedAgents[typedKey] = initialRecommendations[typedKey];
         }
