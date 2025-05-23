@@ -132,6 +132,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       currentStepId={currentStepId}
       profileData={profileData}
       isStepValid={isStepValid}
+      className="w-full max-w-full"
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
