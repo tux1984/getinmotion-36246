@@ -1,193 +1,293 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
-import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
-import { useLanguage } from '@/context/LanguageContext';
-import { Brain, Search } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { CheckCircle, ArrowRight, Zap } from 'lucide-react';
 
 interface RecommendedAgentsStepProps {
   profileType: ProfileType;
   maturityScores: CategoryScore | null;
-  onExtendedAnalysisRequested?: () => void;
-  initialRecommendations?: RecommendedAgents;
+  initialRecommendations: RecommendedAgents | null;
+  onExtendedAnalysisRequested: () => void;
+  onContinue: () => void;
+  language: 'en' | 'es';
 }
 
-export const RecommendedAgentsStep: React.FC<RecommendedAgentsStepProps> = ({ 
-  profileType, 
+export const RecommendedAgentsStep: React.FC<RecommendedAgentsStepProps> = ({
+  profileType,
   maturityScores,
+  initialRecommendations,
   onExtendedAnalysisRequested,
-  initialRecommendations
+  onContinue,
+  language
 }) => {
-  const { language } = useLanguage();
-  const showDeeperAnalysisOption = !!onExtendedAnalysisRequested;
-  const hasInitialRecommendations = !!initialRecommendations;
-  
-  const currentRecommendations = maturityScores ? {
-    admin: true,
-    accounting: maturityScores.monetization > 20 || profileType === 'team',
-    legal: maturityScores.marketFit > 35,
-    operations: maturityScores.marketFit > 50 || profileType === 'team',
-    cultural: true
-  } : initialRecommendations || {
-    admin: true,
-    accounting: profileType === 'team' || profileType === 'solo',
-    legal: profileType === 'team',
-    operations: profileType === 'team',
-    cultural: true
-  };
-  
-  const agentDescriptions = {
+  const translations = {
     en: {
+      title: "Your Recommended Copilots",
+      description: "Based on your profile, we've selected these copilots to help you with your project.",
+      extendedAnalysis: "Get a more personalized recommendation",
+      extendedAnalysisDescription: "Answer a few more questions for a more tailored experience.",
+      continue: "Continue with these recommendations",
       admin: {
         title: "Administrative Assistant",
-        description: "Helps with day-to-day tasks, scheduling, and general organization.",
-        ideal: "Everyone"
+        description: "Your personal assistant that helps you handle everyday tasks and keeps your project organized."
+      },
+      cultural: {
+        title: "Cultural Planner",
+        description: "Help with planning and executing your cultural initiatives and creative projects."
       },
       accounting: {
-        title: "Financial Advisor",
-        description: "Assists with budgeting, expense tracking, and financial planning.",
-        ideal: "Solo creators and teams"
+        title: "Accounting Copilot",
+        description: "Manage your finances, budgeting, and handle financial planning for your project."
       },
       legal: {
-        title: "Legal Guide",
-        description: "Provides guidance on contracts, intellectual property, and regulations.",
-        ideal: "Growing businesses and teams"
+        title: "Legal Advisor",
+        description: "Guide you through legal aspects of your business, contracts, and compliance."
       },
       operations: {
         title: "Operations Manager",
-        description: "Helps streamline processes, workflows, and team coordination.",
-        ideal: "Teams and businesses with multiple people"
-      },
-      cultural: {
-        title: "Creative Guide",
-        description: "Specializes in cultural and creative industries specific needs.",
-        ideal: "All creative professionals"
+        description: "Streamline your operations and improve processes for better efficiency."
       }
     },
     es: {
+      title: "Tus Copilotos Recomendados",
+      description: "Basado en tu perfil, hemos seleccionado estos copilotos para ayudarte con tu proyecto.",
+      extendedAnalysis: "Obtener recomendación más personalizada",
+      extendedAnalysisDescription: "Responde algunas preguntas más para una experiencia más adaptada.",
+      continue: "Continuar con estas recomendaciones",
       admin: {
         title: "Asistente Administrativo",
-        description: "Ayuda con tareas diarias, programación y organización general.",
-        ideal: "Todos"
+        description: "Tu asistente personal que te ayuda a manejar tareas diarias y mantener tu proyecto organizado."
+      },
+      cultural: {
+        title: "Planificador Cultural",
+        description: "Ayuda con la planificación y ejecución de tus iniciativas culturales y proyectos creativos."
       },
       accounting: {
-        title: "Asesor Financiero",
-        description: "Asiste con presupuestos, seguimiento de gastos y planificación financiera.",
-        ideal: "Creadores individuales y equipos"
+        title: "Copiloto Contable",
+        description: "Gestiona tus finanzas, presupuestos y maneja la planificación financiera para tu proyecto."
       },
       legal: {
-        title: "Guía Legal",
-        description: "Proporciona orientación sobre contratos, propiedad intelectual y regulaciones.",
-        ideal: "Negocios y equipos en crecimiento"
+        title: "Asesor Legal",
+        description: "Te guía a través de los aspectos legales de tu negocio, contratos y cumplimiento."
       },
       operations: {
         title: "Gerente de Operaciones",
-        description: "Ayuda a optimizar procesos, flujos de trabajo y coordinación de equipos.",
-        ideal: "Equipos y negocios con varias personas"
-      },
-      cultural: {
-        title: "Guía Creativo",
-        description: "Se especializa en necesidades específicas de industrias culturales y creativas.",
-        ideal: "Todos los profesionales creativos"
+        description: "Optimiza tus operaciones y mejora los procesos para una mayor eficiencia."
       }
     }
   };
 
-  const t = {
-    en: {
-      title: "Recommended Agents for You",
-      subtitle: hasInitialRecommendations 
-        ? "Based on your profile, these agents can help you right away" 
-        : "Based on your project profile and maturity level, we recommend these AI copilots",
-      deeperAnalysis: "Want more accurate recommendations?",
-      deeperAnalysisDesc: "Take a deeper assessment to get more personalized agent recommendations.",
-      deeperButton: "Take Extended Analysis",
-      idealFor: "Ideal for",
-      continue: "Continue"
-    },
-    es: {
-      title: "Agentes Recomendados para Ti",
-      subtitle: hasInitialRecommendations 
-        ? "Según tu perfil, estos agentes pueden ayudarte de inmediato" 
-        : "Según el perfil y nivel de madurez de tu proyecto, recomendamos estos copilotos de IA",
-      deeperAnalysis: "¿Quieres recomendaciones más precisas?",
-      deeperAnalysisDesc: "Realiza una evaluación más profunda para obtener recomendaciones de agentes más personalizadas.",
-      deeperButton: "Realizar Análisis Extendido",
-      idealFor: "Ideal para",
-      continue: "Continuar"
+  const t = translations[language];
+
+  const agentIcons = {
+    admin: (
+      <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="18" height="18" x="3" y="3" rx="2" />
+          <path d="M7 7h.01" />
+          <path d="M12 7h.01" />
+          <path d="M17 7h.01" />
+          <path d="M7 12h.01" />
+          <path d="M12 12h.01" />
+          <path d="M17 12h.01" />
+          <path d="M7 17h.01" />
+          <path d="M12 17h.01" />
+          <path d="M17 17h.01" />
+        </svg>
+      </div>
+    ),
+    cultural: (
+      <div className="p-2 rounded-full bg-purple-100 text-purple-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v8" />
+          <path d="M8 12h8" />
+        </svg>
+      </div>
+    ),
+    accounting: (
+      <div className="p-2 rounded-full bg-green-100 text-green-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="14" x="2" y="5" rx="2" />
+          <line x1="2" x2="22" y1="10" y2="10" />
+        </svg>
+      </div>
+    ),
+    legal: (
+      <div className="p-2 rounded-full bg-red-100 text-red-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 22h-2" />
+          <path d="M20 15v2h-2" />
+          <path d="M4 19.5V15" />
+          <path d="M20 8v3" />
+          <path d="M18 2h2v2" />
+          <path d="M4 11V9" />
+          <path d="M12 2h2" />
+          <path d="M12 22h2" />
+          <path d="M12 17h2" />
+          <path d="M8 22H6" />
+          <path d="M4 5V3" />
+          <path d="M6 2H4" />
+        </svg>
+      </div>
+    ),
+    operations: (
+      <div className="p-2 rounded-full bg-amber-100 text-amber-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      </div>
+    )
+  };
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
     }
   };
-  
-  const descriptions = agentDescriptions[language];
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto py-4">
+    <div className="p-6 md:p-8">
       <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="mb-8 text-center"
+      >
+        <motion.h2 variants={item} className="text-2xl font-bold text-purple-800 mb-3">
+          {t.title}
+        </motion.h2>
+        <motion.p variants={item} className="text-gray-600 max-w-2xl mx-auto">
+          {t.description}
+        </motion.p>
+      </motion.div>
+
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
+      >
+        {/* Administrative Assistant - always recommended */}
+        <motion.div variants={item}>
+          <Card className="p-5 h-full border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+            <div className="flex items-start mb-2">
+              {agentIcons.admin}
+              <div className="ml-3">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-blue-800 mt-2">{t.admin.title}</h3>
+            <p className="text-gray-600 mt-1 text-sm">{t.admin.description}</p>
+          </Card>
+        </motion.div>
+
+        {/* Cultural Planner */}
+        {initialRecommendations?.cultural && (
+          <motion.div variants={item}>
+            <Card className="p-5 h-full border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+              <div className="flex items-start mb-2">
+                {agentIcons.cultural}
+                <div className="ml-3">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-purple-800 mt-2">{t.cultural.title}</h3>
+              <p className="text-gray-600 mt-1 text-sm">{t.cultural.description}</p>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Accounting Copilot */}
+        {initialRecommendations?.accounting && (
+          <motion.div variants={item}>
+            <Card className="p-5 h-full border-green-200 bg-gradient-to-br from-green-50 to-white">
+              <div className="flex items-start mb-2">
+                {agentIcons.accounting}
+                <div className="ml-3">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-green-800 mt-2">{t.accounting.title}</h3>
+              <p className="text-gray-600 mt-1 text-sm">{t.accounting.description}</p>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Legal Advisor */}
+        {initialRecommendations?.legal && (
+          <motion.div variants={item}>
+            <Card className="p-5 h-full border-red-200 bg-gradient-to-br from-red-50 to-white">
+              <div className="flex items-start mb-2">
+                {agentIcons.legal}
+                <div className="ml-3">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-red-800 mt-2">{t.legal.title}</h3>
+              <p className="text-gray-600 mt-1 text-sm">{t.legal.description}</p>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Operations Manager */}
+        {initialRecommendations?.operations && (
+          <motion.div variants={item}>
+            <Card className="p-5 h-full border-amber-200 bg-gradient-to-br from-amber-50 to-white">
+              <div className="flex items-start mb-2">
+                {agentIcons.operations}
+                <div className="ml-3">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-amber-800 mt-2">{t.operations.title}</h3>
+              <p className="text-gray-600 mt-1 text-sm">{t.operations.description}</p>
+            </Card>
+          </motion.div>
+        )}
+      </motion.div>
+
+      <motion.div 
+        className="mt-10 flex flex-col gap-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        transition={{ delay: 0.4 }}
       >
-        <h2 className="text-2xl font-bold mb-2 text-purple-800">{t[language].title}</h2>
-        <p className="text-gray-600">{t[language].subtitle}</p>
-      </motion.div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {Object.entries(currentRecommendations)
-          .filter(([_, isRecommended]) => isRecommended)
-          .map(([agentKey]) => {
-            const agent = descriptions[agentKey as keyof typeof descriptions];
-            return (
-              <motion.div
-                key={agentKey}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="h-full"
-              >
-                <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      {agent.title}
-                    </CardTitle>
-                    <CardDescription>{agent.description}</CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Badge variant="outline" className="bg-purple-50">
-                      {t[language].idealFor}: {agent.ideal}
-                    </Badge>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            );
-          })}
-      </div>
-      
-      {showDeeperAnalysisOption && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center p-6 bg-purple-50 rounded-xl mb-6"
+        <Button
+          onClick={onExtendedAnalysisRequested}
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-6 py-3 h-auto flex items-center gap-2 w-full md:w-auto mx-auto"
+          size="lg"
         >
-          <Search className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-          <h3 className="text-lg font-semibold text-purple-800 mb-2">
-            {t[language].deeperAnalysis}
-          </h3>
-          <p className="text-gray-600 mb-4">
-            {t[language].deeperAnalysisDesc}
-          </p>
+          <Zap className="h-4 w-4" />
+          {t.extendedAnalysis}
+        </Button>
+        
+        <p className="text-gray-500 text-sm text-center">{t.extendedAnalysisDescription}</p>
+        
+        <div className="mt-4 text-center">
           <Button
-            onClick={onExtendedAnalysisRequested}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            variant="link"
+            onClick={onContinue}
+            className="text-indigo-600 hover:text-indigo-800 flex items-center mx-auto"
           >
-            <Brain className="w-4 h-4 mr-2" />
-            {t[language].deeperButton}
+            {t.continue}
+            <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
-        </motion.div>
-      )}
+        </div>
+      </motion.div>
     </div>
   );
 };

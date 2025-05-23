@@ -6,6 +6,8 @@ import { RadioCards } from './RadioCards';
 import { CheckboxCards } from './CheckboxCards';
 import { IconOption } from './IconOption';
 import { UserProfileData } from '../types/wizardTypes';
+import { MotionLogo } from '@/components/MotionLogo';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export interface QuestionConfig {
   id: string;
@@ -115,6 +117,18 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         return <p>Question type not supported</p>;
     }
   };
+  
+  // Sticky header with logo and language switcher
+  const StickyHeader = () => (
+    <div className="bg-white border-b border-gray-200 py-3 px-4 shadow-sm flex justify-between items-center">
+      <div className="flex-shrink-0">
+        <MotionLogo variant="dark" size="sm" />
+      </div>
+      <div className="flex items-center">
+        <LanguageSwitcher />
+      </div>
+    </div>
+  );
 
   return (
     <StepContainer
@@ -133,6 +147,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       profileData={profileData}
       isStepValid={isStepValid}
       className="w-full max-w-full"
+      stickyHeader={<StickyHeader />}
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}

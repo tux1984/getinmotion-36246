@@ -22,6 +22,7 @@ interface StepContainerProps {
   currentStepId?: string;
   profileData?: any;
   isStepValid?: boolean;
+  stickyHeader?: ReactNode;
 }
 
 export const StepContainer: React.FC<StepContainerProps> = ({ 
@@ -41,7 +42,8 @@ export const StepContainer: React.FC<StepContainerProps> = ({
   isFirstStep = false,
   currentStepId = '',
   profileData,
-  isStepValid = true
+  isStepValid = true,
+  stickyHeader
 }) => {
   return (
     <motion.div 
@@ -51,6 +53,12 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       transition={{ duration: 0.4 }}
       className={`w-full h-full flex flex-col ${className}`}
     >
+      {stickyHeader && (
+        <div className="sticky top-0 z-10 w-full">
+          {stickyHeader}
+        </div>
+      )}
+      
       <div className="flex-1 flex flex-col md:flex-row gap-6 p-4">
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">

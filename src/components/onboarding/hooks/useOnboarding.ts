@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -15,11 +14,12 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
   const [showMaturityCalculator, setShowMaturityCalculator] = useState(true);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
   const [initialRecommendations, setInitialRecommendations] = useState<RecommendedAgents | null>(null);
+  const [showExtendedQuestions, setShowExtendedQuestions] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { language } = useLanguage();
   
-  const totalSteps = 4;
+  const totalSteps = showExtendedQuestions ? 5 : 4;
   
   const handleMaturityComplete = (scores: CategoryScore) => {
     setMaturityScores(scores);
@@ -28,7 +28,8 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
   };
   
   const handleComplete = () => {
-    // Determine recommended agents based on profile type and maturity scores
+    // Determine recommended agents based on profile type and maturity scores,
+    // with preference given to extended recommendations if available
     const recommendedAgents: RecommendedAgents = {
       admin: true, // Always recommend the administrative assistant
       accounting: false,
@@ -37,16 +38,34 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
       cultural: false
     };
     
-    // Profile-based recommendations
-    if (profileType === 'idea') {
-      recommendedAgents.cultural = true;
-    } else if (profileType === 'solo') {
-      recommendedAgents.accounting = true;
-      recommendedAgents.cultural = true;
-    } else if (profileType === 'team') {
-      recommendedAgents.accounting = true;
-      recommendedAgents.operations = true;
-      recommendedAgents.cultural = true;
+    // If we have extended recommendations from deep analysis questions, use those
+    if (initialRecommendations?.extended) {
+      Object.keys(initialRecommendations.extended).forEach((key) => {
+        const typedKey = key as keyof RecommendedAgents;
+        recommendedAgents[typedKey] = initialRecommendations.extended?.[typedKey] || false;
+      });
+    }
+    // Otherwise use initial recommendations or fallback to profile-based recommendations
+    else if (initialRecommendations) {
+      Object.keys(initialRecommendations).forEach((key) => {
+        if (key !== 'extended') {  // Skip the 'extended' property
+          const typedKey = key as keyof RecommendedAgents;
+          recommendedAgents[typedKey] = initialRecommendations[typedKey];
+        }
+      });
+    }
+    // Profile-based fallback recommendations
+    else {
+      if (profileType === 'idea') {
+        recommendedAgents.cultural = true;
+      } else if (profileType === 'solo') {
+        recommendedAgents.accounting = true;
+        recommendedAgents.cultural = true;
+      } else if (profileType === 'team') {
+        recommendedAgents.accounting = true;
+        recommendedAgents.operations = true;
+        recommendedAgents.cultural = true;
+      }
     }
     
     // Maturity score-based adjustments
@@ -62,11 +81,6 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
       if (maturityScores.marketFit > 50) {
         recommendedAgents.operations = true;
       }
-    } else if (initialRecommendations) {
-      // Use initial recommendations if no maturity scores
-      Object.keys(initialRecommendations).forEach((key) => {
-        recommendedAgents[key as keyof RecommendedAgents] = initialRecommendations[key as keyof RecommendedAgents];
-      });
     }
     
     // Save recommendations and maturity scores to localStorage
@@ -123,9 +137,12 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     maturityScores,
     initialRecommendations,
     setInitialRecommendations,
+    showExtendedQuestions,
+    setShowExtendedQuestions,
     handleMaturityComplete,
     handleNext,
     handlePrevious,
-    handleSkip
+    handleSkip,
+    handleComplete
   };
 };
