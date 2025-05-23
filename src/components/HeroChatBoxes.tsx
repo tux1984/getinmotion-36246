@@ -4,19 +4,20 @@ import { ChatBox } from './hero/ChatBox';
 import { ChatBoxesHeader } from './hero/ChatBoxesHeader';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
-import { agents } from './hero/agentsData';
+import { getAgents } from './hero/agentsData';
 import { ChatBoxCarousel } from './hero/ChatBoxCarousel';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const HeroChatBoxes = () => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
+  const agents = getAgents();
   
   if (isMobile) {
     return (
       <div className="w-full max-w-full overflow-hidden pt-4 px-2">
         <ChatBoxesHeader language={language} />
-        <ChatBoxCarousel language={language} />
+        <ChatBoxCarousel agents={agents} language={language} />
       </div>
     );
   }
