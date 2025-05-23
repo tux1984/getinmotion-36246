@@ -19,7 +19,6 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
   
   const {
     currentStep,
-    totalSteps,
     maturityScores,
     handleMaturityComplete,
     handleNext,

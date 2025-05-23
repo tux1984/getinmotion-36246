@@ -62,7 +62,13 @@ export const ComparisonStep: React.FC<ComparisonStepProps> = ({
   
   // Check if recommendations have changed
   const hasChanges = extendedRecommendations && initialRecommendations && Object.keys(initialRecommendations).some(
-    key => initialRecommendations[key as keyof RecommendedAgents] !== extendedRecommendations[key as keyof RecommendedAgents]
+    key => {
+      if (key !== 'extended') {
+        const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
+        return initialRecommendations[typedKey] !== extendedRecommendations[typedKey];
+      }
+      return false;
+    }
   );
   
   return (

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -31,7 +30,7 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
   const handleComplete = () => {
     // Determine recommended agents based on profile type and maturity scores,
     // with preference given to extended recommendations if available
-    const recommendedAgents: RecommendedAgents = {
+    let recommendedAgents: RecommendedAgents = {
       admin: true, // Always recommend the administrative assistant
       accounting: false,
       legal: false,
@@ -42,23 +41,13 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     // If we have extended recommendations from deep analysis questions, use those
     if (initialRecommendations?.extended) {
       // Extract extended recommendations but exclude the 'extended' property itself
-      Object.keys(initialRecommendations.extended).forEach((key) => {
-        // Make sure the key is a valid property of RecommendedAgents (excluding 'extended')
-        if (key !== 'extended' && key in recommendedAgents) {
-          const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
-          recommendedAgents[typedKey] = initialRecommendations.extended?.[typedKey] ?? false;
-        }
-      });
+      const { extended, ...basicProps } = initialRecommendations.extended;
+      recommendedAgents = { ...recommendedAgents, ...basicProps };
     }
     // Otherwise use initial recommendations or fallback to profile-based recommendations
     else if (initialRecommendations) {
-      Object.keys(initialRecommendations).forEach((key) => {
-        // Make sure the key is a valid property of RecommendedAgents
-        if (key !== 'extended' && key in recommendedAgents) {
-          const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
-          recommendedAgents[typedKey] = initialRecommendations[typedKey];
-        }
-      });
+      const { extended, ...basicProps } = initialRecommendations;
+      recommendedAgents = { ...recommendedAgents, ...basicProps };
     }
     // Profile-based fallback recommendations
     else {
