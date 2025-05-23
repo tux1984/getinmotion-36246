@@ -66,17 +66,18 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
   };
   
   return (
-    <div className="p-8 pb-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white">
+    <div className="mx-6 mt-6 p-5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-200/50">
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="md:pr-4"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
             {t[language].title}
           </h1>
-          <p className="text-purple-100 md:text-lg">
+          <p className="text-purple-100 text-sm md:text-base">
             {t[language].subtitle}
           </p>
         </motion.div>
@@ -86,17 +87,17 @@ export const WizardHeader: React.FC<WizardHeaderProps> = ({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.4 }}
-            className="mt-4 md:mt-0"
+            className="mt-3 md:mt-0 md:ml-4"
           >
-            <div className="flex items-center gap-3 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-300 to-indigo-400 text-white flex items-center justify-center">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-300 to-indigo-400 text-white flex items-center justify-center">
                 {getIndustryIcon()}
               </div>
               <div>
-                <div className="text-sm text-purple-200 font-medium uppercase tracking-wide">
+                <div className="text-xs text-purple-200 font-medium uppercase tracking-wide">
                   {language === 'en' ? 'Your Industry' : 'Tu Industria'}
                 </div>
-                <div className="text-lg font-semibold text-white">
+                <div className="text-sm font-semibold text-white">
                   {getIndustryText()}
                 </div>
               </div>
