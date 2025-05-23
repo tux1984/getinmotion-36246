@@ -51,46 +51,48 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       transition={{ duration: 0.4 }}
       className={`w-full h-full flex flex-col ${className}`}
     >
-      {/* Step progress indicator at the top if provided */}
-      {currentStep && totalSteps && (
-        <div className="mb-6">
-          <StepProgress 
-            currentStep={currentStep}
-            totalSteps={totalSteps}
-            language={language}
-          />
-        </div>
-      )}
-      
       <div className="flex-1 flex flex-col md:flex-row gap-8">
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">
-          <div className="text-left mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-purple-800 mb-2">
-              {title}
-            </h2>
-            {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
-          </div>
-          
-          <div className="flex-1">
-            {children}
-          </div>
-          
-          {/* Navigation buttons at the bottom of left column if needed */}
-          {showNavigation && onNext && onPrevious && (
-            <div className="mt-8">
-              <WizardNavigation 
-                onNext={onNext}
-                onPrevious={onPrevious}
-                isFirstStep={isFirstStep}
-                isLastStep={false}
-                language={language}
-                currentStepId={currentStepId}
-                profileData={profileData}
-                isValid={isStepValid}
-              />
+          <div className="bg-white rounded-xl shadow-sm border border-purple-50 p-5 mb-6">
+            {/* Step progress indicator at the top if provided */}
+            {currentStep && totalSteps && (
+              <div className="mb-4">
+                <StepProgress 
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                  language={language}
+                />
+              </div>
+            )}
+            
+            <div className="text-left mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-purple-800 mb-2">
+                {title}
+              </h2>
+              {subtitle && <p className="text-gray-600 text-lg">{subtitle}</p>}
             </div>
-          )}
+            
+            <div className="flex-1">
+              {children}
+            </div>
+            
+            {/* Navigation buttons */}
+            {showNavigation && onNext && onPrevious && (
+              <div className="mt-8">
+                <WizardNavigation 
+                  onNext={onNext}
+                  onPrevious={onPrevious}
+                  isFirstStep={isFirstStep}
+                  isLastStep={false}
+                  language={language}
+                  currentStepId={currentStepId}
+                  profileData={profileData}
+                  isValid={isStepValid}
+                />
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Right column with illustration */}
