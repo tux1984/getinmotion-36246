@@ -99,7 +99,7 @@ export const StepContainer: React.FC<StepContainerProps> = ({
         {illustration && (
           <div className="w-full md:w-2/5 h-auto flex justify-center items-center">
             <motion.div 
-              className="relative"
+              className="relative w-full h-full"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ 
@@ -112,7 +112,7 @@ export const StepContainer: React.FC<StepContainerProps> = ({
               <img 
                 src={illustration} 
                 alt="Step illustration"
-                className="max-h-[350px] object-contain" 
+                className="w-full h-full object-contain" 
               />
             </motion.div>
           </div>
