@@ -1,7 +1,7 @@
 
 import { WizardStepId } from '../types/wizardTypes';
 import { UserProfileData } from '../../types/wizardTypes';
-import { getQuestions } from '../../wizard-questions/questions';
+import { getQuestions } from '../../wizard-questions/index';
 
 // Define the base steps (always shown)
 export const baseSteps: WizardStepId[] = [

@@ -7,7 +7,7 @@ import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
-import { getQuestions } from '../wizard-questions/questions';
+import { getQuestions } from '../wizard-questions/index';
 
 // Define the cute monster images array
 const characterImages = [
