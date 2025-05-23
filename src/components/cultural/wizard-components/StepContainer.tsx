@@ -51,10 +51,10 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       transition={{ duration: 0.4 }}
       className={`w-full h-full flex flex-col ${className}`}
     >
-      <div className="flex-1 flex flex-col md:flex-row gap-8">
+      <div className="flex-1 flex flex-col md:flex-row gap-8 m-4">
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">
-          <div className="bg-white rounded-xl shadow-sm border border-purple-50 p-5 mb-6">
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
             {/* Step progress indicator at the top if provided */}
             {currentStep && totalSteps && (
               <div className="mb-4">
@@ -98,7 +98,7 @@ export const StepContainer: React.FC<StepContainerProps> = ({
         {/* Right column with illustration */}
         {illustration && (
           <div className="w-full md:w-2/5 h-auto">
-            <div className="rounded-2xl overflow-hidden shadow-lg h-full">
+            <div className="rounded-2xl overflow-hidden shadow-sm h-full">
               <img 
                 src={illustration} 
                 alt="Step illustration"
