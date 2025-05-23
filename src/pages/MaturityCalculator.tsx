@@ -34,10 +34,10 @@ const MaturityCalculator = () => {
   return (
     <div className="min-h-screen h-screen w-full overflow-hidden bg-white flex items-center justify-center">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Very subtle gradient background - barely visible purple tint */}
+        {/* Very subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/40"></div>
         
-        {/* Extremely subtle animated background elements with very low opacity */}
+        {/* Extremely subtle animated background elements */}
         <motion.div 
           className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-100/20 to-purple-200/10 opacity-10 blur-3xl"
           animate={{ 
@@ -67,7 +67,7 @@ const MaturityCalculator = () => {
         />
       </div>
       
-      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center">
+      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-4">
         <CulturalMaturityWizard onComplete={handleComplete} />
       </div>
     </div>

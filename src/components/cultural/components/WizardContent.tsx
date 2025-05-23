@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
 import { StepProgress } from '../wizard-components/StepProgress';
 import { WizardNavigation } from '../wizard-components/WizardNavigation';
@@ -51,41 +51,48 @@ export const WizardContent: React.FC<WizardContentProps> = ({
         industry={profileData.industry} 
       />
       
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-auto">
-        {/* Step progress positioned before the content */}
-        <div className="mb-6">
-          <StepProgress 
-            currentStep={currentStepNumber}
-            totalSteps={totalSteps}
-            language={language}
-          />
-        </div>
-        
-        {/* Main content area */}
-        <div className="flex-1">
-          <WizardStepContent
-            currentStepId={currentStepId}
-            profileData={profileData}
-            updateProfileData={updateProfileData}
-            language={language}
-            calculateMaturityScores={calculateMaturityScores}
-            getRecommendedAgents={getRecommendedAgents}
-            onComplete={handleCompleteWizard}
-          />
-        </div>
-        
-        {/* Navigation outside of step content at bottom */}
-        <div className="mt-8">
-          <WizardNavigation
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            isFirstStep={currentStepNumber === 1}
-            isLastStep={currentStepId === 'results'}
-            language={language}
-            currentStepId={currentStepId}
-            profileData={profileData}
-            isValid={isCurrentStepValid()}
-          />
+      <div className="flex-1 flex flex-col p-6 md:p-8 overflow-auto">
+        {/* Left side content block */}
+        <div className="flex-1 flex flex-col">
+          {/* Step progress at the top */}
+          <div className="mb-6">
+            <StepProgress 
+              currentStep={currentStepNumber}
+              totalSteps={totalSteps}
+              language={language}
+            />
+          </div>
+          
+          {/* Main content area */}
+          <div className="flex-1">
+            <AnimatePresence mode="wait">
+              <WizardStepContent
+                currentStepId={currentStepId}
+                profileData={profileData}
+                updateProfileData={updateProfileData}
+                language={language}
+                calculateMaturityScores={calculateMaturityScores}
+                getRecommendedAgents={getRecommendedAgents}
+                onComplete={handleCompleteWizard}
+              />
+            </AnimatePresence>
+          </div>
+          
+          {/* Navigation at bottom of left column */}
+          {currentStepId !== 'results' && (
+            <div className="mt-8">
+              <WizardNavigation
+                onNext={handleNext}
+                onPrevious={handlePrevious}
+                isFirstStep={currentStepNumber === 1}
+                isLastStep={currentStepId === 'results'}
+                language={language}
+                currentStepId={currentStepId}
+                profileData={profileData}
+                isValid={isCurrentStepValid()}
+              />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

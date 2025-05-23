@@ -108,7 +108,6 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       subtitle={question.subtitle}
       industry={industry}
       illustration={illustration}
-      fullWidth={true}
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
