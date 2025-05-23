@@ -40,16 +40,19 @@ export const useOnboarding = ({ profileType, onComplete }: UseOnboardingProps) =
     
     // If we have extended recommendations from deep analysis questions, use those
     if (initialRecommendations?.extended) {
+      // Extract extended recommendations but exclude the 'extended' property itself
       Object.keys(initialRecommendations.extended).forEach((key) => {
-        const typedKey = key as keyof RecommendedAgents;
-        recommendedAgents[typedKey] = initialRecommendations.extended?.[typedKey] || false;
+        const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
+        if (typedKey !== 'extended') {
+          recommendedAgents[typedKey] = initialRecommendations.extended?.[typedKey] ?? false;
+        }
       });
     }
     // Otherwise use initial recommendations or fallback to profile-based recommendations
     else if (initialRecommendations) {
       Object.keys(initialRecommendations).forEach((key) => {
         if (key !== 'extended') {  // Skip the 'extended' property
-          const typedKey = key as keyof RecommendedAgents;
+          const typedKey = key as keyof Omit<RecommendedAgents, 'extended'>;
           recommendedAgents[typedKey] = initialRecommendations[typedKey];
         }
       });
