@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { WelcomeStep } from './WelcomeStep';
 import { ProfileQuestions } from './ProfileQuestions';
@@ -73,11 +74,25 @@ export const OnboardingContent: React.FC<OnboardingContentProps> = ({
         <ProfileQuestions
           profileType={profileType}
           onComplete={(extendedRecs) => {
-            // Store updated recommendations but keep initial ones for comparison
-            setInitialRecommendations(prev => ({
-              ...prev,
-              extended: extendedRecs
-            }));
+            // Fix this part - Create a new recommendations object instead of using a updater function
+            if (initialRecommendations) {
+              const updatedRecommendations: RecommendedAgents = {
+                ...initialRecommendations,
+                extended: extendedRecs
+              };
+              setInitialRecommendations(updatedRecommendations);
+            } else {
+              // If initialRecommendations is null, create a new object with extended property
+              const newRecommendations: RecommendedAgents = {
+                admin: true,
+                accounting: false,
+                legal: false,
+                operations: false,
+                cultural: false,
+                extended: extendedRecs
+              };
+              setInitialRecommendations(newRecommendations);
+            }
             handleNext();
           }}
           showExtendedQuestions={true}
