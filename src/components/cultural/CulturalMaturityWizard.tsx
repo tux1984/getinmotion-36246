@@ -1,14 +1,10 @@
 
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { motion } from 'framer-motion';
-import { WizardHeader } from './wizard-components/WizardHeader';
-import { StepProgress } from './wizard-components/StepProgress';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
-import { WizardNavigation } from './wizard-components/WizardNavigation';
-import { WizardStepContent } from './wizard-components/WizardStepContent';
 import { useMaturityWizard } from './hooks/useMaturityWizard';
+import { WizardContent } from './components/WizardContent';
 
 export const CulturalMaturityWizard: React.FC<{
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
@@ -30,56 +26,19 @@ export const CulturalMaturityWizard: React.FC<{
   } = useMaturityWizard(onComplete);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="w-full h-full flex flex-col bg-white shadow-xl rounded-none overflow-hidden"
-    >
-      <WizardHeader 
-        step={currentStepNumber} 
-        totalSteps={totalSteps} 
-        language={language} 
-        industry={profileData.industry} 
-      />
-      
-      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-auto">
-        {/* Step progress is now positioned before the content */}
-        <div className="mb-6">
-          <StepProgress 
-            currentStep={currentStepNumber}
-            totalSteps={totalSteps}
-            language={language}
-          />
-        </div>
-        
-        {/* Main content area */}
-        <div className="flex-1">
-          <WizardStepContent
-            currentStepId={currentStepId}
-            profileData={profileData}
-            updateProfileData={updateProfileData}
-            language={language}
-            calculateMaturityScores={calculateMaturityScores}
-            getRecommendedAgents={getRecommendedAgents}
-            onComplete={handleCompleteWizard}
-          />
-        </div>
-        
-        {/* Navigation now appears outside of the step content at the bottom of the page */}
-        <div className="mt-8">
-          <WizardNavigation
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            isFirstStep={currentStepNumber === 1}
-            isLastStep={currentStepId === 'results'}
-            language={language}
-            currentStepId={currentStepId}
-            profileData={profileData}
-            isValid={isCurrentStepValid()}
-          />
-        </div>
-      </div>
-    </motion.div>
+    <WizardContent
+      currentStepId={currentStepId}
+      currentStepNumber={currentStepNumber}
+      totalSteps={totalSteps}
+      profileData={profileData}
+      language={language}
+      isCurrentStepValid={isCurrentStepValid}
+      updateProfileData={updateProfileData}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      calculateMaturityScores={calculateMaturityScores}
+      getRecommendedAgents={getRecommendedAgents}
+      handleCompleteWizard={handleCompleteWizard}
+    />
   );
 };
