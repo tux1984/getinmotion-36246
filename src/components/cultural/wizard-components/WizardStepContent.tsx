@@ -24,6 +24,11 @@ interface WizardStepContentProps {
   calculateMaturityScores: () => CategoryScore;
   getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
   onComplete: () => void;
+  currentStepNumber: number;
+  totalSteps: number;
+  handleNext: () => void;
+  handlePrevious: () => void;
+  isCurrentStepValid: () => boolean;
 }
 
 export const WizardStepContent: React.FC<WizardStepContentProps> = ({
@@ -33,7 +38,12 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   language,
   calculateMaturityScores,
   getRecommendedAgents,
-  onComplete
+  onComplete,
+  currentStepNumber,
+  totalSteps,
+  handleNext,
+  handlePrevious,
+  isCurrentStepValid
 }) => {
   // Enhanced animation variants
   const pageVariants = {
@@ -103,6 +113,13 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
           language={language}
           industry={profileData.industry}
           illustration={getStepImage()}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isFirstStep={currentStepNumber === 1}
+          currentStepId={currentStepId}
+          isStepValid={isCurrentStepValid()}
         />
       );
     }

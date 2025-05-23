@@ -28,6 +28,13 @@ interface QuestionStepProps {
   language: 'en' | 'es';
   industry?: string;
   illustration?: string;
+  currentStepNumber?: number;
+  totalSteps?: number;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  isFirstStep?: boolean;
+  currentStepId?: string;
+  isStepValid?: boolean;
 }
 
 export const QuestionStep: React.FC<QuestionStepProps> = ({
@@ -36,7 +43,14 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   updateProfileData,
   language,
   industry,
-  illustration
+  illustration,
+  currentStepNumber,
+  totalSteps,
+  onNext,
+  onPrevious,
+  isFirstStep,
+  currentStepId,
+  isStepValid = true
 }) => {
   const handleSingleSelect = (value: string) => {
     // For radio buttons and icon selects
@@ -108,6 +122,16 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       subtitle={question.subtitle}
       industry={industry}
       illustration={illustration}
+      currentStep={currentStepNumber}
+      totalSteps={totalSteps}
+      language={language}
+      showNavigation={!!onNext && !!onPrevious}
+      onNext={onNext}
+      onPrevious={onPrevious}
+      isFirstStep={isFirstStep}
+      currentStepId={currentStepId}
+      profileData={profileData}
+      isStepValid={isStepValid}
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}

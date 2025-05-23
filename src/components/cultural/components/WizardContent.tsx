@@ -2,8 +2,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
-import { StepProgress } from '../wizard-components/StepProgress';
-import { WizardNavigation } from '../wizard-components/WizardNavigation';
 import { WizardStepContent } from '../wizard-components/WizardStepContent';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId } from '../hooks/useMaturityWizard';
@@ -52,47 +50,24 @@ export const WizardContent: React.FC<WizardContentProps> = ({
       />
       
       <div className="flex-1 flex flex-col p-6 md:p-8 overflow-auto">
-        {/* Left side content block */}
-        <div className="flex-1 flex flex-col">
-          {/* Step progress at the top */}
-          <div className="mb-6">
-            <StepProgress 
-              currentStep={currentStepNumber}
-              totalSteps={totalSteps}
+        {/* Main content area with all step content */}
+        <div className="flex-1">
+          <AnimatePresence mode="wait">
+            <WizardStepContent
+              currentStepId={currentStepId}
+              profileData={profileData}
+              updateProfileData={updateProfileData}
               language={language}
+              calculateMaturityScores={calculateMaturityScores}
+              getRecommendedAgents={getRecommendedAgents}
+              onComplete={handleCompleteWizard}
+              currentStepNumber={currentStepNumber}
+              totalSteps={totalSteps}
+              handleNext={handleNext}
+              handlePrevious={handlePrevious}
+              isCurrentStepValid={isCurrentStepValid}
             />
-          </div>
-          
-          {/* Main content area */}
-          <div className="flex-1">
-            <AnimatePresence mode="wait">
-              <WizardStepContent
-                currentStepId={currentStepId}
-                profileData={profileData}
-                updateProfileData={updateProfileData}
-                language={language}
-                calculateMaturityScores={calculateMaturityScores}
-                getRecommendedAgents={getRecommendedAgents}
-                onComplete={handleCompleteWizard}
-              />
-            </AnimatePresence>
-          </div>
-          
-          {/* Navigation at bottom of left column */}
-          {currentStepId !== "results" && (
-            <div className="mt-8">
-              <WizardNavigation
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-                isFirstStep={currentStepNumber === 1}
-                isLastStep={false}
-                language={language}
-                currentStepId={currentStepId}
-                profileData={profileData}
-                isValid={isCurrentStepValid()}
-              />
-            </div>
-          )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>

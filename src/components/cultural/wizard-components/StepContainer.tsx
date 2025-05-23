@@ -1,6 +1,8 @@
 
 import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { StepProgress } from './StepProgress';
+import { WizardNavigation } from './WizardNavigation';
 
 interface StepContainerProps {
   title: string;
@@ -10,6 +12,16 @@ interface StepContainerProps {
   illustration?: string;
   industry?: string;
   fullWidth?: boolean;
+  currentStep?: number;
+  totalSteps?: number;
+  language?: 'en' | 'es';
+  showNavigation?: boolean;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  isFirstStep?: boolean;
+  currentStepId?: string;
+  profileData?: any;
+  isStepValid?: boolean;
 }
 
 export const StepContainer: React.FC<StepContainerProps> = ({ 
@@ -19,7 +31,17 @@ export const StepContainer: React.FC<StepContainerProps> = ({
   className = "",
   illustration,
   industry,
-  fullWidth = false
+  fullWidth = false,
+  currentStep,
+  totalSteps,
+  language = 'en',
+  showNavigation = false,
+  onNext,
+  onPrevious,
+  isFirstStep = false,
+  currentStepId = '',
+  profileData,
+  isStepValid = true
 }) => {
   return (
     <motion.div 
@@ -27,9 +49,20 @@ export const StepContainer: React.FC<StepContainerProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className={`w-full max-w-5xl mx-auto ${className}`}
+      className={`w-full h-full flex flex-col ${className}`}
     >
-      <div className="flex flex-col md:flex-row gap-8">
+      {/* Step progress indicator at the top if provided */}
+      {currentStep && totalSteps && (
+        <div className="mb-6">
+          <StepProgress 
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            language={language}
+          />
+        </div>
+      )}
+      
+      <div className="flex-1 flex flex-col md:flex-row gap-8">
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">
           <div className="text-left mb-6">
@@ -42,6 +75,22 @@ export const StepContainer: React.FC<StepContainerProps> = ({
           <div className="flex-1">
             {children}
           </div>
+          
+          {/* Navigation buttons at the bottom of left column if needed */}
+          {showNavigation && onNext && onPrevious && (
+            <div className="mt-8">
+              <WizardNavigation 
+                onNext={onNext}
+                onPrevious={onPrevious}
+                isFirstStep={isFirstStep}
+                isLastStep={false}
+                language={language}
+                currentStepId={currentStepId}
+                profileData={profileData}
+                isValid={isStepValid}
+              />
+            </div>
+          )}
         </div>
         
         {/* Right column with illustration */}

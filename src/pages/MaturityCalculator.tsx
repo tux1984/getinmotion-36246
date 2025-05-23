@@ -67,7 +67,7 @@ const MaturityCalculator = () => {
         />
       </div>
       
-      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-4">
+      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-0">
         <CulturalMaturityWizard onComplete={handleComplete} />
       </div>
     </div>
