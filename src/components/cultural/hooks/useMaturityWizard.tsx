@@ -50,32 +50,13 @@ export const useMaturityWizard = (
   const handleNext = () => {
     const currentIndex = steps.indexOf(currentStepId);
     
-    // If we're at analysis choice, determine next step based on user choice
-    if (currentStepId === 'analysisChoice') {
-      if (profileData.analysisPreference === 'detailed') {
-        // Go to first detailed question
-        setCurrentStepId('pricingMethod');
-      } else {
-        // Skip detailed analysis and go to results
-        setCurrentStepId('results');
-      }
-    } 
-    // If we're at profile type step, the next step depends on the profile type
-    else if (currentStepId === 'profileType') {
-      // Use the first step from the specific profile path
-      switch (profileData.profileType) {
-        case 'idea':
-        case 'solo':
-        case 'team':
-          // All start with industry
-          setCurrentStepId('industry');
-          break;
-        default:
-          // Fallback to next in sequence
-          if (currentIndex < steps.length - 1) {
-            setCurrentStepId(steps[currentIndex + 1]);
-          }
-      }
+    // If we're at profile type step, go directly to profile questions
+    if (currentStepId === 'profileType') {
+      setCurrentStepId('profileQuestions');
+    }
+    // If we're at profile questions, go to results
+    else if (currentStepId === 'profileQuestions') {
+      setCurrentStepId('results');
     }
     // Otherwise go to next step in sequence
     else if (currentIndex < steps.length - 1) {

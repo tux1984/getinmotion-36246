@@ -4,7 +4,8 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { UserProfileData } from '../../types/wizardTypes';
 
 export type WizardStepId = 
-  | 'profileType'  // Added new step
+  | 'profileType'  // First step to select profile type
+  | 'profileQuestions' // Step for profile-specific questions
   | 'industry' 
   | 'activities' 
   | 'experience'

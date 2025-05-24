@@ -9,8 +9,7 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/index';
 import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
-import { ProfileQuestionStep } from '../wizard-steps/ProfileQuestionStep';
-import { AnalysisChoiceStep } from '../wizard-steps/AnalysisChoiceStep';
+import { ProfileQuestionsStep } from '../wizard-steps/ProfileQuestionsStep';
 
 // Define the cute monster images array
 const characterImages = [
@@ -94,38 +93,22 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       return characterImages[2]; // Use design monster for results
     }
     
-    const stepKeys = Object.keys(questions);
-    const stepIndex = stepKeys.indexOf(currentStepId);
-    
-    // Map different steps to different character images
-    switch (currentStepId) {
-      case 'industry': 
-        return characterImages[0]; // Community monster
-      case 'activities': 
-        return characterImages[5]; // Business monster
-      case 'analysisChoice':
-        return characterImages[6]; // Analytics monster
-      case 'taskOrganization': 
-        return characterImages[4]; // Planning monster
-      case 'pricingMethod': 
-        return characterImages[1]; // Creative monster
-      default:
-        // Fallback to rotating through the array
-        const imageIndex = stepIndex % characterImages.length;
-        return characterImages[imageIndex];
+    // Use different characters for different profile types
+    if (currentStepId === 'profileQuestions') {
+      switch (profileData.profileType) {
+        case 'idea':
+          return characterImages[1]; // Creative monster for idea
+        case 'solo':
+          return characterImages[5]; // Business monster for solo
+        case 'team':
+          return characterImages[4]; // Planning monster for team
+        default:
+          return characterImages[0];
+      }
     }
-  };
-
-  // Check if the current step is a profile-specific question step
-  const isProfileQuestionStep = () => {
-    // If there's a profile type and we're not at the profileType, analysisChoice, or results step
-    return (
-      !!profileData.profileType &&
-      currentStepId !== 'profileType' &&
-      currentStepId !== 'analysisChoice' &&
-      currentStepId !== 'results' &&
-      !questionConfig // No question configuration means it's not a standard question step
-    );
+    
+    // Fallback
+    return characterImages[0];
   };
 
   // Render active step content
@@ -145,10 +128,10 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       );
     }
     
-    // Handle analysis choice step
-    if (currentStepId === 'analysisChoice') {
+    // Handle profile-specific questions step
+    if (currentStepId === 'profileQuestions') {
       return (
-        <AnalysisChoiceStep
+        <ProfileQuestionsStep
           profileData={profileData}
           updateProfileData={updateProfileData}
           language={language}
@@ -157,6 +140,7 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
           onNext={handleNext}
           onPrevious={handlePrevious}
           isStepValid={isCurrentStepValid()}
+          illustration={getStepImage()}
         />
       );
     }
@@ -174,24 +158,7 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       );
     }
     
-    // Handle profile-specific question steps
-    if (isProfileQuestionStep()) {
-      return (
-        <ProfileQuestionStep
-          profileData={profileData}
-          updateProfileData={updateProfileData}
-          language={language}
-          currentStepNumber={currentStepNumber}
-          totalSteps={totalSteps}
-          currentStepId={currentStepId}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          isStepValid={isCurrentStepValid()}
-        />
-      );
-    }
-    
-    // Handle regular question steps
+    // Handle regular question steps (fallback)
     if (questionConfig) {
       return (
         <QuestionStep 

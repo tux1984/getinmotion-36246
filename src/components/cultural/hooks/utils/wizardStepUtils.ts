@@ -6,104 +6,23 @@ import { getQuestions } from '../../wizard-questions/index';
 // Define the base steps (always shown)
 export const baseSteps: WizardStepId[] = [
   'profileType', // First step for profile selection
+  'profileQuestions', // Step to show profile-specific questions
   'results'      // Last step for results
 ];
 
-// Define the steps for each profile type
-export const ideaProfileSteps: WizardStepId[] = [
-  'industry',
-  'activities',
-  'experience',
-  'paymentMethods',
-  'analysisChoice'
-];
-
-export const soloProfileSteps: WizardStepId[] = [
-  'industry', 
-  'activities', 
-  'experience',
-  'paymentMethods',
-  'brandIdentity',
-  'financialControl',
-  'analysisChoice'
-];
-
-export const teamProfileSteps: WizardStepId[] = [
-  'industry', 
-  'activities', 
-  'experience',
-  'paymentMethods',
-  'brandIdentity',
-  'financialControl',
-  'teamStructure',
-  'taskOrganization',
-  'decisionMaking',
-  'analysisChoice'
-];
-
-// Define the detailed steps (shown only if detailed analysis is selected)
-export const detailedSteps: WizardStepId[] = [
-  'pricingMethod',
-  'internationalSales',
-  'formalizedBusiness',
-  'collaboration',
-  'economicSustainability'
-];
-
-// Get all steps based on profile type and analysis preference
+// Get all steps based on profile type
 export const getSteps = (profileData: UserProfileData, currentStepId: WizardStepId): WizardStepId[] => {
   if (!profileData.profileType || currentStepId === 'profileType') {
     // If no profile type selected or we're at the profile selection step, just return base steps
     return [...baseSteps];
   }
   
-  // Get steps based on profile type
-  let profileSteps: WizardStepId[] = [];
-  switch (profileData.profileType) {
-    case 'idea':
-      profileSteps = [...ideaProfileSteps];
-      break;
-    case 'solo':
-      profileSteps = [...soloProfileSteps];
-      break;
-    case 'team':
-      profileSteps = [...teamProfileSteps];
-      break;
-    default:
-      profileSteps = [];
-  }
-  
-  // Fix: Explicitly type the array as WizardStepId[]
-  let steps: WizardStepId[] = [
+  // Always return the same 3 steps: profile type selection, profile-specific questions, and results
+  const steps: WizardStepId[] = [
     'profileType',
-    ...profileSteps,
+    'profileQuestions',
     'results'
   ];
-  
-  // If user chose detailed analysis and has reached the analysis choice step
-  if (
-    profileData.analysisPreference === 'detailed' &&
-    currentStepId !== 'results' &&
-    profileSteps.indexOf('analysisChoice') >= 0 &&
-    steps.indexOf(currentStepId) > steps.indexOf('analysisChoice')
-  ) {
-    // Fix: Ensure proper typing of concatenated arrays
-    steps = [
-      ...steps.slice(0, steps.indexOf('results')),
-      ...detailedSteps,
-      'results'
-    ] as WizardStepId[];
-  }
-  
-  // If user reached one of the detailed analysis steps
-  if (detailedSteps.includes(currentStepId as any)) {
-    // Fix: Ensure proper typing of concatenated arrays
-    steps = [
-      ...steps.slice(0, steps.indexOf('results')),
-      ...detailedSteps,
-      'results'
-    ] as WizardStepId[];
-  }
   
   return steps;
 };
@@ -130,6 +49,12 @@ export const isStepValid = (currentStepId: WizardStepId, profileData: UserProfil
 
   // For results step, always valid
   if (currentStepId === 'results') return true;
+  
+  // For profile questions step, check based on the profile type
+  if (currentStepId === 'profileQuestions') {
+    // This is simplified and should be expanded based on your validation needs
+    return true; // We'll handle this differently in the ProfileQuestionStep component
+  }
   
   const language = 'en'; // Default to English
   const questions = getQuestions(language);
