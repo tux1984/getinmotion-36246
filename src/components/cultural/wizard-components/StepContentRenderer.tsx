@@ -82,18 +82,32 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
   const questions = getQuestions(language);
   const questionConfig = questions[currentStepId];
   
-  // Select an image based on the current step
+  // Select an image based on the current step and profile type
   const getStepImage = () => {
     // For the profile type selection step
     if (currentStepId === 'profileType') {
-      return characterImages[0]; // Use the first character image for profile type
+      return characterImages[0]; // Use the community monster for profile type
     }
 
+    // For the results step, use a character based on the highest score
     if (currentStepId === 'results') {
-      return characterImages[2]; // Use design monster for results
+      const scores = calculateMaturityScores();
+      const categories = ['ideaValidation', 'userExperience', 'marketFit', 'monetization'];
+      const highestCategory = categories.reduce((a, b) => 
+        scores[a as keyof CategoryScore] > scores[b as keyof CategoryScore] ? a : b
+      );
+      
+      // Map category to character
+      switch(highestCategory) {
+        case 'ideaValidation': return characterImages[1]; // Creative monster for idea validation
+        case 'userExperience': return characterImages[2]; // Design monster for UX
+        case 'marketFit': return characterImages[5]; // Business monster for market fit
+        case 'monetization': return characterImages[3]; // Finance monster for monetization
+        default: return characterImages[2]; // Default to design monster
+      }
     }
     
-    // Use different characters for different profile types
+    // For profile questions step, use different characters for different profile types
     if (currentStepId === 'profileQuestions') {
       switch (profileData.profileType) {
         case 'idea':
@@ -150,6 +164,7 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
         recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
         language={language}
         onComplete={onComplete}
+        illustration={getStepImage()}
       />
     );
   }

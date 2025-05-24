@@ -52,8 +52,9 @@ export const isStepValid = (currentStepId: WizardStepId, profileData: UserProfil
   
   // For profile questions step, check based on the profile type
   if (currentStepId === 'profileQuestions') {
-    // This is simplified and should be expanded based on your validation needs
-    return true; // We'll handle this differently in the ProfileQuestionStep component
+    // This is simplified since the actual validation happens inside the ProfileQuestionsStep
+    // component when moving between questions
+    return true;
   }
   
   const language = 'en'; // Default to English
