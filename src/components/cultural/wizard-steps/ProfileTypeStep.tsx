@@ -68,12 +68,13 @@ export const ProfileTypeStep: React.FC<ProfileTypeStepProps> = ({
   };
 
   return (
-    <StepContainer>
+    <StepContainer title={t.title} subtitle={t.subtitle}>
       <div className="flex flex-col space-y-8 w-full max-w-4xl mx-auto">
         <div className="text-center mb-4">
           <StepProgress 
             currentStep={currentStepNumber} 
             totalSteps={totalSteps}
+            language={language}
           />
           <h2 className="text-2xl sm:text-3xl font-bold text-purple-900 mt-6">{t.title}</h2>
           <p className="text-lg text-gray-600 mt-2">{t.subtitle}</p>
@@ -110,9 +111,13 @@ export const ProfileTypeStep: React.FC<ProfileTypeStepProps> = ({
 
         <WizardNavigation
           onNext={onNext}
+          onPrevious={() => {}} // Empty function since this is the first step
           isFirstStep={true}
-          isNextEnabled={isStepValid}
-          showBackButton={false}
+          isLastStep={false}
+          language={language}
+          currentStepId="profileType"
+          profileData={profileData}
+          isValid={isStepValid}
         />
       </div>
     </StepContainer>
