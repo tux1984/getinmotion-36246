@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore } from '@/components/maturity/types';
-import { RecommendedAgents } from '@/types/dashboard';
+import { ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
 

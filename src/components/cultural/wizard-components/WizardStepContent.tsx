@@ -8,6 +8,7 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/index';
+import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
 
 // Define the cute monster images array
 const characterImages = [
@@ -82,6 +83,11 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
   
   // Select an image based on the current step
   const getStepImage = () => {
+    // For the profile type selection step
+    if (currentStepId === 'profileType') {
+      return characterImages[0]; // Use the first character image for profile type
+    }
+
     if (currentStepId === 'results') {
       return characterImages[2]; // Use design monster for results
     }
@@ -91,15 +97,15 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
     
     // Map different steps to different character images
     switch (currentStepId) {
-      case 'industry': // Changed from 'profile' to 'industry'
+      case 'industry': 
         return characterImages[0]; // Community monster
-      case 'activities': // Changed from 'business' to 'activities'
+      case 'activities': 
         return characterImages[5]; // Business monster
       case 'analysisChoice':
         return characterImages[6]; // Analytics monster
-      case 'taskOrganization': // Changed from 'management' to 'taskOrganization'
+      case 'taskOrganization': 
         return characterImages[4]; // Planning monster
-      case 'pricingMethod': // Changed from 'detailedAnalysis' to 'pricingMethod'
+      case 'pricingMethod': 
         return characterImages[1]; // Creative monster
       default:
         // Fallback to rotating through the array
@@ -110,6 +116,21 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
 
   // Render active step content
   const renderStepContent = () => {
+    // Handle profile type step
+    if (currentStepId === 'profileType') {
+      return (
+        <ProfileTypeStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    }
+
     if (currentStepId === 'results') {
       return (
         <ResultsStep 

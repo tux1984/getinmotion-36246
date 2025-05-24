@@ -1,5 +1,6 @@
 
 export interface UserProfileData {
+  profileType?: 'idea' | 'solo' | 'team';  // Added profileType field
   industry: string;
   activities: string[];
   experience: string;

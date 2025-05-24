@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -17,10 +18,11 @@ export type { WizardStepId } from './types/wizardTypes';
 export const useMaturityWizard = (
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void
 ): WizardHookReturn => {
-  // Initial step is industry selection
-  const [currentStepId, setCurrentStepId] = useState<WizardStepId>('industry');
+  // Initial step is profile type selection
+  const [currentStepId, setCurrentStepId] = useState<WizardStepId>('profileType');
   
   const [profileData, setProfileData] = useState<UserProfileData>({
+    profileType: undefined,
     industry: '',
     activities: [],
     experience: '',

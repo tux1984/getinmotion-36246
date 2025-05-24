@@ -5,6 +5,7 @@ import { getQuestions } from '../../wizard-questions/index';
 
 // Define the base steps (always shown)
 export const baseSteps: WizardStepId[] = [
+  'profileType', // New first step for profile selection
   'industry', 
   'activities', 
   'experience',
@@ -72,6 +73,11 @@ export const getCurrentStepInfo = (profileData: UserProfileData, currentStepId: 
 
 // Check if current step is valid (has been answered)
 export const isStepValid = (currentStepId: WizardStepId, profileData: UserProfileData): boolean => {
+  // Special case for profile type step
+  if (currentStepId === 'profileType') {
+    return !!profileData.profileType;
+  }
+
   const language = 'en'; // Default to English
   const questions = getQuestions(language);
   const question = questions[currentStepId];

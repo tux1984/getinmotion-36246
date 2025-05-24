@@ -12,7 +12,6 @@ import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ProfileSelector } from '@/components/ProfileSelector';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
@@ -59,11 +58,6 @@ const Index = () => {
   };
   
   const t = translations[language];
-  
-  const handleProfileSelected = (profileType) => {
-    // The ProfileSelector component will handle navigation internally
-    console.log('Profile selected:', profileType);
-  };
   
   const handleAccessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,9 +136,6 @@ const Index = () => {
       
       <main className="flex-grow w-full">
         <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
-        
-        {/* Replace UserProfileTypes with ProfileSelector */}
-        <ProfileSelector onProfileSelected={handleProfileSelected} />
         
         <div className="container mx-auto px-4 py-8 md:py-16 w-full" id="access">
           <div className="max-w-4xl mx-auto w-full">
