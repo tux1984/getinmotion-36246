@@ -9,6 +9,8 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { QuestionStep } from './QuestionStep';
 import { getQuestions } from '../wizard-questions/index';
 import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
+import { ProfileQuestionStep } from '../wizard-steps/ProfileQuestionStep';
+import { AnalysisChoiceStep } from '../wizard-steps/AnalysisChoiceStep';
 
 // Define the cute monster images array
 const characterImages = [
@@ -114,6 +116,18 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
     }
   };
 
+  // Check if the current step is a profile-specific question step
+  const isProfileQuestionStep = () => {
+    // If there's a profile type and we're not at the profileType, analysisChoice, or results step
+    return (
+      !!profileData.profileType &&
+      currentStepId !== 'profileType' &&
+      currentStepId !== 'analysisChoice' &&
+      currentStepId !== 'results' &&
+      !questionConfig // No question configuration means it's not a standard question step
+    );
+  };
+
   // Render active step content
   const renderStepContent = () => {
     // Handle profile type step
@@ -130,7 +144,24 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
         />
       );
     }
+    
+    // Handle analysis choice step
+    if (currentStepId === 'analysisChoice') {
+      return (
+        <AnalysisChoiceStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    }
 
+    // Handle results step
     if (currentStepId === 'results') {
       return (
         <ResultsStep 
@@ -143,7 +174,24 @@ export const WizardStepContent: React.FC<WizardStepContentProps> = ({
       );
     }
     
-    // Handle all question steps individually
+    // Handle profile-specific question steps
+    if (isProfileQuestionStep()) {
+      return (
+        <ProfileQuestionStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          currentStepId={currentStepId}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    }
+    
+    // Handle regular question steps
     if (questionConfig) {
       return (
         <QuestionStep 

@@ -1,125 +1,158 @@
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
-import { Button } from '@/components/ui/button';
-import { Lightbulb, Brain, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { StepProgress } from '../wizard-components/StepProgress';
+import { WizardNavigation } from '../wizard-components/WizardNavigation';
 
 interface AnalysisChoiceStepProps {
   profileData: UserProfileData;
   updateProfileData: (data: Partial<UserProfileData>) => void;
   language: 'en' | 'es';
+  currentStepNumber: number;
+  totalSteps: number;
+  onNext: () => void;
+  onPrevious: () => void;
+  isStepValid: boolean;
 }
 
-export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({ 
-  profileData, 
-  updateProfileData, 
-  language 
+export const AnalysisChoiceStep: React.FC<AnalysisChoiceStepProps> = ({
+  profileData,
+  updateProfileData,
+  language,
+  currentStepNumber,
+  totalSteps,
+  onNext,
+  onPrevious,
+  isStepValid,
 }) => {
-  const t = {
+  const translations = {
     en: {
-      title: "Choose Your Path",
-      subtitle: "How would you like to proceed with your assessment?",
-      quickTitle: "Quick Recommendation",
-      quickDesc: "Get agent recommendations based on what you've told us so far.",
-      quickButton: "Quick Recommendation",
-      detailedTitle: "Detailed Analysis",
-      detailedDesc: "Answer a few more questions for a more tailored experience.",
-      detailedButton: "Detailed Analysis"
+      title: "Choose Analysis Type",
+      subtitle: "Select the level of detail you want for your maturity assessment",
+      quick: {
+        title: "Quick Analysis",
+        description: "A simplified assessment with essential recommendations. Takes about 2 minutes."
+      },
+      detailed: {
+        title: "Detailed Analysis",
+        description: "A comprehensive assessment with in-depth recommendations. Takes about 5 minutes."
+      }
     },
     es: {
-      title: "Elige tu Camino",
-      subtitle: "¿Cómo te gustaría continuar con tu evaluación?",
-      quickTitle: "Recomendación Rápida",
-      quickDesc: "Obtén recomendaciones de agentes basadas en lo que nos has contado hasta ahora.",
-      quickButton: "Recomendación Rápida",
-      detailedTitle: "Análisis Detallado",
-      detailedDesc: "Responde algunas preguntas más para una experiencia más personalizada.",
-      detailedButton: "Análisis Detallado"
+      title: "Elige el Tipo de Análisis",
+      subtitle: "Selecciona el nivel de detalle que deseas para tu evaluación de madurez",
+      quick: {
+        title: "Análisis Rápido",
+        description: "Una evaluación simplificada con recomendaciones esenciales. Toma alrededor de 2 minutos."
+      },
+      detailed: {
+        title: "Análisis Detallado",
+        description: "Una evaluación completa con recomendaciones en profundidad. Toma alrededor de 5 minutos."
+      }
     }
   };
-  
-  const handleQuickChoice = () => {
-    updateProfileData({ analysisPreference: 'quick' });
+
+  const t = translations[language];
+
+  const handleSelectAnalysisType = (type: 'quick' | 'detailed') => {
+    updateProfileData({ analysisPreference: type });
   };
-  
-  const handleDetailedChoice = () => {
-    updateProfileData({ analysisPreference: 'detailed' });
-  };
-  
+
   return (
-    <StepContainer
-      title={t[language].title}
-      subtitle={t[language].subtitle}
-      fullWidth={true}
-    >
-      <motion.div 
-        className="flex flex-col lg:flex-row gap-8 pt-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <motion.div 
-          whileHover={{ y: -5, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`flex-1 bg-indigo-50 rounded-2xl p-8 border-2 ${
-            profileData.analysisPreference === 'quick' 
-              ? 'border-indigo-400 shadow-lg' 
-              : 'border-indigo-100 hover:border-indigo-300 hover:shadow-xl'
-          } transition-all`}
-          onClick={handleQuickChoice}
-        >
-          <div className="flex flex-col h-full">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
-              <Lightbulb className="w-8 h-8 text-indigo-600" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-indigo-800">{t[language].quickTitle}</h3>
-            <p className="text-gray-600 mb-8 flex-grow text-lg">{t[language].quickDesc}</p>
-            <Button 
-              className={`mt-auto gap-3 ${
-                profileData.analysisPreference === 'quick'
-                  ? 'bg-indigo-700 hover:bg-indigo-800'
-                  : 'bg-indigo-600 hover:bg-indigo-700'
-              } text-lg py-6 px-8 rounded-xl`}
-              onClick={handleQuickChoice}
-            >
-              {t[language].quickButton}
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </div>
-        </motion.div>
-        
-        <motion.div 
-          whileHover={{ y: -5, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`flex-1 bg-purple-50 rounded-2xl p-8 border-2 ${
-            profileData.analysisPreference === 'detailed' 
-              ? 'border-purple-400 shadow-lg' 
-              : 'border-purple-100 hover:border-purple-300 hover:shadow-xl'
-          } transition-all`}
-          onClick={handleDetailedChoice}
-        >
-          <div className="flex flex-col h-full">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
-              <Brain className="w-8 h-8 text-purple-600" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-purple-800">{t[language].detailedTitle}</h3>
-            <p className="text-gray-600 mb-8 flex-grow text-lg">{t[language].detailedDesc}</p>
-            <Button 
-              className={`mt-auto gap-3 ${
-                profileData.analysisPreference === 'detailed'
-                  ? 'bg-purple-700 hover:bg-purple-800'
-                  : 'bg-purple-600 hover:bg-purple-700'
-              } text-lg py-6 px-8 rounded-xl`}
-              onClick={handleDetailedChoice}
-            >
-              {t[language].detailedButton}
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </div>
-        </motion.div>
-      </motion.div>
+    <StepContainer title={t.title} subtitle={t.subtitle}>
+      <div className="flex flex-col space-y-8 w-full max-w-4xl mx-auto">
+        <div className="text-center mb-4">
+          <StepProgress 
+            currentStep={currentStepNumber} 
+            totalSteps={totalSteps}
+            language={language}
+          />
+          <h2 className="text-2xl sm:text-3xl font-bold text-purple-900 mt-6">{t.title}</h2>
+          <p className="text-lg text-gray-600 mt-2">{t.subtitle}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          {/* Quick Analysis Option */}
+          <AnalysisCard 
+            title={t.quick.title}
+            description={t.quick.description}
+            isSelected={profileData.analysisPreference === 'quick'}
+            onClick={() => handleSelectAnalysisType('quick')}
+            image="/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png" // Analytics monster
+          />
+
+          {/* Detailed Analysis Option */}
+          <AnalysisCard 
+            title={t.detailed.title}
+            description={t.detailed.description}
+            isSelected={profileData.analysisPreference === 'detailed'}
+            onClick={() => handleSelectAnalysisType('detailed')}
+            image="/lovable-uploads/a2ebe4fd-31ed-43ec-9f9f-35fe6b529ad2.png" // Creative monster
+          />
+        </div>
+
+        <WizardNavigation
+          onNext={onNext}
+          onPrevious={onPrevious}
+          isFirstStep={false}
+          isLastStep={false}
+          language={language}
+          currentStepId="analysisChoice"
+          profileData={profileData}
+          isValid={isStepValid}
+        />
+      </div>
     </StepContainer>
+  );
+};
+
+interface AnalysisCardProps {
+  title: string;
+  description: string;
+  isSelected: boolean;
+  onClick: () => void;
+  image: string;
+}
+
+const AnalysisCard: React.FC<AnalysisCardProps> = ({
+  title,
+  description,
+  isSelected,
+  onClick,
+  image
+}) => {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.98 }}
+      className={`relative overflow-hidden rounded-xl shadow-lg cursor-pointer transition-all duration-300 ${
+        isSelected
+          ? 'ring-4 ring-purple-500 bg-white shadow-purple-300'
+          : 'bg-white hover:shadow-xl'
+      }`}
+      onClick={onClick}
+    >
+      <div className="h-32 sm:h-40 overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
+        <img
+          src={image}
+          alt={title}
+          className="w-28 h-28 object-contain transform transition-transform duration-300 hover:scale-110"
+        />
+      </div>
+      <div className="p-4 sm:p-6">
+        <h3 className="text-lg font-bold text-purple-900">{title}</h3>
+        <p className="text-sm text-gray-600 mt-2">{description}</p>
+        
+        {isSelected && (
+          <div className="absolute top-3 right-3 bg-purple-600 text-white p-1 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -61,6 +60,23 @@ export const useMaturityWizard = (
         setCurrentStepId('results');
       }
     } 
+    // If we're at profile type step, the next step depends on the profile type
+    else if (currentStepId === 'profileType') {
+      // Use the first step from the specific profile path
+      switch (profileData.profileType) {
+        case 'idea':
+        case 'solo':
+        case 'team':
+          // All start with industry
+          setCurrentStepId('industry');
+          break;
+        default:
+          // Fallback to next in sequence
+          if (currentIndex < steps.length - 1) {
+            setCurrentStepId(steps[currentIndex + 1]);
+          }
+      }
+    }
     // Otherwise go to next step in sequence
     else if (currentIndex < steps.length - 1) {
       setCurrentStepId(steps[currentIndex + 1]);

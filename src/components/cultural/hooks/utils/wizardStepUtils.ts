@@ -5,7 +5,30 @@ import { getQuestions } from '../../wizard-questions/index';
 
 // Define the base steps (always shown)
 export const baseSteps: WizardStepId[] = [
-  'profileType', // New first step for profile selection
+  'profileType', // First step for profile selection
+  'results'      // Last step for results
+];
+
+// Define the steps for each profile type
+export const ideaProfileSteps: WizardStepId[] = [
+  'industry',
+  'activities',
+  'experience',
+  'paymentMethods',
+  'analysisChoice'
+];
+
+export const soloProfileSteps: WizardStepId[] = [
+  'industry', 
+  'activities', 
+  'experience',
+  'paymentMethods',
+  'brandIdentity',
+  'financialControl',
+  'analysisChoice'
+];
+
+export const teamProfileSteps: WizardStepId[] = [
   'industry', 
   'activities', 
   'experience',
@@ -15,8 +38,7 @@ export const baseSteps: WizardStepId[] = [
   'teamStructure',
   'taskOrganization',
   'decisionMaking',
-  'analysisChoice',
-  'results'
+  'analysisChoice'
 ];
 
 // Define the detailed steps (shown only if detailed analysis is selected)
@@ -28,19 +50,45 @@ export const detailedSteps: WizardStepId[] = [
   'economicSustainability'
 ];
 
-// Get all steps based on analysis preference
+// Get all steps based on profile type and analysis preference
 export const getSteps = (profileData: UserProfileData, currentStepId: WizardStepId): WizardStepId[] => {
-  let steps = [...baseSteps];
+  if (!profileData.profileType || currentStepId === 'profileType') {
+    // If no profile type selected or we're at the profile selection step, just return base steps
+    return [...baseSteps];
+  }
   
-  // If user chose detailed analysis and hasn't reached results yet
+  // Get steps based on profile type
+  let profileSteps: WizardStepId[] = [];
+  switch (profileData.profileType) {
+    case 'idea':
+      profileSteps = [...ideaProfileSteps];
+      break;
+    case 'solo':
+      profileSteps = [...soloProfileSteps];
+      break;
+    case 'team':
+      profileSteps = [...teamProfileSteps];
+      break;
+    default:
+      profileSteps = [];
+  }
+  
+  let steps = [
+    'profileType',
+    ...profileSteps,
+    'results'
+  ];
+  
+  // If user chose detailed analysis and has reached the analysis choice step
   if (
     profileData.analysisPreference === 'detailed' &&
     currentStepId !== 'results' &&
-    baseSteps.indexOf(currentStepId) > baseSteps.indexOf('analysisChoice')
+    profileSteps.indexOf('analysisChoice') >= 0 &&
+    steps.indexOf(currentStepId) > steps.indexOf('analysisChoice')
   ) {
     // Insert detailed steps before results
     steps = [
-      ...baseSteps.slice(0, baseSteps.indexOf('results')),
+      ...steps.slice(0, steps.indexOf('results')),
       ...detailedSteps,
       'results'
     ];
@@ -49,7 +97,7 @@ export const getSteps = (profileData: UserProfileData, currentStepId: WizardStep
   // If user reached one of the detailed analysis steps
   if (detailedSteps.includes(currentStepId as any)) {
     steps = [
-      ...baseSteps.slice(0, baseSteps.indexOf('results')),
+      ...steps.slice(0, steps.indexOf('results')),
       ...detailedSteps,
       'results'
     ];
@@ -78,11 +126,14 @@ export const isStepValid = (currentStepId: WizardStepId, profileData: UserProfil
     return !!profileData.profileType;
   }
 
+  // For results step, always valid
+  if (currentStepId === 'results') return true;
+  
   const language = 'en'; // Default to English
   const questions = getQuestions(language);
   const question = questions[currentStepId];
   
-  if (!question || currentStepId === 'results') return true;
+  if (!question) return true;
   
   switch (question.type) {
     case 'radio':
