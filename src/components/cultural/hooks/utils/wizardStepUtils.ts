@@ -73,7 +73,8 @@ export const getSteps = (profileData: UserProfileData, currentStepId: WizardStep
       profileSteps = [];
   }
   
-  let steps = [
+  // Fix: Explicitly type the array as WizardStepId[]
+  let steps: WizardStepId[] = [
     'profileType',
     ...profileSteps,
     'results'
@@ -86,21 +87,22 @@ export const getSteps = (profileData: UserProfileData, currentStepId: WizardStep
     profileSteps.indexOf('analysisChoice') >= 0 &&
     steps.indexOf(currentStepId) > steps.indexOf('analysisChoice')
   ) {
-    // Insert detailed steps before results
+    // Fix: Ensure proper typing of concatenated arrays
     steps = [
       ...steps.slice(0, steps.indexOf('results')),
       ...detailedSteps,
       'results'
-    ];
+    ] as WizardStepId[];
   }
   
   // If user reached one of the detailed analysis steps
   if (detailedSteps.includes(currentStepId as any)) {
+    // Fix: Ensure proper typing of concatenated arrays
     steps = [
       ...steps.slice(0, steps.indexOf('results')),
       ...detailedSteps,
       'results'
-    ];
+    ] as WizardStepId[];
   }
   
   return steps;
