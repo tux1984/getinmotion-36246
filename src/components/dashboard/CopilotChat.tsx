@@ -18,6 +18,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   const [copilotName, setCopilotName] = useState('');
   const [copilotColor, setCopilotColor] = useState('');
   const [copilotIcon, setCopilotIcon] = useState<React.ReactNode>(null);
+  const [hasAddedGreeting, setHasAddedGreeting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Use our AI agent hook with the specific agent type
@@ -96,34 +97,39 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
         setCopilotColor('bg-slate-100 text-slate-700');
         setCopilotIcon(<FileText className="w-5 h-5" />);
     }
-    
-    // Send an initial greeting if there are no messages
-    if (messages.length === 0) {
+  }, [agentId, language]);
+
+  // Send initial greeting when messages are empty and we haven't added one yet
+  useEffect(() => {
+    if (messages.length === 0 && !hasAddedGreeting && !isProcessing) {
       let greeting = '';
       
       if (agentId === 'contract-generator') {
         greeting = language === 'en' 
           ? "Hello! I'm your Contract Generator for cultural projects. I can help you create contracts for exhibitions, performances, commissions, and other cultural activities. What type of contract do you need assistance with today?"
           : "¡Hola! Soy tu Generador de Contratos para proyectos culturales. Puedo ayudarte a crear contratos para exposiciones, performances, comisiones y otras actividades culturales. ¿Con qué tipo de contrato necesitas ayuda hoy?";
+      } else if (agentId === 'cost-calculator') {
+        greeting = language === 'en'
+          ? "Hello! I'm your Cost Calculator for cultural projects. I can help you calculate project costs, set pricing for your work, and develop financial plans. What project would you like to calculate costs for?"
+          : "¡Hola! Soy tu Calculador de Costos para proyectos culturales. Puedo ayudarte a calcular costos de proyectos, establecer precios para tu trabajo y desarrollar planes financieros. ¿Para qué proyecto te gustaría calcular los costos?";
       }
       
       if (greeting) {
-        // We're using the hook's sendMessage for the system message
-        // but we don't want it to appear as user input
-        setTimeout(() => {
-          const systemMessage: Message = { type: 'agent', content: greeting };
-          clearMessages(); // Clear any existing messages
-          // @ts-ignore - we're directly manipulating messages here
-          useAIAgent(agentId).setMessages([systemMessage]);
-        }, 100);
+        setHasAddedGreeting(true);
+        sendMessage(greeting);
       }
     }
-  }, [agentId, language, messages.length]);
+  }, [messages.length, hasAddedGreeting, isProcessing, agentId, language, sendMessage]);
 
   const handleSendMessage = () => {
     if (!inputMessage.trim() || isProcessing) return;
     sendMessage(inputMessage);
     setInputMessage('');
+  };
+
+  const handleClearMessages = () => {
+    clearMessages();
+    setHasAddedGreeting(false);
   };
 
   return (
@@ -140,7 +146,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={clearMessages}
+              onClick={handleClearMessages}
               className="text-slate-500 hover:text-slate-700"
             >
               <span className="text-xs">{t.reset}</span>
