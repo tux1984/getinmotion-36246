@@ -14,7 +14,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Verificar el método
+  // Verify method
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -23,12 +23,12 @@ serve(async (req) => {
   }
 
   try {
-    // Obtener body de la solicitud
+    // Get request body
     const { messages, systemPrompt } = await req.json();
 
     console.log('Received request:', { messages, systemPrompt });
 
-    // Validar mensajes
+    // Validate messages
     if (!messages || !Array.isArray(messages)) {
       console.error('Invalid messages format:', messages);
       return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
@@ -37,7 +37,7 @@ serve(async (req) => {
       });
     }
 
-    // Validar API key
+    // Validate API key
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key not found');
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
@@ -57,12 +57,17 @@ serve(async (req) => {
       });
     }
     
-    // Add user messages
-    completeMessages.push(...messages);
+    // Add user messages - ensure they have the correct format
+    const formattedMessages = messages.map(msg => ({
+      role: msg.role || (msg.type === 'user' ? 'user' : 'assistant'),
+      content: msg.content || msg.message || ''
+    }));
+    
+    completeMessages.push(...formattedMessages);
 
     console.log('Sending to OpenAI:', JSON.stringify(completeMessages, null, 2));
 
-    // Llamar a la API de OpenAI
+    // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -85,12 +90,14 @@ serve(async (req) => {
       
       let errorMessage = 'Error communicating with AI service';
       if (response.status === 401) {
-        errorMessage = 'Invalid API key';
+        errorMessage = 'Invalid OpenAI API key';
       } else if (response.status === 429) {
         errorMessage = 'Rate limit exceeded';
+      } else if (response.status === 400) {
+        errorMessage = 'Invalid request to OpenAI';
       }
       
-      return new Response(JSON.stringify({ error: errorMessage }), {
+      return new Response(JSON.stringify({ error: errorMessage, details: errorText }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -99,14 +106,26 @@ serve(async (req) => {
     const data = await response.json();
     console.log('OpenAI response data:', JSON.stringify(data, null, 2));
 
-    // Devolver respuesta
+    // Verify response structure
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid OpenAI response structure:', data);
+      return new Response(JSON.stringify({ error: 'Invalid response from OpenAI' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Return response
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in openai-chat function:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error', 
+      details: error.message || 'Unknown error' 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
