@@ -25,7 +25,6 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
             title={t.title}
             subtitle={t.subtitle}
             waitlist={t.waitlist}
-            learnMore={t.learnMore}
             onJoinWaitlist={onJoinWaitlist}
           />
           
