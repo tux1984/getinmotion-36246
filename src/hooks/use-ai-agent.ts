@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Message } from '@/types/chat';
 import { useToast } from '@/hooks/use-toast';
@@ -38,8 +37,8 @@ export function useAIAgent(agentType: string = 'admin') {
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
     
-    console.log('=== AI Agent Debug Info ===');
-    console.log('Sending message:', content);
+    console.log('=== AI Agent Send Message ===');
+    console.log('Message content:', content);
     console.log('Agent type:', agentType);
     
     // Add user message
@@ -49,16 +48,13 @@ export function useAIAgent(agentType: string = 'admin') {
     setIsProcessing(true);
     
     try {
-      // Map dashboard agent IDs to system prompt types if needed
+      // Map agent type to system prompt
       const mappedAgentType = agentIdMapping[agentType] || agentType;
-      
-      // Get the system prompt for the selected agent
       const systemPrompt = agentSystemPrompts[mappedAgentType] || agentSystemPrompts.admin;
       
       console.log('Using system prompt for agent:', mappedAgentType);
-      console.log('System prompt preview:', systemPrompt.substring(0, 100) + '...');
       
-      // Prepare messages for API - convert our message format to OpenAI format
+      // Prepare messages for API
       const apiMessages = [
         ...messages.map(msg => ({
           role: msg.type === 'user' ? 'user' : 'assistant',
@@ -67,77 +63,68 @@ export function useAIAgent(agentType: string = 'admin') {
         { role: 'user', content }
       ];
       
-      console.log('API Messages being sent:', apiMessages);
-      console.log('Total messages count:', apiMessages.length);
-      
       const requestPayload = {
         systemPrompt,
         messages: apiMessages
       };
       
-      console.log('Request payload to edge function:', JSON.stringify(requestPayload, null, 2));
+      console.log('Calling edge function with payload:', requestPayload);
       
-      // Call Supabase Edge Function for OpenAI integration
-      console.log('Calling Supabase edge function: openai-chat...');
+      // Call Supabase Edge Function
       const { data, error } = await supabaseClient.functions.invoke('openai-chat', {
         body: requestPayload
       });
       
-      console.log('=== Supabase Edge Function Response ===');
-      console.log('Data received:', data);
-      console.log('Error received:', error);
+      console.log('Edge function response data:', data);
+      console.log('Edge function response error:', error);
       
+      // Handle Supabase function errors
       if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(`Supabase Error: ${error.message || 'Unknown error from edge function'}`);
+        console.error('Supabase function invoke error:', error);
+        throw new Error(`Edge function error: ${error.message}`);
       }
       
+      // Handle case where no data is returned
       if (!data) {
-        console.error('No data received from edge function');
-        throw new Error('No hay respuesta del servicio de IA');
+        console.error('No data returned from edge function');
+        throw new Error('No response from AI service');
       }
       
-      // Check if we got an error response from the edge function
+      // Handle edge function returned an error
       if (data.error) {
         console.error('Edge function returned error:', data.error);
-        console.error('Error details:', data.details);
-        console.error('Error status:', data.status);
         throw new Error(data.error);
       }
       
-      if (!data.choices || !data.choices[0]?.message) {
-        console.error('Invalid response structure from OpenAI:', data);
-        throw new Error('Respuesta inválida del servicio de IA');
+      // Validate OpenAI response structure
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('Invalid OpenAI response structure:', data);
+        throw new Error('Invalid response format from AI service');
       }
       
-      // Add AI response
-      const aiResponse = data.choices[0].message.content || 'Lo siento, no pude generar una respuesta.';
+      // Extract AI response
+      const aiResponse = data.choices[0].message.content || 'Sorry, I could not generate a response.';
+      console.log('AI response received:', aiResponse.substring(0, 100) + '...');
+      
+      // Add AI message
       const aiMessage: Message = { type: 'agent', content: aiResponse };
       setMessages(prev => [...prev, aiMessage]);
       
-      console.log('AI Response received successfully:', aiResponse.substring(0, 100) + '...');
-      console.log('=== End Debug Info ===');
-      
     } catch (error) {
-      console.error('=== ERROR in AI Agent ===');
-      console.error('Error type:', typeof error);
+      console.error('=== AI Agent Error ===');
       console.error('Error details:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error stack:', error?.stack);
       
-      // More descriptive error messages
-      let errorMessage = 'No se pudo generar una respuesta. Por favor intenta de nuevo.';
+      // Show user-friendly error messages
+      let errorMessage = 'Failed to get AI response. Please try again.';
       
-      if (error?.message?.includes('API key') || error?.message?.includes('Invalid OpenAI API key')) {
-        errorMessage = 'Error de configuración de API Key de OpenAI. La clave no es válida.';
-      } else if (error?.message?.includes('429') || error?.message?.includes('Rate limit')) {
-        errorMessage = 'Límite de uso de OpenAI excedido. Por favor intenta más tarde.';
+      if (error?.message?.includes('API key')) {
+        errorMessage = 'OpenAI API key issue. Please check configuration.';
+      } else if (error?.message?.includes('rate limit') || error?.message?.includes('429')) {
+        errorMessage = 'AI service rate limit reached. Please try again later.';
       } else if (error?.message?.includes('network') || error?.message?.includes('fetch')) {
-        errorMessage = 'Error de conexión. Por favor verifica tu conexión a internet.';
-      } else if (error?.message?.includes('Invalid request') || error?.message?.includes('400')) {
-        errorMessage = 'Error en la solicitud a OpenAI. Por favor intenta de nuevo.';
-      } else if (error?.message?.includes('Supabase Error')) {
-        errorMessage = 'Error en la función de servidor. Revisa la configuración.';
+        errorMessage = 'Network error. Please check your connection.';
+      } else if (error?.message?.includes('Edge function error')) {
+        errorMessage = 'AI service configuration error. Please contact support.';
       }
       
       toast({
