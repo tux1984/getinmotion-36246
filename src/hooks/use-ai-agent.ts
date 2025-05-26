@@ -38,6 +38,9 @@ export function useAIAgent(agentType: string = 'admin') {
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
     
+    console.log('Sending message:', content);
+    console.log('Agent type:', agentType);
+    
     // Add user message
     const userMessage: Message = { type: 'user', content };
     setMessages(prev => [...prev, userMessage]);
@@ -51,25 +54,42 @@ export function useAIAgent(agentType: string = 'admin') {
       // Get the system prompt for the selected agent
       const systemPrompt = agentSystemPrompts[mappedAgentType] || agentSystemPrompts.admin;
       
+      console.log('Using system prompt for agent:', mappedAgentType);
+      console.log('System prompt:', systemPrompt);
+      
+      // Prepare messages for API
+      const apiMessages = [
+        ...messages.map(msg => ({
+          role: msg.type === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+        { role: 'user', content }
+      ];
+      
+      console.log('API Messages:', apiMessages);
+      
       // Call Supabase Edge Function for OpenAI integration
       const { data, error } = await supabaseClient.functions.invoke('openai-chat', {
         body: {
           systemPrompt,
-          messages: [
-            ...messages.map(msg => ({
-              role: msg.type === 'user' ? 'user' : 'assistant',
-              content: msg.content
-            })),
-            { role: 'user', content }
-          ]
+          messages: apiMessages
         }
       });
       
+      console.log('Supabase response:', { data, error });
+      
       if (error) {
+        console.error('Supabase error:', error);
         throw new Error(error.message || 'Error communicating with AI service');
       }
       
-      if (!data || !data.choices || !data.choices[0]?.message) {
+      if (!data) {
+        console.error('No data received from API');
+        throw new Error('No response received from AI service');
+      }
+      
+      if (!data.choices || !data.choices[0]?.message) {
+        console.error('Invalid response structure:', data);
         throw new Error('Invalid response from AI service');
       }
       
@@ -78,6 +98,8 @@ export function useAIAgent(agentType: string = 'admin') {
       const aiMessage: Message = { type: 'agent', content: aiResponse };
       setMessages(prev => [...prev, aiMessage]);
       
+      console.log('AI Response:', aiResponse);
+      
     } catch (error) {
       console.error('Error generating AI response:', error);
       
@@ -85,11 +107,11 @@ export function useAIAgent(agentType: string = 'admin') {
       let errorMessage = 'No se pudo generar una respuesta. Por favor intenta de nuevo.';
       
       if (error.message?.includes('API key')) {
-        errorMessage = 'API key error. Please check your OpenAI API key configuration.';
+        errorMessage = 'Error de configuración de API. Por favor verifica la configuración.';
       } else if (error.message?.includes('429')) {
-        errorMessage = 'Rate limit exceeded. Please try again later.';
-      } else if (error.message?.includes('network')) {
-        errorMessage = 'Network error. Please check your internet connection.';
+        errorMessage = 'Límite de uso excedido. Por favor intenta más tarde.';
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMessage = 'Error de conexión. Por favor verifica tu conexión a internet.';
       }
       
       toast({
