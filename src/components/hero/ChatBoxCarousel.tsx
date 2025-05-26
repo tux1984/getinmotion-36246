@@ -32,9 +32,9 @@ export const ChatBoxCarousel: React.FC<ChatBoxCarouselProps> = ({ agents, langua
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="flex items-center justify-center mt-6 gap-4">
-          <CarouselPrevious className="static translate-y-0 bg-indigo-800/50 hover:bg-indigo-700/60 border-indigo-500/50 text-indigo-200 hover:text-white" />
-          <CarouselNext className="static translate-y-0 bg-indigo-800/50 hover:bg-indigo-700/60 border-indigo-500/50 text-indigo-200 hover:text-white" />
+        <div className="flex items-center justify-center mt-4 gap-4">
+          <CarouselPrevious className="static translate-y-0 bg-indigo-800/70 hover:bg-indigo-700/80 border-indigo-500/50 text-indigo-200 hover:text-white backdrop-blur-sm" />
+          <CarouselNext className="static translate-y-0 bg-indigo-800/70 hover:bg-indigo-700/80 border-indigo-500/50 text-indigo-200 hover:text-white backdrop-blur-sm" />
         </div>
       </Carousel>
     </div>
