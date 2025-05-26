@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('=== OpenAI Chat Function Called ===');
+  console.log('=== OpenAI Chat Function Started ===');
   console.log('Request method:', req.method);
   console.log('Request URL:', req.url);
   
@@ -29,12 +29,12 @@ serve(async (req) => {
   try {
     // Get OpenAI API key
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    console.log('OpenAI API key check:', OPENAI_API_KEY ? `Found (${OPENAI_API_KEY.substring(0, 10)}...)` : 'NOT FOUND');
+    console.log('OpenAI API key check:', OPENAI_API_KEY ? 'Found' : 'NOT FOUND');
 
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY environment variable not found');
       return new Response(JSON.stringify({ 
-        error: 'OpenAI API key not configured in edge function secrets' 
+        error: 'OpenAI API key not configured' 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -105,65 +105,94 @@ serve(async (req) => {
     };
 
     console.log('Calling OpenAI API...');
-    console.log('OpenAI request body:', JSON.stringify(openAIBody, null, 2));
 
-    // Call OpenAI API
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(openAIBody),
-    });
+    // Call OpenAI API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    console.log('OpenAI response status:', openAIResponse.status);
-    console.log('OpenAI response headers:', Object.fromEntries(openAIResponse.headers.entries()));
+    try {
+      const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(openAIBody),
+        signal: controller.signal,
+      });
 
-    if (!openAIResponse.ok) {
-      const errorText = await openAIResponse.text();
-      console.error('OpenAI API error:', errorText);
-      
-      let errorMessage = 'Error calling OpenAI API';
-      if (openAIResponse.status === 401) {
-        errorMessage = 'Invalid OpenAI API key';
-      } else if (openAIResponse.status === 429) {
-        errorMessage = 'OpenAI rate limit exceeded';
-      } else if (openAIResponse.status === 400) {
-        errorMessage = 'Invalid request to OpenAI';
+      clearTimeout(timeoutId);
+
+      console.log('OpenAI response status:', openAIResponse.status);
+
+      if (!openAIResponse.ok) {
+        const errorText = await openAIResponse.text();
+        console.error('OpenAI API error:', errorText);
+        
+        let errorMessage = 'Error calling OpenAI API';
+        if (openAIResponse.status === 401) {
+          errorMessage = 'Invalid OpenAI API key';
+        } else if (openAIResponse.status === 429) {
+          errorMessage = 'OpenAI rate limit exceeded';
+        } else if (openAIResponse.status === 400) {
+          errorMessage = 'Invalid request to OpenAI';
+        }
+        
+        return new Response(JSON.stringify({ 
+          error: errorMessage, 
+          details: errorText,
+          status: openAIResponse.status 
+        }), {
+          status: openAIResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-      
-      return new Response(JSON.stringify({ 
-        error: errorMessage, 
-        details: errorText,
-        status: openAIResponse.status 
-      }), {
-        status: openAIResponse.status,
+
+      const data = await openAIResponse.json();
+      console.log('OpenAI response received successfully');
+
+      // Validate OpenAI response structure
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('Invalid OpenAI response structure:', data);
+        return new Response(JSON.stringify({ 
+          error: 'Invalid response from OpenAI',
+          details: 'Missing choices or message in response'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Return successful response
+      console.log('Returning successful response');
+      return new Response(JSON.stringify(data), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
-    }
 
-    const data = await openAIResponse.json();
-    console.log('OpenAI response data:', JSON.stringify(data, null, 2));
-
-    // Validate OpenAI response structure
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid OpenAI response structure:', data);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError.name === 'AbortError') {
+        console.error('OpenAI API request timed out');
+        return new Response(JSON.stringify({ 
+          error: 'Request timed out',
+          details: 'OpenAI API request took too long'
+        }), {
+          status: 408,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      console.error('Fetch error:', fetchError);
       return new Response(JSON.stringify({ 
-        error: 'Invalid response from OpenAI',
-        details: 'Missing choices or message in response'
+        error: 'Network error calling OpenAI',
+        details: fetchError.message
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    // Return successful response
-    console.log('Returning successful response');
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
 
   } catch (error) {
     console.error('=== EDGE FUNCTION ERROR ===');
@@ -172,7 +201,7 @@ serve(async (req) => {
     console.error('Error stack:', error.stack);
     
     return new Response(JSON.stringify({ 
-      error: 'Internal server error in edge function', 
+      error: 'Internal server error', 
       details: error.message,
       type: error.name
     }), {
