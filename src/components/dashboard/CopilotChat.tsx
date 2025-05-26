@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Send, FileText, Calculator, FileSpreadsheet, Briefcase, Palette } from 'lucide-react';
@@ -204,7 +203,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder={t.enterMessage}
             className="flex-grow"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             disabled={isProcessing}
           />
           <Button 
