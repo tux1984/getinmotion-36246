@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MotionLogo } from '@/components/MotionLogo';
 import { HeroSection } from '@/components/HeroSection';
+import { UserProfileTypes } from '@/components/user-types/UserProfileTypes';
+import { ProductExplanation } from '@/components/ProductExplanation';
 import { ValueProposition } from '@/components/ValueProposition';
 import { Footer } from '@/components/Footer';
 import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
@@ -137,6 +139,17 @@ const Index = () => {
       <main className="flex-grow w-full">
         <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
         
+        {/* User Profile Types Module */}
+        <div className="container mx-auto px-4 py-8 md:py-16 w-full">
+          <UserProfileTypes />
+        </div>
+        
+        {/* Product Explanation Module */}
+        <div className="w-full">
+          <ProductExplanation />
+        </div>
+        
+        {/* Access Form Section */}
         <div className="container mx-auto px-4 py-8 md:py-16 w-full" id="access">
           <div className="max-w-4xl mx-auto w-full">
             {showWaitlistForm ? (
