@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Autoplay from 'embla-carousel-autoplay';
 import { 
   Carousel, 
   CarouselContent, 
@@ -17,35 +16,27 @@ interface ChatBoxCarouselProps {
 }
 
 export const ChatBoxCarousel: React.FC<ChatBoxCarouselProps> = ({ agents, language }) => {
-  // Create a plugin array with autoplay configuration
-  const plugins = [
-    Autoplay({
-      delay: 4000, // 4 seconds delay between slides
-      stopOnInteraction: true, // stop autoplay when user interacts with carousel
-      stopOnMouseEnter: true, // pause on mouse hover
-    }),
-  ];
-
   return (
-    <Carousel
-      opts={{
-        align: "start",
-        loop: true,
-      }}
-      plugins={plugins}
-      className="w-full"
-    >
-      <CarouselContent className="-ml-4">
-        {agents.map((agent) => (
-          <CarouselItem key={agent.id} className="pl-4 sm:basis-1/2 lg:basis-1/2 xl:basis-1/2">
-            <ChatBox agent={agent} language={language} />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <div className="flex items-center justify-center mt-4 gap-2">
-        <CarouselPrevious className="relative hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
-        <CarouselNext className="relative hover:bg-indigo-800/50 hover:text-indigo-100 border-indigo-500/50 text-indigo-300" />
-      </div>
-    </Carousel>
+    <div className="relative w-full">
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {agents.map((agent) => (
+            <CarouselItem key={agent.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+              <ChatBox agent={agent} language={language} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="flex items-center justify-center mt-6 gap-4">
+          <CarouselPrevious className="static translate-y-0 bg-indigo-800/50 hover:bg-indigo-700/60 border-indigo-500/50 text-indigo-200 hover:text-white" />
+          <CarouselNext className="static translate-y-0 bg-indigo-800/50 hover:bg-indigo-700/60 border-indigo-500/50 text-indigo-200 hover:text-white" />
+        </div>
+      </Carousel>
+    </div>
   );
 };

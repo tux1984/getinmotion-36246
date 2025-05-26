@@ -15,30 +15,34 @@ export const HeroChatBoxes = () => {
   
   if (isMobile) {
     return (
-      <div className="w-full max-w-full overflow-hidden pt-4 px-2">
-        <ChatBoxesHeader language={language} />
-        <ChatBoxCarousel agents={agents} language={language} />
+      <div className="w-full py-8 bg-gradient-to-br from-indigo-900/80 to-purple-900/80">
+        <div className="container mx-auto px-4">
+          <ChatBoxesHeader language={language} />
+          <ChatBoxCarousel agents={agents} language={language} />
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div 
-      className="w-full max-w-full flex-grow relative pl-4 pr-4 overflow-hidden"
+      className="w-full py-12 bg-gradient-to-br from-indigo-900/80 to-purple-900/80"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.5 }}
     >
-      <ChatBoxesHeader language={language} />
-      
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-        {agents.map((agent) => (
-          <ChatBox 
-            key={agent.id} 
-            agent={agent}
-            language={language}
-          />
-        ))}
+      <div className="container mx-auto px-4">
+        <ChatBoxesHeader language={language} />
+        
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {agents.map((agent) => (
+            <ChatBox 
+              key={agent.id} 
+              agent={agent}
+              language={language}
+            />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
