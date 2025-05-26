@@ -9,6 +9,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('=== OpenAI Chat Function Called ===');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,6 +18,7 @@ serve(async (req) => {
 
   // Verify method
   if (req.method !== 'POST') {
+    console.error('Invalid method:', req.method);
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -24,48 +27,72 @@ serve(async (req) => {
 
   try {
     // Get request body
-    const { messages, systemPrompt } = await req.json();
+    const requestBody = await req.json();
+    console.log('Request body received:', JSON.stringify(requestBody, null, 2));
+    
+    const { messages, systemPrompt } = requestBody;
 
-    console.log('Received request:', { messages, systemPrompt });
-
-    // Validate messages
-    if (!messages || !Array.isArray(messages)) {
-      console.error('Invalid messages format:', messages);
-      return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Validate API key
+    // Validate API key first
     if (!OPENAI_API_KEY) {
-      console.error('OpenAI API key not found');
+      console.error('OpenAI API key not found in environment variables');
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Prepare the complete message array with the system prompt if provided
+    console.log('OpenAI API key found, length:', OPENAI_API_KEY.length);
+
+    // Validate messages
+    if (!messages || !Array.isArray(messages)) {
+      console.error('Invalid messages format:', messages);
+      return new Response(JSON.stringify({ error: 'Invalid messages format - must be an array' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Prepare the complete message array
     const completeMessages = [];
     
     // Add system prompt if provided
-    if (systemPrompt) {
+    if (systemPrompt && systemPrompt.trim()) {
       completeMessages.push({
         role: 'system',
-        content: systemPrompt
+        content: systemPrompt.trim()
       });
+      console.log('Added system prompt, length:', systemPrompt.length);
     }
     
-    // Add user messages - ensure they have the correct format
-    const formattedMessages = messages.map(msg => ({
-      role: msg.role || (msg.type === 'user' ? 'user' : 'assistant'),
-      content: msg.content || msg.message || ''
-    }));
-    
-    completeMessages.push(...formattedMessages);
+    // Add user messages with proper formatting
+    for (const msg of messages) {
+      if (msg && (msg.content || msg.message)) {
+        completeMessages.push({
+          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          content: (msg.content || msg.message || '').trim()
+        });
+      }
+    }
 
-    console.log('Sending to OpenAI:', JSON.stringify(completeMessages, null, 2));
+    console.log('Complete messages prepared:', JSON.stringify(completeMessages, null, 2));
+
+    if (completeMessages.length === 0) {
+      console.error('No valid messages to send to OpenAI');
+      return new Response(JSON.stringify({ error: 'No valid messages provided' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Prepare OpenAI request
+    const openAIRequestBody = {
+      model: 'gpt-4o-mini',
+      messages: completeMessages,
+      temperature: 0.7,
+      max_tokens: 1000,
+    };
+
+    console.log('Calling OpenAI API with body:', JSON.stringify(openAIRequestBody, null, 2));
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -74,57 +101,65 @@ serve(async (req) => {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: completeMessages,
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
+      body: JSON.stringify(openAIRequestBody),
     });
 
     console.log('OpenAI response status:', response.status);
+    console.log('OpenAI response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('OpenAI API error response:', errorText);
       
-      let errorMessage = 'Error communicating with AI service';
+      let errorMessage = 'Error comunicándose con el servicio de IA';
       if (response.status === 401) {
-        errorMessage = 'Invalid OpenAI API key';
+        errorMessage = 'Clave API de OpenAI inválida';
+        console.error('Invalid OpenAI API key - check your configuration');
       } else if (response.status === 429) {
-        errorMessage = 'Rate limit exceeded';
+        errorMessage = 'Límite de velocidad excedido';
       } else if (response.status === 400) {
-        errorMessage = 'Invalid request to OpenAI';
+        errorMessage = 'Solicitud inválida a OpenAI';
       }
       
-      return new Response(JSON.stringify({ error: errorMessage, details: errorText }), {
+      return new Response(JSON.stringify({ 
+        error: errorMessage, 
+        details: errorText,
+        status: response.status 
+      }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const data = await response.json();
-    console.log('OpenAI response data:', JSON.stringify(data, null, 2));
+    console.log('OpenAI success response:', JSON.stringify(data, null, 2));
 
     // Verify response structure
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error('Invalid OpenAI response structure:', data);
-      return new Response(JSON.stringify({ error: 'Invalid response from OpenAI' }), {
+      return new Response(JSON.stringify({ error: 'Respuesta inválida de OpenAI' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Return response
+    // Return successful response
+    console.log('Returning successful response to client');
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
-    console.error('Error in openai-chat function:', error);
+    console.error('=== ERROR in openai-chat function ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
     return new Response(JSON.stringify({ 
-      error: 'Internal server error', 
-      details: error.message || 'Unknown error' 
+      error: 'Error interno del servidor', 
+      details: error.message || 'Error desconocido',
+      type: error.name || 'UnknownError'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
