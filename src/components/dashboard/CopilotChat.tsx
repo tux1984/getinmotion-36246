@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Send, FileText, Calculator, FileSpreadsheet, Briefcase, Palette } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,19 +18,19 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   const [copilotName, setCopilotName] = useState('');
   const [copilotColor, setCopilotColor] = useState('');
   const [copilotIcon, setCopilotIcon] = useState<React.ReactNode>(null);
-  const [hasAddedGreeting, setHasAddedGreeting] = useState(false);
+  const [greetingInitialized, setGreetingInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Use our AI agent hook with the specific agent type
   const { messages, isProcessing, sendMessage, clearMessages } = useAIAgent(agentId);
   
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
   
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
   
   const translations = {
     en: {
@@ -48,8 +49,8 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   
   const t = translations[language];
 
+  // Set initial chat configurations based on agent type
   useEffect(() => {
-    // Set initial chat configurations based on agent type
     switch(agentId) {
       case 'contract-generator':
         setCopilotName(language === 'en' ? 'Contract Generator' : 'Generador de Contratos');
@@ -98,9 +99,9 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
     }
   }, [agentId, language]);
 
-  // Send initial greeting when messages are empty and we haven't added one yet
+  // Send initial greeting - fixed to prevent infinite loops
   useEffect(() => {
-    if (messages.length === 0 && !hasAddedGreeting && !isProcessing) {
+    if (messages.length === 0 && !greetingInitialized && !isProcessing) {
       let greeting = '';
       
       if (agentId === 'contract-generator') {
@@ -114,22 +115,33 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
       }
       
       if (greeting) {
-        setHasAddedGreeting(true);
-        sendMessage(greeting);
+        setGreetingInitialized(true);
+        // Add initial message directly to avoid infinite loop
+        const initialMessage = { type: 'agent' as const, content: greeting };
+        // We'll use a timeout to avoid immediate state updates causing loops
+        setTimeout(() => {
+          sendMessage(greeting);
+        }, 100);
       }
     }
-  }, [messages.length, hasAddedGreeting, isProcessing, agentId, language, sendMessage]);
+  }, [messages.length, greetingInitialized, isProcessing, agentId, language, sendMessage]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (!inputMessage.trim() || isProcessing) return;
     sendMessage(inputMessage);
     setInputMessage('');
-  };
+  }, [inputMessage, isProcessing, sendMessage]);
 
-  const handleClearMessages = () => {
+  const handleClearMessages = useCallback(() => {
     clearMessages();
-    setHasAddedGreeting(false);
-  };
+    setGreetingInitialized(false);
+  }, [clearMessages]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  }, [handleSendMessage]);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
@@ -156,7 +168,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
               variant="ghost" 
               size="sm" 
               onClick={onBack}
-              className="hidden" // Hide back button in AgentDetails context
+              className="hidden"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -203,7 +215,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder={t.enterMessage}
             className="flex-grow"
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyDown={handleKeyDown}
             disabled={isProcessing}
           />
           <Button 
