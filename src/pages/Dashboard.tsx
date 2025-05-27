@@ -15,6 +15,8 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  console.log('Dashboard: Component rendering');
+  
   const {
     agents,
     showOnboarding,
@@ -24,14 +26,25 @@ const Dashboard = () => {
     selectedAgent,
     maturityScores,
     recommendedAgents,
+    isLoading,
+    error,
     handleOnboardingComplete,
     handleSelectAgent,
     handleBackFromAgentDetails,
     checkLocationStateForOnboarding
   } = useAgentManagement();
 
+  console.log('Dashboard: State values:', {
+    isLoading,
+    error,
+    showOnboarding,
+    agentsCount: agents.length,
+    activeSection
+  });
+
   // Check for onboarding flag in location state
   useEffect(() => {
+    console.log('Dashboard: Checking location state for onboarding');
     const stateChanged = checkLocationStateForOnboarding(location.state);
     
     if (stateChanged) {
@@ -41,11 +54,41 @@ const Dashboard = () => {
   }, [location, checkLocationStateForOnboarding]);
   
   const handleNavigateToMaturityCalculator = () => {
+    console.log('Dashboard: Navigating to maturity calculator');
     navigate('/maturity-calculator', { state: { profileType } });
   };
 
+  // Show loading state
+  if (isLoading) {
+    console.log('Dashboard: Showing loading state');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    console.log('Dashboard: Showing error state:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Show onboarding if necessary
   if (showOnboarding) {
+    console.log('Dashboard: Showing onboarding');
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
         <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
@@ -57,6 +100,7 @@ const Dashboard = () => {
     );
   }
 
+  console.log('Dashboard: Showing main dashboard');
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
