@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Palette, Briefcase, Clock, Rocket } from 'lucide-react';
+
 interface FeatureCardsProps {
   whatIsMotion: string;
   motionDescription: string;
@@ -13,6 +15,7 @@ interface FeatureCardsProps {
   growthPartner: string;
   growthPartnerDesc: string;
 }
+
 export const FeatureCards: React.FC<FeatureCardsProps> = ({
   whatIsMotion,
   motionDescription,
@@ -26,72 +29,98 @@ export const FeatureCards: React.FC<FeatureCardsProps> = ({
   growthPartner,
   growthPartnerDesc
 }) => {
-  return <div className="mt-24 bg-gradient-to-br from-indigo-950 to-purple-950 py-16 text-white relative">
-      {/* Abstract art elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full bg-indigo-500 mix-blend-soft-light blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full bg-pink-500 mix-blend-soft-light blur-3xl"></div>
-      </div>
+  return (
+    <div className="w-full py-16 md:py-20 relative">
+      {/* Subtle decorative elements matching hero style */}
+      <div className="absolute top-10 right-10 text-pink-300/30 text-4xl opacity-50 rotate-12 animate-pulse" style={{animationDuration: '4s'}}>♪</div>
+      <div className="absolute bottom-20 left-10 text-indigo-300/30 text-5xl opacity-40 -rotate-6 animate-pulse" style={{animationDuration: '6s'}}>♫</div>
       
-      <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif text-center">{whatIsMotion}</h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 font-serif tracking-tight">
+            {whatIsMotion}
+          </h2>
+          
+          <div className="max-w-4xl mx-auto mb-12">
+            <p className="text-lg sm:text-xl md:text-2xl text-indigo-100 leading-relaxed">
+              {motionDescription}
+            </p>
+          </div>
+        </div>
         
-        <p className="text-xl mb-16 max-w-4xl leading-relaxed text-indigo-100">
-          {motionDescription}
-        </p>
-        
-        <div className="grid md:grid-cols-4 gap-6 relative">
-          {/* Arrow connector for desktop */}
-          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-pink-500/50 via-purple-500/50 to-indigo-500/50 -z-1"></div>
-          
-          <div className="relative group transition-all duration-300 hover:-translate-y-2">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
-            <div className="relative bg-indigo-900/50 p-6 rounded-lg backdrop-blur-sm border border-indigo-800/30">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mb-4">
-                <Palette className="w-8 h-8 text-white" />
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {/* Creative Platform Card */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500/60 to-purple-600/60 rounded-xl blur-sm opacity-70 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative overflow-hidden rounded-xl shadow-xl border border-white/10 bg-indigo-900/40 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent"></div>
+              <div className="relative p-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg">
+                  <Palette className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-pink-200">{creativePlatform}</h3>
+                <p className="text-indigo-200 text-sm leading-relaxed">{creativePlatformDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-pink-200">{creativePlatform}</h3>
-              <p className="text-indigo-200">{creativePlatformDesc}</p>
             </div>
           </div>
           
-          <div className="relative group transition-all duration-300 hover:-translate-y-2">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
-            <div className="relative bg-indigo-900/50 p-6 rounded-lg backdrop-blur-sm border border-indigo-800/30">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-4">
-                <Briefcase className="w-8 h-8 text-white" />
+          {/* Business Suite Card */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/60 to-indigo-600/60 rounded-xl blur-sm opacity-70 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative overflow-hidden rounded-xl shadow-xl border border-white/10 bg-indigo-900/40 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent"></div>
+              <div className="relative p-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg">
+                  <Briefcase className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-purple-200">{businessSuite}</h3>
+                <p className="text-indigo-200 text-sm leading-relaxed">{businessSuiteDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-purple-200">{businessSuite}</h3>
-              <p className="text-indigo-200">{businessSuiteDesc}</p>
             </div>
           </div>
           
-          <div className="relative group transition-all duration-300 hover:-translate-y-2">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
-            <div className="relative bg-indigo-900/50 p-6 rounded-lg backdrop-blur-sm border border-indigo-800/30">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center mb-4">
-                <Clock className="w-8 h-8 text-white" />
+          {/* Time Protector Card */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/60 to-blue-600/60 rounded-xl blur-sm opacity-70 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative overflow-hidden rounded-xl shadow-xl border border-white/10 bg-indigo-900/40 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent"></div>
+              <div className="relative p-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
+                  <Clock className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-indigo-200">{timeProtector}</h3>
+                <p className="text-indigo-200 text-sm leading-relaxed">{timeProtectorDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-indigo-200">{timeProtector}</h3>
-              <p className="text-indigo-200">{timeProtectorDesc}</p>
             </div>
           </div>
           
-          <div className="relative group transition-all duration-300 hover:-translate-y-2">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
-            <div className="relative bg-indigo-900/50 p-6 rounded-lg backdrop-blur-sm border border-indigo-800/30">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4">
-                <Rocket className="w-8 h-8 text-white" />
+          {/* Growth Partner Card */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/60 to-cyan-600/60 rounded-xl blur-sm opacity-70 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative overflow-hidden rounded-xl shadow-xl border border-white/10 bg-indigo-900/40 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent"></div>
+              <div className="relative p-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg">
+                  <Rocket className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-blue-200">{growthPartner}</h3>
+                <p className="text-indigo-200 text-sm leading-relaxed">{growthPartnerDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-blue-200">{growthPartner}</h3>
-              <p className="text-indigo-200">{growthPartnerDesc}</p>
             </div>
           </div>
         </div>
         
-        <div className="mt-20 text-center">
-          <p className="text-2xl italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">{motionPurpose}</p>
+        {/* Purpose Statement */}
+        <div className="text-center">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xl sm:text-2xl md:text-3xl italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 leading-relaxed">
+              {motionPurpose}
+            </p>
+          </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
