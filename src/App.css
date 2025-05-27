@@ -1,3 +1,13 @@
+
+/* Estilos específicos para la home page */
+.home-layout {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* Estilos originales del root para otras páginas */
 #root {
   max-width: 1280px;
   margin: 0 auto;

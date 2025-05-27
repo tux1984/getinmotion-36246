@@ -67,7 +67,7 @@ const Index = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-indigo-950 to-purple-950">
+    <div className="home-layout flex flex-col min-h-screen w-full bg-gradient-to-b from-indigo-950 to-purple-950">
       <Header 
         translations={{
           navAbout: t.navAbout,
