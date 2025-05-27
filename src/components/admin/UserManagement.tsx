@@ -31,14 +31,21 @@ export const UserManagement = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
+      console.log('Fetching users using Edge Function...');
       
-      setUsers(data || []);
+      const { data, error } = await supabase.functions.invoke('get-admin-users');
+      
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      
+      console.log('Users fetched successfully:', data?.users?.length);
+      setUsers(data?.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
