@@ -8,8 +8,17 @@ import { TextField, TextAreaField, SelectField } from './FormField';
 import { CheckboxGroup } from './CheckboxGroup';
 import { useWaitlistForm } from './useWaitlistForm';
 import { WaitlistFormProps } from './types';
-import { checkSupabaseConnection } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { SupabaseStatus } from './SupabaseStatus';
+
+const checkSupabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase.from('waitlist').select('count').limit(1);
+    return { connected: !error };
+  } catch (error) {
+    return { connected: false };
+  }
+};
 
 export const WaitlistForm = ({ onSubmit, onCodeSubmit, language }: WaitlistFormProps) => {
   const {

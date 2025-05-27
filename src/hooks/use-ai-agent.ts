@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Message } from '@/types/chat';
 import { useToast } from '@/hooks/use-toast';
-import { supabaseClient } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define agent types and their system prompts
 export const agentSystemPrompts: Record<string, string> = {
@@ -70,7 +70,7 @@ export function useAIAgent(agentType: string = 'admin') {
       console.log('Calling edge function with payload:', requestPayload);
       
       // Call Supabase Edge Function with improved error handling
-      const { data, error } = await supabaseClient.functions.invoke('openai-chat', {
+      const { data, error } = await supabase.functions.invoke('openai-chat', {
         body: requestPayload,
         headers: {
           'Content-Type': 'application/json',
