@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Agent, ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { getAgentData } from '@/components/cultural/useAgentData';
+import { useAgentData } from '@/components/cultural/useAgentData';
 
 export const useAgentManagement = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -14,6 +13,9 @@ export const useAgentManagement = () => {
     primary: [],
     secondary: []
   });
+
+  // Get agents using the hook
+  const culturalAgents = useAgentData('en'); // Default to English, could be made dynamic
 
   // Initialize data from localStorage
   useEffect(() => {
@@ -59,16 +61,25 @@ export const useAgentManagement = () => {
           setProfileType(storedProfile as ProfileType);
         }
 
-        // Initialize agents
-        const allAgents = getAgentData();
-        setAgents(allAgents);
+        // Convert cultural agents to Agent format and set them
+        const convertedAgents: Agent[] = culturalAgents.map(agent => ({
+          id: agent.id,
+          name: agent.title,
+          status: 'active' as const,
+          category: 'cultural',
+          activeTasks: 0,
+          color: agent.color,
+          icon: agent.icon
+        }));
+        
+        setAgents(convertedAgents);
       } catch (error) {
         console.error('Error initializing data:', error);
       }
     };
 
     initializeData();
-  }, []);
+  }, [culturalAgents]);
 
   const handleOnboardingComplete = useCallback((scores: CategoryScore, recommended: RecommendedAgents) => {
     setMaturityScores(scores);
