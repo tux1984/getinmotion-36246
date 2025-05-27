@@ -1,97 +1,89 @@
 
+import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
-import { UserProfileData } from '../../types/wizardTypes';
 
-// Compute maturity scores based on answers
 export const calculateMaturityScores = (profileData: UserProfileData): CategoryScore => {
+  // Initialize scores
   let ideaValidation = 0;
   let userExperience = 0;
   let marketFit = 0;
   let monetization = 0;
-  
-  // Calculate idea validation score
-  if (profileData.experience === 'more-than-2-years') {
-    ideaValidation += 30;
-  } else if (profileData.experience === '6-months-to-2-years') {
+
+  // Cultural Profile scoring
+  if (profileData.industry) {
     ideaValidation += 20;
-  } else {
+    marketFit += 15;
+  }
+
+  if (profileData.activities && profileData.activities.length > 0) {
+    userExperience += 15;
     ideaValidation += 10;
   }
-  
-  if (profileData.brandIdentity === 'yes') {
-    ideaValidation += 20;
-  } else if (profileData.brandIdentity === 'somewhat') {
-    ideaValidation += 10;
+
+  // Business Maturity scoring
+  if (profileData.experience) {
+    switch (profileData.experience) {
+      case 'beginner':
+        ideaValidation += 10;
+        break;
+      case 'intermediate':
+        ideaValidation += 20;
+        userExperience += 15;
+        break;
+      case 'advanced':
+        ideaValidation += 30;
+        userExperience += 25;
+        marketFit += 20;
+        break;
+    }
   }
-  
-  // Calculate user experience score
-  if (profileData.activities.includes('classes') || 
-      profileData.activities.includes('services')) {
+
+  if (profileData.paymentMethods) {
+    monetization += 25;
+    marketFit += 15;
+  }
+
+  if (profileData.brandIdentity) {
+    userExperience += 20;
+    marketFit += 15;
+  }
+
+  // Management Style scoring
+  if (profileData.financialControl) {
+    monetization += 20;
+  }
+
+  if (profileData.teamStructure) {
     userExperience += 15;
-  }
-  
-  if (profileData.brandIdentity === 'yes') {
-    userExperience += 25;
-  } else if (profileData.brandIdentity === 'somewhat') {
-    userExperience += 15;
-  }
-  
-  // Calculate market fit score
-  if (profileData.activities.includes('selling-online') || 
-      profileData.activities.includes('export')) {
-    marketFit += 20;
-  }
-  
-  if (profileData.teamStructure === 'team') {
-    marketFit += 20;
-  } else if (profileData.teamStructure === 'occasional') {
     marketFit += 10;
   }
-  
-  // Calculate monetization score
-  if (profileData.paymentMethods === 'billing-system') {
-    monetization += 25;
-  } else if (profileData.paymentMethods === 'digital-platforms') {
-    monetization += 15;
-  } else if (profileData.paymentMethods === 'cash-or-transfer') {
-    monetization += 5;
+
+  if (profileData.taskOrganization) {
+    userExperience += 15;
+    ideaValidation += 10;
   }
-  
-  if (profileData.financialControl === 'detailed') {
-    monetization += 25;
-  } else if (profileData.financialControl === 'somewhat') {
-    monetization += 15;
-  } else {
-    monetization += 5;
+
+  if (profileData.decisionMaking) {
+    marketFit += 15;
+    ideaValidation += 10;
   }
-  
-  // Add more detailed analysis points if available
-  if (profileData.analysisPreference === 'detailed') {
-    if (profileData.pricingMethod === 'myself') {
-      monetization += 10;
+
+  // Extended questions bonus (for deep analysis)
+  if (profileData.analysisPreference === 'deep') {
+    if (profileData.pricingMethod) {
+      monetization += 15;
     }
-    
-    if (profileData.internationalSales === 'yes') {
-      marketFit += 15;
+    if (profileData.internationalSales) {
+      marketFit += 10;
     }
-    
-    if (profileData.formalizedBusiness === 'yes') {
+    if (profileData.formalizedBusiness) {
       monetization += 10;
       marketFit += 10;
     }
-    
-    if (profileData.collaboration === 'yes') {
-      userExperience += 10;
-    }
-    
-    if (profileData.economicSustainability === 'yes') {
-      marketFit += 10;
-      monetization += 10;
-    }
   }
-  
-  // Cap scores at 100
+
+  // Ensure scores don't exceed 100
   return {
     ideaValidation: Math.min(100, ideaValidation),
     userExperience: Math.min(100, userExperience),
@@ -100,46 +92,29 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
   };
 };
 
-// Determine recommended agents based on profile data and scores
 export const getRecommendedAgents = (profileData: UserProfileData, scores: CategoryScore): RecommendedAgents => {
-  const recommendedAgents: RecommendedAgents = {
-    admin: false,
-    accounting: false,
-    legal: false,
-    operations: false,
-    cultural: false
+  // Determine recommended agents based on scores and profile
+  const recommendations: RecommendedAgents = {
+    primary: [],
+    secondary: []
   };
-  
-  // Admin is recommended if the user has a team or complex operations
-  if (profileData.teamStructure === 'team' || 
-      profileData.activities.length > 2 || 
-      profileData.taskOrganization === 'digital-tools') {
-    recommendedAgents.admin = true;
-  }
-  
-  // Accounting is recommended if monetization is focus area
-  if (scores.monetization < 50 || 
-      profileData.financialControl !== 'detailed' || 
-      profileData.activities.includes('export')) {
-    recommendedAgents.accounting = true;
-  }
-  
-  // Legal is recommended for formal businesses or international sales
-  if (profileData.activities.includes('export') || 
-      profileData.formalizedBusiness === 'yes' || 
-      profileData.paymentMethods === 'billing-system') {
-    recommendedAgents.legal = true;
-  }
-  
-  // Operations is recommended for teams
-  if (profileData.teamStructure === 'team' || 
-      profileData.taskOrganization === 'digital-tools' ||
-      profileData.activities.length > 3) {
-    recommendedAgents.operations = true;
-  }
-  
-  // Cultural agent is always recommended for cultural creators
-  recommendedAgents.cultural = true;
-  
-  return recommendedAgents;
+
+  // Primary recommendations based on lowest scores (areas needing most help)
+  const scoresArray = [
+    { category: 'ideaValidation', score: scores.ideaValidation, agent: 'idea-validator' },
+    { category: 'userExperience', score: scores.userExperience, agent: 'ux-designer' },
+    { category: 'marketFit', score: scores.marketFit, agent: 'market-analyst' },
+    { category: 'monetization', score: scores.monetization, agent: 'finance-advisor' }
+  ];
+
+  // Sort by lowest scores first
+  scoresArray.sort((a, b) => a.score - b.score);
+
+  // Recommend top 2 lowest scoring areas as primary
+  recommendations.primary = scoresArray.slice(0, 2).map(item => item.agent);
+
+  // Recommend next 2 as secondary
+  recommendations.secondary = scoresArray.slice(2, 4).map(item => item.agent);
+
+  return recommendations;
 };

@@ -1,15 +1,10 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { IdeaProfileQuestions } from '@/components/onboarding/components/questions/IdeaProfileQuestions';
-import { SoloProfileQuestions } from '@/components/onboarding/components/questions/SoloProfileQuestions';
-import { TeamProfileQuestions } from '@/components/onboarding/components/questions/TeamProfileQuestions';
-import { StepContainer } from '../wizard-components/StepContainer';
-import { StepProgress } from '../wizard-components/StepProgress';
-import { WizardNavigation } from '../wizard-components/WizardNavigation';
-import { UserProfileData } from '../types/wizardTypes';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { UserProfileData } from '../types/wizardTypes';
+import { RadioCards } from '../wizard-components/RadioCards';
+import { CheckboxCards } from '../wizard-components/CheckboxCards';
 
 interface ProfileQuestionsStepProps {
   profileData: UserProfileData;
@@ -20,7 +15,7 @@ interface ProfileQuestionsStepProps {
   onNext: () => void;
   onPrevious: () => void;
   isStepValid: boolean;
-  illustration: string;
+  illustration?: string;
 }
 
 export const ProfileQuestionsStep: React.FC<ProfileQuestionsStepProps> = ({
@@ -32,191 +27,179 @@ export const ProfileQuestionsStep: React.FC<ProfileQuestionsStepProps> = ({
   onNext,
   onPrevious,
   isStepValid,
-  illustration,
+  illustration
 }) => {
-  // State to track the current question index for the multi-step question forms
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  
-  // Handle answers from profile-specific question components
-  const handleAnswer = (questionId: string, value: any) => {
-    updateProfileData({ [questionId]: value });
-  };
+  const [currentQuestion, setCurrentQuestion] = useState(0);
 
-  // Determine if we need to show extended questions based on user's preference
-  const showExtendedQuestions = profileData.analysisPreference === 'detailed';
-  
   const translations = {
     en: {
-      title: "Profile Questions",
-      subtitle: "Tell us about your creative project",
-      idea: "Idea Development",
-      solo: "Solo Creator",
-      team: "Team Management",
+      title: "Let's understand your profile better",
+      subtitle: "Answer these questions to get personalized recommendations",
+      industry: "What's your creative industry?",
+      activities: "What activities do you do? (Select all that apply)",
+      experience: "What's your experience level?",
+      previous: "Back",
       next: "Next",
-      previous: "Previous",
-      complete: "Continue",
-      questionCount: (current: number, total: number) => `Question ${current} of ${total}`
+      continue: "Continue"
     },
     es: {
-      title: "Preguntas de Perfil",
-      subtitle: "Cuéntanos sobre tu proyecto creativo",
-      idea: "Desarrollo de Ideas",
-      solo: "Creador Individual",
-      team: "Gestión de Equipo",
+      title: "Conozcamos mejor tu perfil",
+      subtitle: "Responde estas preguntas para obtener recomendaciones personalizadas",
+      industry: "¿Cuál es tu industria creativa?",
+      activities: "¿Qué actividades realizas? (Selecciona todas las que apliquen)",
+      experience: "¿Cuál es tu nivel de experiencia?",
+      previous: "Atrás",
       next: "Siguiente",
-      previous: "Anterior",
-      complete: "Continuar",
-      questionCount: (current: number, total: number) => `Pregunta ${current} de ${total}`
+      continue: "Continuar"
     }
   };
-  
+
   const t = translations[language];
-  
-  // Get the title based on profile type
-  const getTitle = () => {
-    switch (profileData.profileType) {
-      case 'idea': return t.idea;
-      case 'solo': return t.solo;
-      case 'team': return t.team;
-      default: return t.title;
-    }
-  };
 
-  // Get the total number of questions based on profile type
-  const getTotalQuestions = () => {
-    switch (profileData.profileType) {
-      case 'idea': return showExtendedQuestions ? 7 : 5;
-      case 'solo': return showExtendedQuestions ? 7 : 5;
-      case 'team': return showExtendedQuestions ? 7 : 5;
-      default: return 5;
-    }
-  };
+  const industryOptions = [
+    { id: 'music', label: language === 'en' ? 'Music' : 'Música' },
+    { id: 'visual-arts', label: language === 'en' ? 'Visual Arts' : 'Artes Visuales' },
+    { id: 'performing-arts', label: language === 'en' ? 'Performing Arts' : 'Artes Escénicas' },
+    { id: 'literature', label: language === 'en' ? 'Literature' : 'Literatura' },
+    { id: 'audiovisual', label: language === 'en' ? 'Audiovisual' : 'Audiovisual' },
+    { id: 'digital-arts', label: language === 'en' ? 'Digital Arts' : 'Artes Digitales' }
+  ];
 
-  // Check if we're at the last question
-  const isLastQuestion = currentQuestionIndex === getTotalQuestions() - 1;
-  
-  // Handle next question or complete the step
+  const activityOptions = [
+    { id: 'creation', label: language === 'en' ? 'Content Creation' : 'Creación de Contenido' },
+    { id: 'performance', label: language === 'en' ? 'Live Performance' : 'Presentaciones en Vivo' },
+    { id: 'teaching', label: language === 'en' ? 'Teaching/Workshops' : 'Enseñanza/Talleres' },
+    { id: 'collaboration', label: language === 'en' ? 'Collaborations' : 'Colaboraciones' },
+    { id: 'production', label: language === 'en' ? 'Production' : 'Producción' }
+  ];
+
+  const experienceOptions = [
+    { id: 'beginner', label: language === 'en' ? 'Beginner (0-2 years)' : 'Principiante (0-2 años)' },
+    { id: 'intermediate', label: language === 'en' ? 'Intermediate (3-5 years)' : 'Intermedio (3-5 años)' },
+    { id: 'advanced', label: language === 'en' ? 'Advanced (5+ years)' : 'Avanzado (5+ años)' }
+  ];
+
+  const questions = [
+    {
+      id: 'industry',
+      title: t.industry,
+      type: 'radio' as const,
+      options: industryOptions,
+      value: profileData.industry,
+      onChange: (value: string) => updateProfileData({ industry: value })
+    },
+    {
+      id: 'activities',
+      title: t.activities,
+      type: 'checkbox' as const,
+      options: activityOptions,
+      value: profileData.activities || [],
+      onChange: (values: string[]) => updateProfileData({ activities: values })
+    },
+    {
+      id: 'experience',
+      title: t.experience,
+      type: 'radio' as const,
+      options: experienceOptions,
+      value: profileData.experience,
+      onChange: (value: string) => updateProfileData({ experience: value })
+    }
+  ];
+
+  const currentQ = questions[currentQuestion];
+  const isLastQuestion = currentQuestion === questions.length - 1;
+
   const handleNextQuestion = () => {
     if (isLastQuestion) {
       onNext();
-      // Reset question index for when user comes back
-      setCurrentQuestionIndex(0);
     } else {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestion(prev => prev + 1);
     }
   };
 
-  // Handle previous question or go back to previous step
   const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    } else {
+    if (currentQuestion === 0) {
       onPrevious();
+    } else {
+      setCurrentQuestion(prev => prev - 1);
     }
   };
-  
+
+  const isCurrentQuestionValid = () => {
+    if (currentQ.type === 'radio') {
+      return !!currentQ.value;
+    }
+    if (currentQ.type === 'checkbox') {
+      return (currentQ.value as string[]).length > 0;
+    }
+    return false;
+  };
+
   return (
-    <StepContainer title={getTitle()} subtitle={t.subtitle}>
-      <div className="flex flex-col space-y-6 w-full max-w-4xl mx-auto">
-        <div className="text-center mb-4">
-          <StepProgress 
-            currentStep={currentStepNumber} 
-            totalSteps={totalSteps}
-            language={language}
-          />
-          
-          {/* Question counter badge */}
-          <div className="mt-4">
-            <span className="inline-block bg-purple-100 text-purple-800 text-sm font-medium px-4 py-1.5 rounded-full">
-              {t.questionCount(currentQuestionIndex + 1, getTotalQuestions())}
-            </span>
-          </div>
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+            {language === 'en' ? `Step ${currentStepNumber} of ${totalSteps}` : `Paso ${currentStepNumber} de ${totalSteps}`}
+          </span>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Content area for questions */}
-          <div className="col-span-1 md:col-span-2 order-2 md:order-1">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              {profileData.profileType === 'idea' && (
-                <IdeaProfileQuestions
-                  currentQuestionIndex={currentQuestionIndex}
-                  showExtendedQuestions={showExtendedQuestions}
-                  answers={profileData}
-                  onAnswer={handleAnswer}
-                  language={language}
-                />
-              )}
-              
-              {profileData.profileType === 'solo' && (
-                <SoloProfileQuestions
-                  currentQuestionIndex={currentQuestionIndex}
-                  showExtendedQuestions={showExtendedQuestions}
-                  answers={profileData}
-                  onAnswer={handleAnswer}
-                  language={language}
-                />
-              )}
-              
-              {profileData.profileType === 'team' && (
-                <TeamProfileQuestions
-                  currentQuestionIndex={currentQuestionIndex}
-                  showExtendedQuestions={showExtendedQuestions}
-                  answers={profileData}
-                  onAnswer={handleAnswer}
-                  language={language}
-                />
-              )}
-              
-              {/* Navigation buttons for questions */}
-              <div className="flex justify-between mt-8">
-                <Button
-                  onClick={handlePreviousQuestion}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  {t.previous}
-                </Button>
-                
-                <Button
-                  onClick={handleNextQuestion}
-                  disabled={!isStepValid}
-                  className="gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                >
-                  {isLastQuestion ? t.complete : t.next}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Illustration area */}
-          <div className="col-span-1 order-1 md:order-2">
-            <div className="flex justify-center items-start md:items-center h-full sticky top-8">
-              <motion.img
-                src={illustration}
-                alt="Character illustration"
-                className="w-40 h-40 md:w-56 md:h-56 object-contain"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* We don't need this since we have in-page navigation now */}
-        {/* <WizardNavigation
-          onNext={onNext}
-          onPrevious={onPrevious}
-          isFirstStep={false}
-          isLastStep={false}
-          language={language}
-          currentStepId="profileQuestions"
-          profileData={profileData}
-          isValid={isStepValid}
-        /> */}
+        <h2 className="text-3xl font-bold text-purple-800 mb-4">{t.title}</h2>
+        <p className="text-lg text-gray-600">{t.subtitle}</p>
       </div>
-    </StepContainer>
+
+      {/* Question */}
+      <motion.div
+        key={currentQuestion}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="mb-12"
+      >
+        <h3 className="text-xl font-semibold text-purple-800 mb-6">{currentQ.title}</h3>
+        
+        {currentQ.type === 'radio' && (
+          <RadioCards
+            name={currentQ.id}
+            options={currentQ.options}
+            selectedValue={currentQ.value as string}
+            onChange={currentQ.onChange as (value: string) => void}
+          />
+        )}
+        
+        {currentQ.type === 'checkbox' && (
+          <CheckboxCards
+            options={currentQ.options}
+            selectedValues={currentQ.value as string[]}
+            onChange={(value: string, checked: boolean) => {
+              const currentValues = (currentQ.value as string[]) || [];
+              if (checked) {
+                currentQ.onChange([...currentValues, value]);
+              } else {
+                currentQ.onChange(currentValues.filter(v => v !== value));
+              }
+            }}
+          />
+        )}
+      </motion.div>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={handlePreviousQuestion}
+          className="px-6 py-3"
+        >
+          {t.previous}
+        </Button>
+        
+        <Button
+          onClick={handleNextQuestion}
+          disabled={!isCurrentQuestionValid()}
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3"
+        >
+          {isLastQuestion ? t.continue : t.next}
+        </Button>
+      </div>
+    </div>
   );
 };
