@@ -52,7 +52,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
         return;
       }
       
-      // Attempt to insert data into Supabase waitlist table
+      // Attempt to insert data into Supabase waitlist table using direct client
       const { error: supabaseError } = await supabase
         .from('waitlist')
         .insert([

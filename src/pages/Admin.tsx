@@ -34,14 +34,21 @@ const Admin = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase
-        .from('waitlist')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
+      console.log('Fetching waitlist using Edge Function...');
       
-      setWaitlistData(data || []);
+      const { data, error } = await supabase.functions.invoke('get-waitlist');
+      
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      
+      console.log('Waitlist fetched successfully:', data?.waitlist?.length);
+      setWaitlistData(data?.waitlist || []);
     } catch (error) {
       console.error('Error fetching waitlist data:', error);
       toast({
@@ -99,25 +106,21 @@ const Admin = () => {
               <SupabaseStatus />
             </div>
             
-            <Tabs defaultValue="users" className="w-full">
+            <Tabs defaultValue="waitlist" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-indigo-900/50">
-                <TabsTrigger 
-                  value="users"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
-                >
-                  Gestión de Usuarios
-                </TabsTrigger>
                 <TabsTrigger 
                   value="waitlist"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
                 >
                   Lista de Espera
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="users"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                >
+                  Gestión de Usuarios
+                </TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="users" className="mt-6">
-                <UserManagement />
-              </TabsContent>
               
               <TabsContent value="waitlist" className="mt-6">
                 <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
@@ -127,6 +130,10 @@ const Admin = () => {
                     onRefresh={handleRefresh} 
                   />
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="users" className="mt-6">
+                <UserManagement />
               </TabsContent>
             </Tabs>
           </div>
