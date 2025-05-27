@@ -24,10 +24,6 @@ export type CategoryScore = {
 };
 
 export interface RecommendedAgents {
-  admin: boolean;
-  accounting: boolean;
-  legal: boolean;
-  operations: boolean;
-  cultural: boolean;
-  extended?: RecommendedAgents; // Add the extended property for comparison functionality
+  primary: string[];
+  secondary: string[];
 }
