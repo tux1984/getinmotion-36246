@@ -23,13 +23,13 @@ export type CategoryScore = {
   monetization: number;
 };
 
-// Support both onboarding format and cultural maturity format
+// Enhanced RecommendedAgents interface to support both formats
 export interface RecommendedAgents {
-  // For cultural maturity (new format)
+  // New format (primary)
   primary?: string[];
   secondary?: string[];
   
-  // For onboarding (legacy format)
+  // Legacy format (for backward compatibility)
   admin?: boolean;
   accounting?: boolean;
   legal?: boolean;
