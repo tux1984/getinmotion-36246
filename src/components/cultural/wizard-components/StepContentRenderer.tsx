@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
@@ -14,6 +13,7 @@ import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { getQuestions } from '../wizard-questions/index';
+import { ExtendedQuestionsStep } from '../wizard-steps/ExtendedQuestionsStep';
 
 // Animation variants for page transitions
 export const pageVariants = {
@@ -134,6 +134,10 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
       return characterImages[6]; // Analytics monster for analysis choice
     }
     
+    if (currentStepId === 'extendedQuestions') {
+      return characterImages[1]; // Creative monster for extended questions
+    }
+    
     // Fallback
     return characterImages[0];
   };
@@ -208,6 +212,21 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
         onPrevious={handlePrevious}
         currentStepNumber={currentStepNumber}
         totalSteps={totalSteps}
+      />
+    );
+  }
+  
+  if (currentStepId === 'extendedQuestions') {
+    return (
+      <ExtendedQuestionsStep
+        profileData={profileData}
+        updateProfileData={updateProfileData}
+        language={language}
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        isStepValid={isCurrentStepValid()}
       />
     );
   }

@@ -50,6 +50,31 @@ export const isStepValid = (currentStepId: WizardStepId, profileData: UserProfil
   // For results step, always valid
   if (currentStepId === 'results') return true;
   
+  // For bifurcation step, check if analysis type is selected
+  if (currentStepId === 'bifurcation') {
+    return !!profileData.analysisPreference;
+  }
+  
+  // For extended questions step, check if all required fields are filled
+  if (currentStepId === 'extendedQuestions') {
+    return !!(profileData.pricingMethod && profileData.internationalSales && profileData.formalizedBusiness);
+  }
+  
+  // For cultural profile questions
+  if (currentStepId === 'culturalProfile') {
+    return !!(profileData.industry && profileData.activities?.length > 0);
+  }
+  
+  // For business maturity questions
+  if (currentStepId === 'businessMaturity') {
+    return !!(profileData.experience && profileData.paymentMethods && profileData.brandIdentity);
+  }
+  
+  // For management style questions
+  if (currentStepId === 'managementStyle') {
+    return !!(profileData.financialControl && profileData.teamStructure && profileData.taskOrganization && profileData.decisionMaking);
+  }
+  
   // For profile questions step, check based on the profile type
   if (currentStepId === 'profileQuestions') {
     // This is simplified since the actual validation happens inside the ProfileQuestionsStep

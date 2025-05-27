@@ -1,6 +1,8 @@
 
+export type ProfileType = 'solo' | 'idea' | 'team' | 'cultural';
+
 export interface UserProfileData {
-  profileType?: 'idea' | 'solo' | 'team';  // Added profileType field
+  profileType: ProfileType;
   industry: string;
   activities: string[];
   experience: string;
@@ -10,10 +12,11 @@ export interface UserProfileData {
   teamStructure: string;
   taskOrganization: string;
   decisionMaking: string;
-  analysisPreference?: 'quick' | 'detailed';
-  pricingMethod?: string;
-  internationalSales?: string;
-  formalizedBusiness?: string;
-  collaboration?: string;
-  economicSustainability?: string;
+  analysisPreference?: 'quick' | 'deep';
+  // Extended questions for deep analysis
+  pricingMethod: string;
+  internationalSales: string;
+  formalizedBusiness: string;
+  collaboration: string;
+  economicSustainability: string;
 }
