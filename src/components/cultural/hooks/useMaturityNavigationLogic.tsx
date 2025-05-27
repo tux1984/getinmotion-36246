@@ -19,6 +19,7 @@ interface UseMaturityNavigationLogicProps {
   setRecommendedAgents: (agents: RecommendedAgents) => void;
   toast: any;
   t: any;
+  language: 'en' | 'es';
 }
 
 export const useMaturityNavigationLogic = ({
@@ -37,7 +38,8 @@ export const useMaturityNavigationLogic = ({
   setScores,
   setRecommendedAgents,
   toast,
-  t
+  t,
+  language
 }: UseMaturityNavigationLogicProps) => {
 
   const handleNext = useCallback(() => {
@@ -104,7 +106,7 @@ export const useMaturityNavigationLogic = ({
         setCurrentStep('results');
       }
     }
-  }, [currentStep, profileType, questions, extendedQuestions, currentQuestionIndex, answers, extendedAnswers, analysisType, t, toast, calculateScores, getRecommendations, setCurrentStep, setCurrentQuestionIndex, setScores, setRecommendedAgents]);
+  }, [currentStep, profileType, questions, extendedQuestions, currentQuestionIndex, answers, extendedAnswers, analysisType, t, toast, calculateScores, getRecommendations, setCurrentStep, setCurrentQuestionIndex, setScores, setRecommendedAgents, language]);
 
   const handleBack = useCallback(() => {
     if (currentStep === 'questions' && currentQuestionIndex > 0) {

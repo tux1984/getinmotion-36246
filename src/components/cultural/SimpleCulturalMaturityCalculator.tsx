@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
@@ -160,7 +159,8 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     setScores,
     setRecommendedAgents,
     toast,
-    t
+    t,
+    language
   });
 
   // Memoized image calculation
@@ -296,6 +296,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                         scores={scores}
                         recommendedAgents={recommendedAgents}
                         t={t}
+                        language={language}
                         onComplete={handleComplete}
                       />
                     </motion.div>

@@ -64,15 +64,18 @@ export const useMaturityCalculatorLogic = (
 
     scoresArray.sort((a, b) => a.score - b.score);
 
-    // Enhanced recommendations based on extended analysis
+    // Base recommendations
     const recommendations: RecommendedAgents = {
       primary: scoresArray.slice(0, 2).map(item => item.category),
       secondary: scoresArray.slice(2, 4).map(item => item.category)
     };
 
-    // Add more recommendations if extended analysis was completed
+    // Add extended flag if extended analysis was completed
     if (Object.keys(extendedAnswers).length > 0) {
-      recommendations.extended = true;
+      recommendations.extended = {
+        primary: recommendations.primary,
+        secondary: recommendations.secondary
+      };
     }
 
     return recommendations;

@@ -8,13 +8,15 @@ interface ResultsDisplayProps {
   scores: CategoryScore;
   recommendedAgents: RecommendedAgents;
   t: any;
+  language: 'en' | 'es';
   onComplete: () => void;
 }
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = React.memo(({ 
   scores, 
   recommendedAgents, 
-  t, 
+  t,
+  language,
   onComplete 
 }) => (
   <div className="space-y-6">
