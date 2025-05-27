@@ -6,7 +6,7 @@ import { ValueProposition } from '@/components/ValueProposition';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
 import { UserProfileSection } from '@/components/sections/UserProfileSection';
-import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
+import { CollapsibleWaitlistForm } from '@/components/waitlist/CollapsibleWaitlistForm';
 import { useLanguage } from '@/context/LanguageContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -68,22 +68,8 @@ const Index = () => {
           <ProductExplanation />
         </div>
 
-        {/* Waitlist Section */}
-        <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8" id="waitlist">
-          <div className="w-full max-w-2xl mx-auto">
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition duration-300"></div>
-              <div className="bg-indigo-950/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden relative border border-indigo-800/30">
-                <div className="p-4 md:p-8">
-                  <WaitlistForm 
-                    language={language}
-                    onSubmit={() => setShowWaitlist(false)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* New Collapsible Waitlist Section */}
+        <CollapsibleWaitlistForm language={language} />
         
         {/* Access Section - Simplified */}
         <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8" id="access">
