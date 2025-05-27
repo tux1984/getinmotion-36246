@@ -20,6 +20,10 @@ interface WizardStepContentProps {
   handleNext: () => void;
   handlePrevious: () => void;
   isCurrentStepValid: () => boolean;
+  // New props for bifurcation
+  showBifurcation?: boolean;
+  analysisType?: 'quick' | 'deep' | null;
+  handleAnalysisChoice?: (type: 'quick' | 'deep') => void;
 }
 
 export const WizardStepContent: React.FC<WizardStepContentProps> = (props) => {

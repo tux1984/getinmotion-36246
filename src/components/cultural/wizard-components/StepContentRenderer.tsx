@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
 import { ProfileQuestionsStep } from '../wizard-steps/ProfileQuestionsStep';
 import { ResultsStep } from '../wizard-steps/ResultsStep';
+import { CulturalProfileStep } from '../wizard-steps/CulturalProfileStep';
+import { BusinessMaturityStep } from '../wizard-steps/BusinessMaturityStep';
+import { ManagementStyleStep } from '../wizard-steps/ManagementStyleStep';
+import { BifurcationStep } from '../wizard-steps/BifurcationStep';
 import { QuestionStep } from './QuestionStep';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId } from '../hooks/useMaturityWizard';
@@ -62,6 +66,10 @@ interface StepContentRendererProps {
   handleNext: () => void;
   handlePrevious: () => void;
   isCurrentStepValid: () => boolean;
+  // New props for bifurcation
+  showBifurcation?: boolean;
+  analysisType?: 'quick' | 'deep' | null;
+  handleAnalysisChoice?: (type: 'quick' | 'deep') => void;
 }
 
 export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
@@ -76,7 +84,9 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
   totalSteps,
   handleNext,
   handlePrevious,
-  isCurrentStepValid
+  isCurrentStepValid,
+  analysisType,
+  handleAnalysisChoice
 }) => {
   // Get question configuration based on current step
   const questions = getQuestions(language);
@@ -107,18 +117,21 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
       }
     }
     
-    // For profile questions step, use different characters for different profile types
-    if (currentStepId === 'profileQuestions') {
-      switch (profileData.profileType) {
-        case 'idea':
-          return characterImages[1]; // Creative monster for idea
-        case 'solo':
-          return characterImages[5]; // Business monster for solo
-        case 'team':
-          return characterImages[4]; // Planning monster for team
-        default:
-          return characterImages[0];
-      }
+    // For cultural profile steps, use different characters
+    if (currentStepId === 'culturalProfile') {
+      return characterImages[1]; // Creative monster for cultural profile
+    }
+    
+    if (currentStepId === 'businessMaturity') {
+      return characterImages[3]; // Finance monster for business maturity
+    }
+    
+    if (currentStepId === 'managementStyle') {
+      return characterImages[4]; // Planning monster for management
+    }
+    
+    if (currentStepId === 'bifurcation') {
+      return characterImages[6]; // Analytics monster for analysis choice
     }
     
     // Fallback
@@ -136,6 +149,65 @@ export const StepContentRenderer: React.FC<StepContentRendererProps> = ({
         totalSteps={totalSteps}
         onNext={handleNext}
         isStepValid={isCurrentStepValid()}
+      />
+    );
+  }
+  
+  if (currentStepId === 'culturalProfile') {
+    return (
+      <CulturalProfileStep
+        profileData={profileData}
+        updateProfileData={updateProfileData}
+        language={language}
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
+        onNext={handleNext}
+        isStepValid={isCurrentStepValid()}
+      />
+    );
+  }
+  
+  if (currentStepId === 'businessMaturity') {
+    return (
+      <BusinessMaturityStep
+        profileData={profileData}
+        updateProfileData={updateProfileData}
+        language={language}
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        isStepValid={isCurrentStepValid()}
+      />
+    );
+  }
+  
+  if (currentStepId === 'managementStyle') {
+    return (
+      <ManagementStyleStep
+        profileData={profileData}
+        updateProfileData={updateProfileData}
+        language={language}
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        isStepValid={isCurrentStepValid()}
+      />
+    );
+  }
+  
+  if (currentStepId === 'bifurcation') {
+    return (
+      <BifurcationStep
+        profileData={profileData}
+        language={language}
+        selectedAnalysisType={analysisType}
+        onAnalysisChoice={handleAnalysisChoice!}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
       />
     );
   }

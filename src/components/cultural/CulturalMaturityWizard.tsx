@@ -22,7 +22,11 @@ export const CulturalMaturityWizard: React.FC<{
     calculateMaturityScores,
     getRecommendedAgents,
     handleCompleteWizard,
-    isCurrentStepValid
+    isCurrentStepValid,
+    // New properties for bifurcation
+    showBifurcation,
+    analysisType,
+    handleAnalysisChoice
   } = useMaturityWizard(onComplete);
 
   return (
@@ -39,6 +43,9 @@ export const CulturalMaturityWizard: React.FC<{
       calculateMaturityScores={calculateMaturityScores}
       getRecommendedAgents={getRecommendedAgents}
       handleCompleteWizard={handleCompleteWizard}
+      showBifurcation={showBifurcation}
+      analysisType={analysisType}
+      handleAnalysisChoice={handleAnalysisChoice}
     />
   );
 };

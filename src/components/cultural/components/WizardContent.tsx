@@ -19,6 +19,10 @@ interface WizardContentProps {
   calculateMaturityScores: () => any;
   getRecommendedAgents: (scores: any) => any;
   handleCompleteWizard: () => void;
+  // New props for bifurcation
+  showBifurcation?: boolean;
+  analysisType?: 'quick' | 'deep' | null;
+  handleAnalysisChoice?: (type: 'quick' | 'deep') => void;
 }
 
 export const WizardContent: React.FC<WizardContentProps> = ({
@@ -33,7 +37,10 @@ export const WizardContent: React.FC<WizardContentProps> = ({
   handlePrevious,
   calculateMaturityScores,
   getRecommendedAgents,
-  handleCompleteWizard
+  handleCompleteWizard,
+  showBifurcation,
+  analysisType,
+  handleAnalysisChoice
 }) => {
   return (
     <motion.div
@@ -66,6 +73,9 @@ export const WizardContent: React.FC<WizardContentProps> = ({
               handleNext={handleNext}
               handlePrevious={handlePrevious}
               isCurrentStepValid={isCurrentStepValid}
+              showBifurcation={showBifurcation}
+              analysisType={analysisType}
+              handleAnalysisChoice={handleAnalysisChoice}
             />
           </AnimatePresence>
         </div>
