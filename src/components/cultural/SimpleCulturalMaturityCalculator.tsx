@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getQuestions } from '@/components/maturity/getQuestions';
+import { getProfileSpecificQuestions } from '@/components/maturity/getProfileSpecificQuestions';
 import { QuestionCard } from '@/components/maturity/QuestionCard';
 import { ProgressBar } from '@/components/maturity/ProgressBar';
 
@@ -101,7 +101,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   };
 
   const t = translations[language];
-  const questions = profileType ? getQuestions(language, profileType) : [];
+  const questions = profileType ? getProfileSpecificQuestions(language, profileType) : [];
   const totalSteps = questions.length + 2; // +2 for profile type and results
   const currentStepNumber = currentStep === 'profileType' ? 1 : 
                            currentStep === 'questions' ? currentQuestionIndex + 2 :
@@ -113,13 +113,32 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     const maxPossible = questions.length * 3;
     const percentage = (total / maxPossible) * 100;
     
-    // Distribute scores across categories based on answers
-    return {
-      ideaValidation: Math.min(100, Math.round(percentage * 0.8)),
-      userExperience: Math.min(100, Math.round(percentage * 0.9)),
-      marketFit: Math.min(100, Math.round(percentage * 0.7)),
-      monetization: Math.min(100, Math.round(percentage * 0.6))
-    };
+    // Distribute scores across categories based on profile type and answers
+    const baseScore = Math.min(100, Math.round(percentage));
+    
+    // Create different score distributions based on profile type
+    if (profileType === 'idea') {
+      return {
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.9)),
+        userExperience: Math.min(100, Math.round(baseScore * 0.7)),
+        marketFit: Math.min(100, Math.round(baseScore * 0.8)),
+        monetization: Math.min(100, Math.round(baseScore * 0.6))
+      };
+    } else if (profileType === 'solo') {
+      return {
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.8)),
+        userExperience: Math.min(100, Math.round(baseScore * 0.9)),
+        marketFit: Math.min(100, Math.round(baseScore * 0.85)),
+        monetization: Math.min(100, Math.round(baseScore * 0.8))
+      };
+    } else { // team
+      return {
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.85)),
+        userExperience: Math.min(100, Math.round(baseScore * 0.8)),
+        marketFit: Math.min(100, Math.round(baseScore * 0.9)),
+        monetization: Math.min(100, Math.round(baseScore * 0.85))
+      };
+    }
   };
 
   const getRecommendations = (scores: CategoryScore): RecommendedAgents => {
