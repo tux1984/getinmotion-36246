@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CulturalMaturityWizard } from '@/components/cultural/CulturalMaturityWizard';
+import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
-import { CategoryScore } from '@/components/maturity/types';
-import { RecommendedAgents } from '@/types/dashboard';
+import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { motion } from 'framer-motion';
 
 const MaturityCalculator = () => {
@@ -67,8 +66,11 @@ const MaturityCalculator = () => {
         />
       </div>
       
-      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-0">
-        <CulturalMaturityWizard onComplete={handleComplete} />
+      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-4">
+        <SimpleCulturalMaturityCalculator 
+          language={language}
+          onComplete={handleComplete} 
+        />
       </div>
     </div>
   );
