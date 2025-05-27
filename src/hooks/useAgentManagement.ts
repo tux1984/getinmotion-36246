@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Agent, ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useAgentData } from '@/components/cultural/useAgentData';
@@ -16,6 +17,90 @@ export const useAgentManagement = () => {
 
   // Get agents using the hook
   const culturalAgents = useAgentData('en'); // Default to English, could be made dynamic
+
+  // Convert recommended agents to legacy format for dashboard display
+  const convertRecommendationsToLegacy = (recommendations: RecommendedAgents): Agent[] => {
+    const allAgents: Agent[] = [];
+    
+    // Always add admin agent as it's always recommended
+    allAgents.push({
+      id: 'admin',
+      name: 'Administrative Assistant',
+      status: 'active',
+      category: 'business',
+      activeTasks: 0,
+      color: 'bg-blue-500',
+      icon: '📋'
+    });
+
+    // Check for cultural agents in primary/secondary recommendations
+    const hasCultural = recommendations.primary?.includes('cultural') || 
+                       recommendations.secondary?.includes('cultural') ||
+                       recommendations.cultural;
+    
+    if (hasCultural) {
+      allAgents.push({
+        id: 'cultural',
+        name: 'Cultural Creator Agent',
+        status: 'active',
+        category: 'cultural',
+        activeTasks: 0,
+        color: 'bg-pink-500',
+        icon: '🎨'
+      });
+    }
+
+    // Check for other agents based on recommendations
+    const hasAccounting = recommendations.primary?.includes('finance-advisor') || 
+                         recommendations.secondary?.includes('finance-advisor') ||
+                         recommendations.accounting;
+    
+    if (hasAccounting) {
+      allAgents.push({
+        id: 'accounting',
+        name: 'Accounting Copilot',
+        status: 'active',
+        category: 'finance',
+        activeTasks: 0,
+        color: 'bg-green-500',
+        icon: '💰'
+      });
+    }
+
+    const hasLegal = recommendations.primary?.includes('legal') || 
+                     recommendations.secondary?.includes('legal') ||
+                     recommendations.legal;
+    
+    if (hasLegal) {
+      allAgents.push({
+        id: 'legal',
+        name: 'Legal Advisor',
+        status: 'active',
+        category: 'legal',
+        activeTasks: 0,
+        color: 'bg-red-500',
+        icon: '⚖️'
+      });
+    }
+
+    const hasOperations = recommendations.primary?.includes('operations') || 
+                         recommendations.secondary?.includes('operations') ||
+                         recommendations.operations;
+    
+    if (hasOperations) {
+      allAgents.push({
+        id: 'operations',
+        name: 'Operations Manager',
+        status: 'active',
+        category: 'operations',
+        activeTasks: 0,
+        color: 'bg-amber-500',
+        icon: '⚙️'
+      });
+    }
+
+    return allAgents;
+  };
 
   // Initialize data from localStorage
   useEffect(() => {
@@ -52,7 +137,26 @@ export const useAgentManagement = () => {
         // Load recommended agents
         const storedRecommended = localStorage.getItem('recommendedAgents');
         if (storedRecommended) {
-          setRecommendedAgents(JSON.parse(storedRecommended));
+          const recommendations = JSON.parse(storedRecommended);
+          setRecommendedAgents(recommendations);
+          
+          // Convert recommendations to agents for dashboard display
+          const agentsFromRecommendations = convertRecommendationsToLegacy(recommendations);
+          setAgents(agentsFromRecommendations);
+        } else {
+          // If no recommendations, show default agents based on profile type
+          const storedProfile = localStorage.getItem('profileType');
+          const currentProfileType = storedProfile as ProfileType || 'solo';
+          setProfileType(currentProfileType);
+          
+          // Create default recommendations based on profile type
+          const defaultRecommendations: RecommendedAgents = {
+            primary: ['admin'],
+            secondary: currentProfileType === 'team' ? ['operations'] : ['cultural']
+          };
+          
+          const defaultAgents = convertRecommendationsToLegacy(defaultRecommendations);
+          setAgents(defaultAgents);
         }
 
         // Load profile type
@@ -60,31 +164,34 @@ export const useAgentManagement = () => {
         if (storedProfile) {
           setProfileType(storedProfile as ProfileType);
         }
-
-        // Convert cultural agents to Agent format and set them
-        const convertedAgents: Agent[] = culturalAgents.map(agent => ({
-          id: agent.id,
-          name: agent.title,
-          status: 'active' as const,
-          category: 'cultural',
-          activeTasks: 0,
-          color: agent.color,
-          icon: agent.icon
-        }));
-        
-        setAgents(convertedAgents);
       } catch (error) {
         console.error('Error initializing data:', error);
+        // Set default agents if there's an error
+        setAgents([{
+          id: 'admin',
+          name: 'Administrative Assistant',
+          status: 'active',
+          category: 'business',
+          activeTasks: 0,
+          color: 'bg-blue-500',
+          icon: '📋'
+        }]);
       }
     };
 
     initializeData();
-  }, [culturalAgents]);
+  }, []);
 
   const handleOnboardingComplete = useCallback((scores: CategoryScore, recommended: RecommendedAgents) => {
+    console.log('Onboarding completed with recommendations:', recommended);
+    
     setMaturityScores(scores);
     setRecommendedAgents(recommended);
     setShowOnboarding(false);
+    
+    // Convert recommendations to agents for dashboard
+    const agentsFromRecommendations = convertRecommendationsToLegacy(recommended);
+    setAgents(agentsFromRecommendations);
     
     // Save to localStorage
     localStorage.setItem('maturityScores', JSON.stringify(scores));

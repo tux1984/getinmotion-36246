@@ -93,28 +93,61 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
 };
 
 export const getRecommendedAgents = (profileData: UserProfileData, scores: CategoryScore): RecommendedAgents => {
-  // Determine recommended agents based on scores and profile
+  // Create recommendations compatible with both new and legacy formats
   const recommendations: RecommendedAgents = {
     primary: [],
-    secondary: []
+    secondary: [],
+    // Legacy format for backward compatibility
+    admin: true, // Always recommend admin
+    accounting: false,
+    legal: false,
+    operations: false,
+    cultural: true // Always recommend cultural for cultural creators
   };
 
-  // Primary recommendations based on lowest scores (areas needing most help)
+  // Determine primary recommendations based on lowest scores (areas needing most help)
   const scoresArray = [
-    { category: 'ideaValidation', score: scores.ideaValidation, agent: 'idea-validator' },
-    { category: 'userExperience', score: scores.userExperience, agent: 'ux-designer' },
-    { category: 'marketFit', score: scores.marketFit, agent: 'market-analyst' },
-    { category: 'monetization', score: scores.monetization, agent: 'finance-advisor' }
+    { category: 'finance-advisor', score: scores.monetization, legacy: 'accounting' },
+    { category: 'legal', score: scores.marketFit, legacy: 'legal' },
+    { category: 'operations', score: scores.userExperience, legacy: 'operations' },
+    { category: 'cultural', score: scores.ideaValidation, legacy: 'cultural' }
   ];
 
-  // Sort by lowest scores first
+  // Sort by lowest scores first (areas needing most help)
   scoresArray.sort((a, b) => a.score - b.score);
 
-  // Recommend top 2 lowest scoring areas as primary
-  recommendations.primary = scoresArray.slice(0, 2).map(item => item.agent);
+  // Always include admin and cultural in primary
+  recommendations.primary = ['admin', 'cultural'];
+  
+  // Add the most needed agent to primary
+  const mostNeeded = scoresArray[0];
+  if (mostNeeded.category !== 'cultural') {
+    recommendations.primary.push(mostNeeded.category);
+    // Set legacy format
+    (recommendations as any)[mostNeeded.legacy] = true;
+  }
 
-  // Recommend next 2 as secondary
-  recommendations.secondary = scoresArray.slice(2, 4).map(item => item.agent);
+  // Add secondary recommendations
+  recommendations.secondary = [];
+  const secondaryNeeded = scoresArray.slice(1, 3);
+  
+  secondaryNeeded.forEach(item => {
+    if (item.category !== 'cultural' && !recommendations.primary?.includes(item.category)) {
+      recommendations.secondary?.push(item.category);
+      // Set legacy format for potential secondary agents
+      if (item.score < 40) { // Only recommend if score is low enough
+        (recommendations as any)[item.legacy] = true;
+      }
+    }
+  });
 
+  // Enhanced recommendations for deep analysis
+  if (profileData.analysisPreference === 'deep') {
+    recommendations.extended = {
+      ...recommendations
+    };
+  }
+
+  console.log('Generated recommendations:', recommendations);
   return recommendations;
 };

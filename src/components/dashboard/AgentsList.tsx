@@ -20,6 +20,8 @@ export const AgentsList: React.FC<AgentsListProps> = ({
   language
 }) => {
   const isMobile = useIsMobile();
+  
+  console.log('AgentsList rendering with agents:', agents);
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -38,14 +40,20 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       </div>
       
       <div className="grid grid-cols-1 gap-2 sm:gap-3">
-        {agents.map((agent) => (
-          <AgentCard 
-            key={agent.id}
-            agent={agent}
-            onActionClick={onAgentAction}
-            language={language}
-          />
-        ))}
+        {agents.length > 0 ? (
+          agents.map((agent) => (
+            <AgentCard 
+              key={agent.id}
+              agent={agent}
+              onActionClick={onAgentAction}
+              language={language}
+            />
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            {language === 'en' ? 'No agents available' : 'No hay agentes disponibles'}
+          </div>
+        )}
         
         {/* Add new agent card */}
         <div 
