@@ -22,11 +22,11 @@ interface HeroSectionProps {
 export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
   const t = heroTranslations[language];
 
-  // Slide data
+  // Slide data with fixed image URLs
   const slides = [
     {
       ...t.slide1,
-      image: '/lovable-uploads/e8a28766-b792-4f42-a39b-4efa30630520.png',
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
       imageAlt: 'GET IN MOTION Platform for Creative Artists',
       action: () => {
         document.getElementById('user-profile-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -35,7 +35,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
     },
     {
       ...t.slide2,
-      image: '/lovable-uploads/29ee6c88-14b5-4d1e-a714-025b093eaaa7.png',
+      image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=600&fit=crop',
       imageAlt: 'AI-Powered Creative Tools',
       action: () => {
         document.getElementById('product-explanation')?.scrollIntoView({ behavior: 'smooth' });
@@ -44,7 +44,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
     },
     {
       ...t.slide3,
-      image: '/lovable-uploads/e8a28766-b792-4f42-a39b-4efa30630520.png',
+      image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop',
       imageAlt: 'Join Creative Community',
       action: onJoinWaitlist,
       isLastSlide: true
