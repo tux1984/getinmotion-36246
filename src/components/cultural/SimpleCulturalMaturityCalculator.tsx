@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+
+import React, { useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
@@ -15,6 +16,9 @@ import { ResultsDisplay } from './components/ResultsDisplay';
 import { BifurcationChoice } from './components/BifurcationChoice';
 import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
 import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
+import { MobileHeader } from './components/MobileHeader';
+import { MobileNavigation } from './components/MobileNavigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SimpleCulturalMaturityCalculatorProps {
   language: 'en' | 'es';
@@ -35,6 +39,8 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   language, 
   onComplete 
 }) => {
+  const isMobile = useIsMobile();
+
   const {
     currentStep,
     setCurrentStep,
@@ -187,35 +193,57 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     return undefined;
   }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length]);
 
+  // Auto-scroll to top on step change for mobile
+  useEffect(() => {
+    if (isMobile) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep, currentQuestionIndex, isMobile]);
+
   return (
     <OnboardingErrorBoundary>
       <div className="w-full max-w-4xl mx-auto">
-        <Card className="border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm">
-          <CardContent className="pt-8 px-8">
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold text-purple-900 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                  {t.title}
-                </h3>
-                <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-                  {language === 'en' 
-                    ? `Step ${currentStepNumber} of ${totalSteps}` 
-                    : `Paso ${currentStepNumber} de ${totalSteps}`}
-                </span>
-              </div>
-              
-              <ProgressBar current={currentStepNumber} total={totalSteps} />
-            </div>
+        {/* Mobile Header */}
+        {isMobile && (
+          <MobileHeader 
+            title={t.title}
+            currentStep={currentStepNumber}
+            totalSteps={totalSteps}
+            language={language}
+          />
+        )}
 
-            <div className="flex gap-8 items-start">
-              {/* Character Image */}
-              <div className="hidden md:block w-1/3">
-                <OptimizedCharacterImage
-                  src={getCurrentCharacterImage}
-                  alt="Character"
-                  preloadNext={getNextCharacterImage}
-                />
+        <Card className={`border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-t-none border-t-0' : ''}`}>
+          <CardContent className={`${isMobile ? 'pt-4 px-4 pb-20' : 'pt-8 px-8'}`}>
+            {/* Desktop Header */}
+            {!isMobile && (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-2xl font-bold text-purple-900 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                    {t.title}
+                  </h3>
+                  <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+                    {language === 'en' 
+                      ? `Step ${currentStepNumber} of ${totalSteps}` 
+                      : `Paso ${currentStepNumber} de ${totalSteps}`}
+                  </span>
+                </div>
+                
+                <ProgressBar current={currentStepNumber} total={totalSteps} />
               </div>
+            )}
+
+            <div className={`flex gap-8 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
+              {/* Character Image - Hidden on mobile for better space utilization */}
+              {!isMobile && (
+                <div className="w-1/3">
+                  <OptimizedCharacterImage
+                    src={getCurrentCharacterImage}
+                    alt="Character"
+                    preloadNext={getNextCharacterImage}
+                  />
+                </div>
+              )}
 
               {/* Content */}
               <div className="flex-1">
@@ -226,7 +254,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <ProfileTypeSelector
                         profileType={profileType}
@@ -242,7 +270,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <QuestionCard 
                         question={questions[currentQuestionIndex]}
@@ -258,7 +286,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <BifurcationChoice
                         language={language}
@@ -274,7 +302,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <QuestionCard 
                         question={extendedQuestions[currentQuestionIndex]}
@@ -290,7 +318,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <ResultsDisplay
                         scores={scores}
@@ -305,32 +333,46 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
               </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex justify-between pt-6 pb-4">
-              <DebouncedButton 
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 'profileType'}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t.back}
-              </DebouncedButton>
-
-              {currentStep !== 'results' && (
+            {/* Desktop Navigation */}
+            {!isMobile && (
+              <div className="flex justify-between pt-6 pb-4">
                 <DebouncedButton 
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentStep === 'profileType'}
+                  className="flex items-center gap-2"
                 >
-                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
-                    ? t.complete 
-                    : t.next}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4" />
+                  {t.back}
                 </DebouncedButton>
-              )}
-            </div>
+
+                {currentStep !== 'results' && (
+                  <DebouncedButton 
+                    onClick={handleNext}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
+                  >
+                    {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
+                      ? t.complete 
+                      : t.next}
+                    <ArrowRight className="h-4 w-4" />
+                  </DebouncedButton>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Mobile Navigation - Fixed at bottom */}
+        {isMobile && (
+          <MobileNavigation
+            onBack={handleBack}
+            onNext={handleNext}
+            canGoBack={currentStep !== 'profileType'}
+            showNext={currentStep !== 'results'}
+            nextLabel={currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 ? t.complete : t.next}
+            backLabel={t.back}
+          />
+        )}
       </div>
     </OnboardingErrorBoundary>
   );
