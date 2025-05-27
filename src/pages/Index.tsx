@@ -61,10 +61,12 @@ const Index = () => {
         <HeroSection language={language} onJoinWaitlist={handleJoinWaitlist} />
         
         {/* User Profile Types Module */}
-        <UserProfileSection />
+        <div id="user-profile-section">
+          <UserProfileSection />
+        </div>
         
         {/* Product Explanation Module */}
-        <div className="w-full">
+        <div className="w-full" id="product-explanation">
           <ProductExplanation />
         </div>
 
