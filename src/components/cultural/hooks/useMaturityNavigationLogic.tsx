@@ -55,7 +55,7 @@ export const useMaturityNavigationLogic = ({
       }
 
       if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
         const finalScores = calculateScores();
         const recommendations = getRecommendations(finalScores);
@@ -68,7 +68,7 @@ export const useMaturityNavigationLogic = ({
 
   const handleBack = useCallback(() => {
     if (currentStep === 'questions' && currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     } else if (currentStep === 'questions' && currentQuestionIndex === 0) {
       setCurrentStep('profileType');
     } else if (currentStep === 'results') {
