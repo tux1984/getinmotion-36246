@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
+import { UserManagement } from '@/components/admin/UserManagement';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -97,13 +99,36 @@ const Admin = () => {
               <SupabaseStatus />
             </div>
             
-            <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
-              <WaitlistTable 
-                data={waitlistData} 
-                isLoading={isLoading} 
-                onRefresh={handleRefresh} 
-              />
-            </div>
+            <Tabs defaultValue="users" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-indigo-900/50">
+                <TabsTrigger 
+                  value="users"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                >
+                  Gestión de Usuarios
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="waitlist"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                >
+                  Lista de Espera
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="users" className="mt-6">
+                <UserManagement />
+              </TabsContent>
+              
+              <TabsContent value="waitlist" className="mt-6">
+                <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
+                  <WaitlistTable 
+                    data={waitlistData} 
+                    isLoading={isLoading} 
+                    onRefresh={handleRefresh} 
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>

@@ -5,10 +5,10 @@ import { ProductExplanation } from '@/components/ProductExplanation';
 import { ValueProposition } from '@/components/ValueProposition';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
-import { AccessSection } from '@/components/sections/AccessSection';
 import { UserProfileSection } from '@/components/sections/UserProfileSection';
 import { useLanguage } from '@/context/LanguageContext';
-import { useAccessForm } from '@/hooks/useAccessForm';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const { language } = useLanguage();
@@ -19,48 +19,21 @@ const Index = () => {
       navAbout: "About Us",
       navCases: "Case Studies",
       navAccess: "Access",
-      formTitle: "Join GET IN MOTION",
-      waitlist: "Waitlist",
-      accessCode: "I have a code",
-      accessCodePlaceholder: "Access code",
-      verifying: "Verifying...",
-      accessButton: "Access MVP",
-      incorrectCode: "Incorrect code",
-      invalidCodeMessage: "The access code you entered is invalid.",
-      maturityCalculator: "Project Maturity Calculator",
-      maturityCalculatorDesc: "Evaluate your project's maturity and get personalized recommendations"
+      accessPlatform: "Access Platform",
+      accessDescription: "Sign in to access your personalized cultural creation dashboard",
+      loginButton: "Sign In"
     },
     es: {
       navAbout: "Nosotros",
       navCases: "Casos",
       navAccess: "Acceder",
-      formTitle: "Únete a GET IN MOTION",
-      waitlist: "Lista de espera",
-      accessCode: "Tengo un código",
-      accessCodePlaceholder: "Código de acceso",
-      verifying: "Verificando...",
-      accessButton: "Acceder al MVP",
-      incorrectCode: "Código incorrecto",
-      invalidCodeMessage: "El código de acceso que has introducido no es válido.",
-      maturityCalculator: "Calculadora de Madurez del Proyecto",
-      maturityCalculatorDesc: "Evalúa la madurez de tu proyecto y obtén recomendaciones personalizadas"
+      accessPlatform: "Acceder a la Plataforma",
+      accessDescription: "Inicia sesión para acceder a tu dashboard personalizado de creación cultural",
+      loginButton: "Iniciar Sesión"
     }
   };
   
   const t = translations[language];
-  
-  const {
-    accessCode,
-    setAccessCode,
-    isLoading,
-    showWaitlistForm,
-    setShowWaitlistForm,
-    validCode,
-    handleAccessSubmit,
-    handleWaitlistClick,
-    handleWaitlistSubmitted,
-    handleCodeSubmitted
-  } = useAccessForm({ translations: t });
 
   const handleAccessClick = () => {
     document.getElementById('access')?.scrollIntoView({ behavior: 'smooth' });
@@ -78,7 +51,7 @@ const Index = () => {
       />
       
       <main className="flex-grow w-full">
-        <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
+        <HeroSection language={language} onJoinWaitlist={() => {}} />
         
         {/* User Profile Types Module */}
         <UserProfileSection />
@@ -88,29 +61,29 @@ const Index = () => {
           <ProductExplanation />
         </div>
         
-        {/* Access Form Section */}
-        <AccessSection
-          language={language}
-          translations={{
-            formTitle: t.formTitle,
-            waitlist: t.waitlist,
-            accessCode: t.accessCode,
-            accessCodePlaceholder: t.accessCodePlaceholder,
-            verifying: t.verifying,
-            accessButton: t.accessButton,
-            maturityCalculator: t.maturityCalculator,
-            maturityCalculatorDesc: t.maturityCalculatorDesc
-          }}
-          accessCode={accessCode}
-          setAccessCode={setAccessCode}
-          isLoading={isLoading}
-          showWaitlistForm={showWaitlistForm}
-          setShowWaitlistForm={setShowWaitlistForm}
-          validCode={validCode}
-          handleAccessSubmit={handleAccessSubmit}
-          handleWaitlistSubmitted={handleWaitlistSubmitted}
-          handleCodeSubmitted={handleCodeSubmitted}
-        />
+        {/* Access Section - Simplified */}
+        <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8" id="access">
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition duration-300"></div>
+              <div className="bg-indigo-950/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden relative border border-indigo-800/30">
+                <div className="p-4 md:p-8 text-center">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
+                    {t.accessPlatform}
+                  </h2>
+                  <p className="text-indigo-200 mb-6">
+                    {t.accessDescription}
+                  </p>
+                  <Link to="/login">
+                    <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-none">
+                      {t.loginButton}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <ValueProposition language={language} />
       </main>
