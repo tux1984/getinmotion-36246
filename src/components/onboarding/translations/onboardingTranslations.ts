@@ -33,34 +33,47 @@ type OnboardingTranslations = {
 };
 
 export const getOnboardingTranslations = (profileType: ProfileType): OnboardingTranslations => {
+  const profileDescriptions = {
+    en: {
+      idea: 'cultural idea',
+      solo: 'cultural venture',
+      team: 'cultural team project'
+    },
+    es: {
+      idea: 'idea cultural',
+      solo: 'emprendimiento cultural',
+      team: 'proyecto cultural en equipo'
+    }
+  };
+
   return {
     en: {
       welcome: "Welcome to GET IN MOTION",
-      welcomeDesc: "Let's set up your workspace based on your project status.",
-      profileQuestions: "Tell us about your project",
-      profileQuestionsDesc: `Let's learn more about your ${profileType === 'idea' ? 'idea' : profileType === 'team' ? 'team' : 'solo project'}.`,
-      initialRecommendations: "Your initial recommendations",
-      initialRecommendationsDesc: "Based on your profile, here are our initial recommendations for you.",
-      extendedQuestions: "Enhanced analysis",
-      extendedQuestionsDesc: "Let's dive deeper to provide more personalized recommendations.",
-      compareResults: "Compare recommendations",
-      compareResultsDesc: "See how additional information refined our recommendations for you.",
-      finalizing: "Finalizing Your Workspace",
-      finalizingDesc: "We're setting up your personalized dashboard with the recommended tools."
+      welcomeDesc: "Let's set up your cultural workspace based on your creative project.",
+      profileQuestions: "Tell us about your cultural project",
+      profileQuestionsDesc: `Let's learn more about your ${profileDescriptions.en[profileType]} and creative industry.`,
+      initialRecommendations: "Your personalized cultural agents",
+      initialRecommendationsDesc: "Based on your cultural entrepreneur profile, here are our specialized recommendations.",
+      extendedQuestions: "Deep cultural analysis",
+      extendedQuestionsDesc: "Let's dive deeper into your creative business to provide more specialized recommendations.",
+      compareResults: "Enhanced recommendations",
+      compareResultsDesc: "See how the additional information refined our cultural agent recommendations for you.",
+      finalizing: "Setting up your creative workspace",
+      finalizingDesc: "We're preparing your personalized dashboard with specialized tools for cultural entrepreneurs."
     },
     es: {
       welcome: "Bienvenido a GET IN MOTION",
-      welcomeDesc: "Configuremos tu espacio de trabajo según el estado de tu proyecto.",
-      profileQuestions: "Cuéntanos sobre tu proyecto",
-      profileQuestionsDesc: `Conozcamos más sobre tu ${profileType === 'idea' ? 'idea' : profileType === 'team' ? 'equipo' : 'proyecto individual'}.`,
-      initialRecommendations: "Tus recomendaciones iniciales",
-      initialRecommendationsDesc: "Basado en tu perfil, aquí están nuestras recomendaciones iniciales para ti.",
-      extendedQuestions: "Análisis mejorado",
-      extendedQuestionsDesc: "Profundicemos más para brindarte recomendaciones más personalizadas.",
-      compareResults: "Comparar recomendaciones",
-      compareResultsDesc: "Mira cómo la información adicional refinó nuestras recomendaciones para ti.",
-      finalizing: "Finalizando Tu Espacio de Trabajo",
-      finalizingDesc: "Estamos configurando tu panel personalizado con las herramientas recomendadas."
+      welcomeDesc: "Configuremos tu espacio de trabajo cultural según tu proyecto creativo.",
+      profileQuestions: "Contanos sobre tu proyecto cultural",
+      profileQuestionsDesc: `Conozcamos más sobre tu ${profileDescriptions.es[profileType]} y tu industria creativa.`,
+      initialRecommendations: "Tus agentes culturales personalizados",
+      initialRecommendationsDesc: "Basado en tu perfil de emprendedor cultural, aquí están nuestras recomendaciones especializadas.",
+      extendedQuestions: "Análisis cultural profundo", 
+      extendedQuestionsDesc: "Profundicemos más en tu negocio creativo para brindarte recomendaciones más especializadas.",
+      compareResults: "Recomendaciones mejoradas",
+      compareResultsDesc: "Mirá cómo la información adicional refinó nuestras recomendaciones de agentes culturales para vos.",
+      finalizing: "Configurando tu espacio creativo",
+      finalizingDesc: "Estamos preparando tu panel personalizado con herramientas especializadas para emprendedores culturales."
     }
   };
 };
