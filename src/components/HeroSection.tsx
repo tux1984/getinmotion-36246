@@ -30,7 +30,8 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
       imageAlt: 'GET IN MOTION Platform for Creative Artists',
       action: () => {
         document.getElementById('user-profile-section')?.scrollIntoView({ behavior: 'smooth' });
-      }
+      },
+      isLastSlide: false
     },
     {
       ...t.slide2,
@@ -38,7 +39,8 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
       imageAlt: 'AI-Powered Creative Tools',
       action: () => {
         document.getElementById('product-explanation')?.scrollIntoView({ behavior: 'smooth' });
-      }
+      },
+      isLastSlide: false
     },
     {
       ...t.slide3,
