@@ -16,37 +16,46 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
   const t = heroTranslations[language];
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900 to-purple-900 py-24 md:py-32 relative overflow-hidden">
+    <div className="w-full bg-gradient-to-br from-indigo-900 to-purple-900 relative overflow-hidden">
       <HeroBackground />
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-          <HeroContent 
-            title={t.title}
-            subtitle={t.subtitle}
-            waitlist={t.waitlist}
-            onJoinWaitlist={onJoinWaitlist}
-          />
-          
-          <HeroImage />
+      {/* Main hero content */}
+      <div className="w-full py-16 md:py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <HeroContent 
+              title={t.title}
+              subtitle={t.subtitle}
+              waitlist={t.waitlist}
+              onJoinWaitlist={onJoinWaitlist}
+            />
+            
+            <HeroImage />
+          </div>
         </div>
       </div>
       
+      {/* Chat boxes section integrated without gap */}
       <HeroChatBoxes language={language} />
       
-      <FeatureCards 
-        whatIsMotion={t.whatIsMotion}
-        motionDescription={t.motionDescription}
-        motionPurpose={t.motionPurpose}
-        creativePlatform={t.creativePlatform}
-        creativePlatformDesc={t.creativePlatformDesc}
-        businessSuite={t.businessSuite}
-        businessSuiteDesc={t.businessSuiteDesc}
-        timeProtector={t.timeProtector}
-        timeProtectorDesc={t.timeProtectorDesc}
-        growthPartner={t.growthPartner}
-        growthPartnerDesc={t.growthPartnerDesc}
-      />
+      {/* Feature cards section integrated */}
+      <div className="w-full py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FeatureCards 
+            whatIsMotion={t.whatIsMotion}
+            motionDescription={t.motionDescription}
+            motionPurpose={t.motionPurpose}
+            creativePlatform={t.creativePlatform}
+            creativePlatformDesc={t.creativePlatformDesc}
+            businessSuite={t.businessSuite}
+            businessSuiteDesc={t.businessSuiteDesc}
+            timeProtector={t.timeProtector}
+            timeProtectorDesc={t.timeProtectorDesc}
+            growthPartner={t.growthPartner}
+            growthPartnerDesc={t.growthPartnerDesc}
+          />
+        </div>
+      </div>
     </div>
   );
 };
