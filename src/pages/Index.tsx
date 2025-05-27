@@ -98,7 +98,7 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-indigo-950 to-purple-950">
       <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <div className="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <MotionLogo variant="light" size="lg" />
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="bg-indigo-900/40 p-2 rounded-lg">
@@ -137,10 +137,8 @@ const Index = () => {
         <HeroSection language={language} onJoinWaitlist={handleWaitlistClick} />
         
         {/* User Profile Types Module */}
-        <div className="w-full py-8 md:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <UserProfileTypes />
-          </div>
+        <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+          <UserProfileTypes />
         </div>
         
         {/* Product Explanation Module */}
@@ -149,8 +147,8 @@ const Index = () => {
         </div>
         
         {/* Access Form Section */}
-        <div className="w-full py-8 md:py-12" id="access">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8" id="access">
+          <div className="w-full max-w-2xl mx-auto">
             {showWaitlistForm ? (
               <WaitlistForm 
                 language={language} 

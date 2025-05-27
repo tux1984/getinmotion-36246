@@ -40,8 +40,8 @@ export const UserProfileTypes: React.FC = () => {
   const t = translations[language];
 
   return (
-    <div className="py-16 bg-gradient-to-br from-indigo-900/70 to-purple-900/70 rounded-xl backdrop-blur-sm" id="profile-types">
-      <div className="container mx-auto px-4">
+    <div className="w-full py-16 bg-gradient-to-br from-indigo-900/70 to-purple-900/70 rounded-xl backdrop-blur-sm" id="profile-types">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">{t.title}</h2>
           <p className="text-lg text-indigo-100 max-w-3xl mx-auto">{t.subtitle}</p>

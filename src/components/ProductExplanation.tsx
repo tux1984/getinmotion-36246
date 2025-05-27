@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -78,8 +77,8 @@ export const ProductExplanation = () => {
   ];
 
   return (
-    <div className="py-16 bg-gradient-to-br from-indigo-950/80 to-purple-950/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4">
+    <div className="w-full py-16 bg-gradient-to-br from-indigo-950/80 to-purple-950/80 backdrop-blur-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">
             {t.title}

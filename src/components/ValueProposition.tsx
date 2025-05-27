@@ -57,8 +57,8 @@ export const ValueProposition = ({ language }: ValuePropositionProps) => {
   const t = translations[language];
 
   return (
-    <section className="py-16 bg-white" id="benefits">
-      <div className="container mx-auto px-4">
+    <section className="w-full py-16 bg-white" id="benefits">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">{t.title}</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
