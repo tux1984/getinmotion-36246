@@ -67,18 +67,18 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     en: {
       title: "Cultural Maturity Assessment",
       subtitle: "Let's evaluate your creative project's development stage",
-      profileTypeTitle: "Select Your Profile Type",
+      profileTypeTitle: "Where are you today with your cultural or creative project?",
       profileTypeSubtitle: "Choose the option that best describes your current situation",
       idea: {
-        title: "I have an idea",
+        title: "I have an idea, but haven't started it yet",
         description: "I'm in the early stages with a creative concept or business idea I want to develop"
       },
       solo: {
-        title: "I work solo",
+        title: "My venture is already working, but I'm alone",
         description: "I'm an individual creator, freelancer, or solo entrepreneur managing my creative business"
       },
       team: {
-        title: "I lead a team",
+        title: "I have a team assembled and running",
         description: "I manage a team or organization in the creative or cultural sector"
       },
       next: "Next",
@@ -97,18 +97,18 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     es: {
       title: "Evaluación de Madurez Cultural",
       subtitle: "Vamos a evaluar la etapa de desarrollo de tu proyecto creativo",
-      profileTypeTitle: "Selecciona Tu Tipo de Perfil",
+      profileTypeTitle: "¿Dónde estás hoy con tu proyecto cultural o creativo?",
       profileTypeSubtitle: "Elige la opción que mejor describe tu situación actual",
       idea: {
-        title: "Tengo una idea",
+        title: "Tengo una idea, pero aún no la puse en marcha",
         description: "Estoy en las primeras etapas con un concepto creativo o idea de negocio que quiero desarrollar"
       },
       solo: {
-        title: "Trabajo solo",
+        title: "Mi emprendimiento ya funciona, pero estoy solo/a",
         description: "Soy un creador individual, freelancer o emprendedor solitario que gestiona mi negocio creativo"
       },
       team: {
-        title: "Lidero un equipo",
+        title: "Tengo un equipo armado y en marcha",
         description: "Gestiono un equipo u organización en el sector creativo o cultural"
       },
       next: "Siguiente",

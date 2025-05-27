@@ -1,517 +1,825 @@
 
-import React from 'react';
-import { Lightbulb, User, Users, Target, TrendingUp, DollarSign, Clock, CheckCircle, AlertCircle, Search, Palette, Music, Calendar, Heart, Globe, Handshake, BarChart, FileText, Settings } from 'lucide-react';
-import { Question, Language, ProfileType } from './types';
+import { QuestionConfig } from '@/components/cultural/wizard-components/QuestionStep';
+import { Music, Palette, Scissors, Users, Heart, Calendar, Lightbulb, Target, Clock, Search, DollarSign, Eye, CreditCard, Instagram, FileText, Building, Briefcase, CheckCircle } from 'lucide-react';
 
-export const getProfileSpecificQuestions = (language: Language, profileType: ProfileType): Question[] => {
-  const questionSets = {
-    idea: {
-      en: [
-        {
-          id: 'idea-clarity',
-          question: 'How clear and specific is your creative idea?',
+export const getProfileSpecificQuestions = (language: 'en' | 'es', profileType: 'idea' | 'solo' | 'team'): QuestionConfig[] => {
+  const t = {
+    en: {
+      // IDEA Profile Questions
+      idea: {
+        industry: {
+          title: "What is your main creative industry or field?",
           options: [
-            { id: 'idea-clarity-1', text: 'Just a rough concept', value: 1, icon: <Lightbulb size={20} /> },
-            { id: 'idea-clarity-2', text: 'General direction with some details', value: 2, icon: <Lightbulb size={20} /> },
-            { id: 'idea-clarity-3', text: 'Well-defined concept with clear features', value: 3, icon: <Lightbulb size={20} /> }
+            { id: 'music', label: 'Music' },
+            { id: 'visual', label: 'Visual arts' },
+            { id: 'crafts', label: 'Crafts' },
+            { id: 'theater', label: 'Theater' },
+            { id: 'dance', label: 'Dance' },
+            { id: 'wellness', label: 'Home or body products' },
+            { id: 'other', label: 'Other' }
           ]
         },
-        {
-          id: 'market-research',
-          question: 'Have you researched your target audience and market?',
+        activities: {
+          title: "What activities do you imagine developing?",
           options: [
-            { id: 'market-research-1', text: 'No research done yet', value: 1, icon: <Search size={20} /> },
-            { id: 'market-research-2', text: 'Some informal research', value: 2, icon: <Search size={20} /> },
-            { id: 'market-research-3', text: 'Structured market analysis', value: 3, icon: <Search size={20} /> }
+            { id: 'create', label: 'Create physical objects' },
+            { id: 'teach', label: 'Give workshops' },
+            { id: 'artistic', label: 'Artistic services' },
+            { id: 'social', label: 'Publish works on social media' },
+            { id: 'other', label: 'Other' }
           ]
         },
-        {
-          id: 'creative-validation',
-          question: 'Have you tested your creative concept with potential users?',
+        ideaAge: {
+          title: "How long ago did this idea emerge?",
           options: [
-            { id: 'creative-validation-1', text: 'No validation yet', value: 1, icon: <CheckCircle size={20} /> },
-            { id: 'creative-validation-2', text: 'Feedback from friends/family', value: 2, icon: <CheckCircle size={20} /> },
-            { id: 'creative-validation-3', text: 'Feedback from target audience', value: 3, icon: <CheckCircle size={20} /> }
+            { id: 'under6months', label: 'Less than 6 months' },
+            { id: '6months2years', label: '6 months - 2 years' },
+            { id: 'over2years', label: 'More than 2 years' }
           ]
         },
-        {
-          id: 'competitive-analysis',
-          question: 'Do you know who your competitors are in the cultural sector?',
+        phase: {
+          title: "What phase is your idea in?",
           options: [
-            { id: 'competitive-analysis-1', text: 'No idea about competition', value: 1, icon: <BarChart size={20} /> },
-            { id: 'competitive-analysis-2', text: 'Aware of some competitors', value: 2, icon: <BarChart size={20} /> },
-            { id: 'competitive-analysis-3', text: 'Detailed competitive analysis', value: 3, icon: <BarChart size={20} /> }
+            { id: 'justIdea', label: 'Just an idea' },
+            { id: 'research', label: 'Research phase' },
+            { id: 'prototype', label: 'Prototype' },
+            { id: 'seeking', label: 'Seeking support' }
           ]
         },
-        {
-          id: 'revenue-model',
-          question: 'Do you have a clear idea of how you will generate income?',
+        plan: {
+          title: "Do you have a written plan or strategy?",
           options: [
-            { id: 'revenue-model-1', text: 'No clear revenue plan', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'revenue-model-2', text: 'Basic pricing ideas', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'revenue-model-3', text: 'Defined revenue streams', value: 3, icon: <DollarSign size={20} /> }
+            { id: 'yes', label: 'Yes' },
+            { id: 'somewhat', label: 'More or less' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'cultural-uniqueness',
-          question: 'What makes your cultural offering unique?',
+        resources: {
+          title: "Do you have initial resources?",
           options: [
-            { id: 'cultural-uniqueness-1', text: 'Similar to existing offerings', value: 1, icon: <Palette size={20} /> },
-            { id: 'cultural-uniqueness-2', text: 'Some unique elements', value: 2, icon: <Palette size={20} /> },
-            { id: 'cultural-uniqueness-3', text: 'Highly innovative approach', value: 3, icon: <Palette size={20} /> }
+            { id: 'savings', label: 'Savings' },
+            { id: 'seeking', label: 'Seeking support' },
+            { id: 'none', label: 'No resources' }
           ]
         },
-        {
-          id: 'startup-timeline',
-          question: 'What is your timeline to launch your cultural project?',
+        team: {
+          title: "Do you work alone or with others?",
           options: [
-            { id: 'startup-timeline-1', text: 'No specific timeline', value: 1, icon: <Clock size={20} /> },
-            { id: 'startup-timeline-2', text: 'Rough timeline in mind', value: 2, icon: <Clock size={20} /> },
-            { id: 'startup-timeline-3', text: 'Detailed launch plan', value: 3, icon: <Clock size={20} /> }
+            { id: 'alone', label: 'Alone' },
+            { id: 'family', label: 'Family/friends' },
+            { id: 'seeking', label: 'Seeking team' }
           ]
         },
-        {
-          id: 'resource-needs',
-          question: 'Do you know what resources you need to start?',
+        organization: {
+          title: "How do you organize your ideas and tasks?",
           options: [
-            { id: 'resource-needs-1', text: 'Unclear about needs', value: 1, icon: <Settings size={20} /> },
-            { id: 'resource-needs-2', text: 'General idea of needs', value: 2, icon: <Settings size={20} /> },
-            { id: 'resource-needs-3', text: 'Detailed resource plan', value: 3, icon: <Settings size={20} /> }
+            { id: 'paper', label: 'Paper' },
+            { id: 'phone', label: 'Phone notes' },
+            { id: 'digital', label: 'Digital tools' },
+            { id: 'none', label: 'No method' }
           ]
         },
-        {
-          id: 'cultural-impact',
-          question: 'Have you defined the cultural impact you want to create?',
+        goals: {
+          title: "Do you set goals or deadlines?",
           options: [
-            { id: 'cultural-impact-1', text: 'No clear impact vision', value: 1, icon: <Heart size={20} /> },
-            { id: 'cultural-impact-2', text: 'General impact goals', value: 2, icon: <Heart size={20} /> },
-            { id: 'cultural-impact-3', text: 'Clear cultural mission', value: 3, icon: <Heart size={20} /> }
+            { id: 'yes', label: 'Yes' },
+            { id: 'sometimes', label: 'Sometimes' },
+            { id: 'no', label: 'No' }
           ]
         }
-      ],
-      es: [
-        {
-          id: 'idea-clarity',
-          question: '¿Qué tan clara y específica es tu idea creativa?',
+      },
+      // SOLO Profile Questions
+      solo: {
+        industry: {
+          title: "What is your creative industry?",
           options: [
-            { id: 'idea-clarity-1', text: 'Solo un concepto aproximado', value: 1, icon: <Lightbulb size={20} /> },
-            { id: 'idea-clarity-2', text: 'Dirección general con algunos detalles', value: 2, icon: <Lightbulb size={20} /> },
-            { id: 'idea-clarity-3', text: 'Concepto bien definido con características claras', value: 3, icon: <Lightbulb size={20} /> }
+            { id: 'music', label: 'Music' },
+            { id: 'visual', label: 'Visual arts' },
+            { id: 'crafts', label: 'Crafts' },
+            { id: 'theater', label: 'Theater' },
+            { id: 'dance', label: 'Dance' },
+            { id: 'wellness', label: 'Home or body products' },
+            { id: 'other', label: 'Other' }
           ]
         },
-        {
-          id: 'market-research',
-          question: '¿Has investigado tu audiencia objetivo y el mercado?',
+        activities: {
+          title: "What activities do you currently do?",
           options: [
-            { id: 'market-research-1', text: 'No he hecho investigación aún', value: 1, icon: <Search size={20} /> },
-            { id: 'market-research-2', text: 'Algo de investigación informal', value: 2, icon: <Search size={20} /> },
-            { id: 'market-research-3', text: 'Análisis estructurado del mercado', value: 3, icon: <Search size={20} /> }
+            { id: 'products', label: 'Sell products' },
+            { id: 'services', label: 'Artistic services' },
+            { id: 'classes', label: 'Classes or workshops' },
+            { id: 'experiences', label: 'Experiences' },
+            { id: 'digital', label: 'Digital content' }
           ]
         },
-        {
-          id: 'creative-validation',
-          question: '¿Has probado tu concepto creativo con usuarios potenciales?',
+        timeActive: {
+          title: "How long have you been active with this project?",
           options: [
-            { id: 'creative-validation-1', text: 'Sin validación aún', value: 1, icon: <CheckCircle size={20} /> },
-            { id: 'creative-validation-2', text: 'Comentarios de amigos/familia', value: 2, icon: <CheckCircle size={20} /> },
-            { id: 'creative-validation-3', text: 'Feedback de audiencia objetivo', value: 3, icon: <CheckCircle size={20} /> }
+            { id: 'under6months', label: 'Less than 6 months' },
+            { id: '6months2years', label: '6 months - 2 years' },
+            { id: 'over2years', label: 'More than 2 years' }
           ]
         },
-        {
-          id: 'competitive-analysis',
-          question: '¿Conoces quiénes son tus competidores en el sector cultural?',
+        payment: {
+          title: "What method do you use to charge?",
           options: [
-            { id: 'competitive-analysis-1', text: 'No tengo idea de la competencia', value: 1, icon: <BarChart size={20} /> },
-            { id: 'competitive-analysis-2', text: 'Conozco algunos competidores', value: 2, icon: <BarChart size={20} /> },
-            { id: 'competitive-analysis-3', text: 'Análisis detallado de competencia', value: 3, icon: <BarChart size={20} /> }
+            { id: 'cash', label: 'Cash' },
+            { id: 'transfer', label: 'Bank transfers' },
+            { id: 'platform', label: 'Payment platform' },
+            { id: 'combined', label: 'Combined' }
           ]
         },
-        {
-          id: 'revenue-model',
-          question: '¿Tienes una idea clara de cómo generarás ingresos?',
+        finances: {
+          title: "Do you keep track of income and expenses?",
           options: [
-            { id: 'revenue-model-1', text: 'No tengo plan de ingresos claro', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'revenue-model-2', text: 'Ideas básicas de precios', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'revenue-model-3', text: 'Flujos de ingresos definidos', value: 3, icon: <DollarSign size={20} /> }
+            { id: 'yes', label: 'Yes' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'cultural-uniqueness',
-          question: '¿Qué hace única tu oferta cultural?',
+        brand: {
+          title: "Do you have a defined brand or visual identity?",
           options: [
-            { id: 'cultural-uniqueness-1', text: 'Similar a ofertas existentes', value: 1, icon: <Palette size={20} /> },
-            { id: 'cultural-uniqueness-2', text: 'Algunos elementos únicos', value: 2, icon: <Palette size={20} /> },
-            { id: 'cultural-uniqueness-3', text: 'Enfoque altamente innovador', value: 3, icon: <Palette size={20} /> }
+            { id: 'clear', label: 'Yes, clear' },
+            { id: 'partial', label: 'Partial' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'startup-timeline',
-          question: '¿Cuál es tu cronograma para lanzar tu proyecto cultural?',
+        content: {
+          title: "Do you plan content or promotions?",
           options: [
-            { id: 'startup-timeline-1', text: 'No tengo cronograma específico', value: 1, icon: <Clock size={20} /> },
-            { id: 'startup-timeline-2', text: 'Cronograma aproximado en mente', value: 2, icon: <Clock size={20} /> },
-            { id: 'startup-timeline-3', text: 'Plan de lanzamiento detallado', value: 3, icon: <Clock size={20} /> }
+            { id: 'calendar', label: 'Yes, with calendar' },
+            { id: 'spontaneous', label: 'Spontaneous' },
+            { id: 'none', label: 'Not yet' }
           ]
         },
-        {
-          id: 'resource-needs',
-          question: '¿Sabes qué recursos necesitas para empezar?',
+        tasks: {
+          title: "How do you manage your daily tasks?",
           options: [
-            { id: 'resource-needs-1', text: 'No estoy claro sobre las necesidades', value: 1, icon: <Settings size={20} /> },
-            { id: 'resource-needs-2', text: 'Idea general de las necesidades', value: 2, icon: <Settings size={20} /> },
-            { id: 'resource-needs-3', text: 'Plan detallado de recursos', value: 3, icon: <Settings size={20} /> }
+            { id: 'app', label: 'Task app' },
+            { id: 'paper', label: 'Paper' },
+            { id: 'whatsapp', label: 'WhatsApp' },
+            { id: 'none', label: 'No organization' }
           ]
         },
-        {
-          id: 'cultural-impact',
-          question: '¿Has definido el impacto cultural que quieres crear?',
+        delegate: {
+          title: "What would you like to delegate first?",
           options: [
-            { id: 'cultural-impact-1', text: 'No tengo visión clara del impacto', value: 1, icon: <Heart size={20} /> },
-            { id: 'cultural-impact-2', text: 'Objetivos generales de impacto', value: 2, icon: <Heart size={20} /> },
-            { id: 'cultural-impact-3', text: 'Misión cultural clara', value: 3, icon: <Heart size={20} /> }
+            { id: 'finances', label: 'Finances' },
+            { id: 'marketing', label: 'Marketing' },
+            { id: 'communication', label: 'Communication' },
+            { id: 'payments', label: 'Payments' },
+            { id: 'legal', label: 'Legal' },
+            { id: 'other', label: 'Other' }
           ]
         }
-      ]
+      },
+      // TEAM Profile Questions
+      team: {
+        industry: {
+          title: "What is your creative industry?",
+          options: [
+            { id: 'music', label: 'Music' },
+            { id: 'visual', label: 'Visual arts' },
+            { id: 'crafts', label: 'Crafts' },
+            { id: 'theater', label: 'Theater' },
+            { id: 'dance', label: 'Dance' },
+            { id: 'wellness', label: 'Home or body products' },
+            { id: 'other', label: 'Other' }
+          ]
+        },
+        activities: {
+          title: "What activities does your venture do?",
+          options: [
+            { id: 'sales', label: 'Sales' },
+            { id: 'classes', label: 'Classes' },
+            { id: 'events', label: 'Events' },
+            { id: 'services', label: 'Services' },
+            { id: 'digital', label: 'Digital content' },
+            { id: 'other', label: 'Other' }
+          ]
+        },
+        timeActive: {
+          title: "How long has your project been running?",
+          options: [
+            { id: 'under6months', label: 'Less than 6 months' },
+            { id: '6months2years', label: '6 months - 2 years' },
+            { id: 'over2years', label: 'More than 2 years' }
+          ]
+        },
+        income: {
+          title: "Do you have regular income?",
+          options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'irregular', label: 'Irregular' },
+            { id: 'none', label: 'Not yet' }
+          ]
+        },
+        legal: {
+          title: "Are you legally formalized?",
+          options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'process', label: 'In process' },
+            { id: 'no', label: 'No' }
+          ]
+        },
+        funding: {
+          title: "Have you received support or funding?",
+          options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'partial', label: 'Partial' },
+            { id: 'no', label: 'No' }
+          ]
+        },
+        teamSize: {
+          title: "How many people are on the team?",
+          options: [
+            { id: '1', label: '1 person' },
+            { id: '2-3', label: '2-3 people' },
+            { id: '4+', label: '4+ people' }
+          ]
+        },
+        organization: {
+          title: "How do you organize internally?",
+          options: [
+            { id: 'digital', label: 'Digital tools' },
+            { id: 'chats', label: 'Chats' },
+            { id: 'meetings', label: 'Meetings + spreadsheets' },
+            { id: 'separate', label: 'Each on their own' }
+          ]
+        },
+        roles: {
+          title: "Do you have defined roles?",
+          options: [
+            { id: 'yes', label: 'Yes' },
+            { id: 'somewhat', label: 'More or less' },
+            { id: 'no', label: 'No' }
+          ]
+        }
+      }
     },
-
-    solo: {
-      en: [
-        {
-          id: 'workflow-organization',
-          question: 'How organized are your creative workflows and processes?',
+    es: {
+      // IDEA Profile Questions
+      idea: {
+        industry: {
+          title: "¿Cuál es tu industria o campo creativo principal?",
           options: [
-            { id: 'workflow-organization-1', text: 'Ad-hoc, figure it out as I go', value: 1, icon: <Settings size={20} /> },
-            { id: 'workflow-organization-2', text: 'Some basic processes in place', value: 2, icon: <Settings size={20} /> },
-            { id: 'workflow-organization-3', text: 'Well-documented workflows', value: 3, icon: <Settings size={20} /> }
+            { id: 'music', label: 'Música' },
+            { id: 'visual', label: 'Artes visuales' },
+            { id: 'crafts', label: 'Artesanía' },
+            { id: 'theater', label: 'Teatro' },
+            { id: 'dance', label: 'Danza' },
+            { id: 'wellness', label: 'Productos para el hogar o cuerpo' },
+            { id: 'other', label: 'Otro' }
           ]
         },
-        {
-          id: 'time-management',
-          question: 'How do you manage your time between creative work and business tasks?',
+        activities: {
+          title: "¿Qué actividades imaginás desarrollar?",
           options: [
-            { id: 'time-management-1', text: 'Struggle to balance both', value: 1, icon: <Clock size={20} /> },
-            { id: 'time-management-2', text: 'Decent balance but room for improvement', value: 2, icon: <Clock size={20} /> },
-            { id: 'time-management-3', text: 'Excellent time management system', value: 3, icon: <Clock size={20} /> }
+            { id: 'create', label: 'Crear objetos físicos' },
+            { id: 'teach', label: 'Dar talleres' },
+            { id: 'artistic', label: 'Servicios artísticos' },
+            { id: 'social', label: 'Publicar obras en redes' },
+            { id: 'other', label: 'Otro' }
           ]
         },
-        {
-          id: 'client-management',
-          question: 'How do you handle client relationships and communication?',
+        ideaAge: {
+          title: "¿Hace cuánto surgió esta idea?",
           options: [
-            { id: 'client-management-1', text: 'Informal, mostly verbal agreements', value: 1, icon: <User size={20} /> },
-            { id: 'client-management-2', text: 'Basic contracts and regular communication', value: 2, icon: <User size={20} /> },
-            { id: 'client-management-3', text: 'Professional CRM and processes', value: 3, icon: <User size={20} /> }
+            { id: 'under6months', label: 'Menos de 6 meses' },
+            { id: '6months2years', label: '6 meses - 2 años' },
+            { id: 'over2years', label: 'Más de 2 años' }
           ]
         },
-        {
-          id: 'income-diversification',
-          question: 'How diversified are your income streams?',
+        phase: {
+          title: "¿En qué fase está tu idea?",
           options: [
-            { id: 'income-diversification-1', text: 'Single main income source', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'income-diversification-2', text: '2-3 different income sources', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'income-diversification-3', text: 'Multiple diversified income streams', value: 3, icon: <DollarSign size={20} /> }
+            { id: 'justIdea', label: 'Solo una idea' },
+            { id: 'research', label: 'Investigación' },
+            { id: 'prototype', label: 'Prototipo' },
+            { id: 'seeking', label: 'Buscando apoyo' }
           ]
         },
-        {
-          id: 'marketing-strategy',
-          question: 'How developed is your personal brand and marketing?',
+        plan: {
+          title: "¿Tenés algún plan o estrategia escrita?",
           options: [
-            { id: 'marketing-strategy-1', text: 'Minimal online presence', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'marketing-strategy-2', text: 'Active on some platforms', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'marketing-strategy-3', text: 'Comprehensive marketing strategy', value: 3, icon: <TrendingUp size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'somewhat', label: 'Más o menos' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'skill-development',
-          question: 'How do you approach learning new skills for your business?',
+        resources: {
+          title: "¿Contás con recursos iniciales?",
           options: [
-            { id: 'skill-development-1', text: 'Learn as needed, no plan', value: 1, icon: <Target size={20} /> },
-            { id: 'skill-development-2', text: 'Occasional courses or workshops', value: 2, icon: <Target size={20} /> },
-            { id: 'skill-development-3', text: 'Structured learning and development plan', value: 3, icon: <Target size={20} /> }
+            { id: 'savings', label: 'Ahorros' },
+            { id: 'seeking', label: 'Buscando apoyo' },
+            { id: 'none', label: 'No tengo' }
           ]
         },
-        {
-          id: 'financial-tracking',
-          question: 'How do you track your business finances?',
+        team: {
+          title: "¿Trabajás solo/a o con alguien más?",
           options: [
-            { id: 'financial-tracking-1', text: 'Basic bank account tracking', value: 1, icon: <BarChart size={20} /> },
-            { id: 'financial-tracking-2', text: 'Spreadsheets for expenses/income', value: 2, icon: <BarChart size={20} /> },
-            { id: 'financial-tracking-3', text: 'Professional accounting software', value: 3, icon: <BarChart size={20} /> }
+            { id: 'alone', label: 'Solo/a' },
+            { id: 'family', label: 'Familiares/amigos' },
+            { id: 'seeking', label: 'Buscando equipo' }
           ]
         },
-        {
-          id: 'network-building',
-          question: 'How actively do you build professional networks?',
+        organization: {
+          title: "¿Cómo organizás tus ideas y tareas?",
           options: [
-            { id: 'network-building-1', text: 'Limited networking', value: 1, icon: <Users size={20} /> },
-            { id: 'network-building-2', text: 'Attend some events/connect online', value: 2, icon: <Users size={20} /> },
-            { id: 'network-building-3', text: 'Active networking and collaborations', value: 3, icon: <Users size={20} /> }
+            { id: 'paper', label: 'Papel' },
+            { id: 'phone', label: 'Notas en el celular' },
+            { id: 'digital', label: 'Herramientas digitales' },
+            { id: 'none', label: 'No tengo método' }
           ]
         },
-        {
-          id: 'cultural-positioning',
-          question: 'How well have you positioned yourself in the cultural sector?',
+        goals: {
+          title: "¿Establecés metas o plazos?",
           options: [
-            { id: 'cultural-positioning-1', text: 'Still figuring out my niche', value: 1, icon: <Palette size={20} /> },
-            { id: 'cultural-positioning-2', text: 'Clear positioning but limited recognition', value: 2, icon: <Palette size={20} /> },
-            { id: 'cultural-positioning-3', text: 'Strong reputation and clear positioning', value: 3, icon: <Palette size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'sometimes', label: 'A veces' },
+            { id: 'no', label: 'No' }
           ]
         }
-      ],
-      es: [
-        {
-          id: 'workflow-organization',
-          question: '¿Qué tan organizados están tus flujos de trabajo creativos?',
+      },
+      // SOLO Profile Questions
+      solo: {
+        industry: {
+          title: "¿Cuál es tu industria creativa?",
           options: [
-            { id: 'workflow-organization-1', text: 'Improvisado, resuelvo sobre la marcha', value: 1, icon: <Settings size={20} /> },
-            { id: 'workflow-organization-2', text: 'Algunos procesos básicos establecidos', value: 2, icon: <Settings size={20} /> },
-            { id: 'workflow-organization-3', text: 'Flujos de trabajo bien documentados', value: 3, icon: <Settings size={20} /> }
+            { id: 'music', label: 'Música' },
+            { id: 'visual', label: 'Artes visuales' },
+            { id: 'crafts', label: 'Artesanía' },
+            { id: 'theater', label: 'Teatro' },
+            { id: 'dance', label: 'Danza' },
+            { id: 'wellness', label: 'Productos para el hogar o cuerpo' },
+            { id: 'other', label: 'Otro' }
           ]
         },
-        {
-          id: 'time-management',
-          question: '¿Cómo gestionas tu tiempo entre trabajo creativo y tareas comerciales?',
+        activities: {
+          title: "¿Qué tipo de actividades realizás actualmente?",
           options: [
-            { id: 'time-management-1', text: 'Lucho por equilibrar ambos', value: 1, icon: <Clock size={20} /> },
-            { id: 'time-management-2', text: 'Balance decente pero mejorable', value: 2, icon: <Clock size={20} /> },
-            { id: 'time-management-3', text: 'Excelente sistema de gestión del tiempo', value: 3, icon: <Clock size={20} /> }
+            { id: 'products', label: 'Venta de productos' },
+            { id: 'services', label: 'Servicios artísticos' },
+            { id: 'classes', label: 'Clases o talleres' },
+            { id: 'experiences', label: 'Experiencias' },
+            { id: 'digital', label: 'Contenido digital' }
           ]
         },
-        {
-          id: 'client-management',
-          question: '¿Cómo manejas las relaciones y comunicación con clientes?',
+        timeActive: {
+          title: "¿Hace cuánto tiempo estás activo con este proyecto?",
           options: [
-            { id: 'client-management-1', text: 'Informal, principalmente acuerdos verbales', value: 1, icon: <User size={20} /> },
-            { id: 'client-management-2', text: 'Contratos básicos y comunicación regular', value: 2, icon: <User size={20} /> },
-            { id: 'client-management-3', text: 'CRM profesional y procesos', value: 3, icon: <User size={20} /> }
+            { id: 'under6months', label: 'Menos de 6 meses' },
+            { id: '6months2years', label: '6 meses - 2 años' },
+            { id: 'over2years', label: 'Más de 2 años' }
           ]
         },
-        {
-          id: 'income-diversification',
-          question: '¿Qué tan diversificadas están tus fuentes de ingresos?',
+        payment: {
+          title: "¿Qué método usás para cobrar?",
           options: [
-            { id: 'income-diversification-1', text: 'Una fuente principal de ingresos', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'income-diversification-2', text: '2-3 fuentes diferentes de ingresos', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'income-diversification-3', text: 'Múltiples fuentes diversificadas', value: 3, icon: <DollarSign size={20} /> }
+            { id: 'cash', label: 'Efectivo' },
+            { id: 'transfer', label: 'Transferencias' },
+            { id: 'platform', label: 'Plataforma de pagos' },
+            { id: 'combined', label: 'Combinado' }
           ]
         },
-        {
-          id: 'marketing-strategy',
-          question: '¿Qué tan desarrollada está tu marca personal y marketing?',
+        finances: {
+          title: "¿Llevás registro de ingresos y gastos?",
           options: [
-            { id: 'marketing-strategy-1', text: 'Presencia online mínima', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'marketing-strategy-2', text: 'Activo en algunas plataformas', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'marketing-strategy-3', text: 'Estrategia de marketing integral', value: 3, icon: <TrendingUp size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'skill-development',
-          question: '¿Cómo abordas el aprendizaje de nuevas habilidades para tu negocio?',
+        brand: {
+          title: "¿Tenés una marca o identidad visual definida?",
           options: [
-            { id: 'skill-development-1', text: 'Aprendo según necesidad, sin plan', value: 1, icon: <Target size={20} /> },
-            { id: 'skill-development-2', text: 'Cursos o talleres ocasionales', value: 2, icon: <Target size={20} /> },
-            { id: 'skill-development-3', text: 'Plan estructurado de aprendizaje', value: 3, icon: <Target size={20} /> }
+            { id: 'clear', label: 'Sí, clara' },
+            { id: 'partial', label: 'Parcial' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'financial-tracking',
-          question: '¿Cómo haces seguimiento a las finanzas de tu negocio?',
+        content: {
+          title: "¿Planificás contenidos o promociones?",
           options: [
-            { id: 'financial-tracking-1', text: 'Seguimiento básico de cuenta bancaria', value: 1, icon: <BarChart size={20} /> },
-            { id: 'financial-tracking-2', text: 'Hojas de cálculo para gastos/ingresos', value: 2, icon: <BarChart size={20} /> },
-            { id: 'financial-tracking-3', text: 'Software de contabilidad profesional', value: 3, icon: <BarChart size={20} /> }
+            { id: 'calendar', label: 'Sí, con calendario' },
+            { id: 'spontaneous', label: 'Espontáneo' },
+            { id: 'none', label: 'No lo hago aún' }
           ]
         },
-        {
-          id: 'network-building',
-          question: '¿Qué tan activamente construyes redes profesionales?',
+        tasks: {
+          title: "¿Cómo gestionás tus tareas diarias?",
           options: [
-            { id: 'network-building-1', text: 'Networking limitado', value: 1, icon: <Users size={20} /> },
-            { id: 'network-building-2', text: 'Asisto a eventos/conecto online', value: 2, icon: <Users size={20} /> },
-            { id: 'network-building-3', text: 'Networking activo y colaboraciones', value: 3, icon: <Users size={20} /> }
+            { id: 'app', label: 'App de tareas' },
+            { id: 'paper', label: 'Papel' },
+            { id: 'whatsapp', label: 'WhatsApp' },
+            { id: 'none', label: 'No organizo tareas' }
           ]
         },
-        {
-          id: 'cultural-positioning',
-          question: '¿Qué tan bien te has posicionado en el sector cultural?',
+        delegate: {
+          title: "¿Qué te gustaría delegar primero?",
           options: [
-            { id: 'cultural-positioning-1', text: 'Aún descubriendo mi nicho', value: 1, icon: <Palette size={20} /> },
-            { id: 'cultural-positioning-2', text: 'Posicionamiento claro pero reconocimiento limitado', value: 2, icon: <Palette size={20} /> },
-            { id: 'cultural-positioning-3', text: 'Fuerte reputación y posicionamiento claro', value: 3, icon: <Palette size={20} /> }
+            { id: 'finances', label: 'Finanzas' },
+            { id: 'marketing', label: 'Marketing' },
+            { id: 'communication', label: 'Comunicación' },
+            { id: 'payments', label: 'Cobros' },
+            { id: 'legal', label: 'Legal' },
+            { id: 'other', label: 'Otra' }
           ]
         }
-      ]
-    },
-
-    team: {
-      en: [
-        {
-          id: 'team-structure',
-          question: 'How well-defined are the roles in your cultural team?',
+      },
+      // TEAM Profile Questions
+      team: {
+        industry: {
+          title: "¿Cuál es tu industria creativa?",
           options: [
-            { id: 'team-structure-1', text: 'Everyone does everything', value: 1, icon: <Users size={20} /> },
-            { id: 'team-structure-2', text: 'Some role clarity but overlap', value: 2, icon: <Users size={20} /> },
-            { id: 'team-structure-3', text: 'Clear roles and responsibilities', value: 3, icon: <Users size={20} /> }
+            { id: 'music', label: 'Música' },
+            { id: 'visual', label: 'Artes visuales' },
+            { id: 'crafts', label: 'Artesanía' },
+            { id: 'theater', label: 'Teatro' },
+            { id: 'dance', label: 'Danza' },
+            { id: 'wellness', label: 'Productos para el hogar o cuerpo' },
+            { id: 'other', label: 'Otro' }
           ]
         },
-        {
-          id: 'communication-systems',
-          question: 'How does your team communicate and coordinate?',
+        activities: {
+          title: "¿Qué actividades realiza tu emprendimiento?",
           options: [
-            { id: 'communication-systems-1', text: 'Informal conversations and messages', value: 1, icon: <FileText size={20} /> },
-            { id: 'communication-systems-2', text: 'Regular meetings and basic tools', value: 2, icon: <FileText size={20} /> },
-            { id: 'communication-systems-3', text: 'Structured communication systems', value: 3, icon: <FileText size={20} /> }
+            { id: 'sales', label: 'Venta' },
+            { id: 'classes', label: 'Clases' },
+            { id: 'events', label: 'Eventos' },
+            { id: 'services', label: 'Servicios' },
+            { id: 'digital', label: 'Contenido digital' },
+            { id: 'other', label: 'Otro' }
           ]
         },
-        {
-          id: 'project-management',
-          question: 'How do you manage cultural projects and deadlines?',
+        timeActive: {
+          title: "¿Hace cuánto está en marcha tu proyecto?",
           options: [
-            { id: 'project-management-1', text: 'Wing it and hope for the best', value: 1, icon: <Calendar size={20} /> },
-            { id: 'project-management-2', text: 'Basic planning and tracking', value: 2, icon: <Calendar size={20} /> },
-            { id: 'project-management-3', text: 'Professional project management tools', value: 3, icon: <Calendar size={20} /> }
+            { id: 'under6months', label: 'Menos de 6 meses' },
+            { id: '6months2years', label: '6 meses - 2 años' },
+            { id: 'over2years', label: 'Más de 2 años' }
           ]
         },
-        {
-          id: 'decision-making',
-          question: 'How are important decisions made in your organization?',
+        income: {
+          title: "¿Tienen ingresos regulares?",
           options: [
-            { id: 'decision-making-1', text: 'Unclear decision-making process', value: 1, icon: <Target size={20} /> },
-            { id: 'decision-making-2', text: 'Some consultation but leader decides', value: 2, icon: <Target size={20} /> },
-            { id: 'decision-making-3', text: 'Clear collaborative decision process', value: 3, icon: <Target size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'irregular', label: 'Irregulares' },
+            { id: 'none', label: 'No aún' }
           ]
         },
-        {
-          id: 'talent-development',
-          question: 'How do you develop and retain talent in your team?',
+        legal: {
+          title: "¿Están formalizados legalmente?",
           options: [
-            { id: 'talent-development-1', text: 'No formal development program', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'talent-development-2', text: 'Occasional training and feedback', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'talent-development-3', text: 'Structured development and growth plans', value: 3, icon: <TrendingUp size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'process', label: 'En proceso' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'financial-management',
-          question: 'How sophisticated is your financial management?',
+        funding: {
+          title: "¿Recibieron apoyos o financiamiento?",
           options: [
-            { id: 'financial-management-1', text: 'Basic budgeting and tracking', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'financial-management-2', text: 'Regular financial reporting', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'financial-management-3', text: 'Advanced financial planning and analysis', value: 3, icon: <DollarSign size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'partial', label: 'Parcial' },
+            { id: 'no', label: 'No' }
           ]
         },
-        {
-          id: 'stakeholder-relations',
-          question: 'How do you manage relationships with stakeholders and partners?',
+        teamSize: {
+          title: "¿Cuántas personas son en el equipo?",
           options: [
-            { id: 'stakeholder-relations-1', text: 'Ad-hoc communication', value: 1, icon: <Handshake size={20} /> },
-            { id: 'stakeholder-relations-2', text: 'Regular updates and meetings', value: 2, icon: <Handshake size={20} /> },
-            { id: 'stakeholder-relations-3', text: 'Strategic stakeholder management', value: 3, icon: <Handshake size={20} /> }
+            { id: '1', label: '1 persona' },
+            { id: '2-3', label: '2-3 personas' },
+            { id: '4+', label: '4+ personas' }
           ]
         },
-        {
-          id: 'cultural-impact-measurement',
-          question: 'How do you measure the cultural impact of your work?',
+        organization: {
+          title: "¿Cómo se organizan internamente?",
           options: [
-            { id: 'cultural-impact-measurement-1', text: 'No formal measurement', value: 1, icon: <BarChart size={20} /> },
-            { id: 'cultural-impact-measurement-2', text: 'Basic metrics and feedback', value: 2, icon: <BarChart size={20} /> },
-            { id: 'cultural-impact-measurement-3', text: 'Comprehensive impact assessment', value: 3, icon: <BarChart size={20} /> }
+            { id: 'digital', label: 'Herramientas digitales' },
+            { id: 'chats', label: 'Chats' },
+            { id: 'meetings', label: 'Reuniones + planillas' },
+            { id: 'separate', label: 'Cada uno por su lado' }
           ]
         },
-        {
-          id: 'scalability-planning',
-          question: 'How prepared is your organization for growth and scaling?',
+        roles: {
+          title: "¿Tienen roles definidos?",
           options: [
-            { id: 'scalability-planning-1', text: 'No growth planning', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'scalability-planning-2', text: 'Some growth ideas and goals', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'scalability-planning-3', text: 'Strategic growth plan with systems', value: 3, icon: <TrendingUp size={20} /> }
+            { id: 'yes', label: 'Sí' },
+            { id: 'somewhat', label: 'Más o menos' },
+            { id: 'no', label: 'No' }
           ]
         }
-      ],
-      es: [
-        {
-          id: 'team-structure',
-          question: '¿Qué tan bien definidos están los roles en tu equipo cultural?',
-          options: [
-            { id: 'team-structure-1', text: 'Todos hacen de todo', value: 1, icon: <Users size={20} /> },
-            { id: 'team-structure-2', text: 'Cierta claridad de roles pero hay superposición', value: 2, icon: <Users size={20} /> },
-            { id: 'team-structure-3', text: 'Roles y responsabilidades claras', value: 3, icon: <Users size={20} /> }
-          ]
-        },
-        {
-          id: 'communication-systems',
-          question: '¿Cómo se comunica y coordina tu equipo?',
-          options: [
-            { id: 'communication-systems-1', text: 'Conversaciones informales y mensajes', value: 1, icon: <FileText size={20} /> },
-            { id: 'communication-systems-2', text: 'Reuniones regulares y herramientas básicas', value: 2, icon: <FileText size={20} /> },
-            { id: 'communication-systems-3', text: 'Sistemas estructurados de comunicación', value: 3, icon: <FileText size={20} /> }
-          ]
-        },
-        {
-          id: 'project-management',
-          question: '¿Cómo gestionas proyectos culturales y plazos?',
-          options: [
-            { id: 'project-management-1', text: 'Improvisamos y esperamos lo mejor', value: 1, icon: <Calendar size={20} /> },
-            { id: 'project-management-2', text: 'Planificación y seguimiento básicos', value: 2, icon: <Calendar size={20} /> },
-            { id: 'project-management-3', text: 'Herramientas profesionales de gestión', value: 3, icon: <Calendar size={20} /> }
-          ]
-        },
-        {
-          id: 'decision-making',
-          question: '¿Cómo se toman las decisiones importantes en tu organización?',
-          options: [
-            { id: 'decision-making-1', text: 'Proceso de decisión poco claro', value: 1, icon: <Target size={20} /> },
-            { id: 'decision-making-2', text: 'Cierta consulta pero el líder decide', value: 2, icon: <Target size={20} /> },
-            { id: 'decision-making-3', text: 'Proceso colaborativo claro de decisión', value: 3, icon: <Target size={20} /> }
-          ]
-        },
-        {
-          id: 'talent-development',
-          question: '¿Cómo desarrollas y retienes talento en tu equipo?',
-          options: [
-            { id: 'talent-development-1', text: 'No hay programa formal de desarrollo', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'talent-development-2', text: 'Capacitación y feedback ocasionales', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'talent-development-3', text: 'Planes estructurados de desarrollo', value: 3, icon: <TrendingUp size={20} /> }
-          ]
-        },
-        {
-          id: 'financial-management',
-          question: '¿Qué tan sofisticada es tu gestión financiera?',
-          options: [
-            { id: 'financial-management-1', text: 'Presupuesto y seguimiento básicos', value: 1, icon: <DollarSign size={20} /> },
-            { id: 'financial-management-2', text: 'Reportes financieros regulares', value: 2, icon: <DollarSign size={20} /> },
-            { id: 'financial-management-3', text: 'Planificación y análisis financiero avanzado', value: 3, icon: <DollarSign size={20} /> }
-          ]
-        },
-        {
-          id: 'stakeholder-relations',
-          question: '¿Cómo gestionas las relaciones con stakeholders y socios?',
-          options: [
-            { id: 'stakeholder-relations-1', text: 'Comunicación improvisada', value: 1, icon: <Handshake size={20} /> },
-            { id: 'stakeholder-relations-2', text: 'Actualizaciones y reuniones regulares', value: 2, icon: <Handshake size={20} /> },
-            { id: 'stakeholder-relations-3', text: 'Gestión estratégica de stakeholders', value: 3, icon: <Handshake size={20} /> }
-          ]
-        },
-        {
-          id: 'cultural-impact-measurement',
-          question: '¿Cómo mides el impacto cultural de tu trabajo?',
-          options: [
-            { id: 'cultural-impact-measurement-1', text: 'No hay medición formal', value: 1, icon: <BarChart size={20} /> },
-            { id: 'cultural-impact-measurement-2', text: 'Métricas básicas y feedback', value: 2, icon: <BarChart size={20} /> },
-            { id: 'cultural-impact-measurement-3', text: 'Evaluación integral de impacto', value: 3, icon: <BarChart size={20} /> }
-          ]
-        },
-        {
-          id: 'scalability-planning',
-          question: '¿Qué tan preparada está tu organización para crecer y escalar?',
-          options: [
-            { id: 'scalability-planning-1', text: 'No hay planificación de crecimiento', value: 1, icon: <TrendingUp size={20} /> },
-            { id: 'scalability-planning-2', text: 'Algunas ideas y objetivos de crecimiento', value: 2, icon: <TrendingUp size={20} /> },
-            { id: 'scalability-planning-3', text: 'Plan estratégico de crecimiento con sistemas', value: 3, icon: <TrendingUp size={20} /> }
-          ]
-        }
-      ]
+      }
     }
   };
 
-  return questionSets[profileType][language];
+  const iconMap = {
+    music: <Music className="h-5 w-5" />,
+    visual: <Palette className="h-5 w-5" />,
+    crafts: <Scissors className="h-5 w-5" />,
+    theater: <Users className="h-5 w-5" />,
+    dance: <Users className="h-5 w-5" />,
+    wellness: <Heart className="h-5 w-5" />,
+    other: <Calendar className="h-5 w-5" />,
+    create: <Lightbulb className="h-5 w-5" />,
+    teach: <Users className="h-5 w-5" />,
+    artistic: <Palette className="h-5 w-5" />,
+    social: <Instagram className="h-5 w-5" />,
+    under6months: <Clock className="h-5 w-5" />,
+    '6months2years': <Clock className="h-5 w-5" />,
+    over2years: <Clock className="h-5 w-5" />,
+    justIdea: <Lightbulb className="h-5 w-5" />,
+    research: <Search className="h-5 w-5" />,
+    prototype: <Target className="h-5 w-5" />,
+    seeking: <Search className="h-5 w-5" />,
+    yes: <CheckCircle className="h-5 w-5" />,
+    somewhat: <Eye className="h-5 w-5" />,
+    no: <FileText className="h-5 w-5" />,
+    savings: <DollarSign className="h-5 w-5" />,
+    none: <FileText className="h-5 w-5" />,
+    alone: <Users className="h-5 w-5" />,
+    family: <Users className="h-5 w-5" />,
+    paper: <FileText className="h-5 w-5" />,
+    phone: <FileText className="h-5 w-5" />,
+    digital: <Building className="h-5 w-5" />,
+    sometimes: <Clock className="h-5 w-5" />,
+    products: <Briefcase className="h-5 w-5" />,
+    services: <Users className="h-5 w-5" />,
+    classes: <Users className="h-5 w-5" />,
+    experiences: <Heart className="h-5 w-5" />,
+    cash: <DollarSign className="h-5 w-5" />,
+    transfer: <CreditCard className="h-5 w-5" />,
+    platform: <CreditCard className="h-5 w-5" />,
+    combined: <CreditCard className="h-5 w-5" />,
+    clear: <CheckCircle className="h-5 w-5" />,
+    partial: <Eye className="h-5 w-5" />,
+    calendar: <Calendar className="h-5 w-5" />,
+    spontaneous: <Clock className="h-5 w-5" />,
+    app: <Building className="h-5 w-5" />,
+    whatsapp: <Instagram className="h-5 w-5" />,
+    finances: <DollarSign className="h-5 w-5" />,
+    marketing: <Instagram className="h-5 w-5" />,
+    communication: <Users className="h-5 w-5" />,
+    payments: <CreditCard className="h-5 w-5" />,
+    legal: <FileText className="h-5 w-5" />,
+    sales: <DollarSign className="h-5 w-5" />,
+    events: <Calendar className="h-5 w-5" />,
+    irregular: <Clock className="h-5 w-5" />,
+    process: <Building className="h-5 w-5" />,
+    '1': <Users className="h-5 w-5" />,
+    '2-3': <Users className="h-5 w-5" />,
+    '4+': <Users className="h-5 w-5" />,
+    chats: <Instagram className="h-5 w-5" />,
+    meetings: <Calendar className="h-5 w-5" />,
+    separate: <Users className="h-5 w-5" />
+  };
+
+  // Get the questions for the specific profile
+  const profileQuestions = t[language][profileType];
+  
+  const questions: QuestionConfig[] = [
+    {
+      id: 'industry',
+      type: 'radio',
+      title: profileQuestions.industry.title,
+      fieldName: 'industry',
+      options: profileQuestions.industry.options.map(opt => ({
+        ...opt,
+        icon: iconMap[opt.id as keyof typeof iconMap]
+      }))
+    },
+    {
+      id: 'activities',
+      type: 'checkbox',
+      title: profileQuestions.activities.title,
+      fieldName: 'activities',
+      options: profileQuestions.activities.options.map(opt => ({
+        ...opt,
+        icon: iconMap[opt.id as keyof typeof iconMap]
+      }))
+    }
+  ];
+
+  // Add profile-specific questions
+  if (profileType === 'idea') {
+    questions.push(
+      {
+        id: 'ideaAge',
+        type: 'radio',
+        title: profileQuestions.ideaAge.title,
+        fieldName: 'ideaAge',
+        options: profileQuestions.ideaAge.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'phase',
+        type: 'radio',
+        title: profileQuestions.phase.title,
+        fieldName: 'phase',
+        options: profileQuestions.phase.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'plan',
+        type: 'radio',
+        title: profileQuestions.plan.title,
+        fieldName: 'plan',
+        options: profileQuestions.plan.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'resources',
+        type: 'radio',
+        title: profileQuestions.resources.title,
+        fieldName: 'resources',
+        options: profileQuestions.resources.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'team',
+        type: 'radio',
+        title: profileQuestions.team.title,
+        fieldName: 'team',
+        options: profileQuestions.team.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'organization',
+        type: 'radio',
+        title: profileQuestions.organization.title,
+        fieldName: 'organization',
+        options: profileQuestions.organization.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'goals',
+        type: 'radio',
+        title: profileQuestions.goals.title,
+        fieldName: 'goals',
+        options: profileQuestions.goals.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      }
+    );
+  } else if (profileType === 'solo') {
+    questions.push(
+      {
+        id: 'timeActive',
+        type: 'radio',
+        title: profileQuestions.timeActive.title,
+        fieldName: 'timeActive',
+        options: profileQuestions.timeActive.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'payment',
+        type: 'radio',
+        title: profileQuestions.payment.title,
+        fieldName: 'payment',
+        options: profileQuestions.payment.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'finances',
+        type: 'radio',
+        title: profileQuestions.finances.title,
+        fieldName: 'finances',
+        options: profileQuestions.finances.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'brand',
+        type: 'radio',
+        title: profileQuestions.brand.title,
+        fieldName: 'brand',
+        options: profileQuestions.brand.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'content',
+        type: 'radio',
+        title: profileQuestions.content.title,
+        fieldName: 'content',
+        options: profileQuestions.content.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'tasks',
+        type: 'radio',
+        title: profileQuestions.tasks.title,
+        fieldName: 'tasks',
+        options: profileQuestions.tasks.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'delegate',
+        type: 'radio',
+        title: profileQuestions.delegate.title,
+        fieldName: 'delegate',
+        options: profileQuestions.delegate.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      }
+    );
+  } else if (profileType === 'team') {
+    questions.push(
+      {
+        id: 'timeActive',
+        type: 'radio',
+        title: profileQuestions.timeActive.title,
+        fieldName: 'timeActive',
+        options: profileQuestions.timeActive.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'income',
+        type: 'radio',
+        title: profileQuestions.income.title,
+        fieldName: 'income',
+        options: profileQuestions.income.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'legal',
+        type: 'radio',
+        title: profileQuestions.legal.title,
+        fieldName: 'legal',
+        options: profileQuestions.legal.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'funding',
+        type: 'radio',
+        title: profileQuestions.funding.title,
+        fieldName: 'funding',
+        options: profileQuestions.funding.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'teamSize',
+        type: 'radio',
+        title: profileQuestions.teamSize.title,
+        fieldName: 'teamSize',
+        options: profileQuestions.teamSize.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'organization',
+        type: 'radio',
+        title: profileQuestions.organization.title,
+        fieldName: 'organization',
+        options: profileQuestions.organization.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      },
+      {
+        id: 'roles',
+        type: 'radio',
+        title: profileQuestions.roles.title,
+        fieldName: 'roles',
+        options: profileQuestions.roles.options.map(opt => ({
+          ...opt,
+          icon: iconMap[opt.id as keyof typeof iconMap]
+        }))
+      }
+    );
+  }
+
+  return questions;
 };
