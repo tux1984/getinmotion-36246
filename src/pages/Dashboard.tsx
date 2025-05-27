@@ -39,7 +39,8 @@ const Dashboard = () => {
     error,
     showOnboarding,
     agentsCount: agents.length,
-    activeSection
+    activeSection,
+    hasMaturityScores: !!maturityScores
   });
 
   // Check for onboarding flag in location state
@@ -76,11 +77,20 @@ const Dashboard = () => {
     console.log('Dashboard: Showing error state:', error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Error: {error}</p>
-          <Button onClick={() => window.location.reload()}>
-            Reintentar
-          </Button>
+        <div className="text-center space-y-4">
+          <div className="text-red-600 text-lg font-medium">Error cargando el dashboard</div>
+          <p className="text-gray-600">{error}</p>
+          <div className="space-x-4">
+            <Button onClick={() => window.location.reload()}>
+              Reintentar
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/maturity-calculator')}
+            >
+              Ir a Evaluación
+            </Button>
+          </div>
         </div>
       </div>
     );

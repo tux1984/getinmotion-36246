@@ -93,51 +93,42 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
 };
 
 export const getRecommendedAgents = (profileData: UserProfileData, scores: CategoryScore): RecommendedAgents => {
+  console.log('Generating recommendations for scores:', scores);
+  
   // Create recommendations compatible with both new and legacy formats
   const recommendations: RecommendedAgents = {
-    primary: [],
+    primary: ['admin', 'cultural'], // Always include these for cultural creators
     secondary: [],
     // Legacy format for backward compatibility
-    admin: true, // Always recommend admin
+    admin: true,
+    cultural: true,
     accounting: false,
     legal: false,
-    operations: false,
-    cultural: true // Always recommend cultural for cultural creators
+    operations: false
   };
 
-  // Determine primary recommendations based on lowest scores (areas needing most help)
-  const scoresArray = [
-    { category: 'finance-advisor', score: scores.monetization, legacy: 'accounting' },
-    { category: 'legal', score: scores.marketFit, legacy: 'legal' },
-    { category: 'operations', score: scores.userExperience, legacy: 'operations' },
-    { category: 'cultural', score: scores.ideaValidation, legacy: 'cultural' }
+  // Determine additional recommendations based on lowest scores (areas needing most help)
+  const needsAssessment = [
+    { category: 'finance-advisor', score: scores.monetization, legacy: 'accounting' as const },
+    { category: 'legal', score: scores.marketFit, legacy: 'legal' as const },
+    { category: 'operations', score: scores.userExperience, legacy: 'operations' as const }
   ];
 
   // Sort by lowest scores first (areas needing most help)
-  scoresArray.sort((a, b) => a.score - b.score);
+  needsAssessment.sort((a, b) => a.score - b.score);
 
-  // Always include admin and cultural in primary
-  recommendations.primary = ['admin', 'cultural'];
-  
-  // Add the most needed agent to primary
-  const mostNeeded = scoresArray[0];
-  if (mostNeeded.category !== 'cultural') {
-    recommendations.primary.push(mostNeeded.category);
-    // Set legacy format
+  // Add the most needed agent to primary if score is low enough
+  const mostNeeded = needsAssessment[0];
+  if (mostNeeded.score < 60) {
+    recommendations.primary?.push(mostNeeded.category);
     (recommendations as any)[mostNeeded.legacy] = true;
   }
 
-  // Add secondary recommendations
-  recommendations.secondary = [];
-  const secondaryNeeded = scoresArray.slice(1, 3);
-  
-  secondaryNeeded.forEach(item => {
-    if (item.category !== 'cultural' && !recommendations.primary?.includes(item.category)) {
+  // Add secondary recommendations for scores below 50
+  needsAssessment.forEach(item => {
+    if (item.score < 50 && !recommendations.primary?.includes(item.category)) {
       recommendations.secondary?.push(item.category);
-      // Set legacy format for potential secondary agents
-      if (item.score < 40) { // Only recommend if score is low enough
-        (recommendations as any)[item.legacy] = true;
-      }
+      (recommendations as any)[item.legacy] = true;
     }
   });
 

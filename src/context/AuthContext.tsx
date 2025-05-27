@@ -35,8 +35,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
       
-      setIsAuthorized(data || false);
-      return data || false;
+      const authorized = data || false;
+      setIsAuthorized(authorized);
+      return authorized;
     } catch (error) {
       console.error('Error checking authorization:', error);
       setIsAuthorized(false);
@@ -45,14 +46,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    // Set up auth state listener
+    console.log('AuthContext: Setting up auth listener');
+    
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('AuthContext: Auth state changed:', event, session?.user?.email);
+        
+        // Only synchronous state updates here
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Defer authorization check to prevent deadlock
         if (session?.user) {
-          await checkAuthorization(session.user.email);
+          setTimeout(() => {
+            checkAuthorization(session.user.email);
+          }, 0);
         } else {
           setIsAuthorized(false);
         }
@@ -61,13 +70,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthContext: Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await checkAuthorization(session.user.email);
+        setTimeout(() => {
+          checkAuthorization(session.user.email);
+        }, 0);
       } else {
         setIsAuthorized(false);
       }
@@ -75,27 +87,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthContext: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    console.log('AuthContext: Attempting sign in for:', email);
     
-    if (!error && data.user) {
-      const authorized = await checkAuthorization(data.user.email);
-      if (!authorized) {
-        await supabase.auth.signOut();
-        return { error: { message: 'Usuario no autorizado para acceder al sistema' } };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error('AuthContext: Sign in error:', error);
+        return { error };
       }
+      
+      if (data.user) {
+        const authorized = await checkAuthorization(data.user.email);
+        if (!authorized) {
+          console.log('AuthContext: User not authorized, signing out');
+          await supabase.auth.signOut();
+          return { error: { message: 'Usuario no autorizado para acceder al sistema' } };
+        }
+      }
+      
+      console.log('AuthContext: Sign in successful');
+      return { error: null };
+    } catch (error) {
+      console.error('AuthContext: Sign in exception:', error);
+      return { error };
     }
-    
-    return { error };
   };
 
   const signOut = async () => {
+    console.log('AuthContext: Signing out');
     await supabase.auth.signOut();
     setIsAuthorized(false);
   };

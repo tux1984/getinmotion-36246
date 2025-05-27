@@ -21,6 +21,8 @@ const Login = () => {
   const location = useLocation();
   const { language } = useLanguage();
   
+  console.log('Login: Component rendering, user:', user?.email, 'authorized:', isAuthorized, 'loading:', loading);
+  
   const translations = {
     en: {
       title: "Access GET IN MOTION",
@@ -63,6 +65,7 @@ const Login = () => {
   // Redirect if already authenticated and authorized
   useEffect(() => {
     if (!loading && user && isAuthorized) {
+      console.log('Login: User authenticated and authorized, redirecting');
       const from = location.state?.from?.pathname || '/maturity-calculator';
       navigate(from, { replace: true });
     }
@@ -72,16 +75,20 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
+    console.log('Login: Attempting login for:', email);
+    
     try {
       const { error } = await signIn(email, password);
       
       if (error) {
+        console.error('Login: Error during sign in:', error);
         toast({
           title: error.message.includes('no autorizado') ? t.unauthorized : t.invalidCredentials,
           description: error.message.includes('no autorizado') ? t.unauthorizedMessage : t.invalidCredentialsMessage,
           variant: "destructive",
         });
       } else {
+        console.log('Login: Sign in successful');
         toast({
           title: t.welcomeBack,
           description: t.loginSuccessful,
@@ -91,6 +98,7 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     } catch (error) {
+      console.error('Login: Exception during sign in:', error);
       toast({
         title: t.errorOccurred,
         description: error instanceof Error ? error.message : 'Unknown error',
@@ -102,6 +110,7 @@ const Login = () => {
   };
 
   if (loading) {
+    console.log('Login: Showing loading state');
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex items-center justify-center">
         <div className="text-white">Cargando...</div>

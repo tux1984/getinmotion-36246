@@ -1,7 +1,6 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Agent, ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { useAgentData } from '@/components/cultural/useAgentData';
 
 export const useAgentManagement = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -19,15 +18,12 @@ export const useAgentManagement = () => {
 
   console.log('useAgentManagement: Hook initialized');
 
-  // Get agents using the hook
-  const culturalAgents = useAgentData('en'); // Default to English, could be made dynamic
-
   // Convert recommended agents to legacy format for dashboard display
-  const convertRecommendationsToLegacy = useCallback((recommendations: RecommendedAgents): Agent[] => {
+  const convertRecommendationsToLegacy = (recommendations: RecommendedAgents): Agent[] => {
     console.log('Converting recommendations to legacy format:', recommendations);
     const allAgents: Agent[] = [];
     
-    // Always add admin agent as it's always recommended
+    // Always add admin agent
     allAgents.push({
       id: 'admin',
       name: 'Administrative Assistant',
@@ -38,7 +34,7 @@ export const useAgentManagement = () => {
       icon: '📋'
     });
 
-    // Check for cultural agents in primary/secondary recommendations
+    // Check for cultural agents
     const hasCultural = recommendations.primary?.includes('cultural') || 
                        recommendations.secondary?.includes('cultural') ||
                        recommendations.cultural;
@@ -55,7 +51,7 @@ export const useAgentManagement = () => {
       });
     }
 
-    // Check for other agents based on recommendations
+    // Add other agents based on recommendations
     const hasAccounting = recommendations.primary?.includes('finance-advisor') || 
                          recommendations.secondary?.includes('finance-advisor') ||
                          recommendations.accounting;
@@ -106,17 +102,17 @@ export const useAgentManagement = () => {
 
     console.log('Converted agents:', allAgents);
     return allAgents;
-  }, []);
+  };
 
   // Initialize data from localStorage
   useEffect(() => {
     console.log('useAgentManagement: Starting initialization');
-    setIsLoading(true);
-    setError(null);
-
+    
     const initializeData = () => {
       try {
-        console.log('useAgentManagement: Checking onboarding status');
+        setIsLoading(true);
+        setError(null);
+
         // Check onboarding status
         const onboardingCompleted = localStorage.getItem('onboardingCompleted');
         console.log('Onboarding completed:', onboardingCompleted);
@@ -128,7 +124,13 @@ export const useAgentManagement = () => {
           return;
         }
 
-        console.log('useAgentManagement: Loading maturity scores');
+        // Load profile type
+        const storedProfile = localStorage.getItem('profileType');
+        if (storedProfile) {
+          setProfileType(storedProfile as ProfileType);
+          console.log('Loaded profile type:', storedProfile);
+        }
+
         // Load maturity scores
         const storedScores = localStorage.getItem('maturityScores');
         if (storedScores) {
@@ -140,7 +142,6 @@ export const useAgentManagement = () => {
           const scoreHistory = localStorage.getItem('maturityScoreHistory');
           let history = scoreHistory ? JSON.parse(scoreHistory) : [];
           
-          // Only add if it's different from the last entry
           const lastEntry = history[history.length - 1];
           if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(scores)) {
             history.push({
@@ -151,7 +152,6 @@ export const useAgentManagement = () => {
           }
         }
 
-        console.log('useAgentManagement: Loading recommended agents');
         // Load recommended agents
         const storedRecommended = localStorage.getItem('recommendedAgents');
         if (storedRecommended) {
@@ -159,32 +159,18 @@ export const useAgentManagement = () => {
           console.log('Loaded recommended agents:', recommendations);
           setRecommendedAgents(recommendations);
           
-          // Convert recommendations to agents for dashboard display
           const agentsFromRecommendations = convertRecommendationsToLegacy(recommendations);
           setAgents(agentsFromRecommendations);
         } else {
           console.log('useAgentManagement: No recommendations found, using defaults');
-          // If no recommendations, show default agents based on profile type
-          const storedProfile = localStorage.getItem('profileType');
-          const currentProfileType = storedProfile as ProfileType || 'solo';
-          setProfileType(currentProfileType);
-          
-          // Create default recommendations based on profile type
           const defaultRecommendations: RecommendedAgents = {
             primary: ['admin'],
-            secondary: currentProfileType === 'team' ? ['operations'] : ['cultural']
+            secondary: profileType === 'team' ? ['operations'] : ['cultural']
           };
           
           const defaultAgents = convertRecommendationsToLegacy(defaultRecommendations);
           setAgents(defaultAgents);
-        }
-
-        console.log('useAgentManagement: Loading profile type');
-        // Load profile type
-        const storedProfile = localStorage.getItem('profileType');
-        if (storedProfile) {
-          setProfileType(storedProfile as ProfileType);
-          console.log('Loaded profile type:', storedProfile);
+          setRecommendedAgents(defaultRecommendations);
         }
 
         console.log('useAgentManagement: Initialization completed successfully');
@@ -192,6 +178,7 @@ export const useAgentManagement = () => {
       } catch (error) {
         console.error('useAgentManagement: Error initializing data:', error);
         setError('Error loading dashboard data');
+        
         // Set default agents if there's an error
         setAgents([{
           id: 'admin',
@@ -210,16 +197,15 @@ export const useAgentManagement = () => {
     const timeoutId = setTimeout(initializeData, 100);
     
     return () => clearTimeout(timeoutId);
-  }, [convertRecommendationsToLegacy]);
+  }, []); // Remove all dependencies to prevent loops
 
-  const handleOnboardingComplete = useCallback((scores: CategoryScore, recommended: RecommendedAgents) => {
+  const handleOnboardingComplete = (scores: CategoryScore, recommended: RecommendedAgents) => {
     console.log('useAgentManagement: Onboarding completed with recommendations:', recommended);
     
     setMaturityScores(scores);
     setRecommendedAgents(recommended);
     setShowOnboarding(false);
     
-    // Convert recommendations to agents for dashboard
     const agentsFromRecommendations = convertRecommendationsToLegacy(recommended);
     setAgents(agentsFromRecommendations);
     
@@ -236,28 +222,28 @@ export const useAgentManagement = () => {
       timestamp: new Date().toISOString()
     });
     localStorage.setItem('maturityScoreHistory', JSON.stringify(history));
-  }, [convertRecommendationsToLegacy]);
+  };
 
-  const handleSelectAgent = useCallback((agentId: string) => {
+  const handleSelectAgent = (agentId: string) => {
     console.log('useAgentManagement: Selecting agent:', agentId);
     setSelectedAgent(agentId);
     setActiveSection('agent-details');
-  }, []);
+  };
 
-  const handleBackFromAgentDetails = useCallback(() => {
+  const handleBackFromAgentDetails = () => {
     console.log('useAgentManagement: Going back from agent details');
     setSelectedAgent(null);
     setActiveSection('dashboard');
-  }, []);
+  };
 
-  const checkLocationStateForOnboarding = useCallback((locationState: any) => {
+  const checkLocationStateForOnboarding = (locationState: any) => {
     if (locationState?.showOnboarding) {
       console.log('useAgentManagement: Location state requests onboarding');
       setShowOnboarding(true);
       return true;
     }
     return false;
-  }, []);
+  };
 
   return {
     agents,
