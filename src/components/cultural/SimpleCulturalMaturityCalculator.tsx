@@ -1,7 +1,6 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +10,10 @@ import { useOptimizedQuestions } from './hooks/useOptimizedQuestions';
 import { OptimizedCharacterImage } from './components/OptimizedCharacterImage';
 import { OnboardingErrorBoundary } from './components/OnboardingErrorBoundary';
 import { DebouncedButton } from './components/DebouncedButton';
+import { ProfileTypeSelector } from './components/ProfileTypeSelector';
+import { ResultsDisplay } from './components/ResultsDisplay';
+import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
+import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
 
 interface SimpleCulturalMaturityCalculatorProps {
   language: 'en' | 'es';
@@ -18,149 +21,37 @@ interface SimpleCulturalMaturityCalculatorProps {
 }
 
 const characterImages = [
-  "/lovable-uploads/cfd16f14-72a3-4b55-bfd2-67adcd44eb78.png", // Community monster
-  "/lovable-uploads/a2ebe4fd-31ed-43ec-9f9f-35fe6b529ad2.png", // Creative monster
-  "/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png", // Design monster
-  "/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png", // Finance monster
-  "/lovable-uploads/c131a30d-0ce5-4b65-ae3c-5715f73e4f4c.png", // Planning monster
-  "/lovable-uploads/aad610ec-9f67-4ed0-93dc-8c2b3e8f98d3.png", // Business monster
-  "/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png", // Analytics monster
+  "/lovable-uploads/cfd16f14-72a3-4b55-bfd2-67adcd44eb78.png",
+  "/lovable-uploads/a2ebe4fd-31ed-43ec-9f9f-35fe6b529ad2.png",
+  "/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png",
+  "/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png",
+  "/lovable-uploads/c131a30d-0ce5-4b65-ae3c-5715f73e4f4c.png",
+  "/lovable-uploads/aad610ec-9f67-4ed0-93dc-8c2b3e8f98d3.png",
+  "/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png",
 ];
-
-const ProfileTypeSelector = React.memo(({ profileType, onSelect, t }: {
-  profileType: ProfileType | null;
-  onSelect: (type: ProfileType) => void;
-  t: any;
-}) => (
-  <div className="space-y-6">
-    <div>
-      <h4 className="text-xl font-semibold text-purple-900 mb-2">{t.profileTypeTitle}</h4>
-      <p className="text-gray-600 mb-6">{t.profileTypeSubtitle}</p>
-    </div>
-
-    <div className="grid gap-4">
-      {[
-        { type: 'idea' as ProfileType, data: t.idea },
-        { type: 'solo' as ProfileType, data: t.solo },
-        { type: 'team' as ProfileType, data: t.team }
-      ].map(({ type, data }) => (
-        <motion.div
-          key={type}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-            profileType === type
-              ? 'border-purple-500 bg-purple-50'
-              : 'border-gray-200 hover:border-purple-300'
-          }`}
-          onClick={() => onSelect(type)}
-        >
-          <h5 className="font-semibold text-purple-900">{data.title}</h5>
-          <p className="text-sm text-gray-600 mt-1">{data.description}</p>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-));
-
-ProfileTypeSelector.displayName = 'ProfileTypeSelector';
-
-const ResultsDisplay = React.memo(({ scores, recommendedAgents, t, onComplete }: {
-  scores: CategoryScore;
-  recommendedAgents: RecommendedAgents;
-  t: any;
-  onComplete: () => void;
-}) => (
-  <div className="space-y-6">
-    <div>
-      <h4 className="text-xl font-semibold text-purple-900 mb-2">{t.resultsTitle}</h4>
-      <p className="text-gray-600 mb-6">{t.resultsSubtitle}</p>
-    </div>
-
-    {/* Scores Display */}
-    <div className="space-y-4">
-      {Object.entries(scores).map(([category, score]) => (
-        <div key={category} className="space-y-2">
-          <div className="flex justify-between">
-            <span className="capitalize text-sm font-medium">{category.replace(/([A-Z])/g, ' $1')}</span>
-            <span className="text-sm font-semibold">{score}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <motion.div 
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${score}%` }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* Recommendations */}
-    <div className="space-y-4">
-      <div>
-        <h5 className="font-semibold text-purple-900 mb-2">{t.primaryRecommendations}</h5>
-        <div className="flex flex-wrap gap-2">
-          {recommendedAgents.primary?.map((agent, index) => (
-            <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-              {agent.replace('-', ' ')}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h5 className="font-semibold text-purple-900 mb-2">{t.secondaryRecommendations}</h5>
-        <div className="flex flex-wrap gap-2">
-          {recommendedAgents.secondary?.map((agent, index) => (
-            <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-              {agent.replace('-', ' ')}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {/* Deeper Analysis Option */}
-    <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
-      <h5 className="font-semibold text-purple-900 mb-2">{t.deeperAnalysis}</h5>
-      <p className="text-sm text-gray-600 mb-3">{t.moreQuestions}</p>
-      <div className="flex gap-3">
-        <DebouncedButton
-          variant="outline"
-          size="sm"
-          onClick={onComplete}
-        >
-          {t.finishAssessment}
-        </DebouncedButton>
-        <DebouncedButton
-          size="sm"
-          className="bg-gradient-to-r from-purple-500 to-indigo-600"
-          onClick={() => {
-            console.log("Extended analysis clicked - feature coming soon");
-          }}
-        >
-          {t.moreQuestions}
-        </DebouncedButton>
-      </div>
-    </div>
-  </div>
-));
-
-ResultsDisplay.displayName = 'ResultsDisplay';
 
 export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCalculatorProps> = ({ 
   language, 
   onComplete 
 }) => {
-  const [currentStep, setCurrentStep] = useState<'profileType' | 'questions' | 'results'>('profileType');
-  const [profileType, setProfileType] = useState<ProfileType | null>(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [scores, setScores] = useState<CategoryScore | null>(null);
-  const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents | null>(null);
-  const { toast } = useToast();
+  const {
+    currentStep,
+    setCurrentStep,
+    profileType,
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    answers,
+    scores,
+    setScores,
+    recommendedAgents,
+    setRecommendedAgents,
+    toast,
+    calculateScores,
+    getRecommendations,
+    handleProfileSelect,
+    handleSelectOption,
+    handleComplete
+  } = useMaturityCalculatorLogic(language, onComplete);
 
   // Memoized questions and calculations
   const { questions, totalSteps } = useOptimizedQuestions(language, profileType);
@@ -237,57 +128,24 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
 
   const t = translations[language];
 
-  // Memoized score calculation functions
-  const calculateScores = useCallback((): CategoryScore => {
-    const values = Object.values(answers);
-    const total = values.reduce((sum, val) => sum + val, 0);
-    const maxPossible = questions.length * 3;
-    const percentage = (total / maxPossible) * 100;
-    
-    const baseScore = Math.min(100, Math.round(percentage));
-    
-    if (profileType === 'idea') {
-      return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.9)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.7)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.8)),
-        monetization: Math.min(100, Math.round(baseScore * 0.6))
-      };
-    } else if (profileType === 'solo') {
-      return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.8)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.9)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.85)),
-        monetization: Math.min(100, Math.round(baseScore * 0.8))
-      };
-    } else {
-      return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.85)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.8)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.9)),
-        monetization: Math.min(100, Math.round(baseScore * 0.85))
-      };
-    }
-  }, [answers, questions.length, profileType]);
-
-  const getRecommendations = useCallback((scores: CategoryScore): RecommendedAgents => {
-    const scoresArray = [
-      { category: 'idea-validator', score: scores.ideaValidation },
-      { category: 'ux-designer', score: scores.userExperience },
-      { category: 'market-analyst', score: scores.marketFit },
-      { category: 'finance-advisor', score: scores.monetization }
-    ];
-
-    scoresArray.sort((a, b) => a.score - b.score);
-
-    return {
-      primary: scoresArray.slice(0, 2).map(item => item.category),
-      secondary: scoresArray.slice(2, 4).map(item => item.category)
-    };
-  }, []);
+  const { handleNext, handleBack } = useMaturityNavigationLogic({
+    currentStep,
+    setCurrentStep,
+    profileType,
+    questions,
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    answers,
+    calculateScores,
+    getRecommendations,
+    setScores,
+    setRecommendedAgents,
+    toast,
+    t
+  });
 
   // Memoized image calculation
-  const getCurrentCharacterImage = useCallback(() => {
+  const getCurrentCharacterImage = useMemo(() => {
     if (currentStep === 'profileType') {
       return characterImages[0];
     } else if (currentStep === 'questions') {
@@ -297,73 +155,12 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     }
   }, [currentStep, currentQuestionIndex]);
 
-  const getNextCharacterImage = useCallback(() => {
+  const getNextCharacterImage = useMemo(() => {
     if (currentStep === 'questions' && currentQuestionIndex < questions.length - 1) {
       return characterImages[((currentQuestionIndex + 1) % characterImages.length) + 1] || characterImages[1];
     }
     return undefined;
   }, [currentStep, currentQuestionIndex, questions.length]);
-
-  // Optimized handlers
-  const handleProfileSelect = useCallback((type: ProfileType) => {
-    setProfileType(type);
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (currentStep === 'profileType') {
-      if (!profileType) {
-        toast({
-          title: t.selectProfile,
-          variant: 'destructive'
-        });
-        return;
-      }
-      setCurrentStep('questions');
-    } else if (currentStep === 'questions') {
-      const currentQuestion = questions[currentQuestionIndex];
-      if (!answers[currentQuestion.id]) {
-        toast({
-          title: t.answerQuestion,
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        const finalScores = calculateScores();
-        const recommendations = getRecommendations(finalScores);
-        setScores(finalScores);
-        setRecommendedAgents(recommendations);
-        setCurrentStep('results');
-      }
-    }
-  }, [currentStep, profileType, questions, currentQuestionIndex, answers, t, toast, calculateScores, getRecommendations]);
-
-  const handleBack = useCallback(() => {
-    if (currentStep === 'questions' && currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    } else if (currentStep === 'questions' && currentQuestionIndex === 0) {
-      setCurrentStep('profileType');
-    } else if (currentStep === 'results') {
-      setCurrentStep('questions');
-      setCurrentQuestionIndex(questions.length - 1);
-    }
-  }, [currentStep, currentQuestionIndex, questions.length]);
-
-  const handleSelectOption = useCallback((questionId: string, value: number) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
-  }, []);
-
-  const handleComplete = useCallback(() => {
-    if (scores && recommendedAgents) {
-      onComplete(scores, recommendedAgents);
-    }
-  }, [scores, recommendedAgents, onComplete]);
 
   return (
     <OnboardingErrorBoundary>
@@ -389,9 +186,9 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
               {/* Character Image */}
               <div className="hidden md:block w-1/3">
                 <OptimizedCharacterImage
-                  src={getCurrentCharacterImage()}
+                  src={getCurrentCharacterImage}
                   alt="Character"
-                  preloadNext={getNextCharacterImage()}
+                  preloadNext={getNextCharacterImage}
                 />
               </div>
 
