@@ -38,7 +38,7 @@ const Dashboard = () => {
       // Clear state after using it
       window.history.replaceState({}, document.title);
     }
-  }, [location]);
+  }, [location, checkLocationStateForOnboarding]);
   
   const handleNavigateToMaturityCalculator = () => {
     navigate('/maturity-calculator', { state: { profileType } });
