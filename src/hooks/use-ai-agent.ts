@@ -119,15 +119,30 @@ export function useAIAgent(agentType: string = 'admin') {
         }
       }
       
-      // Validate OpenAI response structure
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.error('Invalid OpenAI response structure:', data);
-        throw new Error('Invalid response format from AI service');
+      // More robust response validation
+      let aiResponse = 'Sorry, I could not generate a response.';
+      
+      // Handle different possible response formats
+      if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
+        const choice = data.choices[0];
+        if (choice.message && choice.message.content) {
+          aiResponse = choice.message.content;
+        } else if (choice.text) {
+          // Handle alternative response format
+          aiResponse = choice.text;
+        }
+      } else if (data.message) {
+        // Handle direct message format
+        aiResponse = data.message;
+      } else if (data.content) {
+        // Handle direct content format
+        aiResponse = data.content;
+      } else if (typeof data === 'string') {
+        // Handle string response
+        aiResponse = data;
       }
       
-      // Extract AI response
-      const aiResponse = data.choices[0].message.content || 'Sorry, I could not generate a response.';
-      console.log('AI response received successfully');
+      console.log('AI response received successfully:', aiResponse);
       
       // Add AI message
       const aiMessage: Message = { type: 'agent', content: aiResponse };
