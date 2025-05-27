@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionCard } from '@/components/maturity/QuestionCard';
 import { ProgressBar } from '@/components/maturity/ProgressBar';
 import { useOptimizedQuestions } from './hooks/useOptimizedQuestions';
+import { getExtendedQuestions } from '@/components/maturity/questions';
 import { OptimizedCharacterImage } from './components/OptimizedCharacterImage';
 import { OnboardingErrorBoundary } from './components/OnboardingErrorBoundary';
 import { DebouncedButton } from './components/DebouncedButton';
 import { ProfileTypeSelector } from './components/ProfileTypeSelector';
 import { ResultsDisplay } from './components/ResultsDisplay';
+import { BifurcationChoice } from './components/BifurcationChoice';
 import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
 import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
 
@@ -41,6 +43,9 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     currentQuestionIndex,
     setCurrentQuestionIndex,
     answers,
+    extendedAnswers,
+    analysisType,
+    setAnalysisType,
     scores,
     setScores,
     recommendedAgents,
@@ -50,17 +55,28 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     getRecommendations,
     handleProfileSelect,
     handleSelectOption,
+    handleAnalysisChoice,
     handleComplete
   } = useMaturityCalculatorLogic(language, onComplete);
 
-  // Memoized questions and calculations
-  const { questions, totalSteps } = useOptimizedQuestions(language, profileType);
-  
+  // Get questions based on current step
+  const { questions } = useOptimizedQuestions(language, profileType);
+  const extendedQuestions = useMemo(() => {
+    return profileType ? getExtendedQuestions(language, profileType) : [];
+  }, [language, profileType]);
+
+  // Calculate current step number and total steps
   const currentStepNumber = useMemo(() => {
     if (currentStep === 'profileType') return 1;
     if (currentStep === 'questions') return currentQuestionIndex + 2;
-    return totalSteps;
-  }, [currentStep, currentQuestionIndex, totalSteps]);
+    if (currentStep === 'bifurcation') return questions.length + 2;
+    if (currentStep === 'extendedQuestions') return questions.length + 3 + currentQuestionIndex;
+    return questions.length + 3 + (analysisType === 'deep' ? extendedQuestions.length : 0);
+  }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length, analysisType]);
+
+  const totalSteps = useMemo(() => {
+    return questions.length + 3 + (analysisType === 'deep' ? extendedQuestions.length : 0);
+  }, [questions.length, extendedQuestions.length, analysisType]);
 
   // Memoized translations
   const translations = useMemo(() => ({
@@ -133,9 +149,12 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     setCurrentStep,
     profileType,
     questions,
+    extendedQuestions,
     currentQuestionIndex,
     setCurrentQuestionIndex,
     answers,
+    extendedAnswers,
+    analysisType,
     calculateScores,
     getRecommendations,
     setScores,
@@ -150,6 +169,10 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       return characterImages[0];
     } else if (currentStep === 'questions') {
       return characterImages[(currentQuestionIndex % characterImages.length) + 1] || characterImages[1];
+    } else if (currentStep === 'bifurcation') {
+      return characterImages[3];
+    } else if (currentStep === 'extendedQuestions') {
+      return characterImages[(currentQuestionIndex % characterImages.length) + 4] || characterImages[4];
     } else {
       return characterImages[6];
     }
@@ -158,9 +181,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   const getNextCharacterImage = useMemo(() => {
     if (currentStep === 'questions' && currentQuestionIndex < questions.length - 1) {
       return characterImages[((currentQuestionIndex + 1) % characterImages.length) + 1] || characterImages[1];
+    } else if (currentStep === 'extendedQuestions' && currentQuestionIndex < extendedQuestions.length - 1) {
+      return characterImages[((currentQuestionIndex + 1) % characterImages.length) + 4] || characterImages[4];
     }
     return undefined;
-  }, [currentStep, currentQuestionIndex, questions.length]);
+  }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length]);
 
   return (
     <OnboardingErrorBoundary>
@@ -227,6 +252,38 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                     </motion.div>
                   )}
 
+                  {currentStep === 'bifurcation' && (
+                    <motion.div
+                      key="bifurcation"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <BifurcationChoice
+                        language={language}
+                        selectedType={analysisType}
+                        onSelect={handleAnalysisChoice}
+                      />
+                    </motion.div>
+                  )}
+
+                  {currentStep === 'extendedQuestions' && extendedQuestions[currentQuestionIndex] && (
+                    <motion.div
+                      key={`extended-${currentQuestionIndex}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <QuestionCard 
+                        question={extendedQuestions[currentQuestionIndex]}
+                        selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
+                        onSelectOption={handleSelectOption}
+                      />
+                    </motion.div>
+                  )}
+
                   {currentStep === 'results' && scores && recommendedAgents && (
                     <motion.div
                       key="results"
@@ -264,7 +321,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
                   onClick={handleNext}
                   className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
                 >
-                  {currentStep === 'questions' && currentQuestionIndex === questions.length - 1 
+                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
                     ? t.complete 
                     : t.next}
                   <ArrowRight className="h-4 w-4" />

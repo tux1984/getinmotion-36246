@@ -2,17 +2,31 @@
 import { useMemo } from 'react';
 import { ProfileType } from '@/types/dashboard';
 import { Question } from '@/components/maturity/types';
-import { getProfileSpecificQuestions } from '@/components/maturity/questions';
+import { getProfileSpecificQuestions, getExtendedQuestions } from '@/components/maturity/questions';
 
-export const useOptimizedQuestions = (language: 'en' | 'es', profileType: ProfileType | null) => {
+export const useOptimizedQuestions = (
+  language: 'en' | 'es', 
+  profileType: ProfileType | null,
+  includeExtended: boolean = false
+) => {
   const questions = useMemo((): Question[] => {
     if (!profileType) return [];
-    return getProfileSpecificQuestions(language, profileType);
-  }, [language, profileType]);
+    const baseQuestions = getProfileSpecificQuestions(language, profileType);
+    
+    if (includeExtended) {
+      const extendedQuestions = getExtendedQuestions(language, profileType);
+      return [...baseQuestions, ...extendedQuestions];
+    }
+    
+    return baseQuestions;
+  }, [language, profileType, includeExtended]);
 
   const totalSteps = useMemo(() => {
-    return questions.length + 2; // +2 for profile type and results
-  }, [questions.length]);
+    if (includeExtended) {
+      return questions.length + 3; // +3 for profile type, bifurcation, and results
+    }
+    return questions.length + 3; // +3 for profile type, bifurcation, and results
+  }, [questions.length, includeExtended]);
 
   return { questions, totalSteps };
 };

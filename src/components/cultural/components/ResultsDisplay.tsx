@@ -56,40 +56,43 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = React.memo(({
         </div>
       </div>
 
-      <div>
-        <h5 className="font-semibold text-purple-900 mb-2">{t.secondaryRecommendations}</h5>
-        <div className="flex flex-wrap gap-2">
-          {recommendedAgents.secondary?.map((agent, index) => (
-            <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-              {agent.replace('-', ' ')}
-            </span>
-          ))}
+      {recommendedAgents.secondary && (
+        <div>
+          <h5 className="font-semibold text-purple-900 mb-2">{t.secondaryRecommendations}</h5>
+          <div className="flex flex-wrap gap-2">
+            {recommendedAgents.secondary.map((agent, index) => (
+              <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                {agent.replace('-', ' ')}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
 
-    {/* Deeper Analysis Option */}
-    <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
-      <h5 className="font-semibold text-purple-900 mb-2">{t.deeperAnalysis}</h5>
-      <p className="text-sm text-gray-600 mb-3">{t.moreQuestions}</p>
-      <div className="flex gap-3">
-        <DebouncedButton
-          variant="outline"
-          size="sm"
-          onClick={onComplete}
-        >
-          {t.finishAssessment}
-        </DebouncedButton>
-        <DebouncedButton
-          size="sm"
-          className="bg-gradient-to-r from-purple-500 to-indigo-600"
-          onClick={() => {
-            console.log("Extended analysis clicked - feature coming soon");
-          }}
-        >
-          {t.moreQuestions}
-        </DebouncedButton>
+    {/* Enhanced analysis notice */}
+    {recommendedAgents.extended && (
+      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+        <h5 className="font-semibold text-green-900 mb-2">
+          {language === 'en' ? 'Enhanced Analysis Complete' : 'Análisis Mejorado Completado'}
+        </h5>
+        <p className="text-sm text-green-700">
+          {language === 'en' 
+            ? 'Your recommendations are based on the comprehensive analysis including extended questions.'
+            : 'Tus recomendaciones están basadas en el análisis integral incluyendo preguntas extendidas.'}
+        </p>
       </div>
+    )}
+
+    {/* Completion button */}
+    <div className="flex justify-center pt-4">
+      <DebouncedButton
+        size="lg"
+        className="bg-gradient-to-r from-purple-500 to-indigo-600 px-8 py-3"
+        onClick={onComplete}
+      >
+        {t.finishAssessment}
+      </DebouncedButton>
     </div>
   </div>
 ));

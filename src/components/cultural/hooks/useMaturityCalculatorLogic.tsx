@@ -7,46 +7,52 @@ export const useMaturityCalculatorLogic = (
   language: 'en' | 'es',
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void
 ) => {
-  const [currentStep, setCurrentStep] = useState<'profileType' | 'questions' | 'results'>('profileType');
+  const [currentStep, setCurrentStep] = useState<'profileType' | 'questions' | 'bifurcation' | 'extendedQuestions' | 'results'>('profileType');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [extendedAnswers, setExtendedAnswers] = useState<Record<string, number>>({});
+  const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
   const [scores, setScores] = useState<CategoryScore | null>(null);
   const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents | null>(null);
   const { toast } = useToast();
 
-  // Memoized score calculation functions
+  // Enhanced score calculation that includes extended answers
   const calculateScores = useCallback((): CategoryScore => {
-    const values = Object.values(answers);
+    const allAnswers = { ...answers, ...extendedAnswers };
+    const values = Object.values(allAnswers);
     const total = values.reduce((sum, val) => sum + val, 0);
-    const maxPossible = Object.keys(answers).length * 3;
-    const percentage = (total / maxPossible) * 100;
+    const maxPossible = Object.keys(allAnswers).length * 3;
+    const percentage = maxPossible > 0 ? (total / maxPossible) * 100 : 0;
     
     const baseScore = Math.min(100, Math.round(percentage));
     
+    // Enhanced scoring with extended questions
+    const extendedBonus = Object.keys(extendedAnswers).length > 0 ? 5 : 0;
+    
     if (profileType === 'idea') {
       return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.9)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.7)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.8)),
-        monetization: Math.min(100, Math.round(baseScore * 0.6))
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.9) + extendedBonus),
+        userExperience: Math.min(100, Math.round(baseScore * 0.7) + extendedBonus),
+        marketFit: Math.min(100, Math.round(baseScore * 0.8) + extendedBonus),
+        monetization: Math.min(100, Math.round(baseScore * 0.6) + extendedBonus)
       };
     } else if (profileType === 'solo') {
       return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.8)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.9)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.85)),
-        monetization: Math.min(100, Math.round(baseScore * 0.8))
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.8) + extendedBonus),
+        userExperience: Math.min(100, Math.round(baseScore * 0.9) + extendedBonus),
+        marketFit: Math.min(100, Math.round(baseScore * 0.85) + extendedBonus),
+        monetization: Math.min(100, Math.round(baseScore * 0.8) + extendedBonus)
       };
     } else {
       return {
-        ideaValidation: Math.min(100, Math.round(baseScore * 0.85)),
-        userExperience: Math.min(100, Math.round(baseScore * 0.8)),
-        marketFit: Math.min(100, Math.round(baseScore * 0.9)),
-        monetization: Math.min(100, Math.round(baseScore * 0.85))
+        ideaValidation: Math.min(100, Math.round(baseScore * 0.85) + extendedBonus),
+        userExperience: Math.min(100, Math.round(baseScore * 0.8) + extendedBonus),
+        marketFit: Math.min(100, Math.round(baseScore * 0.9) + extendedBonus),
+        monetization: Math.min(100, Math.round(baseScore * 0.85) + extendedBonus)
       };
     }
-  }, [answers, profileType]);
+  }, [answers, extendedAnswers, profileType]);
 
   const getRecommendations = useCallback((scores: CategoryScore): RecommendedAgents => {
     const scoresArray = [
@@ -58,11 +64,19 @@ export const useMaturityCalculatorLogic = (
 
     scoresArray.sort((a, b) => a.score - b.score);
 
-    return {
+    // Enhanced recommendations based on extended analysis
+    const recommendations: RecommendedAgents = {
       primary: scoresArray.slice(0, 2).map(item => item.category),
       secondary: scoresArray.slice(2, 4).map(item => item.category)
     };
-  }, []);
+
+    // Add more recommendations if extended analysis was completed
+    if (Object.keys(extendedAnswers).length > 0) {
+      recommendations.extended = true;
+    }
+
+    return recommendations;
+  }, [extendedAnswers]);
 
   // Optimized handlers
   const handleProfileSelect = useCallback((type: ProfileType) => {
@@ -70,10 +84,21 @@ export const useMaturityCalculatorLogic = (
   }, []);
 
   const handleSelectOption = useCallback((questionId: string, value: number) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+    if (questionId.startsWith('extended_')) {
+      setExtendedAnswers(prev => ({
+        ...prev,
+        [questionId]: value
+      }));
+    } else {
+      setAnswers(prev => ({
+        ...prev,
+        [questionId]: value
+      }));
+    }
+  }, []);
+
+  const handleAnalysisChoice = useCallback((type: 'quick' | 'deep') => {
+    setAnalysisType(type);
   }, []);
 
   const handleComplete = useCallback(() => {
@@ -89,6 +114,9 @@ export const useMaturityCalculatorLogic = (
     currentQuestionIndex,
     setCurrentQuestionIndex,
     answers,
+    extendedAnswers,
+    analysisType,
+    setAnalysisType,
     scores,
     setScores,
     recommendedAgents,
@@ -98,6 +126,7 @@ export const useMaturityCalculatorLogic = (
     getRecommendations,
     handleProfileSelect,
     handleSelectOption,
+    handleAnalysisChoice,
     handleComplete
   };
 };
