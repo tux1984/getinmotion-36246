@@ -60,26 +60,23 @@ export const UserManagement = () => {
     setIsCreating(true);
     
     try {
-      // First create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newUserEmail,
-        password: newUserPassword,
-        email_confirm: true
+      console.log('Calling create-admin-user function...');
+      
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: newUserEmail,
+          password: newUserPassword
+        }
       });
       
-      if (authError) throw authError;
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
       
-      // Then add to admin_users table
-      const { error: insertError } = await supabase
-        .from('admin_users')
-        .insert([
-          {
-            email: newUserEmail,
-            created_by: (await supabase.auth.getUser()).data.user?.id
-          }
-        ]);
-        
-      if (insertError) throw insertError;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
       
       toast({
         title: 'Usuario creado',
