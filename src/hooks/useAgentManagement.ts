@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Agent, CategoryScore, RecommendedAgents, ProfileType } from '@/types/dashboard';
-import { calculateMaturityScores, getRecommendedAgents } from '@/components/cultural/hooks/utils/scoreCalculation';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
-import { UserProfileData } from '@/components/cultural/types/wizardTypes';
 import { useUserData } from './useUserData';
 import { useMaturityScores } from './useMaturityScores';
+import { useAgentRecommendations } from './useAgentRecommendations';
 
 type ActiveSection = 'dashboard' | 'agent-details' | 'agent-manager';
 
@@ -33,6 +32,12 @@ export const useAgentManagement = () => {
     saveMaturityScores 
   } = useMaturityScores();
 
+  // Use the new recommendations hook
+  const recommendedAgents = useAgentRecommendations({ 
+    maturityScores: currentScores,
+    userProfile: profile 
+  });
+
   // Convert user agents to Agent format
   const agents: Agent[] = culturalAgentsDatabase.map(agentInfo => {
     const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
@@ -49,31 +54,6 @@ export const useAgentManagement = () => {
     };
   });
 
-  // Generate recommendations based on current scores
-  const recommendedAgents: RecommendedAgents = React.useMemo(() => {
-    if (!currentScores) {
-      // Default recommendations for new users
-      return {
-        primary: ['cultural-consultant', 'project-manager', 'cost-calculator'],
-        secondary: ['content-creator', 'marketing-advisor', 'legal-advisor'],
-        admin: true,
-        cultural: true,
-        accounting: false,
-        legal: false,
-        operations: true
-      };
-    }
-
-    // Generate recommendations based on scores
-    const profileData: Partial<UserProfileData> = {
-      industry: 'musica', // Default - this should come from user profile
-      experience: currentScores.ideaValidation < 50 ? 'beginner' : 
-                 currentScores.ideaValidation < 80 ? 'intermediate' : 'advanced'
-    };
-
-    return getRecommendedAgents(profileData as UserProfileData, currentScores);
-  }, [currentScores]);
-
   // Combined loading state
   useEffect(() => {
     setIsLoading(userDataLoading || scoresLoading);
@@ -87,9 +67,6 @@ export const useAgentManagement = () => {
   // Check if user needs onboarding
   useEffect(() => {
     if (!isLoading && !error) {
-      // Show onboarding if:
-      // 1. No maturity scores exist
-      // 2. No enabled agents exist
       const hasScores = !!currentScores;
       const hasEnabledAgents = userAgents.some(agent => agent.is_enabled);
       
@@ -105,21 +82,14 @@ export const useAgentManagement = () => {
     console.log('Onboarding completed with scores and recommendations:', { scores, recommendedAgents });
     
     try {
-      // Save maturity scores with a basic profile data structure
-      const basicProfileData: Partial<UserProfileData> = {
+      await saveMaturityScores(scores, {
         profileType: profileType,
-        industry: 'musica', // Default for cultural entrepreneurs
+        industry: 'musica',
         experience: scores.ideaValidation < 50 ? 'beginner' : 
                    scores.ideaValidation < 80 ? 'intermediate' : 'advanced'
-      };
-      
-      await saveMaturityScores(scores, basicProfileData);
-      
-      // Enable selected agents (this will be handled by the useUserData hook)
-      // The agents will be enabled when the user first interacts with them
+      });
       
       setShowOnboarding(false);
-      
       console.log('Onboarding data saved successfully');
     } catch (error) {
       console.error('Error saving onboarding data:', error);
