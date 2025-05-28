@@ -20,6 +20,11 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   // Determine which logo to show based on variant and theme
   const shouldUseLightLogo = variant === 'light' || (variant === 'auto' && isDark);
   
+  // Use the new final logos
+  const logoSrc = shouldUseLightLogo 
+    ? "/lovable-uploads/83544840-d1c3-4b9f-928d-eccc7a19598d.png" // Logo invertido para fondos oscuros
+    : "/lovable-uploads/77e14212-9338-4d00-861e-6e21561b333c.png"; // Logo en colores para fondos claros
+  
   // Set size based on prop
   const sizeClasses = {
     sm: 'h-6 w-auto',
@@ -30,9 +35,9 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   return (
     <Link to="/" className={`inline-flex items-center ${className}`}>
       <img 
-        src="/lovable-uploads/f8038b45-1f3e-4034-9af0-f7c1fd90dcab.png" 
-        alt="Motion Logo" 
-        className={`${sizeClasses[size]} filter ${shouldUseLightLogo ? 'brightness-100' : 'brightness-[0.2]'} ${shouldUseLightLogo ? 'drop-shadow-lg' : ''}`}
+        src={logoSrc}
+        alt="Get in Motion Logo" 
+        className={`${sizeClasses[size]}`}
       />
     </Link>
   );
