@@ -29,15 +29,13 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
     <div className="space-y-12">
       <ModernWelcomeSection 
         language={language}
-        onMaturityCalculatorClick={onMaturityCalculatorClick}
-        onAgentManagerClick={onAgentManagerClick}
       />
       
       {maturityScores && (
         <ModernMaturityOverview 
-          scores={maturityScores}
+          currentScores={maturityScores}
           language={language}
-          onMaturityCalculatorClick={onMaturityCalculatorClick}
+          onRetakeAssessment={onMaturityCalculatorClick}
         />
       )}
       
