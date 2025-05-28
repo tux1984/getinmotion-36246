@@ -66,6 +66,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return [...new Set(culturalAgentsDatabase.map(agent => agent.category))];
   }, []);
 
+  // Get user agent data for each agent
+  const getUserAgentData = (agentId: string) => {
+    return userAgents.find(ua => ua.agent_id === agentId);
+  };
+
+  // Check if agent is recommended
+  const isAgentRecommended = (agentId: string) => {
+    const recommendedIds = ['cultural-consultant', 'project-manager', 'cost-calculator', 'content-creator', 'collaboration-agreement', 'export-advisor', 'stakeholder-matching'];
+    return recommendedIds.includes(agentId);
+  };
+
   // Group agents by category with filtering and sorting
   const filteredAndGroupedAgents = useMemo(() => {
     let filteredAgents = culturalAgentsDatabase;
@@ -138,17 +149,6 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   const recommendedAgents = culturalAgentsDatabase.filter(agent => 
     isAgentRecommended(agent.id)
   ).length;
-
-  // Get user agent data for each agent
-  const getUserAgentData = (agentId: string) => {
-    return userAgents.find(ua => ua.agent_id === agentId);
-  };
-
-  // Check if agent is recommended
-  const isAgentRecommended = (agentId: string) => {
-    const recommendedIds = ['cultural-consultant', 'project-manager', 'cost-calculator', 'content-creator', 'collaboration-agreement', 'export-advisor', 'stakeholder-matching'];
-    return recommendedIds.includes(agentId);
-  };
 
   const handleToggleAgent = async (agentId: string, currentEnabled: boolean) => {
     setTogglingAgents(prev => new Set(prev).add(agentId));
