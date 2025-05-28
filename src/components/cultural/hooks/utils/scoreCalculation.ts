@@ -1,4 +1,3 @@
-
 import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -109,7 +108,7 @@ export const getRecommendedAgents = (profileData: UserProfileData, scores: Categ
 
   // Determine additional recommendations based on lowest scores (areas needing most help)
   const needsAssessment = [
-    { category: 'finance-advisor', score: scores.monetization, legacy: 'accounting' as const },
+    { category: 'accounting', score: scores.monetization, legacy: 'accounting' as const },
     { category: 'legal', score: scores.marketFit, legacy: 'legal' as const },
     { category: 'operations', score: scores.userExperience, legacy: 'operations' as const }
   ];

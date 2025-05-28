@@ -6,7 +6,7 @@ export const useAgentManagement = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [profileType, setProfileType] = useState<ProfileType>('solo');
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'agent-details'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'agent-details' | 'agent-manager'>('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
   const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents>({
@@ -18,9 +18,9 @@ export const useAgentManagement = () => {
 
   console.log('useAgentManagement: Hook initialized');
 
-  // Convert recommended agents to legacy format for dashboard display
-  const convertRecommendationsToLegacy = (recommendations: RecommendedAgents): Agent[] => {
-    console.log('Converting recommendations to legacy format:', recommendations);
+  // Convert recommended agents to agent list for dashboard display
+  const convertRecommendationsToAgents = (recommendations: RecommendedAgents): Agent[] => {
+    console.log('Converting recommendations to agents:', recommendations);
     const allAgents: Agent[] = [];
     
     // Always add admin agent
@@ -52,8 +52,8 @@ export const useAgentManagement = () => {
     }
 
     // Add other agents based on recommendations
-    const hasAccounting = recommendations.primary?.includes('finance-advisor') || 
-                         recommendations.secondary?.includes('finance-advisor') ||
+    const hasAccounting = recommendations.primary?.includes('accounting') || 
+                         recommendations.secondary?.includes('accounting') ||
                          recommendations.accounting;
     
     if (hasAccounting) {
@@ -159,16 +159,21 @@ export const useAgentManagement = () => {
           console.log('Loaded recommended agents:', recommendations);
           setRecommendedAgents(recommendations);
           
-          const agentsFromRecommendations = convertRecommendationsToLegacy(recommendations);
+          const agentsFromRecommendations = convertRecommendationsToAgents(recommendations);
           setAgents(agentsFromRecommendations);
         } else {
           console.log('useAgentManagement: No recommendations found, using defaults');
           const defaultRecommendations: RecommendedAgents = {
             primary: ['admin'],
-            secondary: profileType === 'team' ? ['operations'] : ['cultural']
+            secondary: profileType === 'team' ? ['operations'] : ['cultural'],
+            admin: true,
+            accounting: false,
+            legal: false,
+            operations: profileType === 'team',
+            cultural: profileType !== 'idea'
           };
           
-          const defaultAgents = convertRecommendationsToLegacy(defaultRecommendations);
+          const defaultAgents = convertRecommendationsToAgents(defaultRecommendations);
           setAgents(defaultAgents);
           setRecommendedAgents(defaultRecommendations);
         }
@@ -206,7 +211,7 @@ export const useAgentManagement = () => {
     setRecommendedAgents(recommended);
     setShowOnboarding(false);
     
-    const agentsFromRecommendations = convertRecommendationsToLegacy(recommended);
+    const agentsFromRecommendations = convertRecommendationsToAgents(recommended);
     setAgents(agentsFromRecommendations);
     
     // Save to localStorage
@@ -236,6 +241,16 @@ export const useAgentManagement = () => {
     setActiveSection('dashboard');
   };
 
+  const handleOpenAgentManager = () => {
+    console.log('useAgentManagement: Opening agent manager');
+    setActiveSection('agent-manager');
+  };
+
+  const handleBackFromAgentManager = () => {
+    console.log('useAgentManagement: Going back from agent manager');
+    setActiveSection('dashboard');
+  };
+
   const checkLocationStateForOnboarding = (locationState: any) => {
     if (locationState?.showOnboarding) {
       console.log('useAgentManagement: Location state requests onboarding');
@@ -259,6 +274,8 @@ export const useAgentManagement = () => {
     handleOnboardingComplete,
     handleSelectAgent,
     handleBackFromAgentDetails,
+    handleOpenAgentManager,
+    handleBackFromAgentManager,
     checkLocationStateForOnboarding
   };
 };

@@ -62,12 +62,34 @@ const Login = () => {
   
   const t = translations[language];
   
+  // Check if user has completed onboarding
+  const checkOnboardingStatus = () => {
+    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+    return onboardingCompleted === 'true';
+  };
+  
   // Redirect if already authenticated and authorized
   useEffect(() => {
     if (!loading && user && isAuthorized) {
       console.log('Login: User authenticated and authorized, redirecting');
-      const from = location.state?.from?.pathname || '/maturity-calculator';
-      navigate(from, { replace: true });
+      
+      // Check if user has completed onboarding
+      const hasCompletedOnboarding = checkOnboardingStatus();
+      
+      // Determine redirect destination
+      let redirectTo = '/maturity-calculator'; // Default for new users
+      if (hasCompletedOnboarding) {
+        redirectTo = '/dashboard'; // For returning users who completed onboarding
+      }
+      
+      // Override with original intended destination if exists
+      const from = location.state?.from?.pathname;
+      if (from && from !== '/login') {
+        redirectTo = from;
+      }
+      
+      console.log('Login: Redirecting to:', redirectTo);
+      navigate(redirectTo, { replace: true });
     }
   }, [user, isAuthorized, loading, navigate, location]);
 
@@ -94,8 +116,7 @@ const Login = () => {
           description: t.loginSuccessful,
         });
         
-        const from = location.state?.from?.pathname || '/maturity-calculator';
-        navigate(from, { replace: true });
+        // The redirect will be handled by the useEffect above
       }
     } catch (error) {
       console.error('Login: Exception during sign in:', error);

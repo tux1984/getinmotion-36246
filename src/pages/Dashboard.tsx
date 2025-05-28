@@ -5,6 +5,7 @@ import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AgentDetails } from '@/components/dashboard/AgentDetails';
+import { AgentManager } from '@/components/dashboard/AgentManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
@@ -31,6 +32,8 @@ const Dashboard = () => {
     handleOnboardingComplete,
     handleSelectAgent,
     handleBackFromAgentDetails,
+    handleOpenAgentManager,
+    handleBackFromAgentManager,
     checkLocationStateForOnboarding
   } = useAgentManagement();
 
@@ -57,6 +60,12 @@ const Dashboard = () => {
   const handleNavigateToMaturityCalculator = () => {
     console.log('Dashboard: Navigating to maturity calculator');
     navigate('/maturity-calculator', { state: { profileType } });
+  };
+
+  const handleAgentToggle = (agentId: string, enabled: boolean) => {
+    console.log('Dashboard: Toggling agent:', agentId, enabled);
+    // This will be implemented to update agent preferences
+    // For now, just log the action
   };
 
   // Show loading state
@@ -113,7 +122,10 @@ const Dashboard = () => {
   console.log('Dashboard: Showing main dashboard');
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
+      <NewDashboardHeader 
+        onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+        onAgentManagerClick={handleOpenAgentManager}
+      />
       
       <div className="container mx-auto px-4 py-6">
         {activeSection === 'dashboard' && (
@@ -141,6 +153,27 @@ const Dashboard = () => {
             </div>
             <AgentDetails 
               agentId={selectedAgent}
+              language={language}
+            />
+          </div>
+        )}
+
+        {activeSection === 'agent-manager' && (
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+            <div className="mb-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleBackFromAgentManager}
+                className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
+              </Button>
+            </div>
+            <AgentManager 
+              currentAgents={agents}
+              onAgentToggle={handleAgentToggle}
               language={language}
             />
           </div>

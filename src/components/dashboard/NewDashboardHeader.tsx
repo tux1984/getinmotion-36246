@@ -1,58 +1,80 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Calculator, Settings, LogOut, Users } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { useLanguage } from '@/context/LanguageContext';
-import { BarChart3, RotateCcw } from 'lucide-react';
 
 interface NewDashboardHeaderProps {
   onMaturityCalculatorClick: () => void;
+  onAgentManagerClick?: () => void;
 }
 
-export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
-  onMaturityCalculatorClick
+export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({ 
+  onMaturityCalculatorClick,
+  onAgentManagerClick
 }) => {
+  const { signOut } = useAuth();
   const { language } = useLanguage();
-  
+
   const translations = {
     en: {
-      retakeAssessment: "Retake Maturity Assessment",
-      help: "Help",
-      account: "Account"
+      maturityCalculator: "Maturity Calculator",
+      agentManager: "Agent Manager",
+      settings: "Settings",
+      signOut: "Sign Out"
     },
     es: {
-      retakeAssessment: "Repetir Evaluación de Madurez",
-      help: "Ayuda",
-      account: "Cuenta"
+      maturityCalculator: "Calculadora de Madurez",
+      agentManager: "Gestor de Agentes",
+      settings: "Configuración",
+      signOut: "Cerrar Sesión"
     }
   };
-  
+
   const t = translations[language];
 
   return (
-    <header className="bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-900 border-b border-purple-800/30 py-4 shadow-lg">
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        <MotionLogo variant="light" className="py-1" />
+    <header className="bg-white/95 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <MotionLogo variant="dark" />
         
-        <div className="flex items-center gap-4">
-          <Button 
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onMaturityCalculatorClick}
-            className="bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white font-medium flex items-center gap-2"
+            className="flex items-center gap-2"
           >
-            <BarChart3 className="w-4 h-4" />
-            {t.retakeAssessment}
+            <Calculator className="w-4 h-4" />
+            <span className="hidden sm:inline">{t.maturityCalculator}</span>
           </Button>
           
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-            <Button variant="ghost" size="sm" className="text-indigo-100 hover:text-white hover:bg-indigo-800/50">
-              {t.help}
+          {onAgentManagerClick && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onAgentManagerClick}
+              className="flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.agentManager}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-indigo-100 hover:text-white hover:bg-indigo-800/50">
-              {t.account}
-            </Button>
-          </div>
+          )}
+          
+          <LanguageSwitcher />
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="flex items-center gap-2 text-gray-600 hover:text-red-600"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">{t.signOut}</span>
+          </Button>
         </div>
       </div>
     </header>
