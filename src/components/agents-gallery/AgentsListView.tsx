@@ -9,6 +9,8 @@ interface AgentsListViewProps {
     priority: string;
     impact: string;
     categories: Record<string, string>;
+    exampleQuestion: string;
+    exampleAnswer: string;
   };
 }
 
@@ -22,7 +24,6 @@ export const AgentsListView: React.FC<AgentsListViewProps> = ({
         <AgentCard
           key={agent.id}
           agent={agent}
-          isListView={true}
           translations={translations}
         />
       ))}

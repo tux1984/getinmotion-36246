@@ -9,6 +9,8 @@ interface AgentsGridViewProps {
     priority: string;
     impact: string;
     categories: Record<string, string>;
+    exampleQuestion: string;
+    exampleAnswer: string;
   };
 }
 
@@ -22,7 +24,6 @@ export const AgentsGridView: React.FC<AgentsGridViewProps> = ({
         <AgentCard
           key={agent.id}
           agent={agent}
-          isListView={false}
           translations={translations}
         />
       ))}
