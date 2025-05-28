@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CulturalAgent } from '@/data/agentsDatabase';
 import { Zap, Loader2, Clock } from 'lucide-react';
+import './masonry.css';
 
 interface AgentCategoryCardProps {
   category: string;
@@ -95,23 +96,23 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
   };
 
   return (
-    <Card className="h-full bg-gradient-to-br from-white to-gray-50/50 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-      <CardHeader className="pb-4">
+    <Card className="h-fit bg-gradient-to-br from-white to-gray-50/30 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <CardTitle className="text-lg font-semibold text-gray-800 mb-2">
               {categoryName}
             </CardTitle>
-            <div className="flex gap-2">
-              <Badge className="bg-green-100 text-green-700 border-green-200">
+            <div className="flex flex-wrap gap-1.5">
+              <Badge className="bg-green-100 text-green-700 border-green-200 text-xs px-2 py-0.5">
                 {activeCount} {t.active}
               </Badge>
-              <Badge variant="outline" className="text-gray-600">
+              <Badge variant="outline" className="text-gray-600 text-xs px-2 py-0.5">
                 {totalCount} total
               </Badge>
               {recommendedCount > 0 && (
-                <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">
-                  <Zap className="w-3 h-3 mr-1" />
+                <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs px-1.5 py-0.5">
+                  <Zap className="w-2.5 h-2.5 mr-0.5" />
                   {recommendedCount}
                 </Badge>
               )}
@@ -120,7 +121,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 pt-0">
         {agents.map((agent) => {
           const userAgent = getUserAgentData(agent.id);
           const isEnabled = userAgent?.is_enabled || false;
@@ -133,40 +134,40 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           return (
             <div
               key={agent.id}
-              className={`p-3 rounded-lg border transition-all ${
+              className={`p-2.5 rounded-lg border transition-all duration-200 ${
                 isEnabled 
-                  ? 'bg-green-50 border-green-200 shadow-sm' 
-                  : 'bg-white border-gray-200 hover:border-gray-300'
-              } ${isRecentlyChanged ? 'ring-2 ring-green-300 animate-pulse' : ''}`}
+                  ? 'bg-green-50/80 border-green-200 shadow-sm' 
+                  : 'bg-white/80 border-gray-200 hover:border-gray-300'
+              } ${isRecentlyChanged ? 'ring-1 ring-green-300 animate-pulse' : ''}`}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 flex-1">
-                  <div className={`w-8 h-8 rounded-full ${agent.color} flex items-center justify-center text-white text-sm flex-shrink-0`}>
+              <div className="flex items-start justify-between mb-1.5">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className={`w-7 h-7 rounded-full ${agent.color} flex items-center justify-center text-white text-sm flex-shrink-0`}>
                     {agent.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <h4 className="font-medium text-sm text-gray-800 truncate">
                         {agent.name}
                       </h4>
                       {isRecommended && (
-                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 text-xs px-1.5 py-0.5">
-                          <Zap className="w-2.5 h-2.5" />
+                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 text-xs px-1 py-0">
+                          <Zap className="w-2 h-2" />
                         </Badge>
                       )}
                     </div>
                     <div className="flex gap-1 mb-1">
-                      <Badge className={`text-xs px-1.5 py-0.5 ${getPriorityColor(agent.priority)}`}>
+                      <Badge className={`text-xs px-1 py-0 ${getPriorityColor(agent.priority)}`}>
                         {agent.priority}
                       </Badge>
-                      <Badge className={`text-xs px-1.5 py-0.5 ${getImpactColor(agent.impact)}`}>
+                      <Badge className={`text-xs px-1 py-0 ${getImpactColor(agent.impact)}`}>
                         ★{agent.impact}
                       </Badge>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   {isToggling && (
                     <Loader2 className="w-3 h-3 animate-spin text-purple-500" />
                   )}
@@ -179,15 +180,15 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                 </div>
               </div>
               
-              <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+              <p className="text-xs text-gray-600 mb-1.5 line-clamp-2 leading-relaxed">
                 {agent.description}
               </p>
               
               {isEnabled && (
                 <div className="flex justify-between items-center text-xs text-gray-500">
-                  <span>{t.usageCount}: {usageCount}</span>
+                  <span className="font-medium">{t.usageCount}: {usageCount}</span>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="w-2.5 h-2.5" />
                     <span>{formatLastUsed(lastUsed)}</span>
                   </div>
                 </div>

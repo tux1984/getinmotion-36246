@@ -130,8 +130,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         </div>
       </div>
 
-      {/* Category Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Bento Grid Layout */}
+      <div className="masonry-grid">
         {Object.entries(groupedAgents).map(([category, agents]) => {
           const categoryActiveCount = agents.filter(agent => 
             getUserAgentData(agent.id)?.is_enabled
@@ -142,20 +142,21 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
           ).length;
 
           return (
-            <AgentCategoryCard
-              key={category}
-              category={category}
-              categoryName={t.categories[category as keyof typeof t.categories]}
-              agents={agents}
-              activeCount={categoryActiveCount}
-              totalCount={agents.length}
-              recommendedCount={categoryRecommendedCount}
-              getUserAgentData={getUserAgentData}
-              isAgentRecommended={isAgentRecommended}
-              onToggleAgent={handleToggleAgent}
-              togglingAgents={togglingAgents}
-              language={language}
-            />
+            <div key={category} className="masonry-item">
+              <AgentCategoryCard
+                category={category}
+                categoryName={t.categories[category as keyof typeof t.categories]}
+                agents={agents}
+                activeCount={categoryActiveCount}
+                totalCount={agents.length}
+                recommendedCount={categoryRecommendedCount}
+                getUserAgentData={getUserAgentData}
+                isAgentRecommended={isAgentRecommended}
+                onToggleAgent={handleToggleAgent}
+                togglingAgents={togglingAgents}
+                language={language}
+              />
+            </div>
           );
         })}
       </div>

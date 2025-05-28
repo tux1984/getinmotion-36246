@@ -1,0 +1,113 @@
+
+/* Masonry/Bento Grid Layout */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  }
+}
+
+/* Masonry item styling */
+.masonry-item {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  overflow: hidden;
+}
+
+/* Smooth transitions for card movements */
+.masonry-grid .masonry-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Alternative CSS Grid approach for better browser support */
+@supports (grid-template-rows: masonry) {
+  .masonry-grid {
+    grid-template-rows: masonry;
+  }
+}
+
+/* Fallback for browsers without masonry support */
+@supports not (grid-template-rows: masonry) {
+  .masonry-grid {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: stretch;
+    max-height: 200vh; /* Adjust based on content */
+  }
+  
+  @media (min-width: 768px) {
+    .masonry-grid {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    
+    .masonry-item {
+      flex: 1 1 calc(50% - 0.75rem);
+      max-width: calc(50% - 0.75rem);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .masonry-item {
+      flex: 1 1 calc(33.333% - 1rem);
+      max-width: calc(33.333% - 1rem);
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .masonry-item {
+      flex: 1 1 calc(25% - 1.125rem);
+      max-width: calc(25% - 1.125rem);
+    }
+  }
+}
+
+/* Enhanced animations for dynamic layouts */
+.masonry-item {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animation for items */
+.masonry-item:nth-child(1) { animation-delay: 0ms; }
+.masonry-item:nth-child(2) { animation-delay: 100ms; }
+.masonry-item:nth-child(3) { animation-delay: 200ms; }
+.masonry-item:nth-child(4) { animation-delay: 300ms; }
+.masonry-item:nth-child(5) { animation-delay: 400ms; }
+.masonry-item:nth-child(6) { animation-delay: 500ms; }
