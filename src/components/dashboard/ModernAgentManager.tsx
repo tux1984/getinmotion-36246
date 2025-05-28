@@ -9,7 +9,7 @@ import { useAgentStats } from '@/hooks/useAgentStats';
 import { AgentCategoryCard } from './AgentCategoryCard';
 import { AgentFiltersPanel } from '../agent-manager/AgentFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
-import { TrueMasonryGrid } from '../agent-manager/TrueMasonryGrid';
+import { ModernAgentsGrid } from '../agent-manager/ModernAgentsGrid';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 import { Link } from 'react-router-dom';
@@ -118,9 +118,9 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
-      {/* True Masonry Grid Layout */}
+      {/* Modern CSS Grid Layout */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <TrueMasonryGrid columnWidth={400} gap={20}>
+        <ModernAgentsGrid>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -132,24 +132,23 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
             ).length;
 
             return (
-              <div key={category}>
-                <AgentCategoryCard
-                  category={category}
-                  categoryName={category}
-                  agents={agents}
-                  activeCount={categoryActiveCount}
-                  totalCount={agents.length}
-                  recommendedCount={categoryRecommendedCount}
-                  getUserAgentData={getUserAgentData}
-                  isAgentRecommended={isAgentRecommended}
-                  onToggleAgent={handleToggleAgent}
-                  togglingAgents={togglingAgents}
-                  language={language}
-                />
-              </div>
+              <AgentCategoryCard
+                key={category}
+                category={category}
+                categoryName={category}
+                agents={agents}
+                activeCount={categoryActiveCount}
+                totalCount={agents.length}
+                recommendedCount={categoryRecommendedCount}
+                getUserAgentData={getUserAgentData}
+                isAgentRecommended={isAgentRecommended}
+                onToggleAgent={handleToggleAgent}
+                togglingAgents={togglingAgents}
+                language={language}
+              />
             );
           })}
-        </TrueMasonryGrid>
+        </ModernAgentsGrid>
       ) : (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
