@@ -1,60 +1,23 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, X, Zap, Circle, CheckCircle, AlertCircle } from 'lucide-react';
-import { AgentFilter } from '@/types/agentTypes';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Search, X } from 'lucide-react';
 
 interface AgentFiltersPanelProps {
-  filters: AgentFilter;
-  onUpdateFilter: (key: keyof AgentFilter, value: any) => void;
+  filters: {
+    search: string;
+    status: string;
+    categories: string[];
+  };
+  onUpdateFilter: (key: string, value: string) => void;
   onToggleCategory: (category: string) => void;
   onClearFilters: () => void;
   categories: string[];
   hasActiveFilters: boolean;
   language: 'en' | 'es';
 }
-
-const translations = {
-  en: {
-    search: "Search agents...",
-    filters: "Filters:",
-    status: "Status",
-    priority: "Priority",
-    sortBy: "Sort by",
-    clearFilters: "Clear filters",
-    all: "All",
-    active: "Active",
-    inactive: "Inactive",
-    recommended: "Recommended",
-    high: "High",
-    medium: "Medium",
-    low: "Low",
-    name: "Name",
-    usage: "Usage",
-    impact: "Impact"
-  },
-  es: {
-    search: "Buscar agentes...",
-    filters: "Filtros:",
-    status: "Estado",
-    priority: "Prioridad",
-    sortBy: "Ordenar por",
-    clearFilters: "Limpiar filtros",
-    all: "Todos",
-    active: "Activos",
-    inactive: "Inactivos",
-    recommended: "Recomendados",
-    high: "Alta",
-    medium: "Media",
-    low: "Baja",
-    name: "Nombre",
-    usage: "Uso",
-    impact: "Impacto"
-  }
-};
 
 export const AgentFiltersPanel: React.FC<AgentFiltersPanelProps> = ({
   filters,
@@ -65,105 +28,92 @@ export const AgentFiltersPanel: React.FC<AgentFiltersPanelProps> = ({
   hasActiveFilters,
   language
 }) => {
+  const translations = {
+    en: {
+      searchPlaceholder: "Search agents...",
+      allStatuses: "All Statuses",
+      activeOnly: "Active Only",
+      inactiveOnly: "Inactive Only",
+      categories: "Categories",
+      clearFilters: "Clear Filters"
+    },
+    es: {
+      searchPlaceholder: "Buscar agentes...",
+      allStatuses: "Todos los Estados",
+      activeOnly: "Solo Activos",
+      inactiveOnly: "Solo Inactivos",
+      categories: "Categorías",
+      clearFilters: "Limpiar Filtros"
+    }
+  };
+
   const t = translations[language];
 
+  const statusOptions = [
+    { value: 'all', label: t.allStatuses },
+    { value: 'active', label: t.activeOnly },
+    { value: 'inactive', label: t.inactiveOnly }
+  ];
+
   return (
-    <div className="space-y-4 mb-6">
-      {/* Search Bar */}
+    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6 shadow-sm">
+      {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         <Input
-          placeholder={t.search}
-          value={filters.searchTerm}
-          onChange={(e) => onUpdateFilter('searchTerm', e.target.value)}
-          className="pl-10 bg-white/70 backdrop-blur-sm border-purple-200 focus:border-purple-400"
+          placeholder={t.searchPlaceholder}
+          value={filters.search}
+          onChange={(e) => onUpdateFilter('search', e.target.value)}
+          className="pl-10"
         />
       </div>
 
-      {/* Filters Row */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-purple-600" />
-          <span className="text-sm font-medium text-gray-700">{t.filters}</span>
+      {/* Status Filter */}
+      <div>
+        <div className="flex gap-2 flex-wrap">
+          {statusOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={filters.status === option.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => onUpdateFilter('status', option.value)}
+              className="text-xs"
+            >
+              {option.label}
+            </Button>
+          ))}
         </div>
+      </div>
 
-        {/* Category Multi-Select */}
-        <div className="flex flex-wrap gap-1">
-          {categories.map(category => (
+      {/* Categories */}
+      <div>
+        <h4 className="font-medium text-gray-900 mb-3">{t.categories}</h4>
+        <div className="flex gap-2 flex-wrap">
+          {categories.map((category) => (
             <Badge
               key={category}
-              variant={filters.selectedCategories.includes(category) ? "default" : "outline"}
-              className={`cursor-pointer transition-all ${
-                filters.selectedCategories.includes(category)
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'hover:bg-purple-50 text-gray-600'
-              }`}
+              variant={filters.categories.includes(category) ? "default" : "outline"}
+              className="cursor-pointer hover:bg-purple-100"
               onClick={() => onToggleCategory(category)}
             >
               {category}
             </Badge>
           ))}
         </div>
-
-        {/* Status Filter */}
-        <Select value={filters.selectedStatus} onValueChange={(value) => onUpdateFilter('selectedStatus', value)}>
-          <SelectTrigger className="w-32 bg-white/70 border-purple-200">
-            <div className="flex items-center gap-2">
-              {filters.selectedStatus === 'active' && <CheckCircle className="w-3 h-3 text-green-500" />}
-              {filters.selectedStatus === 'inactive' && <Circle className="w-3 h-3 text-gray-400" />}
-              {filters.selectedStatus === 'recommended' && <Zap className="w-3 h-3 text-yellow-500" />}
-              <SelectValue />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t.all}</SelectItem>
-            <SelectItem value="active">{t.active}</SelectItem>
-            <SelectItem value="inactive">{t.inactive}</SelectItem>
-            <SelectItem value="recommended">{t.recommended}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Priority Filter */}
-        <Select value={filters.selectedPriority} onValueChange={(value) => onUpdateFilter('selectedPriority', value)}>
-          <SelectTrigger className="w-32 bg-white/70 border-purple-200">
-            <div className="flex items-center gap-2">
-              {filters.selectedPriority === 'Alta' && <AlertCircle className="w-3 h-3 text-red-500" />}
-              <SelectValue placeholder={t.priority} />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t.all}</SelectItem>
-            <SelectItem value="Alta">{t.high}</SelectItem>
-            <SelectItem value="Media">{t.medium}</SelectItem>
-            <SelectItem value="Baja">{t.low}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Sort Filter */}
-        <Select value={filters.sortBy} onValueChange={(value) => onUpdateFilter('sortBy', value)}>
-          <SelectTrigger className="w-36 bg-white/70 border-purple-200">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">{t.name}</SelectItem>
-            <SelectItem value="usage">{t.usage}</SelectItem>
-            <SelectItem value="impact">{t.impact}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters */}
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            <X className="w-4 h-4 mr-1" />
-            {t.clearFilters}
-          </Button>
-        )}
       </div>
+
+      {/* Clear Filters */}
+      {hasActiveFilters && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClearFilters}
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          <X className="w-4 h-4 mr-1" />
+          {t.clearFilters}
+        </Button>
+      )}
     </div>
   );
 };

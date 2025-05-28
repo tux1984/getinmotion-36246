@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Zap, Clock } from 'lucide-react';
+import { Play, Clock } from 'lucide-react';
 
 interface MediumAgentCardProps {
   agent: {
@@ -14,7 +14,6 @@ interface MediumAgentCardProps {
     isEnabled: boolean;
     usageCount: number;
     lastUsed: string | null;
-    priority: string;
   };
   onEnable: (agentId: string) => void;
   language: 'en' | 'es';
@@ -72,7 +71,6 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
       {isRecommended && (
         <div className="absolute -top-2 -right-2">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
-            <Zap className="w-3 h-3 mr-1" />
             {t.recommended}
           </Badge>
         </div>

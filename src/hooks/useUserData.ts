@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -111,6 +112,7 @@ export const useUserData = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
+      console.log('Fetched user agents:', data);
       setAgents(data || []);
     } catch (err) {
       console.error('Error fetching user agents:', err);
@@ -208,32 +210,42 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      setLoading(true);
+      console.log('Enabling agent:', agentId, 'for user:', user.id);
+      
       const { data, error } = await supabase
         .from('user_agents')
         .upsert({
           user_id: user.id,
           agent_id: agentId,
-          is_enabled: true
+          is_enabled: true,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,agent_id'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error enabling agent:', error);
+        throw error;
+      }
       
+      console.log('Agent enabled successfully:', data);
+      
+      // Update local state immediately
       setAgents(prev => {
         const existing = prev.find(a => a.agent_id === agentId);
         if (existing) {
-          return prev.map(a => a.agent_id === agentId ? data : a);
+          return prev.map(a => a.agent_id === agentId ? { ...a, is_enabled: true, updated_at: new Date().toISOString() } : a);
         } else {
           return [...prev, data];
         }
       });
+      
+      return data;
     } catch (err) {
       console.error('Error enabling agent:', err);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -241,25 +253,37 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      setLoading(true);
-      const { error } = await supabase.rpc('disable_agent', {
-        p_user_id: user.id,
-        p_agent_id: agentId
-      });
-
-      if (error) throw error;
+      console.log('Disabling agent:', agentId, 'for user:', user.id);
       
-      // Update local state
+      const { data, error } = await supabase
+        .from('user_agents')
+        .update({
+          is_enabled: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('agent_id', agentId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase error disabling agent:', error);
+        throw error;
+      }
+      
+      console.log('Agent disabled successfully:', data);
+      
+      // Update local state immediately
       setAgents(prev => prev.map(a => 
         a.agent_id === agentId 
           ? { ...a, is_enabled: false, updated_at: new Date().toISOString() }
           : a
       ));
+      
+      return data;
     } catch (err) {
       console.error('Error disabling agent:', err);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
