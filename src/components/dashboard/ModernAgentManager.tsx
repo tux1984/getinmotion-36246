@@ -53,7 +53,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return [...new Set(culturalAgentsDatabase.map(agent => agent.category))];
   }, []);
 
-  // Get user agent data for each agent
+  // Get user agent data for each agent with proper type safety
   const getUserAgentData = (agentId: string) => {
     return userAgents.find(ua => ua.agent_id === agentId);
   };
@@ -108,9 +108,10 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
         <TrueMasonryGrid columnWidth={400} gap={20}>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
-            const categoryActiveCount = agents.filter(agent => 
-              Boolean(getUserAgentData(agent.id)?.is_enabled)
-            ).length;
+            const categoryActiveCount = agents.filter(agent => {
+              const userAgentData = getUserAgentData(agent.id);
+              return userAgentData ? Boolean(userAgentData.is_enabled) : false;
+            }).length;
             
             const categoryRecommendedCount = agents.filter(agent => 
               isAgentRecommended(agent.id)
