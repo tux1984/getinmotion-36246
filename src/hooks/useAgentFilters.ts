@@ -42,11 +42,13 @@ export const useAgentFilters = (
   }, [agents, filters, getUserAgentData]);
 
   const hasActiveFilters = useMemo(() => {
-    return filters.searchTerm ||
-           filters.selectedCategories.length > 0 ||
-           filters.selectedStatus !== 'all' ||
-           filters.selectedPriority !== 'all' ||
-           filters.sortBy !== 'name';
+    return Boolean(
+      filters.searchTerm ||
+      filters.selectedCategories.length > 0 ||
+      filters.selectedStatus !== 'all' ||
+      filters.selectedPriority !== 'all' ||
+      filters.sortBy !== 'name'
+    );
   }, [filters]);
 
   return {
