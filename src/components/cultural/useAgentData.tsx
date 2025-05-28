@@ -1,7 +1,6 @@
-
 import { useMemo } from 'react';
 import { Calculator, FileText, HelpCircle, Globe, Palette, Users, TrendingUp } from 'lucide-react';
-import { CulturalAgent } from './types';
+import { CulturalAgent, CreatorProfile } from './types';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { agentTranslations } from './translations';
 
@@ -14,12 +13,25 @@ export const useAgentData = (language: 'en' | 'es') => {
       description: agent.description,
       icon: getIconComponent(agent.id),
       color: getColorClass(agent.category),
-      profiles: agent.profiles || [],
+      profiles: convertStringProfilesToCreatorProfiles(agent.profiles || []),
       priority: getPriorityNumber(agent.priority)
     }));
   }, [language]);
 
   return culturalAgents;
+};
+
+const convertStringProfilesToCreatorProfiles = (profiles: string[]): CreatorProfile[] => {
+  const profileMap: Record<string, CreatorProfile> = {
+    'musician': 'musician',
+    'visual-artist': 'visual-artist',
+    'textile-artisan': 'textile-artisan',
+    'indigenous-artisan': 'indigenous-artisan'
+  };
+  
+  return profiles
+    .map(profile => profileMap[profile])
+    .filter(Boolean) as CreatorProfile[];
 };
 
 const getIconComponent = (agentId: string) => {
