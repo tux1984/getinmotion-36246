@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Agent, CategoryScore, RecommendedAgents, ProfileType } from '@/types/dashboard';
 import { calculateMaturityScores, getRecommendedAgents } from '@/components/cultural/hooks/utils/scoreCalculation';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';

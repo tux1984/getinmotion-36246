@@ -9,7 +9,7 @@ import { AgentManager } from '@/components/dashboard/AgentManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
-import { NewDashboardMain } from '@/components/dashboard/NewDashboardMain';
+import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
 
 const Dashboard = () => {
   const { language } = useLanguage();
@@ -129,7 +129,7 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-6">
         {activeSection === 'dashboard' && (
-          <NewDashboardMain 
+          <ModernDashboardMain 
             onSelectAgent={handleSelectAgent}
             onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
             agents={agents}
