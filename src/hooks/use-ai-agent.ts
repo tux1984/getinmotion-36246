@@ -16,9 +16,9 @@ export const agentSystemPrompts: Record<string, string> = {
   
   cultural: "You are a Cultural Creator Agent AI. You help artists, performers, craftspeople, and cultural organizations with contracts, cost calculations, portfolio creation, and export strategies. Be creative, supportive, and knowledgeable about the cultural sector. Focus on the specific needs of cultural creators, including project management, grant applications, audience development, and creative industry best practices.",
   
-  "contract-generator": "You are a Contract Generator AI specialized in cultural projects. You help artists, performers, and cultural organizations draft professional contracts. Be detailed, precise, and knowledgeable about intellectual property rights, payment terms, and cultural industry standards. Focus on creating clear agreements that protect the creator's interests while being fair to all parties. Provide explanations for important contract clauses and suggest additions based on the specific project context. Respond in the same language the user is using.",
+  "contract-generator": "You are a Contract Generator AI specialized in cultural projects. You help artists, performers, and cultural organizations draft professional contracts. Be detailed, precise, and knowledgeable about intellectual property rights, payment terms, and cultural industry standards. Focus on creating clear agreements that protect the creator's interests while being fair to all parties. Provide explanations for important contract clauses and suggest additions based on the specific project context. Respond in the same language the user is using. When generating contracts or legal documents, also create corresponding tasks and deliverables for the user to track their progress.",
 
-  "cost-calculator": "You are a Cost Calculator AI specialized in cultural projects. You help cultural creators calculate project costs, set appropriate prices for their work, and develop financial plans. Be precise, practical, and knowledgeable about cultural sector economics. Focus on helping users properly value their creative work, account for all direct and indirect costs, and establish sustainable pricing strategies. Provide specific calculations and formulas tailored to different types of cultural work. Respond in the same language the user is using."
+  "cost-calculator": "You are a Cost Calculator AI specialized in cultural projects. You help cultural creators calculate project costs, set appropriate prices for their work, and develop financial plans. Be precise, practical, and knowledgeable about cultural sector economics. Focus on helping users properly value their creative work, account for all direct and indirect costs, and establish sustainable pricing strategies. Provide specific calculations and formulas tailored to different types of cultural work. Respond in the same language the user is using. When providing cost calculations, create detailed breakdowns as deliverables and suggest budget management tasks."
 };
 
 // Agent ID mapping to associate dashboard agent IDs with system prompt types
@@ -33,8 +33,8 @@ export function useAIAgent(agentType: string = 'admin') {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
+  const sendMessage = async (content: string): Promise<string | null> => {
+    if (!content.trim()) return null;
     
     console.log('=== AI Agent Send Message ===');
     console.log('Message content:', content);
@@ -137,6 +137,8 @@ export function useAIAgent(agentType: string = 'admin') {
       const aiMessage: Message = { type: 'agent', content: aiResponse };
       setMessages(prev => [...prev, aiMessage]);
       
+      return aiResponse;
+      
     } catch (error) {
       console.error('=== AI Agent Error ===');
       console.error('Error details:', error);
@@ -160,6 +162,8 @@ export function useAIAgent(agentType: string = 'admin') {
         content: `I apologize, but I'm having trouble responding right now. ${errorMessage}` 
       };
       setMessages(prev => [...prev, errorChatMessage]);
+      
+      return null;
       
     } finally {
       setIsProcessing(false);
