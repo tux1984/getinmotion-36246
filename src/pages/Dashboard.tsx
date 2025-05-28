@@ -72,11 +72,14 @@ const Dashboard = () => {
     try {
       if (enabled) {
         await enableAgent(agentId);
+        console.log('Agent enabled successfully:', agentId);
       } else {
         await disableAgent(agentId);
+        console.log('Agent disabled successfully:', agentId);
       }
       // Refresh data to ensure UI is updated
       await refetch();
+      console.log('Data refreshed after agent toggle');
     } catch (error) {
       console.error('Error toggling agent:', error);
     }
@@ -99,7 +102,10 @@ const Dashboard = () => {
     console.log('Dashboard: Showing onboarding');
     return (
       <DashboardBackground>
-        <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+          onAgentManagerClick={handleOpenAgentManager}
+        />
         <OnboardingWizard 
           profileType={profileType} 
           onComplete={handleOnboardingComplete} 
@@ -108,7 +114,7 @@ const Dashboard = () => {
     );
   }
 
-  console.log('Dashboard: Showing main dashboard');
+  console.log('Dashboard: Showing main dashboard, active section:', activeSection);
   return (
     <DashboardBackground>
       <NewDashboardHeader 
@@ -125,6 +131,7 @@ const Dashboard = () => {
         language={language}
         onSelectAgent={handleSelectAgent}
         onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+        onOpenAgentManager={handleOpenAgentManager}
         onBackFromAgentDetails={handleBackFromAgentDetails}
         onBackFromAgentManager={handleBackFromAgentManager}
         onAgentToggle={handleAgentToggle}

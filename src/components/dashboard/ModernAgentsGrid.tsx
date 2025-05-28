@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useMemo } from 'react';
 import { Agent, RecommendedAgents } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,9 +23,14 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
 }) => {
   const { agents: userAgents, trackAgentUsage, enableAgent, loading, refetch } = useUserData();
 
+  // Auto-refresh when userAgents change
+  useEffect(() => {
+    console.log('ModernAgentsGrid: User agents changed, refreshing data');
+  }, [userAgents]);
+
   const translations = {
     en: {
-      yourAgents: "Your AI Agents",
+      yourAgents: "Your Active Agents",
       primaryRecommendations: "Recommended for You",
       chatWith: "Chat",
       configure: "Configure",
@@ -36,10 +42,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       enable: "Enable",
       lastUsed: "Last used",
       never: "Never",
-      justEnabled: "Just enabled"
+      justEnabled: "Just enabled",
+      enabling: "Enabling..."
     },
     es: {
-      yourAgents: "Tus Agentes IA",
+      yourAgents: "Tus Agentes Activos",
       primaryRecommendations: "Recomendados para Ti",
       chatWith: "Chatear",
       configure: "Configurar",
@@ -51,7 +58,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       enable: "Habilitar",
       lastUsed: "Último uso",
       never: "Nunca",
-      justEnabled: "Recién habilitado"
+      justEnabled: "Recién habilitado",
+      enabling: "Habilitando..."
     }
   };
 
@@ -76,22 +84,41 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     };
   };
 
-  const getFilteredAgents = (agentList: string[] | undefined) => {
-    if (!agentList) return [];
-    return agentList.map(getMergedAgentData);
-  };
+  // Filter and categorize agents
+  const categorizedAgents = useMemo(() => {
+    const allAgents = culturalAgentsDatabase.map(agent => getMergedAgentData(agent.id));
+    
+    // Separate active and inactive agents
+    const activeAgents = allAgents.filter(agent => agent.isEnabled);
+    const inactiveAgents = allAgents.filter(agent => !agent.isEnabled);
+    
+    // Filter recommended agents (only show inactive ones in recommendations)
+    const primaryRecommended = (recommendedAgents.primary || [])
+      .map(getMergedAgentData)
+      .filter(agent => !agent.isEnabled);
+    
+    const secondaryRecommended = (recommendedAgents.secondary || [])
+      .map(getMergedAgentData)
+      .filter(agent => !agent.isEnabled);
 
-  const primaryAgents = getFilteredAgents(recommendedAgents.primary);
-  const secondaryAgents = getFilteredAgents(recommendedAgents.secondary);
-  const allOtherAgents = culturalAgentsDatabase
-    .filter(agent => 
+    // All other inactive agents (not in primary or secondary recommendations)
+    const otherInactive = inactiveAgents.filter(agent => 
       !recommendedAgents.primary?.includes(agent.id) && 
       !recommendedAgents.secondary?.includes(agent.id)
-    )
-    .map(agent => getMergedAgentData(agent.id));
+    );
+
+    return {
+      active: activeAgents,
+      primaryRecommended,
+      secondaryRecommended,
+      otherInactive,
+      allInactive: [...primaryRecommended, ...secondaryRecommended, ...otherInactive]
+    };
+  }, [userAgents, recommendedAgents]);
 
   const handleAgentClick = async (agentId: string) => {
     try {
+      console.log('Clicking agent:', agentId);
       // Track agent usage
       await trackAgentUsage(agentId);
       
@@ -106,9 +133,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
 
   const handleEnableAgent = async (agentId: string) => {
     try {
+      console.log('Enabling agent:', agentId);
       await enableAgent(agentId);
       // Refresh to get latest data
       await refetch();
+      console.log('Agent enabled and data refreshed');
     } catch (error) {
       console.error('Error enabling agent:', error);
     }
@@ -210,7 +239,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
             disabled={loading}
           >
             <Play className="w-4 h-4 mr-2" />
-            {loading ? 'Habilitando...' : t.enable}
+            {loading ? t.enabling : t.enable}
           </Button>
         )}
         <Button 
@@ -248,17 +277,33 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       <div className="flex items-center gap-3">
         <Bot className="w-8 h-8 text-purple-400" />
         <h2 className="text-3xl font-bold text-white">{t.yourAgents}</h2>
+        {categorizedAgents.active.length > 0 && (
+          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30">
+            {categorizedAgents.active.length} activo{categorizedAgents.active.length !== 1 ? 's' : ''}
+          </Badge>
+        )}
       </div>
 
+      {/* Active Agents */}
+      {categorizedAgents.active.length > 0 && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categorizedAgents.active.map(agent => (
+              <ModernAgentCard key={agent.id} agent={agent} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Primary Recommendations */}
-      {primaryAgents.length > 0 && (
+      {categorizedAgents.primaryRecommended.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-purple-200 flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-400" />
             {t.primaryRecommendations}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {primaryAgents.map(agent => (
+            {categorizedAgents.primaryRecommended.map(agent => (
               <ModernAgentCard key={agent.id} agent={agent} isRecommended={true} />
             ))}
           </div>
@@ -266,16 +311,16 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       )}
 
       {/* Collapsible Available Agents Section */}
-      {(secondaryAgents.length > 0 || allOtherAgents.length > 0) && (
+      {categorizedAgents.allInactive.length > 0 && (
         <CollapsibleAgentsSection
-          agents={[...secondaryAgents, ...allOtherAgents]}
+          agents={categorizedAgents.allInactive}
           onEnableAgent={handleEnableAgent}
           language={language}
         />
       )}
 
       {/* Empty state */}
-      {primaryAgents.length === 0 && secondaryAgents.length === 0 && allOtherAgents.length === 0 && (
+      {categorizedAgents.active.length === 0 && categorizedAgents.allInactive.length === 0 && (
         <div className="text-center py-12">
           <Bot className="w-16 h-16 text-purple-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">No agents available</h3>

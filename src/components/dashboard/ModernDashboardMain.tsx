@@ -1,22 +1,24 @@
 
 import React from 'react';
-import { useLanguage } from '@/context/LanguageContext';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
+import { ModernWelcomeSection } from './ModernWelcomeSection';
 import { ModernMaturityOverview } from './ModernMaturityOverview';
 import { ModernAgentsGrid } from './ModernAgentsGrid';
-import { ModernWelcomeSection } from './ModernWelcomeSection';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ModernDashboardMainProps {
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
+  onAgentManagerClick?: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
   recommendedAgents: RecommendedAgents;
 }
 
-export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({ 
+export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
+  onAgentManagerClick,
   agents,
   maturityScores,
   recommendedAgents
@@ -24,21 +26,22 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   const { language } = useLanguage();
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-8 space-y-8">
-      {/* Welcome Section */}
-      <ModernWelcomeSection language={language} />
+    <div className="space-y-12">
+      <ModernWelcomeSection 
+        language={language}
+        onMaturityCalculatorClick={onMaturityCalculatorClick}
+        onAgentManagerClick={onAgentManagerClick}
+      />
       
-      {/* Maturity Overview */}
       {maturityScores && (
-        <ModernMaturityOverview
-          currentScores={maturityScores}
+        <ModernMaturityOverview 
+          scores={maturityScores}
           language={language}
-          onRetakeAssessment={onMaturityCalculatorClick}
+          onMaturityCalculatorClick={onMaturityCalculatorClick}
         />
       )}
       
-      {/* Agents Grid */}
-      <ModernAgentsGrid
+      <ModernAgentsGrid 
         agents={agents}
         recommendedAgents={recommendedAgents}
         onSelectAgent={onSelectAgent}

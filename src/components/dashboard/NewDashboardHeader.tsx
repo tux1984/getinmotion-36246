@@ -36,6 +36,15 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
 
   const t = translations[language];
 
+  const handleAgentManagerClick = () => {
+    console.log('Agent Manager button clicked');
+    if (onAgentManagerClick) {
+      onAgentManagerClick();
+    } else {
+      console.warn('onAgentManagerClick is not provided');
+    }
+  };
+
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -52,17 +61,15 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             <span className="hidden sm:inline">{t.maturityCalculator}</span>
           </Button>
           
-          {onAgentManagerClick && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onAgentManagerClick}
-              className="flex items-center gap-2"
-            >
-              <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.agentManager}</span>
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAgentManagerClick}
+            className="flex items-center gap-2"
+          >
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">{t.agentManager}</span>
+          </Button>
           
           <LanguageSwitcher />
           

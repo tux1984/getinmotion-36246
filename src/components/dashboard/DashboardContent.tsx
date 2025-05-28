@@ -16,6 +16,7 @@ interface DashboardContentProps {
   language: 'en' | 'es';
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
+  onOpenAgentManager: () => void;
   onBackFromAgentDetails: () => void;
   onBackFromAgentManager: () => void;
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
@@ -30,6 +31,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   language,
   onSelectAgent,
   onMaturityCalculatorClick,
+  onOpenAgentManager,
   onBackFromAgentDetails,
   onBackFromAgentManager,
   onAgentToggle
@@ -40,6 +42,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         <ModernDashboardMain 
           onSelectAgent={onSelectAgent}
           onMaturityCalculatorClick={onMaturityCalculatorClick}
+          onAgentManagerClick={onOpenAgentManager}
           agents={agents}
           maturityScores={maturityScores}
           recommendedAgents={recommendedAgents}

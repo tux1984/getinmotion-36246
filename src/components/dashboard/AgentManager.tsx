@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,11 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
 import { useUserData } from '@/hooks/useUserData';
-import { Zap, Clock } from 'lucide-react';
+import { Zap, Clock, Loader2 } from 'lucide-react';
 
 interface AgentManagerProps {
   currentAgents: Agent[];
-  onAgentToggle: (agentId: string, enabled: boolean) => void;
+  onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
   language: 'en' | 'es';
 }
 
@@ -22,6 +22,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   language
 }) => {
   const { agents: userAgents, loading } = useUserData();
+  const [togglingAgents, setTogglingAgents] = useState<Set<string>>(new Set());
 
   const translations = {
     en: {
@@ -45,7 +46,9 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
       recommended: "Recommended",
       usageCount: "Usage count",
       lastUsed: "Last used",
-      never: "Never"
+      never: "Never",
+      activating: "Activating...",
+      deactivating: "Deactivating..."
     },
     es: {
       title: "Gestor de Agentes",
@@ -68,7 +71,9 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
       recommended: "Recomendado",
       usageCount: "Contador de uso",
       lastUsed: "Último uso",
-      never: "Nunca"
+      never: "Nunca",
+      activating: "Activando...",
+      deactivating: "Desactivando..."
     }
   };
 
@@ -100,7 +105,24 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   };
 
   const handleToggleAgent = async (agentId: string, currentEnabled: boolean) => {
-    await onAgentToggle(agentId, !currentEnabled);
+    console.log('AgentManager: Toggling agent', agentId, 'from', currentEnabled, 'to', !currentEnabled);
+    
+    // Add to toggling set
+    setTogglingAgents(prev => new Set(prev).add(agentId));
+    
+    try {
+      await onAgentToggle(agentId, !currentEnabled);
+      console.log('AgentManager: Agent toggle completed successfully');
+    } catch (error) {
+      console.error('AgentManager: Error toggling agent:', error);
+    } finally {
+      // Remove from toggling set
+      setTogglingAgents(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(agentId);
+        return newSet;
+      });
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -138,14 +160,26 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
     const isRecommended = isAgentRecommended(agent.id);
     const usageCount = userAgent?.usage_count || 0;
     const lastUsed = userAgent?.last_used_at;
+    const isToggling = togglingAgents.has(agent.id);
+    const isRecentlyChanged = userAgent && new Date(userAgent.updated_at).getTime() > Date.now() - 5000;
     
     return (
-      <Card className={`transition-all relative ${isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''}`}>
+      <Card className={`transition-all relative ${
+        isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''
+      } ${isRecentlyChanged ? 'ring-2 ring-green-300 shadow-green-200' : ''}`}>
         {isRecommended && (
           <div className="absolute -top-2 -right-2 z-10">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
               <Zap className="w-3 h-3 mr-1" />
               {t.recommended}
+            </Badge>
+          </div>
+        )}
+
+        {isRecentlyChanged && (
+          <div className="absolute -top-2 -left-2 z-10">
+            <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
+              {isEnabled ? 'Activado' : 'Desactivado'}
             </Badge>
           </div>
         )}
@@ -173,11 +207,16 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
                 </div>
               </div>
             </div>
-            <Switch
-              checked={isEnabled}
-              onCheckedChange={() => handleToggleAgent(agent.id, isEnabled)}
-              disabled={loading}
-            />
+            <div className="flex items-center gap-2">
+              {isToggling && (
+                <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+              )}
+              <Switch
+                checked={isEnabled}
+                onCheckedChange={() => handleToggleAgent(agent.id, isEnabled)}
+                disabled={loading || isToggling}
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -238,7 +277,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
         <h2 className="text-2xl font-bold mb-2">{t.title}</h2>
         <p className="text-gray-600">{t.subtitle}</p>
         <p className="text-sm text-purple-600 mt-1">
-          {culturalAgentsDatabase.length} agentes disponibles (A1-A20)
+          {culturalAgentsDatabase.length} agentes disponibles • {userAgents.filter(ua => ua.is_enabled).length} activos
         </p>
       </div>
 
@@ -258,7 +297,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
                 {t.categories[category as keyof typeof t.categories]}
               </h3>
               <p className="text-sm text-gray-600">
-                {agents.length} agentes en esta categoría
+                {agents.length} agentes en esta categoría • {agents.filter(agent => getUserAgentData(agent.id)?.is_enabled).length} activos
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
