@@ -1,14 +1,10 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
 import { useUserData } from '@/hooks/useUserData';
-import { Zap, Clock, Loader2 } from 'lucide-react';
+import { AgentManagerHeader } from './AgentManagerHeader';
+import { AgentCategoryTabs } from './AgentCategoryTabs';
 
 interface AgentManagerProps {
   currentAgents: Agent[];
@@ -84,9 +80,8 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
     return userAgents.find(ua => ua.agent_id === agentId);
   };
 
-  // Check if agent is recommended (you can customize this logic)
+  // Check if agent is recommended
   const isAgentRecommended = (agentId: string) => {
-    // This could be based on user profile, maturity scores, etc.
     const recommendedIds = ['cultural-consultant', 'project-manager', 'cost-calculator', 'content-creator'];
     return recommendedIds.includes(agentId);
   };
@@ -107,7 +102,6 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   const handleToggleAgent = async (agentId: string, currentEnabled: boolean) => {
     console.log('AgentManager: Toggling agent', agentId, 'from', currentEnabled, 'to', !currentEnabled);
     
-    // Add to toggling set
     setTogglingAgents(prev => new Set(prev).add(agentId));
     
     try {
@@ -116,7 +110,6 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
     } catch (error) {
       console.error('AgentManager: Error toggling agent:', error);
     } finally {
-      // Remove from toggling set
       setTogglingAgents(prev => {
         const newSet = new Set(prev);
         newSet.delete(agentId);
@@ -154,112 +147,15 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
     return groups;
   }, {} as Record<string, CulturalAgent[]>);
 
-  const AgentCard = ({ agent }: { agent: CulturalAgent }) => {
-    const userAgent = getUserAgentData(agent.id);
-    const isEnabled = userAgent?.is_enabled || false;
-    const isRecommended = isAgentRecommended(agent.id);
-    const usageCount = userAgent?.usage_count || 0;
-    const lastUsed = userAgent?.last_used_at;
-    const isToggling = togglingAgents.has(agent.id);
-    const isRecentlyChanged = userAgent && new Date(userAgent.updated_at).getTime() > Date.now() - 5000;
-    
-    return (
-      <Card className={`transition-all relative ${
-        isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''
-      } ${isRecentlyChanged ? 'ring-2 ring-green-300 shadow-green-200' : ''}`}>
-        {isRecommended && (
-          <div className="absolute -top-2 -right-2 z-10">
-            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
-              <Zap className="w-3 h-3 mr-1" />
-              {t.recommended}
-            </Badge>
-          </div>
-        )}
-
-        {isRecentlyChanged && (
-          <div className="absolute -top-2 -left-2 z-10">
-            <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
-              {isEnabled ? 'Activado' : 'Desactivado'}
-            </Badge>
-          </div>
-        )}
-        
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-3">
-              <div className={`w-12 h-12 rounded-full ${agent.color} flex items-center justify-center text-white text-xl shadow-lg`}>
-                {agent.icon}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="text-xs font-mono">
-                    {agent.code}
-                  </Badge>
-                </div>
-                <CardTitle className="text-base leading-tight">{agent.name}</CardTitle>
-                <div className="flex gap-2 mt-2">
-                  <Badge className={`text-xs ${getPriorityColor(agent.priority)}`}>
-                    {t.priority}: {agent.priority}
-                  </Badge>
-                  <Badge className={`text-xs ${getImpactColor(agent.impact)}`}>
-                    {t.impact}: {agent.impact}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {isToggling && (
-                <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-              )}
-              <Switch
-                checked={isEnabled}
-                onCheckedChange={() => handleToggleAgent(agent.id, isEnabled)}
-                disabled={loading || isToggling}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <CardDescription className="text-sm mb-3">
-            {agent.description}
-          </CardDescription>
-          
-          {/* Usage Stats */}
-          <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
-            <div className="flex items-center gap-1">
-              <span>{t.usageCount}: {usageCount}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <span>{t.lastUsed}: {formatLastUsed(lastUsed)}</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <Badge 
-              variant={isEnabled ? "default" : "secondary"} 
-              className={`text-xs ${isEnabled ? 'bg-green-100 text-green-800' : ''}`}
-            >
-              {isEnabled ? t.enabled : t.disabled}
-            </Badge>
-            {agent.profiles && (
-              <div className="text-xs text-gray-500">
-                Perfiles: {agent.profiles.length}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">{t.title}</h2>
-          <p className="text-gray-600">{t.subtitle}</p>
-        </div>
+        <AgentManagerHeader
+          title={t.title}
+          subtitle={t.subtitle}
+          totalAgents={0}
+          activeAgents={0}
+        />
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="bg-gray-100 rounded-lg p-6 animate-pulse">
@@ -273,41 +169,24 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">{t.title}</h2>
-        <p className="text-gray-600">{t.subtitle}</p>
-        <p className="text-sm text-purple-600 mt-1">
-          {culturalAgentsDatabase.length} agentes disponibles • {userAgents.filter(ua => ua.is_enabled).length} activos
-        </p>
-      </div>
+      <AgentManagerHeader
+        title={t.title}
+        subtitle={t.subtitle}
+        totalAgents={culturalAgentsDatabase.length}
+        activeAgents={userAgents.filter(ua => ua.is_enabled).length}
+      />
 
-      <Tabs defaultValue="Financiera" className="space-y-4">
-        <TabsList className="grid grid-cols-3 lg:grid-cols-6">
-          {Object.keys(groupedAgents).map(category => (
-            <TabsTrigger key={category} value={category} className="text-xs">
-              {t.categories[category as keyof typeof t.categories]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {Object.entries(groupedAgents).map(([category, agents]) => (
-          <TabsContent key={category} value={category}>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-1">
-                {t.categories[category as keyof typeof t.categories]}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {agents.length} agentes en esta categoría • {agents.filter(agent => getUserAgentData(agent.id)?.is_enabled).length} activos
-              </p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-              {agents.map(agent => (
-                <AgentCard key={agent.id} agent={agent} />
-              ))}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+      <AgentCategoryTabs
+        groupedAgents={groupedAgents}
+        getUserAgentData={getUserAgentData}
+        isAgentRecommended={isAgentRecommended}
+        togglingAgents={togglingAgents}
+        onToggleAgent={handleToggleAgent}
+        formatLastUsed={formatLastUsed}
+        getPriorityColor={getPriorityColor}
+        getImpactColor={getImpactColor}
+        translations={t}
+      />
     </div>
   );
 };

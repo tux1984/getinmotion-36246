@@ -1,144 +1,136 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Play, Pause, Info } from 'lucide-react';
-import { Agent } from '@/types/dashboard';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { CulturalAgent } from '@/data/agentsDatabase';
+import { Zap, Clock, Loader2 } from 'lucide-react';
 
 interface AgentCardProps {
-  agent: Agent;
-  onActionClick: (id: string, action: string) => void;
-  language: 'en' | 'es';
+  agent: CulturalAgent;
+  userAgent: any;
+  isEnabled: boolean;
+  isRecommended: boolean;
+  usageCount: number;
+  lastUsed: string | null;
+  isToggling: boolean;
+  isRecentlyChanged: boolean;
+  onToggleAgent: (agentId: string, currentEnabled: boolean) => Promise<void>;
+  formatLastUsed: (lastUsed: string | null) => string;
+  getPriorityColor: (priority: string) => string;
+  getImpactColor: (impact: number) => string;
+  translations: {
+    priority: string;
+    impact: string;
+    enabled: string;
+    disabled: string;
+    recommended: string;
+    usageCount: string;
+    lastUsed: string;
+  };
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, onActionClick, language }) => {
-  const isMobile = useIsMobile();
-  
-  const statusColors = {
-    active: 'bg-green-500',
-    paused: 'bg-amber-400',
-    inactive: 'bg-red-400'
-  };
-  
-  const statusText = {
-    en: {
-      active: 'Active',
-      paused: 'Paused',
-      inactive: 'Inactive'
-    },
-    es: {
-      active: 'Activo',
-      paused: 'En pausa',
-      inactive: 'Inactivo'
-    }
-  };
-  
-  const t = {
-    en: {
-      activeTasks: 'active tasks',
-      lastUsed: 'Last used',
-      activateAgent: 'Activate',
-      pauseAgent: 'Pause',
-      viewTasks: 'View tasks',
-      enter: 'Enter',
-      info: 'Info'
-    },
-    es: {
-      activeTasks: 'tareas activas',
-      lastUsed: 'Último uso',
-      activateAgent: 'Activar',
-      pauseAgent: 'Pausar',
-      viewTasks: 'Ver tareas',
-      enter: 'Entrar',
-      info: 'Info'
-    }
-  };
-
+export const AgentCard: React.FC<AgentCardProps> = ({
+  agent,
+  userAgent,
+  isEnabled,
+  isRecommended,
+  usageCount,
+  lastUsed,
+  isToggling,
+  isRecentlyChanged,
+  onToggleAgent,
+  formatLastUsed,
+  getPriorityColor,
+  getImpactColor,
+  translations
+}) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-white border border-gray-100 rounded-lg hover:shadow-sm transition-all">
-      {/* Left section with icon and info */}
-      <div className="flex items-center">
-        <div className="text-xl sm:text-2xl mr-2 sm:mr-3">{agent.icon}</div>
-        <div>
-          <div className="flex items-center">
-            <h3 className="text-sm sm:text-base font-medium">{agent.name}</h3>
-            <div className={`w-2 h-2 rounded-full ${statusColors[agent.status]} ml-2`}></div>
+    <Card className={`transition-all relative ${
+      isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''
+    } ${isRecentlyChanged ? 'ring-2 ring-green-300 shadow-green-200' : ''}`}>
+      {isRecommended && (
+        <div className="absolute -top-2 -right-2 z-10">
+          <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
+            <Zap className="w-3 h-3 mr-1" />
+            {translations.recommended}
+          </Badge>
+        </div>
+      )}
+
+      {isRecentlyChanged && (
+        <div className="absolute -top-2 -left-2 z-10">
+          <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
+            {isEnabled ? 'Activado' : 'Desactivado'}
+          </Badge>
+        </div>
+      )}
+      
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <div className={`w-12 h-12 rounded-full ${agent.color} flex items-center justify-center text-white text-xl shadow-lg`}>
+              {agent.icon}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline" className="text-xs font-mono">
+                  {agent.code}
+                </Badge>
+              </div>
+              <CardTitle className="text-base leading-tight">{agent.name}</CardTitle>
+              <div className="flex gap-2 mt-2">
+                <Badge className={`text-xs ${getPriorityColor(agent.priority)}`}>
+                  {translations.priority}: {agent.priority}
+                </Badge>
+                <Badge className={`text-xs ${getImpactColor(agent.impact)}`}>
+                  {translations.impact}: {agent.impact}
+                </Badge>
+              </div>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-gray-500">{agent.category}</p>
-          {agent.lastUsed && (
-            <p className="text-xs text-gray-400 mt-0.5 sm:mt-1">
-              {t[language].lastUsed}: {agent.lastUsed}
-            </p>
+          <div className="flex items-center gap-2">
+            {isToggling && (
+              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+            )}
+            <Switch
+              checked={isEnabled}
+              onCheckedChange={() => onToggleAgent(agent.id, isEnabled)}
+              disabled={isToggling}
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="text-sm mb-3">
+          {agent.description}
+        </CardDescription>
+        
+        {/* Usage Stats */}
+        <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+          <div className="flex items-center gap-1">
+            <span>{translations.usageCount}: {usageCount}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            <span>{translations.lastUsed}: {formatLastUsed(lastUsed)}</span>
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <Badge 
+            variant={isEnabled ? "default" : "secondary"} 
+            className={`text-xs ${isEnabled ? 'bg-green-100 text-green-800' : ''}`}
+          >
+            {isEnabled ? translations.enabled : translations.disabled}
+          </Badge>
+          {agent.profiles && (
+            <div className="text-xs text-gray-500">
+              Perfiles: {agent.profiles.length}
+            </div>
           )}
         </div>
-      </div>
-      
-      {/* Right section with actions */}
-      <div className="flex items-center space-x-2 mt-3 sm:mt-0">
-        {agent.status === 'active' && (
-          <>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="default"
-              className="bg-violet-600 hover:bg-violet-700 text-xs sm:text-sm"
-              onClick={() => onActionClick(agent.id, 'enter')}
-            >
-              {t[language].enter}
-            </Button>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="outline"
-              className="border-gray-200"
-              onClick={() => onActionClick(agent.id, 'pause')}
-            >
-              <Pause className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          </>
-        )}
-        
-        {agent.status === 'paused' && (
-          <>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="default"
-              className="bg-violet-600 hover:bg-violet-700 text-xs sm:text-sm"
-              onClick={() => onActionClick(agent.id, 'activate')}
-            >
-              <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              {t[language].activateAgent}
-            </Button>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="outline"
-              className="border-gray-200 text-xs sm:text-sm"
-              onClick={() => onActionClick(agent.id, 'viewTasks')}
-            >
-              {t[language].viewTasks}
-            </Button>
-          </>
-        )}
-        
-        {agent.status === 'inactive' && (
-          <>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="default"
-              className="bg-violet-600 hover:bg-violet-700 text-xs sm:text-sm"
-              onClick={() => onActionClick(agent.id, 'activate')}
-            >
-              {t[language].activateAgent}
-            </Button>
-            <Button 
-              size={isMobile ? "sm" : "default"}
-              variant="outline"
-              className="border-gray-200"
-              onClick={() => onActionClick(agent.id, 'info')}
-            >
-              <Info className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          </>
-        )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
