@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
@@ -22,7 +21,7 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   
   // Use correct logo files from the uploads directory
   const logoSrc = shouldUseLightLogo 
-    ? "/lovable-uploads/c6c643f0-5964-45a6-aa39-10286d505435.png" // Logo for dark backgrounds
+    ? "/lovable-uploads/a049cc5b-c8c3-463f-a2e8-eb2cfa2232db.png" // New logo for dark backgrounds
     : "/lovable-uploads/98f35650-02b1-4578-9248-60db60c6688d.png"; // Logo for light backgrounds
   
   // Set size based on prop
