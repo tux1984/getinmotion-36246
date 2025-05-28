@@ -28,6 +28,10 @@ const Index = () => {
 
   const handleAccessClick = () => {
     setShowWaitlist(true);
+    // Scroll to waitlist form
+    setTimeout(() => {
+      document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const handleJoinWaitlist = () => {
@@ -52,7 +56,7 @@ const Index = () => {
       <FeaturesSection language={language} />
       <ValueProposition language={language} />
       <div id="waitlist-form">
-        <WaitlistForm language={language} />
+        <WaitlistForm language={language} showWaitlist={showWaitlist} />
       </div>
       <Footer language={language} />
     </div>

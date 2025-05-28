@@ -20,7 +20,7 @@ const checkSupabaseConnection = async () => {
   }
 };
 
-export const WaitlistForm = ({ onSubmit, onCodeSubmit, language }: WaitlistFormProps) => {
+export const WaitlistForm = ({ onSubmit, onCodeSubmit, language, showWaitlist = true }: WaitlistFormProps & { showWaitlist?: boolean }) => {
   const {
     formData,
     isLoading,
@@ -65,6 +65,11 @@ export const WaitlistForm = ({ onSubmit, onCodeSubmit, language }: WaitlistFormP
       setCodeValidated(false);
     }
   }, [formData.accessCode, onCodeSubmit]);
+
+  // Don't render anything if showWaitlist is false
+  if (!showWaitlist) {
+    return null;
+  }
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow-md border border-slate-100">
