@@ -1,232 +1,161 @@
-import { useState, useEffect } from 'react';
-import { Agent, ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { culturalAgentsDatabase, getAgentById } from '@/data/agentsDatabase';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Agent, CategoryScore, RecommendedAgents, ProfileType } from '@/types/dashboard';
+import { calculateMaturityScores, getRecommendedAgents } from '@/components/cultural/hooks/utils/scoreCalculation';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
+import { UserProfileData } from '@/components/cultural/types/wizardTypes';
+import { useUserData } from './useUserData';
+import { useMaturityScores } from './useMaturityScores';
+
+type ActiveSection = 'dashboard' | 'agent-details' | 'agent-manager';
 
 export const useAgentManagement = () => {
-  const [agents, setAgents] = useState<Agent[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [profileType, setProfileType] = useState<ProfileType>('solo');
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'agent-details' | 'agent-manager'>('dashboard');
+  const [profileType, setProfileType] = useState<ProfileType>('idea');
+  const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
-  const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents>({
-    primary: [],
-    secondary: []
-  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('useAgentManagement: Hook initialized');
+  // Use real data hooks
+  const { 
+    profile, 
+    projects, 
+    agents: userAgents, 
+    loading: userDataLoading,
+    error: userDataError 
+  } = useUserData();
+  
+  const { 
+    currentScores, 
+    loading: scoresLoading,
+    error: scoresError,
+    saveMaturityScores 
+  } = useMaturityScores();
 
-  // Convert recommended agents to agent list for dashboard display
-  const convertRecommendationsToAgents = (recommendations: RecommendedAgents): Agent[] => {
-    console.log('Converting recommendations to agents:', recommendations);
-    const allAgents: Agent[] = [];
+  // Convert user agents to Agent format
+  const agents: Agent[] = culturalAgentsDatabase.map(agentInfo => {
+    const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
     
-    // Get icons mapping
-    const getAgentIcon = (agentId: string) => {
-      const agentData = getAgentById(agentId);
-      return agentData?.icon || '🤖';
+    return {
+      id: agentInfo.id,
+      name: agentInfo.name,
+      status: userAgent?.is_enabled ? 'active' : 'inactive',
+      category: agentInfo.category,
+      activeTasks: userAgent?.usage_count || 0,
+      lastUsed: userAgent?.last_used_at ? new Date(userAgent.last_used_at).toLocaleDateString() : undefined,
+      color: agentInfo.color,
+      icon: agentInfo.icon
+    };
+  });
+
+  // Generate recommendations based on current scores
+  const recommendedAgents: RecommendedAgents = React.useMemo(() => {
+    if (!currentScores) {
+      // Default recommendations for new users
+      return {
+        primary: ['cultural-consultant', 'project-manager', 'cost-calculator'],
+        secondary: ['content-creator', 'marketing-advisor', 'legal-advisor'],
+        admin: true,
+        cultural: true,
+        accounting: false,
+        legal: false,
+        operations: true
+      };
+    }
+
+    // Generate recommendations based on scores
+    const profileData: Partial<UserProfileData> = {
+      industry: 'musica', // Default - this should come from user profile
+      experience: currentScores.ideaValidation < 50 ? 'beginner' : 
+                 currentScores.ideaValidation < 80 ? 'intermediate' : 'advanced'
     };
 
-    // Process primary agents
-    if (recommendations.primary) {
-      recommendations.primary.forEach(agentId => {
-        const agentData = getAgentById(agentId);
-        if (agentData) {
-          allAgents.push({
-            id: agentData.id,
-            name: agentData.name,
-            status: 'active',
-            category: agentData.category,
-            activeTasks: Math.floor(Math.random() * 5) + 1,
-            color: agentData.color,
-            icon: getAgentIcon(agentId),
-            lastUsed: Math.random() > 0.5 ? 'Hace 2 días' : undefined
-          });
-        }
-      });
-    }
+    return getRecommendedAgents(profileData as UserProfileData, currentScores);
+  }, [currentScores]);
 
-    // Process secondary agents
-    if (recommendations.secondary) {
-      recommendations.secondary.forEach(agentId => {
-        const agentData = getAgentById(agentId);
-        if (agentData && !allAgents.find(a => a.id === agentData.id)) {
-          allAgents.push({
-            id: agentData.id,
-            name: agentData.name,
-            status: Math.random() > 0.5 ? 'paused' : 'inactive',
-            category: agentData.category,
-            activeTasks: Math.floor(Math.random() * 3),
-            color: agentData.color,
-            icon: getAgentIcon(agentId)
-          });
-        }
-      });
-    }
-
-    // If no agents, add some defaults to ensure dashboard shows content
-    if (allAgents.length === 0) {
-      console.log('No agents from recommendations, adding defaults');
-      const defaultAgentIds = ['collaboration-agreement', 'cost-calculator', 'maturity-evaluator', 'export-advisor', 'contract-generator'];
-      defaultAgentIds.forEach(agentId => {
-        const agentData = getAgentById(agentId);
-        if (agentData) {
-          allAgents.push({
-            id: agentData.id,
-            name: agentData.name,
-            status: 'active',
-            category: agentData.category,
-            activeTasks: Math.floor(Math.random() * 3) + 1,
-            color: agentData.color,
-            icon: getAgentIcon(agentId),
-            lastUsed: Math.random() > 0.3 ? 'Hace 1 día' : undefined
-          });
-        }
-      });
-    }
-
-    console.log('Converted agents:', allAgents);
-    return allAgents;
-  };
-
-  // Initialize data from localStorage
+  // Combined loading state
   useEffect(() => {
-    console.log('useAgentManagement: Starting initialization');
-    
-    const initializeData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+    setIsLoading(userDataLoading || scoresLoading);
+  }, [userDataLoading, scoresLoading]);
 
-        // Check onboarding status
-        const onboardingCompleted = localStorage.getItem('onboardingCompleted');
-        console.log('Onboarding completed:', onboardingCompleted);
-        
-        if (!onboardingCompleted) {
-          console.log('useAgentManagement: Onboarding not completed, showing onboarding');
-          setShowOnboarding(true);
-          setIsLoading(false);
-          return;
-        }
+  // Combined error state
+  useEffect(() => {
+    setError(userDataError || scoresError || null);
+  }, [userDataError, scoresError]);
 
-        // Load profile type
-        const storedProfile = localStorage.getItem('profileType');
-        if (storedProfile) {
-          setProfileType(storedProfile as ProfileType);
-          console.log('Loaded profile type:', storedProfile);
-        }
-
-        // Load maturity scores
-        const storedScores = localStorage.getItem('maturityScores');
-        if (storedScores) {
-          const scores = JSON.parse(storedScores);
-          console.log('Loaded maturity scores:', scores);
-          setMaturityScores(scores);
-        }
-
-        // Load recommended agents
-        const storedRecommended = localStorage.getItem('recommendedAgents');
-        let recommendations: RecommendedAgents;
-        
-        if (storedRecommended) {
-          recommendations = JSON.parse(storedRecommended);
-          console.log('Loaded recommended agents:', recommendations);
-        } else {
-          console.log('useAgentManagement: No recommendations found, using defaults');
-          recommendations = {
-            primary: ['collaboration-agreement', 'cost-calculator', 'stakeholder-matching'],
-            secondary: ['maturity-evaluator', 'export-advisor', 'contract-generator', 'pricing-assistant'],
-            admin: true,
-            accounting: true,
-            legal: true,
-            operations: true,
-            cultural: true
-          };
-          localStorage.setItem('recommendedAgents', JSON.stringify(recommendations));
-        }
-        
-        setRecommendedAgents(recommendations);
-        const agentsFromRecommendations = convertRecommendationsToAgents(recommendations);
-        setAgents(agentsFromRecommendations);
-
-        console.log('useAgentManagement: Initialization completed successfully');
-        setIsLoading(false);
-      } catch (error) {
-        console.error('useAgentManagement: Error initializing data:', error);
-        setError('Error loading dashboard data');
-        
-        // Set fallback agents if there's an error
-        const fallbackRecommendations: RecommendedAgents = {
-          primary: ['collaboration-agreement', 'cost-calculator'],
-          secondary: ['maturity-evaluator', 'export-advisor']
-        };
-        const fallbackAgents = convertRecommendationsToAgents(fallbackRecommendations);
-        setAgents(fallbackAgents);
-        setRecommendedAgents(fallbackRecommendations);
-        setIsLoading(false);
+  // Check if user needs onboarding
+  useEffect(() => {
+    if (!isLoading && !error) {
+      // Show onboarding if:
+      // 1. No maturity scores exist
+      // 2. No enabled agents exist
+      const hasScores = !!currentScores;
+      const hasEnabledAgents = userAgents.some(agent => agent.is_enabled);
+      
+      console.log('Onboarding check:', { hasScores, hasEnabledAgents });
+      
+      if (!hasScores && !hasEnabledAgents) {
+        setShowOnboarding(true);
       }
-    };
+    }
+  }, [currentScores, userAgents, isLoading, error]);
 
-    initializeData();
-  }, []);
+  const handleOnboardingComplete = useCallback(async (data: {
+    profileType: ProfileType;
+    maturityScores: CategoryScore;
+    profileData: UserProfileData;
+    selectedAgents: string[];
+  }) => {
+    console.log('Onboarding completed with data:', data);
+    
+    try {
+      // Save maturity scores
+      await saveMaturityScores(data.maturityScores, data.profileData);
+      
+      // Enable selected agents (this will be handled by the useUserData hook)
+      // The agents will be enabled when the user first interacts with them
+      
+      setProfileType(data.profileType);
+      setShowOnboarding(false);
+      
+      console.log('Onboarding data saved successfully');
+    } catch (error) {
+      console.error('Error saving onboarding data:', error);
+      setError('Error al guardar los datos del onboarding');
+    }
+  }, [saveMaturityScores]);
 
-  const handleOnboardingComplete = (scores: CategoryScore, recommended: RecommendedAgents) => {
-    console.log('useAgentManagement: Onboarding completed with recommendations:', recommended);
-    
-    setMaturityScores(scores);
-    setRecommendedAgents(recommended);
-    setShowOnboarding(false);
-    
-    const agentsFromRecommendations = convertRecommendationsToAgents(recommended);
-    setAgents(agentsFromRecommendations);
-    
-    // Save to localStorage
-    localStorage.setItem('maturityScores', JSON.stringify(scores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(recommended));
-    localStorage.setItem('onboardingCompleted', 'true');
-    
-    // Add to score history
-    const scoreHistory = localStorage.getItem('maturityScoreHistory');
-    const history = scoreHistory ? JSON.parse(scoreHistory) : [];
-    history.push({
-      ...scores,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem('maturityScoreHistory', JSON.stringify(history));
-  };
-
-  const handleSelectAgent = (agentId: string) => {
-    console.log('useAgentManagement: Selecting agent:', agentId);
+  const handleSelectAgent = useCallback((agentId: string) => {
+    console.log('Selecting agent:', agentId);
     setSelectedAgent(agentId);
     setActiveSection('agent-details');
-  };
+  }, []);
 
-  const handleBackFromAgentDetails = () => {
-    console.log('useAgentManagement: Going back from agent details');
+  const handleBackFromAgentDetails = useCallback(() => {
+    console.log('Returning from agent details');
     setSelectedAgent(null);
     setActiveSection('dashboard');
-  };
+  }, []);
 
-  const handleOpenAgentManager = () => {
-    console.log('useAgentManagement: Opening agent manager');
+  const handleOpenAgentManager = useCallback(() => {
+    console.log('Opening agent manager');
     setActiveSection('agent-manager');
-  };
+  }, []);
 
-  const handleBackFromAgentManager = () => {
-    console.log('useAgentManagement: Going back from agent manager');
+  const handleBackFromAgentManager = useCallback(() => {
+    console.log('Returning from agent manager');
     setActiveSection('dashboard');
-  };
+  }, []);
 
-  const checkLocationStateForOnboarding = (locationState: any) => {
+  const checkLocationStateForOnboarding = useCallback((locationState: any) => {
     if (locationState?.showOnboarding) {
-      console.log('useAgentManagement: Location state requests onboarding');
+      console.log('Location state indicates onboarding should be shown');
       setShowOnboarding(true);
       return true;
     }
     return false;
-  };
+  }, []);
 
   return {
     agents,
@@ -235,7 +164,7 @@ export const useAgentManagement = () => {
     activeSection,
     setActiveSection,
     selectedAgent,
-    maturityScores,
+    maturityScores: currentScores,
     recommendedAgents,
     isLoading,
     error,

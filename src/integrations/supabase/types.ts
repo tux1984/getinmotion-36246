@@ -36,6 +36,156 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_usage_metrics: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          messages_count: number
+          session_duration: number | null
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          messages_count?: number
+          session_duration?: number | null
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          messages_count?: number
+          session_duration?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_agents: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_used_at: string | null
+          updated_at: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_used_at?: string | null
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_used_at?: string | null
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_maturity_scores: {
+        Row: {
+          created_at: string
+          id: string
+          idea_validation: number
+          market_fit: number
+          monetization: number
+          profile_data: Json | null
+          user_experience: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_validation: number
+          market_fit: number
+          monetization: number
+          profile_data?: Json | null
+          user_experience: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_validation?: number
+          market_fit?: number
+          monetization?: number
+          profile_data?: Json | null
+          user_experience?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           city: string | null
@@ -89,6 +239,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_latest_maturity_scores: {
+        Args: { user_uuid: string }
+        Returns: {
+          idea_validation: number
+          user_experience: number
+          market_fit: number
+          monetization: number
+          created_at: string
+        }[]
+      }
       is_authorized_user: {
         Args: { user_email: string }
         Returns: boolean

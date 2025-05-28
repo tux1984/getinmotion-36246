@@ -4,6 +4,8 @@ import { Agent, RecommendedAgents } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bot, MessageCircle, Play, Pause, Settings, Zap } from 'lucide-react';
+import { useUserData } from '@/hooks/useUserData';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 interface ModernAgentsGridProps {
   agents: Agent[];
@@ -18,6 +20,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   onSelectAgent,
   language
 }) => {
+  const { agents: userAgents, trackAgentUsage, enableAgent, loading } = useUserData();
+
   const translations = {
     en: {
       yourAgents: "Your AI Agents",
@@ -28,8 +32,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       active: "Active",
       paused: "Paused",
       inactive: "Inactive",
-      activeTasks: "active tasks",
-      recommended: "Recommended"
+      activeTasks: "uses",
+      recommended: "Recommended",
+      enable: "Enable",
+      lastUsed: "Last used",
+      never: "Never"
     },
     es: {
       yourAgents: "Tus Agentes IA",
@@ -40,43 +47,87 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       active: "Activo",
       paused: "Pausado",
       inactive: "Inactivo",
-      activeTasks: "tareas activas",
-      recommended: "Recomendado"
+      activeTasks: "usos",
+      recommended: "Recomendado",
+      enable: "Habilitar",
+      lastUsed: "Último uso",
+      never: "Nunca"
     }
   };
 
   const t = translations[language];
 
+  // Merge agent data with user configuration
+  const getMergedAgentData = (agentId: string) => {
+    const agentConfig = userAgents.find(ua => ua.agent_id === agentId);
+    const agentInfo = culturalAgentsDatabase.find(a => a.id === agentId);
+    
+    return {
+      id: agentId,
+      name: agentInfo?.name || agentId,
+      category: agentInfo?.category || 'General',
+      icon: agentInfo?.icon || '🤖',
+      color: agentInfo?.color || 'bg-purple-500',
+      isEnabled: agentConfig?.is_enabled || false,
+      usageCount: agentConfig?.usage_count || 0,
+      lastUsed: agentConfig?.last_used_at,
+      priority: agentInfo?.priority || 'Media'
+    };
+  };
+
   const getFilteredAgents = (agentList: string[] | undefined) => {
     if (!agentList) return [];
-    return agents.filter(agent => agentList.includes(agent.id));
+    return agentList.map(getMergedAgentData);
   };
 
   const primaryAgents = getFilteredAgents(recommendedAgents.primary);
   const secondaryAgents = getFilteredAgents(recommendedAgents.secondary);
-  const allOtherAgents = agents.filter(agent => 
-    !recommendedAgents.primary?.includes(agent.id) && 
-    !recommendedAgents.secondary?.includes(agent.id)
-  );
+  const allOtherAgents = culturalAgentsDatabase
+    .filter(agent => 
+      !recommendedAgents.primary?.includes(agent.id) && 
+      !recommendedAgents.secondary?.includes(agent.id)
+    )
+    .map(agent => getMergedAgentData(agent.id));
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30';
-      case 'paused': return 'bg-amber-500/20 text-amber-300 border-amber-400/30';
-      case 'inactive': return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+  const handleAgentClick = async (agentId: string) => {
+    try {
+      // Track agent usage
+      await trackAgentUsage(agentId);
+      
+      // Navigate to agent
+      onSelectAgent(agentId);
+    } catch (error) {
+      console.error('Error tracking agent usage:', error);
+      // Still navigate even if tracking fails
+      onSelectAgent(agentId);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return <Play className="w-3 h-3" />;
-      case 'paused': return <Pause className="w-3 h-3" />;
-      default: return <Settings className="w-3 h-3" />;
+  const handleEnableAgent = async (agentId: string) => {
+    try {
+      await enableAgent(agentId);
+    } catch (error) {
+      console.error('Error enabling agent:', error);
     }
   };
 
-  const ModernAgentCard = ({ agent, isRecommended = false }: { agent: Agent; isRecommended?: boolean }) => (
+  const formatLastUsed = (lastUsed: string | null) => {
+    if (!lastUsed) return t.never;
+    
+    const date = new Date(lastUsed);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Hace unos minutos';
+    if (diffInHours < 24) return `Hace ${diffInHours}h`;
+    if (diffInHours < 168) return `Hace ${Math.floor(diffInHours / 24)}d`;
+    return date.toLocaleDateString();
+  };
+
+  const ModernAgentCard = ({ agent, isRecommended = false }: { 
+    agent: ReturnType<typeof getMergedAgentData>; 
+    isRecommended?: boolean;
+  }) => (
     <div className="group relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
       {isRecommended && (
         <div className="absolute -top-2 -right-2">
@@ -100,26 +151,52 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
           </div>
         </div>
         
-        <Badge className={`text-xs flex items-center gap-1 ${getStatusColor(agent.status)}`}>
-          {getStatusIcon(agent.status)}
-          {t[agent.status as keyof typeof t] || agent.status}
+        <Badge className={`text-xs flex items-center gap-1 ${
+          agent.isEnabled 
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
+            : 'bg-gray-500/20 text-gray-300 border-gray-400/30'
+        }`}>
+          {agent.isEnabled ? (
+            <>
+              <Play className="w-3 h-3" />
+              {t.active}
+            </>
+          ) : (
+            <>
+              <Pause className="w-3 h-3" />
+              {t.inactive}
+            </>
+          )}
         </Badge>
       </div>
 
       <div className="flex items-center justify-between text-sm text-gray-300 mb-4">
-        <span>{agent.activeTasks} {t.activeTasks}</span>
-        <span>{agent.lastUsed || 'Nunca'}</span>
+        <span>{agent.usageCount} {t.activeTasks}</span>
+        <span>{t.lastUsed}: {formatLastUsed(agent.lastUsed)}</span>
       </div>
 
       <div className="flex gap-2">
-        <Button 
-          onClick={() => onSelectAgent(agent.id)}
-          className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white border-0 rounded-xl font-medium transition-all duration-200 hover:scale-105"
-          size="sm"
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          {t.chatWith}
-        </Button>
+        {agent.isEnabled ? (
+          <Button 
+            onClick={() => handleAgentClick(agent.id)}
+            className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white border-0 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+            size="sm"
+            disabled={loading}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {t.chatWith}
+          </Button>
+        ) : (
+          <Button 
+            onClick={() => handleEnableAgent(agent.id)}
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+            size="sm"
+            disabled={loading}
+          >
+            <Play className="w-4 h-4 mr-2" />
+            {t.enable}
+          </Button>
+        )}
         <Button 
           variant="outline" 
           size="sm" 
@@ -130,6 +207,24 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       </div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center gap-3">
+          <Bot className="w-8 h-8 text-purple-400" />
+          <div className="h-8 bg-white/20 rounded w-48 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="bg-white/10 rounded-2xl p-6 animate-pulse">
+              <div className="h-32 bg-white/20 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -167,7 +262,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       )}
 
       {/* Empty state */}
-      {agents.length === 0 && (
+      {primaryAgents.length === 0 && secondaryAgents.length === 0 && allOtherAgents.length === 0 && (
         <div className="text-center py-12">
           <Bot className="w-16 h-16 text-purple-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">No agents available</h3>
