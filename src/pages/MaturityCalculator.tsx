@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { motion } from 'framer-motion';
+import { MotionLogo } from '@/components/MotionLogo';
 
 const MaturityCalculator = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen h-screen w-full overflow-hidden bg-white flex items-center justify-center">
+    <div className="min-h-screen h-screen w-full overflow-hidden bg-white flex flex-col items-center justify-center">
       <div className="absolute inset-0 overflow-hidden">
         {/* Very subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/40"></div>
@@ -69,11 +70,19 @@ const MaturityCalculator = () => {
         />
       </div>
       
-      <div className="relative z-10 w-full h-full max-h-full flex items-center justify-center px-4">
-        <SimpleCulturalMaturityCalculator 
-          language={language}
-          onComplete={handleComplete} 
-        />
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 flex flex-col items-center">
+        {/* Large centered logo */}
+        <div className="mb-8">
+          <MotionLogo variant="dark" size="lg" />
+        </div>
+        
+        {/* Calculator component */}
+        <div className="w-full">
+          <SimpleCulturalMaturityCalculator 
+            language={language}
+            onComplete={handleComplete} 
+          />
+        </div>
       </div>
     </div>
   );

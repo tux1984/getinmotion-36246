@@ -1,6 +1,7 @@
+
 import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionCard } from '@/components/maturity/QuestionCard';
@@ -17,10 +18,21 @@ import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
 import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
 import { MobileHeader } from './components/MobileHeader';
 import { MobileNavigation } from './components/MobileNavigation';
-import { MaturityCalculatorHeader } from './components/MaturityCalculatorHeader';
 import { RecoverProgressDialog } from './components/RecoverProgressDialog';
 import { useMaturityProgress } from './hooks/useMaturityProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface SimpleCulturalMaturityCalculatorProps {
   language: 'en' | 'es';
@@ -42,6 +54,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   onComplete 
 }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [showRecoverDialog, setShowRecoverDialog] = useState(false);
 
   const {
@@ -131,7 +144,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       secondaryRecommendations: "Secondary Recommendations",
       deeperAnalysis: "Want a deeper analysis?",
       moreQuestions: "Answer more questions for detailed insights",
-      finishAssessment: "Finish Assessment"
+      finishAssessment: "Finish Assessment",
+      exitTitle: "Exit Assessment",
+      exitDescription: "Your progress will be saved and you can continue later. Are you sure you want to exit?",
+      saveAndExit: "Save & Exit",
+      cancel: "Cancel"
     },
     es: {
       title: "Evaluación de Madurez Cultural",
@@ -161,7 +178,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       secondaryRecommendations: "Recomendaciones Secundarias",
       deeperAnalysis: "¿Quieres un análisis más profundo?",
       moreQuestions: "Responde más preguntas para obtener información detallada",
-      finishAssessment: "Finalizar Evaluación"
+      finishAssessment: "Finalizar Evaluación",
+      exitTitle: "Salir de la Evaluación", 
+      exitDescription: "Tu progreso se guardará y podrás continuar después. ¿Estás seguro que quieres salir?",
+      saveAndExit: "Guardar y Salir",
+      cancel: "Cancelar"
     }
   }), []);
 
@@ -197,6 +218,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       extendedAnswers,
       analysisType
     });
+    navigate('/dashboard');
   };
 
   // Continue with saved progress
@@ -265,15 +287,8 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
         lastSaveTime={savedProgress?.timestamp}
       />
 
-      {/* Header with Logo and Exit */}
-      <MaturityCalculatorHeader
-        language={language}
-        onSaveAndExit={handleSaveAndExit}
-        currentStep={currentStep}
-      />
-
-      {/* Main Content with top padding for fixed header */}
-      <div className="w-full max-w-4xl mx-auto pt-16">
+      {/* Main Content */}
+      <div className="w-full max-w-4xl mx-auto">
         {/* Mobile Header */}
         {isMobile && (
           <MobileHeader 
@@ -284,7 +299,30 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
           />
         )}
 
-        <Card className={`border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-t-none border-t-0' : ''}`}>
+        <Card className={`relative border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-t-none border-t-0' : ''}`}>
+          {/* Exit button in top-right corner of Card */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.exitTitle}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.exitDescription}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSaveAndExit}>
+                  {t.saveAndExit}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <CardContent className={`${isMobile ? 'pt-4 px-4 pb-20' : 'pt-8 px-8'}`}>
             {/* Desktop Header */}
             {!isMobile && (
