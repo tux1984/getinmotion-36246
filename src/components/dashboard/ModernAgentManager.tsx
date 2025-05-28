@@ -124,8 +124,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
-              // Ensure proper boolean conversion - handle both string and boolean types
-              return userAgentData ? Boolean(userAgentData.is_enabled) && userAgentData.is_enabled !== 'false' : false;
+              return userAgentData ? userAgentData.is_enabled : false;
             }).length;
             
             const categoryRecommendedCount = agents.filter(agent => 
