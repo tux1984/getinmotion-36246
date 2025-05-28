@@ -22,28 +22,28 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
       <div className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
-          <MotionLogo variant="dark" size="xl" />
+          <MotionLogo variant="dark" size="lg" />
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <a 
             href="/agents" 
-            className="group flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-all duration-200 hover:bg-purple-50 rounded-xl"
+            className="group flex items-center gap-2 px-6 py-3 text-gray-700 hover:text-purple-600 font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200 hover:shadow-lg hover:scale-105 transform"
           >
             <span className="group-hover:scale-110 transition-transform duration-200">🤖</span>
             {translations.navAgents}
           </a>
           
-          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200">
+          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-3 hover:from-gray-100 hover:to-slate-100 transition-all duration-200 hover:shadow-md hover:scale-105 transform">
             <LanguageSwitcher />
           </div>
           
           <Button
             onClick={onAccessClick}
-            className="group flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg transform"
+            className="group flex items-center gap-3 bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-110 hover:shadow-xl transform hover:shadow-purple-500/25 active:scale-95"
           >
-            <UserPlus className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+            <UserPlus className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200" />
             {translations.navAccess}
           </Button>
         </nav>
@@ -51,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200"
+          className="md:hidden p-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 hover:scale-110 transform"
         >
           {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
