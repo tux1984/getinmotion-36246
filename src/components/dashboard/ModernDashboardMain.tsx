@@ -42,6 +42,7 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
       <ModernAgentsGrid 
         agents={agents}
         recommendedAgents={recommendedAgents}
+        maturityScores={maturityScores}
         onSelectAgent={onSelectAgent}
         language={language}
       />
