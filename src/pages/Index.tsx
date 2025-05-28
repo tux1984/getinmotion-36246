@@ -48,15 +48,18 @@ const Index = () => {
         translations={t}
         onAccessClick={handleAccessClick}
       />
-      <HeroSection 
-        language={language}
-        onJoinWaitlist={handleJoinWaitlist}
-      />
-      <ProductExplanation />
-      <FeaturesSection language={language} />
-      <ValueProposition language={language} />
-      <CollapsibleWaitlistForm language={language} />
-      <Footer language={language} />
+      {/* Add padding top to account for floating header */}
+      <div className="pt-24">
+        <HeroSection 
+          language={language}
+          onJoinWaitlist={handleJoinWaitlist}
+        />
+        <ProductExplanation />
+        <FeaturesSection language={language} />
+        <ValueProposition language={language} />
+        <CollapsibleWaitlistForm language={language} />
+        <Footer language={language} />
+      </div>
     </div>
   );
 };

@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { Link } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Menu, X, UserPlus } from 'lucide-react';
+import { useState } from 'react';
 
 interface HeaderProps {
   translations: {
@@ -15,50 +15,78 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) => {
-  const handleAccessClick = () => {
-    // Open login page in new tab/window
-    window.open('/login', '_blank');
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
-      <div className="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <MotionLogo variant="light" size="lg" />
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="bg-indigo-900/40 p-2 rounded-lg">
+    <header className="fixed top-6 left-6 right-6 z-50">
+      <div className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center">
+          <MotionLogo variant="dark" size="xl" />
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          <a 
+            href="/agents" 
+            className="group flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-all duration-200 hover:bg-purple-50 rounded-xl"
+          >
+            <span className="group-hover:scale-110 transition-transform duration-200">🤖</span>
+            {translations.navAgents}
+          </a>
+          
+          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200">
             <LanguageSwitcher />
           </div>
-          <div className="flex gap-1 sm:gap-2">
-            <Link to="/agents">
-              <Button variant="ghost" className="text-indigo-100 hover:text-white hover:bg-indigo-800/50">
-                {translations.navAgents}
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              className="text-xs sm:text-sm md:text-base border-pink-500 text-pink-200 hover:bg-pink-900/30 hover:text-pink-100 px-2 sm:px-4 flex items-center gap-2"
-              onClick={handleAccessClick}
-            >
-              <ExternalLink className="w-4 h-4" />
-              {translations.navAccess}
-            </Button>
-            <Link to="/admin">
-              <Button 
-                variant="ghost"
-                size="icon"
-                className="text-indigo-300 hover:text-white hover:bg-indigo-800/50 hidden sm:flex"
-              >
-                <span className="sr-only">Admin</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="m22 12-3-3m0 0-3 3m3-3v9"></path>
-                </svg>
-              </Button>
-            </Link>
-          </div>
-        </div>
+          
+          <Button
+            onClick={onAccessClick}
+            className="group flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg transform"
+          >
+            <UserPlus className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+            {translations.navAccess}
+          </Button>
+        </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200"
+        >
+          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden mt-2 bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-4 space-y-3">
+          <a 
+            href="/agents" 
+            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-purple-600 font-medium transition-all duration-200 hover:bg-purple-50 rounded-xl"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <span>🤖</span>
+            {translations.navAgents}
+          </a>
+          
+          <div className="flex justify-center py-2">
+            <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2">
+              <LanguageSwitcher />
+            </div>
+          </div>
+          
+          <Button
+            onClick={() => {
+              onAccessClick();
+              setIsMenuOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          >
+            <UserPlus className="w-4 h-4" />
+            {translations.navAccess}
+          </Button>
+        </div>
+      )}
     </header>
   );
 };
