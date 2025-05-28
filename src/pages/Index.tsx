@@ -30,17 +30,30 @@ const Index = () => {
     setShowWaitlist(true);
   };
 
+  const handleJoinWaitlist = () => {
+    setShowWaitlist(true);
+    // Scroll to waitlist form
+    setTimeout(() => {
+      document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen">
       <Header 
         translations={t}
         onAccessClick={handleAccessClick}
       />
-      <HeroSection />
+      <HeroSection 
+        language={language}
+        onJoinWaitlist={handleJoinWaitlist}
+      />
       <ProductExplanation />
       <FeaturesSection language={language} />
       <ValueProposition language={language} />
-      <WaitlistForm />
+      <div id="waitlist-form">
+        <WaitlistForm language={language} />
+      </div>
       <Footer language={language} />
     </div>
   );

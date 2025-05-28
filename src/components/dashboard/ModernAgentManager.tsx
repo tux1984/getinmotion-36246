@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
@@ -123,7 +124,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
-              return userAgentData ? userAgentData.is_enabled === true : false;
+              return userAgentData ? Boolean(userAgentData.is_enabled) : false;
             }).length;
             
             const categoryRecommendedCount = agents.filter(agent => 
