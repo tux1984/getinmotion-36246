@@ -1,136 +1,129 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { CulturalAgent } from '@/data/agentsDatabase';
-import { Zap, Clock, Loader2 } from 'lucide-react';
+import { Agent } from '@/types/dashboard';
+import { MoreHorizontal, Play, Pause, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AgentCardProps {
-  agent: CulturalAgent;
-  userAgent: any;
-  isEnabled: boolean;
-  isRecommended: boolean;
-  usageCount: number;
-  lastUsed: string | null;
-  isToggling: boolean;
-  isRecentlyChanged: boolean;
-  onToggleAgent: (agentId: string, currentEnabled: boolean) => Promise<void>;
-  formatLastUsed: (lastUsed: string | null) => string;
-  getPriorityColor: (priority: string) => string;
-  getImpactColor: (impact: number) => string;
-  translations: {
-    priority: string;
-    impact: string;
-    enabled: string;
-    disabled: string;
-    recommended: string;
-    usageCount: string;
-    lastUsed: string;
-  };
+  agent: Agent;
+  onActionClick: (id: string, action: string) => void;
+  language: 'en' | 'es';
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({
-  agent,
-  userAgent,
-  isEnabled,
-  isRecommended,
-  usageCount,
-  lastUsed,
-  isToggling,
-  isRecentlyChanged,
-  onToggleAgent,
-  formatLastUsed,
-  getPriorityColor,
-  getImpactColor,
-  translations
+export const AgentCard: React.FC<AgentCardProps> = ({ 
+  agent, 
+  onActionClick,
+  language 
 }) => {
-  return (
-    <Card className={`transition-all relative ${
-      isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''
-    } ${isRecentlyChanged ? 'ring-2 ring-green-300 shadow-green-200' : ''}`}>
-      {isRecommended && (
-        <div className="absolute -top-2 -right-2 z-10">
-          <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
-            <Zap className="w-3 h-3 mr-1" />
-            {translations.recommended}
-          </Badge>
-        </div>
-      )}
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'paused': return 'bg-yellow-100 text-yellow-800';
+      case 'inactive': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-      {isRecentlyChanged && (
-        <div className="absolute -top-2 -left-2 z-10">
-          <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
-            {isEnabled ? 'Activado' : 'Desactivado'}
-          </Badge>
-        </div>
-      )}
+  const getStatusText = (status: string) => {
+    if (language === 'en') {
+      switch (status) {
+        case 'active': return 'Active';
+        case 'paused': return 'Paused';
+        case 'inactive': return 'Inactive';
+        default: return 'Unknown';
+      }
+    } else {
+      switch (status) {
+        case 'active': return 'Activo';
+        case 'paused': return 'Pausado';
+        case 'inactive': return 'Inactivo';
+        default: return 'Desconocido';
+      }
+    }
+  };
+
+  return (
+    <div className="flex items-center p-3 sm:p-4 bg-white rounded-lg border border-gray-200 hover:border-violet-300 hover:shadow-sm transition-all">
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${agent.color} flex items-center justify-center mr-2 sm:mr-3 text-white`}>
+        {agent.icon}
+      </div>
       
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`w-12 h-12 rounded-full ${agent.color} flex items-center justify-center text-white text-xl shadow-lg`}>
-              {agent.icon}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="text-xs font-mono">
-                  {agent.code}
-                </Badge>
-              </div>
-              <CardTitle className="text-base leading-tight">{agent.name}</CardTitle>
-              <div className="flex gap-2 mt-2">
-                <Badge className={`text-xs ${getPriorityColor(agent.priority)}`}>
-                  {translations.priority}: {agent.priority}
-                </Badge>
-                <Badge className={`text-xs ${getImpactColor(agent.impact)}`}>
-                  {translations.impact}: {agent.impact}
-                </Badge>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {isToggling && (
-              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-            )}
-            <Switch
-              checked={isEnabled}
-              onCheckedChange={() => onToggleAgent(agent.id, isEnabled)}
-              disabled={isToggling}
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className="text-sm mb-3">
-          {agent.description}
-        </CardDescription>
-        
-        {/* Usage Stats */}
-        <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
-          <div className="flex items-center gap-1">
-            <span>{translations.usageCount}: {usageCount}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            <span>{translations.lastUsed}: {formatLastUsed(lastUsed)}</span>
-          </div>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <Badge 
-            variant={isEnabled ? "default" : "secondary"} 
-            className={`text-xs ${isEnabled ? 'bg-green-100 text-green-800' : ''}`}
-          >
-            {isEnabled ? translations.enabled : translations.disabled}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-medium text-sm sm:text-base text-gray-900 truncate">
+            {agent.name}
+          </h3>
+          <Badge className={`text-xs ${getStatusColor(agent.status)}`}>
+            {getStatusText(agent.status)}
           </Badge>
-          {agent.profiles && (
-            <div className="text-xs text-gray-500">
-              Perfiles: {agent.profiles.length}
-            </div>
+        </div>
+        
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          <span>{agent.category}</span>
+          <span>•</span>
+          <span>
+            {agent.activeTasks} {language === 'en' ? 'active tasks' : 'tareas activas'}
+          </span>
+          {agent.lastUsed && (
+            <>
+              <span>•</span>
+              <span>
+                {language === 'en' ? 'Last used' : 'Último uso'}: {agent.lastUsed}
+              </span>
+            </>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={agent.status === 'active'}
+          onCheckedChange={(checked) => 
+            onActionClick(agent.id, checked ? 'activate' : 'pause')
+          }
+        />
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onActionClick(agent.id, 'view')}>
+              {language === 'en' ? 'View Details' : 'Ver Detalles'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onActionClick(agent.id, agent.status === 'active' ? 'pause' : 'activate')}>
+              {agent.status === 'active' ? (
+                <>
+                  <Pause className="mr-2 h-4 w-4" />
+                  {language === 'en' ? 'Pause' : 'Pausar'}
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  {language === 'en' ? 'Activate' : 'Activar'}
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => onActionClick(agent.id, 'delete')}
+              className="text-red-600"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {language === 'en' ? 'Delete' : 'Eliminar'}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 };
