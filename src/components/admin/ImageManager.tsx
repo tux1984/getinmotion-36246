@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ImageFile {
   name: string;
@@ -26,42 +27,46 @@ export const ImageManager: React.FC = () => {
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Simular la obtención de imágenes desde el servidor
+  // Obtener imágenes reales desde Supabase Storage
   const fetchImages = async () => {
     setIsLoading(true);
     try {
-      // Esta es una simulación - en una implementación real, esto vendría de una API
-      const mockImages: ImageFile[] = [
-        {
-          name: 'a049cc5b-c8c3-463f-a2e8-eb2cfa2232db.png',
-          url: '/lovable-uploads/a049cc5b-c8c3-463f-a2e8-eb2cfa2232db.png',
-          size: 15420,
-          lastModified: '2025-01-19'
-        },
-        {
-          name: '98f35650-02b1-4578-9248-60db60c6688d.png',
-          url: '/lovable-uploads/98f35650-02b1-4578-9248-60db60c6688d.png',
-          size: 18930,
-          lastModified: '2025-01-18'
-        },
-        {
-          name: '390caed4-1006-489e-9da8-b17d9f8fb814.png',
-          url: '/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png',
-          size: 22150,
-          lastModified: '2025-01-17'
-        },
-        {
-          name: '4d2abc22-b792-462b-8247-6cc413c71b23.png',
-          url: '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png',
-          size: 19680,
-          lastModified: '2025-01-16'
-        }
-      ];
+      console.log('Fetching images from Supabase Storage...');
       
-      setImages(mockImages);
+      const { data: files, error } = await supabase.storage
+        .from('images')
+        .list('', {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+      if (error) {
+        console.error('Error fetching images:', error);
+        throw error;
+      }
+
+      const imageFiles: ImageFile[] = files
+        .filter(file => file.name !== '.emptyFolderPlaceholder')
+        .map(file => {
+          const { data: publicUrl } = supabase.storage
+            .from('images')
+            .getPublicUrl(file.name);
+          
+          return {
+            name: file.name,
+            url: publicUrl.publicUrl,
+            size: file.metadata?.size,
+            lastModified: file.created_at ? new Date(file.created_at).toISOString().split('T')[0] : undefined
+          };
+        });
+      
+      console.log('Images fetched successfully:', imageFiles.length);
+      setImages(imageFiles);
+      
       toast({
         title: 'Imágenes cargadas',
-        description: `Se encontraron ${mockImages.length} imágenes.`,
+        description: `Se encontraron ${imageFiles.length} imágenes.`,
       });
     } catch (error) {
       console.error('Error fetching images:', error);
@@ -85,25 +90,40 @@ export const ImageManager: React.FC = () => {
     setUploadingFiles(fileNames);
 
     try {
+      console.log('Uploading files:', fileNames);
+      
       for (const file of fileArray) {
-        // Simular subida de archivo
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Generar un nombre único para evitar colisiones
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop();
+        const uniqueFileName = `${timestamp}-${file.name}`;
         
-        const newImage: ImageFile = {
-          name: file.name,
-          url: `/lovable-uploads/${Date.now()}-${file.name}`,
-          size: file.size,
-          lastModified: new Date().toISOString().split('T')[0]
-        };
+        console.log(`Uploading file: ${uniqueFileName}`);
         
-        setImages(prev => [...prev, newImage]);
+        const { data, error } = await supabase.storage
+          .from('images')
+          .upload(uniqueFileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          throw error;
+        }
+
+        console.log(`File uploaded successfully: ${uniqueFileName}`);
       }
+      
+      // Refrescar la lista de imágenes después de subir
+      await fetchImages();
       
       toast({
         title: 'Subida exitosa',
         description: `Se subieron ${fileArray.length} imagen(es).`,
       });
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
         title: 'Error',
         description: 'Error al subir las imágenes.',
@@ -116,16 +136,28 @@ export const ImageManager: React.FC = () => {
 
   const handleDeleteImage = async (imageName: string) => {
     try {
-      // Simular eliminación
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Deleting image:', imageName);
       
+      const { error } = await supabase.storage
+        .from('images')
+        .remove([imageName]);
+
+      if (error) {
+        console.error('Error deleting image:', error);
+        throw error;
+      }
+      
+      // Actualizar la lista local removiendo la imagen eliminada
       setImages(prev => prev.filter(img => img.name !== imageName));
+      
+      console.log('Image deleted successfully:', imageName);
       
       toast({
         title: 'Imagen eliminada',
         description: `La imagen ${imageName} ha sido eliminada.`,
       });
     } catch (error) {
+      console.error('Delete error:', error);
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la imagen.',
@@ -174,9 +206,22 @@ export const ImageManager: React.FC = () => {
                 Haz clic para subir imágenes o arrastra aquí
               </p>
               <p className="text-indigo-400 text-sm">
-                Formatos soportados: PNG, JPG, GIF, SVG
+                Formatos soportados: PNG, JPG, GIF, WebP, SVG
               </p>
             </label>
+          </div>
+
+          {/* Refresh Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={fetchImages}
+              variant="outline"
+              size="sm"
+              disabled={isLoading}
+              className="text-indigo-200 border-indigo-600 hover:bg-indigo-800/50"
+            >
+              {isLoading ? 'Cargando...' : 'Actualizar Lista'}
+            </Button>
           </div>
 
           {/* Loading State */}
