@@ -101,22 +101,23 @@ export const useAgentManagement = () => {
     }
   }, [currentScores, userAgents, isLoading, error]);
 
-  const handleOnboardingComplete = useCallback(async (data: {
-    profileType: ProfileType;
-    maturityScores: CategoryScore;
-    profileData: UserProfileData;
-    selectedAgents: string[];
-  }) => {
-    console.log('Onboarding completed with data:', data);
+  const handleOnboardingComplete = useCallback(async (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
+    console.log('Onboarding completed with scores and recommendations:', { scores, recommendedAgents });
     
     try {
-      // Save maturity scores
-      await saveMaturityScores(data.maturityScores, data.profileData);
+      // Save maturity scores with a basic profile data structure
+      const basicProfileData: Partial<UserProfileData> = {
+        profileType: profileType,
+        industry: 'musica', // Default for cultural entrepreneurs
+        experience: scores.ideaValidation < 50 ? 'beginner' : 
+                   scores.ideaValidation < 80 ? 'intermediate' : 'advanced'
+      };
+      
+      await saveMaturityScores(scores, basicProfileData);
       
       // Enable selected agents (this will be handled by the useUserData hook)
       // The agents will be enabled when the user first interacts with them
       
-      setProfileType(data.profileType);
       setShowOnboarding(false);
       
       console.log('Onboarding data saved successfully');
@@ -124,7 +125,7 @@ export const useAgentManagement = () => {
       console.error('Error saving onboarding data:', error);
       setError('Error al guardar los datos del onboarding');
     }
-  }, [saveMaturityScores]);
+  }, [saveMaturityScores, profileType]);
 
   const handleSelectAgent = useCallback((agentId: string) => {
     console.log('Selecting agent:', agentId);
