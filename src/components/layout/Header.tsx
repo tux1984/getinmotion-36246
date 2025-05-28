@@ -7,8 +7,7 @@ import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   translations: {
-    navAbout: string;
-    navCases: string;
+    navAgents: string;
     navAccess: string;
   };
   onAccessClick: () => void;
@@ -24,12 +23,11 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             <LanguageSwitcher />
           </div>
           <div className="flex gap-1 sm:gap-2">
-            <Button variant="ghost" className="hidden md:flex text-indigo-100 hover:text-white hover:bg-indigo-800/50">
-              {translations.navAbout}
-            </Button>
-            <Button variant="ghost" className="hidden md:flex text-indigo-100 hover:text-white hover:bg-indigo-800/50">
-              {translations.navCases}
-            </Button>
+            <Link to="/agents">
+              <Button variant="ghost" className="text-indigo-100 hover:text-white hover:bg-indigo-800/50">
+                {translations.navAgents}
+              </Button>
+            </Link>
             <Button 
               variant="outline" 
               className="text-xs sm:text-sm md:text-base border-pink-500 text-pink-200 hover:bg-pink-900/30 hover:text-pink-100 px-2 sm:px-4"

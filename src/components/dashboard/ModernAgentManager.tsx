@@ -10,8 +10,9 @@ import { AgentCategoryCard } from './AgentCategoryCard';
 import { AgentFiltersPanel } from '../agent-manager/AgentFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
 import { TrueMasonryGrid } from '../agent-manager/TrueMasonryGrid';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ExternalLink } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
+import { Link } from 'react-router-dom';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
@@ -34,7 +35,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       loading: "Loading agent management...",
       noAgentsFound: "No agents found",
       tryAdjusting: "Try adjusting your filters or search terms",
-      clearAllFilters: "Clear all filters"
+      clearAllFilters: "Clear all filters",
+      viewAllAgents: "View All Agents Gallery"
     },
     es: {
       title: "Gestor de Agentes IA",
@@ -42,7 +44,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       loading: "Cargando gestión de agentes...",
       noAgentsFound: "No se encontraron agentes",
       tryAdjusting: "Intenta ajustar tus filtros o términos de búsqueda",
-      clearAllFilters: "Limpiar todos los filtros"
+      clearAllFilters: "Limpiar todos los filtros",
+      viewAllAgents: "Ver Galería de Todos los Agentes"
     }
   };
 
@@ -93,6 +96,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
+      {/* Link to full agents gallery */}
+      <div className="flex justify-center">
+        <Link 
+          to="/agents"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+          <ExternalLink className="w-5 h-5" />
+          {t.viewAllAgents}
+        </Link>
+      </div>
+
       {/* Filters */}
       <AgentFiltersPanel
         filters={filters}
@@ -110,7 +124,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
-              return userAgentData ? Boolean(userAgentData.is_enabled) : false;
+              return userAgentData ? userAgentData.is_enabled === true : false;
             }).length;
             
             const categoryRecommendedCount = agents.filter(agent => 

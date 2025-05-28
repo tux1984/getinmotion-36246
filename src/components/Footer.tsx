@@ -16,8 +16,8 @@ export const Footer = ({ language }: FooterProps) => {
       calculator: "Maturity Calculator", 
       dashboard: "Dashboard",
       agents: "AI Agents",
+      agentsGallery: "Agents Gallery",
       company: "Company",
-      aboutUs: "About Us",
       contact: "Contact",
       onePager: "One Pager",
       twoPager: "Two Pager", 
@@ -39,8 +39,8 @@ export const Footer = ({ language }: FooterProps) => {
       calculator: "Calculadora de Madurez",
       dashboard: "Dashboard", 
       agents: "Agentes de IA",
+      agentsGallery: "Galería de Agentes",
       company: "Empresa",
-      aboutUs: "Sobre Nosotros",
       contact: "Contacto",
       onePager: "Una Página",
       twoPager: "Dos Páginas",
@@ -135,9 +135,9 @@ export const Footer = ({ language }: FooterProps) => {
                 </Link>
               </li>
               <li>
-                <a href="#features" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.agents}
-                </a>
+                <Link to="/agents" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
+                  {t.agentsGallery}
+                </Link>
               </li>
             </ul>
           </div>
@@ -148,11 +148,6 @@ export const Footer = ({ language }: FooterProps) => {
               {t.company}
             </h3>
             <ul className="space-y-3">
-              <li>
-                <a href="#" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.aboutUs}
-                </a>
-              </li>
               <li>
                 <Link to="/one-pager" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
                   {t.onePager}
@@ -167,6 +162,11 @@ export const Footer = ({ language }: FooterProps) => {
                 <Link to="/three-pager" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
                   {t.threePager}
                 </Link>
+              </li>
+              <li>
+                <a href="#" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
+                  {t.contact}
+                </a>
               </li>
             </ul>
           </div>
@@ -190,11 +190,6 @@ export const Footer = ({ language }: FooterProps) => {
               <li>
                 <a href="#access" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
                   {t.waitlist}
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.contact}
                 </a>
               </li>
             </ul>

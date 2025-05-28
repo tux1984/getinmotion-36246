@@ -15,6 +15,7 @@ import Admin from './pages/Admin';
 import OnePager from './pages/OnePager';
 import TwoPager from './pages/TwoPager';
 import ThreePager from './pages/ThreePager';
+import AgentsGallery from './pages/AgentsGallery';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/agents" element={<AgentsGallery />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/one-pager" element={<OnePager />} />
               <Route path="/two-pager" element={<TwoPager />} />
