@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   translations: {
@@ -14,6 +15,11 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) => {
+  const handleAccessClick = () => {
+    // Open waitlist form in new tab/window
+    window.open('/#waitlist', '_blank');
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-indigo-950/80 border-b border-indigo-800/30 shadow-md">
       <div className="w-full py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -30,9 +36,10 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             </Link>
             <Button 
               variant="outline" 
-              className="text-xs sm:text-sm md:text-base border-pink-500 text-pink-200 hover:bg-pink-900/30 hover:text-pink-100 px-2 sm:px-4"
-              onClick={onAccessClick}
+              className="text-xs sm:text-sm md:text-base border-pink-500 text-pink-200 hover:bg-pink-900/30 hover:text-pink-100 px-2 sm:px-4 flex items-center gap-2"
+              onClick={handleAccessClick}
             >
+              <ExternalLink className="w-4 h-4" />
               {translations.navAccess}
             </Button>
             <Link to="/admin">

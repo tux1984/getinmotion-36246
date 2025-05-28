@@ -16,8 +16,8 @@ const AgentsGallery = () => {
 
   const translations = {
     en: {
-      title: "Complete AI Agents Collection",
-      subtitle: "Discover our comprehensive suite of 20 specialized AI agents designed to transform your creative business operations",
+      title: "AI Agents Collection",
+      subtitle: "Discover our comprehensive suite of specialized AI agents designed to transform your creative business operations",
       search: "Search agents...",
       allCategories: "All Categories",
       viewGrid: "Grid View",
@@ -38,8 +38,8 @@ const AgentsGallery = () => {
       }
     },
     es: {
-      title: "Colección Completa de Agentes IA",
-      subtitle: "Descubre nuestra suite integral de 20 agentes de IA especializados diseñados para transformar las operaciones de tu negocio creativo",
+      title: "Colección de Agentes IA",
+      subtitle: "Descubre nuestra suite integral de agentes de IA especializados diseñados para transformar las operaciones de tu negocio creativo",
       search: "Buscar agentes...",
       allCategories: "Todas las Categorías",
       viewGrid: "Vista de Cuadrícula",
@@ -94,7 +94,7 @@ const AgentsGallery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
       <AgentsGalleryHeader
         title={t.title}
         subtitle={t.subtitle}
@@ -128,17 +128,19 @@ const AgentsGallery = () => {
 
         {/* Agents Display */}
         {filteredAgents.length > 0 ? (
-          viewMode === 'grid' ? (
-            <AgentsGridView
-              agents={filteredAgents}
-              translations={agentTranslations}
-            />
-          ) : (
-            <AgentsListView
-              agents={filteredAgents}
-              translations={agentTranslations}
-            />
-          )
+          <div className="pb-12">
+            {viewMode === 'grid' ? (
+              <AgentsGridView
+                agents={filteredAgents}
+                translations={agentTranslations}
+              />
+            ) : (
+              <AgentsListView
+                agents={filteredAgents}
+                translations={agentTranslations}
+              />
+            )}
+          </div>
         ) : (
           <AgentsEmptyState
             title={t.noAgentsTitle}
