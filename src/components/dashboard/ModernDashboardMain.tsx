@@ -33,7 +33,7 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
         style={{ backgroundImage: `url("${backgroundPattern}")` }}
       />
       
-      <div className="relative z-10 container mx-auto px-4 py-8 space-y-8">
+      <div className="relative z-10 w-full py-8 space-y-8">
         {/* Welcome Section */}
         <ModernWelcomeSection language={language} />
         
