@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
@@ -19,10 +20,10 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   // Determine which logo to show based on variant and theme
   const shouldUseLightLogo = variant === 'light' || (variant === 'auto' && isDark);
   
-  // Use correct logo files from the uploads directory
+  // Use new logo URLs from Supabase Storage
   const logoSrc = shouldUseLightLogo 
-    ? "/lovable-uploads/a049cc5b-c8c3-463f-a2e8-eb2cfa2232db.png" // New logo for dark backgrounds
-    : "/lovable-uploads/98f35650-02b1-4578-9248-60db60c6688d.png"; // Logo for light backgrounds
+    ? "https://ylooqmqmoufqtxvetxuj.supabase.co/storage/v1/object/public/images/1748464946532-logo_2.png" // Logo for dark backgrounds
+    : "https://ylooqmqmoufqtxvetxuj.supabase.co/storage/v1/object/public/images/1748464946989-logo_1.png"; // Logo for light backgrounds
   
   // Set size based on prop
   const sizeClasses = {
