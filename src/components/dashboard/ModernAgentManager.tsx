@@ -73,6 +73,26 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 
   const stats = useAgentStats(culturalAgentsDatabase, userAgents);
 
+  // Convert AgentFilter to AgentFiltersPanel expected format
+  const filtersForPanel = {
+    search: filters.searchTerm,
+    status: filters.selectedStatus,
+    categories: filters.selectedCategories
+  };
+
+  const handleUpdateFilter = (key: string, value: string) => {
+    switch (key) {
+      case 'search':
+        updateFilter('searchTerm', value);
+        break;
+      case 'status':
+        updateFilter('selectedStatus', value as any);
+        break;
+      default:
+        break;
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -109,8 +129,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 
       {/* Filters */}
       <AgentFiltersPanel
-        filters={filters}
-        onUpdateFilter={updateFilter}
+        filters={filtersForPanel}
+        onUpdateFilter={handleUpdateFilter}
         onToggleCategory={toggleCategory}
         onClearFilters={clearFilters}
         categories={categories}
