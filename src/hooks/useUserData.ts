@@ -277,16 +277,16 @@ export const useUserData = () => {
           messages_count: messagesCount
         });
 
-      // Update agent usage count and last used
-      await supabase
+      // Update agent last used time - the trigger will handle usage_count increment
+      const { error: updateError } = await supabase
         .from('user_agents')
-        .upsert({
-          user_id: user.id,
-          agent_id: agentId,
-          is_enabled: true,
-          last_used_at: new Date().toISOString(),
-          usage_count: 1 // This will be incremented by the trigger
-        });
+        .update({
+          last_used_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('agent_id', agentId);
+
+      if (updateError) throw updateError;
 
       // Refresh data
       await fetchUserAgents();

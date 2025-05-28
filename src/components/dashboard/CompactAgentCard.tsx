@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Settings } from 'lucide-react';
+import { Play } from 'lucide-react';
 
 interface CompactAgentCardProps {
   agent: {
@@ -68,13 +68,6 @@ export const CompactAgentCard: React.FC<CompactAgentCardProps> = ({
               {t.enable}
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-6 w-6 p-0 border-white/20 text-white hover:bg-white/10"
-          >
-            <Settings className="w-3 h-3" />
-          </Button>
         </div>
       </div>
     </div>

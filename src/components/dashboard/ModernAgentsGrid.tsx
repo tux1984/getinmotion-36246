@@ -1,17 +1,20 @@
 
 import React, { useEffect, useMemo } from 'react';
-import { Agent, RecommendedAgents } from '@/types/dashboard';
+import { Agent, RecommendedAgents, CategoryScore } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bot, MessageCircle, Play, Pause, Settings, Zap, Clock, Loader2 } from 'lucide-react';
+import { Bot, MessageCircle, Play, Pause, Zap, Clock, Loader2 } from 'lucide-react';
 import { useUserData } from '@/hooks/useUserData';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { CollapsibleAgentsSection } from './CollapsibleAgentsSection';
+import { CollapsibleRecommendationsSection } from './CollapsibleRecommendationsSection';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
+import { useRealtimeAgents } from '@/hooks/useRealtimeAgents';
 
 interface ModernAgentsGridProps {
   agents: Agent[];
   recommendedAgents: RecommendedAgents;
+  maturityScores: CategoryScore | null;
   onSelectAgent: (id: string) => void;
   language: 'en' | 'es';
 }
@@ -19,10 +22,14 @@ interface ModernAgentsGridProps {
 export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   agents,
   recommendedAgents,
+  maturityScores,
   onSelectAgent,
   language
 }) => {
   const { agents: userAgents, trackAgentUsage, enableAgent, disableAgent, loading, refetch } = useUserData();
+  
+  // Real-time updates
+  useRealtimeAgents({ onAgentChange: refetch });
   
   // Use the toggle hook
   const { togglingAgents, handleToggleAgent } = useAgentToggle(async (agentId: string, enabled: boolean) => {
@@ -42,16 +49,10 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   const translations = {
     en: {
       yourAgents: "Your Active Agents",
-      primaryRecommendations: "Recommended Based on Your Maturity",
       chatWith: "Chat",
-      configure: "Configure",
       active: "Active",
-      paused: "Paused",
       inactive: "Inactive",
       activeTasks: "uses",
-      recommended: "Recommended",
-      enable: "Enable",
-      disable: "Disable",
       lastUsed: "Last used",
       never: "Never",
       justEnabled: "Just enabled",
@@ -60,16 +61,10 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     },
     es: {
       yourAgents: "Tus Agentes Activos",
-      primaryRecommendations: "Recomendados Según Tu Madurez",
       chatWith: "Chatear",
-      configure: "Configurar",
       active: "Activo",
-      paused: "Pausado",
       inactive: "Inactivo",
       activeTasks: "usos",
-      recommended: "Recomendado",
-      enable: "Habilitar",
-      disable: "Deshabilitar",
       lastUsed: "Último uso",
       never: "Nunca",
       justEnabled: "Recién habilitado",
@@ -141,11 +136,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   };
 
   const handleEnableAgent = async (agentId: string) => {
-    await handleToggleAgent(agentId, false); // false because we want to enable (opposite of current state)
+    await handleToggleAgent(agentId, false);
   };
 
   const handleDisableAgent = async (agentId: string) => {
-    await handleToggleAgent(agentId, true); // true because we want to disable (opposite of current state)
+    await handleToggleAgent(agentId, true);
   };
 
   const formatLastUsed = (lastUsed: string | null) => {
@@ -175,7 +170,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
           <div className="absolute -top-2 -right-2">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
               <Zap className="w-3 h-3 mr-1" />
-              {t.recommended}
+              Recomendado
             </Badge>
           </div>
         )}
@@ -269,18 +264,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  {t.enable}
+                  Habilitar
                 </>
               )}
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="border-white/20 text-white hover:bg-white/10 rounded-xl"
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     );
@@ -328,19 +316,15 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         </div>
       )}
 
-      {/* Primary Recommendations */}
-      {categorizedAgents.primaryRecommended.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-purple-200 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            {t.primaryRecommendations}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categorizedAgents.primaryRecommended.map(agent => (
-              <ModernAgentCard key={agent.id} agent={agent} isRecommended={true} />
-            ))}
-          </div>
-        </div>
+      {/* Primary Recommendations - Collapsible */}
+      {categorizedAgents.primaryRecommended.length > 0 && maturityScores && (
+        <CollapsibleRecommendationsSection
+          agents={categorizedAgents.primaryRecommended}
+          maturityScores={maturityScores}
+          onEnableAgent={handleEnableAgent}
+          togglingAgents={togglingAgents}
+          language={language}
+        />
       )}
 
       {/* Collapsible Available Agents Section */}
