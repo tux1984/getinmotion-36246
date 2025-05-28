@@ -16,11 +16,13 @@ const Index = () => {
   const translations = {
     en: {
       navAgents: "Agents",
-      navAccess: "Get Access"
+      navAccess: "Get Access",
+      navLogin: "Login"
     },
     es: {
       navAgents: "Agentes",
-      navAccess: "Obtener Acceso"
+      navAccess: "Obtener Acceso",
+      navLogin: "Iniciar Sesión"
     }
   };
 
