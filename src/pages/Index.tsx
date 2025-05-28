@@ -7,7 +7,6 @@ import { ValueProposition } from '@/components/ValueProposition';
 import { WaitlistForm } from '@/components/WaitlistForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
-import { HeroAgentsSection } from '@/components/hero/HeroAgentsSection';
 import { useLanguage } from '@/context/LanguageContext';
 
 const Index = () => {
@@ -50,7 +49,6 @@ const Index = () => {
         onJoinWaitlist={handleJoinWaitlist}
       />
       <ProductExplanation />
-      <HeroAgentsSection language={language} />
       <FeaturesSection language={language} />
       <ValueProposition language={language} />
       <div id="waitlist-form">
