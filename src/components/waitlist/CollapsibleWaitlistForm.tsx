@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { translations } from './translations';
@@ -45,6 +45,50 @@ export const CollapsibleWaitlistForm: React.FC<CollapsibleWaitlistFormProps> = (
       setCodeValidated(false);
     }
   }, [formData.accessCode]);
+
+  // Listen for URL hash changes to open the form automatically
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#waitlist' || window.location.pathname.includes('waitlist')) {
+        setIsOpen(true);
+      }
+    };
+
+    // Check initial hash
+    handleHashChange();
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
+  // Auto-open when scrolled to
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            setIsOpen(true);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    const waitlistElement = document.getElementById('waitlist');
+    if (waitlistElement) {
+      observer.observe(waitlistElement);
+    }
+
+    return () => {
+      if (waitlistElement) {
+        observer.unobserve(waitlistElement);
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full py-8 md:py-12 px-4 sm:px-6 lg:px-8" id="waitlist">

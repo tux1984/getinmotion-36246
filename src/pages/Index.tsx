@@ -4,7 +4,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { ProductExplanation } from '@/components/ProductExplanation';
 import { FeaturesSection } from '@/components/FeaturesSection';
 import { ValueProposition } from '@/components/ValueProposition';
-import { WaitlistForm } from '@/components/WaitlistForm';
+import { CollapsibleWaitlistForm } from '@/components/waitlist/CollapsibleWaitlistForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
 import { useLanguage } from '@/context/LanguageContext';
@@ -30,7 +30,7 @@ const Index = () => {
     setShowWaitlist(true);
     // Scroll to waitlist form
     setTimeout(() => {
-      document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
@@ -38,7 +38,7 @@ const Index = () => {
     setShowWaitlist(true);
     // Scroll to waitlist form
     setTimeout(() => {
-      document.getElementById('waitlist-form')?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
@@ -55,9 +55,7 @@ const Index = () => {
       <ProductExplanation />
       <FeaturesSection language={language} />
       <ValueProposition language={language} />
-      <div id="waitlist-form">
-        <WaitlistForm language={language} showWaitlist={showWaitlist} />
-      </div>
+      <CollapsibleWaitlistForm language={language} />
       <Footer language={language} />
     </div>
   );
