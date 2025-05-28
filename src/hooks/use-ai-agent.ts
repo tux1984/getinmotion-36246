@@ -40,7 +40,7 @@ export function useAIAgent(agentType: string = 'admin') {
     console.log('Message content:', content);
     console.log('Agent type:', agentType);
     
-    // Add user message
+    // Add user message immediately
     const userMessage: Message = { type: 'user', content };
     setMessages(prev => [...prev, userMessage]);
     
@@ -52,49 +52,40 @@ export function useAIAgent(agentType: string = 'admin') {
       const systemPrompt = agentSystemPrompts[mappedAgentType] || agentSystemPrompts.admin;
       
       console.log('Using system prompt for agent:', mappedAgentType);
+      console.log('System prompt:', systemPrompt.substring(0, 100) + '...');
       
-      // Prepare messages for API
-      const apiMessages = [
-        ...messages.map(msg => ({
-          role: msg.type === 'user' ? 'user' : 'assistant',
-          content: msg.content
-        })),
-        { role: 'user', content }
-      ];
+      // Prepare conversation history for API (exclude current message as it's already in messages state)
+      const conversationHistory = messages.map(msg => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }));
+      
+      // Add current message to conversation
+      conversationHistory.push({ role: 'user', content });
       
       const requestPayload = {
         systemPrompt,
-        messages: apiMessages
+        messages: conversationHistory
       };
       
-      console.log('Calling edge function with payload:', requestPayload);
+      console.log('Calling edge function with payload:', {
+        systemPrompt: systemPrompt.substring(0, 50) + '...',
+        messagesCount: conversationHistory.length,
+        lastMessage: content.substring(0, 50) + '...'
+      });
       
-      // Call Supabase Edge Function with improved error handling
+      // Call Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('openai-chat', {
-        body: requestPayload,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: requestPayload
       });
       
       console.log('Edge function response - data:', data);
       console.log('Edge function response - error:', error);
       
-      // Handle different types of errors
+      // Handle Supabase function invocation errors
       if (error) {
         console.error('Supabase function invoke error:', error);
-        
-        // Check if it's a network error
-        if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-          throw new Error('Network connection failed. Please check your internet connection.');
-        }
-        
-        // Check if it's an edge function deployment error
-        if (error.message?.includes('Function not found') || error.message?.includes('404')) {
-          throw new Error('AI service is temporarily unavailable. Please try again later.');
-        }
-        
-        throw new Error(`AI service error: ${error.message}`);
+        throw new Error(`Service error: ${error.message || 'Unknown error'}`);
       }
       
       // Handle case where no data is returned
@@ -105,44 +96,42 @@ export function useAIAgent(agentType: string = 'admin') {
       
       // Handle edge function returned an error
       if (data.error) {
-        console.error('Edge function returned error:', data.error);
+        console.error('Edge function returned error:', data);
         
         // Provide specific error messages based on the error type
-        if (data.error.includes('API key')) {
-          throw new Error('AI service configuration issue. Please contact support.');
+        let errorMessage = 'AI service error occurred';
+        
+        if (data.error.includes('API key') || data.error.includes('OPENAI_API_KEY')) {
+          errorMessage = 'OpenAI API key is not configured properly. Please contact support.';
         } else if (data.error.includes('rate limit') || data.status === 429) {
-          throw new Error('AI service is busy. Please try again in a moment.');
+          errorMessage = 'AI service is busy. Please try again in a moment.';
         } else if (data.error.includes('timeout')) {
-          throw new Error('AI service took too long to respond. Please try again.');
+          errorMessage = 'AI service took too long to respond. Please try again.';
+        } else if (data.error.includes('Invalid request')) {
+          errorMessage = 'Invalid request format. Please try rephrasing your message.';
         } else {
-          throw new Error(data.error);
+          errorMessage = data.error;
         }
+        
+        throw new Error(errorMessage);
       }
       
-      // More robust response validation
+      // Extract AI response from OpenAI response format
       let aiResponse = 'Sorry, I could not generate a response.';
       
-      // Handle different possible response formats
       if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
         const choice = data.choices[0];
         if (choice.message && choice.message.content) {
-          aiResponse = choice.message.content;
-        } else if (choice.text) {
-          // Handle alternative response format
-          aiResponse = choice.text;
+          aiResponse = choice.message.content.trim();
         }
-      } else if (data.message) {
-        // Handle direct message format
-        aiResponse = data.message;
-      } else if (data.content) {
-        // Handle direct content format
-        aiResponse = data.content;
-      } else if (typeof data === 'string') {
-        // Handle string response
-        aiResponse = data;
       }
       
-      console.log('AI response received successfully:', aiResponse);
+      if (!aiResponse || aiResponse === 'Sorry, I could not generate a response.') {
+        console.error('No valid content in OpenAI response:', data);
+        throw new Error('AI service returned an empty response');
+      }
+      
+      console.log('AI response received successfully:', aiResponse.substring(0, 100) + '...');
       
       // Add AI message
       const aiMessage: Message = { type: 'agent', content: aiResponse };
@@ -155,20 +144,20 @@ export function useAIAgent(agentType: string = 'admin') {
       // Show user-friendly error messages
       let errorMessage = 'Failed to get AI response. Please try again.';
       
-      if (error?.message) {
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
       
       toast({
-        title: 'Error',
+        title: 'AI Error',
         description: errorMessage,
         variant: 'destructive',
       });
       
-      // Add error message to chat
+      // Add error message to chat for better UX
       const errorChatMessage: Message = { 
         type: 'agent', 
-        content: `I apologize, but I'm having trouble responding right now. Error: ${errorMessage}` 
+        content: `I apologize, but I'm having trouble responding right now. ${errorMessage}` 
       };
       setMessages(prev => [...prev, errorChatMessage]);
       

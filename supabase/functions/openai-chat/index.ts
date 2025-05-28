@@ -34,7 +34,7 @@ serve(async (req) => {
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY environment variable not found');
       return new Response(JSON.stringify({ 
-        error: 'OpenAI API key not configured' 
+        error: 'OpenAI API key not configured. Please contact support.' 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -45,7 +45,11 @@ serve(async (req) => {
     let requestBody;
     try {
       requestBody = await req.json();
-      console.log('Request body received:', JSON.stringify(requestBody, null, 2));
+      console.log('Request body received:', {
+        hasSystemPrompt: !!requestBody.systemPrompt,
+        messagesCount: requestBody.messages?.length || 0,
+        systemPromptLength: requestBody.systemPrompt?.length || 0
+      });
     } catch (e) {
       console.error('Failed to parse request body:', e);
       return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
@@ -78,15 +82,19 @@ serve(async (req) => {
     
     // Add user messages
     for (const msg of messages) {
-      if (msg && (msg.content || msg.message)) {
+      if (msg && msg.content && msg.content.trim()) {
         completeMessages.push({
           role: msg.role === 'assistant' ? 'assistant' : 'user',
-          content: (msg.content || msg.message || '').trim()
+          content: msg.content.trim()
         });
       }
     }
 
-    console.log('Complete messages for OpenAI:', JSON.stringify(completeMessages, null, 2));
+    console.log('Complete messages for OpenAI:', {
+      totalMessages: completeMessages.length,
+      hasSystemMessage: completeMessages[0]?.role === 'system',
+      lastUserMessage: completeMessages[completeMessages.length - 1]?.content?.substring(0, 50) + '...'
+    });
 
     if (completeMessages.length === 0) {
       console.error('No valid messages to send');
@@ -101,10 +109,10 @@ serve(async (req) => {
       model: 'gpt-4o-mini',
       messages: completeMessages,
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 1500,
     };
 
-    console.log('Calling OpenAI API...');
+    console.log('Calling OpenAI API with model:', openAIBody.model);
 
     // Call OpenAI API with timeout
     const controller = new AbortController();
@@ -124,10 +132,11 @@ serve(async (req) => {
       clearTimeout(timeoutId);
 
       console.log('OpenAI response status:', openAIResponse.status);
+      console.log('OpenAI response headers:', Object.fromEntries(openAIResponse.headers.entries()));
 
       if (!openAIResponse.ok) {
         const errorText = await openAIResponse.text();
-        console.error('OpenAI API error:', errorText);
+        console.error('OpenAI API error response:', errorText);
         
         let errorMessage = 'Error calling OpenAI API';
         if (openAIResponse.status === 401) {
@@ -143,13 +152,20 @@ serve(async (req) => {
           details: errorText,
           status: openAIResponse.status 
         }), {
-          status: openAIResponse.status,
+          status: openAIResponse.status >= 500 ? 500 : openAIResponse.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
       const data = await openAIResponse.json();
       console.log('OpenAI response received successfully');
+      console.log('Response data structure:', {
+        hasChoices: !!data.choices,
+        choicesLength: data.choices?.length || 0,
+        firstChoiceHasMessage: !!data.choices?.[0]?.message,
+        firstChoiceRole: data.choices?.[0]?.message?.role,
+        contentLength: data.choices?.[0]?.message?.content?.length || 0
+      });
 
       // Validate OpenAI response structure
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
@@ -164,7 +180,7 @@ serve(async (req) => {
       }
 
       // Return successful response
-      console.log('Returning successful response');
+      console.log('Returning successful response to client');
       return new Response(JSON.stringify(data), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -184,7 +200,7 @@ serve(async (req) => {
         });
       }
       
-      console.error('Fetch error:', fetchError);
+      console.error('Fetch error calling OpenAI:', fetchError);
       return new Response(JSON.stringify({ 
         error: 'Network error calling OpenAI',
         details: fetchError.message
