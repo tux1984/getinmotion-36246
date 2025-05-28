@@ -66,7 +66,14 @@ export function useAgentConversations(agentId: string) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Type cast the data to ensure it matches our interface
+      const typedMessages: AgentMessage[] = (data || []).map(msg => ({
+        ...msg,
+        message_type: msg.message_type as 'user' | 'agent'
+      }));
+      
+      setMessages(typedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -124,7 +131,13 @@ export function useAgentConversations(agentId: string) {
 
       if (error) throw error;
       
-      setMessages(prev => [...prev, data]);
+      // Type cast the returned data
+      const typedMessage: AgentMessage = {
+        ...data,
+        message_type: data.message_type as 'user' | 'agent'
+      };
+      
+      setMessages(prev => [...prev, typedMessage]);
       
       // Update conversation timestamp
       await supabase
@@ -132,7 +145,7 @@ export function useAgentConversations(agentId: string) {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      return data;
+      return typedMessage;
     } catch (error) {
       console.error('Error adding message:', error);
       throw error;

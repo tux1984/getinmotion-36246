@@ -43,7 +43,15 @@ export function useAgentTasks(agentId?: string) {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTasks(data || []);
+      
+      // Type cast the data to ensure it matches our interface
+      const typedTasks: AgentTask[] = (data || []).map(task => ({
+        ...task,
+        relevance: task.relevance as 'low' | 'medium' | 'high',
+        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+      }));
+      
+      setTasks(typedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -77,8 +85,15 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      setTasks(prev => [data, ...prev]);
-      return data;
+      // Type cast the returned data
+      const typedTask: AgentTask = {
+        ...data,
+        relevance: data.relevance as 'low' | 'medium' | 'high',
+        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+      };
+      
+      setTasks(prev => [typedTask, ...prev]);
+      return typedTask;
     } catch (error) {
       console.error('Error creating task:', error);
       toast({
@@ -101,8 +116,15 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      setTasks(prev => prev.map(task => task.id === taskId ? data : task));
-      return data;
+      // Type cast the returned data
+      const typedTask: AgentTask = {
+        ...data,
+        relevance: data.relevance as 'low' | 'medium' | 'high',
+        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+      };
+      
+      setTasks(prev => prev.map(task => task.id === taskId ? typedTask : task));
+      return typedTask;
     } catch (error) {
       console.error('Error updating task:', error);
       toast({
