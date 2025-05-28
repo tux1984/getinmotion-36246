@@ -19,13 +19,13 @@ export const DashboardAgentManager: React.FC<DashboardAgentManagerProps> = ({
   onAgentToggle
 }) => {
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+    <div className="min-h-screen">
       <div className="mb-6">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onBack}
-          className="flex items-center gap-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50"
+          className="flex items-center gap-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50/50 backdrop-blur-sm border border-purple-200/50"
         >
           <ArrowLeft className="w-4 h-4" />
           {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}

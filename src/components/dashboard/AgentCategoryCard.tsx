@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CulturalAgent } from '@/data/agentsDatabase';
-import { Zap, Loader2, Clock } from 'lucide-react';
+import { Zap, Loader2, Clock, Star } from 'lucide-react';
 import './masonry.css';
 
 interface AgentCategoryCardProps {
@@ -40,8 +40,6 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
       recommended: "Recommended",
       priority: "Priority",
       impact: "Impact",
-      activate: "Activate",
-      deactivate: "Deactivate",
       usageCount: "Uses",
       lastUsed: "Last used",
       never: "Never"
@@ -49,10 +47,8 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
     es: {
       active: "Activos",
       recommended: "Recomendado",
-      priority: "Prioridad", 
+      priority: "Prioridad",
       impact: "Impacto",
-      activate: "Activar",
-      deactivate: "Desactivar",
       usageCount: "Usos",
       lastUsed: "Último uso",
       never: "Nunca"
@@ -63,22 +59,22 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Alta': return 'bg-red-100 text-red-800';
-      case 'Media-Alta': return 'bg-orange-100 text-orange-800';
-      case 'Media': return 'bg-yellow-100 text-yellow-800';
-      case 'Baja': return 'bg-blue-100 text-blue-800';
-      case 'Muy Baja': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Alta': return 'bg-red-50 text-red-700 border-red-200';
+      case 'Media-Alta': return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'Media': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'Baja': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Muy Baja': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   const getImpactColor = (impact: number) => {
     switch (impact) {
-      case 4: return 'bg-green-100 text-green-800';
-      case 3: return 'bg-lime-100 text-lime-800';
-      case 2: return 'bg-yellow-100 text-yellow-800';
-      case 1: return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 4: return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 3: return 'bg-green-50 text-green-700 border-green-200';
+      case 2: return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 1: return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -96,22 +92,30 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
   };
 
   return (
-    <Card className="h-fit bg-gradient-to-br from-white to-gray-50/30 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <Card className="h-fit bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md hover:bg-white/90 transition-all duration-300 overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-gray-800 mb-2">
+            <CardTitle className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+              <span className="text-2xl">{
+                category === 'Financiera' ? '💰' :
+                category === 'Legal' ? '⚖️' :
+                category === 'Diagnóstico' ? '🔍' :
+                category === 'Comercial' ? '📈' :
+                category === 'Operativo' ? '⚙️' :
+                category === 'Comunidad' ? '🤝' : '🤖'
+              }</span>
               {categoryName}
             </CardTitle>
             <div className="flex flex-wrap gap-1.5">
-              <Badge className="bg-green-100 text-green-700 border-green-200 text-xs px-2 py-0.5">
+              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5">
                 {activeCount} {t.active}
               </Badge>
-              <Badge variant="outline" className="text-gray-600 text-xs px-2 py-0.5">
+              <Badge variant="outline" className="text-gray-600 border-gray-300 text-xs px-2 py-0.5">
                 {totalCount} total
               </Badge>
               {recommendedCount > 0 && (
-                <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs px-1.5 py-0.5">
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 text-xs px-1.5 py-0.5">
                   <Zap className="w-2.5 h-2.5 mr-0.5" />
                   {recommendedCount}
                 </Badge>
@@ -134,34 +138,35 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           return (
             <div
               key={agent.id}
-              className={`p-2.5 rounded-lg border transition-all duration-200 ${
+              className={`p-3 rounded-lg border transition-all duration-200 ${
                 isEnabled 
-                  ? 'bg-green-50/80 border-green-200 shadow-sm' 
-                  : 'bg-white/80 border-gray-200 hover:border-gray-300'
-              } ${isRecentlyChanged ? 'ring-1 ring-green-300 animate-pulse' : ''}`}
+                  ? 'bg-emerald-50/80 border-emerald-200 shadow-sm hover:shadow-md' 
+                  : 'bg-white/60 border-gray-200 hover:border-gray-300 hover:bg-white/80'
+              } ${isRecentlyChanged ? 'ring-1 ring-emerald-300 animate-pulse' : ''}`}
             >
-              <div className="flex items-start justify-between mb-1.5">
+              <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className={`w-7 h-7 rounded-full ${agent.color} flex items-center justify-center text-white text-sm flex-shrink-0`}>
+                  <div className={`w-8 h-8 rounded-full ${agent.color} flex items-center justify-center text-white text-sm flex-shrink-0 shadow-sm`}>
                     {agent.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
+                    <div className="flex items-center gap-1.5 mb-1">
                       <h4 className="font-medium text-sm text-gray-800 truncate">
                         {agent.name}
                       </h4>
                       {isRecommended && (
                         <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 text-xs px-1 py-0">
-                          <Zap className="w-2 h-2" />
+                          <Star className="w-2 h-2" />
                         </Badge>
                       )}
                     </div>
                     <div className="flex gap-1 mb-1">
-                      <Badge className={`text-xs px-1 py-0 ${getPriorityColor(agent.priority)}`}>
+                      <Badge className={`text-xs px-1.5 py-0.5 ${getPriorityColor(agent.priority)}`}>
                         {agent.priority}
                       </Badge>
-                      <Badge className={`text-xs px-1 py-0 ${getImpactColor(agent.impact)}`}>
-                        ★{agent.impact}
+                      <Badge className={`text-xs px-1.5 py-0.5 ${getImpactColor(agent.impact)}`}>
+                        <Star className="w-2 h-2 mr-0.5" />
+                        {agent.impact}
                       </Badge>
                     </div>
                   </div>
@@ -180,12 +185,12 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                 </div>
               </div>
               
-              <p className="text-xs text-gray-600 mb-1.5 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-gray-600 mb-2 line-clamp-2 leading-relaxed">
                 {agent.description}
               </p>
               
               {isEnabled && (
-                <div className="flex justify-between items-center text-xs text-gray-500">
+                <div className="flex justify-between items-center text-xs text-gray-500 bg-gray-50/50 rounded px-2 py-1">
                   <span className="font-medium">{t.usageCount}: {usageCount}</span>
                   <div className="flex items-center gap-1">
                     <Clock className="w-2.5 h-2.5" />
