@@ -56,16 +56,9 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return [...new Set(culturalAgentsDatabase.map(agent => agent.category))];
   }, []);
 
-  // Get user agent data for each agent with proper type safety and boolean conversion
+  // Get user agent data for each agent - simplified version
   const getUserAgentData = (agentId: string) => {
-    const userAgent = userAgents.find(ua => ua.agent_id === agentId);
-    if (!userAgent) return undefined;
-    
-    // Ensure is_enabled is always a boolean
-    return {
-      ...userAgent,
-      is_enabled: Boolean(userAgent.is_enabled) && userAgent.is_enabled !== 'false'
-    };
+    return userAgents.find(ua => ua.agent_id === agentId);
   };
 
   // Use our new hooks
