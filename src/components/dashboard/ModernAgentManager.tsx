@@ -7,12 +7,11 @@ import { useAgentFilters } from '@/hooks/useAgentFilters';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { useAgentStats } from '@/hooks/useAgentStats';
 import { AgentCategoryCard } from './AgentCategoryCard';
-import { AgentFiltersPanel } from '../agent-manager/AgentFiltersPanel';
+import { CompactFiltersPanel } from '../agent-manager/CompactFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
 import { ModernAgentsGrid } from '../agent-manager/ModernAgentsGrid';
-import { Loader2, ExternalLink } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
-import { Link } from 'react-router-dom';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
@@ -31,21 +30,19 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   const translations = {
     en: {
       title: "AI Agent Manager",
-      subtitle: "Activate and manage your specialized AI agents with advanced filtering and search capabilities",
+      subtitle: "Activate and manage your specialized AI agents",
       loading: "Loading agent management...",
       noAgentsFound: "No agents found",
-      tryAdjusting: "Try adjusting your filters or search terms",
-      clearAllFilters: "Clear all filters",
-      viewAllAgents: "View All Agents Gallery"
+      tryAdjusting: "Try adjusting your filters",
+      clearAllFilters: "Clear all filters"
     },
     es: {
       title: "Gestor de Agentes IA",
-      subtitle: "Activa y gestiona tus agentes IA especializados con filtros avanzados y capacidades de búsqueda",
+      subtitle: "Activa y gestiona tus agentes IA especializados",
       loading: "Cargando gestión de agentes...",
       noAgentsFound: "No se encontraron agentes",
-      tryAdjusting: "Intenta ajustar tus filtros o términos de búsqueda",
-      clearAllFilters: "Limpiar todos los filtros",
-      viewAllAgents: "Ver Galería de Todos los Agentes"
+      tryAdjusting: "Intenta ajustar tus filtros",
+      clearAllFilters: "Limpiar todos los filtros"
     }
   };
 
@@ -61,7 +58,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return userAgents.find(ua => ua.agent_id === agentId);
   };
 
-  // Use our new hooks
+  // Use our new hooks with simplified filters (no search, no categories)
   const {
     filters,
     updateFilter,
@@ -73,23 +70,9 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 
   const stats = useAgentStats(culturalAgentsDatabase, userAgents);
 
-  // Convert AgentFilter to AgentFiltersPanel expected format
-  const filtersForPanel = {
-    search: filters.searchTerm,
-    status: filters.selectedStatus,
-    categories: filters.selectedCategories
-  };
-
   const handleUpdateFilter = (key: string, value: string) => {
-    switch (key) {
-      case 'search':
-        updateFilter('searchTerm', value);
-        break;
-      case 'status':
-        updateFilter('selectedStatus', value as any);
-        break;
-      default:
-        break;
+    if (key === 'status') {
+      updateFilter('selectedStatus', value as any);
     }
   };
 
@@ -105,8 +88,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   }
 
   return (
-    <div className="space-y-8 p-6">
-      {/* Modern Header */}
+    <div className="space-y-4 p-4">
+      {/* Compact Header */}
       <ModernStatsHeader
         title={t.title}
         subtitle={t.subtitle}
@@ -116,31 +99,16 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
-      {/* Link to full agents gallery */}
-      <div className="flex justify-center">
-        <Link 
-          to="/agents"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-        >
-          <ExternalLink className="w-5 h-5" />
-          {t.viewAllAgents}
-        </Link>
-      </div>
-
-      {/* Filters */}
-      <AgentFiltersPanel
-        filters={filtersForPanel}
+      {/* Compact Filters - Only Status */}
+      <CompactFiltersPanel
+        selectedStatus={filters.selectedStatus}
         onUpdateFilter={handleUpdateFilter}
-        onToggleCategory={toggleCategory}
-        onClearFilters={clearFilters}
-        categories={categories}
-        hasActiveFilters={hasActiveFilters}
         language={language}
       />
 
-      {/* Modern CSS Grid Layout */}
+      {/* Compact CSS Grid Layout */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <ModernAgentsGrid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -168,17 +136,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
               />
             );
           })}
-        </ModernAgentsGrid>
+        </div>
       ) : (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🔍</span>
+        <div className="text-center py-8">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-xl">🔍</span>
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">{t.noAgentsFound}</h3>
-          <p className="text-gray-600 mb-4">{t.tryAdjusting}</p>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">{t.noAgentsFound}</h3>
+          <p className="text-gray-600 mb-3">{t.tryAdjusting}</p>
           <button
             onClick={clearFilters}
-            className="text-purple-600 hover:text-purple-800 font-medium"
+            className="text-purple-600 hover:text-purple-800 font-medium text-sm"
           >
             {t.clearAllFilters}
           </button>

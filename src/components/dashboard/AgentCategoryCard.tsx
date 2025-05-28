@@ -39,7 +39,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
       inactive: "Inactive",
       activate: "Activate",
       deactivate: "Deactivate",
-      recommended: "Recommended",
+      recommended: "Rec",
       usageCount: "uses",
       lastUsed: "Last used",
       never: "Never",
@@ -51,7 +51,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
       inactive: "Inactivo",
       activate: "Activar",
       deactivate: "Desactivar",
-      recommended: "Recomendado",
+      recommended: "Rec",
       usageCount: "usos",
       lastUsed: "Último uso",
       never: "Nunca",
@@ -77,17 +77,17 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
 
   return (
     <Card className="h-fit">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold text-gray-900">
+          <CardTitle className="text-base font-bold text-gray-900">
             {categoryName}
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" className="text-xs px-2 py-0">
               {activeCount}/{totalCount}
             </Badge>
             {recommendedCount > 0 && (
-              <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+              <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0">
                 {recommendedCount} {t.recommended}
               </Badge>
             )}
@@ -95,7 +95,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 pt-0">
         {agents.map(agent => {
           const userAgentData = getUserAgentData(agent.id);
           const isEnabled = Boolean(userAgentData?.is_enabled);
@@ -105,30 +105,30 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           return (
             <div 
               key={agent.id}
-              className={`p-3 rounded-lg border transition-all duration-200 ${
+              className={`p-2 rounded-lg border transition-all duration-200 ${
                 isEnabled 
                   ? 'bg-emerald-50 border-emerald-200' 
                   : 'bg-gray-50 border-gray-200'
               }`}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-sm">
+              <div className="flex items-start justify-between mb-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-md flex items-center justify-center text-xs">
                     {agent.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm truncate">
+                    <h4 className="font-medium text-gray-900 text-xs leading-tight">
                       {agent.name}
                     </h4>
                     {isRecommended && (
-                      <Badge className="bg-yellow-100 text-yellow-800 text-xs mt-1">
+                      <Badge className="bg-yellow-100 text-yellow-800 text-xs mt-0.5 px-1 py-0">
                         {t.recommended}
                       </Badge>
                     )}
                   </div>
                 </div>
                 
-                <Badge className={`text-xs ${
+                <Badge className={`text-xs px-1 py-0 ${
                   isEnabled 
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-gray-100 text-gray-800'
@@ -137,11 +137,11 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                 <span>{userAgentData?.usage_count || 0} {t.usageCount}</span>
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>{formatLastUsed(userAgentData?.last_used_at)}</span>
+                  <span className="truncate max-w-16">{formatLastUsed(userAgentData?.last_used_at)}</span>
                 </div>
               </div>
 
@@ -149,7 +149,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                 onClick={() => onToggleAgent(agent.id, isEnabled)}
                 disabled={isToggling}
                 size="sm"
-                className={`w-full text-xs ${
+                className={`w-full text-xs h-7 ${
                   isEnabled
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-emerald-500 hover:bg-emerald-600 text-white'
