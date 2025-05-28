@@ -101,52 +101,58 @@ export const getRecommendedAgents = (profileData: UserProfileData, scores: Categ
     secondary: []
   };
 
-  // Siempre incluir agentes básicos de alta prioridad
-  const highPriorityAgents = culturalAgentsDatabase.filter(agent => 
-    agent.priority === 'Alta'
-  ).map(agent => agent.id);
+  // Always include high priority agents
+  const highPriorityAgents = culturalAgentsDatabase
+    .filter(agent => agent.priority === 'Alta')
+    .map(agent => agent.id);
   
   recommendations.primary = [...highPriorityAgents];
 
-  // Agregar agentes según puntuaciones bajas (necesitan más ayuda)
+  // Add agents based on low scores (they need more help)
   const needsAssessment = [
-    { category: 'cost-calculator', score: scores.monetization },
-    { category: 'contract-generator', score: scores.marketFit },
-    { category: 'maturity-evaluator', score: scores.ideaValidation },
-    { category: 'export-advisor', score: scores.marketFit },
-    { category: 'pricing-assistant', score: scores.monetization }
+    { agentId: 'cost-calculator', score: scores.monetization },
+    { agentId: 'contract-generator', score: scores.marketFit },
+    { agentId: 'maturity-evaluator', score: scores.ideaValidation },
+    { agentId: 'export-advisor', score: scores.marketFit },
+    { agentId: 'pricing-assistant', score: scores.monetization }
   ];
 
-  // Ordenar por puntuaciones más bajas primero
+  // Sort by lowest scores first
   needsAssessment.sort((a, b) => a.score - b.score);
 
-  // Agregar agentes más necesarios a primary
+  // Add most needed agents to primary
   needsAssessment.slice(0, 2).forEach(item => {
-    if (item.score < 60 && !recommendations.primary?.includes(item.category)) {
-      recommendations.primary?.push(item.category);
+    if (item.score < 60 && !recommendations.primary?.includes(item.agentId)) {
+      recommendations.primary?.push(item.agentId);
     }
   });
 
-  // Agregar agentes secundarios basados en perfil y industria
+  // Add secondary agents based on profile and industry
   if (profileData.industry) {
-    const industryAgents = culturalAgentsDatabase.filter(agent => 
-      agent.profiles?.includes(profileData.industry) && 
-      !recommendations.primary?.includes(agent.id)
-    ).slice(0, 3).map(agent => agent.id);
+    const industryAgents = culturalAgentsDatabase
+      .filter(agent => 
+        agent.profiles?.includes(profileData.industry) && 
+        !recommendations.primary?.includes(agent.id)
+      )
+      .slice(0, 3)
+      .map(agent => agent.id);
     
     recommendations.secondary = [...(recommendations.secondary || []), ...industryAgents];
   }
 
-  // Agregar agentes de prioridad media para completar recomendaciones
-  const mediumPriorityAgents = culturalAgentsDatabase.filter(agent => 
-    (agent.priority === 'Media' || agent.priority === 'Media-Alta') &&
-    !recommendations.primary?.includes(agent.id) &&
-    !recommendations.secondary?.includes(agent.id)
-  ).slice(0, 4).map(agent => agent.id);
+  // Add medium priority agents to complete recommendations
+  const mediumPriorityAgents = culturalAgentsDatabase
+    .filter(agent => 
+      (agent.priority === 'Media' || agent.priority === 'Media-Alta') &&
+      !recommendations.primary?.includes(agent.id) &&
+      !recommendations.secondary?.includes(agent.id)
+    )
+    .slice(0, 4)
+    .map(agent => agent.id);
 
   recommendations.secondary = [...(recommendations.secondary || []), ...mediumPriorityAgents];
 
-  // Mantener compatibilidad con formato legacy
+  // Maintain compatibility with legacy format
   recommendations.admin = true;
   recommendations.cultural = true;
   recommendations.accounting = recommendations.primary?.includes('cost-calculator') || recommendations.secondary?.includes('income-calculator');

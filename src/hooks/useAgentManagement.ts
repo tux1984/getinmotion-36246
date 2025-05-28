@@ -23,7 +23,13 @@ export const useAgentManagement = () => {
     console.log('Converting recommendations to agents:', recommendations);
     const allAgents: Agent[] = [];
     
-    // Procesar agentes primarios
+    // Get icons mapping
+    const getAgentIcon = (agentId: string) => {
+      const agentData = getAgentById(agentId);
+      return agentData?.icon || '🤖';
+    };
+
+    // Process primary agents
     if (recommendations.primary) {
       recommendations.primary.forEach(agentId => {
         const agentData = getAgentById(agentId);
@@ -33,16 +39,16 @@ export const useAgentManagement = () => {
             name: agentData.name,
             status: 'active',
             category: agentData.category,
-            activeTasks: Math.floor(Math.random() * 5),
+            activeTasks: Math.floor(Math.random() * 5) + 1,
             color: agentData.color,
-            icon: agentData.icon,
+            icon: getAgentIcon(agentId),
             lastUsed: Math.random() > 0.5 ? 'Hace 2 días' : undefined
           });
         }
       });
     }
 
-    // Procesar agentes secundarios
+    // Process secondary agents
     if (recommendations.secondary) {
       recommendations.secondary.forEach(agentId => {
         const agentData = getAgentById(agentId);
@@ -50,20 +56,21 @@ export const useAgentManagement = () => {
           allAgents.push({
             id: agentData.id,
             name: agentData.name,
-            status: 'paused',
+            status: Math.random() > 0.5 ? 'paused' : 'inactive',
             category: agentData.category,
-            activeTasks: 0,
+            activeTasks: Math.floor(Math.random() * 3),
             color: agentData.color,
-            icon: agentData.icon
+            icon: getAgentIcon(agentId)
           });
         }
       });
     }
 
-    // Si no hay agentes, agregar algunos por defecto
+    // If no agents, add some defaults to ensure dashboard shows content
     if (allAgents.length === 0) {
-      const defaultAgents = ['collaboration-agreement', 'cost-calculator', 'maturity-evaluator'];
-      defaultAgents.forEach(agentId => {
+      console.log('No agents from recommendations, adding defaults');
+      const defaultAgentIds = ['collaboration-agreement', 'cost-calculator', 'maturity-evaluator', 'export-advisor', 'contract-generator'];
+      defaultAgentIds.forEach(agentId => {
         const agentData = getAgentById(agentId);
         if (agentData) {
           allAgents.push({
@@ -71,9 +78,10 @@ export const useAgentManagement = () => {
             name: agentData.name,
             status: 'active',
             category: agentData.category,
-            activeTasks: Math.floor(Math.random() * 3),
+            activeTasks: Math.floor(Math.random() * 3) + 1,
             color: agentData.color,
-            icon: agentData.icon
+            icon: getAgentIcon(agentId),
+            lastUsed: Math.random() > 0.3 ? 'Hace 1 día' : undefined
           });
         }
       });
@@ -87,7 +95,7 @@ export const useAgentManagement = () => {
   useEffect(() => {
     console.log('useAgentManagement: Starting initialization');
     
-    const initializeData = () => {
+    const initializeData = async () => {
       try {
         setIsLoading(true);
         setError(null);
@@ -116,46 +124,32 @@ export const useAgentManagement = () => {
           const scores = JSON.parse(storedScores);
           console.log('Loaded maturity scores:', scores);
           setMaturityScores(scores);
-          
-          // Add to history if not already there
-          const scoreHistory = localStorage.getItem('maturityScoreHistory');
-          let history = scoreHistory ? JSON.parse(scoreHistory) : [];
-          
-          const lastEntry = history[history.length - 1];
-          if (!lastEntry || JSON.stringify(lastEntry) !== JSON.stringify(scores)) {
-            history.push({
-              ...scores,
-              timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('maturityScoreHistory', JSON.stringify(history));
-          }
         }
 
         // Load recommended agents
         const storedRecommended = localStorage.getItem('recommendedAgents');
+        let recommendations: RecommendedAgents;
+        
         if (storedRecommended) {
-          const recommendations = JSON.parse(storedRecommended);
+          recommendations = JSON.parse(storedRecommended);
           console.log('Loaded recommended agents:', recommendations);
-          setRecommendedAgents(recommendations);
-          
-          const agentsFromRecommendations = convertRecommendationsToAgents(recommendations);
-          setAgents(agentsFromRecommendations);
         } else {
           console.log('useAgentManagement: No recommendations found, using defaults');
-          const defaultRecommendations: RecommendedAgents = {
-            primary: ['collaboration-agreement', 'cost-calculator'],
-            secondary: ['maturity-evaluator', 'export-advisor', 'contract-generator'],
+          recommendations = {
+            primary: ['collaboration-agreement', 'cost-calculator', 'stakeholder-matching'],
+            secondary: ['maturity-evaluator', 'export-advisor', 'contract-generator', 'pricing-assistant'],
             admin: true,
-            accounting: false,
+            accounting: true,
             legal: true,
-            operations: false,
+            operations: true,
             cultural: true
           };
-          
-          const defaultAgents = convertRecommendationsToAgents(defaultRecommendations);
-          setAgents(defaultAgents);
-          setRecommendedAgents(defaultRecommendations);
+          localStorage.setItem('recommendedAgents', JSON.stringify(recommendations));
         }
+        
+        setRecommendedAgents(recommendations);
+        const agentsFromRecommendations = convertRecommendationsToAgents(recommendations);
+        setAgents(agentsFromRecommendations);
 
         console.log('useAgentManagement: Initialization completed successfully');
         setIsLoading(false);
@@ -163,20 +157,19 @@ export const useAgentManagement = () => {
         console.error('useAgentManagement: Error initializing data:', error);
         setError('Error loading dashboard data');
         
-        // Set default agents if there's an error
-        const defaultAgents = convertRecommendationsToAgents({
+        // Set fallback agents if there's an error
+        const fallbackRecommendations: RecommendedAgents = {
           primary: ['collaboration-agreement', 'cost-calculator'],
-          secondary: []
-        });
-        setAgents(defaultAgents);
+          secondary: ['maturity-evaluator', 'export-advisor']
+        };
+        const fallbackAgents = convertRecommendationsToAgents(fallbackRecommendations);
+        setAgents(fallbackAgents);
+        setRecommendedAgents(fallbackRecommendations);
         setIsLoading(false);
       }
     };
 
-    // Add a small delay to prevent blocking the UI
-    const timeoutId = setTimeout(initializeData, 100);
-    
-    return () => clearTimeout(timeoutId);
+    initializeData();
   }, []);
 
   const handleOnboardingComplete = (scores: CategoryScore, recommended: RecommendedAgents) => {
