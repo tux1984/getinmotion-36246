@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Agent, ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
+import { culturalAgentsDatabase, getAgentById } from '@/data/agentsDatabase';
 
 export const useAgentManagement = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -23,80 +23,59 @@ export const useAgentManagement = () => {
     console.log('Converting recommendations to agents:', recommendations);
     const allAgents: Agent[] = [];
     
-    // Always add admin agent
-    allAgents.push({
-      id: 'admin',
-      name: 'Administrative Assistant',
-      status: 'active',
-      category: 'business',
-      activeTasks: 0,
-      color: 'bg-blue-500',
-      icon: '📋'
-    });
-
-    // Check for cultural agents
-    const hasCultural = recommendations.primary?.includes('cultural') || 
-                       recommendations.secondary?.includes('cultural') ||
-                       recommendations.cultural;
-    
-    if (hasCultural) {
-      allAgents.push({
-        id: 'cultural',
-        name: 'Cultural Creator Agent',
-        status: 'active',
-        category: 'cultural',
-        activeTasks: 0,
-        color: 'bg-pink-500',
-        icon: '🎨'
+    // Procesar agentes primarios
+    if (recommendations.primary) {
+      recommendations.primary.forEach(agentId => {
+        const agentData = getAgentById(agentId);
+        if (agentData) {
+          allAgents.push({
+            id: agentData.id,
+            name: agentData.name,
+            status: 'active',
+            category: agentData.category,
+            activeTasks: Math.floor(Math.random() * 5),
+            color: agentData.color,
+            icon: agentData.icon,
+            lastUsed: Math.random() > 0.5 ? 'Hace 2 días' : undefined
+          });
+        }
       });
     }
 
-    // Add other agents based on recommendations
-    const hasAccounting = recommendations.primary?.includes('accounting') || 
-                         recommendations.secondary?.includes('accounting') ||
-                         recommendations.accounting;
-    
-    if (hasAccounting) {
-      allAgents.push({
-        id: 'accounting',
-        name: 'Accounting Copilot',
-        status: 'active',
-        category: 'finance',
-        activeTasks: 0,
-        color: 'bg-green-500',
-        icon: '💰'
+    // Procesar agentes secundarios
+    if (recommendations.secondary) {
+      recommendations.secondary.forEach(agentId => {
+        const agentData = getAgentById(agentId);
+        if (agentData && !allAgents.find(a => a.id === agentData.id)) {
+          allAgents.push({
+            id: agentData.id,
+            name: agentData.name,
+            status: 'paused',
+            category: agentData.category,
+            activeTasks: 0,
+            color: agentData.color,
+            icon: agentData.icon
+          });
+        }
       });
     }
 
-    const hasLegal = recommendations.primary?.includes('legal') || 
-                     recommendations.secondary?.includes('legal') ||
-                     recommendations.legal;
-    
-    if (hasLegal) {
-      allAgents.push({
-        id: 'legal',
-        name: 'Legal Advisor',
-        status: 'active',
-        category: 'legal',
-        activeTasks: 0,
-        color: 'bg-red-500',
-        icon: '⚖️'
-      });
-    }
-
-    const hasOperations = recommendations.primary?.includes('operations') || 
-                         recommendations.secondary?.includes('operations') ||
-                         recommendations.operations;
-    
-    if (hasOperations) {
-      allAgents.push({
-        id: 'operations',
-        name: 'Operations Manager',
-        status: 'active',
-        category: 'operations',
-        activeTasks: 0,
-        color: 'bg-amber-500',
-        icon: '⚙️'
+    // Si no hay agentes, agregar algunos por defecto
+    if (allAgents.length === 0) {
+      const defaultAgents = ['collaboration-agreement', 'cost-calculator', 'maturity-evaluator'];
+      defaultAgents.forEach(agentId => {
+        const agentData = getAgentById(agentId);
+        if (agentData) {
+          allAgents.push({
+            id: agentData.id,
+            name: agentData.name,
+            status: 'active',
+            category: agentData.category,
+            activeTasks: Math.floor(Math.random() * 3),
+            color: agentData.color,
+            icon: agentData.icon
+          });
+        }
       });
     }
 
@@ -164,13 +143,13 @@ export const useAgentManagement = () => {
         } else {
           console.log('useAgentManagement: No recommendations found, using defaults');
           const defaultRecommendations: RecommendedAgents = {
-            primary: ['admin'],
-            secondary: profileType === 'team' ? ['operations'] : ['cultural'],
+            primary: ['collaboration-agreement', 'cost-calculator'],
+            secondary: ['maturity-evaluator', 'export-advisor', 'contract-generator'],
             admin: true,
             accounting: false,
-            legal: false,
-            operations: profileType === 'team',
-            cultural: profileType !== 'idea'
+            legal: true,
+            operations: false,
+            cultural: true
           };
           
           const defaultAgents = convertRecommendationsToAgents(defaultRecommendations);
@@ -185,15 +164,11 @@ export const useAgentManagement = () => {
         setError('Error loading dashboard data');
         
         // Set default agents if there's an error
-        setAgents([{
-          id: 'admin',
-          name: 'Administrative Assistant',
-          status: 'active',
-          category: 'business',
-          activeTasks: 0,
-          color: 'bg-blue-500',
-          icon: '📋'
-        }]);
+        const defaultAgents = convertRecommendationsToAgents({
+          primary: ['collaboration-agreement', 'cost-calculator'],
+          secondary: []
+        });
+        setAgents(defaultAgents);
         setIsLoading(false);
       }
     };
@@ -202,7 +177,7 @@ export const useAgentManagement = () => {
     const timeoutId = setTimeout(initializeData, 100);
     
     return () => clearTimeout(timeoutId);
-  }, []); // Remove all dependencies to prevent loops
+  }, []);
 
   const handleOnboardingComplete = (scores: CategoryScore, recommended: RecommendedAgents) => {
     console.log('useAgentManagement: Onboarding completed with recommendations:', recommended);

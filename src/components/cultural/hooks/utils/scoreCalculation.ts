@@ -1,6 +1,8 @@
+
 import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 export const calculateMaturityScores = (profileData: UserProfileData): CategoryScore => {
   // Initialize scores
@@ -94,49 +96,62 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
 export const getRecommendedAgents = (profileData: UserProfileData, scores: CategoryScore): RecommendedAgents => {
   console.log('Generating recommendations for scores:', scores);
   
-  // Create recommendations compatible with both new and legacy formats
   const recommendations: RecommendedAgents = {
-    primary: ['admin', 'cultural'], // Always include these for cultural creators
-    secondary: [],
-    // Legacy format for backward compatibility
-    admin: true,
-    cultural: true,
-    accounting: false,
-    legal: false,
-    operations: false
+    primary: [],
+    secondary: []
   };
 
-  // Determine additional recommendations based on lowest scores (areas needing most help)
+  // Siempre incluir agentes básicos de alta prioridad
+  const highPriorityAgents = culturalAgentsDatabase.filter(agent => 
+    agent.priority === 'Alta'
+  ).map(agent => agent.id);
+  
+  recommendations.primary = [...highPriorityAgents];
+
+  // Agregar agentes según puntuaciones bajas (necesitan más ayuda)
   const needsAssessment = [
-    { category: 'accounting', score: scores.monetization, legacy: 'accounting' as const },
-    { category: 'legal', score: scores.marketFit, legacy: 'legal' as const },
-    { category: 'operations', score: scores.userExperience, legacy: 'operations' as const }
+    { category: 'cost-calculator', score: scores.monetization },
+    { category: 'contract-generator', score: scores.marketFit },
+    { category: 'maturity-evaluator', score: scores.ideaValidation },
+    { category: 'export-advisor', score: scores.marketFit },
+    { category: 'pricing-assistant', score: scores.monetization }
   ];
 
-  // Sort by lowest scores first (areas needing most help)
+  // Ordenar por puntuaciones más bajas primero
   needsAssessment.sort((a, b) => a.score - b.score);
 
-  // Add the most needed agent to primary if score is low enough
-  const mostNeeded = needsAssessment[0];
-  if (mostNeeded.score < 60) {
-    recommendations.primary?.push(mostNeeded.category);
-    (recommendations as any)[mostNeeded.legacy] = true;
-  }
-
-  // Add secondary recommendations for scores below 50
-  needsAssessment.forEach(item => {
-    if (item.score < 50 && !recommendations.primary?.includes(item.category)) {
-      recommendations.secondary?.push(item.category);
-      (recommendations as any)[item.legacy] = true;
+  // Agregar agentes más necesarios a primary
+  needsAssessment.slice(0, 2).forEach(item => {
+    if (item.score < 60 && !recommendations.primary?.includes(item.category)) {
+      recommendations.primary?.push(item.category);
     }
   });
 
-  // Enhanced recommendations for deep analysis
-  if (profileData.analysisPreference === 'deep') {
-    recommendations.extended = {
-      ...recommendations
-    };
+  // Agregar agentes secundarios basados en perfil y industria
+  if (profileData.industry) {
+    const industryAgents = culturalAgentsDatabase.filter(agent => 
+      agent.profiles?.includes(profileData.industry) && 
+      !recommendations.primary?.includes(agent.id)
+    ).slice(0, 3).map(agent => agent.id);
+    
+    recommendations.secondary = [...(recommendations.secondary || []), ...industryAgents];
   }
+
+  // Agregar agentes de prioridad media para completar recomendaciones
+  const mediumPriorityAgents = culturalAgentsDatabase.filter(agent => 
+    (agent.priority === 'Media' || agent.priority === 'Media-Alta') &&
+    !recommendations.primary?.includes(agent.id) &&
+    !recommendations.secondary?.includes(agent.id)
+  ).slice(0, 4).map(agent => agent.id);
+
+  recommendations.secondary = [...(recommendations.secondary || []), ...mediumPriorityAgents];
+
+  // Mantener compatibilidad con formato legacy
+  recommendations.admin = true;
+  recommendations.cultural = true;
+  recommendations.accounting = recommendations.primary?.includes('cost-calculator') || recommendations.secondary?.includes('income-calculator');
+  recommendations.legal = recommendations.primary?.includes('contract-generator') || recommendations.secondary?.includes('collaboration-agreement');
+  recommendations.operations = recommendations.primary?.includes('collaborator-management') || recommendations.secondary?.includes('stakeholder-matching');
 
   console.log('Generated recommendations:', recommendations);
   return recommendations;
