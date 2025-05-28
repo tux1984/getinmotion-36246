@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';

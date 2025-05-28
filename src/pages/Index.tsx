@@ -36,14 +36,11 @@ const Index = () => {
         translations={t}
         onAccessClick={handleAccessClick}
       />
-      <HeroSection onAccessClick={handleAccessClick} />
+      <HeroSection />
       <ProductExplanation />
-      <FeaturesSection />
-      <ValueProposition />
-      <WaitlistForm 
-        isOpen={showWaitlist} 
-        onClose={() => setShowWaitlist(false)} 
-      />
+      <FeaturesSection language={language} />
+      <ValueProposition language={language} />
+      <WaitlistForm />
       <Footer language={language} />
     </div>
   );

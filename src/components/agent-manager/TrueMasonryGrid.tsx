@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface TrueMasonryGridProps {
   children: React.ReactElement[];
@@ -17,6 +17,7 @@ export const TrueMasonryGrid: React.FC<TrueMasonryGridProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(1);
   const [heights, setHeights] = useState<number[]>([]);
+  const itemHeights = useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
     const updateLayout = () => {
@@ -28,6 +29,7 @@ export const TrueMasonryGrid: React.FC<TrueMasonryGridProps> = ({
       if (newColumns !== columns) {
         setColumns(newColumns);
         setHeights(new Array(newColumns).fill(0));
+        itemHeights.current.clear();
       }
     };
 
@@ -36,12 +38,47 @@ export const TrueMasonryGrid: React.FC<TrueMasonryGridProps> = ({
     return () => window.removeEventListener('resize', updateLayout);
   }, [columnWidth, gap, columns]);
 
+  const updateItemHeight = useCallback((index: number, height: number) => {
+    const currentHeight = itemHeights.current.get(index);
+    if (currentHeight !== height && height > 0) {
+      itemHeights.current.set(index, height);
+      
+      // Recalculate all heights
+      const newHeights = new Array(columns).fill(0);
+      const itemPositions: { columnIndex: number; top: number }[] = [];
+      
+      for (let i = 0; i < children.length; i++) {
+        const itemHeight = itemHeights.current.get(i);
+        if (itemHeight) {
+          const columnIndex = newHeights.indexOf(Math.min(...newHeights));
+          itemPositions[i] = { columnIndex, top: newHeights[columnIndex] };
+          newHeights[columnIndex] += itemHeight + gap;
+        }
+      }
+      
+      setHeights(newHeights);
+    }
+  }, [columns, children.length, gap]);
+
   const getItemStyle = (index: number) => {
     if (heights.length === 0) return {};
 
-    const columnIndex = heights.indexOf(Math.min(...heights));
+    const itemHeight = itemHeights.current.get(index);
+    if (!itemHeight) return {};
+
+    // Calculate position based on current heights
+    const newHeights = [...heights];
+    for (let i = 0; i < index; i++) {
+      const prevHeight = itemHeights.current.get(i);
+      if (prevHeight) {
+        const columnIndex = newHeights.indexOf(Math.min(...newHeights));
+        newHeights[columnIndex] += prevHeight + gap;
+      }
+    }
+
+    const columnIndex = newHeights.indexOf(Math.min(...newHeights));
     const left = columnIndex * (columnWidth + gap);
-    const top = heights[columnIndex];
+    const top = newHeights[columnIndex];
 
     return {
       position: 'absolute' as const,
@@ -50,13 +87,6 @@ export const TrueMasonryGrid: React.FC<TrueMasonryGridProps> = ({
       width: `${columnWidth}px`,
       transition: 'all 0.3s ease'
     };
-  };
-
-  const updateHeights = (index: number, height: number) => {
-    const columnIndex = heights.indexOf(Math.min(...heights));
-    const newHeights = [...heights];
-    newHeights[columnIndex] += height + gap;
-    setHeights(newHeights);
   };
 
   const containerHeight = heights.length > 0 ? Math.max(...heights) : 0;
@@ -75,11 +105,8 @@ export const TrueMasonryGrid: React.FC<TrueMasonryGridProps> = ({
           key={child.key || index}
           style={getItemStyle(index)}
           ref={(el) => {
-            if (el) {
-              const height = el.offsetHeight;
-              if (height > 0) {
-                updateHeights(index, height);
-              }
+            if (el && el.offsetHeight > 0) {
+              updateItemHeight(index, el.offsetHeight);
             }
           }}
         >
