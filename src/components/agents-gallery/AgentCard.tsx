@@ -1,105 +1,87 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CulturalAgent } from '@/data/agentsDatabase';
 
 interface AgentCardProps {
   agent: CulturalAgent;
-  isListView?: boolean;
   translations: {
     priority: string;
     impact: string;
     categories: Record<string, string>;
+    exampleQuestion: string;
+    exampleAnswer: string;
   };
 }
 
 const getAgentColor = (category: string) => {
   const colors = {
-    'Financiera': 'bg-purple-500',
-    'Legal': 'bg-blue-500',
-    'Diagnóstico': 'bg-purple-500',
-    'Comercial': 'bg-pink-500',
-    'Operativo': 'bg-pink-500',
-    'Comunidad': 'bg-blue-500'
+    'Financiera': 'from-purple-500 to-purple-600',
+    'Legal': 'from-blue-500 to-blue-600',
+    'Diagnóstico': 'from-purple-500 to-purple-600',
+    'Comercial': 'from-pink-500 to-pink-600',
+    'Operativo': 'from-pink-500 to-pink-600',
+    'Comunidad': 'from-blue-500 to-blue-600'
   };
-  return colors[category as keyof typeof colors] || 'bg-gray-500';
-};
-
-const getCategoryColor = (category: string) => {
-  const colors = {
-    'Financiera': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Legal': 'bg-blue-50 text-blue-700 border-blue-200',
-    'Diagnóstico': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Comercial': 'bg-pink-50 text-pink-700 border-pink-200',
-    'Operativo': 'bg-pink-50 text-pink-700 border-pink-200',
-    'Comunidad': 'bg-blue-50 text-blue-700 border-blue-200'
-  };
-  return colors[category as keyof typeof colors] || 'bg-gray-50 text-gray-700 border-gray-200';
+  return colors[category as keyof typeof colors] || 'from-gray-500 to-gray-600';
 };
 
 export const AgentCard: React.FC<AgentCardProps> = ({
   agent,
-  isListView = false,
   translations
 }) => {
-  if (isListView) {
-    return (
-      <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-white">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-6">
-            <div className={`w-16 h-16 ${getAgentColor(agent.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-              <span className="text-2xl text-white">{agent.icon}</span>
+  return (
+    <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg overflow-hidden bg-white relative">
+      <CardContent className="p-0">
+        {/* Header with gradient background */}
+        <div className={`bg-gradient-to-r ${getAgentColor(agent.category)} p-6 text-white relative overflow-hidden`}>
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-8 -translate-x-8"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <span className="text-2xl">{agent.icon}</span>
+              </div>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                {translations.categories[agent.category] || agent.category}
+              </span>
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="text-xl font-bold text-gray-900">{agent.name}</h3>
-                <Badge className={getCategoryColor(agent.category)}>
-                  {translations.categories[agent.category] || agent.category}
-                </Badge>
-              </div>
-              
-              <p className="text-gray-600 mb-4 leading-relaxed">{agent.description}</p>
-              
-              <div className="flex gap-2">
-                <Badge variant="outline" className="text-xs font-medium">
-                  {translations.priority}: {agent.priority}
-                </Badge>
-                <Badge variant="outline" className="text-xs font-medium">
-                  {translations.impact}: {agent.impact}
-                </Badge>
-              </div>
-            </div>
+            <h3 className="font-bold text-lg mb-2 leading-tight">{agent.name}</h3>
+            <p className="text-white/90 text-sm leading-relaxed">{agent.description}</p>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
+        </div>
 
-  return (
-    <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 shadow-lg overflow-hidden bg-white">
-      <CardContent className="p-0">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className={`w-14 h-14 ${getAgentColor(agent.category)} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-              <span className="text-2xl text-white">{agent.icon}</span>
+        {/* Content with Q&A example */}
+        <div className="p-6 space-y-4">
+          {agent.exampleQuestion && agent.exampleAnswer && (
+            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  {translations.exampleQuestion}
+                </p>
+                <p className="text-sm text-gray-700 font-medium">"{agent.exampleQuestion}"</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  {translations.exampleAnswer}
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">"{agent.exampleAnswer}"</p>
+              </div>
             </div>
-            <Badge className={getCategoryColor(agent.category)}>
-              {translations.categories[agent.category] || agent.category}
-            </Badge>
-          </div>
-          
-          <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight">{agent.name}</h3>
-          <p className="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed">{agent.description}</p>
-          
-          <div className="flex gap-2 flex-wrap">
-            <Badge variant="outline" className="text-xs font-medium bg-gray-50">
-              {translations.priority}: {agent.priority}
-            </Badge>
-            <Badge variant="outline" className="text-xs font-medium bg-gray-50">
-              {translations.impact}: {agent.impact}
-            </Badge>
+          )}
+
+          {/* Stats */}
+          <div className="flex gap-2 pt-2">
+            <div className="flex-1 text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-500 font-medium">{translations.priority}</p>
+              <p className="text-sm font-semibold text-gray-700">{agent.priority}</p>
+            </div>
+            <div className="flex-1 text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-500 font-medium">{translations.impact}</p>
+              <p className="text-sm font-semibold text-gray-700">{agent.impact}/4</p>
+            </div>
           </div>
         </div>
       </CardContent>

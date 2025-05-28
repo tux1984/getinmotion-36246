@@ -16,8 +16,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) => {
   const handleAccessClick = () => {
-    // Open waitlist form in new tab/window
-    window.open('/#waitlist', '_blank');
+    // Open login page in new tab/window
+    window.open('/login', '_blank');
   };
 
   return (

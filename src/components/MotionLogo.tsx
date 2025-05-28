@@ -20,10 +20,10 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   // Determine which logo to show based on variant and theme
   const shouldUseLightLogo = variant === 'light' || (variant === 'auto' && isDark);
   
-  // Use available logo files from the uploads directory
+  // Use correct logo files from the uploads directory
   const logoSrc = shouldUseLightLogo 
-    ? "/lovable-uploads/aad610ec-9f67-4ed0-93dc-8c2b3e8f98d3.png" // Logo for dark backgrounds
-    : "/lovable-uploads/c131a30d-0ce5-4b65-ae3c-5715f73e4f4c.png"; // Logo for light backgrounds
+    ? "/lovable-uploads/c6c643f0-5964-45a6-aa39-10286d505435.png" // Logo for dark backgrounds
+    : "/lovable-uploads/98f35650-02b1-4578-9248-60db60c6688d.png"; // Logo for light backgrounds
   
   // Set size based on prop
   const sizeClasses = {

@@ -1,4 +1,3 @@
-
 export interface CulturalAgent {
   id: string;
   code: string;
@@ -10,6 +9,8 @@ export interface CulturalAgent {
   icon: string;
   color: string;
   profiles?: string[];
+  exampleQuestion?: string;
+  exampleAnswer?: string;
 }
 
 export const culturalAgentsDatabase: CulturalAgent[] = [
@@ -23,7 +24,9 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
     description: 'Calcula costos de producción, precios de venta y análisis de rentabilidad para proyectos culturales',
     icon: '💰',
     color: 'bg-green-500',
-    profiles: ['visual-artist', 'textile-artisan', 'indigenous-artisan']
+    profiles: ['visual-artist', 'textile-artisan', 'indigenous-artisan'],
+    exampleQuestion: "¿Cómo calculo el precio de venta de mi obra de arte?",
+    exampleAnswer: "Te ayudo a calcular todos los costos (materiales, tiempo, gastos generales) y agregar un margen de ganancia adecuado para tu mercado."
   },
   {
     id: 'collaboration-agreement',
@@ -35,7 +38,9 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
     description: 'Genera contratos de colaboración, cesión de derechos y acuerdos entre creadores',
     icon: '🤝',
     color: 'bg-blue-500',
-    profiles: ['musician', 'visual-artist', 'indigenous-artisan']
+    profiles: ['musician', 'visual-artist', 'indigenous-artisan'],
+    exampleQuestion: "Necesito un contrato para colaborar con otro artista",
+    exampleAnswer: "Creo contratos personalizados que protejan los derechos de ambas partes, definiendo claramente la propiedad intelectual y las responsabilidades."
   },
   {
     id: 'maturity-evaluator',
@@ -47,7 +52,9 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
     description: 'Evalúa el nivel de madurez empresarial y proporciona recomendaciones de crecimiento',
     icon: '📊',
     color: 'bg-purple-500',
-    profiles: ['musician', 'visual-artist', 'textile-artisan', 'indigenous-artisan']
+    profiles: ['musician', 'visual-artist', 'textile-artisan', 'indigenous-artisan'],
+    exampleQuestion: "¿En qué etapa está mi negocio creativo?",
+    exampleAnswer: "Evalúo tu nivel de madurez empresarial y te doy un plan de crecimiento personalizado con pasos específicos a seguir."
   },
   {
     id: 'export-advisor',
