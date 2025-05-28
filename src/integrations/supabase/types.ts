@@ -239,6 +239,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      disable_agent: {
+        Args: { p_user_id: string; p_agent_id: string }
+        Returns: undefined
+      }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }
         Returns: {

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
@@ -8,6 +7,7 @@ import { AgentDetails } from '@/components/dashboard/AgentDetails';
 import { AgentManager } from '@/components/dashboard/AgentManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
+import { useUserData } from '@/hooks/useUserData';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
 
@@ -37,6 +37,8 @@ const Dashboard = () => {
     checkLocationStateForOnboarding
   } = useAgentManagement();
 
+  const { enableAgent, disableAgent, refetch } = useUserData();
+
   console.log('Dashboard: State values:', {
     isLoading,
     error,
@@ -62,10 +64,19 @@ const Dashboard = () => {
     navigate('/maturity-calculator', { state: { profileType } });
   };
 
-  const handleAgentToggle = (agentId: string, enabled: boolean) => {
+  const handleAgentToggle = async (agentId: string, enabled: boolean) => {
     console.log('Dashboard: Toggling agent:', agentId, enabled);
-    // This will be implemented to update agent preferences
-    // For now, just log the action
+    try {
+      if (enabled) {
+        await enableAgent(agentId);
+      } else {
+        await disableAgent(agentId);
+      }
+      // Refresh data to ensure UI is updated
+      await refetch();
+    } catch (error) {
+      console.error('Error toggling agent:', error);
+    }
   };
 
   const backgroundPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";

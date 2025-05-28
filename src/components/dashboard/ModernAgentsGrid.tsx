@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Agent, RecommendedAgents } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bot, MessageCircle, Play, Pause, Settings, Zap } from 'lucide-react';
+import { Bot, MessageCircle, Play, Pause, Settings, Zap, Clock } from 'lucide-react';
 import { useUserData } from '@/hooks/useUserData';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { CollapsibleAgentsSection } from './CollapsibleAgentsSection';
@@ -21,7 +20,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   onSelectAgent,
   language
 }) => {
-  const { agents: userAgents, trackAgentUsage, enableAgent, loading } = useUserData();
+  const { agents: userAgents, trackAgentUsage, enableAgent, loading, refetch } = useUserData();
 
   const translations = {
     en: {
@@ -36,7 +35,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       recommended: "Recommended",
       enable: "Enable",
       lastUsed: "Last used",
-      never: "Never"
+      never: "Never",
+      justEnabled: "Just enabled"
     },
     es: {
       yourAgents: "Tus Agentes IA",
@@ -50,7 +50,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       recommended: "Recomendado",
       enable: "Habilitar",
       lastUsed: "Último uso",
-      never: "Nunca"
+      never: "Nunca",
+      justEnabled: "Recién habilitado"
     }
   };
 
@@ -70,7 +71,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       isEnabled: agentConfig?.is_enabled || false,
       usageCount: agentConfig?.usage_count || 0,
       lastUsed: agentConfig?.last_used_at,
-      priority: agentInfo?.priority || 'Media'
+      priority: agentInfo?.priority || 'Media',
+      isRecentlyEnabled: agentConfig && new Date(agentConfig.updated_at).getTime() > Date.now() - 10000 // Last 10 seconds
     };
   };
 
@@ -105,6 +107,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   const handleEnableAgent = async (agentId: string) => {
     try {
       await enableAgent(agentId);
+      // Refresh to get latest data
+      await refetch();
     } catch (error) {
       console.error('Error enabling agent:', error);
     }
@@ -127,12 +131,22 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     agent: ReturnType<typeof getMergedAgentData>; 
     isRecommended?: boolean;
   }) => (
-    <div className="group relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+    <div className={`group relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+      agent.isRecentlyEnabled ? 'ring-2 ring-green-400 shadow-green-400/20' : ''
+    }`}>
       {isRecommended && (
         <div className="absolute -top-2 -right-2">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
             <Zap className="w-3 h-3 mr-1" />
             {t.recommended}
+          </Badge>
+        </div>
+      )}
+      
+      {agent.isRecentlyEnabled && (
+        <div className="absolute -top-2 -left-2">
+          <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
+            {t.justEnabled}
           </Badge>
         </div>
       )}
@@ -171,7 +185,10 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
 
       <div className="flex items-center justify-between text-sm text-gray-300 mb-4">
         <span>{agent.usageCount} {t.activeTasks}</span>
-        <span>{t.lastUsed}: {formatLastUsed(agent.lastUsed)}</span>
+        <div className="flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          <span>{formatLastUsed(agent.lastUsed)}</span>
+        </div>
       </div>
 
       <div className="flex gap-2">
@@ -193,7 +210,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
             disabled={loading}
           >
             <Play className="w-4 h-4 mr-2" />
-            {t.enable}
+            {loading ? 'Habilitando...' : t.enable}
           </Button>
         )}
         <Button 

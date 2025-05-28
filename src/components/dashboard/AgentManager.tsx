@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
+import { useUserData } from '@/hooks/useUserData';
+import { Zap, Clock } from 'lucide-react';
 
 interface AgentManagerProps {
   currentAgents: Agent[];
@@ -19,9 +21,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   onAgentToggle,
   language
 }) => {
-  const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
-    new Set(currentAgents.map(agent => agent.id))
-  );
+  const { agents: userAgents, loading } = useUserData();
 
   const translations = {
     en: {
@@ -41,7 +41,11 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
       disabled: "Disabled",
       activate: "Activate",
       deactivate: "Deactivate",
-      allAgents: "All Agents"
+      allAgents: "All Agents",
+      recommended: "Recommended",
+      usageCount: "Usage count",
+      lastUsed: "Last used",
+      never: "Never"
     },
     es: {
       title: "Gestor de Agentes",
@@ -60,24 +64,43 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
       disabled: "Desactivado",
       activate: "Activar",
       deactivate: "Desactivar",
-      allAgents: "Todos los Agentes"
+      allAgents: "Todos los Agentes",
+      recommended: "Recomendado",
+      usageCount: "Contador de uso",
+      lastUsed: "Último uso",
+      never: "Nunca"
     }
   };
 
   const t = translations[language];
 
-  const handleToggleAgent = (agentId: string) => {
-    const isEnabled = enabledAgents.has(agentId);
-    const newEnabledAgents = new Set(enabledAgents);
+  // Get user agent data for each agent
+  const getUserAgentData = (agentId: string) => {
+    return userAgents.find(ua => ua.agent_id === agentId);
+  };
+
+  // Check if agent is recommended (you can customize this logic)
+  const isAgentRecommended = (agentId: string) => {
+    // This could be based on user profile, maturity scores, etc.
+    const recommendedIds = ['cultural-consultant', 'project-manager', 'cost-calculator', 'content-creator'];
+    return recommendedIds.includes(agentId);
+  };
+
+  const formatLastUsed = (lastUsed: string | null) => {
+    if (!lastUsed) return t.never;
     
-    if (isEnabled) {
-      newEnabledAgents.delete(agentId);
-    } else {
-      newEnabledAgents.add(agentId);
-    }
+    const date = new Date(lastUsed);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    setEnabledAgents(newEnabledAgents);
-    onAgentToggle(agentId, !isEnabled);
+    if (diffInHours < 1) return 'Hace unos minutos';
+    if (diffInHours < 24) return `Hace ${diffInHours}h`;
+    if (diffInHours < 168) return `Hace ${Math.floor(diffInHours / 24)}d`;
+    return date.toLocaleDateString();
+  };
+
+  const handleToggleAgent = async (agentId: string, currentEnabled: boolean) => {
+    await onAgentToggle(agentId, !currentEnabled);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -110,14 +133,27 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   }, {} as Record<string, CulturalAgent[]>);
 
   const AgentCard = ({ agent }: { agent: CulturalAgent }) => {
-    const isEnabled = enabledAgents.has(agent.id);
+    const userAgent = getUserAgentData(agent.id);
+    const isEnabled = userAgent?.is_enabled || false;
+    const isRecommended = isAgentRecommended(agent.id);
+    const usageCount = userAgent?.usage_count || 0;
+    const lastUsed = userAgent?.last_used_at;
     
     return (
-      <Card className={`transition-all ${isEnabled ? 'ring-2 ring-purple-200' : ''}`}>
+      <Card className={`transition-all relative ${isEnabled ? 'ring-2 ring-purple-200 bg-purple-50/50' : ''}`}>
+        {isRecommended && (
+          <div className="absolute -top-2 -right-2 z-10">
+            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
+              <Zap className="w-3 h-3 mr-1" />
+              {t.recommended}
+            </Badge>
+          </div>
+        )}
+        
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
-              <div className={`w-12 h-12 rounded-full ${agent.color} flex items-center justify-center text-white text-xl`}>
+              <div className={`w-12 h-12 rounded-full ${agent.color} flex items-center justify-center text-white text-xl shadow-lg`}>
                 {agent.icon}
               </div>
               <div className="flex-1">
@@ -139,7 +175,8 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
             </div>
             <Switch
               checked={isEnabled}
-              onCheckedChange={() => handleToggleAgent(agent.id)}
+              onCheckedChange={() => handleToggleAgent(agent.id, isEnabled)}
+              disabled={loading}
             />
           </div>
         </CardHeader>
@@ -147,8 +184,23 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
           <CardDescription className="text-sm mb-3">
             {agent.description}
           </CardDescription>
+          
+          {/* Usage Stats */}
+          <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+            <div className="flex items-center gap-1">
+              <span>{t.usageCount}: {usageCount}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <span>{t.lastUsed}: {formatLastUsed(lastUsed)}</span>
+            </div>
+          </div>
+          
           <div className="flex justify-between items-center">
-            <Badge variant={isEnabled ? "default" : "secondary"} className="text-xs">
+            <Badge 
+              variant={isEnabled ? "default" : "secondary"} 
+              className={`text-xs ${isEnabled ? 'bg-green-100 text-green-800' : ''}`}
+            >
               {isEnabled ? t.enabled : t.disabled}
             </Badge>
             {agent.profiles && (
@@ -161,6 +213,24 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
       </Card>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">{t.title}</h2>
+          <p className="text-gray-600">{t.subtitle}</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-gray-100 rounded-lg p-6 animate-pulse">
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

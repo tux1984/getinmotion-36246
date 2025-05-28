@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -209,6 +208,7 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('user_agents')
         .upsert({
@@ -232,6 +232,34 @@ export const useUserData = () => {
     } catch (err) {
       console.error('Error enabling agent:', err);
       throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const disableAgent = async (agentId: string) => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.rpc('disable_agent', {
+        p_user_id: user.id,
+        p_agent_id: agentId
+      });
+
+      if (error) throw error;
+      
+      // Update local state
+      setAgents(prev => prev.map(a => 
+        a.agent_id === agentId 
+          ? { ...a, is_enabled: false, updated_at: new Date().toISOString() }
+          : a
+      ));
+    } catch (err) {
+      console.error('Error disabling agent:', err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -257,7 +285,7 @@ export const useUserData = () => {
           agent_id: agentId,
           is_enabled: true,
           last_used_at: new Date().toISOString(),
-          usage_count: 1 // This will be incremented by a trigger in the future
+          usage_count: 1 // This will be incremented by the trigger
         });
 
       // Refresh data
@@ -301,6 +329,7 @@ export const useUserData = () => {
     updateProject,
     deleteProject,
     enableAgent,
+    disableAgent,
     trackAgentUsage,
     refetch: () => {
       if (user) {
