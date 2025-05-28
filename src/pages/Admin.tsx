@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { UserManagement } from '@/components/admin/UserManagement';
+import { ImageManager } from '@/components/admin/ImageManager';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -107,7 +108,7 @@ const Admin = () => {
             </div>
             
             <Tabs defaultValue="waitlist" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-indigo-900/50">
+              <TabsList className="grid w-full grid-cols-3 bg-indigo-900/50">
                 <TabsTrigger 
                   value="waitlist"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
@@ -119,6 +120,12 @@ const Admin = () => {
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
                 >
                   Gestión de Usuarios
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="images"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                >
+                  Gestión de Imágenes
                 </TabsTrigger>
               </TabsList>
               
@@ -134,6 +141,10 @@ const Admin = () => {
               
               <TabsContent value="users" className="mt-6">
                 <UserManagement />
+              </TabsContent>
+
+              <TabsContent value="images" className="mt-6">
+                <ImageManager />
               </TabsContent>
             </Tabs>
           </div>
