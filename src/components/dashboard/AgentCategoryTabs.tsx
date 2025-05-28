@@ -2,7 +2,8 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CulturalAgent } from '@/data/agentsDatabase';
-import { AgentCard } from './AgentCard';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface AgentCategoryTabsProps {
   groupedAgents: Record<string, CulturalAgent[]>;
@@ -15,6 +16,95 @@ interface AgentCategoryTabsProps {
   getImpactColor: (impact: number) => string;
   translations: any;
 }
+
+interface CulturalAgentCardProps {
+  agent: CulturalAgent;
+  userAgent: any;
+  isEnabled: boolean;
+  isRecommended: boolean;
+  usageCount: number;
+  lastUsed: string | null;
+  isToggling: boolean;
+  isRecentlyChanged: boolean | undefined;
+  onToggleAgent: (agentId: string, currentEnabled: boolean) => Promise<void>;
+  formatLastUsed: (lastUsed: string | null) => string;
+  getPriorityColor: (priority: string) => string;
+  getImpactColor: (impact: number) => string;
+  translations: any;
+}
+
+const CulturalAgentCard: React.FC<CulturalAgentCardProps> = ({
+  agent,
+  userAgent,
+  isEnabled,
+  isRecommended,
+  usageCount,
+  lastUsed,
+  isToggling,
+  isRecentlyChanged,
+  onToggleAgent,
+  formatLastUsed,
+  getPriorityColor,
+  getImpactColor,
+  translations
+}) => {
+  return (
+    <div className={`p-4 rounded-lg border transition-all duration-200 ${
+      isEnabled 
+        ? 'bg-white border-purple-200 shadow-sm' 
+        : 'bg-gray-50 border-gray-200'
+    } ${isRecentlyChanged ? 'ring-2 ring-purple-300' : ''}`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center text-white text-lg`}>
+            {agent.icon}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-medium text-gray-900">{agent.name}</h3>
+              {isRecommended && (
+                <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                  {translations.recommended}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 line-clamp-2">{agent.description}</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={(checked) => onToggleAgent(agent.id, isEnabled)}
+            disabled={isToggling}
+          />
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center space-x-3">
+          <Badge className={getPriorityColor(agent.priority)}>
+            {translations.priority}: {agent.priority}
+          </Badge>
+          <Badge className={getImpactColor(agent.impact)}>
+            {translations.impact}: {agent.impact}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <span>{translations.usageCount}: {usageCount}</span>
+          <span>{translations.lastUsed}: {formatLastUsed(lastUsed)}</span>
+        </div>
+      </div>
+      
+      {isToggling && (
+        <div className="mt-2 text-xs text-purple-600">
+          {isEnabled ? translations.deactivating : translations.activating}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const AgentCategoryTabs: React.FC<AgentCategoryTabsProps> = ({
   groupedAgents,
@@ -58,7 +148,7 @@ export const AgentCategoryTabs: React.FC<AgentCategoryTabsProps> = ({
               const isRecentlyChanged = userAgent && new Date(userAgent.updated_at).getTime() > Date.now() - 5000;
               
               return (
-                <AgentCard
+                <CulturalAgentCard
                   key={agent.id}
                   agent={agent}
                   userAgent={userAgent}
