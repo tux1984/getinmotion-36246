@@ -1,13 +1,17 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Agent } from '@/types/dashboard';
-import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { useUserData } from '@/hooks/useUserData';
+import { useAgentFilters } from '@/hooks/useAgentFilters';
+import { useAgentToggle } from '@/hooks/useAgentToggle';
+import { useAgentStats } from '@/hooks/useAgentStats';
 import { AgentCategoryCard } from './AgentCategoryCard';
-import { AgentFilters } from './AgentFilters';
+import { AgentFiltersPanel } from '../agent-manager/AgentFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
-import { MasonryGrid } from './MasonryGrid';
+import { TrueMasonryGrid } from '../agent-manager/TrueMasonryGrid';
 import { Loader2 } from 'lucide-react';
+import { isAgentRecommended } from '@/utils/agentUtils';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
@@ -21,41 +25,24 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   language
 }) => {
   const { agents: userAgents, loading } = useUserData();
-  const [togglingAgents, setTogglingAgents] = useState<Set<string>>(new Set());
-  
-  // Filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedPriority, setSelectedPriority] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
+  const { togglingAgents, handleToggleAgent } = useAgentToggle(onAgentToggle);
 
   const translations = {
     en: {
       title: "AI Agent Manager",
       subtitle: "Activate and manage your specialized AI agents with advanced filtering and search capabilities",
       loading: "Loading agent management...",
-      categories: {
-        Financiera: "Financial",
-        Legal: "Legal", 
-        Diagnóstico: "Diagnostic",
-        Comercial: "Commercial",
-        Operativo: "Operations",
-        Comunidad: "Community"
-      }
+      noAgentsFound: "No agents found",
+      tryAdjusting: "Try adjusting your filters or search terms",
+      clearAllFilters: "Clear all filters"
     },
     es: {
       title: "Gestor de Agentes IA",
       subtitle: "Activa y gestiona tus agentes IA especializados con filtros avanzados y capacidades de búsqueda",
       loading: "Cargando gestión de agentes...",
-      categories: {
-        Financiera: "Financiera",
-        Legal: "Legal",
-        Diagnóstico: "Diagnóstico", 
-        Comercial: "Comercial",
-        Operativo: "Operativo",
-        Comunidad: "Comunidad"
-      }
+      noAgentsFound: "No se encontraron agentes",
+      tryAdjusting: "Intenta ajustar tus filtros o términos de búsqueda",
+      clearAllFilters: "Limpiar todos los filtros"
     }
   };
 
@@ -71,108 +58,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return userAgents.find(ua => ua.agent_id === agentId);
   };
 
-  // Check if agent is recommended
-  const isAgentRecommended = (agentId: string) => {
-    const recommendedIds = ['cultural-consultant', 'project-manager', 'cost-calculator', 'content-creator', 'collaboration-agreement', 'export-advisor', 'stakeholder-matching'];
-    return recommendedIds.includes(agentId);
-  };
+  // Use our new hooks
+  const {
+    filters,
+    updateFilter,
+    clearFilters,
+    toggleCategory,
+    filteredAndGroupedAgents,
+    hasActiveFilters
+  } = useAgentFilters(culturalAgentsDatabase, getUserAgentData);
 
-  // Group agents by category with filtering and sorting
-  const filteredAndGroupedAgents = useMemo(() => {
-    let filteredAgents = culturalAgentsDatabase;
-
-    // Search filter
-    if (searchTerm) {
-      filteredAgents = filteredAgents.filter(agent =>
-        agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (selectedCategories.length > 0) {
-      filteredAgents = filteredAgents.filter(agent =>
-        selectedCategories.includes(agent.category)
-      );
-    }
-
-    // Status filter
-    if (selectedStatus !== 'all') {
-      filteredAgents = filteredAgents.filter(agent => {
-        const userAgent = getUserAgentData(agent.id);
-        const isEnabled = userAgent?.is_enabled || false;
-        const isRecommended = isAgentRecommended(agent.id);
-        
-        switch (selectedStatus) {
-          case 'active': return isEnabled;
-          case 'inactive': return !isEnabled;
-          case 'recommended': return isRecommended;
-          default: return true;
-        }
-      });
-    }
-
-    // Priority filter
-    if (selectedPriority !== 'all') {
-      filteredAgents = filteredAgents.filter(agent => agent.priority === selectedPriority);
-    }
-
-    // Sort agents
-    filteredAgents = [...filteredAgents].sort((a, b) => {
-      switch (sortBy) {
-        case 'usage':
-          const usageA = getUserAgentData(a.id)?.usage_count || 0;
-          const usageB = getUserAgentData(b.id)?.usage_count || 0;
-          return usageB - usageA;
-        case 'impact':
-          return b.impact - a.impact;
-        case 'name':
-        default:
-          return a.name.localeCompare(b.name);
-      }
-    });
-
-    // Group by category
-    return filteredAgents.reduce((groups, agent) => {
-      if (!groups[agent.category]) {
-        groups[agent.category] = [];
-      }
-      groups[agent.category].push(agent);
-      return groups;
-    }, {} as Record<string, CulturalAgent[]>);
-  }, [searchTerm, selectedCategories, selectedStatus, selectedPriority, sortBy, userAgents]);
-
-  // Calculate stats
-  const totalAgents = culturalAgentsDatabase.length;
-  const activeAgents = userAgents.filter(ua => ua.is_enabled).length;
-  const recommendedAgents = culturalAgentsDatabase.filter(agent => 
-    isAgentRecommended(agent.id)
-  ).length;
-
-  const handleToggleAgent = async (agentId: string, currentEnabled: boolean) => {
-    setTogglingAgents(prev => new Set(prev).add(agentId));
-    
-    try {
-      await onAgentToggle(agentId, !currentEnabled);
-    } catch (error) {
-      console.error('Error toggling agent:', error);
-    } finally {
-      setTogglingAgents(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(agentId);
-        return newSet;
-      });
-    }
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategories([]);
-    setSelectedStatus('all');
-    setSelectedPriority('all');
-    setSortBy('name');
-  };
+  const stats = useAgentStats(culturalAgentsDatabase, userAgents);
 
   if (loading) {
     return (
@@ -191,73 +87,66 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       <ModernStatsHeader
         title={t.title}
         subtitle={t.subtitle}
-        totalAgents={totalAgents}
-        activeAgents={activeAgents}
-        recommendedAgents={recommendedAgents}
+        totalAgents={stats.totalAgents}
+        activeAgents={stats.activeAgents}
+        recommendedAgents={stats.recommendedAgents}
         language={language}
       />
 
       {/* Filters */}
-      <AgentFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedCategories={selectedCategories}
-        onCategoryChange={setSelectedCategories}
-        selectedStatus={selectedStatus}
-        onStatusChange={setSelectedStatus}
-        selectedPriority={selectedPriority}
-        onPriorityChange={setSelectedPriority}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        onClearFilters={handleClearFilters}
-        language={language}
+      <AgentFiltersPanel
+        filters={filters}
+        onUpdateFilter={updateFilter}
+        onToggleCategory={toggleCategory}
+        onClearFilters={clearFilters}
         categories={categories}
+        hasActiveFilters={hasActiveFilters}
+        language={language}
       />
 
-      {/* Masonry Grid Layout */}
-      <MasonryGrid>
-        {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
-          const categoryActiveCount = agents.filter(agent => 
-            getUserAgentData(agent.id)?.is_enabled
-          ).length;
-          
-          const categoryRecommendedCount = agents.filter(agent => 
-            isAgentRecommended(agent.id)
-          ).length;
+      {/* True Masonry Grid Layout */}
+      {Object.keys(filteredAndGroupedAgents).length > 0 ? (
+        <TrueMasonryGrid columnWidth={400} gap={20}>
+          {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
+            const categoryActiveCount = agents.filter(agent => 
+              getUserAgentData(agent.id)?.is_enabled
+            ).length;
+            
+            const categoryRecommendedCount = agents.filter(agent => 
+              isAgentRecommended(agent.id)
+            ).length;
 
-          return (
-            <div key={category} className="masonry-item">
-              <AgentCategoryCard
-                category={category}
-                categoryName={t.categories[category as keyof typeof t.categories]}
-                agents={agents}
-                activeCount={categoryActiveCount}
-                totalCount={agents.length}
-                recommendedCount={categoryRecommendedCount}
-                getUserAgentData={getUserAgentData}
-                isAgentRecommended={isAgentRecommended}
-                onToggleAgent={handleToggleAgent}
-                togglingAgents={togglingAgents}
-                language={language}
-              />
-            </div>
-          );
-        })}
-      </MasonryGrid>
-
-      {/* Empty state */}
-      {Object.keys(filteredAndGroupedAgents).length === 0 && (
+            return (
+              <div key={category}>
+                <AgentCategoryCard
+                  category={category}
+                  categoryName={category}
+                  agents={agents}
+                  activeCount={categoryActiveCount}
+                  totalCount={agents.length}
+                  recommendedCount={categoryRecommendedCount}
+                  getUserAgentData={getUserAgentData}
+                  isAgentRecommended={isAgentRecommended}
+                  onToggleAgent={handleToggleAgent}
+                  togglingAgents={togglingAgents}
+                  language={language}
+                />
+              </div>
+            );
+          })}
+        </TrueMasonryGrid>
+      ) : (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">🔍</span>
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No agents found</h3>
-          <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">{t.noAgentsFound}</h3>
+          <p className="text-gray-600 mb-4">{t.tryAdjusting}</p>
           <button
-            onClick={handleClearFilters}
+            onClick={clearFilters}
             className="text-purple-600 hover:text-purple-800 font-medium"
           >
-            Clear all filters
+            {t.clearAllFilters}
           </button>
         </div>
       )}
