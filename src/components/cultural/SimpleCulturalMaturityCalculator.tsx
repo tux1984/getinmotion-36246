@@ -1,5 +1,4 @@
-
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
@@ -18,6 +17,9 @@ import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
 import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
 import { MobileHeader } from './components/MobileHeader';
 import { MobileNavigation } from './components/MobileNavigation';
+import { MaturityCalculatorHeader } from './components/MaturityCalculatorHeader';
+import { RecoverProgressDialog } from './components/RecoverProgressDialog';
+import { useMaturityProgress } from './hooks/useMaturityProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SimpleCulturalMaturityCalculatorProps {
@@ -40,6 +42,15 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   onComplete 
 }) => {
   const isMobile = useIsMobile();
+  const [showRecoverDialog, setShowRecoverDialog] = useState(false);
+
+  const {
+    hasSavedProgress,
+    savedProgress,
+    saveProgress,
+    clearProgress,
+    loadProgress
+  } = useMaturityProgress();
 
   const {
     currentStep,
@@ -63,6 +74,13 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     handleAnalysisChoice,
     handleComplete
   } = useMaturityCalculatorLogic(language, onComplete);
+
+  // Check for saved progress on mount
+  useEffect(() => {
+    if (hasSavedProgress && savedProgress) {
+      setShowRecoverDialog(true);
+    }
+  }, [hasSavedProgress, savedProgress]);
 
   // Get questions based on current step
   const { questions } = useOptimizedQuestions(language, profileType);
@@ -169,6 +187,42 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     language
   });
 
+  // Save progress function
+  const handleSaveAndExit = () => {
+    saveProgress({
+      currentStep,
+      currentQuestionIndex,
+      profileType,
+      answers,
+      extendedAnswers,
+      analysisType
+    });
+  };
+
+  // Continue with saved progress
+  const handleContinueProgress = () => {
+    const progress = loadProgress();
+    if (progress) {
+      setCurrentStep(progress.currentStep);
+      setCurrentQuestionIndex(progress.currentQuestionIndex);
+      if (progress.profileType) handleProfileSelect(progress.profileType);
+      Object.entries(progress.answers).forEach(([id, value]) => {
+        handleSelectOption(id, value);
+      });
+      Object.entries(progress.extendedAnswers).forEach(([id, value]) => {
+        handleSelectOption(id, value);
+      });
+      if (progress.analysisType) setAnalysisType(progress.analysisType);
+    }
+    setShowRecoverDialog(false);
+  };
+
+  // Start new assessment
+  const handleStartNew = () => {
+    clearProgress();
+    setShowRecoverDialog(false);
+  };
+
   // Memoized image calculation
   const getCurrentCharacterImage = useMemo(() => {
     if (currentStep === 'profileType') {
@@ -202,7 +256,24 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
 
   return (
     <OnboardingErrorBoundary>
-      <div className="w-full max-w-4xl mx-auto">
+      {/* Recovery Dialog */}
+      <RecoverProgressDialog
+        isOpen={showRecoverDialog}
+        onContinue={handleContinueProgress}
+        onStartNew={handleStartNew}
+        language={language}
+        lastSaveTime={savedProgress?.timestamp}
+      />
+
+      {/* Header with Logo and Exit */}
+      <MaturityCalculatorHeader
+        language={language}
+        onSaveAndExit={handleSaveAndExit}
+        currentStep={currentStep}
+      />
+
+      {/* Main Content with top padding for fixed header */}
+      <div className="w-full max-w-4xl mx-auto pt-16">
         {/* Mobile Header */}
         {isMobile && (
           <MobileHeader 

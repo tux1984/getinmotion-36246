@@ -18,6 +18,9 @@ const MaturityCalculator = () => {
     localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
     localStorage.setItem('onboardingCompleted', 'true');
     
+    // Clear any saved progress since assessment is completed
+    localStorage.removeItem('maturityCalculatorProgress');
+    
     // Show toast notification
     toast({
       title: language === 'en' ? 'Assessment Completed!' : '¡Evaluación Completada!',
