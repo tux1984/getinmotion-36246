@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Gauge, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { ProductMaturityCalculator } from './ProductMaturityCalculator';
+import { useNavigate } from 'react-router-dom';
 
 interface MaturityCategory {
   name: { en: string; es: string };
@@ -14,7 +14,7 @@ interface MaturityCategory {
 
 export const ProductMaturityMeter = () => {
   const { language } = useLanguage();
-  const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<MaturityCategory[]>([
     {
       name: { en: 'Idea Validation', es: 'Validación de Idea' },
@@ -72,21 +72,8 @@ export const ProductMaturityMeter = () => {
 
   const t = translations[language];
   
-  const handleCalculatorComplete = (scores: {
-    ideaValidation: number;
-    userExperience: number;
-    marketFit: number;
-    monetization: number;
-  }) => {
-    // Update the categories with the new scores
-    const updatedCategories = [...categories];
-    
-    updatedCategories[0].score = scores.ideaValidation;
-    updatedCategories[1].score = scores.userExperience;
-    updatedCategories[2].score = scores.marketFit;
-    updatedCategories[3].score = scores.monetization;
-    
-    setCategories(updatedCategories);
+  const handleNavigateToCalculator = () => {
+    navigate('/maturity-calculator');
   };
 
   return (
@@ -142,7 +129,7 @@ export const ProductMaturityMeter = () => {
       </div>
       
       <Button 
-        onClick={() => setCalculatorOpen(true)}
+        onClick={handleNavigateToCalculator}
         className="w-full flex justify-between items-center"
         variant="outline"
       >
@@ -152,12 +139,6 @@ export const ProductMaturityMeter = () => {
           <ArrowRight className="h-3 w-3" />
         </div>
       </Button>
-      
-      <ProductMaturityCalculator 
-        open={calculatorOpen}
-        onOpenChange={setCalculatorOpen}
-        onComplete={handleCalculatorComplete}
-      />
     </div>
   );
 };

@@ -5,20 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { CategoryScore } from '@/types/dashboard';
 import { TrendingUp, Calendar, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface MaturityComparisonProps {
   currentScores: CategoryScore;
   previousScores?: CategoryScore;
   language: 'en' | 'es';
-  onRetakeAssessment: () => void;
 }
 
 export const MaturityComparison: React.FC<MaturityComparisonProps> = ({
   currentScores,
   previousScores,
-  language,
-  onRetakeAssessment
+  language
 }) => {
+  const navigate = useNavigate();
+
   const translations = {
     en: {
       maturityOverview: "Maturity Overview",
@@ -69,6 +70,10 @@ export const MaturityComparison: React.FC<MaturityComparisonProps> = ({
     return 'text-gray-500';
   };
 
+  const handleRetakeAssessment = () => {
+    navigate('/maturity-calculator');
+  };
+
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-purple-100">
       <CardHeader className="pb-4">
@@ -116,7 +121,7 @@ export const MaturityComparison: React.FC<MaturityComparisonProps> = ({
           <div className="bg-purple-50 p-4 rounded-lg text-center">
             <p className="text-purple-700 mb-3">{t.noComparison}</p>
             <Button 
-              onClick={onRetakeAssessment}
+              onClick={handleRetakeAssessment}
               className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
             >
               {t.retakeAssessment}

@@ -1,14 +1,14 @@
 
 import React from 'react';
-import { ProductMaturityCalculator } from '@/components/ProductMaturityCalculator';
-import { CategoryScore } from '@/components/maturity/types';
+import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
+import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 
 interface MaturityStepProps {
   showCalculator: boolean;
   setShowCalculator: (show: boolean) => void;
-  onComplete: (scores: CategoryScore) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
 }
 
 export const MaturityStep: React.FC<MaturityStepProps> = ({ 
@@ -27,10 +27,9 @@ export const MaturityStep: React.FC<MaturityStepProps> = ({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <ProductMaturityCalculator 
+          <SimpleCulturalMaturityCalculator 
+            language={language}
             onComplete={onComplete}
-            open={showCalculator}
-            onOpenChange={setShowCalculator}
           />
         </motion.div>
       ) : (
