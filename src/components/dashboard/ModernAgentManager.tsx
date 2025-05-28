@@ -109,7 +109,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         <TrueMasonryGrid columnWidth={400} gap={20}>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => 
-              getUserAgentData(agent.id)?.is_enabled
+              Boolean(getUserAgentData(agent.id)?.is_enabled)
             ).length;
             
             const categoryRecommendedCount = agents.filter(agent => 

@@ -1,6 +1,6 @@
 
 import { CulturalAgent } from '@/data/agentsDatabase';
-import { AgentFilter, FilteredAgent, GroupedAgents } from '@/types/agentTypes';
+import { AgentFilter, GroupedAgents } from '@/types/agentTypes';
 
 export const RECOMMENDED_AGENT_IDS = [
   'cultural-consultant',
@@ -77,7 +77,7 @@ export const filterAgents = (
   if (filters.selectedStatus !== 'all') {
     filteredAgents = filteredAgents.filter(agent => {
       const userAgent = getUserAgentData(agent.id);
-      const isEnabled = userAgent?.is_enabled || false;
+      const isEnabled = Boolean(userAgent?.is_enabled);
       const isRecommended = isAgentRecommended(agent.id);
       
       switch (filters.selectedStatus) {

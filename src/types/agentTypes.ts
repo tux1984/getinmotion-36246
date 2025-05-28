@@ -21,17 +21,7 @@ export interface AgentToggleState {
   endToggle: (agentId: string) => void;
 }
 
-export interface FilteredAgent {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  priority: string;
-  impact: number;
-  color: string;
-  icon: React.ReactNode;
-}
-
+// Remove FilteredAgent interface since we'll use CulturalAgent directly
 export interface GroupedAgents {
-  [category: string]: FilteredAgent[];
+  [category: string]: import('@/data/agentsDatabase').CulturalAgent[];
 }
