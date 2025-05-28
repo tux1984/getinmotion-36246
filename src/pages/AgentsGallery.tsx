@@ -14,6 +14,7 @@ const AgentsGallery = () => {
       subtitle: "Discover our comprehensive suite of specialized AI agents designed to transform your creative business operations",
       navAgents: "Agents",
       navAccess: "Get Access",
+      navLogin: "Login",
       priority: "Priority",
       impact: "Impact",
       exampleQuestion: "Example Question",
@@ -32,6 +33,7 @@ const AgentsGallery = () => {
       subtitle: "Descubre nuestra suite integral de agentes de IA especializados diseñados para transformar las operaciones de tu negocio creativo",
       navAgents: "Agentes",
       navAccess: "Obtener Acceso",
+      navLogin: "Iniciar Sesión",
       priority: "Prioridad",
       impact: "Impacto",
       exampleQuestion: "Pregunta Ejemplo",
@@ -63,7 +65,8 @@ const AgentsGallery = () => {
       <Header 
         translations={{
           navAgents: t.navAgents,
-          navAccess: t.navAccess
+          navAccess: t.navAccess,
+          navLogin: t.navLogin
         }}
         onAccessClick={() => {}}
       />
