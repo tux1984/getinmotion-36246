@@ -25,11 +25,11 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
     ? "https://ylooqmqmoufqtxvetxuj.supabase.co/storage/v1/object/public/images/1748464946532-logo_2.png" // Logo for dark backgrounds
     : "https://ylooqmqmoufqtxvetxuj.supabase.co/storage/v1/object/public/images/1748464946989-logo_1.png"; // Logo for light backgrounds
   
-  // Set size based on prop
+  // Set size based on prop - made lg size bigger
   const sizeClasses = {
     sm: 'h-6 w-auto',
     md: 'h-8 w-auto',
-    lg: 'h-10 w-auto'
+    lg: 'h-12 w-auto'
   };
   
   const handleImageError = () => {
@@ -40,7 +40,7 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
   if (imageError) {
     return (
       <Link to="/" className={`inline-flex items-center ${className}`}>
-        <span className={`font-bold ${shouldUseLightLogo ? 'text-white' : 'text-gray-900'} ${size === 'lg' ? 'text-xl' : size === 'md' ? 'text-lg' : 'text-base'}`}>
+        <span className={`font-bold ${shouldUseLightLogo ? 'text-white' : 'text-gray-900'} ${size === 'lg' ? 'text-2xl' : size === 'md' ? 'text-lg' : 'text-base'}`}>
           Get in Motion
         </span>
       </Link>
@@ -52,7 +52,7 @@ export const MotionLogo: React.FC<MotionLogoProps> = ({
       <img 
         src={logoSrc}
         alt="Get in Motion Logo" 
-        className={`${sizeClasses[size]}`}
+        className={`${sizeClasses[size]} hover:scale-105 transition-transform duration-200`}
         onError={handleImageError}
       />
     </Link>

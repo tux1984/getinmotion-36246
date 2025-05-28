@@ -46,41 +46,45 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <MotionLogo variant="dark" />
+    <header className="fixed top-4 left-4 right-4 z-50 mx-2 sm:mx-4 lg:mx-6">
+      <div className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <MotionLogo variant="dark" size="lg" />
+        </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={onMaturityCalculatorClick}
-            className="flex items-center gap-2"
+            className="group flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
           >
-            <Calculator className="w-4 h-4" />
-            <span className="hidden sm:inline">{t.maturityCalculator}</span>
+            <Calculator className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+            <span className="hidden sm:inline font-medium">{t.maturityCalculator}</span>
           </Button>
           
           <Button
             variant="outline"
             size="sm"
             onClick={handleAgentManagerClick}
-            className="flex items-center gap-2"
+            className="group flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-pink-100 hover:border-purple-300 hover:text-purple-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
           >
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">{t.agentManager}</span>
+            <Users className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+            <span className="hidden sm:inline font-medium">{t.agentManager}</span>
           </Button>
           
-          <LanguageSwitcher />
+          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200">
+            <LanguageSwitcher />
+          </div>
           
           <Button
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="flex items-center gap-2 text-gray-600 hover:text-red-600"
+            className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 hover:scale-105 rounded-xl"
           >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">{t.signOut}</span>
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+            <span className="hidden sm:inline font-medium">{t.signOut}</span>
           </Button>
         </div>
       </div>

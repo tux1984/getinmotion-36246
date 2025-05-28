@@ -88,13 +88,21 @@ const Dashboard = () => {
   // Show loading state
   if (isLoading) {
     console.log('Dashboard: Showing loading state');
-    return <DashboardLoadingState />;
+    return (
+      <div className="pt-24">
+        <DashboardLoadingState />
+      </div>
+    );
   }
 
   // Show error state
   if (error) {
     console.log('Dashboard: Showing error state:', error);
-    return <DashboardErrorState error={error} />;
+    return (
+      <div className="pt-24">
+        <DashboardErrorState error={error} />
+      </div>
+    );
   }
 
   // Show onboarding if necessary
@@ -106,10 +114,12 @@ const Dashboard = () => {
           onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
           onAgentManagerClick={handleOpenAgentManager}
         />
-        <OnboardingWizard 
-          profileType={profileType} 
-          onComplete={handleOnboardingComplete} 
-        />
+        <div className="pt-24">
+          <OnboardingWizard 
+            profileType={profileType} 
+            onComplete={handleOnboardingComplete} 
+          />
+        </div>
       </DashboardBackground>
     );
   }
@@ -122,20 +132,22 @@ const Dashboard = () => {
         onAgentManagerClick={handleOpenAgentManager}
       />
       
-      <DashboardContent
-        activeSection={activeSection}
-        selectedAgent={selectedAgent}
-        agents={agents}
-        maturityScores={maturityScores}
-        recommendedAgents={recommendedAgents}
-        language={language}
-        onSelectAgent={handleSelectAgent}
-        onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-        onOpenAgentManager={handleOpenAgentManager}
-        onBackFromAgentDetails={handleBackFromAgentDetails}
-        onBackFromAgentManager={handleBackFromAgentManager}
-        onAgentToggle={handleAgentToggle}
-      />
+      <div className="pt-24">
+        <DashboardContent
+          activeSection={activeSection}
+          selectedAgent={selectedAgent}
+          agents={agents}
+          maturityScores={maturityScores}
+          recommendedAgents={recommendedAgents}
+          language={language}
+          onSelectAgent={handleSelectAgent}
+          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+          onOpenAgentManager={handleOpenAgentManager}
+          onBackFromAgentDetails={handleBackFromAgentDetails}
+          onBackFromAgentManager={handleBackFromAgentManager}
+          onAgentToggle={handleAgentToggle}
+        />
+      </div>
     </DashboardBackground>
   );
 };
