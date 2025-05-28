@@ -68,14 +68,20 @@ const Dashboard = () => {
     // For now, just log the action
   };
 
+  const backgroundPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
+
   // Show loading state
   if (isLoading) {
     console.log('Dashboard: Showing loading state');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundImage: `url("${backgroundPattern}")` }}
+        />
+        <div className="relative z-10 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-300 mx-auto mb-4"></div>
+          <p className="text-purple-200">Cargando dashboard...</p>
         </div>
       </div>
     );
@@ -85,10 +91,14 @@ const Dashboard = () => {
   if (error) {
     console.log('Dashboard: Showing error state:', error);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="text-red-600 text-lg font-medium">Error cargando el dashboard</div>
-          <p className="text-gray-600">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundImage: `url("${backgroundPattern}")` }}
+        />
+        <div className="relative z-10 text-center space-y-4">
+          <div className="text-red-400 text-lg font-medium">Error cargando el dashboard</div>
+          <p className="text-purple-200">{error}</p>
           <div className="space-x-4">
             <Button onClick={() => window.location.reload()}>
               Reintentar
@@ -96,6 +106,7 @@ const Dashboard = () => {
             <Button 
               variant="outline" 
               onClick={() => navigate('/maturity-calculator')}
+              className="border-purple-300 text-purple-200 hover:bg-purple-800"
             >
               Ir a Evaluación
             </Button>
@@ -109,75 +120,89 @@ const Dashboard = () => {
   if (showOnboarding) {
     console.log('Dashboard: Showing onboarding');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-        <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
-        <OnboardingWizard 
-          profileType={profileType} 
-          onComplete={handleOnboardingComplete} 
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundImage: `url("${backgroundPattern}")` }}
         />
+        <div className="relative z-10">
+          <NewDashboardHeader onMaturityCalculatorClick={handleNavigateToMaturityCalculator} />
+          <OnboardingWizard 
+            profileType={profileType} 
+            onComplete={handleOnboardingComplete} 
+          />
+        </div>
       </div>
     );
   }
 
   console.log('Dashboard: Showing main dashboard');
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <NewDashboardHeader 
-        onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-        onAgentManagerClick={handleOpenAgentManager}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Background pattern */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{ backgroundImage: `url("${backgroundPattern}")` }}
       />
       
-      <div className="container mx-auto px-4 py-6">
-        {activeSection === 'dashboard' && (
-          <ModernDashboardMain 
-            onSelectAgent={handleSelectAgent}
-            onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-            agents={agents}
-            maturityScores={maturityScores}
-            recommendedAgents={recommendedAgents}
-          />
-        )}
-
-        {activeSection === 'agent-details' && selectedAgent && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
-            <div className="mb-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleBackFromAgentDetails}
-                className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
-              </Button>
-            </div>
-            <AgentDetails 
-              agentId={selectedAgent}
-              language={language}
+      <div className="relative z-10">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+          onAgentManagerClick={handleOpenAgentManager}
+        />
+        
+        <div className="container mx-auto px-4 py-6">
+          {activeSection === 'dashboard' && (
+            <ModernDashboardMain 
+              onSelectAgent={handleSelectAgent}
+              onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+              agents={agents}
+              maturityScores={maturityScores}
+              recommendedAgents={recommendedAgents}
             />
-          </div>
-        )}
+          )}
 
-        {activeSection === 'agent-manager' && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
-            <div className="mb-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleBackFromAgentManager}
-                className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
-              </Button>
+          {activeSection === 'agent-details' && selectedAgent && (
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+              <div className="mb-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleBackFromAgentDetails}
+                  className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
+                </Button>
+              </div>
+              <AgentDetails 
+                agentId={selectedAgent}
+                language={language}
+              />
             </div>
-            <AgentManager 
-              currentAgents={agents}
-              onAgentToggle={handleAgentToggle}
-              language={language}
-            />
-          </div>
-        )}
+          )}
+
+          {activeSection === 'agent-manager' && (
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+              <div className="mb-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleBackFromAgentManager}
+                  className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
+                </Button>
+              </div>
+              <AgentManager 
+                currentAgents={agents}
+                onAgentToggle={handleAgentToggle}
+                language={language}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

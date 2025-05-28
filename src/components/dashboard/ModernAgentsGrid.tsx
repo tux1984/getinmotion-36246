@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Bot, MessageCircle, Play, Pause, Settings, Zap } from 'lucide-react';
 import { useUserData } from '@/hooks/useUserData';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
+import { CollapsibleAgentsSection } from './CollapsibleAgentsSection';
 
 interface ModernAgentsGridProps {
   agents: Agent[];
@@ -26,7 +27,6 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     en: {
       yourAgents: "Your AI Agents",
       primaryRecommendations: "Recommended for You",
-      allAgents: "All Available Agents",
       chatWith: "Chat",
       configure: "Configure",
       active: "Active",
@@ -41,7 +41,6 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     es: {
       yourAgents: "Tus Agentes IA",
       primaryRecommendations: "Recomendados para Ti",
-      allAgents: "Todos los Agentes",
       chatWith: "Chatear",
       configure: "Configurar",
       active: "Activo",
@@ -249,16 +248,13 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         </div>
       )}
 
-      {/* All Available Agents */}
+      {/* Collapsible Available Agents Section */}
       {(secondaryAgents.length > 0 || allOtherAgents.length > 0) && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-purple-200">{t.allAgents}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...secondaryAgents, ...allOtherAgents].map(agent => (
-              <ModernAgentCard key={agent.id} agent={agent} />
-            ))}
-          </div>
-        </div>
+        <CollapsibleAgentsSection
+          agents={[...secondaryAgents, ...allOtherAgents]}
+          onEnableAgent={handleEnableAgent}
+          language={language}
+        />
       )}
 
       {/* Empty state */}
