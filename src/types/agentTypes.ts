@@ -1,8 +1,10 @@
 
+export type AgentStatus = 'active' | 'inactive' | 'paused';
+
 export interface Agent {
   id: string;
   name: string;
-  status: 'active' | 'inactive';
+  status: AgentStatus;
   category: string;
   activeTasks: number;
   lastUsed?: string;

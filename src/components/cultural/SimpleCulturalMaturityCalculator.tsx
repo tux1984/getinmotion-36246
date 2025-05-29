@@ -80,7 +80,7 @@ export const SimpleCulturalMaturityCalculator = ({
 
   useEffect(() => {
     if (currentStep !== 'results') {
-      const questions = getQuestions(profileType, language);
+      const questions = getQuestions(language, profileType);
       setCategoryQuestions(questions);
       setCurrentQuestionIndex(0);
     }
@@ -141,7 +141,7 @@ export const SimpleCulturalMaturityCalculator = ({
     } else if (currentStepIndex > 0) {
       const prevStep = steps[currentStepIndex - 1];
       setCurrentStep(prevStep);
-      const prevQuestions = getQuestions(profileType, language);
+      const prevQuestions = getQuestions(language, profileType);
       setCurrentQuestionIndex(prevQuestions.length - 1);
     }
   };
@@ -194,11 +194,11 @@ export const SimpleCulturalMaturityCalculator = ({
   };
 
   const totalQuestions = steps.slice(0, -1).reduce((total, step) => {
-    return total + getQuestions(profileType, language).length;
+    return total + getQuestions(language, profileType).length;
   }, 0);
 
   const completedQuestions = steps.slice(0, currentStepIndex).reduce((total, step) => {
-    return total + getQuestions(profileType, language).length;
+    return total + getQuestions(language, profileType).length;
   }, 0) + currentQuestionIndex;
 
   const progressPercentage = Math.round((completedQuestions / totalQuestions) * 100);

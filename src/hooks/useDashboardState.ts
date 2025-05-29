@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Agent } from '@/types/agentTypes';
+import { Agent } from '@/types/dashboard';
 
 type DashboardSection = 'main' | 'agent-details' | 'agent-manager' | 'agent-chat';
 

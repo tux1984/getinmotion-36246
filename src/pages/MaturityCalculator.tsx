@@ -34,13 +34,41 @@ const MaturityCalculator = () => {
       title: 'Maturity Calculator',
       subtitle: 'Evaluate your cultural project maturity',
       selectProfile: 'Select your profile to start the assessment',
-      back: 'Back to Dashboard'
+      back: 'Back to Dashboard',
+      profileTypeTitle: 'Select Your Profile Type',
+      profileTypeSubtitle: 'Choose the option that best describes your current situation',
+      idea: {
+        title: 'I have an idea',
+        description: 'I have a cultural idea but haven\'t started yet'
+      },
+      solo: {
+        title: 'Solo creator',
+        description: 'I\'m working on my cultural project independently'
+      },
+      team: {
+        title: 'Team project',
+        description: 'I\'m part of a team developing a cultural project'
+      }
     },
     es: {
       title: 'Calculadora de Madurez',
       subtitle: 'Evalúa la madurez de tu proyecto cultural',
       selectProfile: 'Selecciona tu perfil para comenzar la evaluación',
-      back: 'Volver al Dashboard'
+      back: 'Volver al Dashboard',
+      profileTypeTitle: 'Selecciona tu Tipo de Perfil',
+      profileTypeSubtitle: 'Elige la opción que mejor describa tu situación actual',
+      idea: {
+        title: 'Tengo una idea',
+        description: 'Tengo una idea cultural pero aún no he empezado'
+      },
+      solo: {
+        title: 'Creador independiente',
+        description: 'Estoy trabajando en mi proyecto cultural de forma independiente'
+      },
+      team: {
+        title: 'Proyecto en equipo',
+        description: 'Formo parte de un equipo desarrollando un proyecto cultural'
+      }
     }
   };
 
@@ -112,8 +140,9 @@ const MaturityCalculator = () => {
             </div>
             
             <ProfileTypeSelector
-              onProfileSelect={handleProfileSelect}
-              selectedProfile={profileType}
+              profileType={profileType}
+              onSelect={handleProfileSelect}
+              t={t}
             />
           </div>
         ) : profileType ? (

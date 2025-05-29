@@ -46,9 +46,15 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
       
       <ModernAgentsGrid 
         agents={agents}
-        recommendedAgents={recommendedAgents}
+        recommendedAgents={{
+          primary: recommendedAgents.map(agent => agent.id),
+          secondary: []
+        }}
         maturityScores={maturityScores}
-        onSelectAgent={onSelectAgent}
+        onSelectAgent={(agentId: string) => {
+          const agent = agents.find(a => a.id === agentId);
+          if (agent) onSelectAgent(agent);
+        }}
         language={language}
       />
     </div>

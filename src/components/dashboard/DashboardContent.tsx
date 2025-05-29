@@ -4,7 +4,7 @@ import { ModernDashboardMain } from './ModernDashboardMain';
 import { DashboardAgentDetails } from './DashboardAgentDetails';
 import { DashboardAgentManager } from './DashboardAgentManager';
 import { ModernCopilotChat } from './ModernCopilotChat';
-import { Agent } from '@/types/agentTypes';
+import { Agent } from '@/types/dashboard';
 import { CategoryScore } from '@/components/maturity/types';
 
 interface DashboardContentProps {
