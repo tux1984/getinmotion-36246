@@ -440,6 +440,10 @@ export type Database = {
           created_at: string
         }[]
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_authorized_user: {
         Args: { user_email: string }
         Returns: boolean

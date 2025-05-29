@@ -7,6 +7,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Input validation function
+function validateInput(data: any) {
+  const { email, password } = data;
+  
+  if (!email || typeof email !== 'string') {
+    return { isValid: false, error: 'Valid email is required' };
+  }
+  
+  if (!password || typeof password !== 'string') {
+    return { isValid: false, error: 'Valid password is required' };
+  }
+  
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { isValid: false, error: 'Invalid email format' };
+  }
+  
+  // Password strength validation
+  if (password.length < 8) {
+    return { isValid: false, error: 'Password must be at least 8 characters long' };
+  }
+  
+  return { isValid: true };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,13 +40,90 @@ serve(async (req) => {
   }
 
   try {
-    const { email, password } = await req.json()
-
-    if (!email || !password) {
+    // Get the authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Email and password are required' }),
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Parse and validate request body
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
         { 
           status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Validate input
+    const validation = validateInput(requestData);
+    if (!validation.isValid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    const { email, password } = requestData;
+
+    // Create Supabase client with the user's token
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    )
+
+    // Verify the user is authenticated
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('Authentication error:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Check if user is admin
+    const { data: isAdmin, error: adminError } = await supabaseClient.rpc('is_admin');
+    
+    if (adminError) {
+      console.error('Admin check error:', adminError);
+      return new Response(
+        JSON.stringify({ error: 'Authorization check failed' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    if (!isAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Insufficient permissions' }),
+        { 
+          status: 403,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
@@ -60,28 +163,13 @@ serve(async (req) => {
 
     console.log('User created in auth, now adding to admin_users table')
 
-    // Get current user from request (the admin creating the user)
-    const authHeader = req.headers.get('Authorization')
-    let createdBy = null
-
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '')
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-      )
-      
-      const { data: { user } } = await supabaseClient.auth.getUser(token)
-      createdBy = user?.id
-    }
-
     // Add to admin_users table
     const { error: insertError } = await supabaseAdmin
       .from('admin_users')
       .insert([
         {
           email,
-          created_by: createdBy
+          created_by: user.id
         }
       ])
 

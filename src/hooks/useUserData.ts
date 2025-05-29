@@ -172,11 +172,14 @@ export const useUserData = () => {
   };
 
   const updateProject = async (id: string, updates: Partial<UserProject>) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
       const { data, error } = await supabase
         .from('user_projects')
         .update(updates)
         .eq('id', id)
+        .eq('user_id', user.id) // Ensure user can only update their own projects
         .select()
         .single();
 
@@ -191,11 +194,14 @@ export const useUserData = () => {
   };
 
   const deleteProject = async (id: string) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
       const { error } = await supabase
         .from('user_projects')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure user can only delete their own projects
 
       if (error) throw error;
       
