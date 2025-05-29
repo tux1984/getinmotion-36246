@@ -16,7 +16,7 @@ interface StepContentContainerProps {
   profileType: any;
   answers: any;
   extendedAnswers: any;
-  analysisType: string | null;
+  analysisType: 'quick' | 'deep' | null;
   scores: any;
   recommendedAgents: any;
   language: 'en' | 'es';
