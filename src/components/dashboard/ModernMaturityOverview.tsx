@@ -19,26 +19,26 @@ export const ModernMaturityOverview: React.FC<ModernMaturityOverviewProps> = ({
 
   const translations = {
     en: {
-      title: "Business Maturity Analysis",
-      retakeAssessment: "Retake Assessment",
+      title: "Business Maturity",
+      retakeAssessment: "Retake",
       ideaValidation: "Idea Validation",
       userExperience: "User Experience", 
       marketFit: "Market Fit",
       monetization: "Monetization",
-      noScores: "Complete your maturity assessment to see your progress",
+      noScores: "Complete your business maturity assessment",
       takeAssessment: "Take Assessment",
-      overallProgress: "Overall Progress"
+      overallProgress: "Overall"
     },
     es: {
-      title: "Análisis de Madurez Empresarial",
-      retakeAssessment: "Repetir Evaluación",
+      title: "Madurez de Negocio",
+      retakeAssessment: "Repetir",
       ideaValidation: "Validación de Idea",
       userExperience: "Experiencia de Usuario",
       marketFit: "Ajuste de Mercado", 
       monetization: "Monetización",
-      noScores: "Completa tu evaluación de madurez para ver tu progreso",
+      noScores: "Completa tu evaluación de madurez de negocio",
       takeAssessment: "Realizar Evaluación",
-      overallProgress: "Progreso General"
+      overallProgress: "General"
     }
   };
 
@@ -106,12 +106,12 @@ export const ModernMaturityOverview: React.FC<ModernMaturityOverviewProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl animate-pulse">
-        <div className="h-8 bg-slate-700/50 rounded mb-6"></div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 shadow-2xl animate-pulse">
+        <div className="h-6 bg-slate-700/50 rounded mb-4"></div>
+        <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-slate-800/50 rounded-xl p-4">
-              <div className="h-20 bg-slate-700/50 rounded"></div>
+            <div key={i} className="bg-slate-800/50 rounded-lg p-3">
+              <div className="h-16 bg-slate-700/50 rounded"></div>
             </div>
           ))}
         </div>
@@ -121,13 +121,13 @@ export const ModernMaturityOverview: React.FC<ModernMaturityOverviewProps> = ({
 
   if (!currentScores) {
     return (
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-        <div className="text-center py-8">
-          <Target className="w-16 h-16 text-purple-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">{t.noScores}</h3>
+      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 shadow-2xl">
+        <div className="text-center py-6">
+          <Target className="w-12 h-12 text-purple-300 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-white mb-2">{t.noScores}</h3>
           <Button
             onClick={onRetakeAssessment}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-xl px-6 py-2 font-medium transition-all duration-200 hover:scale-105"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             {t.takeAssessment}
@@ -140,29 +140,30 @@ export const ModernMaturityOverview: React.FC<ModernMaturityOverviewProps> = ({
   const overallScore = getOverallScore();
 
   return (
-    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 shadow-2xl">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1">{t.title}</h2>
-          <div className="flex items-center gap-3">
-            <span className="text-slate-300">{t.overallProgress}:</span>
-            <span className={`text-2xl font-bold ${getScoreColor(overallScore)}`}>
+          <h2 className="text-lg font-bold text-white mb-1">{t.title}</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-300 text-sm">{t.overallProgress}:</span>
+            <span className={`text-lg font-bold ${getScoreColor(overallScore)}`}>
               {overallScore}%
             </span>
           </div>
         </div>
         <Button
           onClick={onRetakeAssessment}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-xl px-6 py-2 font-medium transition-all duration-200 hover:scale-105"
+          size="sm"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-lg px-3 py-1 text-xs font-medium transition-all duration-200 hover:scale-105"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className="w-3 h-3 mr-1" />
           {t.retakeAssessment}
         </Button>
       </div>
 
-      {/* Two-column layout for scores */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Compact 2x2 grid for scores */}
+      <div className="grid grid-cols-2 gap-3">
         {scoreCategories.map((category) => {
           const score = currentScores[category.key];
           const IconComponent = category.icon;
@@ -171,33 +172,32 @@ export const ModernMaturityOverview: React.FC<ModernMaturityOverviewProps> = ({
           return (
             <div
               key={category.key}
-              className={`bg-gradient-to-br ${category.bgColor} backdrop-blur-sm rounded-xl p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200`}
+              className={`bg-gradient-to-br ${category.bgColor} backdrop-blur-sm rounded-lg p-3 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 bg-gradient-to-br ${category.color} rounded-lg flex items-center justify-center`}>
-                    <IconComponent className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm">{category.label}</p>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-2xl font-bold ${getScoreColor(score)}`}>
-                        {score}%
+              <div className="flex items-center justify-between mb-2">
+                <div className={`w-6 h-6 bg-gradient-to-br ${category.color} rounded-md flex items-center justify-center`}>
+                  <IconComponent className="w-3 h-3 text-white" />
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    <span className={`text-lg font-bold ${getScoreColor(score)}`}>
+                      {score}%
+                    </span>
+                    {scoreChange && (
+                      <span className={`text-xs font-medium ${scoreChange.positive ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {scoreChange.positive ? '+' : ''}{scoreChange.value}
                       </span>
-                      {scoreChange && (
-                        <span className={`text-xs font-medium ${scoreChange.positive ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {scoreChange.positive ? '+' : ''}{scoreChange.value}
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
               
-              {/* Large progress bar */}
-              <div className="w-full bg-slate-700/50 rounded-full h-3">
+              <p className="text-white font-medium text-xs mb-2">{category.label}</p>
+              
+              {/* Compact progress bar */}
+              <div className="w-full bg-slate-700/50 rounded-full h-2">
                 <div
-                  className={`bg-gradient-to-r ${category.color} h-3 rounded-full transition-all duration-1000 ease-out`}
+                  className={`bg-gradient-to-r ${category.color} h-2 rounded-full transition-all duration-1000 ease-out`}
                   style={{ width: `${score}%` }}
                 />
               </div>

@@ -26,18 +26,21 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   const { language } = useLanguage();
 
   return (
-    <div className="space-y-12">
-      <ModernWelcomeSection 
-        language={language}
-      />
-      
-      {maturityScores && (
-        <ModernMaturityOverview 
-          currentScores={maturityScores}
+    <div className="space-y-8">
+      {/* Two-column layout for Welcome and Maturity sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ModernWelcomeSection 
           language={language}
-          onRetakeAssessment={onMaturityCalculatorClick}
         />
-      )}
+        
+        {maturityScores && (
+          <ModernMaturityOverview 
+            currentScores={maturityScores}
+            language={language}
+            onRetakeAssessment={onMaturityCalculatorClick}
+          />
+        )}
+      </div>
       
       <ModernAgentsGrid 
         agents={agents}
