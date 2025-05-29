@@ -1,36 +1,17 @@
+
 import React, { useMemo, useEffect, useState } from 'react';
-import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
-import { motion, AnimatePresence } from 'framer-motion';
-import { QuestionCard } from '@/components/maturity/QuestionCard';
-import { ProgressBar } from '@/components/maturity/ProgressBar';
 import { useOptimizedQuestions } from './hooks/useOptimizedQuestions';
 import { getExtendedQuestions } from '@/components/maturity/questions';
-import { OptimizedCharacterImage } from './components/OptimizedCharacterImage';
 import { OnboardingErrorBoundary } from './components/OnboardingErrorBoundary';
-import { DebouncedButton } from './components/DebouncedButton';
-import { ProfileTypeSelector } from './components/ProfileTypeSelector';
-import { ResultsDisplay } from './components/ResultsDisplay';
-import { BifurcationChoice } from './components/BifurcationChoice';
 import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
 import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
-import { MobileHeader } from './components/MobileHeader';
-import { MobileNavigation } from './components/MobileNavigation';
 import { RecoverProgressDialog } from './components/RecoverProgressDialog';
 import { useMaturityProgress } from './hooks/useMaturityProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { CalculatorLayout } from './components/CalculatorLayout';
+import { StepContentContainer } from './components/StepContentContainer';
 
 interface SimpleCulturalMaturityCalculatorProps {
   language: 'en' | 'es';
@@ -142,11 +123,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       secondaryRecommendations: "Secondary Recommendations",
       deeperAnalysis: "Want a deeper analysis?",
       moreQuestions: "Answer more questions for detailed insights",
-      finishAssessment: "Finish Assessment",
-      exitTitle: "Exit Assessment",
-      exitDescription: "Your progress will be saved and you can continue later. Are you sure you want to exit?",
-      saveAndExit: "Save & Exit",
-      cancel: "Cancel"
+      finishAssessment: "Finish Assessment"
     },
     es: {
       title: "Madurez de Negocio",
@@ -176,11 +153,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       secondaryRecommendations: "Recomendaciones Secundarias",
       deeperAnalysis: "¿Quieres un análisis más profundo?",
       moreQuestions: "Responde más preguntas para obtener información detallada",
-      finishAssessment: "Finalizar Evaluación",
-      exitTitle: "Salir de la Evaluación", 
-      exitDescription: "Tu progreso se guardará y podrás continuar después. ¿Estás seguro que quieres salir?",
-      saveAndExit: "Guardar y Salir",
-      cancel: "Cancelar"
+      finishAssessment: "Finalizar Evaluación"
     }
   }), []);
 
@@ -298,222 +271,44 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
         lastSaveTime={savedProgress?.timestamp}
       />
 
-      {/* Main Content - No Card wrapper, simplified layout */}
-      <div className="w-full">
-        {/* Mobile Header */}
-        {isMobile && (
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-purple-100">
-            <MobileHeader 
-              title={t.title}
-              currentStep={currentStepNumber}
-              totalSteps={totalSteps}
-              language={language}
-            />
-          </div>
-        )}
-
-        {/* Content Container */}
-        <div className={`relative bg-white/80 backdrop-blur-sm ${isMobile ? 'pt-4 pb-20' : 'p-8'} rounded-2xl border border-purple-100/50 shadow-lg`}>
-          {/* Exit button */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200">
-                <X className="h-5 w-5" />
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.exitTitle}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.exitDescription}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleSaveAndExit}>
-                  {t.saveAndExit}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Desktop Header */}
-          {!isMobile && (
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-purple-900 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                  {t.title}
-                </h3>
-                <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-                  {language === 'en' 
-                    ? `Step ${currentStepNumber} of ${totalSteps}` 
-                    : `Paso ${currentStepNumber} de ${totalSteps}`}
-                </span>
-              </div>
-              
-              <ProgressBar current={currentStepNumber} total={totalSteps} />
-            </div>
-          )}
-
-          <div className={`flex gap-6 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
-            {/* Character Image - Smaller on desktop, hidden on mobile */}
-            {!isMobile && (
-              <div className="w-1/4 flex-shrink-0">
-                <OptimizedCharacterImage
-                  src={getCurrentCharacterImage}
-                  alt="Character"
-                  preloadNext={getNextCharacterImage}
-                />
-              </div>
-            )}
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <AnimatePresence mode="wait">
-                {currentStep === 'profileType' && (
-                  <motion.div
-                    key="profileType"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ProfileTypeSelector
-                      profileType={profileType}
-                      onSelect={handleProfileSelect}
-                      t={t}
-                    />
-                  </motion.div>
-                )}
-
-                {currentStep === 'questions' && questions[currentQuestionIndex] && (
-                  <motion.div
-                    key={`question-${currentQuestionIndex}`}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <QuestionCard 
-                      question={questions[currentQuestionIndex]}
-                      selectedValue={answers[questions[currentQuestionIndex].id]}
-                      onSelectOption={handleSelectOption}
-                    />
-                  </motion.div>
-                )}
-
-                {currentStep === 'bifurcation' && (
-                  <motion.div
-                    key="bifurcation"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <BifurcationChoice
-                      language={language}
-                      selectedType={analysisType}
-                      onSelect={handleAnalysisChoice}
-                    />
-                  </motion.div>
-                )}
-
-                {currentStep === 'extendedQuestions' && extendedQuestions[currentQuestionIndex] && (
-                  <motion.div
-                    key={`extended-${currentQuestionIndex}`}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <QuestionCard 
-                      question={extendedQuestions[currentQuestionIndex]}
-                      selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
-                      onSelectOption={handleSelectOption}
-                    />
-                  </motion.div>
-                )}
-
-                {currentStep === 'results' && scores && recommendedAgents && (
-                  <motion.div
-                    key="results"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ResultsDisplay
-                      scores={scores}
-                      recommendedAgents={recommendedAgents}
-                      t={t}
-                      language={language}
-                      onComplete={handleComplete}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Desktop Navigation */}
-          {!isMobile && (
-            <div className="flex justify-between pt-4 mt-6 border-t border-purple-100">
-              <DebouncedButton 
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 'profileType'}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t.back}
-              </DebouncedButton>
-
-              {currentStep !== 'results' && (
-                <DebouncedButton 
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
-                >
-                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
-                    ? t.complete 
-                    : t.next}
-                  <ArrowRight className="h-4 w-4" />
-                </DebouncedButton>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Navigation - Improved positioning */}
-        {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg z-30">
-            <div className="flex justify-between items-center max-w-4xl mx-auto gap-4">
-              <DebouncedButton 
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 'profileType'}
-                className="flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
-                size="lg"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t.back}
-              </DebouncedButton>
-
-              {currentStep !== 'results' && (
-                <DebouncedButton 
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
-                  size="lg"
-                >
-                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
-                    ? t.complete 
-                    : t.next}
-                  <ArrowRight className="h-4 w-4" />
-                </DebouncedButton>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      <CalculatorLayout
+        currentStepNumber={currentStepNumber}
+        totalSteps={totalSteps}
+        title={t.title}
+        language={language}
+        onBack={handleBack}
+        onNext={handleNext}
+        canGoBack={currentStep !== 'profileType'}
+        showNext={currentStep !== 'results'}
+        nextLabel={
+          currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
+            ? t.complete 
+            : t.next
+        }
+        backLabel={t.back}
+        onExit={handleSaveAndExit}
+      >
+        <StepContentContainer
+          currentStep={currentStep}
+          currentQuestionIndex={currentQuestionIndex}
+          questions={questions}
+          extendedQuestions={extendedQuestions}
+          profileType={profileType}
+          answers={answers}
+          extendedAnswers={extendedAnswers}
+          analysisType={analysisType}
+          scores={scores}
+          recommendedAgents={recommendedAgents}
+          language={language}
+          t={t}
+          characterImage={getCurrentCharacterImage}
+          nextCharacterImage={getNextCharacterImage}
+          onProfileSelect={handleProfileSelect}
+          onSelectOption={handleSelectOption}
+          onAnalysisChoice={handleAnalysisChoice}
+          onComplete={handleComplete}
+        />
+      </CalculatorLayout>
     </OnboardingErrorBoundary>
   );
 };
