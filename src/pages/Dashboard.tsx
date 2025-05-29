@@ -124,9 +124,6 @@ const Dashboard = () => {
     );
   }
 
-  // Convert recommendedAgents to Agent[] format
-  const recommendedAgentsArray = Array.isArray(recommendedAgents) ? recommendedAgents : [];
-
   console.log('Dashboard: Showing main dashboard, active section:', activeSection);
   return (
     <DashboardBackground>
@@ -141,7 +138,7 @@ const Dashboard = () => {
           selectedAgent={selectedAgent}
           agents={agents}
           maturityScores={maturityScores}
-          recommendedAgents={recommendedAgentsArray}
+          recommendedAgents={recommendedAgents}
           language={language}
           onSelectAgent={handleSelectAgent}
           onMaturityCalculatorClick={handleNavigateToMaturityCalculator}

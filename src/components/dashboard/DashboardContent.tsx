@@ -1,20 +1,20 @@
 
 import React from 'react';
+import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { ModernDashboardMain } from './ModernDashboardMain';
 import { DashboardAgentDetails } from './DashboardAgentDetails';
 import { DashboardAgentManager } from './DashboardAgentManager';
-import { ModernCopilotChat } from './ModernCopilotChat';
-import { Agent } from '@/types/dashboard';
-import { CategoryScore } from '@/components/maturity/types';
+
+type ActiveSection = 'dashboard' | 'agent-details' | 'agent-manager';
 
 interface DashboardContentProps {
-  activeSection: 'main' | 'agent-details' | 'agent-manager' | 'agent-chat';
-  selectedAgent: Agent | null;
+  activeSection: ActiveSection;
+  selectedAgent: string | null;
   agents: Agent[];
   maturityScores: CategoryScore | null;
-  recommendedAgents: Agent[];
+  recommendedAgents: RecommendedAgents;
   language: 'en' | 'es';
-  onSelectAgent: (agent: Agent) => void;
+  onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
   onOpenAgentManager: () => void;
   onBackFromAgentDetails: () => void;
@@ -22,7 +22,7 @@ interface DashboardContentProps {
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
 }
 
-export const DashboardContent = ({
+export const DashboardContent: React.FC<DashboardContentProps> = ({
   activeSection,
   selectedAgent,
   agents,
@@ -35,94 +35,36 @@ export const DashboardContent = ({
   onBackFromAgentDetails,
   onBackFromAgentManager,
   onAgentToggle
-}: DashboardContentProps) => {
-  console.log('DashboardContent: Rendering section:', activeSection);
-
-  switch (activeSection) {
-    case 'main':
-      return (
-        <ModernDashboardMain
+}) => {
+  return (
+    <div className="container mx-auto px-4 py-6">
+      {activeSection === 'dashboard' && (
+        <ModernDashboardMain 
+          onSelectAgent={onSelectAgent}
+          onMaturityCalculatorClick={onMaturityCalculatorClick}
+          onAgentManagerClick={onOpenAgentManager}
           agents={agents}
           maturityScores={maturityScores}
           recommendedAgents={recommendedAgents}
-          language={language}
-          onSelectAgent={onSelectAgent}
-          onMaturityCalculatorClick={onMaturityCalculatorClick}
-          onOpenAgentManager={onOpenAgentManager}
-          onAgentToggle={onAgentToggle}
         />
-      );
+      )}
 
-    case 'agent-details':
-      if (!selectedAgent) {
-        console.warn('DashboardContent: No selected agent for agent-details view');
-        return (
-          <ModernDashboardMain
-            agents={agents}
-            maturityScores={maturityScores}
-            recommendedAgents={recommendedAgents}
-            language={language}
-            onSelectAgent={onSelectAgent}
-            onMaturityCalculatorClick={onMaturityCalculatorClick}
-            onOpenAgentManager={onOpenAgentManager}
-            onAgentToggle={onAgentToggle}
-          />
-        );
-      }
-      return (
+      {activeSection === 'agent-details' && selectedAgent && (
         <DashboardAgentDetails
-          selectedAgent={selectedAgent.id}
+          selectedAgent={selectedAgent}
           language={language}
           onBack={onBackFromAgentDetails}
         />
-      );
+      )}
 
-    case 'agent-manager':
-      return (
+      {activeSection === 'agent-manager' && (
         <DashboardAgentManager
           agents={agents}
           language={language}
           onBack={onBackFromAgentManager}
           onAgentToggle={onAgentToggle}
         />
-      );
-
-    case 'agent-chat':
-      if (!selectedAgent) {
-        console.warn('DashboardContent: No selected agent for agent-chat view');
-        return (
-          <ModernDashboardMain
-            agents={agents}
-            maturityScores={maturityScores}
-            recommendedAgents={recommendedAgents}
-            language={language}
-            onSelectAgent={onSelectAgent}
-            onMaturityCalculatorClick={onMaturityCalculatorClick}
-            onOpenAgentManager={onOpenAgentManager}
-            onAgentToggle={onAgentToggle}
-          />
-        );
-      }
-      return (
-        <ModernCopilotChat
-          agentId={selectedAgent.id}
-          onBack={onBackFromAgentDetails}
-        />
-      );
-
-    default:
-      console.warn('DashboardContent: Unknown section:', activeSection);
-      return (
-        <ModernDashboardMain
-          agents={agents}
-          maturityScores={maturityScores}
-          recommendedAgents={recommendedAgents}
-          language={language}
-          onSelectAgent={onSelectAgent}
-          onMaturityCalculatorClick={onMaturityCalculatorClick}
-          onOpenAgentManager={onOpenAgentManager}
-          onAgentToggle={onAgentToggle}
-        />
-      );
-  }
+      )}
+    </div>
+  );
 };

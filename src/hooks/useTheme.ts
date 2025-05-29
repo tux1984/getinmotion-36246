@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isDark, setIsDark] = useState(true);
   
   useEffect(() => {
@@ -21,14 +20,7 @@ export const useTheme = () => {
     );
     
     setIsDark(hasDarkBackground);
-    setTheme(hasDarkBackground ? 'dark' : 'light');
   }, []);
   
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    setIsDark(newTheme === 'dark');
-  };
-  
-  return { isDark, theme, toggleTheme };
+  return { isDark };
 };

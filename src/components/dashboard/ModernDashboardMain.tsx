@@ -1,32 +1,30 @@
 
 import React from 'react';
-import { Agent, CategoryScore } from '@/types/dashboard';
+import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { ModernWelcomeSection } from './ModernWelcomeSection';
 import { ModernMaturityOverview } from './ModernMaturityOverview';
 import { ModernAgentsGrid } from './ModernAgentsGrid';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ModernDashboardMainProps {
-  onSelectAgent: (agent: Agent) => void;
+  onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
-  onOpenAgentManager?: () => void;
+  onAgentManagerClick?: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
-  recommendedAgents: Agent[];
-  language: 'en' | 'es';
-  onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
+  recommendedAgents: RecommendedAgents;
 }
 
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
-  onOpenAgentManager,
+  onAgentManagerClick,
   agents,
   maturityScores,
-  recommendedAgents,
-  language,
-  onAgentToggle
+  recommendedAgents
 }) => {
+  const { language } = useLanguage();
+
   return (
     <div className="space-y-8">
       {/* Two-column layout for Welcome and Maturity sections */}
@@ -46,15 +44,9 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
       
       <ModernAgentsGrid 
         agents={agents}
-        recommendedAgents={{
-          primary: recommendedAgents.map(agent => agent.id),
-          secondary: []
-        }}
+        recommendedAgents={recommendedAgents}
         maturityScores={maturityScores}
-        onSelectAgent={(agentId: string) => {
-          const agent = agents.find(a => a.id === agentId);
-          if (agent) onSelectAgent(agent);
-        }}
+        onSelectAgent={onSelectAgent}
         language={language}
       />
     </div>

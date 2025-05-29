@@ -1,17 +1,4 @@
 
-export type AgentStatus = 'active' | 'inactive' | 'paused';
-
-export interface Agent {
-  id: string;
-  name: string;
-  status: AgentStatus;
-  category: string;
-  activeTasks: number;
-  lastUsed?: string;
-  color: string;
-  icon: React.ReactNode;
-}
-
 export interface AgentFilter {
   searchTerm: string;
   selectedCategories: string[];
