@@ -10,8 +10,8 @@ interface UseMaturityNavigationLogicProps {
   extendedQuestions: any[];
   currentQuestionIndex: number;
   setCurrentQuestionIndex: (index: number) => void;
-  answers: Record<string, number>;
-  extendedAnswers: Record<string, number>;
+  answers: Record<string, number | string[]>;
+  extendedAnswers: Record<string, number | string[]>;
   analysisType: 'quick' | 'deep' | null;
   calculateScores: () => CategoryScore;
   getRecommendations: (scores: CategoryScore) => RecommendedAgents;

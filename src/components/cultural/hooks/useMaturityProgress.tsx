@@ -6,8 +6,8 @@ interface SavedProgress {
   currentStep: 'profileType' | 'questions' | 'bifurcation' | 'extendedQuestions' | 'results';
   currentQuestionIndex: number;
   profileType: ProfileType | null;
-  answers: Record<string, number>;
-  extendedAnswers: Record<string, number>;
+  answers: Record<string, number | string[]>;
+  extendedAnswers: Record<string, number | string[]>;
   analysisType: 'quick' | 'deep' | null;
   timestamp: number;
 }
