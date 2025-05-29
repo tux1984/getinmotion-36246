@@ -2,6 +2,7 @@
 import React from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
+import { CheckboxCards } from '../wizard-components/CheckboxCards';
 import { Separator } from '@/components/ui/separator';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { DollarSign, Globe, Briefcase, Users, Wallet } from 'lucide-react';
@@ -24,7 +25,7 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
       pricingQuestion: "Do you define your prices yourself or with help?",
       internationalQuestion: "Do you have experience selling outside your country?",
       formalizedQuestion: "Have you legally formalized your business?",
-      collaborationQuestion: "Do you collaborate with other creators?",
+      collaborationQuestion: "What types of collaboration do you engage in? (Select all that apply)",
       sustainabilityQuestion: "Does your project sustain you economically?",
       pricing: {
         myself: "I define them myself",
@@ -42,9 +43,12 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
         no: "No"
       },
       collaboration: {
-        yes: "Yes, regularly",
-        occasionally: "Occasionally",
-        no: "No"
+        other_creators: "With other creators/artists",
+        businesses: "With businesses/brands",
+        institutions: "With cultural institutions",
+        online_communities: "In online communities",
+        mentorship: "Mentoring or being mentored",
+        none: "I don't collaborate"
       },
       sustainability: {
         yes: "Yes, completely",
@@ -58,7 +62,7 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
       pricingQuestion: "¿Definís precios por tu cuenta o con ayuda?",
       internationalQuestion: "¿Tenés experiencia vendiendo fuera del país?",
       formalizedQuestion: "¿Formalizaste tu negocio legalmente?",
-      collaborationQuestion: "¿Colaborás con otros/as creadores/as?",
+      collaborationQuestion: "¿En qué tipos de colaboración participás? (Seleccioná todas las que correspondan)",
       sustainabilityQuestion: "¿Tu proyecto te sostiene económicamente?",
       pricing: {
         myself: "Los defino yo mismo/a",
@@ -76,9 +80,12 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
         no: "No"
       },
       collaboration: {
-        yes: "Sí, regularmente",
-        occasionally: "Ocasionalmente",
-        no: "No"
+        other_creators: "Con otros creadores/artistas",
+        businesses: "Con empresas/marcas",
+        institutions: "Con instituciones culturales",
+        online_communities: "En comunidades online",
+        mentorship: "Mentoreo o soy mentorado/a",
+        none: "No colaboro"
       },
       sustainability: {
         yes: "Sí, completamente",
@@ -107,9 +114,12 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
   ];
   
   const collaborationOptions = [
-    { id: 'yes', label: t[language].collaboration.yes, icon: <Users className="w-6 h-6 text-emerald-500" /> },
-    { id: 'occasionally', label: t[language].collaboration.occasionally, icon: <Users className="w-6 h-6 text-amber-500" /> },
-    { id: 'no', label: t[language].collaboration.no, icon: <Users className="w-6 h-6 text-red-500" /> }
+    { id: 'other_creators', label: t[language].collaboration.other_creators, icon: <Users className="w-6 h-6 text-purple-500" /> },
+    { id: 'businesses', label: t[language].collaboration.businesses, icon: <Users className="w-6 h-6 text-blue-500" /> },
+    { id: 'institutions', label: t[language].collaboration.institutions, icon: <Users className="w-6 h-6 text-indigo-500" /> },
+    { id: 'online_communities', label: t[language].collaboration.online_communities, icon: <Users className="w-6 h-6 text-green-500" /> },
+    { id: 'mentorship', label: t[language].collaboration.mentorship, icon: <Users className="w-6 h-6 text-amber-500" /> },
+    { id: 'none', label: t[language].collaboration.none, icon: <Users className="w-6 h-6 text-gray-400" /> }
   ];
   
   const sustainabilityOptions = [
@@ -117,6 +127,18 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
     { id: 'partially', label: t[language].sustainability.partially, icon: <Wallet className="w-6 h-6 text-amber-500" /> },
     { id: 'no', label: t[language].sustainability.no, icon: <Wallet className="w-6 h-6 text-red-500" /> }
   ];
+
+  const handleCollaborationChange = (value: string, isChecked: boolean) => {
+    const currentCollabs = Array.isArray(profileData.collaboration) 
+      ? profileData.collaboration 
+      : profileData.collaboration ? [profileData.collaboration] : [];
+    
+    if (isChecked && !currentCollabs.includes(value)) {
+      updateProfileData({ collaboration: [...currentCollabs, value] });
+    } else if (!isChecked && currentCollabs.includes(value)) {
+      updateProfileData({ collaboration: currentCollabs.filter(collab => collab !== value) });
+    }
+  };
   
   return (
     <StepContainer
@@ -168,13 +190,13 @@ export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = ({
         
         <div className="space-y-4">
           <h3 className="text-lg font-medium">{t[language].collaborationQuestion}</h3>
-          <RadioCards
-            name="collaboration"
+          <CheckboxCards
             options={collaborationOptions}
-            selectedValue={profileData.collaboration}
-            onChange={(value) => updateProfileData({ collaboration: value })}
+            selectedValues={Array.isArray(profileData.collaboration) 
+              ? profileData.collaboration 
+              : profileData.collaboration ? [profileData.collaboration] : []}
+            onChange={handleCollaborationChange}
             withIcons
-            compact
           />
         </div>
         

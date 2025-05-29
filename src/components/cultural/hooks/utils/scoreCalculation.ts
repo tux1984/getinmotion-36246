@@ -40,9 +40,29 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
     }
   }
 
+  // Handle payment methods (can be array or string)
   if (profileData.paymentMethods) {
-    monetization += 25;
-    marketFit += 15;
+    const paymentMethodsArray = Array.isArray(profileData.paymentMethods) 
+      ? profileData.paymentMethods 
+      : [profileData.paymentMethods];
+    
+    // Base score for having any payment method
+    monetization += 15;
+    marketFit += 10;
+    
+    // Bonus for multiple payment methods (shows maturity)
+    if (paymentMethodsArray.length > 1) {
+      monetization += 10;
+      marketFit += 5;
+    }
+    
+    // Specific bonuses for advanced payment methods
+    if (paymentMethodsArray.includes('billing_system')) {
+      monetization += 15;
+    }
+    if (paymentMethodsArray.includes('digital_platforms')) {
+      marketFit += 10;
+    }
   }
 
   if (profileData.brandIdentity) {
@@ -60,9 +80,30 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
     marketFit += 10;
   }
 
+  // Handle task organization (can be array or string)
   if (profileData.taskOrganization) {
-    userExperience += 15;
-    ideaValidation += 10;
+    const taskOrgArray = Array.isArray(profileData.taskOrganization) 
+      ? profileData.taskOrganization 
+      : [profileData.taskOrganization];
+    
+    // Base score for any organization
+    userExperience += 10;
+    ideaValidation += 5;
+    
+    // Bonus for multiple organization methods
+    if (taskOrgArray.length > 1) {
+      userExperience += 10;
+      ideaValidation += 5;
+    }
+    
+    // Specific bonuses for advanced organization
+    if (taskOrgArray.includes('digital_tools')) {
+      userExperience += 10;
+    }
+    if (taskOrgArray.includes('formal_processes')) {
+      userExperience += 15;
+      ideaValidation += 10;
+    }
   }
 
   if (profileData.decisionMaking) {
@@ -81,6 +122,33 @@ export const calculateMaturityScores = (profileData: UserProfileData): CategoryS
     if (profileData.formalizedBusiness) {
       monetization += 10;
       marketFit += 10;
+    }
+    
+    // Handle collaboration (can be array or string)
+    if (profileData.collaboration) {
+      const collaborationArray = Array.isArray(profileData.collaboration) 
+        ? profileData.collaboration 
+        : [profileData.collaboration];
+      
+      // Base score for any collaboration
+      if (!collaborationArray.includes('none')) {
+        marketFit += 10;
+        userExperience += 5;
+        
+        // Bonus for multiple collaboration types
+        if (collaborationArray.length > 1) {
+          marketFit += 5;
+          userExperience += 5;
+        }
+        
+        // Specific bonuses
+        if (collaborationArray.includes('businesses')) {
+          monetization += 10;
+        }
+        if (collaborationArray.includes('institutions')) {
+          marketFit += 10;
+        }
+      }
     }
   }
 
@@ -138,6 +206,27 @@ export const getRecommendedAgents = (profileData: UserProfileData, scores: Categ
       .map(agent => agent.id);
     
     recommendations.secondary = [...(recommendations.secondary || []), ...industryAgents];
+  }
+
+  // Add recommendations based on multi-select responses
+  const paymentMethods = Array.isArray(profileData.paymentMethods) 
+    ? profileData.paymentMethods 
+    : profileData.paymentMethods ? [profileData.paymentMethods] : [];
+  
+  if (paymentMethods.includes('billing_system')) {
+    if (!recommendations.primary?.includes('income-calculator')) {
+      recommendations.secondary?.push('income-calculator');
+    }
+  }
+
+  const collaborationTypes = Array.isArray(profileData.collaboration) 
+    ? profileData.collaboration 
+    : profileData.collaboration ? [profileData.collaboration] : [];
+  
+  if (collaborationTypes.includes('businesses') || collaborationTypes.includes('institutions')) {
+    if (!recommendations.primary?.includes('contract-generator')) {
+      recommendations.secondary?.push('contract-generator');
+    }
   }
 
   // Add medium priority agents to complete recommendations

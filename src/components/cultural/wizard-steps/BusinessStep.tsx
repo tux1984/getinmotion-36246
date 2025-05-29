@@ -2,6 +2,7 @@
 import React from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
+import { CheckboxCards } from '../wizard-components/CheckboxCards';
 import { Separator } from '@/components/ui/separator';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { CreditCard, BadgeCheck, Calculator } from 'lucide-react';
@@ -21,7 +22,7 @@ export const BusinessStep: React.FC<BusinessStepProps> = ({
     en: {
       title: "Business Maturity",
       subtitle: "Let's understand how your creative business operates",
-      paymentQuestion: "How do you get paid for your work?",
+      paymentQuestion: "How do you get paid for your work? (Select all that apply)",
       brandQuestion: "Do you have a defined brand or visual identity?",
       financialQuestion: "Do you have control over your income and expenses?",
       payment: {
@@ -44,7 +45,7 @@ export const BusinessStep: React.FC<BusinessStepProps> = ({
     es: {
       title: "Madurez del Negocio",
       subtitle: "Comprendamos cómo opera tu negocio creativo",
-      paymentQuestion: "¿Cómo cobrás por tu trabajo?",
+      paymentQuestion: "¿Cómo cobrás por tu trabajo? (Seleccioná todas las que correspondan)",
       brandQuestion: "¿Tenés una marca o identidad visual definida?",
       financialQuestion: "¿Tenés control de tus ingresos y gastos?",
       payment: {
@@ -124,6 +125,18 @@ export const BusinessStep: React.FC<BusinessStepProps> = ({
       icon: <Calculator className="w-6 h-6 text-gray-400" />
     }
   ];
+
+  const handlePaymentChange = (value: string, isChecked: boolean) => {
+    const currentMethods = Array.isArray(profileData.paymentMethods) 
+      ? profileData.paymentMethods 
+      : profileData.paymentMethods ? [profileData.paymentMethods] : [];
+    
+    if (isChecked && !currentMethods.includes(value)) {
+      updateProfileData({ paymentMethods: [...currentMethods, value] });
+    } else if (!isChecked && currentMethods.includes(value)) {
+      updateProfileData({ paymentMethods: currentMethods.filter(method => method !== value) });
+    }
+  };
   
   return (
     <StepContainer
@@ -133,11 +146,12 @@ export const BusinessStep: React.FC<BusinessStepProps> = ({
       <div className="space-y-8">
         <div className="space-y-4">
           <h3 className="text-lg font-medium">{t[language].paymentQuestion}</h3>
-          <RadioCards
-            name="payment"
+          <CheckboxCards
             options={paymentOptions}
-            selectedValue={profileData.paymentMethods}
-            onChange={(value) => updateProfileData({ paymentMethods: value })}
+            selectedValues={Array.isArray(profileData.paymentMethods) 
+              ? profileData.paymentMethods 
+              : profileData.paymentMethods ? [profileData.paymentMethods] : []}
+            onChange={handlePaymentChange}
             withIcons
           />
         </div>
