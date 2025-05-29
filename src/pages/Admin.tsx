@@ -4,6 +4,7 @@ import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { ImageManager } from '@/components/admin/ImageManager';
+import { CompanyDocuments } from '@/components/admin/CompanyDocuments';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -108,7 +109,7 @@ const Admin = () => {
             </div>
             
             <Tabs defaultValue="waitlist" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-indigo-900/50">
+              <TabsList className="grid w-full grid-cols-4 bg-indigo-900/50">
                 <TabsTrigger 
                   value="waitlist"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
@@ -126,6 +127,12 @@ const Admin = () => {
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
                 >
                   Gestión de Imágenes
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="documents"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+                >
+                  Documentos
                 </TabsTrigger>
               </TabsList>
               
@@ -145,6 +152,12 @@ const Admin = () => {
 
               <TabsContent value="images" className="mt-6">
                 <ImageManager />
+              </TabsContent>
+
+              <TabsContent value="documents" className="mt-6">
+                <div className="bg-indigo-900/40 rounded-xl border border-indigo-800/30 p-6">
+                  <CompanyDocuments />
+                </div>
               </TabsContent>
             </Tabs>
           </div>

@@ -17,11 +17,6 @@ export const Footer = ({ language }: FooterProps) => {
       dashboard: "Dashboard",
       agents: "AI Agents",
       agentsGallery: "Agents Gallery",
-      company: "Company",
-      contact: "Contact",
-      onePager: "One Pager",
-      twoPager: "Two Pager", 
-      threePager: "Three Pager",
       resources: "Resources",
       login: "Login",
       admin: "Admin Access",
@@ -40,11 +35,6 @@ export const Footer = ({ language }: FooterProps) => {
       dashboard: "Dashboard", 
       agents: "Agentes de IA",
       agentsGallery: "Galería de Agentes",
-      company: "Empresa",
-      contact: "Contacto",
-      onePager: "Una Página",
-      twoPager: "Dos Páginas",
-      threePager: "Tres Páginas", 
       resources: "Recursos",
       login: "Iniciar Sesión",
       admin: "Acceso Admin",
@@ -73,7 +63,7 @@ export const Footer = ({ language }: FooterProps) => {
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Main footer content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
           
           {/* Brand section */}
           <div className="lg:col-span-1">
@@ -138,35 +128,6 @@ export const Footer = ({ language }: FooterProps) => {
                 <Link to="/agents" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
                   {t.agentsGallery}
                 </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company section */}
-          <div>
-            <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-300 mb-6">
-              {t.company}
-            </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/one-pager" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.onePager}
-                </Link>
-              </li>
-              <li>
-                <Link to="/two-pager" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.twoPager}
-                </Link>
-              </li>
-              <li>
-                <Link to="/three-pager" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.threePager}
-                </Link>
-              </li>
-              <li>
-                <a href="#" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.contact}
-                </a>
               </li>
             </ul>
           </div>
