@@ -1,3 +1,4 @@
+
 import { Question } from '../types';
 import { Music, Palette, Scissors, Users, Heart, Calendar, Lightbulb, Target, Clock, Search, DollarSign, Eye, CreditCard, Instagram, FileText, Building, Briefcase, CheckCircle } from 'lucide-react';
 
@@ -6,6 +7,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
     en: {
       industry: {
         question: "What is your main creative industry or field?",
+        type: 'radio',
         options: [
           { text: 'Music', value: 1 },
           { text: 'Visual arts', value: 2 },
@@ -29,6 +31,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       ideaAge: {
         question: "How long ago did this idea emerge?",
+        type: 'radio',
         options: [
           { text: 'Less than 6 months', value: 1 },
           { text: '6 months - 2 years', value: 2 },
@@ -37,6 +40,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       phase: {
         question: "What phase is your idea in?",
+        type: 'radio',
         options: [
           { text: 'Just an idea', value: 1 },
           { text: 'Research phase', value: 2 },
@@ -46,6 +50,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       plan: {
         question: "Do you have a written plan or strategy?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'More or less', value: 2 },
@@ -54,6 +59,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       resources: {
         question: "Do you have initial resources?",
+        type: 'radio',
         options: [
           { text: 'Savings', value: 3 },
           { text: 'Seeking support', value: 2 },
@@ -62,6 +68,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       team: {
         question: "Do you work alone or with others?",
+        type: 'radio',
         options: [
           { text: 'Alone', value: 1 },
           { text: 'Family/friends', value: 2 },
@@ -70,6 +77,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       organization: {
         question: "How do you organize your ideas and tasks?",
+        type: 'radio',
         options: [
           { text: 'Paper', value: 1 },
           { text: 'Phone notes', value: 2 },
@@ -79,6 +87,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       goals: {
         question: "Do you set goals or deadlines?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'Sometimes', value: 2 },
@@ -89,6 +98,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
     es: {
       industry: {
         question: "¿Cuál es tu industria o campo creativo principal?",
+        type: 'radio',
         options: [
           { text: 'Música', value: 1 },
           { text: 'Artes visuales', value: 2 },
@@ -112,6 +122,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       ideaAge: {
         question: "¿Hace cuánto surgió esta idea?",
+        type: 'radio',
         options: [
           { text: 'Menos de 6 meses', value: 1 },
           { text: '6 meses - 2 años', value: 2 },
@@ -120,6 +131,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       phase: {
         question: "¿En qué fase está tu idea?",
+        type: 'radio',
         options: [
           { text: 'Solo una idea', value: 1 },
           { text: 'Investigación', value: 2 },
@@ -129,6 +141,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       plan: {
         question: "¿Tenés algún plan o estrategia escrita?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'Más o menos', value: 2 },
@@ -137,6 +150,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       resources: {
         question: "¿Contás con recursos iniciales?",
+        type: 'radio',
         options: [
           { text: 'Ahorros', value: 3 },
           { text: 'Buscando apoyo', value: 2 },
@@ -145,6 +159,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       team: {
         question: "¿Trabajás solo/a o con alguien más?",
+        type: 'radio',
         options: [
           { text: 'Solo/a', value: 1 },
           { text: 'Familiares/amigos', value: 2 },
@@ -153,6 +168,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       organization: {
         question: "¿Cómo organizás tus ideas y tareas?",
+        type: 'radio',
         options: [
           { text: 'Papel', value: 1 },
           { text: 'Notas en el celular', value: 2 },
@@ -162,6 +178,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
       },
       goals: {
         question: "¿Establecés metas o plazos?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'A veces', value: 2 },
@@ -179,7 +196,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `idea_${key}`,
       question: questionData.question,
-      type: questionData.type || 'radio',
+      type: questionData.type as 'radio' | 'checkbox',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,

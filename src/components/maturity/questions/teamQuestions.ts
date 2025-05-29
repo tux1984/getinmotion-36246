@@ -1,3 +1,4 @@
+
 import { Question } from '../types';
 
 export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
@@ -5,6 +6,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
     en: {
       industry: {
         question: "What is your creative industry?",
+        type: 'radio',
         options: [
           { text: 'Music', value: 1 },
           { text: 'Visual arts', value: 2 },
@@ -29,6 +31,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       timeActive: {
         question: "How long has your project been running?",
+        type: 'radio',
         options: [
           { text: 'Less than 6 months', value: 1 },
           { text: '6 months - 2 years', value: 2 },
@@ -37,6 +40,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       income: {
         question: "Do you have regular income?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'Irregular', value: 2 },
@@ -45,6 +49,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       legal: {
         question: "Are you legally formalized?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'In process', value: 2 },
@@ -53,6 +58,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       funding: {
         question: "Have you received support or funding?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'Partial', value: 2 },
@@ -61,6 +67,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       teamSize: {
         question: "How many people are on the team?",
+        type: 'radio',
         options: [
           { text: '1 person', value: 1 },
           { text: '2-3 people', value: 2 },
@@ -69,6 +76,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       organization: {
         question: "How do you organize internally?",
+        type: 'radio',
         options: [
           { text: 'Digital tools', value: 3 },
           { text: 'Chats', value: 2 },
@@ -78,6 +86,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       roles: {
         question: "Do you have defined roles?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'More or less', value: 2 },
@@ -88,6 +97,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
     es: {
       industry: {
         question: "¿Cuál es tu industria creativa?",
+        type: 'radio',
         options: [
           { text: 'Música', value: 1 },
           { text: 'Artes visuales', value: 2 },
@@ -112,6 +122,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       timeActive: {
         question: "¿Hace cuánto está en marcha tu proyecto?",
+        type: 'radio',
         options: [
           { text: 'Menos de 6 meses', value: 1 },
           { text: '6 meses - 2 años', value: 2 },
@@ -120,6 +131,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       income: {
         question: "¿Tienen ingresos regulares?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'Irregulares', value: 2 },
@@ -128,6 +140,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       legal: {
         question: "¿Están formalizados legalmente?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'En proceso', value: 2 },
@@ -136,6 +149,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       funding: {
         question: "¿Recibieron apoyos o financiamiento?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'Parcial', value: 2 },
@@ -144,6 +158,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       teamSize: {
         question: "¿Cuántas personas son en el equipo?",
+        type: 'radio',
         options: [
           { text: '1 persona', value: 1 },
           { text: '2-3 personas', value: 2 },
@@ -152,6 +167,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       organization: {
         question: "¿Cómo se organizan internamente?",
+        type: 'radio',
         options: [
           { text: 'Herramientas digitales', value: 3 },
           { text: 'Chats', value: 2 },
@@ -161,6 +177,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
       },
       roles: {
         question: "¿Tienen roles definidos?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'Más o menos', value: 2 },
@@ -178,7 +195,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `team_${key}`,
       question: questionData.question,
-      type: questionData.type || 'radio',
+      type: questionData.type as 'radio' | 'checkbox',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,

@@ -32,8 +32,8 @@ export interface MaturityStepProps {
   profileType?: ProfileType;
   onNext: () => void;
   onBack?: () => void;
-  onSelectOption: (questionId: string, value: number) => void;
-  answers: Record<string, number>;
+  onSelectOption: (questionId: string, value: number | string[]) => void;
+  answers: Record<string, number | string[]>;
   currentQuestions: Question[];
   step: CalculatorStep;
 }

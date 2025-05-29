@@ -6,6 +6,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
     en: {
       industry: {
         question: "What is your creative industry?",
+        type: 'radio',
         options: [
           { text: 'Music', value: 1 },
           { text: 'Visual arts', value: 2 },
@@ -29,6 +30,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       timeActive: {
         question: "How long have you been active with this project?",
+        type: 'radio',
         options: [
           { text: 'Less than 6 months', value: 1 },
           { text: '6 months - 2 years', value: 2 },
@@ -47,6 +49,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       finances: {
         question: "Do you keep track of income and expenses?",
+        type: 'radio',
         options: [
           { text: 'Yes', value: 3 },
           { text: 'No', value: 1 }
@@ -54,6 +57,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       brand: {
         question: "Do you have a defined brand or visual identity?",
+        type: 'radio',
         options: [
           { text: 'Yes, clear', value: 3 },
           { text: 'Partial', value: 2 },
@@ -62,6 +66,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       content: {
         question: "Do you plan content or promotions?",
+        type: 'radio',
         options: [
           { text: 'Yes, with calendar', value: 3 },
           { text: 'Spontaneous', value: 2 },
@@ -80,6 +85,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       delegate: {
         question: "What would you like to delegate first?",
+        type: 'radio',
         options: [
           { text: 'Finances', value: 1 },
           { text: 'Marketing', value: 2 },
@@ -93,6 +99,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
     es: {
       industry: {
         question: "¿Cuál es tu industria creativa?",
+        type: 'radio',
         options: [
           { text: 'Música', value: 1 },
           { text: 'Artes visuales', value: 2 },
@@ -116,6 +123,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       timeActive: {
         question: "¿Hace cuánto tiempo estás activo con este proyecto?",
+        type: 'radio',
         options: [
           { text: 'Menos de 6 meses', value: 1 },
           { text: '6 meses - 2 años', value: 2 },
@@ -134,6 +142,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       finances: {
         question: "¿Llevás registro de ingresos y gastos?",
+        type: 'radio',
         options: [
           { text: 'Sí', value: 3 },
           { text: 'No', value: 1 }
@@ -141,6 +150,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       brand: {
         question: "¿Tenés una marca o identidad visual definida?",
+        type: 'radio',
         options: [
           { text: 'Sí, clara', value: 3 },
           { text: 'Parcial', value: 2 },
@@ -149,6 +159,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       content: {
         question: "¿Planificás contenidos o promociones?",
+        type: 'radio',
         options: [
           { text: 'Sí, con calendario', value: 3 },
           { text: 'Espontáneo', value: 2 },
@@ -167,6 +178,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
       },
       delegate: {
         question: "¿Qué te gustaría delegar primero?",
+        type: 'radio',
         options: [
           { text: 'Finanzas', value: 1 },
           { text: 'Marketing', value: 2 },
@@ -187,7 +199,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `solo_${key}`,
       question: questionData.question,
-      type: questionData.type || 'radio',
+      type: questionData.type as 'radio' | 'checkbox',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,
