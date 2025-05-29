@@ -318,13 +318,13 @@ export const SimpleCulturalMaturityCalculator = ({
             <CheckboxQuestionCard
               question={currentQuestion}
               selectedValues={answers[currentQuestion.id] as string[] || []}
-              onChange={(values) => handleSelectOption(currentQuestion.id, values)}
+              onSelectOption={(values) => handleSelectOption(currentQuestion.id, values)}
             />
           ) : (
             <QuestionCard
               question={currentQuestion}
               selectedValue={answers[currentQuestion.id] as number}
-              onChange={(value) => handleSelectOption(currentQuestion.id, value)}
+              onSelectOption={(value) => handleSelectOption(currentQuestion.id, value)}
             />
           )}
           

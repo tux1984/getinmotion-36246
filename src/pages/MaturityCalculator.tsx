@@ -2,18 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
-import { ProfileSelector } from '@/components/cultural/components/ProfileTypeSelector';
+import { ProfileTypeSelector } from '@/components/cultural/components/ProfileTypeSelector';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { CategoryScore, ProfileType } from '@/components/maturity/types';
 import { useLanguage } from '@/context/LanguageContext';
-import { useUserData } from '@/hooks/useUserData';
+import { useMaturityScores } from '@/hooks/useMaturityScores';
 
 const MaturityCalculator = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { updateMaturityScores } = useUserData();
+  const { saveMaturityScores } = useMaturityScores();
   
   // Get profile type from location state or default to null
   const initialProfileType = location.state?.profileType as ProfileType | null;
@@ -57,7 +57,12 @@ const MaturityCalculator = () => {
     
     try {
       // Update maturity scores in the database
-      await updateMaturityScores(scores);
+      await saveMaturityScores(scores, {
+        profileType: profileType,
+        industry: 'musica',
+        experience: scores.ideaValidation < 50 ? 'beginner' : 
+                   scores.ideaValidation < 80 ? 'intermediate' : 'advanced'
+      });
       console.log('Maturity scores updated successfully');
       
       // Navigate back to dashboard with completion flag
@@ -106,7 +111,7 @@ const MaturityCalculator = () => {
               </p>
             </div>
             
-            <ProfileSelector
+            <ProfileTypeSelector
               onProfileSelect={handleProfileSelect}
               selectedProfile={profileType}
             />

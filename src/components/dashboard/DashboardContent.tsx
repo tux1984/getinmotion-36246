@@ -71,9 +71,9 @@ export const DashboardContent = ({
       }
       return (
         <DashboardAgentDetails
-          agent={selectedAgent}
+          selectedAgent={selectedAgent.id}
+          language={language}
           onBack={onBackFromAgentDetails}
-          onToggle={onAgentToggle}
         />
       );
 
@@ -81,8 +81,8 @@ export const DashboardContent = ({
       return (
         <DashboardAgentManager
           agents={agents}
+          language={language}
           onBack={onBackFromAgentManager}
-          onSelectAgent={onSelectAgent}
           onAgentToggle={onAgentToggle}
         />
       );

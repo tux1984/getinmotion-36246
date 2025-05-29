@@ -1,4 +1,15 @@
 
+export interface Agent {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive';
+  category: string;
+  activeTasks: number;
+  lastUsed?: string;
+  color: string;
+  icon: React.ReactNode;
+}
+
 export interface AgentFilter {
   searchTerm: string;
   selectedCategories: string[];

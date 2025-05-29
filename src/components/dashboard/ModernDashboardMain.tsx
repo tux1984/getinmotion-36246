@@ -1,30 +1,32 @@
 
 import React from 'react';
-import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
+import { Agent, CategoryScore } from '@/types/dashboard';
 import { ModernWelcomeSection } from './ModernWelcomeSection';
 import { ModernMaturityOverview } from './ModernMaturityOverview';
 import { ModernAgentsGrid } from './ModernAgentsGrid';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ModernDashboardMainProps {
-  onSelectAgent: (id: string) => void;
+  onSelectAgent: (agent: Agent) => void;
   onMaturityCalculatorClick: () => void;
-  onAgentManagerClick?: () => void;
+  onOpenAgentManager?: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
-  recommendedAgents: RecommendedAgents;
+  recommendedAgents: Agent[];
+  language: 'en' | 'es';
+  onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
 }
 
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
-  onAgentManagerClick,
+  onOpenAgentManager,
   agents,
   maturityScores,
-  recommendedAgents
+  recommendedAgents,
+  language,
+  onAgentToggle
 }) => {
-  const { language } = useLanguage();
-
   return (
     <div className="space-y-8">
       {/* Two-column layout for Welcome and Maturity sections */}
