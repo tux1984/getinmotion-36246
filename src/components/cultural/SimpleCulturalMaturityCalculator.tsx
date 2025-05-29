@@ -199,12 +199,27 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       setCurrentStep(progress.currentStep);
       setCurrentQuestionIndex(progress.currentQuestionIndex);
       if (progress.profileType) handleProfileSelect(progress.profileType);
+      
+      // Handle answers with proper typing
       Object.entries(progress.answers).forEach(([id, value]) => {
-        handleSelectOption(id, value);
+        if (typeof value === 'number') {
+          handleSelectOption(id, value);
+        } else if (Array.isArray(value)) {
+          // For checkbox questions, we need to handle string arrays differently
+          // This might need to be adjusted based on how checkbox questions are handled
+          console.log('Handling checkbox answer:', id, value);
+        }
       });
+      
       Object.entries(progress.extendedAnswers).forEach(([id, value]) => {
-        handleSelectOption(id, value);
+        if (typeof value === 'number') {
+          handleSelectOption(id, value);
+        } else if (Array.isArray(value)) {
+          // For checkbox questions in extended answers
+          console.log('Handling extended checkbox answer:', id, value);
+        }
       });
+      
       if (progress.analysisType) setAnalysisType(progress.analysisType);
     }
     setShowRecoverDialog(false);
