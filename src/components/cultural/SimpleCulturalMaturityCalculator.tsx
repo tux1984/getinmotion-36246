@@ -114,11 +114,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     return questions.length + 3 + (analysisType === 'deep' ? extendedQuestions.length : 0);
   }, [questions.length, extendedQuestions.length, analysisType]);
 
-  // Memoized translations
+  // Updated translations with new name
   const translations = useMemo(() => ({
     en: {
-      title: "Cultural Maturity Assessment",
-      subtitle: "Let's evaluate your creative project's development stage",
+      title: "Business Maturity",
+      subtitle: "Let's evaluate your business development stage",
       profileTypeTitle: "Where are you today with your cultural or creative project?",
       profileTypeSubtitle: "Choose the option that best describes your current situation",
       idea: {
@@ -138,7 +138,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       complete: "Complete Assessment",
       selectProfile: "Please select a profile type",
       answerQuestion: "Please answer the question before continuing",
-      resultsTitle: "Your Cultural Maturity Results",
+      resultsTitle: "Your Business Maturity Results",
       resultsSubtitle: "Here's your assessment with recommended tools",
       primaryRecommendations: "Primary Recommendations",
       secondaryRecommendations: "Secondary Recommendations",
@@ -151,8 +151,8 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       cancel: "Cancel"
     },
     es: {
-      title: "Evaluación de Madurez Cultural",
-      subtitle: "Vamos a evaluar la etapa de desarrollo de tu proyecto creativo",
+      title: "Madurez de Negocio",
+      subtitle: "Vamos a evaluar la etapa de desarrollo de tu negocio",
       profileTypeTitle: "¿Dónde estás hoy con tu proyecto cultural o creativo?",
       profileTypeSubtitle: "Elige la opción que mejor describe tu situación actual",
       idea: {
@@ -172,7 +172,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       complete: "Completar Evaluación",
       selectProfile: "Por favor selecciona un tipo de perfil",
       answerQuestion: "Por favor responde la pregunta antes de continuar",
-      resultsTitle: "Tus Resultados de Madurez Cultural",
+      resultsTitle: "Tus Resultados de Madurez de Negocio",
       resultsSubtitle: "Aquí está tu evaluación con herramientas recomendadas",
       primaryRecommendations: "Recomendaciones Principales",
       secondaryRecommendations: "Recomendaciones Secundarias",
@@ -269,10 +269,23 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     return undefined;
   }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length]);
 
-  // Auto-scroll to top on step change for mobile
+  // Improved auto-scroll to ensure navigation buttons are visible
   useEffect(() => {
     if (isMobile) {
+      // Scroll to top first, then ensure navigation is visible
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // After a brief delay, scroll to ensure navigation buttons are visible
+      setTimeout(() => {
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const navigationHeight = 80; // Height of mobile navigation
+        
+        if (documentHeight > windowHeight) {
+          const scrollPosition = Math.max(0, documentHeight - windowHeight + navigationHeight);
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+        }
+      }, 300);
     }
   }, [currentStep, currentQuestionIndex, isMobile]);
 
@@ -300,11 +313,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
         )}
 
         <Card className={`relative border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-t-none border-t-0' : ''}`}>
-          {/* Exit button in top-right corner of Card */}
+          {/* Improved Exit button - larger and more visible */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <X className="h-5 w-5" />
+              <button className="absolute top-4 right-4 z-10 p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200 group">
+                <X className="h-6 w-6 group-hover:scale-110 transition-transform" />
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -323,7 +336,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
             </AlertDialogContent>
           </AlertDialog>
 
-          <CardContent className={`${isMobile ? 'pt-4 px-4 pb-20' : 'pt-8 px-8'}`}>
+          <CardContent className={`${isMobile ? 'pt-4 px-4 pb-24' : 'pt-8 px-8'}`}>
             {/* Desktop Header */}
             {!isMobile && (
               <div className="mb-8">
@@ -471,7 +484,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
           </CardContent>
         </Card>
 
-        {/* Mobile Navigation - Fixed at bottom */}
+        {/* Mobile Navigation - Fixed at bottom with improved spacing */}
         {isMobile && (
           <MobileNavigation
             onBack={handleBack}

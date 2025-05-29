@@ -23,17 +23,17 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   return (
     <motion.div 
-      className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg z-50"
+      className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-4 shadow-lg z-50"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className="flex justify-between items-center max-w-4xl mx-auto">
+      <div className="flex justify-between items-center max-w-4xl mx-auto gap-4">
         <DebouncedButton 
           variant="outline"
           onClick={onBack}
           disabled={!canGoBack}
-          className="flex items-center gap-2 px-4 py-2 min-w-[100px] h-12"
+          className="flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
           size="lg"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -43,7 +43,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         {showNext && (
           <DebouncedButton 
             onClick={onNext}
-            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2 px-4 py-2 min-w-[100px] h-12"
+            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
             size="lg"
           >
             {nextLabel}
