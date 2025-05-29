@@ -1,4 +1,3 @@
-
 import { Question } from '../types';
 
 export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
@@ -17,7 +16,8 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "What activities does your venture do?",
+        question: "What activities does your venture do? (Select all that apply)",
+        type: 'checkbox',
         options: [
           { text: 'Sales', value: 1 },
           { text: 'Classes', value: 2 },
@@ -99,7 +99,8 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "¿Qué actividades realiza tu emprendimiento?",
+        question: "¿Qué actividades realiza tu emprendimiento? (Seleccioná todas las que correspondan)",
+        type: 'checkbox',
         options: [
           { text: 'Venta', value: 1 },
           { text: 'Clases', value: 2 },
@@ -177,6 +178,7 @@ export const getTeamQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `team_${key}`,
       question: questionData.question,
+      type: questionData.type || 'radio',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,

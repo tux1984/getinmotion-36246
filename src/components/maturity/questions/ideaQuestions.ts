@@ -1,4 +1,3 @@
-
 import { Question } from '../types';
 import { Music, Palette, Scissors, Users, Heart, Calendar, Lightbulb, Target, Clock, Search, DollarSign, Eye, CreditCard, Instagram, FileText, Building, Briefcase, CheckCircle } from 'lucide-react';
 
@@ -18,7 +17,8 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "What activities do you imagine developing?",
+        question: "What activities do you imagine developing? (Select all that apply)",
+        type: 'checkbox',
         options: [
           { text: 'Create physical objects', value: 1 },
           { text: 'Give workshops', value: 2 },
@@ -100,7 +100,8 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "¿Qué actividades imaginás desarrollar?",
+        question: "¿Qué actividades imaginás desarrollar? (Seleccioná todas las que correspondan)",
+        type: 'checkbox',
         options: [
           { text: 'Crear objetos físicos', value: 1 },
           { text: 'Dar talleres', value: 2 },
@@ -178,6 +179,7 @@ export const getIdeaQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `idea_${key}`,
       question: questionData.question,
+      type: questionData.type || 'radio',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,

@@ -10,21 +10,33 @@ export const useMaturityCalculatorLogic = (
   const [currentStep, setCurrentStep] = useState<'profileType' | 'questions' | 'bifurcation' | 'extendedQuestions' | 'results'>('profileType');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [extendedAnswers, setExtendedAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number | string[]>>({});
+  const [extendedAnswers, setExtendedAnswers] = useState<Record<string, number | string[]>>({});
   const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
   const [scores, setScores] = useState<CategoryScore | null>(null);
   const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents | null>(null);
   const { toast } = useToast();
 
-  // Enhanced score calculation that includes extended answers
+  // Enhanced score calculation that includes extended answers and multi-select responses
   const calculateScores = useCallback((): CategoryScore => {
     const allAnswers = { ...answers, ...extendedAnswers };
-    const values = Object.values(allAnswers);
-    const total = values.reduce((sum, val) => sum + val, 0);
-    const maxPossible = Object.keys(allAnswers).length * 3;
-    const percentage = maxPossible > 0 ? (total / maxPossible) * 100 : 0;
     
+    // Calculate total considering both single values and arrays
+    let total = 0;
+    let maxPossible = 0;
+    
+    Object.values(allAnswers).forEach(answer => {
+      if (Array.isArray(answer)) {
+        // For arrays, sum all values and count each selection
+        total += answer.reduce((sum, val) => sum + (typeof val === 'number' ? val : 0), 0);
+        maxPossible += answer.length * 3; // Assuming max value is 3
+      } else if (typeof answer === 'number') {
+        total += answer;
+        maxPossible += 3;
+      }
+    });
+    
+    const percentage = maxPossible > 0 ? (total / maxPossible) * 100 : 0;
     const baseScore = Math.min(100, Math.round(percentage));
     
     // Enhanced scoring with extended questions
@@ -86,7 +98,7 @@ export const useMaturityCalculatorLogic = (
     setProfileType(type);
   }, []);
 
-  const handleSelectOption = useCallback((questionId: string, value: number) => {
+  const handleSelectOption = useCallback((questionId: string, value: number | string[]) => {
     if (questionId.startsWith('extended_')) {
       setExtendedAnswers(prev => ({
         ...prev,

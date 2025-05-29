@@ -17,7 +17,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "What activities do you currently do?",
+        question: "What activities do you currently do? (Select all that apply)",
+        type: 'checkbox',
         options: [
           { text: 'Sell products', value: 1 },
           { text: 'Artistic services', value: 2 },
@@ -35,7 +36,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       payment: {
-        question: "What method do you use to charge?",
+        question: "What methods do you use to charge? (Select all that apply)",
+        type: 'checkbox',
         options: [
           { text: 'Cash', value: 1 },
           { text: 'Bank transfers', value: 2 },
@@ -67,7 +69,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       tasks: {
-        question: "How do you manage your daily tasks?",
+        question: "How do you manage your daily tasks? (Select all that apply)",
+        type: 'checkbox',
         options: [
           { text: 'Task app', value: 3 },
           { text: 'Paper', value: 2 },
@@ -101,7 +104,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       activities: {
-        question: "¿Qué tipo de actividades realizás actualmente?",
+        question: "¿Qué tipo de actividades realizás actualmente? (Seleccioná todas las que correspondan)",
+        type: 'checkbox',
         options: [
           { text: 'Venta de productos', value: 1 },
           { text: 'Servicios artísticos', value: 2 },
@@ -119,7 +123,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       payment: {
-        question: "¿Qué método usás para cobrar?",
+        question: "¿Qué métodos usás para cobrar? (Seleccioná todas las que correspondan)",
+        type: 'checkbox',
         options: [
           { text: 'Efectivo', value: 1 },
           { text: 'Transferencias', value: 2 },
@@ -151,7 +156,8 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
         ]
       },
       tasks: {
-        question: "¿Cómo gestionás tus tareas diarias?",
+        question: "¿Cómo gestionás tus tareas diarias? (Seleccioná todas las que correspondan)",
+        type: 'checkbox',
         options: [
           { text: 'App de tareas', value: 3 },
           { text: 'Papel', value: 2 },
@@ -181,6 +187,7 @@ export const getSoloQuestions = (language: 'en' | 'es'): Question[] => {
     return {
       id: `solo_${key}`,
       question: questionData.question,
+      type: questionData.type || 'radio',
       options: questionData.options.map((opt: any, optIndex: number) => ({
         id: `${key}_${optIndex}`,
         text: opt.text,

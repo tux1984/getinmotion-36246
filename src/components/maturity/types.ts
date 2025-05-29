@@ -11,6 +11,7 @@ export interface QuestionOption {
 export interface Question {
   id: string;
   question: string;
+  type?: 'radio' | 'checkbox'; // Add type field
   options: QuestionOption[];
 }
 

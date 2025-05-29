@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionCard } from '@/components/maturity/QuestionCard';
+import { CheckboxQuestionCard } from '@/components/maturity/CheckboxQuestionCard';
 import { ProfileTypeSelector } from './ProfileTypeSelector';
 import { BifurcationChoice } from './BifurcationChoice';
 import { ResultsDisplay } from './ResultsDisplay';
@@ -24,7 +25,7 @@ interface StepContentContainerProps {
   characterImage: string;
   nextCharacterImage?: string;
   onProfileSelect: (type: any) => void;
-  onSelectOption: (id: string, value: number) => void;
+  onSelectOption: (id: string, value: number | string[]) => void;
   onAnalysisChoice: (type: 'quick' | 'deep') => void;
   onComplete: () => void;
 }
@@ -50,6 +51,16 @@ export const StepContentContainer: React.FC<StepContentContainerProps> = ({
   onComplete
 }) => {
   const isMobile = useIsMobile();
+
+  // Helper function to handle checkbox question responses
+  const handleCheckboxResponse = (questionId: string, values: string[]) => {
+    onSelectOption(questionId, values);
+  };
+
+  // Helper function to handle radio question responses
+  const handleRadioResponse = (questionId: string, value: number) => {
+    onSelectOption(questionId, value);
+  };
 
   return (
     <div className={`flex gap-6 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
@@ -91,11 +102,19 @@ export const StepContentContainer: React.FC<StepContentContainerProps> = ({
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <QuestionCard 
-                question={questions[currentQuestionIndex]}
-                selectedValue={answers[questions[currentQuestionIndex].id]}
-                onSelectOption={onSelectOption}
-              />
+              {questions[currentQuestionIndex].type === 'checkbox' ? (
+                <CheckboxQuestionCard 
+                  question={questions[currentQuestionIndex]}
+                  selectedValues={answers[questions[currentQuestionIndex].id] || []}
+                  onSelectOption={handleCheckboxResponse}
+                />
+              ) : (
+                <QuestionCard 
+                  question={questions[currentQuestionIndex]}
+                  selectedValue={answers[questions[currentQuestionIndex].id]}
+                  onSelectOption={handleRadioResponse}
+                />
+              )}
             </motion.div>
           )}
 
@@ -123,11 +142,19 @@ export const StepContentContainer: React.FC<StepContentContainerProps> = ({
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <QuestionCard 
-                question={extendedQuestions[currentQuestionIndex]}
-                selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
-                onSelectOption={onSelectOption}
-              />
+              {extendedQuestions[currentQuestionIndex].type === 'checkbox' ? (
+                <CheckboxQuestionCard 
+                  question={extendedQuestions[currentQuestionIndex]}
+                  selectedValues={extendedAnswers[extendedQuestions[currentQuestionIndex].id] || []}
+                  onSelectOption={handleCheckboxResponse}
+                />
+              ) : (
+                <QuestionCard 
+                  question={extendedQuestions[currentQuestionIndex]}
+                  selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
+                  onSelectOption={handleRadioResponse}
+                />
+              )}
             </motion.div>
           )}
 
