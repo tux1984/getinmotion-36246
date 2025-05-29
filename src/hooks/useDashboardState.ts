@@ -1,33 +1,34 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { Agent } from '@/types/agentTypes';
 
-type ActiveSection = 'dashboard' | 'agent-details' | 'agent-manager';
+type DashboardSection = 'main' | 'agent-details' | 'agent-manager' | 'agent-chat';
 
 export const useDashboardState = () => {
-  const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<DashboardSection>('main');
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
-  const handleSelectAgent = useCallback((agentId: string) => {
-    console.log('Selecting agent:', agentId);
-    setSelectedAgent(agentId);
-    setActiveSection('agent-details');
-  }, []);
+  const handleSelectAgent = (agent: Agent) => {
+    console.log('useDashboardState: Selecting agent:', agent.id);
+    setSelectedAgent(agent);
+    setActiveSection('agent-chat'); // Changed to go directly to chat
+  };
 
-  const handleBackFromAgentDetails = useCallback(() => {
-    console.log('Returning from agent details');
+  const handleBackFromAgentDetails = () => {
+    console.log('useDashboardState: Back from agent details');
+    setActiveSection('main');
     setSelectedAgent(null);
-    setActiveSection('dashboard');
-  }, []);
+  };
 
-  const handleOpenAgentManager = useCallback(() => {
-    console.log('Opening agent manager');
+  const handleOpenAgentManager = () => {
+    console.log('useDashboardState: Opening agent manager');
     setActiveSection('agent-manager');
-  }, []);
+  };
 
-  const handleBackFromAgentManager = useCallback(() => {
-    console.log('Returning from agent manager');
-    setActiveSection('dashboard');
-  }, []);
+  const handleBackFromAgentManager = () => {
+    console.log('useDashboardState: Back from agent manager');
+    setActiveSection('main');
+  };
 
   return {
     activeSection,

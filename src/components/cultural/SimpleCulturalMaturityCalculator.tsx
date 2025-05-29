@@ -80,7 +80,7 @@ export const SimpleCulturalMaturityCalculator = ({
 
   useEffect(() => {
     if (currentStep !== 'results') {
-      const questions = getQuestions(profileType, language, currentStep);
+      const questions = getQuestions(profileType, language);
       setCategoryQuestions(questions);
       setCurrentQuestionIndex(0);
     }
@@ -141,7 +141,7 @@ export const SimpleCulturalMaturityCalculator = ({
     } else if (currentStepIndex > 0) {
       const prevStep = steps[currentStepIndex - 1];
       setCurrentStep(prevStep);
-      const prevQuestions = getQuestions(profileType, language, prevStep);
+      const prevQuestions = getQuestions(profileType, language);
       setCurrentQuestionIndex(prevQuestions.length - 1);
     }
   };
@@ -194,11 +194,11 @@ export const SimpleCulturalMaturityCalculator = ({
   };
 
   const totalQuestions = steps.slice(0, -1).reduce((total, step) => {
-    return total + getQuestions(profileType, language, step).length;
+    return total + getQuestions(profileType, language).length;
   }, 0);
 
   const completedQuestions = steps.slice(0, currentStepIndex).reduce((total, step) => {
-    return total + getQuestions(profileType, language, step).length;
+    return total + getQuestions(profileType, language).length;
   }, 0) + currentQuestionIndex;
 
   const progressPercentage = Math.round((completedQuestions / totalQuestions) * 100);
@@ -248,7 +248,7 @@ export const SimpleCulturalMaturityCalculator = ({
           </CardHeader>
           <CardContent>
             <MaturityResults 
-              scores={scores}
+              score={scores}
               profileType={profileType}
               language={language}
             />
@@ -318,13 +318,13 @@ export const SimpleCulturalMaturityCalculator = ({
             <CheckboxQuestionCard
               question={currentQuestion}
               selectedValues={answers[currentQuestion.id] as string[] || []}
-              onSelect={(values) => handleSelectOption(currentQuestion.id, values)}
+              onChange={(values) => handleSelectOption(currentQuestion.id, values)}
             />
           ) : (
             <QuestionCard
               question={currentQuestion}
               selectedValue={answers[currentQuestion.id] as number}
-              onSelect={(value) => handleSelectOption(currentQuestion.id, value)}
+              onChange={(value) => handleSelectOption(currentQuestion.id, value)}
             />
           )}
           

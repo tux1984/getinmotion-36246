@@ -1,76 +1,125 @@
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
-import { useToast } from '@/components/ui/use-toast';
+import { ProfileSelector } from '@/components/cultural/components/ProfileTypeSelector';
+import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
+import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
+import { CategoryScore, ProfileType } from '@/components/maturity/types';
 import { useLanguage } from '@/context/LanguageContext';
-import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { motion } from 'framer-motion';
-import { MotionLogo } from '@/components/MotionLogo';
+import { useUserData } from '@/hooks/useUserData';
 
 const MaturityCalculator = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { language } = useLanguage();
+  const { updateMaturityScores } = useUserData();
   
-  const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    // Save results to localStorage
-    localStorage.setItem('maturityScores', JSON.stringify(scores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
-    localStorage.setItem('onboardingCompleted', 'true');
+  // Get profile type from location state or default to null
+  const initialProfileType = location.state?.profileType as ProfileType | null;
+  const [profileType, setProfileType] = useState<ProfileType | null>(initialProfileType);
+  const [showCalculator, setShowCalculator] = useState(!!initialProfileType);
+
+  console.log('MaturityCalculator: Initial state', { initialProfileType, showCalculator });
+
+  useEffect(() => {
+    if (initialProfileType) {
+      setProfileType(initialProfileType);
+      setShowCalculator(true);
+    }
+  }, [initialProfileType]);
+
+  const translations = {
+    en: {
+      title: 'Maturity Calculator',
+      subtitle: 'Evaluate your cultural project maturity',
+      selectProfile: 'Select your profile to start the assessment',
+      back: 'Back to Dashboard'
+    },
+    es: {
+      title: 'Calculadora de Madurez',
+      subtitle: 'Evalúa la madurez de tu proyecto cultural',
+      selectProfile: 'Selecciona tu perfil para comenzar la evaluación',
+      back: 'Volver al Dashboard'
+    }
+  };
+
+  const t = translations[language];
+
+  const handleProfileSelect = (selectedProfile: ProfileType) => {
+    console.log('Profile selected:', selectedProfile);
+    setProfileType(selectedProfile);
+    setShowCalculator(true);
+  };
+
+  const handleCalculatorComplete = async (scores: CategoryScore) => {
+    console.log('Maturity calculator completed with scores:', scores);
     
-    // Clear any saved progress since assessment is completed
-    localStorage.removeItem('maturityCalculatorProgress');
-    
-    // Show toast notification
-    toast({
-      title: language === 'en' ? 'Assessment Completed!' : '¡Evaluación Completada!',
-      description: language === 'en' 
-        ? "Your personalized dashboard is ready with the recommended tools."
-        : "Tu panel personalizado está listo con las herramientas recomendadas."
-    });
-    
-    // Navigate to dashboard
+    try {
+      // Update maturity scores in the database
+      await updateMaturityScores(scores);
+      console.log('Maturity scores updated successfully');
+      
+      // Navigate back to dashboard with completion flag
+      navigate('/dashboard', { 
+        state: { 
+          maturityCompleted: true,
+          scores,
+          profileType
+        }
+      });
+    } catch (error) {
+      console.error('Error updating maturity scores:', error);
+      // Still navigate back but without the completion state
+      navigate('/dashboard');
+    }
+  };
+
+  const handleBackToDashboard = () => {
     navigate('/dashboard');
   };
-  
+
+  const handleBackToProfileSelection = () => {
+    setShowCalculator(false);
+    setProfileType(null);
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Simplified background with subtle gradients */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/30"></div>
-        
-        <motion.div 
-          className="absolute top-0 right-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-br from-purple-100/15 to-purple-200/8 opacity-10 blur-3xl"
-          animate={{ 
-            scale: [1, 1.02, 1],
-            x: [0, 3, 0],
-            y: [0, -3, 0], 
-          }}
-          transition={{ 
-            duration: 20,
-            repeat: Infinity,
-            repeatType: "reverse" 
-          }}
-        />
-      </div>
+    <DashboardBackground>
+      <NewDashboardHeader 
+        onMaturityCalculatorClick={handleBackToDashboard}
+        onAgentManagerClick={() => {}}
+      />
       
-      {/* Main content without restrictive containers */}
-      <div className="relative z-10 w-full px-4 py-8">
-        {/* Centered logo */}
-        <div className="text-center mb-8">
-          <MotionLogo variant="dark" size="lg" />
-        </div>
-        
-        {/* Calculator component with full width and no card wrapper */}
-        <div className="w-full max-w-6xl mx-auto">
-          <SimpleCulturalMaturityCalculator 
-            language={language}
-            onComplete={handleComplete} 
+      <div className="pt-24 min-h-screen">
+        {!showCalculator ? (
+          <div className="max-w-4xl mx-auto p-6">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 mb-4">
+                {t.title}
+              </h1>
+              <p className="text-lg text-slate-600 mb-8">
+                {t.subtitle}
+              </p>
+              <p className="text-slate-500">
+                {t.selectProfile}
+              </p>
+            </div>
+            
+            <ProfileSelector
+              onProfileSelect={handleProfileSelect}
+              selectedProfile={profileType}
+            />
+          </div>
+        ) : profileType ? (
+          <SimpleCulturalMaturityCalculator
+            profileType={profileType}
+            onComplete={handleCalculatorComplete}
+            onBack={handleBackToProfileSelection}
           />
-        </div>
+        ) : null}
       </div>
-    </div>
+    </DashboardBackground>
   );
 };
 
