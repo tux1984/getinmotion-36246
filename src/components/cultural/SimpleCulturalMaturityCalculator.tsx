@@ -1,314 +1,355 @@
 
-import React, { useMemo, useEffect, useState } from 'react';
-import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
-import { useOptimizedQuestions } from './hooks/useOptimizedQuestions';
-import { getExtendedQuestions } from '@/components/maturity/questions';
-import { OnboardingErrorBoundary } from './components/OnboardingErrorBoundary';
-import { useMaturityCalculatorLogic } from './hooks/useMaturityCalculatorLogic';
-import { useMaturityNavigationLogic } from './hooks/useMaturityNavigationLogic';
-import { RecoverProgressDialog } from './components/RecoverProgressDialog';
-import { useMaturityProgress } from './hooks/useMaturityProgress';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useNavigate } from 'react-router-dom';
-import { CalculatorLayout } from './components/CalculatorLayout';
-import { StepContentContainer } from './components/StepContentContainer';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { Question, ProfileType, CategoryScore, CalculatorStep } from '@/components/maturity/types';
+import { getQuestions } from '@/components/maturity/getQuestions';
+import { QuestionCard } from '@/components/maturity/QuestionCard';
+import { CheckboxQuestionCard } from '@/components/maturity/CheckboxQuestionCard';
+import { MaturityResults } from '@/components/maturity/MaturityResults';
 
 interface SimpleCulturalMaturityCalculatorProps {
-  language: 'en' | 'es';
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
+  profileType: ProfileType;
+  onComplete?: (scores: CategoryScore) => void;
+  onBack?: () => void;
 }
 
-const characterImages = [
-  "/lovable-uploads/cfd16f14-72a3-4b55-bfd2-67adcd44eb78.png",
-  "/lovable-uploads/a2ebe4fd-31ed-43ec-9f9f-35fe6b529ad2.png",
-  "/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png",
-  "/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png",
-  "/lovable-uploads/c131a30d-0ce5-4b65-ae3c-5715f73e4f4c.png",
-  "/lovable-uploads/aad610ec-9f67-4ed0-93dc-8c2b3e8f98d3.png",
-  "/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png",
-];
+export const SimpleCulturalMaturityCalculator = ({ 
+  profileType, 
+  onComplete, 
+  onBack 
+}: SimpleCulturalMaturityCalculatorProps) => {
+  const { language } = useLanguage();
+  const [currentStep, setCurrentStep] = useState<CalculatorStep>('ideaValidation');
+  const [answers, setAnswers] = useState<Record<string, number | string[]>>({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [categoryQuestions, setCategoryQuestions] = useState<Question[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
-export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCalculatorProps> = ({ 
-  language, 
-  onComplete 
-}) => {
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const [showRecoverDialog, setShowRecoverDialog] = useState(false);
+  const steps: CalculatorStep[] = ['ideaValidation', 'userExperience', 'marketFit', 'monetization', 'results'];
+  const currentStepIndex = steps.indexOf(currentStep);
 
-  const {
-    hasSavedProgress,
-    savedProgress,
-    saveProgress,
-    clearProgress,
-    loadProgress
-  } = useMaturityProgress();
-
-  const {
-    currentStep,
-    setCurrentStep,
-    profileType,
-    currentQuestionIndex,
-    setCurrentQuestionIndex,
-    answers,
-    extendedAnswers,
-    analysisType,
-    setAnalysisType,
-    scores,
-    setScores,
-    recommendedAgents,
-    setRecommendedAgents,
-    toast,
-    calculateScores,
-    getRecommendations,
-    handleProfileSelect,
-    handleSelectOption,
-    handleAnalysisChoice,
-    handleComplete
-  } = useMaturityCalculatorLogic(language, onComplete);
-
-  // Check for saved progress on mount
-  useEffect(() => {
-    if (hasSavedProgress && savedProgress) {
-      setShowRecoverDialog(true);
-    }
-  }, [hasSavedProgress, savedProgress]);
-
-  // Get questions based on current step
-  const { questions } = useOptimizedQuestions(language, profileType);
-  const extendedQuestions = useMemo(() => {
-    return profileType ? getExtendedQuestions(language, profileType) : [];
-  }, [language, profileType]);
-
-  // Calculate current step number and total steps
-  const currentStepNumber = useMemo(() => {
-    if (currentStep === 'profileType') return 1;
-    if (currentStep === 'questions') return currentQuestionIndex + 2;
-    if (currentStep === 'bifurcation') return questions.length + 2;
-    if (currentStep === 'extendedQuestions') return questions.length + 3 + currentQuestionIndex;
-    return questions.length + 3 + (analysisType === 'deep' ? extendedQuestions.length : 0);
-  }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length, analysisType]);
-
-  const totalSteps = useMemo(() => {
-    return questions.length + 3 + (analysisType === 'deep' ? extendedQuestions.length : 0);
-  }, [questions.length, extendedQuestions.length, analysisType]);
-
-  // Updated translations with new name
-  const translations = useMemo(() => ({
+  const translations = {
     en: {
-      title: "Business Maturity",
-      subtitle: "Let's evaluate your business development stage",
-      profileTypeTitle: "Where are you today with your cultural or creative project?",
-      profileTypeSubtitle: "Choose the option that best describes your current situation",
-      idea: {
-        title: "I have an idea, but haven't started it yet",
-        description: "I'm in the early stages with a creative concept or business idea I want to develop"
+      title: 'Cultural Project Maturity Calculator',
+      steps: {
+        ideaValidation: 'Idea Validation',
+        userExperience: 'User Experience',
+        marketFit: 'Market Fit',
+        monetization: 'Monetization',
+        results: 'Results'
       },
-      solo: {
-        title: "My venture is already working, but I'm alone",
-        description: "I'm an individual creator, freelancer, or solo entrepreneur managing my creative business"
+      navigation: {
+        back: 'Back',
+        next: 'Next',
+        previous: 'Previous',
+        finish: 'Finish Assessment',
+        restart: 'Restart Calculator'
       },
-      team: {
-        title: "I have a team assembled and running",
-        description: "I manage a team or organization in the creative or cultural sector"
-      },
-      next: "Next",
-      back: "Back",
-      complete: "Complete Assessment",
-      selectProfile: "Please select a profile type",
-      answerQuestion: "Please answer the question before continuing",
-      resultsTitle: "Your Business Maturity Results",
-      resultsSubtitle: "Here's your assessment with recommended tools",
-      primaryRecommendations: "Primary Recommendations",
-      secondaryRecommendations: "Secondary Recommendations",
-      deeperAnalysis: "Want a deeper analysis?",
-      moreQuestions: "Answer more questions for detailed insights",
-      finishAssessment: "Finish Assessment"
+      progress: 'Progress',
+      question: 'Question',
+      of: 'of'
     },
     es: {
-      title: "Madurez de Negocio",
-      subtitle: "Vamos a evaluar la etapa de desarrollo de tu negocio",
-      profileTypeTitle: "¿Dónde estás hoy con tu proyecto cultural o creativo?",
-      profileTypeSubtitle: "Elige la opción que mejor describe tu situación actual",
-      idea: {
-        title: "Tengo una idea, pero aún no la puse en marcha",
-        description: "Estoy en las primeras etapas con un concepto creativo o idea de negocio que quiero desarrollar"
+      title: 'Calculadora de Madurez de Proyectos Culturales',
+      steps: {
+        ideaValidation: 'Validación de Idea',
+        userExperience: 'Experiencia de Usuario',
+        marketFit: 'Ajuste al Mercado',
+        monetization: 'Monetización',
+        results: 'Resultados'
       },
-      solo: {
-        title: "Mi emprendimiento ya funciona, pero estoy solo/a",
-        description: "Soy un creador individual, freelancer o emprendedor solitario que gestiona mi negocio creativo"
+      navigation: {
+        back: 'Atrás',
+        next: 'Siguiente',
+        previous: 'Anterior',
+        finish: 'Finalizar Evaluación',
+        restart: 'Reiniciar Calculadora'
       },
-      team: {
-        title: "Tengo un equipo armado y en marcha",
-        description: "Gestiono un equipo u organización en el sector creativo o cultural"
-      },
-      next: "Siguiente",
-      back: "Atrás",
-      complete: "Completar Evaluación",
-      selectProfile: "Por favor selecciona un tipo de perfil",
-      answerQuestion: "Por favor responde la pregunta antes de continuar",
-      resultsTitle: "Tus Resultados de Madurez de Negocio",
-      resultsSubtitle: "Aquí está tu evaluación con herramientas recomendadas",
-      primaryRecommendations: "Recomendaciones Principales",
-      secondaryRecommendations: "Recomendaciones Secundarias",
-      deeperAnalysis: "¿Quieres un análisis más profundo?",
-      moreQuestions: "Responde más preguntas para obtener información detallada",
-      finishAssessment: "Finalizar Evaluación"
+      progress: 'Progreso',
+      question: 'Pregunta',
+      of: 'de'
     }
-  }), []);
+  };
 
   const t = translations[language];
 
-  const { handleNext, handleBack } = useMaturityNavigationLogic({
-    currentStep,
-    setCurrentStep,
-    profileType,
-    questions,
-    extendedQuestions,
-    currentQuestionIndex,
-    setCurrentQuestionIndex,
-    answers,
-    extendedAnswers,
-    analysisType,
-    calculateScores,
-    getRecommendations,
-    setScores,
-    setRecommendedAgents,
-    toast,
-    t,
-    language
-  });
-
-  // Save progress function
-  const handleSaveAndExit = () => {
-    saveProgress({
-      currentStep,
-      currentQuestionIndex,
-      profileType,
-      answers,
-      extendedAnswers,
-      analysisType
-    });
-    navigate('/dashboard');
-  };
-
-  // Continue with saved progress
-  const handleContinueProgress = () => {
-    const progress = loadProgress();
-    if (progress) {
-      setCurrentStep(progress.currentStep);
-      setCurrentQuestionIndex(progress.currentQuestionIndex);
-      if (progress.profileType) handleProfileSelect(progress.profileType);
-      Object.entries(progress.answers).forEach(([id, value]) => {
-        handleSelectOption(id, value);
-      });
-      Object.entries(progress.extendedAnswers).forEach(([id, value]) => {
-        handleSelectOption(id, value);
-      });
-      if (progress.analysisType) setAnalysisType(progress.analysisType);
-    }
-    setShowRecoverDialog(false);
-  };
-
-  // Start new assessment
-  const handleStartNew = () => {
-    clearProgress();
-    setShowRecoverDialog(false);
-  };
-
-  // Memoized image calculation
-  const getCurrentCharacterImage = useMemo(() => {
-    if (currentStep === 'profileType') {
-      return characterImages[0];
-    } else if (currentStep === 'questions') {
-      return characterImages[(currentQuestionIndex % characterImages.length) + 1] || characterImages[1];
-    } else if (currentStep === 'bifurcation') {
-      return characterImages[3];
-    } else if (currentStep === 'extendedQuestions') {
-      return characterImages[(currentQuestionIndex % characterImages.length) + 4] || characterImages[4];
-    } else {
-      return characterImages[6];
-    }
-  }, [currentStep, currentQuestionIndex]);
-
-  const getNextCharacterImage = useMemo(() => {
-    if (currentStep === 'questions' && currentQuestionIndex < questions.length - 1) {
-      return characterImages[((currentQuestionIndex + 1) % characterImages.length) + 1] || characterImages[1];
-    } else if (currentStep === 'extendedQuestions' && currentQuestionIndex < extendedQuestions.length - 1) {
-      return characterImages[((currentQuestionIndex + 1) % characterImages.length) + 4] || characterImages[4];
-    }
-    return undefined;
-  }, [currentStep, currentQuestionIndex, questions.length, extendedQuestions.length]);
-
-  // Improved auto-scroll to ensure navigation buttons are visible
   useEffect(() => {
-    if (isMobile) {
-      // Scroll to top first, then ensure navigation is visible
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // After a brief delay, scroll to ensure navigation buttons are visible
-      setTimeout(() => {
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const navigationHeight = 80; // Height of mobile navigation
-        
-        if (documentHeight > windowHeight) {
-          const scrollPosition = Math.max(0, documentHeight - windowHeight + navigationHeight);
-          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
-        }
-      }, 300);
+    if (currentStep !== 'results') {
+      const questions = getQuestions(profileType, language, currentStep);
+      setCategoryQuestions(questions);
+      setCurrentQuestionIndex(0);
     }
-  }, [currentStep, currentQuestionIndex, isMobile]);
+  }, [currentStep, profileType, language]);
+
+  const handleSelectOption = (questionId: string, value: number | string[]) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+
+  const calculateCategoryScore = (stepAnswers: Record<string, number | string[]>): number => {
+    const validAnswers = Object.values(stepAnswers).filter((answer): answer is number => 
+      typeof answer === 'number'
+    );
+    
+    if (validAnswers.length === 0) return 0;
+    
+    const sum = validAnswers.reduce((acc, curr) => acc + curr, 0);
+    const maxPossible = validAnswers.length * 3;
+    return Math.round((sum / maxPossible) * 100);
+  };
+
+  const getCurrentStepAnswers = (): Record<string, number | string[]> => {
+    const stepPrefix = `${profileType}_${currentStep}`;
+    return Object.entries(answers)
+      .filter(([key]) => key.startsWith(stepPrefix))
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+  };
+
+  const canProceedToNext = (): boolean => {
+    if (currentStep === 'results') return false;
+    
+    const currentQuestion = categoryQuestions[currentQuestionIndex];
+    if (!currentQuestion) return false;
+    
+    return answers[currentQuestion.id] !== undefined;
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < categoryQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      const nextStepIndex = currentStepIndex + 1;
+      if (nextStepIndex < steps.length - 1) {
+        setCurrentStep(steps[nextStepIndex]);
+      } else {
+        setCurrentStep('results');
+        setShowResults(true);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    } else if (currentStepIndex > 0) {
+      const prevStep = steps[currentStepIndex - 1];
+      setCurrentStep(prevStep);
+      const prevQuestions = getQuestions(profileType, language, prevStep);
+      setCurrentQuestionIndex(prevQuestions.length - 1);
+    }
+  };
+
+  const handleFinish = () => {
+    const stepAnswers = getCurrentStepAnswers();
+    
+    // Convert mixed answers to numeric for calculation
+    const numericAnswers: Record<string, number> = {};
+    Object.entries(answers).forEach(([key, value]) => {
+      if (typeof value === 'number') {
+        numericAnswers[key] = value;
+      } else if (Array.isArray(value)) {
+        // For multi-select, use the length as the score
+        numericAnswers[key] = Math.min(value.length, 3);
+      }
+    });
+    
+    const scores: CategoryScore = {
+      ideaValidation: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('ideaValidation'))
+        )
+      ),
+      userExperience: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('userExperience'))
+        )
+      ),
+      marketFit: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('marketFit'))
+        )
+      ),
+      monetization: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('monetization'))
+        )
+      )
+    };
+    
+    onComplete?.(scores);
+  };
+
+  const handleRestart = () => {
+    setAnswers({});
+    setCurrentStep('ideaValidation');
+    setCurrentQuestionIndex(0);
+    setShowResults(false);
+  };
+
+  const totalQuestions = steps.slice(0, -1).reduce((total, step) => {
+    return total + getQuestions(profileType, language, step).length;
+  }, 0);
+
+  const completedQuestions = steps.slice(0, currentStepIndex).reduce((total, step) => {
+    return total + getQuestions(profileType, language, step).length;
+  }, 0) + currentQuestionIndex;
+
+  const progressPercentage = Math.round((completedQuestions / totalQuestions) * 100);
+
+  if (showResults) {
+    // Convert mixed answers to numeric for results calculation
+    const numericAnswers: Record<string, number> = {};
+    Object.entries(answers).forEach(([key, value]) => {
+      if (typeof value === 'number') {
+        numericAnswers[key] = value;
+      } else if (Array.isArray(value)) {
+        // For multi-select, use the length as the score
+        numericAnswers[key] = Math.min(value.length, 3);
+      }
+    });
+
+    const scores: CategoryScore = {
+      ideaValidation: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('ideaValidation'))
+        )
+      ),
+      userExperience: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('userExperience'))
+        )
+      ),
+      marketFit: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('marketFit'))
+        )
+      ),
+      monetization: calculateCategoryScore(
+        Object.fromEntries(
+          Object.entries(numericAnswers).filter(([key]) => key.includes('monetization'))
+        )
+      )
+    };
+
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-purple-800">
+              {t.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MaturityResults 
+              scores={scores}
+              profileType={profileType}
+              language={language}
+            />
+            <div className="flex justify-center gap-4 mt-8">
+              <Button onClick={handleRestart} variant="outline">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                {t.navigation.restart}
+              </Button>
+              <Button onClick={handleFinish}>
+                {t.navigation.finish}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const currentQuestion = categoryQuestions[currentQuestionIndex];
+
+  if (!currentQuestion) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <OnboardingErrorBoundary>
-      {/* Recovery Dialog */}
-      <RecoverProgressDialog
-        isOpen={showRecoverDialog}
-        onContinue={handleContinueProgress}
-        onStartNew={handleStartNew}
-        language={language}
-        lastSaveTime={savedProgress?.timestamp}
-      />
-
-      <CalculatorLayout
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        title={t.title}
-        language={language}
-        onBack={handleBack}
-        onNext={handleNext}
-        canGoBack={currentStep !== 'profileType'}
-        showNext={currentStep !== 'results'}
-        nextLabel={
-          currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
-            ? t.complete 
-            : t.next
-        }
-        backLabel={t.back}
-        onExit={handleSaveAndExit}
-      >
-        <StepContentContainer
-          currentStep={currentStep}
-          currentQuestionIndex={currentQuestionIndex}
-          questions={questions}
-          extendedQuestions={extendedQuestions}
-          profileType={profileType}
-          answers={answers}
-          extendedAnswers={extendedAnswers}
-          analysisType={analysisType}
-          scores={scores}
-          recommendedAgents={recommendedAgents}
-          language={language}
-          t={t}
-          characterImage={getCurrentCharacterImage}
-          nextCharacterImage={getNextCharacterImage}
-          onProfileSelect={handleProfileSelect}
-          onSelectOption={handleSelectOption}
-          onAnalysisChoice={handleAnalysisChoice}
-          onComplete={handleComplete}
-        />
-      </CalculatorLayout>
-    </OnboardingErrorBoundary>
+    <div className="max-w-4xl mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between mb-4">
+            <CardTitle className="text-2xl font-bold text-purple-800">
+              {t.title}
+            </CardTitle>
+            {onBack && (
+              <Button variant="ghost" onClick={onBack}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.navigation.back}
+              </Button>
+            )}
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>{t.progress}: {progressPercentage}%</span>
+              <span>
+                {t.question} {completedQuestions + 1} {t.of} {totalQuestions}
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="w-full" />
+            
+            <div className="flex flex-wrap gap-2">
+              {steps.slice(0, -1).map((step, index) => (
+                <Badge 
+                  key={step}
+                  variant={index < currentStepIndex ? "default" : 
+                          index === currentStepIndex ? "secondary" : "outline"}
+                  className={index === currentStepIndex ? "bg-purple-100 text-purple-800" : ""}
+                >
+                  {t.steps[step]}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {currentQuestion.type === 'checkbox' ? (
+            <CheckboxQuestionCard
+              question={currentQuestion}
+              selectedValues={answers[currentQuestion.id] as string[] || []}
+              onSelect={(values) => handleSelectOption(currentQuestion.id, values)}
+            />
+          ) : (
+            <QuestionCard
+              question={currentQuestion}
+              selectedValue={answers[currentQuestion.id] as number}
+              onSelect={(value) => handleSelectOption(currentQuestion.id, value)}
+            />
+          )}
+          
+          <div className="flex justify-between pt-6">
+            <Button 
+              variant="outline" 
+              onClick={handlePrevious}
+              disabled={currentStepIndex === 0 && currentQuestionIndex === 0}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t.navigation.previous}
+            </Button>
+            
+            <Button 
+              onClick={handleNext}
+              disabled={!canProceedToNext()}
+            >
+              {currentQuestionIndex === categoryQuestions.length - 1 && currentStepIndex === steps.length - 2
+                ? t.navigation.finish
+                : t.navigation.next}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
