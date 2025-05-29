@@ -1,6 +1,4 @@
-
 import React, { useMemo, useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -300,24 +298,27 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
         lastSaveTime={savedProgress?.timestamp}
       />
 
-      {/* Main Content */}
-      <div className="w-full max-w-4xl mx-auto">
+      {/* Main Content - No Card wrapper, simplified layout */}
+      <div className="w-full">
         {/* Mobile Header */}
         {isMobile && (
-          <MobileHeader 
-            title={t.title}
-            currentStep={currentStepNumber}
-            totalSteps={totalSteps}
-            language={language}
-          />
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-purple-100">
+            <MobileHeader 
+              title={t.title}
+              currentStep={currentStepNumber}
+              totalSteps={totalSteps}
+              language={language}
+            />
+          </div>
         )}
 
-        <Card className={`relative border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-t-none border-t-0' : ''}`}>
-          {/* Improved Exit button - larger and more visible */}
+        {/* Content Container */}
+        <div className={`relative bg-white/80 backdrop-blur-sm ${isMobile ? 'pt-4 pb-20' : 'p-8'} rounded-2xl border border-purple-100/50 shadow-lg`}>
+          {/* Exit button */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="absolute top-4 right-4 z-10 p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200 group">
-                <X className="h-6 w-6 group-hover:scale-110 transition-transform" />
+              <button className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200">
+                <X className="h-5 w-5" />
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -336,164 +337,181 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
             </AlertDialogContent>
           </AlertDialog>
 
-          <CardContent className={`${isMobile ? 'pt-4 px-4 pb-24' : 'pt-8 px-8'}`}>
-            {/* Desktop Header */}
-            {!isMobile && (
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold text-purple-900 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                    {t.title}
-                  </h3>
-                  <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-                    {language === 'en' 
-                      ? `Step ${currentStepNumber} of ${totalSteps}` 
-                      : `Paso ${currentStepNumber} de ${totalSteps}`}
-                  </span>
-                </div>
-                
-                <ProgressBar current={currentStepNumber} total={totalSteps} />
+          {/* Desktop Header */}
+          {!isMobile && (
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-purple-900 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                  {t.title}
+                </h3>
+                <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+                  {language === 'en' 
+                    ? `Step ${currentStepNumber} of ${totalSteps}` 
+                    : `Paso ${currentStepNumber} de ${totalSteps}`}
+                </span>
               </div>
-            )}
-
-            <div className={`flex gap-8 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
-              {/* Character Image - Hidden on mobile for better space utilization */}
-              {!isMobile && (
-                <div className="w-1/3">
-                  <OptimizedCharacterImage
-                    src={getCurrentCharacterImage}
-                    alt="Character"
-                    preloadNext={getNextCharacterImage}
-                  />
-                </div>
-              )}
-
-              {/* Content */}
-              <div className="flex-1">
-                <AnimatePresence mode="wait">
-                  {currentStep === 'profileType' && (
-                    <motion.div
-                      key="profileType"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ProfileTypeSelector
-                        profileType={profileType}
-                        onSelect={handleProfileSelect}
-                        t={t}
-                      />
-                    </motion.div>
-                  )}
-
-                  {currentStep === 'questions' && questions[currentQuestionIndex] && (
-                    <motion.div
-                      key={`question-${currentQuestionIndex}`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <QuestionCard 
-                        question={questions[currentQuestionIndex]}
-                        selectedValue={answers[questions[currentQuestionIndex].id]}
-                        onSelectOption={handleSelectOption}
-                      />
-                    </motion.div>
-                  )}
-
-                  {currentStep === 'bifurcation' && (
-                    <motion.div
-                      key="bifurcation"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <BifurcationChoice
-                        language={language}
-                        selectedType={analysisType}
-                        onSelect={handleAnalysisChoice}
-                      />
-                    </motion.div>
-                  )}
-
-                  {currentStep === 'extendedQuestions' && extendedQuestions[currentQuestionIndex] && (
-                    <motion.div
-                      key={`extended-${currentQuestionIndex}`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <QuestionCard 
-                        question={extendedQuestions[currentQuestionIndex]}
-                        selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
-                        onSelectOption={handleSelectOption}
-                      />
-                    </motion.div>
-                  )}
-
-                  {currentStep === 'results' && scores && recommendedAgents && (
-                    <motion.div
-                      key="results"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ResultsDisplay
-                        scores={scores}
-                        recommendedAgents={recommendedAgents}
-                        t={t}
-                        language={language}
-                        onComplete={handleComplete}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              
+              <ProgressBar current={currentStepNumber} total={totalSteps} />
             </div>
+          )}
 
-            {/* Desktop Navigation */}
+          <div className={`flex gap-6 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
+            {/* Character Image - Smaller on desktop, hidden on mobile */}
             {!isMobile && (
-              <div className="flex justify-between pt-6 pb-4">
-                <DebouncedButton 
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={currentStep === 'profileType'}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {t.back}
-                </DebouncedButton>
-
-                {currentStep !== 'results' && (
-                  <DebouncedButton 
-                    onClick={handleNext}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
-                  >
-                    {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
-                      ? t.complete 
-                      : t.next}
-                    <ArrowRight className="h-4 w-4" />
-                  </DebouncedButton>
-                )}
+              <div className="w-1/4 flex-shrink-0">
+                <OptimizedCharacterImage
+                  src={getCurrentCharacterImage}
+                  alt="Character"
+                  preloadNext={getNextCharacterImage}
+                />
               </div>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Mobile Navigation - Fixed at bottom with improved spacing */}
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <AnimatePresence mode="wait">
+                {currentStep === 'profileType' && (
+                  <motion.div
+                    key="profileType"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ProfileTypeSelector
+                      profileType={profileType}
+                      onSelect={handleProfileSelect}
+                      t={t}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'questions' && questions[currentQuestionIndex] && (
+                  <motion.div
+                    key={`question-${currentQuestionIndex}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <QuestionCard 
+                      question={questions[currentQuestionIndex]}
+                      selectedValue={answers[questions[currentQuestionIndex].id]}
+                      onSelectOption={handleSelectOption}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'bifurcation' && (
+                  <motion.div
+                    key="bifurcation"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <BifurcationChoice
+                      language={language}
+                      selectedType={analysisType}
+                      onSelect={handleAnalysisChoice}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'extendedQuestions' && extendedQuestions[currentQuestionIndex] && (
+                  <motion.div
+                    key={`extended-${currentQuestionIndex}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <QuestionCard 
+                      question={extendedQuestions[currentQuestionIndex]}
+                      selectedValue={extendedAnswers[extendedQuestions[currentQuestionIndex].id]}
+                      onSelectOption={handleSelectOption}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'results' && scores && recommendedAgents && (
+                  <motion.div
+                    key="results"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ResultsDisplay
+                      scores={scores}
+                      recommendedAgents={recommendedAgents}
+                      t={t}
+                      language={language}
+                      onComplete={handleComplete}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <div className="flex justify-between pt-4 mt-6 border-t border-purple-100">
+              <DebouncedButton 
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 'profileType'}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t.back}
+              </DebouncedButton>
+
+              {currentStep !== 'results' && (
+                <DebouncedButton 
+                  onClick={handleNext}
+                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2"
+                >
+                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
+                    ? t.complete 
+                    : t.next}
+                  <ArrowRight className="h-4 w-4" />
+                </DebouncedButton>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Navigation - Improved positioning */}
         {isMobile && (
-          <MobileNavigation
-            onBack={handleBack}
-            onNext={handleNext}
-            canGoBack={currentStep !== 'profileType'}
-            showNext={currentStep !== 'results'}
-            nextLabel={currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 ? t.complete : t.next}
-            backLabel={t.back}
-          />
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg z-30">
+            <div className="flex justify-between items-center max-w-4xl mx-auto gap-4">
+              <DebouncedButton 
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 'profileType'}
+                className="flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
+                size="lg"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t.back}
+              </DebouncedButton>
+
+              {currentStep !== 'results' && (
+                <DebouncedButton 
+                  onClick={handleNext}
+                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 flex items-center gap-2 px-4 py-3 min-w-[100px] h-12 flex-1"
+                  size="lg"
+                >
+                  {currentStep === 'extendedQuestions' && currentQuestionIndex === extendedQuestions.length - 1 
+                    ? t.complete 
+                    : t.next}
+                  <ArrowRight className="h-4 w-4" />
+                </DebouncedButton>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </OnboardingErrorBoundary>

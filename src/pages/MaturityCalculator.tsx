@@ -35,18 +35,17 @@ const MaturityCalculator = () => {
   };
   
   return (
-    <div className="min-h-screen h-screen w-full overflow-hidden bg-white flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-white">
+      {/* Simplified background with subtle gradients */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Very subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-purple-50/30"></div>
         
-        {/* Extremely subtle animated background elements */}
         <motion.div 
-          className="absolute top-0 right-0 w-[70vw] h-[70vh] rounded-full bg-gradient-to-br from-purple-100/20 to-purple-200/10 opacity-10 blur-3xl"
+          className="absolute top-0 right-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-br from-purple-100/15 to-purple-200/8 opacity-10 blur-3xl"
           animate={{ 
-            scale: [1, 1.03, 1],
-            x: [0, 5, 0],
-            y: [0, -5, 0], 
+            scale: [1, 1.02, 1],
+            x: [0, 3, 0],
+            y: [0, -3, 0], 
           }}
           transition={{ 
             duration: 20,
@@ -54,30 +53,17 @@ const MaturityCalculator = () => {
             repeatType: "reverse" 
           }}
         />
-        
-        <motion.div 
-          className="absolute bottom-0 left-0 w-[60vw] h-[60vh] rounded-full bg-gradient-to-tr from-purple-100/20 to-purple-200/10 opacity-5 blur-3xl"
-          animate={{ 
-            scale: [1, 1.05, 1],
-            x: [0, -8, 0],
-            y: [0, 8, 0], 
-          }}
-          transition={{ 
-            duration: 25,
-            repeat: Infinity,
-            repeatType: "reverse" 
-          }}
-        />
       </div>
       
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 flex flex-col items-center">
-        {/* Large centered logo */}
-        <div className="mb-8">
+      {/* Main content without restrictive containers */}
+      <div className="relative z-10 w-full px-4 py-8">
+        {/* Centered logo */}
+        <div className="text-center mb-8">
           <MotionLogo variant="dark" size="lg" />
         </div>
         
-        {/* Calculator component */}
-        <div className="w-full">
+        {/* Calculator component with full width and no card wrapper */}
+        <div className="w-full max-w-6xl mx-auto">
           <SimpleCulturalMaturityCalculator 
             language={language}
             onComplete={handleComplete} 

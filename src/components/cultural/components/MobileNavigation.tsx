@@ -23,7 +23,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 }) => {
   return (
     <motion.div 
-      className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-100 px-4 py-4 shadow-lg z-50"
+      className="sticky bottom-0 bg-white border-t border-purple-100 px-4 py-3 shadow-lg z-30 mt-6"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
