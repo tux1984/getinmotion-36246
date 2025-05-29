@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Users, FileText, Target, ArrowRight, ArrowLeft } from 'lucide-react';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
+import { CheckboxCards } from '../wizard-components/CheckboxCards';
 
 interface ManagementStyleStepProps {
   profileData: UserProfileData;
@@ -32,7 +33,7 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
       title: "Management Style",
       subtitle: "Tell us about how you organize and manage your work",
       teamQuestion: "Do you work alone or with someone else?",
-      organizationQuestion: "Where do you organize your tasks or projects?",
+      organizationQuestion: "How do you organize your tasks or projects? (Select all that apply)",
       decisionQuestion: "Do you find it easy to make business decisions?",
       team: {
         alone: "Completely alone",
@@ -42,7 +43,8 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
       organization: {
         paper: "Paper or notebook",
         whatsapp: "WhatsApp and memory",
-        tools: "Digital tools (Notion, Trello, Excel)"
+        digital: "Digital tools (Notion, Trello, Excel)",
+        formal: "Formal processes and methodologies"
       },
       decision: {
         easy: "Yes",
@@ -56,7 +58,7 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
       title: "Estilo de Gestión",
       subtitle: "Contanos sobre cómo organizás y gestionás tu trabajo",
       teamQuestion: "¿Trabajás solo/a o con alguien más?",
-      organizationQuestion: "¿Dónde organizás tus tareas o proyectos?",
+      organizationQuestion: "¿Cómo organizás tus tareas o proyectos? (Seleccioná todas las que correspondan)",
       decisionQuestion: "¿Te resulta fácil tomar decisiones de negocio?",
       team: {
         alone: "Completamente solo/a",
@@ -66,7 +68,8 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
       organization: {
         paper: "En papel o libreta",
         whatsapp: "WhatsApp y memoria",
-        tools: "Apps o herramientas (Notion, Trello, Excel)"
+        digital: "Apps o herramientas (Notion, Trello, Excel)",
+        formal: "Procesos formales y metodologías"
       },
       decision: {
         easy: "Sí",
@@ -89,7 +92,8 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
   const organizationOptions = [
     { id: 'paper', label: t.organization.paper, icon: <FileText className="h-5 w-5" /> },
     { id: 'whatsapp', label: t.organization.whatsapp, icon: <FileText className="h-5 w-5" /> },
-    { id: 'tools', label: t.organization.tools, icon: <FileText className="h-5 w-5" /> }
+    { id: 'digital', label: t.organization.digital, icon: <FileText className="h-5 w-5" /> },
+    { id: 'formal', label: t.organization.formal, icon: <FileText className="h-5 w-5" /> }
   ];
 
   const decisionOptions = [
@@ -97,6 +101,25 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
     { id: 'sometimes', label: t.decision.sometimes, icon: <Target className="h-5 w-5" /> },
     { id: 'difficult', label: t.decision.difficult, icon: <Target className="h-5 w-5" /> }
   ];
+
+  const handleTaskOrganizationChange = (value: string, isChecked: boolean) => {
+    const currentTasks = Array.isArray(profileData.taskOrganization) 
+      ? profileData.taskOrganization 
+      : profileData.taskOrganization ? [profileData.taskOrganization] : [];
+    
+    if (isChecked && !currentTasks.includes(value)) {
+      updateProfileData({ taskOrganization: [...currentTasks, value] });
+    } else if (!isChecked && currentTasks.includes(value)) {
+      updateProfileData({ taskOrganization: currentTasks.filter(task => task !== value) });
+    }
+  };
+
+  const getSelectedTaskOrganization = (): string[] => {
+    if (Array.isArray(profileData.taskOrganization)) {
+      return profileData.taskOrganization;
+    }
+    return profileData.taskOrganization ? [profileData.taskOrganization] : [];
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -122,7 +145,7 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
           <RadioCards
             name="teamStructure"
             options={teamOptions}
-            selectedValue={profileData.teamStructure}
+            selectedValue={profileData.teamStructure || ''}
             onChange={(value) => updateProfileData({ teamStructure: value })}
             withIcons
           />
@@ -136,11 +159,10 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
           className="space-y-6"
         >
           <h3 className="text-xl font-semibold text-gray-800">{t.organizationQuestion}</h3>
-          <RadioCards
-            name="taskOrganization"
+          <CheckboxCards
             options={organizationOptions}
-            selectedValue={profileData.taskOrganization}
-            onChange={(value) => updateProfileData({ taskOrganization: value })}
+            selectedValues={getSelectedTaskOrganization()}
+            onChange={handleTaskOrganizationChange}
             withIcons
           />
         </motion.div>
@@ -156,7 +178,7 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
           <RadioCards
             name="decisionMaking"
             options={decisionOptions}
-            selectedValue={profileData.decisionMaking}
+            selectedValue={profileData.decisionMaking || ''}
             onChange={(value) => updateProfileData({ decisionMaking: value })}
             withIcons
           />

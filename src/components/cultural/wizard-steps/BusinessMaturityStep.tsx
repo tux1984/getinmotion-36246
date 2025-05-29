@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CreditCard, Eye, Calculator, ArrowRight, ArrowLeft } from 'lucide-react';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
+import { CheckboxCards } from '../wizard-components/CheckboxCards';
 
 interface BusinessMaturityStepProps {
   profileData: UserProfileData;
@@ -31,7 +32,7 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
     en: {
       title: "Business Maturity",
       subtitle: "Tell us about the current state and structure of your business",
-      paymentQuestion: "How do you currently get paid for your work or products?",
+      paymentQuestion: "How do you currently get paid for your work or products? (Select all that apply)",
       brandQuestion: "Do you have a defined brand or visual identity?",
       financialQuestion: "Do you have control over your income and expenses?",
       payment: {
@@ -56,7 +57,7 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
     es: {
       title: "Madurez del Negocio",
       subtitle: "Contanos sobre el estado actual y estructura de tu negocio",
-      paymentQuestion: "¿Cómo cobrás actualmente por tu trabajo o productos?",
+      paymentQuestion: "¿Cómo cobrás actualmente por tu trabajo o productos? (Seleccioná todas las que correspondan)",
       brandQuestion: "¿Tenés una marca o identidad visual definida?",
       financialQuestion: "¿Tenés control de tus ingresos y gastos?",
       payment: {
@@ -101,6 +102,25 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
     { id: 'intuition', label: t.financial.intuition, icon: <Calculator className="h-5 w-5" /> }
   ];
 
+  const handlePaymentChange = (value: string, isChecked: boolean) => {
+    const currentMethods = Array.isArray(profileData.paymentMethods) 
+      ? profileData.paymentMethods 
+      : profileData.paymentMethods ? [profileData.paymentMethods] : [];
+    
+    if (isChecked && !currentMethods.includes(value)) {
+      updateProfileData({ paymentMethods: [...currentMethods, value] });
+    } else if (!isChecked && currentMethods.includes(value)) {
+      updateProfileData({ paymentMethods: currentMethods.filter(method => method !== value) });
+    }
+  };
+
+  const getSelectedPaymentMethods = (): string[] => {
+    if (Array.isArray(profileData.paymentMethods)) {
+      return profileData.paymentMethods;
+    }
+    return profileData.paymentMethods ? [profileData.paymentMethods] : [];
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Header */}
@@ -122,11 +142,10 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
           className="space-y-6"
         >
           <h3 className="text-xl font-semibold text-gray-800">{t.paymentQuestion}</h3>
-          <RadioCards
-            name="paymentMethods"
+          <CheckboxCards
             options={paymentOptions}
-            selectedValue={profileData.paymentMethods}
-            onChange={(value) => updateProfileData({ paymentMethods: value })}
+            selectedValues={getSelectedPaymentMethods()}
+            onChange={handlePaymentChange}
             withIcons
           />
         </motion.div>
@@ -142,7 +161,7 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
           <RadioCards
             name="brandIdentity"
             options={brandOptions}
-            selectedValue={profileData.brandIdentity}
+            selectedValue={profileData.brandIdentity || ''}
             onChange={(value) => updateProfileData({ brandIdentity: value })}
             withIcons
           />
@@ -159,7 +178,7 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
           <RadioCards
             name="financialControl"
             options={financialOptions}
-            selectedValue={profileData.financialControl}
+            selectedValue={profileData.financialControl || ''}
             onChange={(value) => updateProfileData({ financialControl: value })}
             withIcons
           />
