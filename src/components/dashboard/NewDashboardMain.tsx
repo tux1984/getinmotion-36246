@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
+import { Agent, CategoryScore } from '@/types/dashboard';
 import { ModernDashboardMain } from './ModernDashboardMain';
 
 interface NewDashboardMainProps {
-  onSelectAgent: (id: string) => void;
+  onSelectAgent: (agent: Agent) => void;
   onMaturityCalculatorClick: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
-  recommendedAgents: RecommendedAgents;
+  recommendedAgents: Agent[];
 }
 
 export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({ 
@@ -19,6 +19,8 @@ export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({
   maturityScores,
   recommendedAgents
 }) => {
+  const { language } = useLanguage();
+
   return (
     <ModernDashboardMain
       onSelectAgent={onSelectAgent}
@@ -26,6 +28,8 @@ export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({
       agents={agents}
       maturityScores={maturityScores}
       recommendedAgents={recommendedAgents}
+      language={language}
+      onAgentToggle={async () => {}}
     />
   );
 };

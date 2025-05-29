@@ -146,9 +146,7 @@ export const SimpleCulturalMaturityCalculator = ({
     }
   };
 
-  const handleFinish = () => {
-    const stepAnswers = getCurrentStepAnswers();
-    
+  const calculateFinalScores = (): CategoryScore => {
     // Convert mixed answers to numeric for calculation
     const numericAnswers: Record<string, number> = {};
     Object.entries(answers).forEach(([key, value]) => {
@@ -160,7 +158,7 @@ export const SimpleCulturalMaturityCalculator = ({
       }
     });
     
-    const scores: CategoryScore = {
+    return {
       ideaValidation: calculateCategoryScore(
         Object.fromEntries(
           Object.entries(numericAnswers).filter(([key]) => key.includes('ideaValidation'))
@@ -182,7 +180,10 @@ export const SimpleCulturalMaturityCalculator = ({
         )
       )
     };
-    
+  };
+
+  const handleFinish = () => {
+    const scores = calculateFinalScores();
     onComplete?.(scores);
   };
 
@@ -204,39 +205,7 @@ export const SimpleCulturalMaturityCalculator = ({
   const progressPercentage = Math.round((completedQuestions / totalQuestions) * 100);
 
   if (showResults) {
-    // Convert mixed answers to numeric for results calculation
-    const numericAnswers: Record<string, number> = {};
-    Object.entries(answers).forEach(([key, value]) => {
-      if (typeof value === 'number') {
-        numericAnswers[key] = value;
-      } else if (Array.isArray(value)) {
-        // For multi-select, use the length as the score
-        numericAnswers[key] = Math.min(value.length, 3);
-      }
-    });
-
-    const scores: CategoryScore = {
-      ideaValidation: calculateCategoryScore(
-        Object.fromEntries(
-          Object.entries(numericAnswers).filter(([key]) => key.includes('ideaValidation'))
-        )
-      ),
-      userExperience: calculateCategoryScore(
-        Object.fromEntries(
-          Object.entries(numericAnswers).filter(([key]) => key.includes('userExperience'))
-        )
-      ),
-      marketFit: calculateCategoryScore(
-        Object.fromEntries(
-          Object.entries(numericAnswers).filter(([key]) => key.includes('marketFit'))
-        )
-      ),
-      monetization: calculateCategoryScore(
-        Object.fromEntries(
-          Object.entries(numericAnswers).filter(([key]) => key.includes('monetization'))
-        )
-      )
-    };
+    const scores = calculateFinalScores();
 
     return (
       <div className="max-w-4xl mx-auto p-6">
