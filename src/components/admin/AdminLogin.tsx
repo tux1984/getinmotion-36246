@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export const AdminLogin = () => {
-  const [email, setEmail] = useState('admin@getinmotion.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
@@ -19,6 +19,7 @@ export const AdminLogin = () => {
     setIsLoading(true);
     
     try {
+      console.log('Attempting admin login for:', email);
       const { error } = await signIn(email, password);
       
       if (error) {
@@ -29,6 +30,7 @@ export const AdminLogin = () => {
           variant: "destructive",
         });
       } else {
+        console.log('Login successful');
         toast({
           title: 'Acceso concedido',
           description: 'Bienvenido al panel de administración',
@@ -53,7 +55,7 @@ export const AdminLogin = () => {
           Panel de Administración
         </CardTitle>
         <CardDescription className="text-center text-indigo-200">
-          Credenciales de administrador
+          Ingresa tus credenciales de administrador
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -64,7 +66,7 @@ export const AdminLogin = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@getinmotion.com"
+                placeholder="tu-email@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -82,11 +84,6 @@ export const AdminLogin = () => {
                 required
                 className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
               />
-            </div>
-            <div className="text-xs text-indigo-300 bg-indigo-900/30 p-3 rounded">
-              <strong>Credenciales:</strong><br/>
-              Email: admin@getinmotion.com<br/>
-              Contraseña: MarcelaAdmin!!25
             </div>
           </div>
         </CardContent>

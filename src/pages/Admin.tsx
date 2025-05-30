@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
@@ -14,89 +15,59 @@ import { useAuth } from '@/context/AuthContext';
 const Admin = () => {
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const { toast } = useToast();
-  const { user, session, signOut } = useAuth();
+  const { user, session, signOut, loading, isAuthorized } = useAuth();
   
-  // Check admin status when user changes
+  // Load waitlist data when user is authorized
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setCheckingAuth(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.rpc('is_admin');
-        
-        if (error) {
-          console.error('Error checking admin status:', error);
-          setIsAdmin(false);
-          toast({
-            title: 'Error de autorización',
-            description: 'No se pudo verificar el estado de administrador.',
-            variant: 'destructive',
-          });
-        } else {
-          setIsAdmin(data || false);
-          if (!data) {
-            toast({
-              title: 'Acceso denegado',
-              description: 'No tienes permisos de administrador.',
-              variant: 'destructive',
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Exception checking admin status:', error);
-        setIsAdmin(false);
-        toast({
-          title: 'Error',
-          description: 'Error al verificar permisos de administrador.',
-          variant: 'destructive',
-        });
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user, toast]);
-  
-  // Load waitlist data when authenticated as admin
-  useEffect(() => {
-    if (isAdmin && user) {
+    if (isAuthorized && user && session) {
+      console.log('User is authorized, fetching waitlist data');
       fetchWaitlistData();
     }
-  }, [isAdmin, user]);
+  }, [isAuthorized, user, session]);
   
   const fetchWaitlistData = async () => {
-    if (!isAdmin) return;
+    if (!isAuthorized || !session) {
+      console.log('Not authorized or no session, skipping fetch');
+      return;
+    }
     
     setIsLoading(true);
     
     try {
-      console.log('Fetching waitlist using Edge Function...');
+      console.log('Fetching waitlist data...');
       
-      const { data, error } = await supabase.functions.invoke('get-waitlist', {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
+      // Try direct query first
+      const { data, error } = await supabase
+        .from('waitlist')
+        .select('*')
+        .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Function error:', error);
-        throw error;
+        console.error('Direct query error:', error);
+        
+        // Fallback to edge function
+        const { data: functionData, error: functionError } = await supabase.functions.invoke('get-waitlist', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
+          }
+        });
+        
+        if (functionError) {
+          console.error('Function error:', functionError);
+          throw functionError;
+        }
+        
+        if (functionData?.error) {
+          throw new Error(functionData.error);
+        }
+        
+        console.log('Waitlist fetched via function:', functionData?.waitlist?.length);
+        setWaitlistData(functionData?.waitlist || []);
+      } else {
+        console.log('Waitlist fetched directly:', data?.length);
+        setWaitlistData(data || []);
       }
-      
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      console.log('Waitlist fetched successfully:', data?.waitlist?.length);
-      setWaitlistData(data?.waitlist || []);
     } catch (error) {
       console.error('Error fetching waitlist data:', error);
       toast({
@@ -111,17 +82,14 @@ const Admin = () => {
   
   const handleLogout = async () => {
     await signOut();
-    setIsAdmin(false);
   };
   
   const handleRefresh = () => {
-    if (isAdmin) {
-      fetchWaitlistData();
-    }
+    fetchWaitlistData();
   };
 
   // Show loading while checking authentication
-  if (checkingAuth) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white flex items-center justify-center">
         <div className="text-center">
@@ -132,11 +100,11 @@ const Admin = () => {
     );
   }
 
-  // Show login form if not authenticated
-  if (!user) {
+  // Show login form if not authenticated or not authorized
+  if (!user || !isAuthorized) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
-        <AdminHeader onLogout={handleLogout} isAuthenticated={false} />
+        <AdminHeader onLogout={handleLogout} isAuthenticated={!!user} />
         
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto mt-16">
@@ -144,28 +112,6 @@ const Admin = () => {
             <div className="mt-4">
               <SupabaseStatus />
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show access denied if not admin
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
-        <AdminHeader onLogout={handleLogout} isAuthenticated={true} />
-        
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto mt-16 text-center">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">Acceso Denegado</h2>
-            <p className="text-indigo-200 mb-6">No tienes permisos de administrador para acceder a esta página.</p>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-            >
-              Cerrar Sesión
-            </button>
           </div>
         </div>
       </div>

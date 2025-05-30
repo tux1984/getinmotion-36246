@@ -24,22 +24,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthorization = async (userEmail?: string): Promise<boolean> => {
     try {
       const email = userEmail || user?.email;
-      if (!email) return false;
+      if (!email) {
+        console.log('No email provided for authorization check');
+        return false;
+      }
       
-      const { data, error } = await supabase.rpc('is_authorized_user', { 
-        user_email: email 
-      });
+      console.log('Checking authorization for:', email);
+      
+      // Check if user is in admin_users table
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('email, is_active')
+        .eq('email', email)
+        .eq('is_active', true)
+        .maybeSingle();
       
       if (error) {
         console.error('Error checking authorization:', error);
         return false;
       }
       
-      const authorized = data || false;
+      const authorized = !!data;
+      console.log('Authorization result:', authorized, data);
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      console.error('Error checking authorization:', error);
+      console.error('Exception checking authorization:', error);
       setIsAuthorized(false);
       return false;
     }
@@ -50,18 +60,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('AuthContext: Auth state changed:', event, session?.user?.email);
         
-        // Only synchronous state updates here
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer authorization check to prevent deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            checkAuthorization(session.user.email);
-          }, 0);
+        // Check authorization for authenticated users
+        if (session?.user?.email) {
+          await checkAuthorization(session.user.email);
         } else {
           setIsAuthorized(false);
         }
@@ -71,15 +78,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
 
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('AuthContext: Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        setTimeout(() => {
-          checkAuthorization(session.user.email);
-        }, 0);
+      if (session?.user?.email) {
+        await checkAuthorization(session.user.email);
       } else {
         setIsAuthorized(false);
       }
@@ -107,16 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { error };
       }
       
-      if (data.user) {
-        const authorized = await checkAuthorization(data.user.email);
-        if (!authorized) {
-          console.log('AuthContext: User not authorized, signing out');
-          await supabase.auth.signOut();
-          return { error: { message: 'Usuario no autorizado para acceder al sistema' } };
-        }
-      }
-      
-      console.log('AuthContext: Sign in successful');
+      console.log('AuthContext: Sign in successful for:', data.user?.email);
       return { error: null };
     } catch (error) {
       console.error('AuthContext: Sign in exception:', error);

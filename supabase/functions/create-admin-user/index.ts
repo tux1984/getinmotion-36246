@@ -24,13 +24,27 @@ serve(async (req) => {
       }
     )
 
-    // Create new admin user with fixed credentials
+    const { email, password } = await req.json()
+
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({ error: 'Email and password are required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    console.log('Creating admin user:', email)
+
+    // Create new admin user
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email: 'admin@getinmotion.com',
-      password: 'MarcelaAdmin!!25',
+      email: email,
+      password: password,
       email_confirm: true,
       user_metadata: {
-        full_name: 'Admin Marcela'
+        full_name: 'Admin User'
       }
     })
 
@@ -51,7 +65,7 @@ serve(async (req) => {
     const { error: adminError } = await supabaseAdmin
       .from('admin_users')
       .upsert({
-        email: 'admin@getinmotion.com',
+        email: email,
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -76,7 +90,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Admin user created successfully',
-        email: 'admin@getinmotion.com'
+        email: email
       }),
       { 
         status: 200,
