@@ -2,7 +2,7 @@
 import React from 'react';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
-import { FloatingChatArea } from './FloatingChatArea';
+import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
 import { FloatingAgentInfoModule } from './FloatingAgentInfoModule';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -24,25 +24,22 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
         <div className="flex flex-col h-screen">
-          {/* Módulo flotante con información del agente - fuera del contenedor */}
+          {/* Header blanco fuera del contenedor púrpura */}
           <FloatingAgentInfoModule 
             agentId={selectedAgent}
             language={language}
             onBack={onBack}
           />
           
-          {/* Contenedor púrpura redondeado */}
-          <div className="flex-1 overflow-hidden mx-4 mb-4 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
-            {/* Mobile: Main chat area takes most space */}
-            <div className="flex-1 h-full overflow-hidden">
-              <FloatingChatArea 
-                agentId={selectedAgent} 
-                language={language} 
-              />
-            </div>
+          {/* Contenedor púrpura redondeado simplificado */}
+          <div className="flex-1 mx-4 mb-4 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+            <ModernFloatingAgentChat 
+              agentId={selectedAgent} 
+              language={language} 
+            />
           </div>
           
-          {/* Mobile bottom tabs - simplified */}
+          {/* Mobile bottom tabs */}
           <div className="bg-black/20 backdrop-blur-xl border-t border-white/10 p-2 mx-4 mb-4 rounded-2xl">
             <div className="flex justify-between items-center gap-2">
               <div className="flex-1">
@@ -76,26 +73,25 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
       <div className="h-screen p-4 lg:p-6">
-        {/* Módulo flotante con información del agente - completamente fuera del contenedor púrpura */}
+        {/* Header blanco completamente fuera */}
         <FloatingAgentInfoModule 
           agentId={selectedAgent}
           language={language}
           onBack={onBack}
         />
         
-        {/* Contenedor púrpura redondeado que contiene todo el grid */}
+        {/* Contenedor púrpura redondeado con grid limpio */}
         <div className="bg-black/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl h-[calc(100%-120px)] max-w-7xl mx-auto mt-4 overflow-hidden">
-          {/* Desktop Bento Grid - dentro del contenedor redondeado */}
           <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full p-4 lg:p-6">
-            {/* Main Chat Area - Center stage */}
+            {/* Chat principal - sin contenedores extra */}
             <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
-              <FloatingChatArea 
+              <ModernFloatingAgentChat 
                 agentId={selectedAgent} 
                 language={language} 
               />
             </div>
             
-            {/* Conversation History - Left sidebar on desktop */}
+            {/* Conversation History */}
             <div className="hidden lg:block lg:col-span-3 lg:row-span-6">
               <ConversationHistorySidebar 
                 agentId={selectedAgent} 
@@ -103,7 +99,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
               />
             </div>
             
-            {/* Mini Dashboard - Top right on desktop */}
+            {/* Mini Dashboard */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
               <AgentMiniDashboard 
                 agentId={selectedAgent} 
@@ -111,7 +107,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
               />
             </div>
             
-            {/* Quick Actions - Middle right on desktop */}
+            {/* Quick Actions */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
               <AgentQuickActions 
                 agentId={selectedAgent} 
@@ -119,7 +115,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
               />
             </div>
             
-            {/* Additional Tools - Bottom right on desktop */}
+            {/* Additional Tools */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
               <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl h-full p-4">
                 <h3 className="text-white font-semibold mb-3">
