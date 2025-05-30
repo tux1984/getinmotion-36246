@@ -54,7 +54,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
     }
   };
 
-  // Traducciones para categorías
+  // Enhanced category translations - properly mapping all categories
   const categoryTranslations = {
     en: {
       'Financiera': 'Financial',
@@ -62,7 +62,12 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
       'Diagnóstico': 'Diagnostic',
       'Comercial': 'Commercial',
       'Operativo': 'Operational',
-      'Comunidad': 'Community'
+      'Comunidad': 'Community',
+      'Financial': 'Financial',
+      'Diagnostic': 'Diagnostic',
+      'Commercial': 'Commercial',
+      'Operational': 'Operational',
+      'Community': 'Community'
     },
     es: {
       'Financiera': 'Financiera',
@@ -70,7 +75,12 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
       'Diagnóstico': 'Diagnóstico',
       'Comercial': 'Comercial',
       'Operativo': 'Operativo',
-      'Comunidad': 'Comunidad'
+      'Comunidad': 'Comunidad',
+      'Financial': 'Financiera',
+      'Diagnostic': 'Diagnóstico',
+      'Commercial': 'Comercial',
+      'Operational': 'Operativo',
+      'Community': 'Comunidad'
     }
   };
 
@@ -105,6 +115,8 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           const isRecommended = isAgentRecommended(agent.id);
           const isToggling = togglingAgents.has(agent.id);
           const translation = getAgentTranslation(agent.id, language);
+
+          console.log(`Agent ${agent.id} translation for ${language}:`, translation);
 
           return (
             <div

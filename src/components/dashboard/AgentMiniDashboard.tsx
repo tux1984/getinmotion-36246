@@ -26,25 +26,19 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
   const t = {
     en: {
       overview: "Overview",
-      conversations: "Conversations",
-      messages: "Messages", 
-      tasks: "Active Tasks",
-      completed: "Completed",
+      active: "Active",
+      completed: "Completed", 
+      chats: "Chats",
       deliverables: "Deliverables",
-      avgSession: "Avg Session",
-      minutes: "min",
-      recentActivity: "Recent Activity"
+      today: "Today"
     },
     es: {
       overview: "Resumen",
-      conversations: "Conversaciones",
-      messages: "Mensajes",
-      tasks: "Tareas Activas", 
+      active: "Activo",
       completed: "Completadas",
+      chats: "Chats", 
       deliverables: "Entregables",
-      avgSession: "Sesión Promedio",
-      minutes: "min",
-      recentActivity: "Actividad Reciente"
+      today: "Hoy"
     }
   };
 
@@ -65,37 +59,37 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
           <TrendingUp className="w-5 h-5 text-white" />
         </div>
         <div className="text-xl font-bold text-white">{stats.totalConversations}</div>
-        <div className="text-sm text-purple-200">{t[language].conversations}</div>
+        <div className="text-sm text-purple-200">{t[language].chats}</div>
       </div>
     );
   }
 
   const statsData = [
     {
-      title: t[language].conversations,
-      value: stats.totalConversations.toString(),
-      icon: MessageSquare,
+      title: t[language].active,
+      value: stats.activeTasks.toString(),
+      icon: Clock,
       gradient: "from-blue-500 to-cyan-500",
       bgGradient: "from-blue-500/20 to-cyan-500/20"
     },
     {
-      title: t[language].tasks,
-      value: stats.activeTasks.toString(),
+      title: t[language].completed,
+      value: stats.completedTasks.toString(),
       icon: CheckCircle,
       gradient: "from-green-500 to-emerald-500",
       bgGradient: "from-green-500/20 to-emerald-500/20"
     },
     {
-      title: t[language].deliverables,
-      value: stats.deliverables.toString(),
-      icon: FileText,
+      title: t[language].chats,
+      value: stats.totalConversations.toString(),
+      icon: MessageSquare,
       gradient: "from-purple-500 to-violet-500",
       bgGradient: "from-purple-500/20 to-violet-500/20"
     },
     {
-      title: t[language].avgSession,
-      value: `${stats.avgSessionTime}${t[language].minutes}`,
-      icon: Clock,
+      title: t[language].deliverables,
+      value: stats.deliverables.toString(),
+      icon: FileText,
       gradient: "from-orange-500 to-red-500",
       bgGradient: "from-orange-500/20 to-red-500/20"
     }
@@ -111,7 +105,7 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
         <h3 className="text-lg font-bold text-white">{t[language].overview}</h3>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Main 4 cards */}
       <div className="grid grid-cols-2 gap-3">
         {statsData.map((stat, index) => (
           <div key={index} className={`bg-gradient-to-br ${stat.bgGradient} backdrop-blur-xl p-4 rounded-xl border border-white/10`}>
@@ -128,26 +122,18 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
         ))}
       </div>
 
-      {/* Recent Activity */}
-      {stats.recentActivity.length > 0 && (
-        <div className="bg-white/5 backdrop-blur-xl p-4 rounded-xl border border-white/10">
-          <h4 className="text-sm font-semibold text-white mb-3">
-            {t[language].recentActivity}
-          </h4>
-          <div className="space-y-2">
-            {stats.recentActivity.slice(0, 3).map((activity) => (
-              <div key={activity.id} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
-                {activity.type === 'message' && <MessageSquare className="w-3 h-3 text-blue-400" />}
-                {activity.type === 'task' && <CheckCircle className="w-3 h-3 text-green-400" />}
-                {activity.type === 'deliverable' && <FileText className="w-3 h-3 text-purple-400" />}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white/80 truncate">{activity.title}</p>
-                </div>
-              </div>
-            ))}
+      {/* Today Section */}
+      <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-xl p-4 rounded-xl border border-purple-300/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-white/70 font-medium">{t[language].today}</p>
+            <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
+          </div>
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
+            <MessageSquare className="w-6 h-6 text-white" />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

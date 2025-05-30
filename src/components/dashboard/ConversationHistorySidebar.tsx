@@ -13,12 +13,14 @@ interface ConversationHistorySidebarProps {
   agentId: string;
   language: 'en' | 'es';
   compact?: boolean;
+  onConversationSelect?: (conversationId: string) => void;
 }
 
 export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProps> = ({
   agentId,
   language,
-  compact = false
+  compact = false,
+  onConversationSelect
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const {
@@ -52,8 +54,12 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
   );
 
   const handleNewChat = () => {
-    console.log('New chat button clicked');
+    console.log('New chat button clicked - starting new conversation');
     startNewConversation();
+    // Notify parent component if callback provided
+    if (onConversationSelect) {
+      onConversationSelect('new');
+    }
   };
 
   const handleSelectConversation = async (conversationId: string) => {
@@ -61,6 +67,11 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
     try {
       await selectConversation(conversationId);
       console.log('Conversation selection completed successfully');
+      
+      // Notify parent component about the selection
+      if (onConversationSelect) {
+        onConversationSelect(conversationId);
+      }
     } catch (error) {
       console.error('Error selecting conversation:', error);
     }

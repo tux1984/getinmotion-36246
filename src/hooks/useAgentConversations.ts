@@ -30,6 +30,7 @@ export function useAgentConversations(agentId: string) {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [messagesLoading, setMessagesLoading] = useState(false);
 
   // Fetch conversations for agent
   const fetchConversations = async () => {
@@ -45,7 +46,7 @@ export function useAgentConversations(agentId: string) {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      console.log('Fetched conversations:', data);
+      console.log('Fetched conversations:', data?.length || 0);
       setConversations(data || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -66,6 +67,8 @@ export function useAgentConversations(agentId: string) {
     }
     
     console.log('Fetching messages for conversation:', conversationId);
+    setMessagesLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('agent_messages')
@@ -75,7 +78,7 @@ export function useAgentConversations(agentId: string) {
 
       if (error) throw error;
       
-      console.log('Fetched messages:', data);
+      console.log('Fetched messages:', data?.length || 0);
       
       const typedMessages: AgentMessage[] = (data || []).map(msg => ({
         ...msg,
@@ -91,6 +94,8 @@ export function useAgentConversations(agentId: string) {
         description: 'No se pudieron cargar los mensajes',
         variant: 'destructive',
       });
+    } finally {
+      setMessagesLoading(false);
     }
   };
 
@@ -111,7 +116,7 @@ export function useAgentConversations(agentId: string) {
 
       if (convError) throw convError;
 
-      console.log('Created new conversation:', conversation);
+      console.log('Created new conversation:', conversation.id);
       setCurrentConversationId(conversation.id);
       setMessages([]);
       await fetchConversations();
@@ -143,7 +148,7 @@ export function useAgentConversations(agentId: string) {
 
       if (error) throw error;
       
-      console.log('Added message:', data);
+      console.log('Added message:', data.id);
       
       const typedMessage: AgentMessage = {
         ...data,
@@ -152,7 +157,7 @@ export function useAgentConversations(agentId: string) {
       
       setMessages(prev => {
         const newMessages = [...prev, typedMessage];
-        console.log('Updated messages state with new message, total:', newMessages.length);
+        console.log('Updated messages state, total:', newMessages.length);
         return newMessages;
       });
       
@@ -177,7 +182,7 @@ export function useAgentConversations(agentId: string) {
     console.log('Selecting conversation:', conversationId);
     setCurrentConversationId(conversationId);
     await fetchMessages(conversationId);
-    console.log('Conversation selection completed');
+    console.log('Conversation selection completed for:', conversationId);
   };
 
   // Start new conversation - clear everything
@@ -185,7 +190,7 @@ export function useAgentConversations(agentId: string) {
     console.log('Starting new conversation');
     setCurrentConversationId(null);
     setMessages([]);
-    console.log('New conversation started - cleared state');
+    console.log('New conversation started - state cleared');
   };
 
   useEffect(() => {
@@ -200,14 +205,15 @@ export function useAgentConversations(agentId: string) {
 
   // Debug effect to log state changes
   useEffect(() => {
-    console.log('useAgentConversations state update:', {
+    console.log('useAgentConversations state:', {
       conversationsCount: conversations.length,
       messagesCount: messages.length,
       currentConversationId,
       loading,
+      messagesLoading,
       isProcessing
     });
-  }, [conversations, messages, currentConversationId, loading, isProcessing]);
+  }, [conversations, messages, currentConversationId, loading, messagesLoading, isProcessing]);
 
   return {
     conversations,
@@ -215,6 +221,7 @@ export function useAgentConversations(agentId: string) {
     currentConversationId,
     loading,
     isProcessing,
+    messagesLoading,
     setIsProcessing,
     createConversation,
     addMessage,
