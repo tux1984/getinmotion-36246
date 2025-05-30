@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
 import { CulturalAgent } from '@/data/agentsDatabase';
 import { getAgentTranslation } from '@/data/agentTranslations';
 import { 
@@ -11,9 +10,7 @@ import {
   Star, 
   Users, 
   CheckCircle,
-  Circle,
-  ChevronDown,
-  ChevronUp
+  Circle
 } from 'lucide-react';
 
 interface OptimizedAgentCategoryCardProps {
@@ -43,22 +40,16 @@ export const OptimizedAgentCategoryCard: React.FC<OptimizedAgentCategoryCardProp
   togglingAgents,
   language
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
   const t = {
     en: {
       recommended: "Recommended",
       activate: "Activate",
-      deactivate: "Deactivate",
-      showMore: "Show more",
-      showLess: "Show less"
+      deactivate: "Deactivate"
     },
     es: {
       recommended: "Recomendado",
       activate: "Activar",
-      deactivate: "Desactivar",
-      showMore: "Ver más",
-      showLess: "Ver menos"
+      deactivate: "Desactivar"
     }
   };
 
@@ -94,10 +85,6 @@ export const OptimizedAgentCategoryCard: React.FC<OptimizedAgentCategoryCardProp
 
   const translatedCategoryName = categoryTranslations[language][categoryName as keyof typeof categoryTranslations[typeof language]] || categoryName;
 
-  // Show first 2 agents by default, rest when expanded
-  const visibleAgents = isExpanded ? agents : agents.slice(0, 2);
-  const hasMoreAgents = agents.length > 2;
-
   return (
     <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/15">
       <CardHeader className="pb-3">
@@ -121,7 +108,7 @@ export const OptimizedAgentCategoryCard: React.FC<OptimizedAgentCategoryCardProp
       </CardHeader>
       
       <CardContent className="space-y-3">
-        {visibleAgents.map((agent) => {
+        {agents.map((agent) => {
           const userAgentData = getUserAgentData(agent.id);
           const isEnabled = Boolean(userAgentData?.is_enabled);
           const isRecommended = isAgentRecommended(agent.id);
@@ -188,28 +175,6 @@ export const OptimizedAgentCategoryCard: React.FC<OptimizedAgentCategoryCardProp
             </div>
           );
         })}
-        
-        {/* Show More/Less Button */}
-        {hasMoreAgents && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full text-purple-300 hover:text-white hover:bg-white/10 text-xs"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-3 h-3 mr-1" />
-                {t[language].showLess}
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-3 h-3 mr-1" />
-                {t[language].showMore} ({agents.length - 2})
-              </>
-            )}
-          </Button>
-        )}
       </CardContent>
     </Card>
   );

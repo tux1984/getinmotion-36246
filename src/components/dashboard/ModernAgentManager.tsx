@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
@@ -7,7 +6,7 @@ import { useAgentFilters } from '@/hooks/useAgentFilters';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { OptimizedAgentCategoryCard } from './OptimizedAgentCategoryCard';
 import { CompactTwoColumnHeader } from './CompactTwoColumnHeader';
-import { JavaScriptMasonryGrid } from '../agent-manager/JavaScriptMasonryGrid';
+import { SimpleMasonryGrid } from '../agent-manager/SimpleMasonryGrid';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 
@@ -115,9 +114,9 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
-      {/* JavaScript Masonry Grid */}
+      {/* Simple Masonry Grid */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <JavaScriptMasonryGrid columnWidth={350} gap={24}>
+        <SimpleMasonryGrid>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -145,7 +144,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
               />
             );
           })}
-        </JavaScriptMasonryGrid>
+        </SimpleMasonryGrid>
       ) : (
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">

@@ -32,39 +32,46 @@ export const JavaScriptMasonryGrid: React.FC<JavaScriptMasonryGridProps> = ({
       // Get all child elements
       const items = Array.from(container.children) as HTMLElement[];
       
-      items.forEach((item, index) => {
-        // Find the shortest column
-        const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-        
-        // Calculate position
-        const x = shortestColumnIndex * (actualColumnWidth + gap);
-        const y = columnHeights[shortestColumnIndex];
-        
-        // Set position
-        item.style.position = 'absolute';
-        item.style.left = `${x}px`;
-        item.style.top = `${y}px`;
+      // Reset container height
+      container.style.height = 'auto';
+      
+      // Wait for all items to render their natural height first
+      items.forEach((item) => {
+        item.style.position = 'static';
         item.style.width = `${actualColumnWidth}px`;
-        
-        // Wait for the item to render, then update column height
-        requestAnimationFrame(() => {
-          const itemHeight = item.offsetHeight;
-          columnHeights[shortestColumnIndex] += itemHeight + gap;
-          
-          // Update container height to the tallest column
-          const maxHeight = Math.max(...columnHeights) - gap;
-          container.style.height = `${maxHeight}px`;
-          
-          // Mark as ready when last item is positioned
-          if (index === items.length - 1) {
-            setIsLayoutReady(true);
-          }
-        });
       });
+
+      // Small delay to let content render
+      setTimeout(() => {
+        items.forEach((item, index) => {
+          // Find the shortest column
+          const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+          
+          // Calculate position
+          const x = shortestColumnIndex * (actualColumnWidth + gap);
+          const y = columnHeights[shortestColumnIndex];
+          
+          // Set position
+          item.style.position = 'absolute';
+          item.style.left = `${x}px`;
+          item.style.top = `${y}px`;
+          item.style.width = `${actualColumnWidth}px`;
+          
+          // Get the actual rendered height
+          const itemHeight = item.getBoundingClientRect().height;
+          columnHeights[shortestColumnIndex] += itemHeight + gap;
+        });
+        
+        // Set final container height
+        const maxHeight = Math.max(...columnHeights) - gap;
+        container.style.height = `${maxHeight}px`;
+        setIsLayoutReady(true);
+      }, 50);
     };
 
-    // Initial layout
+    // Initial layout with delay to ensure content is rendered
     const timer = setTimeout(() => {
+      setIsLayoutReady(false);
       layoutMasonry();
     }, 100);
 
