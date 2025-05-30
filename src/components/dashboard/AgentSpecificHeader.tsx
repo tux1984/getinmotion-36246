@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { getAgentById } from '@/data/agentsDatabase';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import { MotionLogo } from '@/components/MotionLogo';
 
 interface AgentSpecificHeaderProps {
@@ -17,7 +18,7 @@ export const AgentSpecificHeader: React.FC<AgentSpecificHeaderProps> = ({
   onBack
 }) => {
   const agent = getAgentById(agentId);
-  const agentName = agent?.name || 'AI Assistant';
+  const agentTranslation = getAgentTranslation(agentId, language);
 
   const t = {
     en: { backToDashboard: "Back to Dashboard" },
@@ -31,10 +32,10 @@ export const AgentSpecificHeader: React.FC<AgentSpecificHeaderProps> = ({
           <MotionLogo variant="dark" size="sm" className="flex-shrink-0" />
           <div className="min-w-0 flex-1">
             <h1 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">
-              {agentName}
+              {agentTranslation.name}
             </h1>
             <p className="text-xs sm:text-sm text-gray-600 line-clamp-1 sm:line-clamp-2">
-              {agent?.description}
+              {agentTranslation.description}
             </p>
           </div>
         </div>

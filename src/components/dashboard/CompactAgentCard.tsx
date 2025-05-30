@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import { Play } from 'lucide-react';
 
 interface CompactAgentCardProps {
@@ -35,6 +36,7 @@ export const CompactAgentCard: React.FC<CompactAgentCardProps> = ({
   };
 
   const t = translations[language];
+  const agentTranslation = getAgentTranslation(agent.id, language);
 
   return (
     <div className={`group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 ${
@@ -46,7 +48,7 @@ export const CompactAgentCard: React.FC<CompactAgentCardProps> = ({
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-white text-sm truncate">
-            {agent.name}
+            {agentTranslation.name}
           </h4>
           <p className="text-purple-200 text-xs">{agent.category}</p>
         </div>

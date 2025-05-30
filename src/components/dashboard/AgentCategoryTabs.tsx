@@ -2,6 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CulturalAgent } from '@/data/agentsDatabase';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 
@@ -15,6 +16,7 @@ interface AgentCategoryTabsProps {
   getPriorityColor: (priority: string) => string;
   getImpactColor: (impact: number) => string;
   translations: any;
+  language: 'en' | 'es';
 }
 
 interface CulturalAgentCardProps {
@@ -31,6 +33,7 @@ interface CulturalAgentCardProps {
   getPriorityColor: (priority: string) => string;
   getImpactColor: (impact: number) => string;
   translations: any;
+  language: 'en' | 'es';
 }
 
 const CulturalAgentCard: React.FC<CulturalAgentCardProps> = ({
@@ -46,8 +49,11 @@ const CulturalAgentCard: React.FC<CulturalAgentCardProps> = ({
   formatLastUsed,
   getPriorityColor,
   getImpactColor,
-  translations
+  translations,
+  language
 }) => {
+  const agentTranslation = getAgentTranslation(agent.id, language);
+
   return (
     <div className={`p-4 rounded-lg border transition-all duration-200 ${
       isEnabled 
@@ -61,14 +67,14 @@ const CulturalAgentCard: React.FC<CulturalAgentCardProps> = ({
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-medium text-gray-900">{agent.name}</h3>
+              <h3 className="font-medium text-gray-900">{agentTranslation.name}</h3>
               {isRecommended && (
                 <Badge className="bg-yellow-100 text-yellow-800 text-xs">
                   {translations.recommended}
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-600 line-clamp-2">{agent.description}</p>
+            <p className="text-sm text-gray-600 line-clamp-2">{agentTranslation.description}</p>
           </div>
         </div>
         
@@ -115,7 +121,8 @@ export const AgentCategoryTabs: React.FC<AgentCategoryTabsProps> = ({
   formatLastUsed,
   getPriorityColor,
   getImpactColor,
-  translations
+  translations,
+  language
 }) => {
   return (
     <Tabs defaultValue="Financiera" className="space-y-4">
@@ -163,6 +170,7 @@ export const AgentCategoryTabs: React.FC<AgentCategoryTabsProps> = ({
                   getPriorityColor={getPriorityColor}
                   getImpactColor={getImpactColor}
                   translations={translations}
+                  language={language}
                 />
               );
             })}

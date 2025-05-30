@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Agent, RecommendedAgents } from '@/types/dashboard';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import { Bot, MessageCircle, Play, Pause, Settings } from 'lucide-react';
 
 interface RecommendedAgentsSectionProps {
@@ -76,46 +77,50 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
     }
   };
 
-  const AgentCard = ({ agent }: { agent: Agent }) => (
-    <Card className="hover:shadow-md transition-all duration-200 border-purple-100">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center text-lg`}>
-              {agent.icon}
+  const AgentCard = ({ agent }: { agent: Agent }) => {
+    const agentTranslation = getAgentTranslation(agent.id, language);
+    
+    return (
+      <Card className="hover:shadow-md transition-all duration-200 border-purple-100">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center text-lg`}>
+                {agent.icon}
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">{agentTranslation.name}</h3>
+                <p className="text-sm text-gray-500">{agent.category}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">{agent.name}</h3>
-              <p className="text-sm text-gray-500">{agent.category}</p>
-            </div>
+            <Badge className={`text-xs ${getStatusColor(agent.status)} flex items-center gap-1`}>
+              {getStatusIcon(agent.status)}
+              {t[agent.status as keyof typeof t] || agent.status}
+            </Badge>
           </div>
-          <Badge className={`text-xs ${getStatusColor(agent.status)} flex items-center gap-1`}>
-            {getStatusIcon(agent.status)}
-            {t[agent.status as keyof typeof t] || agent.status}
-          </Badge>
-        </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-          <span>{agent.activeTasks} {t.activeTasks}</span>
-          <span>{t.lastUsed}: {agent.lastUsed || t.never}</span>
-        </div>
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+            <span>{agent.activeTasks} {t.activeTasks}</span>
+            <span>{t.lastUsed}: {agent.lastUsed || t.never}</span>
+          </div>
 
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => onSelectAgent(agent.id)}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white flex items-center gap-2"
-            size="sm"
-          >
-            <MessageCircle className="w-4 h-4" />
-            {t.chatWith}
-          </Button>
-          <Button variant="outline" size="sm" className="border-purple-200">
-            <Settings className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => onSelectAgent(agent.id)}
+              className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white flex items-center gap-2"
+              size="sm"
+            >
+              <MessageCircle className="w-4 h-4" />
+              {t.chatWith}
+            </Button>
+            <Button variant="outline" size="sm" className="border-purple-200">
+              <Settings className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-6">
