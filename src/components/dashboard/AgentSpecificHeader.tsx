@@ -26,7 +26,7 @@ export const AgentSpecificHeader: React.FC<AgentSpecificHeaderProps> = ({
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-3 sm:p-4 mx-2 sm:mx-4 mt-2 sm:mt-4 mb-2">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-3 sm:p-4 mx-2 sm:mx-4 mt-2 sm:mt-4 mb-2">
       <div className="flex items-center justify-between gap-2 sm:gap-3">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <MotionLogo variant="dark" size="sm" className="flex-shrink-0" />
@@ -44,7 +44,7 @@ export const AgentSpecificHeader: React.FC<AgentSpecificHeaderProps> = ({
           variant="outline" 
           size="sm" 
           onClick={onBack}
-          className="flex items-center gap-1 sm:gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-shrink-0"
+          className="flex items-center gap-1 sm:gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-shrink-0 border-gray-300"
         >
           <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           <span className="hidden sm:inline">

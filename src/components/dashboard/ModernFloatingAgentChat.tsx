@@ -12,12 +12,14 @@ interface ModernFloatingAgentChatProps {
   agentId: string;
   language: 'en' | 'es';
   onBack?: () => void;
+  showHeader?: boolean;
 }
 
 export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = ({
   agentId,
   language,
-  onBack
+  onBack,
+  showHeader = false
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
@@ -46,9 +48,10 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       messagesCount: messages.length,
       isNewChat,
       isProcessing,
-      messagesLoading
+      messagesLoading,
+      showHeader
     });
-  }, [agentId, currentConversationId, messages.length, isNewChat, isProcessing, messagesLoading]);
+  }, [agentId, currentConversationId, messages.length, isNewChat, isProcessing, messagesLoading, showHeader]);
 
   const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,11 +99,14 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   if (messagesLoading) {
     return (
       <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-        <ChatHeader 
-          agentId={agentId}
-          language={language}
-          onBack={onBack}
-        />
+        {showHeader && (
+          <ChatHeader 
+            agentId={agentId}
+            language={language}
+            onBack={onBack}
+            showHeader={showHeader}
+          />
+        )}
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
         </div>
@@ -110,11 +116,14 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 
   return (
     <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-      <ChatHeader 
-        agentId={agentId}
-        language={language}
-        onBack={onBack}
-      />
+      {showHeader && (
+        <ChatHeader 
+          agentId={agentId}
+          language={language}
+          onBack={onBack}
+          showHeader={showHeader}
+        />
+      )}
 
       {isNewChat ? (
         <ChatWelcomeScreen

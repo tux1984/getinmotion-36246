@@ -4,7 +4,6 @@ import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
-import { AgentSpecificHeader } from './AgentSpecificHeader';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Zap, Menu } from 'lucide-react';
@@ -42,19 +41,13 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
         <div className="flex flex-col h-screen">
-          {/* Header específico para agentes */}
-          <AgentSpecificHeader 
-            agentId={selectedAgent}
-            language={language}
-            onBack={onBack}
-          />
-          
-          {/* Main content area with tab switching */}
+          {/* Main content area with tab switching - sin header interno */}
           <div className="flex-1 mx-4 mb-20 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             {activeTab === 'chat' && (
               <ModernFloatingAgentChat 
                 agentId={selectedAgent} 
-                language={language} 
+                language={language}
+                showHeader={false}
               />
             )}
             
@@ -154,21 +147,15 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
       <div className="h-screen p-4 lg:p-6">
-        {/* Header específico para agentes - optimizado para desktop */}
-        <AgentSpecificHeader 
-          agentId={selectedAgent}
-          language={language}
-          onBack={onBack}
-        />
-        
         {/* Contenedor transparente con efecto de cristal muy sutil */}
-        <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-[calc(100%-120px)] max-w-7xl mx-auto mt-4 overflow-hidden">
+        <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-full max-w-7xl mx-auto overflow-hidden">
           <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full p-4 lg:p-6">
-            {/* Chat principal */}
+            {/* Chat principal - sin header interno */}
             <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
               <ModernFloatingAgentChat 
                 agentId={selectedAgent} 
-                language={language} 
+                language={language}
+                showHeader={false}
               />
             </div>
             
