@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
+import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Zap, Menu } from 'lucide-react';
@@ -146,12 +146,12 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
-      <div className="max-h-[75vh] p-2 lg:p-3">
+      <div className="max-h-[65vh] p-2 lg:p-3">
         {/* Contenedor transparente con efecto de cristal muy sutil */}
         <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-full max-w-7xl mx-auto overflow-hidden">
-          <div className="grid grid-cols-12 grid-rows-4 gap-2 lg:gap-3 h-full p-3 lg:p-4">
+          <div className="grid grid-cols-12 auto-rows-max gap-2 lg:gap-3 h-full p-3 lg:p-4">
             {/* Chat principal - sin header interno */}
-            <div className="col-span-12 lg:col-span-7 row-span-4 lg:row-span-4">
+            <div className="col-span-12 lg:col-span-7 row-span-3 lg:row-span-3 min-h-[400px]">
               <ModernFloatingAgentChat 
                 agentId={selectedAgent} 
                 language={language}
@@ -160,7 +160,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             </div>
             
             {/* Conversation History */}
-            <div className="hidden lg:block lg:col-span-3 lg:row-span-4">
+            <div className="hidden lg:block lg:col-span-3 lg:row-span-3 min-h-[400px] overflow-y-auto">
               <ConversationHistorySidebar 
                 agentId={selectedAgent} 
                 language={language} 
@@ -175,7 +175,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
               />
             </div>
             
-            {/* Quick Actions */}
+            {/* Quick Actions - Colapsable */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
               <AgentQuickActions 
                 agentId={selectedAgent} 
@@ -183,24 +183,9 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
               />
             </div>
             
-            {/* Additional Tools */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
-              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full p-3">
-                <h3 className="text-white font-semibold mb-2 text-sm">
-                  {language === 'en' ? 'More Tools' : 'Más Herramientas'}
-                </h3>
-                <div className="space-y-1">
-                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
-                    {language === 'en' ? 'Export Chat' : 'Exportar Chat'}
-                  </button>
-                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
-                    {language === 'en' ? 'Settings' : 'Configuración'}
-                  </button>
-                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
-                    {language === 'en' ? 'Help' : 'Ayuda'}
-                  </button>
-                </div>
-              </div>
+            {/* More Tools - Colapsable */}
+            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
+              <CollapsibleMoreTools language={language} />
             </div>
           </div>
         </div>

@@ -28,7 +28,7 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
 
   return (
     <div className="flex-1 overflow-hidden">
-      <ScrollArea className="h-full p-3">
+      <ScrollArea className="h-full p-2">
         <div className="space-y-3 max-w-4xl mx-auto">
           {messages.map((message) => (
             <MessageBubble 
