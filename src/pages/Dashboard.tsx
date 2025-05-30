@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
 import { useUserData } from '@/hooks/useUserData';
@@ -21,14 +20,10 @@ const Dashboard = () => {
   
   const {
     agents,
-    showOnboarding,
-    profileType,
     maturityScores,
     recommendedAgents,
     isLoading,
-    error,
-    handleOnboardingComplete,
-    checkLocationStateForOnboarding
+    error
   } = useAgentManagement();
 
   const {
@@ -45,26 +40,23 @@ const Dashboard = () => {
   console.log('Dashboard: State values:', {
     isLoading,
     error,
-    showOnboarding,
     agentsCount: agents.length,
     activeSection,
     hasMaturityScores: !!maturityScores
   });
 
-  // Check for onboarding flag in location state
+  // Check if user has completed onboarding, if not redirect to maturity calculator
   useEffect(() => {
-    console.log('Dashboard: Checking location state for onboarding');
-    const stateChanged = checkLocationStateForOnboarding(location.state);
-    
-    if (stateChanged) {
-      // Clear state after using it
-      window.history.replaceState({}, document.title);
+    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+    if (!onboardingCompleted || onboardingCompleted !== 'true') {
+      console.log('Dashboard: User has not completed onboarding, redirecting to maturity calculator');
+      navigate('/maturity-calculator', { replace: true });
     }
-  }, [location, checkLocationStateForOnboarding]);
+  }, [navigate]);
   
   const handleNavigateToMaturityCalculator = () => {
     console.log('Dashboard: Navigating to maturity calculator');
-    navigate('/maturity-calculator', { state: { profileType } });
+    navigate('/maturity-calculator');
   };
 
   const handleAgentToggle = async (agentId: string, enabled: boolean) => {
@@ -102,25 +94,6 @@ const Dashboard = () => {
       <div className="pt-24">
         <DashboardErrorState error={error} />
       </div>
-    );
-  }
-
-  // Show onboarding if necessary
-  if (showOnboarding) {
-    console.log('Dashboard: Showing onboarding');
-    return (
-      <DashboardBackground>
-        <NewDashboardHeader 
-          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-          onAgentManagerClick={handleOpenAgentManager}
-        />
-        <div className="pt-24">
-          <OnboardingWizard 
-            profileType={profileType} 
-            onComplete={handleOnboardingComplete} 
-          />
-        </div>
-      </DashboardBackground>
     );
   }
 

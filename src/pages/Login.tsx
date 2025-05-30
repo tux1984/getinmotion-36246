@@ -76,15 +76,17 @@ const Login = () => {
       // Check if user has completed onboarding
       const hasCompletedOnboarding = checkOnboardingStatus();
       
-      // Determine redirect destination
-      let redirectTo = '/maturity-calculator'; // Default for new users
+      // Default redirect for new users is always maturity calculator
+      let redirectTo = '/maturity-calculator';
+      
+      // Only go to dashboard if user has completed onboarding
       if (hasCompletedOnboarding) {
-        redirectTo = '/dashboard'; // For returning users who completed onboarding
+        redirectTo = '/dashboard';
       }
       
-      // Override with original intended destination if exists
+      // Override with original intended destination if exists and user has completed onboarding
       const from = location.state?.from?.pathname;
-      if (from && from !== '/login') {
+      if (from && from !== '/login' && hasCompletedOnboarding) {
         redirectTo = from;
       }
       

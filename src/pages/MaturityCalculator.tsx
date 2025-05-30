@@ -14,6 +14,8 @@ const MaturityCalculator = () => {
   const { language } = useLanguage();
   
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
+    console.log('MaturityCalculator: Assessment completed, saving results');
+    
     // Save results to localStorage
     localStorage.setItem('maturityScores', JSON.stringify(scores));
     localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
@@ -21,6 +23,8 @@ const MaturityCalculator = () => {
     
     // Clear any saved progress since assessment is completed
     localStorage.removeItem('maturityCalculatorProgress');
+    
+    console.log('MaturityCalculator: Results saved, onboardingCompleted set to true');
     
     // Show toast notification
     toast({
@@ -30,8 +34,9 @@ const MaturityCalculator = () => {
         : "Tu panel personalizado está listo con las herramientas recomendadas."
     });
     
-    // Navigate to dashboard
-    navigate('/dashboard');
+    // Navigate to dashboard - this will now work correctly since onboardingCompleted is true
+    console.log('MaturityCalculator: Navigating to dashboard');
+    navigate('/dashboard', { replace: true });
   };
   
   return (
