@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Bot, MessageCircle, Play, Pause, Zap, Clock, Loader2 } from 'lucide-react';
 import { useUserData } from '@/hooks/useUserData';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import { CollapsibleAgentsSection } from './CollapsibleAgentsSection';
 import { CollapsibleRecommendationsSection } from './CollapsibleRecommendationsSection';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
@@ -57,7 +58,9 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       never: "Never",
       justEnabled: "Just enabled",
       enabling: "Enabling...",
-      disabling: "Disabling..."
+      disabling: "Disabling...",
+      enable: "Enable",
+      recommended: "Recommended"
     },
     es: {
       yourAgents: "Tus Agentes Activos",
@@ -69,7 +72,9 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       never: "Nunca",
       justEnabled: "Recién habilitado",
       enabling: "Habilitando...",
-      disabling: "Deshabilitando..."
+      disabling: "Deshabilitando...",
+      enable: "Habilitar",
+      recommended: "Recomendado"
     }
   };
 
@@ -79,10 +84,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   const getMergedAgentData = (agentId: string) => {
     const agentConfig = userAgents.find(ua => ua.agent_id === agentId);
     const agentInfo = culturalAgentsDatabase.find(a => a.id === agentId);
+    const agentTranslation = getAgentTranslation(agentId, language);
     
     return {
       id: agentId,
-      name: agentInfo?.name || agentId,
+      name: agentTranslation.name,
       category: agentInfo?.category || 'General',
       icon: agentInfo?.icon || '🤖',
       color: agentInfo?.color || 'bg-purple-500',
@@ -122,7 +128,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       otherInactive,
       allInactive: [...primaryRecommended, ...secondaryRecommended, ...otherInactive]
     };
-  }, [userAgents, recommendedAgents]);
+  }, [userAgents, recommendedAgents, language]);
 
   const handleAgentClick = async (agentId: string) => {
     try {
@@ -170,7 +176,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
           <div className="absolute -top-2 -right-2">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
               <Zap className="w-3 h-3 mr-1" />
-              Recomendado
+              {t.recommended}
             </Badge>
           </div>
         )}
@@ -264,7 +270,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  Habilitar
+                  {t.enable}
                 </>
               )}
             </Button>
