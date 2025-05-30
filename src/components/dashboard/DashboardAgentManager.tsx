@@ -19,8 +19,8 @@ export const DashboardAgentManager: React.FC<DashboardAgentManagerProps> = ({
   onAgentToggle
 }) => {
   return (
-    <div className="min-h-screen">
-      <div className="mb-6">
+    <div className="min-h-screen w-full">
+      <div className="mb-4 sm:mb-6 px-2 sm:px-0">
         <Button 
           variant="ghost" 
           size="sm" 

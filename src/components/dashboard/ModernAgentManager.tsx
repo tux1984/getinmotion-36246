@@ -88,7 +88,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-2 sm:p-4">
       {/* Compact Header */}
       <ModernStatsHeader
         title={t.title}
@@ -108,7 +108,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 
       {/* Compact CSS Grid Layout */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <ModernAgentsGrid>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -136,7 +136,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
               />
             );
           })}
-        </div>
+        </ModernAgentsGrid>
       ) : (
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">

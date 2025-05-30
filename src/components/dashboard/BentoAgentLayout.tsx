@@ -1,67 +1,108 @@
+
 import React from 'react';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { FloatingChatArea } from './FloatingChatArea';
 import { AgentQuickActions } from './AgentQuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 interface BentoAgentLayoutProps {
   selectedAgent: string;
   language: 'en' | 'es';
   onBack: () => void;
 }
+
 export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   selectedAgent,
   language,
   onBack
 }) => {
   const isMobile = useIsMobile();
+
   if (isMobile) {
-    return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-        <div className="h-screen">
-          {/* Mobile: Stack layout with tabs */}
-          <div className="flex flex-col h-full">
-            <div className="flex-1">
-              <FloatingChatArea agentId={selectedAgent} language={language} onBack={onBack} />
-            </div>
-            
-            {/* Mobile bottom tabs */}
-            <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 p-4">
-              <div className="grid grid-cols-3 gap-2">
-                <AgentMiniDashboard agentId={selectedAgent} language={language} compact />
-                <ConversationHistorySidebar agentId={selectedAgent} language={language} compact />
-                <AgentQuickActions agentId={selectedAgent} language={language} compact />
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+        <div className="flex flex-col h-screen">
+          {/* Mobile: Main chat area takes most space */}
+          <div className="flex-1 overflow-hidden">
+            <FloatingChatArea 
+              agentId={selectedAgent} 
+              language={language} 
+              onBack={onBack} 
+            />
+          </div>
+          
+          {/* Mobile bottom tabs - simplified */}
+          <div className="bg-black/20 backdrop-blur-xl border-t border-white/10 p-2">
+            <div className="flex justify-between items-center gap-2">
+              <div className="flex-1">
+                <AgentMiniDashboard 
+                  agentId={selectedAgent} 
+                  language={language} 
+                  compact 
+                />
+              </div>
+              <div className="flex-1">
+                <ConversationHistorySidebar 
+                  agentId={selectedAgent} 
+                  language={language} 
+                  compact 
+                />
+              </div>
+              <div className="flex-1">
+                <AgentQuickActions 
+                  agentId={selectedAgent} 
+                  language={language} 
+                  compact 
+                />
               </div>
             </div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      <div className="h-screen px-[24px] py-[24px] my-0 mx-0 rounded-md">
-        {/* Desktop Bento Grid */}
-        <div className="grid grid-cols-12 grid-rows-6 gap-4 h-full max-w-7xl mx-auto">
-          {/* Main Chat Area - Takes center stage */}
-          <div className="col-span-7 row-span-6">
-            <FloatingChatArea agentId={selectedAgent} language={language} onBack={onBack} />
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      <div className="h-screen p-4 lg:p-6">
+        {/* Desktop Bento Grid - improved responsiveness */}
+        <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full max-w-7xl mx-auto">
+          {/* Main Chat Area - Center stage */}
+          <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
+            <FloatingChatArea 
+              agentId={selectedAgent} 
+              language={language} 
+              onBack={onBack} 
+            />
           </div>
           
-          {/* Conversation History - Left sidebar */}
-          <div className="col-span-3 row-span-6">
-            <ConversationHistorySidebar agentId={selectedAgent} language={language} />
+          {/* Conversation History - Left sidebar on desktop, hidden on smaller screens */}
+          <div className="hidden lg:block lg:col-span-3 lg:row-span-6">
+            <ConversationHistorySidebar 
+              agentId={selectedAgent} 
+              language={language} 
+            />
           </div>
           
-          {/* Mini Dashboard - Top right */}
-          <div className="col-span-2 row-span-2">
-            <AgentMiniDashboard agentId={selectedAgent} language={language} />
+          {/* Mini Dashboard - Top right on desktop */}
+          <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
+            <AgentMiniDashboard 
+              agentId={selectedAgent} 
+              language={language} 
+            />
           </div>
           
-          {/* Quick Actions - Middle right */}
-          <div className="col-span-2 row-span-2">
-            <AgentQuickActions agentId={selectedAgent} language={language} />
+          {/* Quick Actions - Middle right on desktop */}
+          <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
+            <AgentQuickActions 
+              agentId={selectedAgent} 
+              language={language} 
+            />
           </div>
           
-          {/* Additional Tools - Bottom right */}
-          <div className="col-span-2 row-span-2">
+          {/* Additional Tools - Bottom right on desktop */}
+          <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl h-full p-4">
               <h3 className="text-white font-semibold mb-3">
                 {language === 'en' ? 'More Tools' : 'Más Herramientas'}
@@ -81,5 +122,6 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
