@@ -2,9 +2,9 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
-import { useAgentManagement } from '@/hooks/useAgentManagement';
 import { useUserData } from '@/hooks/useUserData';
 import { useDashboardState } from '@/hooks/useDashboardState';
+import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { DashboardLoadingState } from '@/components/dashboard/DashboardLoadingState';
@@ -23,8 +23,9 @@ const Dashboard = () => {
     maturityScores,
     recommendedAgents,
     isLoading,
-    error
-  } = useAgentManagement();
+    error,
+    hasOnboarding
+  } = useOptimizedAgentManagement();
 
   const {
     activeSection,
@@ -37,22 +38,22 @@ const Dashboard = () => {
 
   const { enableAgent, disableAgent, refetch } = useUserData();
 
-  console.log('Dashboard: State values:', {
+  console.log('Dashboard: Optimized state values:', {
     isLoading,
     error,
     agentsCount: agents.length,
     activeSection,
-    hasMaturityScores: !!maturityScores
+    hasMaturityScores: !!maturityScores,
+    hasOnboarding
   });
 
-  // Check if user has completed onboarding, if not redirect to maturity calculator
+  // Optimized onboarding check - only redirect if no onboarding and not loading
   useEffect(() => {
-    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
-    if (!onboardingCompleted || onboardingCompleted !== 'true') {
-      console.log('Dashboard: User has not completed onboarding, redirecting to maturity calculator');
+    if (!isLoading && !hasOnboarding && !maturityScores) {
+      console.log('Dashboard: User needs onboarding, redirecting to maturity calculator');
       navigate('/maturity-calculator', { replace: true });
     }
-  }, [navigate]);
+  }, [isLoading, hasOnboarding, maturityScores, navigate]);
   
   const handleNavigateToMaturityCalculator = () => {
     console.log('Dashboard: Navigating to maturity calculator');
@@ -77,7 +78,7 @@ const Dashboard = () => {
     }
   };
 
-  // Show loading state
+  // Show loading state only when actually loading
   if (isLoading) {
     console.log('Dashboard: Showing loading state');
     return (
