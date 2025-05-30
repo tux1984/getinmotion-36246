@@ -1,12 +1,10 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAgentStats } from '@/hooks/useAgentStats';
 import { 
   MessageSquare, 
   CheckCircle, 
-  Clock, 
-  FileText,
+  Target, 
   TrendingUp
 } from 'lucide-react';
 
@@ -25,7 +23,7 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
 
   const t = {
     en: {
-      overview: "Overview",
+      dashboard: "Dashboard",
       active: "Active",
       completed: "Completed", 
       chats: "Chats",
@@ -33,7 +31,7 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
       today: "Today"
     },
     es: {
-      overview: "Resumen",
+      dashboard: "Dashboard",
       active: "Activo",
       completed: "Completadas",
       chats: "Chats", 
@@ -44,9 +42,9 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
-        <div className="flex items-center justify-center h-20">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
+      <div className="bg-purple-600 backdrop-blur-xl p-6 rounded-2xl border border-purple-400/30">
+        <div className="flex items-center justify-center h-40">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
         </div>
       </div>
     );
@@ -54,12 +52,12 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
 
   if (compact) {
     return (
-      <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-xl p-4 rounded-2xl border border-purple-300/20 text-center">
-        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center mx-auto mb-3">
+      <div className="bg-purple-600 backdrop-blur-xl p-4 rounded-2xl border border-purple-400/30 text-center">
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
           <TrendingUp className="w-5 h-5 text-white" />
         </div>
         <div className="text-xl font-bold text-white">{stats.totalConversations}</div>
-        <div className="text-sm text-purple-200">{t[language].chats}</div>
+        <div className="text-sm text-purple-100">{t[language].chats}</div>
       </div>
     );
   }
@@ -68,71 +66,62 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
     {
       title: t[language].active,
       value: stats.activeTasks.toString(),
-      icon: Clock,
-      gradient: "from-blue-500 to-cyan-500",
-      bgGradient: "from-blue-500/20 to-cyan-500/20"
+      icon: Target,
+      iconColor: "text-orange-400"
     },
     {
       title: t[language].completed,
       value: stats.completedTasks.toString(),
       icon: CheckCircle,
-      gradient: "from-green-500 to-emerald-500",
-      bgGradient: "from-green-500/20 to-emerald-500/20"
+      iconColor: "text-green-400"
     },
     {
       title: t[language].chats,
       value: stats.totalConversations.toString(),
       icon: MessageSquare,
-      gradient: "from-purple-500 to-violet-500",
-      bgGradient: "from-purple-500/20 to-violet-500/20"
+      iconColor: "text-blue-400"
     },
     {
       title: t[language].deliverables,
       value: stats.deliverables.toString(),
-      icon: FileText,
-      gradient: "from-orange-500 to-red-500",
-      bgGradient: "from-orange-500/20 to-red-500/20"
+      icon: TrendingUp,
+      iconColor: "text-purple-300"
     }
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="bg-purple-600 backdrop-blur-xl p-6 rounded-2xl border border-purple-400/30">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-white" />
-        </div>
-        <h3 className="text-lg font-bold text-white">{t[language].overview}</h3>
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-white">{t[language].dashboard}</h3>
       </div>
 
-      {/* Stats Grid - Main 4 cards */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Stats Grid - 2x2 layout */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
         {statsData.map((stat, index) => (
-          <div key={index} className={`bg-gradient-to-br ${stat.bgGradient} backdrop-blur-xl p-4 rounded-xl border border-white/10`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 bg-gradient-to-br ${stat.gradient} rounded-lg flex items-center justify-center`}>
-                <stat.icon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-white/70 font-medium">{stat.title}</p>
-                <p className="text-xl font-bold text-white">{stat.value}</p>
-              </div>
+          <div key={index} className="text-center">
+            {/* Icon at top */}
+            <div className="flex justify-center mb-2">
+              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+            </div>
+            
+            {/* Number in center */}
+            <div className="text-2xl font-bold text-white mb-1">
+              {stat.value}
+            </div>
+            
+            {/* Title at bottom */}
+            <div className="text-sm text-purple-100">
+              {stat.title}
             </div>
           </div>
         ))}
       </div>
 
       {/* Today Section */}
-      <div className="bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-xl p-4 rounded-xl border border-purple-300/20">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-white/70 font-medium">{t[language].today}</p>
-            <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
-          </div>
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
-            <MessageSquare className="w-6 h-6 text-white" />
-          </div>
-        </div>
+      <div className="bg-white/10 rounded-xl p-4 text-center">
+        <div className="text-sm text-purple-100 mb-1">{t[language].today}</div>
+        <div className="text-xl font-bold text-white">+{stats.totalMessages}</div>
       </div>
     </div>
   );
