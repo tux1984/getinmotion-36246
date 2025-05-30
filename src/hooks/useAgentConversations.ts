@@ -77,7 +77,6 @@ export function useAgentConversations(agentId: string) {
       
       console.log('Fetched messages:', data);
       
-      // Type cast the data to ensure it matches our interface
       const typedMessages: AgentMessage[] = (data || []).map(msg => ({
         ...msg,
         message_type: msg.message_type as 'user' | 'agent'
@@ -114,7 +113,7 @@ export function useAgentConversations(agentId: string) {
 
       console.log('Created new conversation:', conversation);
       setCurrentConversationId(conversation.id);
-      setMessages([]); // Clear messages for new conversation
+      setMessages([]);
       await fetchConversations();
       
       return conversation.id;
@@ -146,7 +145,6 @@ export function useAgentConversations(agentId: string) {
       
       console.log('Added message:', data);
       
-      // Type cast the returned data
       const typedMessage: AgentMessage = {
         ...data,
         message_type: data.message_type as 'user' | 'agent'

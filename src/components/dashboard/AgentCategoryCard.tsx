@@ -54,12 +54,34 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
     }
   };
 
+  // Traducciones para categorías
+  const categoryTranslations = {
+    en: {
+      'Financiera': 'Financial',
+      'Legal': 'Legal',
+      'Diagnóstico': 'Diagnostic',
+      'Comercial': 'Commercial',
+      'Operativo': 'Operational',
+      'Comunidad': 'Community'
+    },
+    es: {
+      'Financiera': 'Financiera',
+      'Legal': 'Legal',
+      'Diagnóstico': 'Diagnóstico',
+      'Comercial': 'Comercial',
+      'Operativo': 'Operativo',
+      'Comunidad': 'Comunidad'
+    }
+  };
+
+  const translatedCategoryName = categoryTranslations[language][categoryName as keyof typeof categoryTranslations[typeof language]] || categoryName;
+
   return (
     <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-gray-800">
-            {categoryName}
+            {translatedCategoryName}
           </CardTitle>
           <div className="flex items-center gap-2">
             {recommendedCount > 0 && (

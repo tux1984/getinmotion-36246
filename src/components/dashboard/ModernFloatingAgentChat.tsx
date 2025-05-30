@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAgentConversations } from '@/hooks/useAgentConversations';
 import { useAIAgent } from '@/hooks/use-ai-agent';
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +36,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   // Determine if we're in a new chat state
   const isNewChat = !currentConversationId && messages.length === 0;
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || isProcessing) return;
 
@@ -70,11 +70,10 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [inputMessage, isProcessing, currentConversationId, createConversation, addMessage, sendAIMessage, setIsProcessing, toast]);
 
   return (
     <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-      {/* Header simplificado */}
       <ChatHeader 
         agentId={agentId}
         language={language}
