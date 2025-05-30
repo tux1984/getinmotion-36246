@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Target, CheckCircle, Clock } from 'lucide-react';
 
 interface DashboardSummaryProps {
   language: 'en' | 'es';
@@ -23,41 +24,38 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ language }) 
     {
       title: t[language].activeAgents,
       value: "2",
-      icon: "🤖",
-      color: "bg-violet-50 text-violet-700"
+      icon: Target,
+      color: "text-violet-600"
     },
     {
       title: t[language].completedTasks,
       value: "12",
-      icon: "✅",
-      color: "bg-green-50 text-green-700"
+      icon: CheckCircle,
+      color: "text-green-600"
     },
     {
       title: t[language].pendingTasks,
       value: "3",
-      icon: "⏱️",
-      color: "bg-amber-50 text-amber-700"
+      icon: Clock,
+      color: "text-amber-600"
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 md:grid-cols-3">
-      {stats.map((stat, index) => (
-        <div 
-          key={index} 
-          className="bg-white p-3 sm:p-4 rounded-lg border border-gray-100 shadow-sm"
-        >
-          <div className="flex items-center">
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${stat.color} flex items-center justify-center mr-2 sm:mr-3`}>
-              <span className="text-base sm:text-lg">{stat.icon}</span>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-gray-500">{stat.title}</p>
-              <p className="text-lg sm:text-2xl font-semibold">{stat.value}</p>
-            </div>
+    <div className="grid grid-cols-1 gap-6 xs:grid-cols-2 md:grid-cols-3">
+      {stats.map((stat, index) => {
+        const IconComponent = stat.icon;
+        return (
+          <div 
+            key={index} 
+            className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-3"
+          >
+            <IconComponent className={`w-8 h-8 ${stat.color}`} />
+            <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
+            <p className={`text-sm font-medium ${stat.color}`}>{stat.title}</p>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
