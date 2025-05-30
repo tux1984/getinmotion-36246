@@ -4,7 +4,7 @@ import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
-import { FloatingAgentInfoModule } from './FloatingAgentInfoModule';
+import { AgentSpecificHeader } from './AgentSpecificHeader';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BentoAgentLayoutProps {
@@ -24,8 +24,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
         <div className="flex flex-col h-screen">
-          {/* Header blanco fuera del contenedor púrpura */}
-          <FloatingAgentInfoModule 
+          {/* Header específico para agentes - optimizado para móvil */}
+          <AgentSpecificHeader 
             agentId={selectedAgent}
             language={language}
             onBack={onBack}
@@ -73,8 +73,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
       <div className="h-screen p-4 lg:p-6">
-        {/* Header blanco completamente fuera */}
-        <FloatingAgentInfoModule 
+        {/* Header específico para agentes - optimizado para desktop */}
+        <AgentSpecificHeader 
           agentId={selectedAgent}
           language={language}
           onBack={onBack}
