@@ -4,17 +4,46 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
-interface AdminLoginProps {
-  onLogin: (password: string) => void;
-}
-
-export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
+export const AdminLogin = () => {
+  const [email, setEmail] = useState('admin@getinmotion.com');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+  const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(password);
+    setIsLoading(true);
+    
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        console.error('Admin login error:', error);
+        toast({
+          title: 'Error de autenticación',
+          description: error.message || 'Credenciales incorrectas',
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: 'Acceso concedido',
+          description: 'Bienvenido al panel de administración',
+        });
+      }
+    } catch (error) {
+      console.error('Admin login exception:', error);
+      toast({
+        title: 'Error',
+        description: 'Error al intentar iniciar sesión',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
@@ -24,12 +53,24 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           Panel de Administración
         </CardTitle>
         <CardDescription className="text-center text-indigo-200">
-          Ingresa tu contraseña para acceder al panel de administración
+          Credenciales de administrador
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent>
           <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@getinmotion.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
               <Input
@@ -42,14 +83,20 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
                 className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
               />
             </div>
+            <div className="text-xs text-indigo-300 bg-indigo-900/30 p-3 rounded">
+              <strong>Credenciales:</strong><br/>
+              Email: admin@getinmotion.com<br/>
+              Contraseña: MarcelaAdmin!!25
+            </div>
           </div>
         </CardContent>
         <CardFooter>
           <Button 
             type="submit" 
             className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+            disabled={isLoading}
           >
-            Acceder
+            {isLoading ? 'Verificando...' : 'Acceder'}
           </Button>
         </CardFooter>
       </form>

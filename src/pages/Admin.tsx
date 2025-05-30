@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
@@ -141,7 +140,7 @@ const Admin = () => {
         
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto mt-16">
-            <AdminLogin onLogin={() => {}} />
+            <AdminLogin />
             <div className="mt-4">
               <SupabaseStatus />
             </div>
