@@ -6,8 +6,7 @@ import { useUserData } from '@/hooks/useUserData';
 import { useAgentFilters } from '@/hooks/useAgentFilters';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { AgentCategoryCard } from './AgentCategoryCard';
-import { CompactFiltersPanel } from '../agent-manager/CompactFiltersPanel';
-import { ModernStatsHeader } from './ModernStatsHeader';
+import { CompactTwoColumnHeader } from './CompactTwoColumnHeader';
 import { SimpleMasonryGrid } from '../agent-manager/SimpleMasonryGrid';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
@@ -100,19 +99,14 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats Header - normal positioning */}
-      <ModernStatsHeader
+    <div className="space-y-4">
+      {/* Compact Two-Column Header */}
+      <CompactTwoColumnHeader
         title={t.title}
         subtitle={t.subtitle}
         totalAgents={stats.totalAgents}
         activeAgents={stats.activeAgents}
         recommendedAgents={stats.recommendedAgents}
-        language={language}
-      />
-
-      {/* Enhanced Filters with Categories */}
-      <CompactFiltersPanel
         selectedStatus={filters.selectedStatus}
         selectedCategories={filters.selectedCategories}
         categories={categories}

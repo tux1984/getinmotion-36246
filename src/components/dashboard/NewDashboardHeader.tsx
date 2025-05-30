@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calculator, Settings, LogOut, Users } from 'lucide-react';
+import { Calculator, Settings, LogOut, Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useLocation } from 'react-router-dom';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
@@ -18,23 +19,28 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
 }) => {
   const { signOut } = useAuth();
   const { language } = useLanguage();
+  const location = useLocation();
 
   const translations = {
     en: {
       maturityCalculator: "Maturity Calculator",
       agentManager: "Agent Manager",
+      backToDashboard: "Back to Dashboard",
       settings: "Settings",
       signOut: "Sign Out"
     },
     es: {
       maturityCalculator: "Calculadora de Madurez",
       agentManager: "Gestor de Agentes",
+      backToDashboard: "Volver al Dashboard",
       settings: "Configuración",
       signOut: "Cerrar Sesión"
     }
   };
 
   const t = translations[language];
+
+  const isOnAgentManager = location.pathname.includes('/dashboard/agents');
 
   const handleAgentManagerClick = () => {
     console.log('Agent Manager button clicked');
@@ -69,8 +75,17 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             onClick={handleAgentManagerClick}
             className="group flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-pink-100 hover:border-purple-300 hover:text-purple-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
           >
-            <Users className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-            <span className="hidden sm:inline font-medium">{t.agentManager}</span>
+            {isOnAgentManager ? (
+              <>
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+                <span className="hidden sm:inline font-medium">{t.backToDashboard}</span>
+              </>
+            ) : (
+              <>
+                <Users className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                <span className="hidden sm:inline font-medium">{t.agentManager}</span>
+              </>
+            )}
           </Button>
           
           <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200">
