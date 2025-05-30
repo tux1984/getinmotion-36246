@@ -100,8 +100,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   }
 
   return (
-    <div className="space-y-4 p-2 sm:p-4">
-      {/* Fixed Compact Header */}
+    <div className="space-y-4">
+      {/* Stats Header - sticky dentro del área de agentes */}
       <ModernStatsHeader
         title={t.title}
         subtitle={t.subtitle}

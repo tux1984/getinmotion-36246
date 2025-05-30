@@ -125,30 +125,34 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                   : 'bg-white/5 border-white/20 hover:bg-white/10'
               }`}
             >
-              <div className="space-y-3">
-                {/* Title Row - separate from controls */}
+              <div className="space-y-4">
+                {/* Header row with icon and title */}
                 <div className="flex items-start gap-3">
                   <span className="text-2xl flex-shrink-0">{agent.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-white text-lg leading-tight mb-2">
+                    <h4 className="font-semibold text-white text-lg leading-tight">
                       {translation.name}
                     </h4>
-                    {isRecommended && (
-                      <Badge className="bg-yellow-400/20 text-yellow-300 border-yellow-400/30 text-xs mb-2">
-                        <Star className="w-3 h-3 mr-1" />
-                        {t[language].recommended}
-                      </Badge>
-                    )}
                   </div>
                 </div>
 
+                {/* Recommended badge - separate row */}
+                {isRecommended && (
+                  <div>
+                    <Badge className="bg-yellow-400/20 text-yellow-300 border-yellow-400/30 text-xs">
+                      <Star className="w-3 h-3 mr-1" />
+                      {t[language].recommended}
+                    </Badge>
+                  </div>
+                )}
+
                 {/* Description */}
-                <p className="text-purple-200 text-sm leading-relaxed line-clamp-3">
+                <p className="text-purple-200 text-sm leading-relaxed">
                   {translation.description}
                 </p>
 
-                {/* Controls Row - separate from title */}
-                <div className="flex items-center justify-between pt-2">
+                {/* Controls Row - separate from everything else */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
                   <div className="flex items-center gap-2">
                     {isEnabled ? (
                       <CheckCircle className="w-4 h-4 text-emerald-400" />
