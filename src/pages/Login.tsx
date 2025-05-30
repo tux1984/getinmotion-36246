@@ -105,8 +105,8 @@ const Login = () => {
       if (error) {
         console.error('Login: Error during sign in:', error);
         toast({
-          title: error.message.includes('no autorizado') ? t.unauthorized : t.invalidCredentials,
-          description: error.message.includes('no autorizado') ? t.unauthorizedMessage : t.invalidCredentialsMessage,
+          title: error.message?.includes('Invalid') || error.message?.includes('credentials') ? t.invalidCredentials : t.unauthorized,
+          description: error.message?.includes('Invalid') || error.message?.includes('credentials') ? t.invalidCredentialsMessage : error.message || t.unauthorizedMessage,
           variant: "destructive",
         });
       } else {

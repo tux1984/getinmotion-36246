@@ -20,8 +20,8 @@ import AgentsGallery from './pages/AgentsGallery';
 function App() {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
           <div className="min-h-screen">
             <Routes>
               <Route path="/" element={<Index />} />
@@ -51,8 +51,8 @@ function App() {
             </Routes>
           </div>
           <Toaster />
-        </BrowserRouter>
-      </AuthProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </LanguageProvider>
   );
 }

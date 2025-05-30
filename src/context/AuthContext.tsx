@@ -26,6 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const email = userEmail || user?.email;
       if (!email) {
         console.log('No email provided for authorization check');
+        setIsAuthorized(false);
         return false;
       }
       
@@ -41,6 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('Error checking authorization:', error);
+        setIsAuthorized(false);
         return false;
       }
       
@@ -58,7 +60,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     console.log('AuthContext: Setting up auth listener');
     
-    // Set up auth state listener first
+    // Get initial session first
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting initial session:', error);
+        }
+        
+        console.log('AuthContext: Initial session check:', session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user?.email) {
+          await checkAuthorization(session.user.email);
+        } else {
+          setIsAuthorized(false);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Exception getting initial session:', error);
+        setLoading(false);
+      }
+    };
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('AuthContext: Auth state changed:', event, session?.user?.email);
@@ -77,20 +104,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('AuthContext: Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user?.email) {
-        await checkAuthorization(session.user.email);
-      } else {
-        setIsAuthorized(false);
-      }
-      
-      setLoading(false);
-    });
+    // Initialize
+    getInitialSession();
 
     return () => {
       console.log('AuthContext: Cleaning up auth listener');
@@ -102,6 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log('AuthContext: Attempting sign in for:', email);
     
     try {
+      setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -109,21 +125,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('AuthContext: Sign in error:', error);
+        setLoading(false);
         return { error };
       }
       
       console.log('AuthContext: Sign in successful for:', data.user?.email);
+      // Don't set loading to false here, let the auth state change handle it
       return { error: null };
     } catch (error) {
       console.error('AuthContext: Sign in exception:', error);
+      setLoading(false);
       return { error };
     }
   };
 
   const signOut = async () => {
     console.log('AuthContext: Signing out');
+    setLoading(true);
     await supabase.auth.signOut();
     setIsAuthorized(false);
+    setLoading(false);
   };
 
   return (
