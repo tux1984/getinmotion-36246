@@ -78,11 +78,14 @@ const Dashboard = () => {
     }
   };
 
+  // Determine if header should be shown
+  const showHeader = activeSection !== 'agent-details';
+  
   // Show loading state only when actually loading
   if (isLoading) {
     console.log('Dashboard: Showing loading state');
     return (
-      <div className="pt-24">
+      <div className={showHeader ? "pt-24" : "pt-0"}>
         <DashboardLoadingState />
       </div>
     );
@@ -92,7 +95,7 @@ const Dashboard = () => {
   if (error) {
     console.log('Dashboard: Showing error state:', error);
     return (
-      <div className="pt-24">
+      <div className={showHeader ? "pt-24" : "pt-0"}>
         <DashboardErrorState error={error} />
       </div>
     );
@@ -101,12 +104,14 @@ const Dashboard = () => {
   console.log('Dashboard: Showing main dashboard, active section:', activeSection);
   return (
     <DashboardBackground>
-      <NewDashboardHeader 
-        onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-        onAgentManagerClick={handleOpenAgentManager}
-      />
+      {showHeader && (
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+          onAgentManagerClick={handleOpenAgentManager}
+        />
+      )}
       
-      <div className="pt-24">
+      <div className={showHeader ? "pt-24" : "pt-0"}>
         <DashboardContent
           activeSection={activeSection}
           selectedAgent={selectedAgent}
