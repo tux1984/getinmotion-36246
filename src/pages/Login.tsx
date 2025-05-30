@@ -70,28 +70,34 @@ const Login = () => {
   
   // Redirect if already authenticated and authorized
   useEffect(() => {
+    // Only redirect if we're not loading and have a clear auth state
     if (!loading && user && isAuthorized) {
-      console.log('Login: User authenticated and authorized, redirecting');
+      console.log('Login: User authenticated and authorized, preparing redirect');
       
-      // Check if user has completed onboarding
-      const hasCompletedOnboarding = checkOnboardingStatus();
-      
-      // Default redirect for new users is always maturity calculator
-      let redirectTo = '/maturity-calculator';
-      
-      // Only go to dashboard if user has completed onboarding
-      if (hasCompletedOnboarding) {
-        redirectTo = '/dashboard';
-      }
-      
-      // Override with original intended destination if exists and user has completed onboarding
-      const from = location.state?.from?.pathname;
-      if (from && from !== '/login' && hasCompletedOnboarding) {
-        redirectTo = from;
-      }
-      
-      console.log('Login: Redirecting to:', redirectTo);
-      navigate(redirectTo, { replace: true });
+      // Add a small delay to ensure auth state is stable
+      const redirectTimer = setTimeout(() => {
+        // Check if user has completed onboarding
+        const hasCompletedOnboarding = checkOnboardingStatus();
+        
+        // Default redirect for new users is always maturity calculator
+        let redirectTo = '/maturity-calculator';
+        
+        // Only go to dashboard if user has completed onboarding
+        if (hasCompletedOnboarding) {
+          redirectTo = '/dashboard';
+        }
+        
+        // Override with original intended destination if exists and user has completed onboarding
+        const from = location.state?.from?.pathname;
+        if (from && from !== '/login' && hasCompletedOnboarding) {
+          redirectTo = from;
+        }
+        
+        console.log('Login: Redirecting to:', redirectTo);
+        navigate(redirectTo, { replace: true });
+      }, 100);
+
+      return () => clearTimeout(redirectTimer);
     }
   }, [user, isAuthorized, loading, navigate, location]);
 
@@ -132,11 +138,15 @@ const Login = () => {
     }
   };
 
+  // Show loading state with timeout
   if (loading) {
     console.log('Login: Showing loading state');
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex items-center justify-center">
-        <div className="text-white">Cargando...</div>
+        <div className="text-white flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <div>Verificando sesión...</div>
+        </div>
       </div>
     );
   }

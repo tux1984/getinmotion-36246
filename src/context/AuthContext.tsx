@@ -25,33 +25,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const email = userEmail || user?.email;
       if (!email) {
-        console.log('No email provided for authorization check');
+        console.log('AuthContext: No email provided for authorization check');
         setIsAuthorized(false);
         return false;
       }
       
-      console.log('Checking authorization for:', email);
+      console.log('AuthContext: Checking authorization for:', email);
       
-      // Check if user is in admin_users table
-      const { data, error } = await supabase
+      // Add timeout to prevent infinite waiting
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Authorization check timeout')), 10000);
+      });
+      
+      const authCheckPromise = supabase
         .from('admin_users')
         .select('email, is_active')
         .eq('email', email)
         .eq('is_active', true)
         .maybeSingle();
       
+      const { data, error } = await Promise.race([authCheckPromise, timeoutPromise]);
+      
       if (error) {
-        console.error('Error checking authorization:', error);
+        console.error('AuthContext: Error checking authorization:', error);
         setIsAuthorized(false);
         return false;
       }
       
       const authorized = !!data;
-      console.log('Authorization result:', authorized, data);
+      console.log('AuthContext: Authorization result:', authorized, data);
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      console.error('Exception checking authorization:', error);
+      console.error('AuthContext: Exception checking authorization:', error);
       setIsAuthorized(false);
       return false;
     }
@@ -60,46 +66,64 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     console.log('AuthContext: Setting up auth listener');
     
+    let isMounted = true;
+    
     // Get initial session first
     const getInitialSession = async () => {
       try {
+        console.log('AuthContext: Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
         if (error) {
-          console.error('Error getting initial session:', error);
+          console.error('AuthContext: Error getting initial session:', error);
+          setLoading(false);
+          return;
         }
         
-        console.log('AuthContext: Initial session check:', session?.user?.email);
+        console.log('AuthContext: Initial session check:', session?.user?.email || 'No session');
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user?.email) {
+          console.log('AuthContext: User found, checking authorization...');
           await checkAuthorization(session.user.email);
         } else {
+          console.log('AuthContext: No user found, setting unauthorized');
           setIsAuthorized(false);
         }
         
+        console.log('AuthContext: Initial setup complete, setting loading to false');
         setLoading(false);
       } catch (error) {
-        console.error('Exception getting initial session:', error);
-        setLoading(false);
+        console.error('AuthContext: Exception getting initial session:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('AuthContext: Auth state changed:', event, session?.user?.email);
+        console.log('AuthContext: Auth state changed:', event, session?.user?.email || 'No session');
+        
+        if (!isMounted) return;
         
         setSession(session);
         setUser(session?.user ?? null);
         
         // Check authorization for authenticated users
         if (session?.user?.email) {
+          console.log('AuthContext: Auth state change - checking authorization...');
           await checkAuthorization(session.user.email);
         } else {
+          console.log('AuthContext: Auth state change - no user, setting unauthorized');
           setIsAuthorized(false);
         }
         
+        console.log('AuthContext: Auth state change complete, setting loading to false');
         setLoading(false);
       }
     );
@@ -109,6 +133,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return () => {
       console.log('AuthContext: Cleaning up auth listener');
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
