@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { ModernDashboardMain } from './ModernDashboardMain';
 import { DashboardAgentDetails } from './DashboardAgentDetails';
 import { DashboardAgentManager } from './DashboardAgentManager';
-
 type ActiveSection = 'dashboard' | 'agent-details' | 'agent-manager';
-
 interface DashboardContentProps {
   activeSection: ActiveSection;
   selectedAgent: string | null;
@@ -21,7 +18,6 @@ interface DashboardContentProps {
   onBackFromAgentManager: () => void;
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
 }
-
 export const DashboardContent: React.FC<DashboardContentProps> = ({
   activeSection,
   selectedAgent,
@@ -36,35 +32,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   onBackFromAgentManager,
   onAgentToggle
 }) => {
-  return (
-    <div className="container mx-auto px-4 py-6">
-      {activeSection === 'dashboard' && (
-        <ModernDashboardMain 
-          onSelectAgent={onSelectAgent}
-          onMaturityCalculatorClick={onMaturityCalculatorClick}
-          onAgentManagerClick={onOpenAgentManager}
-          agents={agents}
-          maturityScores={maturityScores}
-          recommendedAgents={recommendedAgents}
-        />
-      )}
+  return <div className="container py-[24px] px-[24px] mx-[24px] my-[24px] bg-white/0 rounded">
+      {activeSection === 'dashboard' && <ModernDashboardMain onSelectAgent={onSelectAgent} onMaturityCalculatorClick={onMaturityCalculatorClick} onAgentManagerClick={onOpenAgentManager} agents={agents} maturityScores={maturityScores} recommendedAgents={recommendedAgents} />}
 
-      {activeSection === 'agent-details' && selectedAgent && (
-        <DashboardAgentDetails
-          selectedAgent={selectedAgent}
-          language={language}
-          onBack={onBackFromAgentDetails}
-        />
-      )}
+      {activeSection === 'agent-details' && selectedAgent && <DashboardAgentDetails selectedAgent={selectedAgent} language={language} onBack={onBackFromAgentDetails} />}
 
-      {activeSection === 'agent-manager' && (
-        <DashboardAgentManager
-          agents={agents}
-          language={language}
-          onBack={onBackFromAgentManager}
-          onAgentToggle={onAgentToggle}
-        />
-      )}
-    </div>
-  );
+      {activeSection === 'agent-manager' && <DashboardAgentManager agents={agents} language={language} onBack={onBackFromAgentManager} onAgentToggle={onAgentToggle} />}
+    </div>;
 };
