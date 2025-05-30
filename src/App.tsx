@@ -8,6 +8,9 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
+import DashboardHome from './pages/DashboardHome';
+import AgentManager from './pages/AgentManager';
+import AgentDetails from './pages/AgentDetails';
 import MaturityCalculator from './pages/MaturityCalculator';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -26,11 +29,37 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              {/* Legacy dashboard route for backward compatibility */}
               <Route 
                 path="/dashboard" 
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* New dashboard routes */}
+              <Route 
+                path="/dashboard/home" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardHome />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/agents" 
+                element={
+                  <ProtectedRoute>
+                    <AgentManager />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/agent/:agentId" 
+                element={
+                  <ProtectedRoute>
+                    <AgentDetails />
                   </ProtectedRoute>
                 } 
               />
