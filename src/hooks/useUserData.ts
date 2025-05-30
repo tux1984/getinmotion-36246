@@ -56,7 +56,7 @@ export const useUserData = () => {
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
@@ -151,12 +151,24 @@ export const useUserData = () => {
     if (!user) return null;
 
     try {
+      // Input validation
+      if (!title || title.trim().length === 0) {
+        throw new Error('Title is required');
+      }
+      
+      if (title.length > 255) {
+        throw new Error('Title too long');
+      }
+
+      const sanitizedTitle = title.trim().substring(0, 255);
+      const sanitizedDescription = description?.trim().substring(0, 1000);
+
       const { data, error } = await supabase
         .from('user_projects')
         .insert({
           user_id: user.id,
-          title,
-          description
+          title: sanitizedTitle,
+          description: sanitizedDescription
         })
         .select()
         .single();
@@ -175,9 +187,18 @@ export const useUserData = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      // Input validation and sanitization
+      const sanitizedUpdates = { ...updates };
+      if (sanitizedUpdates.title) {
+        sanitizedUpdates.title = sanitizedUpdates.title.trim().substring(0, 255);
+      }
+      if (sanitizedUpdates.description) {
+        sanitizedUpdates.description = sanitizedUpdates.description.trim().substring(0, 1000);
+      }
+
       const { data, error } = await supabase
         .from('user_projects')
-        .update(updates)
+        .update(sanitizedUpdates)
         .eq('id', id)
         .eq('user_id', user.id) // Ensure user can only update their own projects
         .select()
@@ -216,13 +237,18 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
+      // Input validation
+      if (!agentId || agentId.trim().length === 0) {
+        throw new Error('Agent ID is required');
+      }
+
       console.log('Enabling agent:', agentId, 'for user:', user.id);
       
       const { data, error } = await supabase
         .from('user_agents')
         .upsert({
           user_id: user.id,
-          agent_id: agentId,
+          agent_id: agentId.trim(),
           is_enabled: true,
           updated_at: new Date().toISOString()
         }, {
@@ -259,6 +285,11 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
+      // Input validation
+      if (!agentId || agentId.trim().length === 0) {
+        throw new Error('Agent ID is required');
+      }
+
       console.log('Disabling agent:', agentId, 'for user:', user.id);
       
       const { data, error } = await supabase
@@ -268,7 +299,7 @@ export const useUserData = () => {
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
-        .eq('agent_id', agentId)
+        .eq('agent_id', agentId.trim())
         .select()
         .single();
 
@@ -297,14 +328,27 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
+      // Input validation
+      if (!agentId || agentId.trim().length === 0) {
+        throw new Error('Agent ID is required');
+      }
+
+      if (messagesCount < 0 || messagesCount > 1000) {
+        throw new Error('Invalid messages count');
+      }
+
+      if (sessionDuration && (sessionDuration < 0 || sessionDuration > 86400)) {
+        throw new Error('Invalid session duration');
+      }
+
       // Record usage metrics
       await supabase
         .from('agent_usage_metrics')
         .insert({
           user_id: user.id,
-          agent_id: agentId,
+          agent_id: agentId.trim(),
           session_duration: sessionDuration,
-          messages_count: messagesCount
+          messages_count: Math.max(1, Math.min(1000, messagesCount))
         });
 
       // Update agent last used time - the trigger will handle usage_count increment
@@ -314,7 +358,7 @@ export const useUserData = () => {
           last_used_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
-        .eq('agent_id', agentId);
+        .eq('agent_id', agentId.trim());
 
       if (updateError) throw updateError;
 

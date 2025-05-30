@@ -19,6 +19,23 @@ interface AdminUser {
   created_by: string | null;
 }
 
+// Security validation functions
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  return emailRegex.test(email) && email.length <= 254;
+};
+
+const validatePassword = (password: string): boolean => {
+  return password.length >= 8 && 
+         /[A-Z]/.test(password) && 
+         /[a-z]/.test(password) && 
+         /\d/.test(password);
+};
+
+const sanitizeInput = (input: string): string => {
+  return input.trim().toLowerCase().replace(/[<>\"']/g, '');
+};
+
 export const UserManagement = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,6 +43,7 @@ export const UserManagement = () => {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string}>({});
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -58,20 +76,42 @@ export const UserManagement = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const validateForm = (): boolean => {
+    const errors: {email?: string; password?: string} = {};
+    
+    if (!newUserEmail) {
+      errors.email = 'Email es requerido';
+    } else if (!validateEmail(newUserEmail)) {
+      errors.email = 'Email inválido';
+    }
+    
+    if (!newUserPassword) {
+      errors.password = 'Contraseña es requerida';
+    } else if (!validatePassword(newUserPassword)) {
+      errors.password = 'La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula y número';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsCreating(true);
     
     try {
+      const sanitizedEmail = sanitizeInput(newUserEmail);
+      
       console.log('Calling create-admin-user function...');
       
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
-          email: newUserEmail,
+          email: sanitizedEmail,
           password: newUserPassword
         }
       });
@@ -87,11 +127,12 @@ export const UserManagement = () => {
       
       toast({
         title: 'Usuario creado',
-        description: `Usuario ${newUserEmail} creado exitosamente.`,
+        description: `Usuario ${sanitizedEmail} creado exitosamente.`,
       });
       
       setNewUserEmail('');
       setNewUserPassword('');
+      setValidationErrors({});
       setDialogOpen(false);
       fetchUsers();
     } catch (error: any) {
@@ -131,6 +172,10 @@ export const UserManagement = () => {
     }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
     <Card className="bg-indigo-900/40 border-indigo-800/30 text-white">
       <CardHeader>
@@ -167,11 +212,19 @@ export const UserManagement = () => {
                       id="email"
                       type="email"
                       value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                      required
+                      onChange={(e) => {
+                        setNewUserEmail(e.target.value);
+                        if (validationErrors.email) {
+                          setValidationErrors(prev => ({ ...prev, email: undefined }));
+                        }
+                      }}
                       className="bg-indigo-800 border-indigo-600 text-white"
                       placeholder="usuario@ejemplo.com"
+                      maxLength={254}
                     />
+                    {validationErrors.email && (
+                      <p className="text-red-400 text-sm">{validationErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Contraseña</Label>
@@ -179,12 +232,20 @@ export const UserManagement = () => {
                       id="password"
                       type="password"
                       value={newUserPassword}
-                      onChange={(e) => setNewUserPassword(e.target.value)}
-                      required
-                      minLength={6}
+                      onChange={(e) => {
+                        setNewUserPassword(e.target.value);
+                        if (validationErrors.password) {
+                          setValidationErrors(prev => ({ ...prev, password: undefined }));
+                        }
+                      }}
                       className="bg-indigo-800 border-indigo-600 text-white"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres"
+                      minLength={8}
+                      maxLength={128}
                     />
+                    {validationErrors.password && (
+                      <p className="text-red-400 text-sm">{validationErrors.password}</p>
+                    )}
                   </div>
                   <Button 
                     type="submit" 

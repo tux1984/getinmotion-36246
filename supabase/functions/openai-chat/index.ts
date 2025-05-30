@@ -1,228 +1,220 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface RequestBody {
+  messages: ChatMessage[];
+  systemPrompt?: string;
+}
+
+// Input validation functions
+const validateMessage = (message: any): message is ChatMessage => {
+  if (!message || typeof message !== 'object') return false;
+  if (!['system', 'user', 'assistant'].includes(message.role)) return false;
+  if (typeof message.content !== 'string') return false;
+  if (message.content.length > 10000) return false; // Limit message length
+  return true;
+};
+
+const sanitizeContent = (content: string): string => {
+  // Remove potential harmful content
+  return content.replace(/[<>]/g, '').trim().substring(0, 10000);
+};
+
+const validateRequest = (body: any): { isValid: boolean; error?: string } => {
+  if (!body || typeof body !== 'object') {
+    return { isValid: false, error: 'Invalid request body' };
+  }
+  
+  if (!Array.isArray(body.messages)) {
+    return { isValid: false, error: 'Messages must be an array' };
+  }
+  
+  if (body.messages.length === 0) {
+    return { isValid: false, error: 'At least one message is required' };
+  }
+  
+  if (body.messages.length > 100) {
+    return { isValid: false, error: 'Too many messages' };
+  }
+  
+  for (const message of body.messages) {
+    if (!validateMessage(message)) {
+      return { isValid: false, error: 'Invalid message format' };
+    }
+  }
+  
+  if (body.systemPrompt && (typeof body.systemPrompt !== 'string' || body.systemPrompt.length > 5000)) {
+    return { isValid: false, error: 'Invalid system prompt' };
+  }
+  
+  return { isValid: true };
 };
 
 serve(async (req) => {
   console.log('=== OpenAI Chat Function Started ===');
   console.log('Request method:', req.method);
   console.log('Request URL:', req.url);
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Verify method
-  if (req.method !== 'POST') {
-    console.error('Invalid method:', req.method);
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
-    // Get OpenAI API key
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    console.log('OpenAI API key check:', OPENAI_API_KEY ? 'Found' : 'NOT FOUND');
-
-    if (!OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY environment variable not found');
-      return new Response(JSON.stringify({ 
-        error: 'OpenAI API key not configured. Please contact support.' 
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get and validate request body
-    let requestBody;
-    try {
-      requestBody = await req.json();
-      console.log('Request body received:', {
-        hasSystemPrompt: !!requestBody.systemPrompt,
-        messagesCount: requestBody.messages?.length || 0,
-        systemPromptLength: requestBody.systemPrompt?.length || 0
-      });
-    } catch (e) {
-      console.error('Failed to parse request body:', e);
-      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Check for OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('OpenAI API key check:', openaiApiKey ? 'Found' : 'Missing');
     
-    const { messages, systemPrompt } = requestBody;
-
-    // Validate messages
-    if (!messages || !Array.isArray(messages)) {
-      console.error('Invalid messages format:', messages);
-      return new Response(JSON.stringify({ error: 'Messages must be an array' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (!openaiApiKey) {
+      console.error('OpenAI API key not configured');
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
-    // Build complete messages array
-    const completeMessages = [];
-    
+    // Parse and validate request body
+    const body = await req.json() as RequestBody;
+    console.log('Request body received:', { 
+      hasSystemPrompt: !!body.systemPrompt, 
+      messagesCount: body.messages?.length,
+      systemPromptLength: body.systemPrompt?.length 
+    });
+
+    // Validate input
+    const validation = validateRequest(body);
+    if (!validation.isValid) {
+      console.error('Request validation failed:', validation.error);
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Sanitize and prepare messages
+    const sanitizedMessages: ChatMessage[] = body.messages.map(msg => ({
+      role: msg.role,
+      content: sanitizeContent(msg.content)
+    }));
+
     // Add system prompt if provided
-    if (systemPrompt && systemPrompt.trim()) {
-      completeMessages.push({
+    const messages: ChatMessage[] = [];
+    if (body.systemPrompt) {
+      messages.push({
         role: 'system',
-        content: systemPrompt.trim()
+        content: sanitizeContent(body.systemPrompt)
       });
     }
-    
-    // Add user messages
-    for (const msg of messages) {
-      if (msg && msg.content && msg.content.trim()) {
-        completeMessages.push({
-          role: msg.role === 'assistant' ? 'assistant' : 'user',
-          content: msg.content.trim()
-        });
-      }
-    }
+    messages.push(...sanitizedMessages);
 
     console.log('Complete messages for OpenAI:', {
-      totalMessages: completeMessages.length,
-      hasSystemMessage: completeMessages[0]?.role === 'system',
-      lastUserMessage: completeMessages[completeMessages.length - 1]?.content?.substring(0, 50) + '...'
+      totalMessages: messages.length,
+      hasSystemMessage: messages[0]?.role === 'system',
+      lastUserMessage: messages[messages.length - 1]?.content.substring(0, 50) + '...'
     });
 
-    if (completeMessages.length === 0) {
-      console.error('No valid messages to send');
-      return new Response(JSON.stringify({ error: 'No valid messages provided' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Call OpenAI API with security headers
+    console.log('Calling OpenAI API with model: gpt-4o-mini');
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'Supabase-Function/1.0'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: messages,
+        max_tokens: 1000,
+        temperature: 0.7,
+        presence_penalty: 0,
+        frequency_penalty: 0
+      }),
+    });
+
+    console.log('OpenAI response status:', openaiResponse.status);
+    console.log('OpenAI response headers:', Object.fromEntries(openaiResponse.headers.entries()));
+
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text();
+      console.error('OpenAI API error:', errorText);
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API request failed' }),
+        { 
+          status: openaiResponse.status, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
-    // Prepare OpenAI request
-    const openAIBody = {
-      model: 'gpt-4o-mini',
-      messages: completeMessages,
-      temperature: 0.7,
-      max_tokens: 1500,
+    const openaiData = await openaiResponse.json();
+    console.log('OpenAI response received successfully');
+    console.log('Response data structure:', {
+      hasChoices: !!openaiData.choices,
+      choicesLength: openaiData.choices?.length,
+      firstChoiceHasMessage: !!openaiData.choices?.[0]?.message,
+      firstChoiceRole: openaiData.choices?.[0]?.message?.role,
+      contentLength: openaiData.choices?.[0]?.message?.content?.length
+    });
+
+    // Validate and sanitize response
+    if (!openaiData.choices || !openaiData.choices[0] || !openaiData.choices[0].message) {
+      console.error('Invalid OpenAI response structure');
+      return new Response(
+        JSON.stringify({ error: 'Invalid response from OpenAI' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Sanitize response content
+    const responseContent = sanitizeContent(openaiData.choices[0].message.content);
+    
+    const response = {
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: responseContent
+        }
+      }],
+      usage: openaiData.usage
     };
 
-    console.log('Calling OpenAI API with model:', openAIBody.model);
-
-    // Call OpenAI API with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-    try {
-      const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(openAIBody),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log('OpenAI response status:', openAIResponse.status);
-      console.log('OpenAI response headers:', Object.fromEntries(openAIResponse.headers.entries()));
-
-      if (!openAIResponse.ok) {
-        const errorText = await openAIResponse.text();
-        console.error('OpenAI API error response:', errorText);
-        
-        let errorMessage = 'Error calling OpenAI API';
-        if (openAIResponse.status === 401) {
-          errorMessage = 'Invalid OpenAI API key';
-        } else if (openAIResponse.status === 429) {
-          errorMessage = 'OpenAI rate limit exceeded';
-        } else if (openAIResponse.status === 400) {
-          errorMessage = 'Invalid request to OpenAI';
-        }
-        
-        return new Response(JSON.stringify({ 
-          error: errorMessage, 
-          details: errorText,
-          status: openAIResponse.status 
-        }), {
-          status: openAIResponse.status >= 500 ? 500 : openAIResponse.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+    console.log('Returning successful response to client');
+    return new Response(
+      JSON.stringify(response),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
-
-      const data = await openAIResponse.json();
-      console.log('OpenAI response received successfully');
-      console.log('Response data structure:', {
-        hasChoices: !!data.choices,
-        choicesLength: data.choices?.length || 0,
-        firstChoiceHasMessage: !!data.choices?.[0]?.message,
-        firstChoiceRole: data.choices?.[0]?.message?.role,
-        contentLength: data.choices?.[0]?.message?.content?.length || 0
-      });
-
-      // Validate OpenAI response structure
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.error('Invalid OpenAI response structure:', data);
-        return new Response(JSON.stringify({ 
-          error: 'Invalid response from OpenAI',
-          details: 'Missing choices or message in response'
-        }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Return successful response
-      console.log('Returning successful response to client');
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      
-      if (fetchError.name === 'AbortError') {
-        console.error('OpenAI API request timed out');
-        return new Response(JSON.stringify({ 
-          error: 'Request timed out',
-          details: 'OpenAI API request took too long'
-        }), {
-          status: 408,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      console.error('Fetch error calling OpenAI:', fetchError);
-      return new Response(JSON.stringify({ 
-        error: 'Network error calling OpenAI',
-        details: fetchError.message
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    );
 
   } catch (error) {
-    console.error('=== EDGE FUNCTION ERROR ===');
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    
-    return new Response(JSON.stringify({ 
-      error: 'Internal server error', 
-      details: error.message,
-      type: error.name
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Unexpected error in OpenAI chat function:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
   }
 });

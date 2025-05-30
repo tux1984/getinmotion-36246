@@ -32,19 +32,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       console.log('AuthContext: Checking authorization for:', email);
       
-      // Add timeout to prevent infinite waiting
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Authorization check timeout')), 10000);
-      });
-      
-      const authCheckPromise = supabase
+      // Use RLS-enabled query instead of direct table access
+      const { data, error } = await supabase
         .from('admin_users')
         .select('email, is_active')
         .eq('email', email)
         .eq('is_active', true)
         .maybeSingle();
-      
-      const { data, error } = await Promise.race([authCheckPromise, timeoutPromise]);
       
       if (error) {
         console.error('AuthContext: Error checking authorization:', error);
@@ -68,7 +62,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     let isMounted = true;
     
-    // Get initial session first
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('AuthContext: Auth state changed:', event, session?.user?.email || 'No session');
+        
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Check authorization for authenticated users
+        if (session?.user?.email) {
+          console.log('AuthContext: Auth state change - checking authorization...');
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(() => {
+            if (isMounted) {
+              checkAuthorization(session.user.email);
+            }
+          }, 0);
+        } else {
+          console.log('AuthContext: Auth state change - no user, setting unauthorized');
+          setIsAuthorized(false);
+        }
+        
+        console.log('AuthContext: Auth state change complete, setting loading to false');
+        setLoading(false);
+      }
+    );
+
+    // Get initial session
     const getInitialSession = async () => {
       try {
         console.log('AuthContext: Getting initial session...');
@@ -104,30 +127,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('AuthContext: Auth state changed:', event, session?.user?.email || 'No session');
-        
-        if (!isMounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check authorization for authenticated users
-        if (session?.user?.email) {
-          console.log('AuthContext: Auth state change - checking authorization...');
-          await checkAuthorization(session.user.email);
-        } else {
-          console.log('AuthContext: Auth state change - no user, setting unauthorized');
-          setIsAuthorized(false);
-        }
-        
-        console.log('AuthContext: Auth state change complete, setting loading to false');
-        setLoading(false);
-      }
-    );
-
     // Initialize
     getInitialSession();
 
@@ -143,8 +142,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       setLoading(true);
+      
+      // Input validation
+      if (!email || !password) {
+        return { error: { message: 'Email and password are required' } };
+      }
+      
+      if (!email.includes('@') || email.length < 3) {
+        return { error: { message: 'Invalid email format' } };
+      }
+      
+      if (password.length < 6) {
+        return { error: { message: 'Password must be at least 6 characters' } };
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password
       });
       

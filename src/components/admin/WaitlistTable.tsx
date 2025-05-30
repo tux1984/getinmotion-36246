@@ -26,10 +26,35 @@ interface WaitlistTableProps {
   onRefresh: () => void;
 }
 
+// Security helper functions
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[<>\"']/g, '').trim();
+};
+
+const validateSearchTerm = (searchTerm: string): boolean => {
+  // Prevent XSS and injection attempts
+  if (searchTerm.length > 100) return false;
+  if (/[<>\"'`]/.test(searchTerm)) return false;
+  return true;
+};
+
 export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterField, setFilterField] = useState<string>('all');
+  
+  const handleSearchChange = (value: string) => {
+    const sanitized = sanitizeInput(value);
+    if (validateSearchTerm(sanitized)) {
+      setSearchTerm(sanitized);
+    } else {
+      toast({
+        title: 'Invalid Search',
+        description: 'Search term contains invalid characters or is too long.',
+        variant: 'destructive',
+      });
+    }
+  };
   
   const filteredData = data.filter(entry => {
     if (!searchTerm) return true;
@@ -47,58 +72,82 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
       );
     }
     
-    // @ts-ignore - Dynamic field access
+    // @ts-ignore - Dynamic field access with validation
     const fieldValue = entry[filterField]?.toLowerCase() || '';
     return fieldValue.includes(searchLower);
   });
   
   const exportToCSV = () => {
-    // Create CSV content
-    const headers = ['Nombre', 'Email', 'Teléfono', 'Rol', 'Ciudad', 'País', 'Sector', 'Fecha'];
-    const csvRows = [headers];
-    
-    filteredData.forEach(entry => {
-      const row = [
-        entry.full_name || '',
-        entry.email || '',
-        entry.phone || '',
-        entry.role || '',
-        entry.city || '',
-        entry.country || '',
-        entry.sector || '',
-        new Date(entry.created_at).toLocaleDateString()
-      ];
-      csvRows.push(row);
-    });
-    
-    // Convert to CSV string
-    const csvContent = csvRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `waitlist_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: 'Exportación Completada',
-      description: `Se exportaron ${filteredData.length} registros a CSV.`,
-    });
+    try {
+      // Security: Limit export size
+      if (filteredData.length > 10000) {
+        toast({
+          title: 'Export Limit',
+          description: 'Cannot export more than 10,000 records at once.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Create CSV content with proper escaping
+      const headers = ['Nombre', 'Email', 'Teléfono', 'Rol', 'Ciudad', 'País', 'Sector', 'Fecha'];
+      const csvRows = [headers];
+      
+      filteredData.forEach(entry => {
+        const row = [
+          (entry.full_name || '').replace(/"/g, '""'),
+          (entry.email || '').replace(/"/g, '""'),
+          (entry.phone || '').replace(/"/g, '""'),
+          (entry.role || '').replace(/"/g, '""'),
+          (entry.city || '').replace(/"/g, '""'),
+          (entry.country || '').replace(/"/g, '""'),
+          (entry.sector || '').replace(/"/g, '""'),
+          new Date(entry.created_at).toLocaleDateString()
+        ];
+        csvRows.push(row);
+      });
+      
+      // Convert to CSV string with proper quoting
+      const csvContent = csvRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `waitlist_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: 'Exportación Completada',
+        description: `Se exportaron ${filteredData.length} registros a CSV.`,
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: 'Error de Exportación',
+        description: 'No se pudo completar la exportación.',
+        variant: 'destructive',
+      });
+    }
   };
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(dateString).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
   };
   
   return (
@@ -119,8 +168,9 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
               <Input
                 placeholder="Buscar..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-9 bg-indigo-900/40 border-indigo-700 w-full"
+                maxLength={100}
               />
             </div>
             
@@ -203,9 +253,15 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                       console.log('Entry details:', entry);
                     }}
                   >
-                    <TableCell className="font-medium text-indigo-100">{entry.full_name}</TableCell>
-                    <TableCell className="text-indigo-200">{entry.email}</TableCell>
-                    <TableCell className="text-indigo-300">{entry.phone || '-'}</TableCell>
+                    <TableCell className="font-medium text-indigo-100">
+                      {entry.full_name || 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-indigo-200">
+                      {entry.email || 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-indigo-300">
+                      {entry.phone || '-'}
+                    </TableCell>
                     <TableCell className="text-indigo-300">
                       {entry.role && (
                         <span className="bg-indigo-800/50 text-xs rounded px-2 py-0.5">
@@ -213,7 +269,9 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-indigo-300">{entry.country || '-'}</TableCell>
+                    <TableCell className="text-indigo-300">
+                      {entry.country || '-'}
+                    </TableCell>
                     <TableCell className="text-indigo-300 text-sm">
                       {formatDate(entry.created_at)}
                     </TableCell>
