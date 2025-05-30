@@ -28,8 +28,8 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
 
   return (
     <div className="flex-1 overflow-hidden">
-      <ScrollArea className="h-full p-6">
-        <div className="space-y-6 max-w-4xl mx-auto">
+      <ScrollArea className="h-full p-3">
+        <div className="space-y-3 max-w-4xl mx-auto">
           {messages.map((message) => (
             <MessageBubble 
               key={message.id}

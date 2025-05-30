@@ -40,7 +40,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   if (isMobile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col max-h-[85vh]">
           {/* Main content area with tab switching - sin header interno */}
           <div className="flex-1 mx-4 mb-20 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             {activeTab === 'chat' && (
@@ -146,12 +146,12 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
-      <div className="h-screen p-4 lg:p-6">
+      <div className="max-h-[75vh] p-2 lg:p-3">
         {/* Contenedor transparente con efecto de cristal muy sutil */}
         <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-full max-w-7xl mx-auto overflow-hidden">
-          <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full p-4 lg:p-6">
+          <div className="grid grid-cols-12 grid-rows-4 gap-2 lg:gap-3 h-full p-3 lg:p-4">
             {/* Chat principal - sin header interno */}
-            <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
+            <div className="col-span-12 lg:col-span-7 row-span-4 lg:row-span-4">
               <ModernFloatingAgentChat 
                 agentId={selectedAgent} 
                 language={language}
@@ -160,7 +160,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             </div>
             
             {/* Conversation History */}
-            <div className="hidden lg:block lg:col-span-3 lg:row-span-6">
+            <div className="hidden lg:block lg:col-span-3 lg:row-span-4">
               <ConversationHistorySidebar 
                 agentId={selectedAgent} 
                 language={language} 
@@ -168,7 +168,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             </div>
             
             {/* Mini Dashboard */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
+            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
               <AgentMiniDashboard 
                 agentId={selectedAgent} 
                 language={language} 
@@ -176,7 +176,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             </div>
             
             {/* Quick Actions */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
+            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
               <AgentQuickActions 
                 agentId={selectedAgent} 
                 language={language} 
@@ -185,18 +185,18 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             
             {/* Additional Tools */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
-              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full p-4">
-                <h3 className="text-white font-semibold mb-3">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full p-3">
+                <h3 className="text-white font-semibold mb-2 text-sm">
                   {language === 'en' ? 'More Tools' : 'Más Herramientas'}
                 </h3>
-                <div className="space-y-2">
-                  <button className="w-full text-left text-sm text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                <div className="space-y-1">
+                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
                     {language === 'en' ? 'Export Chat' : 'Exportar Chat'}
                   </button>
-                  <button className="w-full text-left text-sm text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
                     {language === 'en' ? 'Settings' : 'Configuración'}
                   </button>
-                  <button className="w-full text-left text-sm text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                  <button className="w-full text-left text-xs text-purple-200 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
                     {language === 'en' ? 'Help' : 'Ayuda'}
                   </button>
                 </div>
