@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
@@ -186,6 +185,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
         getPriorityColor={getPriorityColor}
         getImpactColor={getImpactColor}
         translations={t}
+        language={language}
       />
     </div>
   );
