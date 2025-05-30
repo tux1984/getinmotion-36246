@@ -1,36 +1,27 @@
-
 import React from 'react';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { FloatingChatArea } from './FloatingChatArea';
 import { AgentQuickActions } from './AgentQuickActions';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface BentoAgentLayoutProps {
   selectedAgent: string;
   language: 'en' | 'es';
   onBack: () => void;
 }
-
 export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   selectedAgent,
   language,
   onBack
 }) => {
   const isMobile = useIsMobile();
-
   if (isMobile) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
         <div className="h-screen">
           {/* Mobile: Stack layout with tabs */}
           <div className="flex flex-col h-full">
             <div className="flex-1">
-              <FloatingChatArea 
-                agentId={selectedAgent}
-                language={language}
-                onBack={onBack}
-              />
+              <FloatingChatArea agentId={selectedAgent} language={language} onBack={onBack} />
             </div>
             
             {/* Mobile bottom tabs */}
@@ -43,46 +34,30 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      <div className="h-screen">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      <div className="h-screen px-[24px] py-[24px] my-0 mx-0 rounded-md">
         {/* Desktop Bento Grid */}
         <div className="grid grid-cols-12 grid-rows-6 gap-4 h-full max-w-7xl mx-auto">
           {/* Main Chat Area - Takes center stage */}
           <div className="col-span-7 row-span-6">
-            <FloatingChatArea 
-              agentId={selectedAgent}
-              language={language}
-              onBack={onBack}
-            />
+            <FloatingChatArea agentId={selectedAgent} language={language} onBack={onBack} />
           </div>
           
           {/* Conversation History - Left sidebar */}
           <div className="col-span-3 row-span-6">
-            <ConversationHistorySidebar 
-              agentId={selectedAgent}
-              language={language}
-            />
+            <ConversationHistorySidebar agentId={selectedAgent} language={language} />
           </div>
           
           {/* Mini Dashboard - Top right */}
           <div className="col-span-2 row-span-2">
-            <AgentMiniDashboard 
-              agentId={selectedAgent}
-              language={language}
-            />
+            <AgentMiniDashboard agentId={selectedAgent} language={language} />
           </div>
           
           {/* Quick Actions - Middle right */}
           <div className="col-span-2 row-span-2">
-            <AgentQuickActions 
-              agentId={selectedAgent}
-              language={language}
-            />
+            <AgentQuickActions agentId={selectedAgent} language={language} />
           </div>
           
           {/* Additional Tools - Bottom right */}
@@ -106,6 +81,5 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
