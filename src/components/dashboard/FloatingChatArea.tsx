@@ -14,7 +14,7 @@ export const FloatingChatArea: React.FC<FloatingChatAreaProps> = ({
   onBack
 }) => {
   return (
-    <div className="h-full overflow-hidden">
+    <div className="h-full overflow-hidden bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
       <ModernFloatingAgentChat 
         agentId={agentId}
         language={language}
