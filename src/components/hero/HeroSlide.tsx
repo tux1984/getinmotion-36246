@@ -21,6 +21,29 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
   onCtaClick,
   isLastSlide = false
 }) => {
+  const handleCtaClick = () => {
+    // If it's the last slide, use the provided onCtaClick (for waitlist)
+    if (isLastSlide) {
+      onCtaClick();
+      return;
+    }
+    
+    // For other slides, scroll to value proposition section (why choose Motion)
+    const valuePropositionSection = document.querySelector('[data-section="value-proposition"]') || 
+                                   document.getElementById('value-proposition') ||
+                                   document.querySelector('.value-proposition');
+    
+    if (valuePropositionSection) {
+      valuePropositionSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      // Fallback: call the original function
+      onCtaClick();
+    }
+  };
+
   return (
     <div className="w-full py-16 md:py-24 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +64,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
                     ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700' 
                     : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
                 }`}
-                onClick={onCtaClick}
+                onClick={handleCtaClick}
               >
                 {cta}
               </Button>
