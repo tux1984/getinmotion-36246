@@ -8,7 +8,7 @@ interface ValuePropositionProps {
 export const ValueProposition: React.FC<ValuePropositionProps> = ({ language }) => {
   const translations = {
     en: {
-      title: "Why Choose Motion?",
+      title: "Why Choose Get in Motion?",
       subtitle: "The perfect AI companion for creative professionals",
       reasons: [
         {
@@ -30,7 +30,7 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({ language }) 
       ]
     },
     es: {
-      title: "¿Por Qué Elegir Motion?",
+      title: "¿Por Qué Elegir Get in Motion?",
       subtitle: "El compañero AI perfecto para profesionales creativos",
       reasons: [
         {
