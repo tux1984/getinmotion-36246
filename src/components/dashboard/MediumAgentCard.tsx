@@ -67,30 +67,40 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
   };
 
   return (
-    <div className={`group relative bg-white/8 backdrop-blur-xl border border-white/20 rounded-xl p-5 hover:bg-white/12 transition-all duration-300 hover:scale-102 hover:shadow-xl ${
+    <div className={`group relative bg-white/8 backdrop-blur-xl border border-white/20 rounded-xl p-6 hover:bg-white/12 transition-all duration-300 hover:scale-102 hover:shadow-xl min-h-[180px] ${
       !agent.isEnabled ? 'opacity-70' : ''
     }`}>
       {isRecommended && (
-        <div className="absolute -top-2 -right-2">
+        <div className="absolute -top-2 -right-2 z-10">
           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
             {t.recommended}
           </Badge>
         </div>
       )}
       
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg shadow-lg">
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg shadow-lg flex-shrink-0">
             {agent.icon}
           </div>
-          <div>
-            <h4 className="font-semibold text-white text-base group-hover:text-purple-200 transition-colors">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-semibold text-white text-base group-hover:text-purple-200 transition-colors leading-tight mb-2">
               {agentTranslation.name}
             </h4>
-            <p className="text-purple-200 text-sm">{agent.category}</p>
+            <p className="text-purple-200 text-sm line-clamp-3 leading-relaxed">
+              {agentTranslation.description}
+            </p>
           </div>
         </div>
-        
+      </div>
+
+      {recommendationReason && (
+        <div className="mb-4 p-3 bg-yellow-400/10 border border-yellow-400/20 rounded-lg">
+          <p className="text-yellow-200 text-xs leading-relaxed">{recommendationReason}</p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between text-sm text-gray-300 mb-5">
         <Badge className={`text-xs ${
           agent.isEnabled 
             ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
@@ -98,15 +108,6 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
         }`}>
           {agent.isEnabled ? `${agent.usageCount} ${t.uses}` : t.inactive}
         </Badge>
-      </div>
-
-      {recommendationReason && (
-        <div className="mb-3 p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-lg">
-          <p className="text-yellow-200 text-xs">{recommendationReason}</p>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between text-sm text-gray-300 mb-4">
         <div className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
           <span>{t.lastUsed}: {formatLastUsed(agent.lastUsed)}</span>

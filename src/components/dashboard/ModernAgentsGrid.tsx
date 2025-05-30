@@ -169,11 +169,11 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
     const isToggling = togglingAgents.has(agent.id);
     
     return (
-      <div className={`group relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+      <div className={`group relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-2xl min-h-[200px] ${
         agent.isRecentlyEnabled ? 'ring-2 ring-green-400 shadow-green-400/20' : ''
       }`}>
         {isRecommended && (
-          <div className="absolute -top-2 -right-2">
+          <div className="absolute -top-2 -right-2 z-10">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
               <Zap className="w-3 h-3 mr-1" />
               {t.recommended}
@@ -182,26 +182,38 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         )}
         
         {agent.isRecentlyEnabled && (
-          <div className="absolute -top-2 -left-2">
+          <div className="absolute -top-2 -left-2 z-10">
             <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
               {t.justEnabled}
             </Badge>
           </div>
         )}
         
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl shadow-lg">
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">
               {agent.icon}
             </div>
-            <div>
-              <h3 className="font-semibold text-white text-lg group-hover:text-purple-200 transition-colors">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-white text-lg group-hover:text-purple-200 transition-colors leading-tight mb-2">
                 {agent.name}
               </h3>
-              <p className="text-purple-200 text-sm">{agent.category}</p>
+              <p className="text-purple-200 text-sm line-clamp-3 leading-relaxed">
+                {getAgentTranslation(agent.id, language).description}
+              </p>
             </div>
           </div>
-          
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-gray-300 mb-6">
+          <span className="bg-white/10 px-2 py-1 rounded-md">{agent.usageCount} {t.activeTasks}</span>
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            <span>{formatLastUsed(agent.lastUsed)}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
           <Badge className={`text-xs flex items-center gap-1 ${
             agent.isEnabled 
               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
@@ -221,15 +233,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
           </Badge>
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-300 mb-4">
-          <span>{agent.usageCount} {t.activeTasks}</span>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            <span>{formatLastUsed(agent.lastUsed)}</span>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
+        <div className="flex gap-3 mt-4">
           {agent.isEnabled ? (
             <>
               <Button 
@@ -314,7 +318,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       {/* Active Agents */}
       {categorizedAgents.active.length > 0 && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {categorizedAgents.active.map(agent => (
               <ModernAgentCard key={agent.id} agent={agent} />
             ))}
