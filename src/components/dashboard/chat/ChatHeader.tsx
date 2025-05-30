@@ -1,9 +1,5 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { getAgentById } from '@/data/agentsDatabase';
-import { MotionLogo } from '@/components/MotionLogo';
 
 interface ChatHeaderProps {
   agentId: string;
@@ -16,37 +12,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   language,
   onBack
 }) => {
-  const agent = getAgentById(agentId);
-  const agentName = agent?.name || 'AI Assistant';
-
-  const t = {
-    en: { backToDashboard: "Back to Dashboard" },
-    es: { backToDashboard: "Volver al Dashboard" }
-  };
-
-  return (
-    <div className="p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <MotionLogo variant="light" size="sm" />
-          <div>
-            <h2 className="text-lg font-semibold text-white">{agentName}</h2>
-            <p className="text-sm text-purple-200">{agent?.description}</p>
-          </div>
-        </div>
-        
-        {onBack && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="text-white hover:bg-white/10 rounded-xl"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t[language].backToDashboard}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  // Header simplificado - toda la información del agente se movió al FloatingAgentInfoModule
+  return null;
 };

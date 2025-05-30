@@ -79,6 +79,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header simplificado - ya no muestra información del agente */}
       <ChatHeader 
         agentId={agentId}
         language={language}

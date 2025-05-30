@@ -4,6 +4,7 @@ import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { FloatingChatArea } from './FloatingChatArea';
 import { AgentQuickActions } from './AgentQuickActions';
+import { FloatingAgentInfoModule } from './FloatingAgentInfoModule';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BentoAgentLayoutProps {
@@ -23,12 +24,18 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
         <div className="flex flex-col h-screen">
+          {/* Módulo flotante con información del agente */}
+          <FloatingAgentInfoModule 
+            agentId={selectedAgent}
+            language={language}
+            onBack={onBack}
+          />
+          
           {/* Mobile: Main chat area takes most space */}
           <div className="flex-1 overflow-hidden">
             <FloatingChatArea 
               agentId={selectedAgent} 
               language={language} 
-              onBack={onBack} 
             />
           </div>
           
@@ -66,18 +73,24 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
       <div className="h-screen p-4 lg:p-6">
-        {/* Desktop Bento Grid - improved responsiveness */}
-        <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full max-w-7xl mx-auto">
+        {/* Módulo flotante con información del agente - reemplaza el header del dashboard */}
+        <FloatingAgentInfoModule 
+          agentId={selectedAgent}
+          language={language}
+          onBack={onBack}
+        />
+        
+        {/* Desktop Bento Grid - ajustado para el nuevo módulo */}
+        <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-[calc(100%-100px)] max-w-7xl mx-auto">
           {/* Main Chat Area - Center stage */}
           <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
             <FloatingChatArea 
               agentId={selectedAgent} 
               language={language} 
-              onBack={onBack} 
             />
           </div>
           
-          {/* Conversation History - Left sidebar on desktop, hidden on smaller screens */}
+          {/* Conversation History - Left sidebar on desktop */}
           <div className="hidden lg:block lg:col-span-3 lg:row-span-6">
             <ConversationHistorySidebar 
               agentId={selectedAgent} 
