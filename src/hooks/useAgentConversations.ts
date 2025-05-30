@@ -59,7 +59,11 @@ export function useAgentConversations(agentId: string) {
 
   // Fetch messages for current conversation
   const fetchMessages = async (conversationId: string) => {
-    if (!conversationId) return;
+    if (!conversationId) {
+      console.log('No conversation ID provided, clearing messages');
+      setMessages([]);
+      return;
+    }
     
     console.log('Fetching messages for conversation:', conversationId);
     try {
@@ -80,6 +84,7 @@ export function useAgentConversations(agentId: string) {
       }));
       
       setMessages(typedMessages);
+      console.log('Messages state updated with:', typedMessages.length, 'messages');
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -109,6 +114,7 @@ export function useAgentConversations(agentId: string) {
 
       console.log('Created new conversation:', conversation);
       setCurrentConversationId(conversation.id);
+      setMessages([]); // Clear messages for new conversation
       await fetchConversations();
       
       return conversation.id;
@@ -146,7 +152,11 @@ export function useAgentConversations(agentId: string) {
         message_type: data.message_type as 'user' | 'agent'
       };
       
-      setMessages(prev => [...prev, typedMessage]);
+      setMessages(prev => {
+        const newMessages = [...prev, typedMessage];
+        console.log('Updated messages state with new message, total:', newMessages.length);
+        return newMessages;
+      });
       
       // Update conversation timestamp
       await supabase
@@ -169,6 +179,7 @@ export function useAgentConversations(agentId: string) {
     console.log('Selecting conversation:', conversationId);
     setCurrentConversationId(conversationId);
     await fetchMessages(conversationId);
+    console.log('Conversation selection completed');
   };
 
   // Start new conversation - clear everything
@@ -176,13 +187,29 @@ export function useAgentConversations(agentId: string) {
     console.log('Starting new conversation');
     setCurrentConversationId(null);
     setMessages([]);
+    console.log('New conversation started - cleared state');
   };
 
   useEffect(() => {
     if (user && agentId) {
-      fetchConversations().finally(() => setLoading(false));
+      console.log('Initializing conversations for agent:', agentId);
+      fetchConversations().finally(() => {
+        setLoading(false);
+        console.log('Initial conversations fetch completed');
+      });
     }
   }, [user, agentId]);
+
+  // Debug effect to log state changes
+  useEffect(() => {
+    console.log('useAgentConversations state update:', {
+      conversationsCount: conversations.length,
+      messagesCount: messages.length,
+      currentConversationId,
+      loading,
+      isProcessing
+    });
+  }, [conversations, messages, currentConversationId, loading, isProcessing]);
 
   return {
     conversations,

@@ -3,8 +3,16 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Clock, Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { CulturalAgent } from '@/data/agentsDatabase';
+import { getAgentTranslation } from '@/data/agentTranslations';
+import { 
+  Loader2, 
+  Star, 
+  Users, 
+  CheckCircle,
+  Circle
+} from 'lucide-react';
 
 interface AgentCategoryCardProps {
   category: string;
@@ -15,7 +23,7 @@ interface AgentCategoryCardProps {
   recommendedCount: number;
   getUserAgentData: (agentId: string) => any;
   isAgentRecommended: (agentId: string) => boolean;
-  onToggleAgent: (agentId: string, currentEnabled: boolean) => Promise<void>;
+  onToggleAgent: (agentId: string, enabled: boolean) => Promise<void>;
   togglingAgents: Set<string>;
   language: 'en' | 'es';
 }
@@ -33,149 +41,95 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
   togglingAgents,
   language
 }) => {
-  const translations = {
+  const t = {
     en: {
-      active: "Active",
-      inactive: "Inactive",
+      recommended: "Recommended",
       activate: "Activate",
-      deactivate: "Deactivate",
-      recommended: "Rec",
-      usageCount: "uses",
-      lastUsed: "Last used",
-      never: "Never",
-      activating: "Activating...",
-      deactivating: "Deactivating..."
+      deactivate: "Deactivate"
     },
     es: {
-      active: "Activo",
-      inactive: "Inactivo",
+      recommended: "Recomendado",
       activate: "Activar",
-      deactivate: "Desactivar",
-      recommended: "Rec",
-      usageCount: "usos",
-      lastUsed: "Último uso",
-      never: "Nunca",
-      activating: "Activando...",
-      deactivating: "Desactivando..."
+      deactivate: "Desactivar"
     }
   };
 
-  const t = translations[language];
-
-  const formatLastUsed = (lastUsed: string | null) => {
-    if (!lastUsed) return t.never;
-    
-    const date = new Date(lastUsed);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Hace unos minutos';
-    if (diffInHours < 24) return `Hace ${diffInHours}h`;
-    if (diffInHours < 168) return `Hace ${Math.floor(diffInHours / 24)}d`;
-    return date.toLocaleDateString();
-  };
-
   return (
-    <Card className="h-fit">
-      <CardHeader className="pb-2">
+    <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-bold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-gray-800">
             {categoryName}
           </CardTitle>
-          <div className="flex items-center gap-1">
-            <Badge variant="secondary" className="text-xs px-2 py-0">
-              {activeCount}/{totalCount}
-            </Badge>
+          <div className="flex items-center gap-2">
             {recommendedCount > 0 && (
-              <Badge className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0">
-                {recommendedCount} {t.recommended}
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                <Star className="w-3 h-3 mr-1" />
+                {recommendedCount}
               </Badge>
             )}
+            <Badge variant="outline" className="text-gray-600">
+              <Users className="w-3 h-3 mr-1" />
+              {activeCount}/{totalCount}
+            </Badge>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-2 pt-0">
-        {agents.map(agent => {
+      <CardContent className="space-y-3">
+        {agents.map((agent) => {
           const userAgentData = getUserAgentData(agent.id);
           const isEnabled = Boolean(userAgentData?.is_enabled);
-          const isToggling = togglingAgents.has(agent.id);
           const isRecommended = isAgentRecommended(agent.id);
-          
+          const isToggling = togglingAgents.has(agent.id);
+          const translation = getAgentTranslation(agent.id, language);
+
           return (
-            <div 
+            <div
               key={agent.id}
-              className={`p-2 rounded-lg border transition-all duration-200 ${
+              className={`p-4 rounded-lg border transition-all ${
                 isEnabled 
-                  ? 'bg-emerald-50 border-emerald-200' 
+                  ? 'bg-purple-50 border-purple-200' 
                   : 'bg-gray-50 border-gray-200'
               }`}
             >
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-md flex items-center justify-center text-xs">
-                    {agent.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-xs leading-tight">
-                      {agent.name}
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{agent.icon}</span>
+                    <h4 className="font-medium text-gray-800 truncate">
+                      {translation.name}
                     </h4>
                     {isRecommended && (
-                      <Badge className="bg-yellow-100 text-yellow-800 text-xs mt-0.5 px-1 py-0">
-                        {t.recommended}
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                        <Star className="w-3 h-3 mr-1" />
+                        {t[language].recommended}
                       </Badge>
                     )}
                   </div>
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {translation.description}
+                  </p>
                 </div>
                 
-                <Badge className={`text-xs px-1 py-0 ${
-                  isEnabled 
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {isEnabled ? t.active : t.inactive}
-                </Badge>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                <span>{userAgentData?.usage_count || 0} {t.usageCount}</span>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span className="truncate max-w-16">{formatLastUsed(userAgentData?.last_used_at)}</span>
+                <div className="flex items-center gap-2 ml-3">
+                  {isEnabled ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Circle className="w-4 h-4 text-gray-400" />
+                  )}
+                  
+                  {isToggling ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                  ) : (
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={(checked) => onToggleAgent(agent.id, checked)}
+                      className="data-[state=checked]:bg-purple-600"
+                    />
+                  )}
                 </div>
               </div>
-
-              <Button
-                onClick={() => onToggleAgent(agent.id, isEnabled)}
-                disabled={isToggling}
-                size="sm"
-                className={`w-full text-xs h-7 ${
-                  isEnabled
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                }`}
-              >
-                {isToggling ? (
-                  <>
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    {isEnabled ? t.deactivating : t.activating}
-                  </>
-                ) : (
-                  <>
-                    {isEnabled ? (
-                      <>
-                        <Pause className="w-3 h-3 mr-1" />
-                        {t.deactivate}
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-3 h-3 mr-1" />
-                        {t.activate}
-                      </>
-                    )}
-                  </>
-                )}
-              </Button>
             </div>
           );
         })}

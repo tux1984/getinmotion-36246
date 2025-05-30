@@ -25,7 +25,8 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
     conversations,
     currentConversationId,
     selectConversation,
-    startNewConversation
+    startNewConversation,
+    loading
   } = useAgentConversations(agentId);
 
   const t = {
@@ -57,14 +58,19 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
 
   const handleSelectConversation = async (conversationId: string) => {
     console.log('Conversation selected:', conversationId);
-    await selectConversation(conversationId);
+    try {
+      await selectConversation(conversationId);
+      console.log('Conversation selection completed');
+    } catch (error) {
+      console.error('Error selecting conversation:', error);
+    }
   };
 
   if (compact) {
     return (
       <Button 
         onClick={handleNewChat}
-        className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white"
         size="sm"
       >
         <MessageSquare className="w-4 h-4 mr-1" />
@@ -73,10 +79,20 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
     );
   }
 
+  if (loading) {
+    return (
+      <Card className="bg-white border border-gray-200 shadow-sm h-full">
+        <CardContent className="p-4 flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl h-full">
+    <Card className="bg-white border border-gray-200 shadow-sm h-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white text-sm flex items-center gap-2">
+        <CardTitle className="text-gray-800 text-sm flex items-center gap-2">
           <MessageSquare className="w-4 h-4" />
           {t[language].conversations}
         </CardTitle>
@@ -93,19 +109,19 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
       <CardContent className="p-4 pt-0 h-[calc(100%-120px)]">
         <div className="mb-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-300" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t[language].search}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-purple-300"
+              className="pl-10 bg-gray-50 border-gray-200 text-gray-800 placeholder:text-gray-400"
             />
           </div>
         </div>
 
         <ScrollArea className="h-full">
           {filteredConversations.length === 0 ? (
-            <div className="text-center py-8 text-purple-200">
+            <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">{t[language].noConversations}</p>
               <p className="text-xs opacity-75">{t[language].startFirst}</p>
@@ -116,16 +132,16 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
                 <div
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv.id)}
-                  className={`p-3 rounded-xl cursor-pointer transition-all hover:bg-white/10 ${
+                  className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${
                     currentConversationId === conv.id 
-                      ? 'bg-purple-600/30 border border-purple-400/50' 
-                      : 'bg-white/5 hover:bg-white/10'
+                      ? 'bg-purple-50 border border-purple-200' 
+                      : 'bg-white hover:bg-gray-50 border border-gray-100'
                   }`}
                 >
-                  <p className="text-white text-sm font-medium truncate">
+                  <p className="text-gray-800 text-sm font-medium truncate">
                     {conv.title || 'Nueva conversación'}
                   </p>
-                  <div className="flex items-center text-xs text-purple-300 mt-1">
+                  <div className="flex items-center text-xs text-gray-500 mt-1">
                     <Clock className="w-3 h-3 mr-1" />
                     {formatDistanceToNow(new Date(conv.updated_at), { 
                       addSuffix: true, 
