@@ -8,7 +8,7 @@ import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { AgentCategoryCard } from './AgentCategoryCard';
 import { CompactFiltersPanel } from '../agent-manager/CompactFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
-import { TrueMasonryGrid } from '../agent-manager/TrueMasonryGrid';
+import { SimpleMasonryGrid } from '../agent-manager/SimpleMasonryGrid';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 
@@ -100,8 +100,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Stats Header - sticky dentro del área de agentes */}
+    <div className="space-y-6">
+      {/* Stats Header - normal positioning */}
       <ModernStatsHeader
         title={t.title}
         subtitle={t.subtitle}
@@ -121,9 +121,9 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
-      {/* Masonry Grid Layout */}
+      {/* Simple Grid Layout */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <TrueMasonryGrid columnWidth={350} gap={20}>
+        <SimpleMasonryGrid>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -151,7 +151,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
               />
             );
           })}
-        </TrueMasonryGrid>
+        </SimpleMasonryGrid>
       ) : (
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">

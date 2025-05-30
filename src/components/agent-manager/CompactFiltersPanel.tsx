@@ -69,7 +69,7 @@ export const CompactFiltersPanel: React.FC<CompactFiltersPanelProps> = ({
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-4 mb-4 mt-20">
+    <div className="bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-4 mb-4">
       {/* Status Filters */}
       <div className="flex justify-center gap-2 mb-4">
         {statusOptions.map((option) => (

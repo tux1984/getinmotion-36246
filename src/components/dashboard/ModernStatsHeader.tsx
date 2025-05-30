@@ -35,7 +35,7 @@ export const ModernStatsHeader: React.FC<ModernStatsHeaderProps> = ({
   const t = translations[language];
 
   return (
-    <div className="sticky top-0 z-40 mb-4">
+    <div className="mb-6">
       <div className="bg-purple-600/20 backdrop-blur-xl rounded-xl border border-purple-300/30 p-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex-1">

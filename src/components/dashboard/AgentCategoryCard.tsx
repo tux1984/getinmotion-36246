@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CulturalAgent } from '@/data/agentsDatabase';
@@ -87,7 +86,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
   const translatedCategoryName = categoryTranslations[language][categoryName as keyof typeof categoryTranslations[typeof language]] || categoryName;
 
   return (
-    <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/15">
+    <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/15 h-fit">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between mb-2">
           <CardTitle className="text-xl font-bold text-white">
@@ -125,8 +124,8 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                   : 'bg-white/5 border-white/20 hover:bg-white/10'
               }`}
             >
-              <div className="space-y-4">
-                {/* Header row with icon and title */}
+              <div className="space-y-3">
+                {/* Header with icon and title */}
                 <div className="flex items-start gap-3">
                   <span className="text-2xl flex-shrink-0">{agent.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -136,7 +135,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                   </div>
                 </div>
 
-                {/* Recommended badge - separate row */}
+                {/* Recommended badge */}
                 {isRecommended && (
                   <div>
                     <Badge className="bg-yellow-400/20 text-yellow-300 border-yellow-400/30 text-xs">
@@ -151,7 +150,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
                   {translation.description}
                 </p>
 
-                {/* Controls Row - separate from everything else */}
+                {/* Controls */}
                 <div className="flex items-center justify-between pt-2 border-t border-white/10">
                   <div className="flex items-center gap-2">
                     {isEnabled ? (
