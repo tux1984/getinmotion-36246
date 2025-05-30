@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Agent } from '@/types/dashboard';
 import { MoreHorizontal, Play, Pause, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getAgentTranslation } from '@/data/agentTranslations';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,8 @@ export const AgentCard: React.FC<AgentCardProps> = ({
   onActionClick,
   language 
 }) => {
+  const agentTranslation = getAgentTranslation(agent.id, language);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -59,7 +62,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-medium text-sm sm:text-base text-gray-900 truncate">
-            {agent.name}
+            {agentTranslation.name}
           </h3>
           <Badge className={`text-xs ${getStatusColor(agent.status)}`}>
             {getStatusText(agent.status)}

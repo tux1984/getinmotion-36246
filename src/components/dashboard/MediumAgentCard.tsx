@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Play, Clock } from 'lucide-react';
+import { getAgentTranslation } from '@/data/agentTranslations';
 
 interface MediumAgentCardProps {
   agent: {
@@ -50,6 +51,7 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
   };
 
   const t = translations[language];
+  const agentTranslation = getAgentTranslation(agent.id, language);
 
   const formatLastUsed = (lastUsed: string | null) => {
     if (!lastUsed) return t.never;
@@ -83,7 +85,7 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
           </div>
           <div>
             <h4 className="font-semibold text-white text-base group-hover:text-purple-200 transition-colors">
-              {agent.name}
+              {agentTranslation.name}
             </h4>
             <p className="text-purple-200 text-sm">{agent.category}</p>
           </div>

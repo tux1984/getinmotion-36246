@@ -116,8 +116,6 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           const isToggling = togglingAgents.has(agent.id);
           const translation = getAgentTranslation(agent.id, language);
 
-          console.log(`Agent ${agent.id} translation for ${language}:`, translation);
-
           return (
             <div
               key={agent.id}
