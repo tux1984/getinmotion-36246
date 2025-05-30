@@ -25,7 +25,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl border-b border-white/20 p-4">
+    <div className="p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <MotionLogo variant="light" size="sm" />

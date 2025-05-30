@@ -78,7 +78,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+    <div className="flex flex-col h-full">
       <ChatHeader 
         agentId={agentId}
         language={language}

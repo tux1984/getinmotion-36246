@@ -49,7 +49,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      <div className="p-6 h-screen">
+      <div className="h-screen">
         {/* Desktop Bento Grid */}
         <div className="grid grid-cols-12 grid-rows-6 gap-4 h-full max-w-7xl mx-auto">
           {/* Main Chat Area - Takes center stage */}
