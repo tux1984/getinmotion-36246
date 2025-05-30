@@ -7,6 +7,8 @@ interface DashboardSummaryProps {
 }
 
 export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ language }) => {
+  console.log('DashboardSummary rendering with new vertical layout');
+  
   const t = {
     en: {
       activeAgents: "Active Agents",
@@ -42,17 +44,17 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ language }) 
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 xs:grid-cols-2 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-8 xs:grid-cols-2 md:grid-cols-3">
       {stats.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
           <div 
-            key={index} 
-            className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-3"
+            key={`stat-${index}-${stat.value}`}
+            className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center justify-center text-center space-y-4"
           >
-            <IconComponent className={`w-8 h-8 ${stat.color}`} />
-            <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
-            <p className={`text-sm font-medium ${stat.color}`}>{stat.title}</p>
+            <IconComponent className={`w-12 h-12 ${stat.color}`} />
+            <div className="text-4xl font-bold text-gray-900">{stat.value}</div>
+            <p className={`text-base font-semibold ${stat.color}`}>{stat.title}</p>
           </div>
         );
       })}
