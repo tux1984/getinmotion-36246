@@ -5,17 +5,20 @@ import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 interface FloatingChatAreaProps {
   agentId: string;
   language: 'en' | 'es';
+  onBack?: () => void;
 }
 
 export const FloatingChatArea: React.FC<FloatingChatAreaProps> = ({
   agentId,
-  language
+  language,
+  onBack
 }) => {
   return (
-    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl h-full overflow-hidden">
+    <div className="h-full overflow-hidden">
       <ModernFloatingAgentChat 
         agentId={agentId}
         language={language}
+        onBack={onBack}
       />
     </div>
   );

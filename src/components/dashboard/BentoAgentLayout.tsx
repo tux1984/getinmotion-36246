@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { FloatingAgentHeader } from './FloatingAgentHeader';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { FloatingChatArea } from './FloatingChatArea';
@@ -23,15 +22,14 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   if (isMobile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-        <FloatingAgentHeader onBack={onBack} language={language} />
-        
-        <div className="pt-20 h-[calc(100vh-80px)]">
+        <div className="h-screen">
           {/* Mobile: Stack layout with tabs */}
           <div className="flex flex-col h-full">
-            <div className="flex-1 p-4">
+            <div className="flex-1">
               <FloatingChatArea 
                 agentId={selectedAgent}
                 language={language}
+                onBack={onBack}
               />
             </div>
             
@@ -51,9 +49,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      <FloatingAgentHeader onBack={onBack} language={language} />
-      
-      <div className="pt-20 p-6 h-[calc(100vh-80px)]">
+      <div className="p-6 h-screen">
         {/* Desktop Bento Grid */}
         <div className="grid grid-cols-12 grid-rows-6 gap-4 h-full max-w-7xl mx-auto">
           {/* Main Chat Area - Takes center stage */}
@@ -61,6 +57,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             <FloatingChatArea 
               agentId={selectedAgent}
               language={language}
+              onBack={onBack}
             />
           </div>
           
