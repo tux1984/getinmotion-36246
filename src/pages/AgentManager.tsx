@@ -4,12 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserData } from '@/hooks/useUserData';
 import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { DashboardLoadingState } from '@/components/dashboard/DashboardLoadingState';
 import { DashboardErrorState } from '@/components/dashboard/DashboardErrorState';
 import { ModernAgentManager } from '@/components/dashboard/ModernAgentManager';
+import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 
 const AgentManager = () => {
   const { language } = useLanguage();
@@ -22,7 +21,12 @@ const AgentManager = () => {
     error
   } = useOptimizedAgentManagement();
 
-  const handleBackToDashboard = () => {
+  const handleMaturityCalculatorClick = () => {
+    navigate('/dashboard/maturity-calculator');
+  };
+
+  const handleAgentManagerClick = () => {
+    // Ya estamos en el agent manager, no hacer nada o volver al dashboard
     navigate('/dashboard/home');
   };
 
@@ -47,7 +51,11 @@ const AgentManager = () => {
   if (isLoading) {
     return (
       <DashboardBackground>
-        <div className="pt-6">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleMaturityCalculatorClick}
+          onAgentManagerClick={handleAgentManagerClick}
+        />
+        <div className="pt-24">
           <DashboardLoadingState />
         </div>
       </DashboardBackground>
@@ -57,7 +65,11 @@ const AgentManager = () => {
   if (error) {
     return (
       <DashboardBackground>
-        <div className="pt-6">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleMaturityCalculatorClick}
+          onAgentManagerClick={handleAgentManagerClick}
+        />
+        <div className="pt-24">
           <DashboardErrorState error={error} />
         </div>
       </DashboardBackground>
@@ -66,19 +78,11 @@ const AgentManager = () => {
 
   return (
     <DashboardBackground>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleBackToDashboard}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50/50 backdrop-blur-sm border border-purple-200/50"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {language === 'en' ? 'Back to Dashboard' : 'Volver al Dashboard'}
-          </Button>
-        </div>
-        
+      <NewDashboardHeader 
+        onMaturityCalculatorClick={handleMaturityCalculatorClick}
+        onAgentManagerClick={handleAgentManagerClick}
+      />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24">
         <ModernAgentManager 
           currentAgents={agents}
           onAgentToggle={handleAgentToggle}
