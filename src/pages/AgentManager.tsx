@@ -54,7 +54,7 @@ const AgentManager = () => {
           onMaturityCalculatorClick={handleMaturityCalculatorClick}
           onAgentManagerClick={handleBackToDashboard}
         />
-        <div className="pt-20">
+        <div className="pt-32">
           <DashboardLoadingState />
         </div>
       </DashboardBackground>
@@ -68,7 +68,7 @@ const AgentManager = () => {
           onMaturityCalculatorClick={handleMaturityCalculatorClick}
           onAgentManagerClick={handleBackToDashboard}
         />
-        <div className="pt-20">
+        <div className="pt-32">
           <DashboardErrorState error={error} />
         </div>
       </DashboardBackground>
@@ -82,7 +82,7 @@ const AgentManager = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-32">
         <ModernAgentManager 
           currentAgents={agents}
           onAgentToggle={handleAgentToggle}
