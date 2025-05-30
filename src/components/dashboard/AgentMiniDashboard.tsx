@@ -30,7 +30,9 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
       completed: "Completed", 
       chats: "Chats",
       deliverables: "Deliverables",
-      today: "Today"
+      today: "Today",
+      recentActivity: "Recent Activity",
+      noRecentActivity: "No recent activity"
     },
     es: {
       overview: "Resumen",
@@ -38,7 +40,9 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
       completed: "Completadas",
       chats: "Chats", 
       deliverables: "Entregables",
-      today: "Hoy"
+      today: "Hoy",
+      recentActivity: "Actividad Reciente",
+      noRecentActivity: "No hay actividad reciente"
     }
   };
 
@@ -132,6 +136,38 @@ export const AgentMiniDashboard: React.FC<AgentMiniDashboardProps> = ({
           <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
             <MessageSquare className="w-6 h-6 text-white" />
           </div>
+        </div>
+      </div>
+
+      {/* Recent Activity Section */}
+      <div className="bg-white/5 backdrop-blur-xl p-4 rounded-xl border border-white/10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+            <MessageSquare className="w-3 h-3 text-white" />
+          </div>
+          <h4 className="text-sm font-medium text-white">{t[language].recentActivity}</h4>
+        </div>
+        
+        <div className="space-y-2">
+          {stats.recentActivity.length > 0 ? (
+            stats.recentActivity.slice(0, 3).map((activity, index) => (
+              <div key={activity.id} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg">
+                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate text-white">
+                    {activity.title}
+                  </p>
+                  <p className="text-xs text-purple-300">
+                    {new Date(activity.timestamp).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-white/60 text-center py-2">
+              {t[language].noRecentActivity}
+            </p>
+          )}
         </div>
       </div>
     </div>

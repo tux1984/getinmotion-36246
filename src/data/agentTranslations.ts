@@ -167,8 +167,15 @@ export const agentTranslations = {
 };
 
 export const getAgentTranslation = (agentId: string, language: 'en' | 'es') => {
-  return agentTranslations[language][agentId] || {
-    name: agentId,
-    description: 'Agent description not available'
-  };
+  const translation = agentTranslations[language]?.[agentId];
+  
+  if (!translation) {
+    console.warn(`Translation not found for agent ${agentId} in language ${language}`);
+    return {
+      name: agentId,
+      description: 'Agent description not available'
+    };
+  }
+  
+  return translation;
 };

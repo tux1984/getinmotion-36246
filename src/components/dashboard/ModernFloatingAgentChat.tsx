@@ -34,7 +34,8 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
 
-  // Determine if we're in a new chat state
+  // Fixed logic: we're in new chat state when there's no conversation AND no messages
+  // OR when we explicitly have no conversation selected
   const isNewChat = !currentConversationId && messages.length === 0;
 
   // Log state for debugging
