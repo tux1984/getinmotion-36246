@@ -5,7 +5,6 @@ import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { useUserData } from '@/hooks/useUserData';
 import { useAgentFilters } from '@/hooks/useAgentFilters';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
-import { useAgentStats } from '@/hooks/useAgentStats';
 import { AgentCategoryCard } from './AgentCategoryCard';
 import { CompactFiltersPanel } from '../agent-manager/CompactFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
@@ -58,6 +57,21 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return userAgents.find(ua => ua.agent_id === agentId);
   };
 
+  // Calculate stats based on user agents and cultural agents database
+  const stats = useMemo(() => {
+    const totalAgents = culturalAgentsDatabase.length;
+    const activeAgents = userAgents.filter(ua => ua.is_enabled).length;
+    const recommendedAgents = culturalAgentsDatabase.filter(agent => 
+      isAgentRecommended(agent.id)
+    ).length;
+
+    return {
+      totalAgents,
+      activeAgents,
+      recommendedAgents
+    };
+  }, [userAgents]);
+
   // Use our new hooks with simplified filters (no search, no categories)
   const {
     filters,
@@ -67,8 +81,6 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     filteredAndGroupedAgents,
     hasActiveFilters
   } = useAgentFilters(culturalAgentsDatabase, getUserAgentData);
-
-  const stats = useAgentStats(culturalAgentsDatabase, userAgents);
 
   const handleUpdateFilter = (key: string, value: string) => {
     if (key === 'status') {
