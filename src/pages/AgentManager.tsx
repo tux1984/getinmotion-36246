@@ -8,7 +8,8 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
 import { DashboardLoadingState } from '@/components/dashboard/DashboardLoadingState';
 import { DashboardErrorState } from '@/components/dashboard/DashboardErrorState';
 import { ModernAgentManager } from '@/components/dashboard/ModernAgentManager';
-import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const AgentManager = () => {
   const { language } = useLanguage();
@@ -25,8 +26,7 @@ const AgentManager = () => {
     navigate('/dashboard/maturity-calculator');
   };
 
-  const handleAgentManagerClick = () => {
-    // Ya estamos en el agent manager, no hacer nada o volver al dashboard
+  const handleBackToDashboard = () => {
     navigate('/dashboard/home');
   };
 
@@ -48,14 +48,15 @@ const AgentManager = () => {
     }
   };
 
+  const translations = {
+    en: { backToDashboard: "Back to Dashboard" },
+    es: { backToDashboard: "Volver al Dashboard" }
+  };
+
   if (isLoading) {
     return (
       <DashboardBackground>
-        <NewDashboardHeader 
-          onMaturityCalculatorClick={handleMaturityCalculatorClick}
-          onAgentManagerClick={handleAgentManagerClick}
-        />
-        <div className="pt-24">
+        <div className="pt-6">
           <DashboardLoadingState />
         </div>
       </DashboardBackground>
@@ -65,11 +66,7 @@ const AgentManager = () => {
   if (error) {
     return (
       <DashboardBackground>
-        <NewDashboardHeader 
-          onMaturityCalculatorClick={handleMaturityCalculatorClick}
-          onAgentManagerClick={handleAgentManagerClick}
-        />
-        <div className="pt-24">
+        <div className="pt-6">
           <DashboardErrorState error={error} />
         </div>
       </DashboardBackground>
@@ -78,11 +75,20 @@ const AgentManager = () => {
 
   return (
     <DashboardBackground>
-      <NewDashboardHeader 
-        onMaturityCalculatorClick={handleMaturityCalculatorClick}
-        onAgentManagerClick={handleAgentManagerClick}
-      />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24">
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleBackToDashboard}
+          className="group flex items-center gap-2 bg-white/95 backdrop-blur-xl border-white/20 text-gray-700 hover:bg-white hover:border-gray-300 hover:text-gray-900 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl font-medium"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+          {translations[language].backToDashboard}
+        </Button>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-20">
         <ModernAgentManager 
           currentAgents={agents}
           onAgentToggle={handleAgentToggle}

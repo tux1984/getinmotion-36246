@@ -8,7 +8,7 @@ import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { AgentCategoryCard } from './AgentCategoryCard';
 import { CompactFiltersPanel } from '../agent-manager/CompactFiltersPanel';
 import { ModernStatsHeader } from './ModernStatsHeader';
-import { ModernAgentsGrid } from '../agent-manager/ModernAgentsGrid';
+import { TrueMasonryGrid } from '../agent-manager/TrueMasonryGrid';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 
@@ -52,7 +52,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     return [...new Set(culturalAgentsDatabase.map(agent => agent.category))];
   }, []);
 
-  // Get user agent data for each agent - simplified version
+  // Get user agent data for each agent
   const getUserAgentData = (agentId: string) => {
     return userAgents.find(ua => ua.agent_id === agentId);
   };
@@ -72,7 +72,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     };
   }, [userAgents]);
 
-  // Use our new hooks with simplified filters (no search, no categories)
+  // Use our filters with categories
   const {
     filters,
     updateFilter,
@@ -101,7 +101,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 
   return (
     <div className="space-y-4 p-2 sm:p-4">
-      {/* Compact Header */}
+      {/* Fixed Compact Header */}
       <ModernStatsHeader
         title={t.title}
         subtitle={t.subtitle}
@@ -111,16 +111,19 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         language={language}
       />
 
-      {/* Compact Filters - Only Status */}
+      {/* Enhanced Filters with Categories */}
       <CompactFiltersPanel
         selectedStatus={filters.selectedStatus}
+        selectedCategories={filters.selectedCategories}
+        categories={categories}
         onUpdateFilter={handleUpdateFilter}
+        onToggleCategory={toggleCategory}
         language={language}
       />
 
-      {/* Compact CSS Grid Layout */}
+      {/* Masonry Grid Layout */}
       {Object.keys(filteredAndGroupedAgents).length > 0 ? (
-        <ModernAgentsGrid>
+        <TrueMasonryGrid columnWidth={350} gap={20}>
           {Object.entries(filteredAndGroupedAgents).map(([category, agents]) => {
             const categoryActiveCount = agents.filter(agent => {
               const userAgentData = getUserAgentData(agent.id);
@@ -148,17 +151,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
               />
             );
           })}
-        </ModernAgentsGrid>
+        </TrueMasonryGrid>
       ) : (
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <span className="text-xl">🔍</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">{t.noAgentsFound}</h3>
-          <p className="text-gray-600 mb-3">{t.tryAdjusting}</p>
+          <h3 className="text-lg font-semibold text-white mb-2">{t.noAgentsFound}</h3>
+          <p className="text-purple-200 mb-3">{t.tryAdjusting}</p>
           <button
             onClick={clearFilters}
-            className="text-purple-600 hover:text-purple-800 font-medium text-sm"
+            className="text-purple-300 hover:text-white font-medium text-sm"
           >
             {t.clearAllFilters}
           </button>

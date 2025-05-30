@@ -54,7 +54,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
     }
   };
 
-  // Enhanced category translations - properly mapping all categories
+  // Enhanced category translations
   const categoryTranslations = {
     en: {
       'Financiera': 'Financial',
@@ -87,20 +87,20 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
   const translatedCategoryName = categoryTranslations[language][categoryName as keyof typeof categoryTranslations[typeof language]] || categoryName;
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-800">
+    <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/15">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between mb-2">
+          <CardTitle className="text-xl font-bold text-white">
             {translatedCategoryName}
           </CardTitle>
           <div className="flex items-center gap-2">
             {recommendedCount > 0 && (
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+              <Badge className="bg-yellow-400/20 text-yellow-300 border-yellow-400/30">
                 <Star className="w-3 h-3 mr-1" />
                 {recommendedCount}
               </Badge>
             )}
-            <Badge variant="outline" className="text-gray-600">
+            <Badge className="bg-purple-500/20 text-purple-300 border-purple-400/30">
               <Users className="w-3 h-3 mr-1" />
               {activeCount}/{totalCount}
             </Badge>
@@ -108,7 +108,7 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {agents.map((agent) => {
           const userAgentData = getUserAgentData(agent.id);
           const isEnabled = Boolean(userAgentData?.is_enabled);
@@ -119,47 +119,58 @@ export const AgentCategoryCard: React.FC<AgentCategoryCardProps> = ({
           return (
             <div
               key={agent.id}
-              className={`p-4 rounded-lg border transition-all ${
+              className={`p-4 rounded-xl border transition-all duration-300 ${
                 isEnabled 
-                  ? 'bg-purple-50 border-purple-200' 
-                  : 'bg-gray-50 border-gray-200'
+                  ? 'bg-purple-500/20 border-purple-400/40 shadow-lg' 
+                  : 'bg-white/5 border-white/20 hover:bg-white/10'
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{agent.icon}</span>
-                    <h4 className="font-medium text-gray-800 truncate">
+              <div className="space-y-3">
+                {/* Title Row - separate from controls */}
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl flex-shrink-0">{agent.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-white text-lg leading-tight mb-2">
                       {translation.name}
                     </h4>
                     {isRecommended && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                      <Badge className="bg-yellow-400/20 text-yellow-300 border-yellow-400/30 text-xs mb-2">
                         <Star className="w-3 h-3 mr-1" />
                         {t[language].recommended}
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {translation.description}
-                  </p>
                 </div>
-                
-                <div className="flex items-center gap-2 ml-3">
-                  {isEnabled ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Circle className="w-4 h-4 text-gray-400" />
-                  )}
+
+                {/* Description */}
+                <p className="text-purple-200 text-sm leading-relaxed line-clamp-3">
+                  {translation.description}
+                </p>
+
+                {/* Controls Row - separate from title */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2">
+                    {isEnabled ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-gray-400" />
+                    )}
+                    <span className="text-sm text-purple-200">
+                      {isEnabled ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
                   
-                  {isToggling ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
-                  ) : (
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={(checked) => onToggleAgent(agent.id, checked)}
-                      className="data-[state=checked]:bg-purple-600"
-                    />
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isToggling ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                    ) : (
+                      <Switch
+                        checked={isEnabled}
+                        onCheckedChange={(checked) => onToggleAgent(agent.id, checked)}
+                        className="data-[state=checked]:bg-purple-600"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
