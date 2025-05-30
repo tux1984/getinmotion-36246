@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,20 +24,14 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Initialize hook state properly to avoid React errors
-  const [hookData, setHookData] = useState<{
-    conversations: any[];
-    currentConversationId: string | null;
-    selectConversation: (id: string) => Promise<void>;
-    startNewConversation: () => void;
-    loading: boolean;
-  } | null>(null);
-
-  // Safely initialize the hook
-  useEffect(() => {
-    const data = useAgentConversations(agentId);
-    setHookData(data);
-  }, [agentId]);
+  // Call the hook directly at the top level - this is the correct way
+  const {
+    conversations,
+    currentConversationId,
+    selectConversation,
+    startNewConversation,
+    loading
+  } = useAgentConversations(agentId);
 
   const t = {
     en: {
@@ -55,19 +49,6 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
       startFirst: "¡Inicia tu primer chat!"
     }
   };
-
-  // Return early loading state if hook data not ready
-  if (!hookData) {
-    return (
-      <Card className="bg-white/5 backdrop-blur-xl border border-white/10 h-full">
-        <CardContent className="p-4 flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const { conversations, currentConversationId, selectConversation, startNewConversation, loading } = hookData;
 
   const filteredConversations = conversations.filter(conv =>
     conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
