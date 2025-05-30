@@ -22,7 +22,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
         <div className="flex flex-col h-screen">
           {/* Header blanco fuera del contenedor púrpura */}
           <FloatingAgentInfoModule 
@@ -31,8 +31,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             onBack={onBack}
           />
           
-          {/* Contenedor púrpura redondeado simplificado */}
-          <div className="flex-1 mx-4 mb-4 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+          {/* Contenedor transparente con efecto de cristal sutil */}
+          <div className="flex-1 mx-4 mb-4 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             <ModernFloatingAgentChat 
               agentId={selectedAgent} 
               language={language} 
@@ -40,7 +40,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           </div>
           
           {/* Mobile bottom tabs */}
-          <div className="bg-black/20 backdrop-blur-xl border-t border-white/10 p-2 mx-4 mb-4 rounded-2xl">
+          <div className="bg-white/5 backdrop-blur-md border-t border-white/10 p-2 mx-4 mb-4 rounded-2xl">
             <div className="flex justify-between items-center gap-2">
               <div className="flex-1">
                 <AgentMiniDashboard 
@@ -71,7 +71,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
       <div className="h-screen p-4 lg:p-6">
         {/* Header blanco completamente fuera */}
         <FloatingAgentInfoModule 
@@ -80,8 +80,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           onBack={onBack}
         />
         
-        {/* Contenedor púrpura redondeado con grid limpio */}
-        <div className="bg-black/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl h-[calc(100%-120px)] max-w-7xl mx-auto mt-4 overflow-hidden">
+        {/* Contenedor transparente con efecto de cristal muy sutil */}
+        <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-[calc(100%-120px)] max-w-7xl mx-auto mt-4 overflow-hidden">
           <div className="grid grid-cols-12 grid-rows-6 gap-3 lg:gap-4 h-full p-4 lg:p-6">
             {/* Chat principal - sin contenedores extra */}
             <div className="col-span-12 lg:col-span-7 row-span-6 lg:row-span-6">
@@ -117,7 +117,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
             
             {/* Additional Tools */}
             <div className="hidden lg:block lg:col-span-2 lg:row-span-2">
-              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl h-full p-4">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full p-4">
                 <h3 className="text-white font-semibold mb-3">
                   {language === 'en' ? 'More Tools' : 'Más Herramientas'}
                 </h3>
