@@ -20,7 +20,6 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   onBack
 }) => {
   const [inputMessage, setInputMessage] = useState('');
-  const [chatStarted, setChatStarted] = useState(false);
   const { toast } = useToast();
   
   const {
@@ -34,11 +33,8 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setChatStarted(true);
-    }
-  }, [messages]);
+  // Determine if we're in a new chat state
+  const isNewChat = !currentConversationId && messages.length === 0;
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +43,6 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
     const messageContent = inputMessage.trim();
     setInputMessage('');
     setIsProcessing(true);
-    setChatStarted(true);
 
     try {
       let conversationId = currentConversationId;
@@ -78,15 +73,15 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header simplificado - ya no muestra información del agente */}
+    <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+      {/* Header simplificado */}
       <ChatHeader 
         agentId={agentId}
         language={language}
         onBack={onBack}
       />
 
-      {!chatStarted && messages.length === 0 ? (
+      {isNewChat ? (
         <ChatWelcomeScreen
           language={language}
           inputMessage={inputMessage}

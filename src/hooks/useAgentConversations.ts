@@ -45,6 +45,7 @@ export function useAgentConversations(agentId: string) {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched conversations:', data);
       setConversations(data || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -58,6 +59,9 @@ export function useAgentConversations(agentId: string) {
 
   // Fetch messages for current conversation
   const fetchMessages = async (conversationId: string) => {
+    if (!conversationId) return;
+    
+    console.log('Fetching messages for conversation:', conversationId);
     try {
       const { data, error } = await supabase
         .from('agent_messages')
@@ -66,6 +70,8 @@ export function useAgentConversations(agentId: string) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+      
+      console.log('Fetched messages:', data);
       
       // Type cast the data to ensure it matches our interface
       const typedMessages: AgentMessage[] = (data || []).map(msg => ({
@@ -101,6 +107,7 @@ export function useAgentConversations(agentId: string) {
 
       if (convError) throw convError;
 
+      console.log('Created new conversation:', conversation);
       setCurrentConversationId(conversation.id);
       await fetchConversations();
       
@@ -131,6 +138,8 @@ export function useAgentConversations(agentId: string) {
 
       if (error) throw error;
       
+      console.log('Added message:', data);
+      
       // Type cast the returned data
       const typedMessage: AgentMessage = {
         ...data,
@@ -145,6 +154,9 @@ export function useAgentConversations(agentId: string) {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      // Refresh conversations to update order
+      await fetchConversations();
+
       return typedMessage;
     } catch (error) {
       console.error('Error adding message:', error);
@@ -152,14 +164,16 @@ export function useAgentConversations(agentId: string) {
     }
   };
 
-  // Select conversation
+  // Select conversation and load its messages
   const selectConversation = async (conversationId: string) => {
+    console.log('Selecting conversation:', conversationId);
     setCurrentConversationId(conversationId);
     await fetchMessages(conversationId);
   };
 
-  // Start new conversation
+  // Start new conversation - clear everything
   const startNewConversation = () => {
+    console.log('Starting new conversation');
     setCurrentConversationId(null);
     setMessages([]);
   };

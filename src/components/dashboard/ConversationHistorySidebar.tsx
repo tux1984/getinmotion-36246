@@ -50,10 +50,20 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
     !searchQuery
   );
 
+  const handleNewChat = () => {
+    console.log('New chat button clicked');
+    startNewConversation();
+  };
+
+  const handleSelectConversation = async (conversationId: string) => {
+    console.log('Conversation selected:', conversationId);
+    await selectConversation(conversationId);
+  };
+
   if (compact) {
     return (
       <Button 
-        onClick={startNewConversation}
+        onClick={handleNewChat}
         className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
         size="sm"
       >
@@ -71,7 +81,7 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
           {t[language].conversations}
         </CardTitle>
         <Button 
-          onClick={startNewConversation}
+          onClick={handleNewChat}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
           size="sm"
         >
@@ -105,7 +115,7 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
               {filteredConversations.map((conv) => (
                 <div
                   key={conv.id}
-                  onClick={() => selectConversation(conv.id)}
+                  onClick={() => handleSelectConversation(conv.id)}
                   className={`p-3 rounded-xl cursor-pointer transition-all hover:bg-white/10 ${
                     currentConversationId === conv.id 
                       ? 'bg-purple-600/30 border border-purple-400/50' 
