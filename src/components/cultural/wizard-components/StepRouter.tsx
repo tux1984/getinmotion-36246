@@ -15,6 +15,7 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { getQuestions } from '../wizard-questions/index';
 import { getStepImage } from './CharacterImageSelector';
+import { OptimizedCharacterImage } from '../components/OptimizedCharacterImage';
 
 interface StepRouterProps {
   currentStepId: WizardStepId;
@@ -52,10 +53,30 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   // Get question configuration based on current step
   const questions = getQuestions(language);
   const questionConfig = questions[currentStepId];
+  const characterImage = getStepImage(currentStepId, calculateMaturityScores);
+
+  // Common layout with character image for most steps
+  const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
+    <div className="flex gap-8 items-start max-w-6xl mx-auto">
+      {/* Character Image */}
+      <div className="w-1/3 flex-shrink-0 hidden md:block">
+        <OptimizedCharacterImage
+          src={characterImage}
+          alt="Character guide"
+          className="w-full h-auto max-w-sm mx-auto"
+        />
+      </div>
+      
+      {/* Step Content */}
+      <div className="flex-1 min-w-0">
+        {stepComponent}
+      </div>
+    </div>
+  );
 
   // Render content based on the current step
   if (currentStepId === 'profileType') {
-    return (
+    return renderStepWithCharacter(
       <ProfileTypeStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -69,7 +90,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'culturalProfile') {
-    return (
+    return renderStepWithCharacter(
       <CulturalProfileStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -83,7 +104,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'businessMaturity') {
-    return (
+    return renderStepWithCharacter(
       <BusinessMaturityStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -98,7 +119,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'managementStyle') {
-    return (
+    return renderStepWithCharacter(
       <ManagementStyleStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -113,7 +134,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'bifurcation') {
-    return (
+    return renderStepWithCharacter(
       <BifurcationStep
         profileData={profileData}
         language={language}
@@ -128,7 +149,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'extendedQuestions') {
-    return (
+    return renderStepWithCharacter(
       <ExtendedQuestionsStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -143,7 +164,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   }
   
   if (currentStepId === 'profileQuestions') {
-    return (
+    return renderStepWithCharacter(
       <ProfileQuestionsStep
         profileData={profileData}
         updateProfileData={updateProfileData}
@@ -153,33 +174,33 @@ export const StepRouter: React.FC<StepRouterProps> = ({
         onNext={handleNext}
         onPrevious={handlePrevious}
         isStepValid={isCurrentStepValid()}
-        illustration={getStepImage(currentStepId, calculateMaturityScores)}
+        illustration={characterImage}
       />
     );
   }
 
   if (currentStepId === 'results') {
-    return (
+    return renderStepWithCharacter(
       <ResultsStep 
         profileData={profileData}
         scores={calculateMaturityScores()}
         recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
         language={language}
         onComplete={onComplete}
-        illustration={getStepImage(currentStepId, calculateMaturityScores)}
+        illustration={characterImage}
       />
     );
   }
   
   if (questionConfig) {
-    return (
+    return renderStepWithCharacter(
       <QuestionStep 
         question={questionConfig}
         profileData={profileData}
         updateProfileData={updateProfileData}
         language={language}
         industry={profileData.industry}
-        illustration={getStepImage(currentStepId, calculateMaturityScores)}
+        illustration={characterImage}
         currentStepNumber={currentStepNumber}
         totalSteps={totalSteps}
         onNext={handleNext}
