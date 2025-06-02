@@ -8,18 +8,34 @@ import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { motion } from 'framer-motion';
 import { MotionLogo } from '@/components/MotionLogo';
 
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
+
 const MaturityCalculator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { language } = useLanguage();
   
-  const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
+  const handleComplete = (
+    scores: CategoryScore, 
+    recommendedAgents: RecommendedAgents, 
+    aiRecommendations?: AIRecommendation[]
+  ) => {
     console.log('MaturityCalculator: Assessment completed, saving results');
     
     // Save results to localStorage
     localStorage.setItem('maturityScores', JSON.stringify(scores));
     localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
     localStorage.setItem('onboardingCompleted', 'true');
+    
+    // Save AI recommendations if available
+    if (aiRecommendations) {
+      localStorage.setItem('aiRecommendations', JSON.stringify(aiRecommendations));
+    }
     
     // Clear any saved progress since assessment is completed
     localStorage.removeItem('maturityCalculatorProgress');
@@ -30,8 +46,8 @@ const MaturityCalculator = () => {
     toast({
       title: language === 'en' ? 'Assessment Completed!' : '¡Evaluación Completada!',
       description: language === 'en' 
-        ? "Your personalized dashboard is ready with the recommended tools."
-        : "Tu panel personalizado está listo con las herramientas recomendadas."
+        ? "Your personalized dashboard is ready with the recommended tools and action plan."
+        : "Tu panel personalizado está listo con las herramientas recomendadas y plan de acción."
     });
     
     // Navigate to dashboard - this will now work correctly since onboardingCompleted is true

@@ -6,8 +6,15 @@ import { ProfileType, RecommendedAgents } from '@/types/dashboard';
 import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
 
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
+
 export const CulturalMaturityWizard: React.FC<{
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   
