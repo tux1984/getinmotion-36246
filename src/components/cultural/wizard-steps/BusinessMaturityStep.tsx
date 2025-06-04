@@ -28,14 +28,17 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const questions = getBusinessQuestions(language);
-  const currentQuestion = questions[currentQuestionIndex];
+  const questionsArray = Object.values(questions);
+  const currentQuestion = questionsArray[currentQuestionIndex];
 
   const handleSingleSelect = (value: string) => {
-    updateProfileData({ [currentQuestion.fieldName]: value });
+    if (currentQuestion) {
+      updateProfileData({ [currentQuestion.fieldName]: value });
+    }
   };
 
   const handleNext = () => {
-    const totalQuestions = questions.length;
+    const totalQuestions = questionsArray.length;
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
@@ -52,20 +55,20 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
   };
 
   const isCurrentQuestionValid = () => {
-    return !!profileData[currentQuestion.fieldName as keyof UserProfileData];
+    return currentQuestion ? !!profileData[currentQuestion.fieldName as keyof UserProfileData] : false;
   };
 
   const t = {
     en: {
       step: `Step ${currentStepNumber} of ${totalSteps}`,
-      question: `Question ${currentQuestionIndex + 1} of ${questions.length}`,
+      question: `Question ${currentQuestionIndex + 1} of ${questionsArray.length}`,
       previous: "Previous",
       next: "Next",
       continue: "Continue"
     },
     es: {
       step: `Paso ${currentStepNumber} de ${totalSteps}`,
-      question: `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`,
+      question: `Pregunta ${currentQuestionIndex + 1} de ${questionsArray.length}`,
       previous: "Anterior",
       next: "Siguiente",
       continue: "Continuar"
@@ -76,7 +79,7 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
     return <div>Loading...</div>;
   }
 
-  const totalQuestions = questions.length;
+  const totalQuestions = questionsArray.length;
 
   return (
     <div className="w-full space-y-8">
