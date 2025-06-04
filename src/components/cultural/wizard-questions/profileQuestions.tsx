@@ -1,54 +1,82 @@
 
 import React from 'react';
-import { Music, Palette, Scissors, Theater, Calendar, User, Clock } from 'lucide-react';
+import { Music, Palette, Drama, BookOpen, Video, Smartphone } from 'lucide-react';
 import { QuestionConfig } from '../wizard-components/QuestionStep';
 import { questionTranslations } from './translations';
 
 export const getProfileQuestions = (language: 'en' | 'es'): Record<string, QuestionConfig> => {
-  return {
+  console.log('getProfileQuestions called with language:', language);
+  
+  const questions = {
     industry: {
       id: 'industry',
-      type: 'icon-select',
+      type: 'radio' as const,
       title: questionTranslations.industry[language].title,
       subtitle: questionTranslations.industry[language].subtitle,
       fieldName: 'industry',
       options: [
-        { id: 'music', label: language === 'en' ? 'Music' : 'Música', icon: <Music className="w-8 h-8 text-purple-500" /> },
-        { id: 'visual_arts', label: language === 'en' ? 'Visual Arts' : 'Artes Visuales', icon: <Palette className="w-8 h-8 text-indigo-500" /> },
-        { id: 'crafts', label: language === 'en' ? 'Crafts' : 'Artesanía', icon: <Scissors className="w-8 h-8 text-blue-500" /> },
-        { id: 'theater', label: language === 'en' ? 'Theater & Dance' : 'Teatro y Danza', icon: <Theater className="w-8 h-8 text-pink-500" /> },
-        { id: 'events', label: language === 'en' ? 'Events & Festivals' : 'Eventos y Festivales', icon: <Calendar className="w-8 h-8 text-amber-500" /> },
-        { id: 'other', label: language === 'en' ? 'Other Creative Field' : 'Otro Campo Creativo', icon: <User className="w-8 h-8 text-green-500" /> }
+        { 
+          id: 'music', 
+          label: language === 'en' ? 'Music' : 'Música',
+          icon: <Music className="w-6 h-6 text-blue-500" />
+        },
+        { 
+          id: 'visual-arts', 
+          label: language === 'en' ? 'Visual Arts' : 'Artes Visuales',
+          icon: <Palette className="w-6 h-6 text-green-500" />
+        },
+        { 
+          id: 'performing-arts', 
+          label: language === 'en' ? 'Performing Arts' : 'Artes Escénicas',
+          icon: <Drama className="w-6 h-6 text-red-500" />
+        },
+        { 
+          id: 'literature', 
+          label: language === 'en' ? 'Literature' : 'Literatura',
+          icon: <BookOpen className="w-6 h-6 text-purple-500" />
+        },
+        { 
+          id: 'audiovisual', 
+          label: language === 'en' ? 'Audiovisual' : 'Audiovisual',
+          icon: <Video className="w-6 h-6 text-indigo-500" />
+        },
+        { 
+          id: 'digital-arts', 
+          label: language === 'en' ? 'Digital Arts' : 'Artes Digitales',
+          icon: <Smartphone className="w-6 h-6 text-teal-500" />
+        }
       ]
     },
     
     activities: {
       id: 'activities',
-      type: 'checkbox',
+      type: 'checkbox' as const,
       title: questionTranslations.activities[language].title,
       subtitle: questionTranslations.activities[language].subtitle,
       fieldName: 'activities',
       options: [
-        { id: 'create', label: language === 'en' ? 'Creating art/products' : 'Crear arte/productos' },
-        { id: 'selling-in-person', label: language === 'en' ? 'Selling in person (fairs, markets)' : 'Vender en persona (ferias, mercados)' },
-        { id: 'selling-online', label: language === 'en' ? 'Selling online' : 'Vender online' },
-        { id: 'classes', label: language === 'en' ? 'Teaching classes or workshops' : 'Dar clases o talleres' },
-        { id: 'services', label: language === 'en' ? 'Offering creative services' : 'Ofrecer servicios creativos' },
-        { id: 'export', label: language === 'en' ? 'Exporting or selling abroad' : 'Exportar o vender en el extranjero' }
+        { id: 'creation', label: language === 'en' ? 'Content Creation' : 'Creación de Contenido' },
+        { id: 'performance', label: language === 'en' ? 'Live Performance' : 'Presentaciones en Vivo' },
+        { id: 'teaching', label: language === 'en' ? 'Teaching/Workshops' : 'Enseñanza/Talleres' },
+        { id: 'collaboration', label: language === 'en' ? 'Collaborations' : 'Colaboraciones' },
+        { id: 'production', label: language === 'en' ? 'Production' : 'Producción' }
       ]
     },
     
     experience: {
       id: 'experience',
-      type: 'radio',
+      type: 'radio' as const,
       title: questionTranslations.experience[language].title,
       subtitle: questionTranslations.experience[language].subtitle,
       fieldName: 'experience',
       options: [
-        { id: 'less-than-6-months', label: language === 'en' ? 'Less than 6 months' : 'Menos de 6 meses', icon: <Clock className="w-6 h-6 text-red-500" /> },
-        { id: '6-months-to-2-years', label: language === 'en' ? '6 months to 2 years' : 'De 6 meses a 2 años', icon: <Clock className="w-6 h-6 text-amber-500" /> },
-        { id: 'more-than-2-years', label: language === 'en' ? 'More than 2 years' : 'Más de 2 años', icon: <Clock className="w-6 h-6 text-green-500" /> }
+        { id: 'beginner', label: language === 'en' ? 'Beginner (0-2 years)' : 'Principiante (0-2 años)' },
+        { id: 'intermediate', label: language === 'en' ? 'Intermediate (3-5 years)' : 'Intermedio (3-5 años)' },
+        { id: 'advanced', label: language === 'en' ? 'Advanced (5+ years)' : 'Avanzado (5+ años)' }
       ]
     }
   };
+  
+  console.log('getProfileQuestions returning:', questions);
+  return questions;
 };

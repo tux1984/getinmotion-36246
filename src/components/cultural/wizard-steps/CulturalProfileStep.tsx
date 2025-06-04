@@ -30,8 +30,13 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   const questionsArray = Object.values(questions);
   const currentQuestion = questionsArray[currentQuestionIndex];
 
+  console.log('CulturalProfileStep - questionsArray:', questionsArray);
+  console.log('CulturalProfileStep - currentQuestion:', currentQuestion);
+  console.log('CulturalProfileStep - currentQuestionIndex:', currentQuestionIndex);
+
   const handleSingleSelect = (value: string) => {
     if (currentQuestion) {
+      console.log('CulturalProfileStep - handleSingleSelect:', value, currentQuestion.fieldName);
       updateProfileData({ [currentQuestion.fieldName]: value });
     }
   };
@@ -98,7 +103,13 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   };
 
   if (!currentQuestion) {
-    return <div>Loading...</div>;
+    console.log('CulturalProfileStep - No current question, questions:', questions);
+    return <div>Loading questions...</div>;
+  }
+
+  if (!currentQuestion.options || currentQuestion.options.length === 0) {
+    console.log('CulturalProfileStep - No options for question:', currentQuestion);
+    return <div>No options available for this question.</div>;
   }
 
   const totalQuestions = questionsArray.length;
