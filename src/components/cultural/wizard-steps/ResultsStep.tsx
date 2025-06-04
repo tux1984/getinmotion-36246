@@ -1,13 +1,21 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Check, ChevronRight, Stars } from 'lucide-react';
+import { Check, ChevronRight, Stars, Sparkles, Loader2 } from 'lucide-react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
 
 interface ResultsStepProps {
   profileData: UserProfileData;
@@ -26,6 +34,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
   onComplete,
   illustration
 }) => {
+  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
+  const { toast } = useToast();
+
   const t = {
     en: {
       title: "Your Results",
@@ -35,16 +47,18 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       categoriesTitle: "Categories",
       recommendedAgents: "Recommended Agents",
       agentRecommendation: "Agent Recommendations",
+      aiRecommendations: "AI-Powered Action Plan",
       whyRecommended: "Why recommended:",
+      loadingRecommendations: "Generating personalized recommendations...",
       levels: {
         beginner: "Early Stage",
-        developing: "Developing",
+        developing: "Developing", 
         growing: "Growing",
         advanced: "Advanced"
       },
       categoryLabels: {
         ideaValidation: "Idea Validation",
-        userExperience: "User Experience",
+        userExperience: "User Experience", 
         marketFit: "Market Fit",
         monetization: "Monetization"
       },
@@ -78,11 +92,13 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       categoriesTitle: "Categorías",
       recommendedAgents: "Agentes Recomendados",
       agentRecommendation: "Recomendaciones de Agentes",
+      aiRecommendations: "Plan de Acción con IA",
       whyRecommended: "Por qué lo recomendamos:",
+      loadingRecommendations: "Generando recomendaciones personalizadas...",
       levels: {
         beginner: "Etapa Inicial",
         developing: "Desarrollándose",
-        growing: "Creciendo",
+        growing: "Creciendo", 
         advanced: "Avanzado"
       },
       categoryLabels: {
@@ -153,6 +169,50 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         reason: t[language].reasons[agent as keyof typeof t.en.reasons]
       }));
   };
+
+  // Get priority color
+  const getPriorityColor = (priority: string) => {
+    const lowercasePriority = priority.toLowerCase();
+    if (lowercasePriority === 'high' || lowercasePriority === 'alta') return 'bg-red-100 text-red-800';
+    if (lowercasePriority === 'medium' || lowercasePriority === 'media') return 'bg-yellow-100 text-yellow-800';
+    return 'bg-green-100 text-green-800';
+  };
+
+  // Fetch AI recommendations
+  useEffect(() => {
+    const fetchAIRecommendations = async () => {
+      try {
+        setIsLoadingRecommendations(true);
+        
+        const { data, error } = await supabase.functions.invoke('ai-recommendations', {
+          body: {
+            scores,
+            profileData,
+            language
+          }
+        });
+
+        if (error) {
+          console.error('Error fetching AI recommendations:', error);
+          toast({
+            title: language === 'en' ? 'Recommendations unavailable' : 'Recomendaciones no disponibles',
+            description: language === 'en' 
+              ? 'Unable to generate AI recommendations at this time.' 
+              : 'No se pudieron generar recomendaciones de IA en este momento.',
+            variant: 'destructive'
+          });
+        } else if (data?.recommendations) {
+          setAiRecommendations(data.recommendations);
+        }
+      } catch (error) {
+        console.error('Error fetching AI recommendations:', error);
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    };
+
+    fetchAIRecommendations();
+  }, [scores, profileData, language, toast]);
 
   // Get subtitle based on profile type
   const getProfileTypeSubtitle = () => {
@@ -367,6 +427,66 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
                   </div>
                 </motion.div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* AI Recommendations */}
+          <motion.div
+            variants={itemVariants}
+            className="bg-white backdrop-blur-sm bg-opacity-90 rounded-2xl border border-slate-200/50 shadow-lg p-8 relative overflow-hidden"
+          >
+            <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 blur-3xl opacity-60"></div>
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 blur-3xl opacity-60"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                  {t[language].aiRecommendations}
+                </h3>
+              </div>
+
+              {isLoadingRecommendations ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-3" />
+                  <span className="text-gray-600">{t[language].loadingRecommendations}</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 mb-6">
+                  {aiRecommendations.map((recommendation, index) => (
+                    <motion.div 
+                      key={index}
+                      custom={index}
+                      variants={agentVariants}
+                      className="p-5 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100/50 hover:shadow-md hover:border-purple-200/50 transition-all"
+                    >
+                      <div className="flex gap-4">
+                        <div className="shrink-0">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center">
+                            <Stars className="w-6 h-6" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-gray-900">{recommendation.title}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(recommendation.priority)}`}>
+                              {recommendation.priority}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-2">
+                            {recommendation.description}
+                          </p>
+                          <span className="text-xs text-purple-600 font-medium">
+                            ⏱️ {recommendation.timeframe}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
           

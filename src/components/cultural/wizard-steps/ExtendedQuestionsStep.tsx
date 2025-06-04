@@ -1,9 +1,9 @@
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
+import { getAnalysisQuestions } from '../wizard-questions/analysisQuestions';
 
 interface ExtendedQuestionsStepProps {
   profileData: UserProfileData;
@@ -26,114 +26,92 @@ export const ExtendedQuestionsStep: React.FC<ExtendedQuestionsStepProps> = ({
   onPrevious,
   isStepValid
 }) => {
-  const translations = {
-    en: {
-      title: "Extended Analysis Questions",
-      subtitle: "These additional questions will help us provide more detailed recommendations",
-      pricing: "How do you currently set your prices?",
-      international: "Do you sell internationally?",
-      formalized: "Is your business formalized?",
-      collaboration: "How do you handle collaborations?",
-      sustainability: "What's your approach to economic sustainability?",
-      previous: "Back",
-      next: "Next"
-    },
-    es: {
-      title: "Preguntas de Análisis Profundo",
-      subtitle: "Estas preguntas adicionales nos ayudarán a brindarte recomendaciones más detalladas",
-      pricing: "¿Cómo establecés actualmente tus precios?",
-      international: "¿Vendés internacionalmente?",
-      formalized: "¿Tu negocio está formalizado?",
-      collaboration: "¿Cómo manejás las colaboraciones?",
-      sustainability: "¿Cuál es tu enfoque hacia la sostenibilidad económica?",
-      previous: "Atrás",
-      next: "Siguiente"
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const questions = getAnalysisQuestions(language);
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const handleSingleSelect = (value: string) => {
+    updateProfileData({ [currentQuestion.fieldName]: value });
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      onNext();
     }
   };
 
-  const t = translations[language];
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    } else {
+      onPrevious();
+    }
+  };
 
-  const pricingOptions = [
-    { id: 'intuitive', label: language === 'en' ? 'Intuitive/by feeling' : 'Intuitivo/por sensación' },
-    { id: 'market-research', label: language === 'en' ? 'Market research' : 'Investigación de mercado' },
-    { id: 'cost-plus', label: language === 'en' ? 'Cost + margin' : 'Costo + margen' },
-    { id: 'value-based', label: language === 'en' ? 'Value-based' : 'Basado en valor' }
-  ];
+  const isCurrentQuestionValid = () => {
+    return !!profileData[currentQuestion.fieldName as keyof UserProfileData];
+  };
 
-  const yesNoOptions = [
-    { id: 'yes', label: language === 'en' ? 'Yes' : 'Sí' },
-    { id: 'no', label: language === 'en' ? 'No' : 'No' }
-  ];
+  const t = {
+    en: {
+      step: `Step ${currentStepNumber} of ${totalSteps}`,
+      question: `Question ${currentQuestionIndex + 1} of ${questions.length}`,
+      previous: "Previous",
+      next: "Next",
+      continue: "Continue"
+    },
+    es: {
+      step: `Paso ${currentStepNumber} de ${totalSteps}`,
+      question: `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`,
+      previous: "Anterior",
+      next: "Siguiente",
+      continue: "Continuar"
+    }
+  };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full space-y-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-            {language === 'en' ? `Step ${currentStepNumber} of ${totalSteps}` : `Paso ${currentStepNumber} de ${totalSteps}`}
-          </span>
-        </div>
-        <h2 className="text-3xl font-bold text-purple-800 mb-4">{t.title}</h2>
-        <p className="text-lg text-gray-600">{t.subtitle}</p>
+      <div className="text-center">
+        <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+          {t[language].step}
+        </span>
+        <h2 className="text-2xl font-bold text-purple-800 mt-4 mb-2">{currentQuestion.title}</h2>
+        {currentQuestion.subtitle && (
+          <p className="text-gray-600">{currentQuestion.subtitle}</p>
+        )}
+        <p className="text-sm text-gray-500 mt-2">{t[language].question}</p>
       </div>
 
-      {/* Questions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8 mb-12"
-      >
-        {/* Pricing Method */}
-        <div>
-          <h3 className="text-xl font-semibold text-purple-800 mb-4">{t.pricing}</h3>
-          <RadioCards
-            name="pricingMethod"
-            options={pricingOptions}
-            selectedValue={profileData.pricingMethod}
-            onChange={(value) => updateProfileData({ pricingMethod: value })}
-          />
-        </div>
-
-        {/* International Sales */}
-        <div>
-          <h3 className="text-xl font-semibold text-purple-800 mb-4">{t.international}</h3>
-          <RadioCards
-            name="internationalSales"
-            options={yesNoOptions}
-            selectedValue={profileData.internationalSales}
-            onChange={(value) => updateProfileData({ internationalSales: value })}
-          />
-        </div>
-
-        {/* Formalized Business */}
-        <div>
-          <h3 className="text-xl font-semibold text-purple-800 mb-4">{t.formalized}</h3>
-          <RadioCards
-            name="formalizedBusiness"
-            options={yesNoOptions}
-            selectedValue={profileData.formalizedBusiness}
-            onChange={(value) => updateProfileData({ formalizedBusiness: value })}
-          />
-        </div>
-      </motion.div>
+      {/* Question Content */}
+      <div className="max-w-2xl mx-auto">
+        <RadioCards
+          name={currentQuestion.id}
+          options={currentQuestion.options}
+          selectedValue={profileData[currentQuestion.fieldName as keyof UserProfileData] as string}
+          onChange={handleSingleSelect}
+          withIcons
+        />
+      </div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex justify-between max-w-2xl mx-auto">
         <Button
           variant="outline"
-          onClick={onPrevious}
+          onClick={handlePrevious}
           className="px-6 py-3"
         >
-          {t.previous}
+          {t[language].previous}
         </Button>
         
         <Button
-          onClick={onNext}
-          disabled={!isStepValid}
+          onClick={handleNext}
+          disabled={!isCurrentQuestionValid()}
           className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3"
         >
-          {t.next}
+          {currentQuestionIndex === questions.length - 1 ? t[language].continue : t[language].next}
         </Button>
       </div>
     </div>

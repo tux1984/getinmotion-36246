@@ -1,20 +1,18 @@
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Eye, Calculator, ArrowRight, ArrowLeft } from 'lucide-react';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
-import { CheckboxCards } from '../wizard-components/CheckboxCards';
+import { getBusinessQuestions } from '../wizard-questions/businessQuestions';
 
 interface BusinessMaturityStepProps {
   profileData: UserProfileData;
   updateProfileData: (data: Partial<UserProfileData>) => void;
   language: 'en' | 'es';
-  onNext: () => void;
-  onPrevious: () => void;
   currentStepNumber: number;
   totalSteps: number;
+  onNext: () => void;
+  onPrevious: () => void;
   isStepValid: boolean;
 }
 
@@ -22,187 +20,98 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
   profileData,
   updateProfileData,
   language,
-  onNext,
-  onPrevious,
   currentStepNumber,
   totalSteps,
+  onNext,
+  onPrevious,
   isStepValid
 }) => {
-  const translations = {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const questions = getBusinessQuestions(language);
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const handleSingleSelect = (value: string) => {
+    updateProfileData({ [currentQuestion.fieldName]: value });
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      onNext();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    } else {
+      onPrevious();
+    }
+  };
+
+  const isCurrentQuestionValid = () => {
+    return !!profileData[currentQuestion.fieldName as keyof UserProfileData];
+  };
+
+  const t = {
     en: {
-      title: "Business Maturity",
-      subtitle: "Tell us about the current state and structure of your business",
-      paymentQuestion: "How do you currently get paid for your work or products? (Select all that apply)",
-      brandQuestion: "Do you have a defined brand or visual identity?",
-      financialQuestion: "Do you have control over your income and expenses?",
-      payment: {
-        cash: "Cash or bank transfers only",
-        digital: "Digital platforms (PayPal, Stripe, etc.)",
-        invoicing: "I have an invoicing system",
-        others: "Others handle payments for me (manager or platform)"
-      },
-      brand: {
-        complete: "Yes, completely",
-        partial: "I have something",
-        none: "No, I use whatever works"
-      },
-      financial: {
-        detailed: "Yes, I keep detailed records",
-        general: "I have a general idea",
-        intuition: "No, I go by intuition"
-      },
-      back: "Back",
+      step: `Step ${currentStepNumber} of ${totalSteps}`,
+      question: `Question ${currentQuestionIndex + 1} of ${questions.length}`,
+      previous: "Previous",
+      next: "Next",
       continue: "Continue"
     },
     es: {
-      title: "Madurez del Negocio",
-      subtitle: "Contanos sobre el estado actual y estructura de tu negocio",
-      paymentQuestion: "¿Cómo cobrás actualmente por tu trabajo o productos? (Seleccioná todas las que correspondan)",
-      brandQuestion: "¿Tenés una marca o identidad visual definida?",
-      financialQuestion: "¿Tenés control de tus ingresos y gastos?",
-      payment: {
-        cash: "Solo efectivo o transferencias",
-        digital: "Plataformas digitales (MercadoPago, Nequi, etc.)",
-        invoicing: "Tengo sistema de facturación",
-        others: "Cobran otros por mí (manager o plataforma)"
-      },
-      brand: {
-        complete: "Sí, totalmente",
-        partial: "Algo tengo",
-        none: "No, uso lo que sale"
-      },
-      financial: {
-        detailed: "Sí, lo llevo detallado",
-        general: "Lo tengo más o menos claro",
-        intuition: "No, me guío por intuición"
-      },
-      back: "Atrás",
+      step: `Paso ${currentStepNumber} de ${totalSteps}`,
+      question: `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`,
+      previous: "Anterior",
+      next: "Siguiente",
       continue: "Continuar"
     }
   };
 
-  const t = translations[language];
-
-  const paymentOptions = [
-    { id: 'cash', label: t.payment.cash, icon: <CreditCard className="h-5 w-5" /> },
-    { id: 'digital', label: t.payment.digital, icon: <CreditCard className="h-5 w-5" /> },
-    { id: 'invoicing', label: t.payment.invoicing, icon: <CreditCard className="h-5 w-5" /> },
-    { id: 'others', label: t.payment.others, icon: <CreditCard className="h-5 w-5" /> }
-  ];
-
-  const brandOptions = [
-    { id: 'complete', label: t.brand.complete, icon: <Eye className="h-5 w-5" /> },
-    { id: 'partial', label: t.brand.partial, icon: <Eye className="h-5 w-5" /> },
-    { id: 'none', label: t.brand.none, icon: <Eye className="h-5 w-5" /> }
-  ];
-
-  const financialOptions = [
-    { id: 'detailed', label: t.financial.detailed, icon: <Calculator className="h-5 w-5" /> },
-    { id: 'general', label: t.financial.general, icon: <Calculator className="h-5 w-5" /> },
-    { id: 'intuition', label: t.financial.intuition, icon: <Calculator className="h-5 w-5" /> }
-  ];
-
-  const handlePaymentChange = (value: string, isChecked: boolean) => {
-    const currentMethods = Array.isArray(profileData.paymentMethods) 
-      ? profileData.paymentMethods 
-      : profileData.paymentMethods ? [profileData.paymentMethods] : [];
-    
-    if (isChecked && !currentMethods.includes(value)) {
-      updateProfileData({ paymentMethods: [...currentMethods, value] });
-    } else if (!isChecked && currentMethods.includes(value)) {
-      updateProfileData({ paymentMethods: currentMethods.filter(method => method !== value) });
-    }
-  };
-
-  const getSelectedPaymentMethods = (): string[] => {
-    if (Array.isArray(profileData.paymentMethods)) {
-      return profileData.paymentMethods;
-    }
-    return profileData.paymentMethods ? [profileData.paymentMethods] : [];
-  };
-
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full space-y-8">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-            {language === 'en' ? `Step ${currentStepNumber} of ${totalSteps}` : `Paso ${currentStepNumber} de ${totalSteps}`}
-          </span>
-        </div>
-        <h2 className="text-3xl font-bold text-purple-800 mb-4">{t.title}</h2>
-        <p className="text-lg text-gray-600">{t.subtitle}</p>
+      <div className="text-center">
+        <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+          {t[language].step}
+        </span>
+        <h2 className="text-2xl font-bold text-purple-800 mt-4 mb-2">{currentQuestion.title}</h2>
+        {currentQuestion.subtitle && (
+          <p className="text-gray-600">{currentQuestion.subtitle}</p>
+        )}
+        <p className="text-sm text-gray-500 mt-2">{t[language].question}</p>
       </div>
 
-      <div className="space-y-12">
-        {/* Payment Methods Question */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          <h3 className="text-xl font-semibold text-gray-800">{t.paymentQuestion}</h3>
-          <CheckboxCards
-            options={paymentOptions}
-            selectedValues={getSelectedPaymentMethods()}
-            onChange={handlePaymentChange}
-            withIcons
-          />
-        </motion.div>
-
-        {/* Brand Identity Question */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-6"
-        >
-          <h3 className="text-xl font-semibold text-gray-800">{t.brandQuestion}</h3>
-          <RadioCards
-            name="brandIdentity"
-            options={brandOptions}
-            selectedValue={profileData.brandIdentity || ''}
-            onChange={(value) => updateProfileData({ brandIdentity: value })}
-            withIcons
-          />
-        </motion.div>
-
-        {/* Financial Control Question */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-6"
-        >
-          <h3 className="text-xl font-semibold text-gray-800">{t.financialQuestion}</h3>
-          <RadioCards
-            name="financialControl"
-            options={financialOptions}
-            selectedValue={profileData.financialControl || ''}
-            onChange={(value) => updateProfileData({ financialControl: value })}
-            withIcons
-          />
-        </motion.div>
+      {/* Question Content */}
+      <div className="max-w-2xl mx-auto">
+        <RadioCards
+          name={currentQuestion.id}
+          options={currentQuestion.options}
+          selectedValue={profileData[currentQuestion.fieldName as keyof UserProfileData] as string}
+          onChange={handleSingleSelect}
+          withIcons
+        />
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-12">
+      <div className="flex justify-between max-w-2xl mx-auto">
         <Button
           variant="outline"
-          onClick={onPrevious}
-          className="px-6 py-3 flex items-center gap-2"
+          onClick={handlePrevious}
+          className="px-6 py-3"
         >
-          <ArrowLeft className="h-4 w-4" />
-          {t.back}
+          {t[language].previous}
         </Button>
         
         <Button
-          onClick={onNext}
-          disabled={!isStepValid}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 flex items-center gap-2"
+          onClick={handleNext}
+          disabled={!isCurrentQuestionValid()}
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3"
         >
-          {t.continue}
-          <ArrowRight className="h-4 w-4" />
+          {currentQuestionIndex === questions.length - 1 ? t[language].continue : t[language].next}
         </Button>
       </div>
     </div>

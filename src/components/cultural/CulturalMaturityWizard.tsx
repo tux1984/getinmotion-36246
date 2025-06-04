@@ -18,6 +18,11 @@ export const CulturalMaturityWizard: React.FC<{
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   
+  const handleWizardComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
+    // AI recommendations will be fetched in ResultsStep and passed through completion
+    onComplete(scores, recommendedAgents);
+  };
+  
   const {
     currentStepId,
     profileData,
@@ -28,13 +33,10 @@ export const CulturalMaturityWizard: React.FC<{
     handlePrevious,
     calculateMaturityScores,
     getRecommendedAgents,
-    handleCompleteWizard,
     isCurrentStepValid,
-    // New properties for bifurcation
-    showBifurcation,
     analysisType,
     handleAnalysisChoice
-  } = useMaturityWizard(onComplete);
+  } = useMaturityWizard(handleWizardComplete);
 
   return (
     <WizardContent
@@ -49,8 +51,7 @@ export const CulturalMaturityWizard: React.FC<{
       handlePrevious={handlePrevious}
       calculateMaturityScores={calculateMaturityScores}
       getRecommendedAgents={getRecommendedAgents}
-      handleCompleteWizard={handleCompleteWizard}
-      showBifurcation={showBifurcation}
+      handleCompleteWizard={handleWizardComplete}
       analysisType={analysisType}
       handleAnalysisChoice={handleAnalysisChoice}
     />
