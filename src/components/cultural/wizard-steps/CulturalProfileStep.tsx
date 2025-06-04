@@ -48,7 +48,7 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   };
 
   const handleNext = () => {
-    const totalQuestions = questions?.length || 0;
+    const totalQuestions = questions.length;
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
@@ -76,14 +76,14 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   const t = {
     en: {
       step: `Step ${currentStepNumber} of ${totalSteps}`,
-      question: `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`,
+      question: `Question ${currentQuestionIndex + 1} of ${questions.length}`,
       previous: "Previous",
       next: "Next",
       continue: "Continue"
     },
     es: {
       step: `Paso ${currentStepNumber} de ${totalSteps}`,
-      question: `Pregunta ${currentQuestionIndex + 1} de ${questions?.length || 0}`,
+      question: `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`,
       previous: "Anterior",
       next: "Siguiente",
       continue: "Continuar"
@@ -94,7 +94,7 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
     return <div>Loading...</div>;
   }
 
-  const totalQuestions = questions?.length || 0;
+  const totalQuestions = questions.length;
 
   return (
     <div className="w-full space-y-8">
