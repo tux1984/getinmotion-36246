@@ -48,7 +48,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   };
 
   const handleNext = () => {
-    if (currentQuestionIndex < (questions.length - 1)) {
+    const totalQuestions = questions?.length || 0;
+    if (currentQuestionIndex < (totalQuestions - 1)) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       onNext();
@@ -75,19 +76,23 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   const t = {
     en: {
       step: `Step ${currentStepNumber} of ${totalSteps}`,
-      question: `Question ${currentQuestionIndex + 1} of ${questions.length}`,
+      question: `Question ${currentQuestionIndex + 1} of ${questions?.length || 0}`,
       previous: "Previous",
       next: "Next",
       continue: "Continue"
     },
     es: {
       step: `Paso ${currentStepNumber} de ${totalSteps}`,
-      question: `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`,
+      question: `Pregunta ${currentQuestionIndex + 1} de ${questions?.length || 0}`,
       previous: "Anterior",
       next: "Siguiente",
       continue: "Continuar"
     }
   };
+
+  if (!currentQuestion) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full space-y-8">
@@ -141,7 +146,7 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
           disabled={!isCurrentQuestionValid()}
           className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3"
         >
-          {currentQuestionIndex === (questions.length - 1) ? t[language].continue : t[language].next}
+          {currentQuestionIndex === ((questions?.length || 1) - 1) ? t[language].continue : t[language].next}
         </Button>
       </div>
     </div>

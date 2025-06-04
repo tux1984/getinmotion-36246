@@ -129,11 +129,11 @@ export const useMaturityWizard = (
     return determineRecommendedAgents(profileData, scores);
   };
   
-  // Handle completion
-  const handleCompleteWizard = () => {
-    const scores = calculateMaturityScores();
-    const recommendedAgents = getRecommendedAgents(scores);
-    onComplete(scores, recommendedAgents);
+  // Handle completion - this function now properly handles the callback signature
+  const handleCompleteWizard = (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => {
+    const finalScores = scores || calculateMaturityScores();
+    const finalRecommendedAgents = recommendedAgents || getRecommendedAgents(finalScores);
+    onComplete(finalScores, finalRecommendedAgents, aiRecommendations);
   };
 
   // Handle analysis choice
