@@ -19,7 +19,6 @@ interface WizardContentProps {
   calculateMaturityScores: () => any;
   getRecommendedAgents: (scores: any) => any;
   handleCompleteWizard: () => void;
-  // New props for bifurcation
   showBifurcation?: boolean;
   analysisType?: 'quick' | 'deep' | null;
   handleAnalysisChoice?: (type: 'quick' | 'deep') => void;
@@ -38,7 +37,6 @@ export const WizardContent: React.FC<WizardContentProps> = ({
   calculateMaturityScores,
   getRecommendedAgents,
   handleCompleteWizard,
-  showBifurcation,
   analysisType,
   handleAnalysisChoice
 }) => {
@@ -57,7 +55,6 @@ export const WizardContent: React.FC<WizardContentProps> = ({
       />
       
       <div className="flex-1 flex flex-col p-6 md:p-8 overflow-auto">
-        {/* Main content area with all step content */}
         <div className="flex-1">
           <AnimatePresence mode="wait">
             <WizardStepContent
@@ -73,7 +70,6 @@ export const WizardContent: React.FC<WizardContentProps> = ({
               handleNext={handleNext}
               handlePrevious={handlePrevious}
               isCurrentStepValid={isCurrentStepValid}
-              showBifurcation={showBifurcation}
               analysisType={analysisType}
               handleAnalysisChoice={handleAnalysisChoice}
             />

@@ -1,19 +1,15 @@
 
 import React from 'react';
-import { ProfileTypeStep } from '../wizard-steps/ProfileTypeStep';
-import { ProfileQuestionsStep } from '../wizard-steps/ProfileQuestionsStep';
-import { ResultsStep } from '../wizard-steps/ResultsStep';
 import { CulturalProfileStep } from '../wizard-steps/CulturalProfileStep';
 import { BusinessMaturityStep } from '../wizard-steps/BusinessMaturityStep';
 import { ManagementStyleStep } from '../wizard-steps/ManagementStyleStep';
 import { BifurcationStep } from '../wizard-steps/BifurcationStep';
 import { ExtendedQuestionsStep } from '../wizard-steps/ExtendedQuestionsStep';
-import { QuestionStep } from './QuestionStep';
+import { ResultsStep } from '../wizard-steps/ResultsStep';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId } from '../hooks/types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
-import { getQuestions } from '../wizard-questions/index';
 import { getStepImage } from './CharacterImageSelector';
 import { OptimizedCharacterImage } from '../components/OptimizedCharacterImage';
 
@@ -50,12 +46,9 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   analysisType,
   handleAnalysisChoice
 }) => {
-  // Get question configuration based on current step
-  const questions = getQuestions(language);
-  const questionConfig = questions[currentStepId];
   const characterImage = getStepImage(currentStepId, calculateMaturityScores);
 
-  // Common layout with character image for most steps
+  // Common layout with character image
   const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
     <div className="flex gap-8 items-start max-w-6xl mx-auto">
       {/* Character Image */}
@@ -74,143 +67,90 @@ export const StepRouter: React.FC<StepRouterProps> = ({
     </div>
   );
 
-  // Render content based on the current step
-  if (currentStepId === 'profileType') {
-    return renderStepWithCharacter(
-      <ProfileTypeStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  if (currentStepId === 'culturalProfile') {
-    return renderStepWithCharacter(
-      <CulturalProfileStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  if (currentStepId === 'businessMaturity') {
-    return renderStepWithCharacter(
-      <BusinessMaturityStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  if (currentStepId === 'managementStyle') {
-    return renderStepWithCharacter(
-      <ManagementStyleStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  if (currentStepId === 'bifurcation') {
-    return renderStepWithCharacter(
-      <BifurcationStep
-        profileData={profileData}
-        language={language}
-        selectedAnalysisType={analysisType}
-        onAnalysisChoice={handleAnalysisChoice!}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-      />
-    );
-  }
-  
-  if (currentStepId === 'extendedQuestions') {
-    return renderStepWithCharacter(
-      <ExtendedQuestionsStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  if (currentStepId === 'profileQuestions') {
-    return renderStepWithCharacter(
-      <ProfileQuestionsStep
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        isStepValid={isCurrentStepValid()}
-        illustration={characterImage}
-      />
-    );
-  }
+  // Route to appropriate step component
+  switch (currentStepId) {
+    case 'culturalProfile':
+      return renderStepWithCharacter(
+        <CulturalProfileStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    
+    case 'businessMaturity':
+      return renderStepWithCharacter(
+        <BusinessMaturityStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    
+    case 'managementStyle':
+      return renderStepWithCharacter(
+        <ManagementStyleStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+    
+    case 'bifurcation':
+      return renderStepWithCharacter(
+        <BifurcationStep
+          profileData={profileData}
+          language={language}
+          selectedAnalysisType={analysisType}
+          onAnalysisChoice={handleAnalysisChoice!}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+        />
+      );
+    
+    case 'extendedQuestions':
+      return renderStepWithCharacter(
+        <ExtendedQuestionsStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
 
-  if (currentStepId === 'results') {
-    return renderStepWithCharacter(
-      <ResultsStep 
-        profileData={profileData}
-        scores={calculateMaturityScores()}
-        recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
-        language={language}
-        onComplete={onComplete}
-        illustration={characterImage}
-      />
-    );
+    case 'results':
+      return renderStepWithCharacter(
+        <ResultsStep 
+          profileData={profileData}
+          scores={calculateMaturityScores()}
+          recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
+          language={language}
+          onComplete={onComplete}
+          illustration={characterImage}
+        />
+      );
+    
+    default:
+      return null;
   }
-  
-  if (questionConfig) {
-    return renderStepWithCharacter(
-      <QuestionStep 
-        question={questionConfig}
-        profileData={profileData}
-        updateProfileData={updateProfileData}
-        language={language}
-        industry={profileData.industry}
-        illustration={characterImage}
-        currentStepNumber={currentStepNumber}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        isFirstStep={currentStepNumber === 1}
-        currentStepId={currentStepId}
-        isStepValid={isCurrentStepValid()}
-      />
-    );
-  }
-  
-  return null;
 };

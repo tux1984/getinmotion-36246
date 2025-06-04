@@ -5,7 +5,6 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId, WizardHookReturn } from './types/wizardTypes';
 import { 
-  getCurrentStepInfo, 
   isStepValid as checkStepValidity
 } from './utils/wizardStepUtils';
 import { 
@@ -18,9 +17,8 @@ export type { WizardStepId } from './types/wizardTypes';
 export const useMaturityWizard = (
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void
 ): WizardHookReturn => {
-  // Initial step is cultural profile
+  // Start with cultural profile step
   const [currentStepId, setCurrentStepId] = useState<WizardStepId>('culturalProfile');
-  const [showBifurcation, setShowBifurcation] = useState(false);
   const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
   
   const [profileData, setProfileData] = useState<UserProfileData>({
@@ -43,18 +41,18 @@ export const useMaturityWizard = (
     economicSustainability: ''
   });
   
-  // Define step sequence for cultural entrepreneurs
+  // Define step sequence
   const stepSequence: WizardStepId[] = [
-    'culturalProfile',    // Bloque 1: Perfil cultural
-    'businessMaturity',   // Bloque 2: Madurez del negocio  
-    'managementStyle',    // Bloque 3: Estilo de gestión
-    'bifurcation',        // Bifurcación: rápido vs profundo
-    'extendedQuestions',  // Preguntas adicionales (solo si elige "profundo")
-    'results'             // Resultados finales
+    'culturalProfile',    
+    'businessMaturity',   
+    'managementStyle',    
+    'bifurcation',        
+    'extendedQuestions',  
+    'results'             
   ];
   
   const currentStepIndex = stepSequence.indexOf(currentStepId);
-  const totalSteps = analysisType === 'deep' ? 6 : 5; // Incluye o excluye extended questions
+  const totalSteps = analysisType === 'deep' ? 6 : 5;
   const currentStepNumber = currentStepIndex + 1;
   
   // Check if current step is valid
@@ -74,7 +72,6 @@ export const useMaturityWizard = (
   const handleNext = () => {
     if (currentStepId === 'bifurcation') {
       if (analysisType === 'quick') {
-        // Skip extended questions and go directly to results
         setCurrentStepId('results');
       } else if (analysisType === 'deep') {
         setCurrentStepId('extendedQuestions');
@@ -87,7 +84,6 @@ export const useMaturityWizard = (
     if (nextIndex < stepSequence.length) {
       const nextStep = stepSequence[nextIndex];
       
-      // Skip extended questions if doing quick analysis
       if (nextStep === 'extendedQuestions' && analysisType === 'quick') {
         setCurrentStepId('results');
       } else {
@@ -117,7 +113,7 @@ export const useMaturityWizard = (
     }
   };
 
-  // Wrapper functions for score calculation
+  // Score calculation functions
   const calculateMaturityScores = (): CategoryScore => {
     return computeScores(profileData);
   };
@@ -126,14 +122,14 @@ export const useMaturityWizard = (
     return determineRecommendedAgents(profileData, scores);
   };
   
-  // Handle completion of the wizard
+  // Handle completion
   const handleCompleteWizard = () => {
     const scores = calculateMaturityScores();
     const recommendedAgents = getRecommendedAgents(scores);
     onComplete(scores, recommendedAgents);
   };
 
-  // Handle analysis type selection
+  // Handle analysis choice
   const handleAnalysisChoice = (type: 'quick' | 'deep') => {
     setAnalysisType(type);
     updateProfileData({ analysisPreference: type });
@@ -151,8 +147,7 @@ export const useMaturityWizard = (
     getRecommendedAgents,
     handleCompleteWizard,
     isCurrentStepValid,
-    // New properties for bifurcation
-    showBifurcation,
+    showBifurcation: true,
     analysisType,
     handleAnalysisChoice
   };
