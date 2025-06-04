@@ -36,7 +36,7 @@ export const ExtendedQuestionsStep: React.FC<ExtendedQuestionsStepProps> = ({
 
   const handleNext = () => {
     const totalQuestions = questions?.length || 0;
-    if (currentQuestionIndex < (totalQuestions - 1)) {
+    if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       onNext();
@@ -75,6 +75,8 @@ export const ExtendedQuestionsStep: React.FC<ExtendedQuestionsStepProps> = ({
   if (!currentQuestion) {
     return <div>Loading...</div>;
   }
+
+  const totalQuestions = questions?.length || 0;
 
   return (
     <div className="w-full space-y-8">
@@ -116,7 +118,7 @@ export const ExtendedQuestionsStep: React.FC<ExtendedQuestionsStepProps> = ({
           disabled={!isCurrentQuestionValid()}
           className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3"
         >
-          {currentQuestionIndex === ((questions?.length || 1) - 1) ? t[language].continue : t[language].next}
+          {currentQuestionIndex === (totalQuestions - 1) ? t[language].continue : t[language].next}
         </Button>
       </div>
     </div>

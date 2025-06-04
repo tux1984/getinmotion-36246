@@ -18,10 +18,6 @@ export const CulturalMaturityWizard: React.FC<{
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   
-  const handleWizardComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => {
-    onComplete(scores, recommendedAgents, aiRecommendations);
-  };
-  
   const {
     currentStepId,
     profileData,
@@ -32,10 +28,11 @@ export const CulturalMaturityWizard: React.FC<{
     handlePrevious,
     calculateMaturityScores,
     getRecommendedAgents,
+    handleCompleteWizard,
     isCurrentStepValid,
     analysisType,
     handleAnalysisChoice
-  } = useMaturityWizard(handleWizardComplete);
+  } = useMaturityWizard(onComplete);
 
   return (
     <WizardContent
@@ -50,7 +47,7 @@ export const CulturalMaturityWizard: React.FC<{
       handlePrevious={handlePrevious}
       calculateMaturityScores={calculateMaturityScores}
       getRecommendedAgents={getRecommendedAgents}
-      handleCompleteWizard={handleWizardComplete}
+      handleCompleteWizard={handleCompleteWizard}
       analysisType={analysisType}
       handleAnalysisChoice={handleAnalysisChoice}
     />
