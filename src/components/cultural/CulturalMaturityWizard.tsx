@@ -18,9 +18,8 @@ export const CulturalMaturityWizard: React.FC<{
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   
-  const handleWizardComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    // AI recommendations will be fetched in ResultsStep and passed through completion
-    onComplete(scores, recommendedAgents);
+  const handleWizardComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => {
+    onComplete(scores, recommendedAgents, aiRecommendations);
   };
   
   const {

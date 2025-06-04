@@ -12,10 +12,17 @@ import {
   getRecommendedAgents as determineRecommendedAgents
 } from './utils/scoreCalculation';
 
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
+
 export type { WizardStepId } from './types/wizardTypes';
 
 export const useMaturityWizard = (
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void
 ): WizardHookReturn => {
   // Start with cultural profile step
   const [currentStepId, setCurrentStepId] = useState<WizardStepId>('culturalProfile');
