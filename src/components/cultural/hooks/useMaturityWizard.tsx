@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -44,7 +45,9 @@ export const useMaturityWizard = (
     internationalSales: '',
     formalizedBusiness: '',
     collaboration: '',
-    economicSustainability: ''
+    economicSustainability: '',
+    // Dynamic questions answers
+    dynamicQuestionAnswers: {}
   });
   
   // Define step sequence - now includes dynamic questions
@@ -54,12 +57,12 @@ export const useMaturityWizard = (
     'managementStyle',    
     'bifurcation',        
     'extendedQuestions',  
-    'dynamicQuestions',   // New step
+    'dynamicQuestions',   
     'results'             
   ];
   
   const currentStepIndex = stepSequence.indexOf(currentStepId);
-  const totalSteps = analysisType === 'deep' ? 7 : 6; // Updated step count
+  const totalSteps = analysisType === 'deep' ? 7 : 6;
   const currentStepNumber = currentStepIndex + 1;
   
   // Check if current step is valid
@@ -67,19 +70,26 @@ export const useMaturityWizard = (
     if (currentStepId === 'bifurcation') {
       return analysisType !== null;
     }
+    if (currentStepId === 'dynamicQuestions') {
+      // Dynamic questions step is always considered valid since it can be skipped
+      return true;
+    }
     return checkStepValidity(currentStepId, profileData);
   };
   
   // Update profile data
   const updateProfileData = (data: Partial<UserProfileData>) => {
+    console.log('Updating profile data:', data);
     setProfileData(prev => ({ ...prev, ...data }));
   };
   
   // Handle navigation
   const handleNext = () => {
+    console.log('Current step:', currentStepId, 'Analysis type:', analysisType);
+    
     if (currentStepId === 'bifurcation') {
       if (analysisType === 'quick') {
-        setCurrentStepId('dynamicQuestions'); // Go to dynamic questions for both paths
+        setCurrentStepId('dynamicQuestions'); // Go to dynamic questions for quick path
       } else if (analysisType === 'deep') {
         setCurrentStepId('extendedQuestions');
       }
@@ -91,6 +101,7 @@ export const useMaturityWizard = (
     if (nextIndex < stepSequence.length) {
       const nextStep = stepSequence[nextIndex];
       
+      // Skip extended questions for quick analysis
       if (nextStep === 'extendedQuestions' && analysisType === 'quick') {
         setCurrentStepId('dynamicQuestions');
       } else {
@@ -136,6 +147,7 @@ export const useMaturityWizard = (
   
   // Handle completion - this function now properly handles the callback signature
   const handleCompleteWizard = (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => {
+    console.log('Completing wizard with profile data:', profileData);
     const finalScores = scores || calculateMaturityScores();
     const finalRecommendedAgents = recommendedAgents || getRecommendedAgents(finalScores);
     onComplete(finalScores, finalRecommendedAgents, aiRecommendations);
@@ -143,6 +155,7 @@ export const useMaturityWizard = (
 
   // Handle analysis choice
   const handleAnalysisChoice = (type: 'quick' | 'deep') => {
+    console.log('Analysis choice selected:', type);
     setAnalysisType(type);
     updateProfileData({ analysisPreference: type });
   };

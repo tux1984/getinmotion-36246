@@ -4,8 +4,8 @@ import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Brain, ChevronRight, ChevronLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader2, Brain, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -40,6 +40,7 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const t = {
@@ -48,26 +49,30 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
       subtitle: "Based on your responses, we'd like to understand more about your creative journey",
       loadingQuestions: "AI is generating personalized questions for you...",
       questionOf: "Question {current} of {total}",
-      placeholder: "Share your thoughts here...",
+      placeholder: "Share your thoughts here... Be as detailed as you'd like.",
       next: "Next Question",
       previous: "Previous Question",
       complete: "Complete Assessment",
       answerRequired: "Please provide an answer before continuing",
-      errorGenerating: "Unable to generate questions. Please try again.",
-      skipStep: "Skip This Step"
+      errorGenerating: "Unable to generate questions. Let's proceed with your assessment.",
+      skipStep: "Skip This Step",
+      almostDone: "Almost done! Just a few more insights to personalize your recommendations.",
+      thinking: "Generating your personalized questions..."
     },
     es: {
       title: "Profundicemos Más",
       subtitle: "Basado en tus respuestas, nos gustaría entender más sobre tu viaje creativo",
       loadingQuestions: "La IA está generando preguntas personalizadas para ti...",
       questionOf: "Pregunta {current} de {total}",
-      placeholder: "Comparte tus pensamientos aquí...",
+      placeholder: "Comparte tus pensamientos aquí... Sé tan detallado como desees.",
       next: "Siguiente Pregunta",
       previous: "Pregunta Anterior",
       complete: "Completar Evaluación",
       answerRequired: "Por favor proporciona una respuesta antes de continuar",
-      errorGenerating: "No se pudieron generar las preguntas. Inténtalo de nuevo.",
-      skipStep: "Omitir Este Paso"
+      errorGenerating: "No se pudieron generar las preguntas. Continuemos con tu evaluación.",
+      skipStep: "Omitir Este Paso",
+      almostDone: "¡Casi terminamos! Solo unos insights más para personalizar tus recomendaciones.",
+      thinking: "Generando tus preguntas personalizadas..."
     }
   };
 
@@ -76,6 +81,8 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
     const generateDynamicQuestions = async () => {
       try {
         setIsLoadingQuestions(true);
+        
+        console.log('Generating dynamic questions for profile:', profileData);
         
         const { data, error } = await supabase.functions.invoke('generate-dynamic-questions', {
           body: {
@@ -90,20 +97,23 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
             title: t[language].errorGenerating,
             variant: 'destructive'
           });
-          // Fallback to next step if questions can't be generated
+          // Proceed to next step if questions can't be generated
           onNext();
           return;
         }
 
-        if (data?.questions && Array.isArray(data.questions)) {
+        console.log('Dynamic questions response:', data);
+
+        if (data?.questions && Array.isArray(data.questions) && data.questions.length > 0) {
           const questionsWithIds = data.questions.map((q: any, index: number) => ({
             id: `dynamic_${index + 1}`,
             question: q.question,
             context: q.context
           }));
           setDynamicQuestions(questionsWithIds);
+          console.log('Set dynamic questions:', questionsWithIds);
         } else {
-          // No questions generated, skip to next step
+          console.log('No questions generated, proceeding to next step');
           onNext();
         }
       } catch (error) {
@@ -134,7 +144,7 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!currentQuestion) return;
 
     const currentAnswer = answers[currentQuestion.id]?.trim();
@@ -147,11 +157,17 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
     }
 
     if (isLastQuestion) {
-      // Save all dynamic answers to profile data
-      updateProfileData({ 
-        dynamicQuestionAnswers: answers 
-      });
-      onNext();
+      setIsSubmitting(true);
+      try {
+        // Save all dynamic answers to profile data
+        updateProfileData({ 
+          dynamicQuestionAnswers: answers 
+        });
+        console.log('Saved dynamic answers:', answers);
+        onNext();
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setCurrentQuestionIndex(prev => prev + 1);
     }
@@ -178,13 +194,32 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
         title={t[language].title}
         subtitle={t[language].subtitle}
       >
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-6">
-            <Brain className="w-8 h-8 text-white" />
+        <div className="flex flex-col items-center justify-center py-20">
+          <motion.div 
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-8"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 10, -10, 0]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          >
+            <Brain className="w-10 h-10 text-white" />
+          </motion.div>
+          
+          <div className="flex items-center space-x-3 mb-4">
+            <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+            <Sparkles className="w-5 h-5 text-purple-500 animate-pulse" />
           </div>
-          <Loader2 className="w-8 h-8 animate-spin text-purple-600 mb-4" />
-          <p className="text-lg text-gray-600 text-center">
-            {t[language].loadingQuestions}
+          
+          <p className="text-xl text-gray-700 text-center font-medium mb-2">
+            {t[language].thinking}
+          </p>
+          <p className="text-gray-500 text-center max-w-md">
+            {t[language].almostDone}
           </p>
         </div>
       </StepContainer>
@@ -192,7 +227,7 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
   }
 
   if (!currentQuestion || dynamicQuestions.length === 0) {
-    // Skip if no questions were generated
+    console.log('No current question or empty questions array, proceeding to next step');
     onNext();
     return null;
   }
@@ -206,7 +241,8 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
         {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-purple-600">
+            <span className="text-sm font-medium text-purple-600 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
               {t[language].questionOf
                 .replace('{current}', (currentQuestionIndex + 1).toString())
                 .replace('{total}', dynamicQuestions.length.toString())}
@@ -220,10 +256,11 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
               {t[language].skipStep}
             </Button>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full transition-all duration-300"
-              style={{
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <motion.div
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
+              initial={{ width: 0 }}
+              animate={{
                 width: `${((currentQuestionIndex + 1) / dynamicQuestions.length) * 100}%`
               }}
             />
@@ -231,43 +268,62 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
         </div>
 
         {/* Question Card */}
-        <motion.div
-          key={currentQuestion.id}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl border border-slate-200/50 shadow-lg p-8 mb-8"
-        >
-          {/* Context if available */}
-          {currentQuestion.context && (
-            <div className="mb-6 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-              <p className="text-sm text-purple-700 italic">
-                {currentQuestion.context}
-              </p>
-            </div>
-          )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestion.id}
+            initial={{ opacity: 0, x: 30, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -30, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="bg-white rounded-2xl border border-slate-200/50 shadow-xl p-8 mb-8"
+          >
+            {/* Context if available */}
+            {currentQuestion.context && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-l-4 border-purple-500"
+              >
+                <p className="text-sm text-purple-700 italic font-medium">
+                  💡 {currentQuestion.context}
+                </p>
+              </motion.div>
+            )}
 
-          {/* Question */}
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
-            {currentQuestion.question}
-          </h3>
+            {/* Question */}
+            <motion.h3 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl font-bold text-gray-900 mb-6 leading-relaxed"
+            >
+              {currentQuestion.question}
+            </motion.h3>
 
-          {/* Answer textarea */}
-          <Textarea
-            value={answers[currentQuestion.id] || ''}
-            onChange={(e) => handleAnswerChange(e.target.value)}
-            placeholder={t[language].placeholder}
-            className="min-h-[120px] resize-none border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-          />
-        </motion.div>
+            {/* Answer textarea */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Textarea
+                value={answers[currentQuestion.id] || ''}
+                onChange={(e) => handleAnswerChange(e.target.value)}
+                placeholder={t[language].placeholder}
+                className="min-h-[140px] resize-none border-gray-300 focus:border-purple-500 focus:ring-purple-500 text-base leading-relaxed"
+              />
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
             onClick={handlePrevious}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-6 py-3"
+            disabled={isSubmitting}
           >
             <ChevronLeft className="w-4 h-4" />
             {isFirstQuestion ? 'Back' : t[language].previous}
@@ -275,10 +331,17 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
 
           <Button
             onClick={handleNext}
-            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white flex items-center gap-2"
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white flex items-center gap-2 px-8 py-3"
           >
-            {isLastQuestion ? t[language].complete : t[language].next}
-            <ChevronRight className="w-4 h-4" />
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                {isLastQuestion ? t[language].complete : t[language].next}
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
           </Button>
         </div>
       </div>
