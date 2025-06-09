@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CulturalProfileStep } from '../wizard-steps/CulturalProfileStep';
 import { BusinessMaturityStep } from '../wizard-steps/BusinessMaturityStep';
@@ -47,21 +48,36 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   handleAnalysisChoice
 }) => {
   const characterImage = getStepImage(currentStepId, calculateMaturityScores);
+  
+  // Fallback image in case the primary image fails
+  const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
-  // Common layout with character image
+  // Common layout with character image - Enhanced with better error handling
   const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
     <div className="flex gap-8 items-start max-w-6xl mx-auto">
-      {/* Character Image */}
+      {/* Character Image - Always visible on desktop */}
       <div className="w-1/3 flex-shrink-0 hidden md:block">
+        <div className="sticky top-4">
+          <OptimizedCharacterImage
+            src={characterImage || fallbackImage}
+            alt="Cultural assessment guide"
+            className="w-full h-auto max-w-sm mx-auto rounded-lg shadow-sm"
+            preloadNext={getStepImage('results', calculateMaturityScores)}
+          />
+        </div>
+      </div>
+      
+      {/* Mobile Character Image - Smaller version */}
+      <div className="w-full flex justify-center mb-6 md:hidden">
         <OptimizedCharacterImage
-          src={characterImage}
-          alt="Character guide"
-          className="w-full h-auto max-w-sm mx-auto"
+          src={characterImage || fallbackImage}
+          alt="Cultural assessment guide"
+          className="w-48 h-auto rounded-lg shadow-sm"
         />
       </div>
       
       {/* Step Content */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 md:w-2/3">
         {stepComponent}
       </div>
     </div>
@@ -160,7 +176,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
           recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
           language={language}
           onComplete={onComplete}
-          illustration={characterImage}
+          illustration={characterImage || fallbackImage}
         />
       );
     

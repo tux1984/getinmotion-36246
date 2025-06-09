@@ -17,48 +17,83 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [imgSrc, setImgSrc] = useState(src);
+
+  // Fallback image
+  const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
   const handleLoad = useCallback(() => {
     setIsLoaded(true);
+    setHasError(false);
+    console.log('Character image loaded successfully:', imgSrc);
+    
     // Preload next image if provided
-    if (preloadNext) {
+    if (preloadNext && preloadNext !== imgSrc) {
       const img = new Image();
       img.src = preloadNext;
     }
-  }, [preloadNext]);
+  }, [preloadNext, imgSrc]);
 
   const handleError = useCallback(() => {
-    setHasError(true);
-  }, []);
+    console.warn('Character image failed to load:', imgSrc, 'Trying fallback...');
+    if (imgSrc !== fallbackImage) {
+      setImgSrc(fallbackImage);
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  }, [imgSrc, fallbackImage]);
+
+  // Update src when prop changes
+  React.useEffect(() => {
+    if (src && src !== imgSrc) {
+      setImgSrc(src);
+      setIsLoaded(false);
+      setHasError(false);
+    }
+  }, [src, imgSrc]);
 
   if (hasError) {
     return (
-      <div className={`${className} bg-gray-100 rounded-lg flex items-center justify-center`}>
-        <span className="text-gray-400">Image not available</span>
+      <div className={`${className} bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center border border-purple-200`}>
+        <div className="text-center p-4">
+          <div className="w-16 h-16 bg-purple-200 rounded-full mx-auto mb-2 flex items-center justify-center">
+            <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span className="text-purple-600 text-sm font-medium">Assessment Guide</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isLoaded ? 1 : 0 }}
-      transition={{ duration: 0.3 }}
-      className="relative"
-    >
-      <img
-        src={src}
-        alt={alt}
-        className={className}
-        onLoad={handleLoad}
-        onError={handleError}
-        loading="lazy"
-        decoding="async"
-      />
-      {!isLoaded && (
-        <div className={`${className} bg-gray-100 animate-pulse rounded-lg absolute inset-0`} />
+    <div className="relative">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 0.95 }}
+        transition={{ duration: 0.3 }}
+        className="relative"
+      >
+        <img
+          src={imgSrc}
+          alt={alt}
+          className={className}
+          onLoad={handleLoad}
+          onError={handleError}
+          loading="lazy"
+          decoding="async"
+        />
+      </motion.div>
+      
+      {/* Loading skeleton */}
+      {!isLoaded && !hasError && (
+        <div className={`${className} bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse rounded-lg absolute inset-0 flex items-center justify-center`}>
+          <div className="w-8 h-8 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 });
 
