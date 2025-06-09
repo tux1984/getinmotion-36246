@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
@@ -288,83 +287,79 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       title={t[language].title}
       subtitle={t[language].subtitle}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-        {/* Left Column - Scores and Character */}
+      <div className="w-full max-w-4xl mx-auto space-y-8">
+        {/* Character illustration and maturity level - centered */}
         <motion.div 
-          className="space-y-8"
+          className="flex flex-col items-center text-center mb-8"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <img 
+            src={illustration} 
+            alt="Character illustration" 
+            className="w-32 h-32 object-contain mb-4"
+          />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h3 className="text-2xl font-bold text-purple-900 mb-2">
+              {getMaturityLevel()}
+            </h3>
+            <p className="text-gray-600">
+              {getProfileTypeSubtitle()}
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Main content grid */}
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Character illustration */}
-          <motion.div 
-            className="flex flex-col justify-center items-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <img 
-              src={illustration} 
-              alt="Character illustration" 
-              className="w-48 h-48 object-contain"
-            />
-            
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-center mt-4"
-            >
-              <h3 className="text-xl font-bold text-purple-900">
-                {getMaturityLevel()}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {getProfileTypeSubtitle()}
-              </p>
-            </motion.div>
-          </motion.div>
-
-          {/* Score Card */}
+          {/* Left Column - Score Card */}
           <motion.div 
             variants={itemVariants}
-            className={`bg-gradient-to-br ${getScoreGradient(overallScore)} rounded-2xl border border-slate-200/50 shadow-lg p-6 relative overflow-hidden`}
+            className={`bg-gradient-to-br ${getScoreGradient(overallScore)} rounded-2xl border border-slate-200/50 shadow-lg p-8 relative overflow-hidden h-fit`}
           >
             <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 blur-xl"></div>
             <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white/30 to-transparent"></div>
             
             <div className="relative z-10">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-medium text-gray-700">
-                    {t[language].overallMaturity}
-                  </span>
-                  <h3 className="text-2xl font-bold mt-1">{getMaturityLevel()}</h3>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className={`w-16 h-16 rounded-full ${getScoreGradient(overallScore)} shadow-inner border border-white/50 flex items-center justify-center`}>
-                    <span className="text-xl font-extrabold">{overallScore}%</span>
+              <div className="mb-8 text-center">
+                <span className="text-sm font-medium text-gray-700 block mb-2">
+                  {t[language].overallMaturity}
+                </span>
+                <div className="flex items-center justify-center space-x-4">
+                  <h3 className="text-3xl font-bold">{getMaturityLevel()}</h3>
+                  <div className={`w-20 h-20 rounded-full ${getScoreGradient(overallScore)} shadow-inner border border-white/50 flex items-center justify-center`}>
+                    <span className="text-2xl font-extrabold">{overallScore}%</span>
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">{t[language].categoriesTitle}</h4>
+              <div className="space-y-6">
+                <h4 className="text-lg font-semibold text-gray-700 mb-4 text-center">{t[language].categoriesTitle}</h4>
                 
                 <motion.div
                   variants={itemVariants}
-                  className="space-y-4"
+                  className="space-y-5"
                 >
-                  {/* Category Progress Bars */}
+                  {/* Category Progress Bars with improved spacing */}
                   <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-indigo-500"></div>
                         <span className="text-sm font-medium">{t[language].categoryLabels.ideaValidation}</span>
                       </div>
-                      <span className="text-sm font-medium">{scores.ideaValidation}%</span>
+                      <span className="text-sm font-bold">{scores.ideaValidation}%</span>
                     </div>
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
                       <motion.div 
                         className={`h-full rounded-full ${getCategoryColor(scores.ideaValidation)}`}
                         initial={{ width: 0 }}
@@ -375,14 +370,14 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
                   </div>
                   
                   <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-purple-500"></div>
                         <span className="text-sm font-medium">{t[language].categoryLabels.userExperience}</span>
                       </div>
-                      <span className="text-sm font-medium">{scores.userExperience}%</span>
+                      <span className="text-sm font-bold">{scores.userExperience}%</span>
                     </div>
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
                       <motion.div
                         className={`h-full rounded-full ${getCategoryColor(scores.userExperience)}`}
                         initial={{ width: 0 }}
@@ -393,14 +388,14 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
                   </div>
                   
                   <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
                         <span className="text-sm font-medium">{t[language].categoryLabels.marketFit}</span>
                       </div>
-                      <span className="text-sm font-medium">{scores.marketFit}%</span>
+                      <span className="text-sm font-bold">{scores.marketFit}%</span>
                     </div>
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
                       <motion.div
                         className={`h-full rounded-full ${getCategoryColor(scores.marketFit)}`}
                         initial={{ width: 0 }}
@@ -411,14 +406,14 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
                   </div>
                   
                   <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
                         <span className="text-sm font-medium">{t[language].categoryLabels.monetization}</span>
                       </div>
-                      <span className="text-sm font-medium">{scores.monetization}%</span>
+                      <span className="text-sm font-bold">{scores.monetization}%</span>
                     </div>
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
                       <motion.div
                         className={`h-full rounded-full ${getCategoryColor(scores.monetization)}`}
                         initial={{ width: 0 }}
@@ -431,122 +426,121 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
               </div>
             </div>
           </motion.div>
-        </motion.div>
 
-        {/* Right Column - Recommendations */}
-        <motion.div 
-          className="space-y-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* AI Recommendations */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white backdrop-blur-sm bg-opacity-90 rounded-2xl border border-slate-200/50 shadow-lg p-6 relative overflow-hidden w-full"
+          {/* Right Column - Recommendations */}
+          <motion.div 
+            className="space-y-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 blur-3xl opacity-60"></div>
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 blur-3xl opacity-60"></div>
-            
-            <div className="relative z-10 w-full">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
-                  <Sparkles className="w-4 h-4" />
+            {/* AI Recommendations */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-white backdrop-blur-sm bg-opacity-90 rounded-2xl border border-slate-200/50 shadow-lg p-6 relative overflow-hidden"
+            >
+              <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 blur-3xl opacity-60"></div>
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 blur-3xl opacity-60"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                    {t[language].aiRecommendations}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                  {t[language].aiRecommendations}
-                </h3>
-              </div>
 
-              {isLoadingRecommendations ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-5 h-5 animate-spin text-purple-600 mr-2" />
-                  <span className="text-sm text-gray-600">{t[language].loadingRecommendations}</span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {aiRecommendations.map((recommendation, index) => (
-                    <motion.div 
-                      key={index}
-                      custom={index}
-                      variants={agentVariants}
-                      className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100/50 hover:shadow-sm hover:border-purple-200/50 transition-all w-full"
-                    >
-                      <div className="flex gap-3 w-full">
-                        <div className="shrink-0">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center">
-                            <Stars className="w-4 h-4" />
+                {isLoadingRecommendations ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-purple-600 mr-3" />
+                    <span className="text-gray-600">{t[language].loadingRecommendations}</span>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {aiRecommendations.map((recommendation, index) => (
+                      <motion.div 
+                        key={index}
+                        custom={index}
+                        variants={agentVariants}
+                        className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100/50 hover:shadow-sm hover:border-purple-200/50 transition-all"
+                      >
+                        <div className="flex gap-3">
+                          <div className="shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center">
+                              <Stars className="w-4 h-4" />
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-1">
-                            <h4 className="font-medium text-gray-900 text-sm">{recommendation.title}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(recommendation.priority)}`}>
-                              {recommendation.priority}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900 text-sm">{recommendation.title}</h4>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(recommendation.priority)}`}>
+                                {recommendation.priority}
+                              </span>
+                            </div>
+                            <p className="text-gray-600 text-sm mb-2">
+                              {recommendation.description}
+                            </p>
+                            <span className="text-xs text-purple-600 font-medium">
+                              ⏱️ {recommendation.timeframe}
                             </span>
                           </div>
-                          <p className="text-gray-600 text-xs mb-1">
-                            {recommendation.description}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+            
+            {/* Agent Recommendations */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-white backdrop-blur-sm bg-opacity-90 rounded-2xl border border-slate-200/50 shadow-lg p-6 relative overflow-hidden"
+            >
+              <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-100 blur-3xl opacity-60"></div>
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-blue-100 blur-3xl opacity-60"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className={`w-10 h-10 rounded-full ${getIndustryIllustration()} flex items-center justify-center text-white`}>
+                    <Stars className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                    {t[language].agentRecommendation}
+                  </h3>
+                </div>
+                
+                <div className="space-y-4 mb-8">
+                  {getRecommendedAgents().map((agent, index) => (
+                    <motion.div 
+                      key={agent.id}
+                      custom={index}
+                      variants={agentVariants}
+                      className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100/50 hover:shadow-sm hover:border-indigo-200/50 transition-all"
+                    >
+                      <div className="flex gap-3">
+                        <div className="shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center">
+                            <Check className="w-4 h-4" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 text-sm mb-1">{agent.name}</h4>
+                          <p className="text-gray-600 text-sm">
+                            {agent.reason}
                           </p>
-                          <span className="text-xs text-purple-600 font-medium">
-                            ⏱️ {recommendation.timeframe}
-                          </span>
                         </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
-              )}
-            </div>
-          </motion.div>
-          
-          {/* Agent Recommendations */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white backdrop-blur-sm bg-opacity-90 rounded-2xl border border-slate-200/50 shadow-lg p-6 relative overflow-hidden w-full"
-          >
-            <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-100 blur-3xl opacity-60"></div>
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-blue-100 blur-3xl opacity-60"></div>
-            
-            <div className="relative z-10 w-full">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className={`w-8 h-8 rounded-full ${getIndustryIllustration()} flex items-center justify-center text-white`}>
-                  <Stars className="w-4 h-4" />
-                </div>
-                <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                  {t[language].agentRecommendation}
-                </h3>
-              </div>
-              
-              <div className="space-y-3 mb-6">
-                {getRecommendedAgents().map((agent, index) => (
-                  <motion.div 
-                    key={agent.id}
-                    custom={index}
-                    variants={agentVariants}
-                    className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100/50 hover:shadow-sm hover:border-indigo-200/50 transition-all w-full"
-                  >
-                    <div className="flex gap-3 w-full">
-                      <div className="shrink-0">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center">
-                          <Check className="w-4 h-4" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 text-sm">{agent.name}</h4>
-                        <p className="text-gray-600 text-xs mt-1">
-                          {agent.reason}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-              
-              <div className="w-full">
+                
                 <Button 
                   onClick={handleActivateAgents}
-                  className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-sm font-medium py-4 group relative overflow-hidden shadow-lg"
+                  className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 font-semibold py-4 group relative overflow-hidden shadow-lg"
+                  size="lg"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 w-full rounded-md overflow-hidden">
                     <span className="absolute -inset-[50%] top-0 blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-500">
@@ -554,10 +548,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
                     </span>
                   </span>
                   <span className="relative">{t[language].primaryButtonText}</span>
-                  <ChevronRight className="w-4 h-4 relative group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="w-5 h-5 relative group-hover:translate-x-1 transition-all" />
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </div>
