@@ -4,7 +4,7 @@ import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Brain, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { Loader2, Brain, ChevronRight, ChevronLeft, Sparkles, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +41,7 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generationError, setGenerationError] = useState(false);
   const { toast } = useToast();
 
   const t = {
@@ -57,7 +58,11 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
       errorGenerating: "Unable to generate questions. Let's proceed with your assessment.",
       skipStep: "Skip This Step",
       almostDone: "Almost done! Just a few more insights to personalize your recommendations.",
-      thinking: "Generating your personalized questions..."
+      thinking: "Generating your personalized questions...",
+      errorTitle: "Question Generation Failed",
+      errorMessage: "We couldn't generate personalized questions right now. You can skip this step or try again.",
+      tryAgain: "Try Again",
+      proceedAnyway: "Proceed Without Questions"
     },
     es: {
       title: "Profundicemos Más",
@@ -72,64 +77,60 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
       errorGenerating: "No se pudieron generar las preguntas. Continuemos con tu evaluación.",
       skipStep: "Omitir Este Paso",
       almostDone: "¡Casi terminamos! Solo unos insights más para personalizar tus recomendaciones.",
-      thinking: "Generando tus preguntas personalizadas..."
+      thinking: "Generando tus preguntas personalizadas...",
+      errorTitle: "Falló la Generación de Preguntas",
+      errorMessage: "No pudimos generar preguntas personalizadas en este momento. Puedes omitir este paso o intentar de nuevo.",
+      tryAgain: "Intentar de Nuevo",
+      proceedAnyway: "Continuar Sin Preguntas"
     }
   };
 
   // Generate dynamic questions based on user's profile data
-  useEffect(() => {
-    const generateDynamicQuestions = async () => {
-      try {
-        setIsLoadingQuestions(true);
-        
-        console.log('Generating dynamic questions for profile:', profileData);
-        
-        const { data, error } = await supabase.functions.invoke('generate-dynamic-questions', {
-          body: {
-            profileData,
-            language
-          }
-        });
-
-        if (error) {
-          console.error('Error generating dynamic questions:', error);
-          toast({
-            title: t[language].errorGenerating,
-            variant: 'destructive'
-          });
-          // Proceed to next step if questions can't be generated
-          onNext();
-          return;
+  const generateDynamicQuestions = async () => {
+    try {
+      setIsLoadingQuestions(true);
+      setGenerationError(false);
+      
+      console.log('Generating dynamic questions for profile:', profileData);
+      
+      const { data, error } = await supabase.functions.invoke('generate-dynamic-questions', {
+        body: {
+          profileData,
+          language
         }
+      });
 
-        console.log('Dynamic questions response:', data);
-
-        if (data?.questions && Array.isArray(data.questions) && data.questions.length > 0) {
-          const questionsWithIds = data.questions.map((q: any, index: number) => ({
-            id: `dynamic_${index + 1}`,
-            question: q.question,
-            context: q.context
-          }));
-          setDynamicQuestions(questionsWithIds);
-          console.log('Set dynamic questions:', questionsWithIds);
-        } else {
-          console.log('No questions generated, proceeding to next step');
-          onNext();
-        }
-      } catch (error) {
+      if (error) {
         console.error('Error generating dynamic questions:', error);
-        toast({
-          title: t[language].errorGenerating,
-          variant: 'destructive'
-        });
-        onNext();
-      } finally {
-        setIsLoadingQuestions(false);
+        setGenerationError(true);
+        return;
       }
-    };
 
+      console.log('Dynamic questions response:', data);
+
+      if (data?.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+        const questionsWithIds = data.questions.map((q: any, index: number) => ({
+          id: `dynamic_${index + 1}`,
+          question: q.question,
+          context: q.context
+        }));
+        setDynamicQuestions(questionsWithIds);
+        console.log('Set dynamic questions:', questionsWithIds);
+      } else {
+        console.log('No questions generated, setting error state');
+        setGenerationError(true);
+      }
+    } catch (error) {
+      console.error('Error generating dynamic questions:', error);
+      setGenerationError(true);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  };
+
+  useEffect(() => {
     generateDynamicQuestions();
-  }, [profileData, language, toast, onNext]);
+  }, [profileData, language]);
 
   const currentQuestion = dynamicQuestions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === dynamicQuestions.length - 1;
@@ -188,6 +189,11 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
     onNext();
   };
 
+  const handleRetry = () => {
+    generateDynamicQuestions();
+  };
+
+  // Loading state
   if (isLoadingQuestions) {
     return (
       <StepContainer
@@ -226,10 +232,46 @@ export const DynamicQuestionsStep: React.FC<DynamicQuestionsStepProps> = ({
     );
   }
 
-  if (!currentQuestion || dynamicQuestions.length === 0) {
-    console.log('No current question or empty questions array, proceeding to next step');
-    onNext();
-    return null;
+  // Error state
+  if (generationError || dynamicQuestions.length === 0) {
+    return (
+      <StepContainer
+        title={t[language].title}
+        subtitle={t[language].subtitle}
+      >
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-8">
+            <AlertCircle className="w-10 h-10 text-red-500" />
+          </div>
+          
+          <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
+            {t[language].errorTitle}
+          </h3>
+          
+          <p className="text-gray-600 text-center max-w-md mb-8">
+            {t[language].errorMessage}
+          </p>
+          
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              onClick={handleRetry}
+              className="flex items-center gap-2"
+            >
+              <Loader2 className="w-4 h-4" />
+              {t[language].tryAgain}
+            </Button>
+            
+            <Button
+              onClick={handleSkip}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+            >
+              {t[language].proceedAnyway}
+            </Button>
+          </div>
+        </div>
+      </StepContainer>
+    );
   }
 
   return (
