@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CulturalProfileStep } from '../wizard-steps/CulturalProfileStep';
 import { BusinessMaturityStep } from '../wizard-steps/BusinessMaturityStep';
@@ -12,6 +11,7 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { getStepImage } from './CharacterImageSelector';
 import { OptimizedCharacterImage } from '../components/OptimizedCharacterImage';
+import { DynamicQuestionsStep } from '../wizard-steps/DynamicQuestionsStep';
 
 interface StepRouterProps {
   currentStepId: WizardStepId;
@@ -127,6 +127,20 @@ export const StepRouter: React.FC<StepRouterProps> = ({
     case 'extendedQuestions':
       return renderStepWithCharacter(
         <ExtendedQuestionsStep
+          profileData={profileData}
+          updateProfileData={updateProfileData}
+          language={language}
+          currentStepNumber={currentStepNumber}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          isStepValid={isCurrentStepValid()}
+        />
+      );
+
+    case 'dynamicQuestions':
+      return renderStepWithCharacter(
+        <DynamicQuestionsStep
           profileData={profileData}
           updateProfileData={updateProfileData}
           language={language}

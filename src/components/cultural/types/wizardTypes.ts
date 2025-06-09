@@ -1,45 +1,45 @@
 
+export type ProfileType = 'idea' | 'solo' | 'team';
+
 export interface UserProfileData {
-  profileType: 'solo' | 'idea' | 'team';
+  profileType: ProfileType;
+  
+  // Cultural profile questions
   industry: string;
   activities: string[];
   experience: string;
-  paymentMethods: string | string[]; // Can be single or multiple
+  
+  // Business maturity questions
+  paymentMethods: string;
   brandIdentity: string;
   financialControl: string;
+  
+  // Management style questions
   teamStructure: string;
-  taskOrganization: string | string[]; // Can be single or multiple
+  taskOrganization: string;
   decisionMaking: string;
+  
+  // Analysis preference
   analysisPreference?: 'quick' | 'deep';
+  
   // Extended questions for deep analysis
   pricingMethod: string;
   internationalSales: string;
   formalizedBusiness: string;
-  collaboration: string | string[]; // Can be single or multiple
+  collaboration: string;
   economicSustainability: string;
+  
+  // Dynamic questions answers
+  dynamicQuestionAnswers?: Record<string, string>;
 }
 
-export type WizardStepId = 
-  | 'culturalProfile'
-  | 'businessMaturity' 
-  | 'managementStyle'
-  | 'bifurcation'
-  | 'extendedQuestions'
-  | 'results';
-
-export interface WizardHookReturn {
-  currentStepId: WizardStepId;
+export interface WizardStepProps {
   profileData: UserProfileData;
-  totalSteps: number;
-  currentStepNumber: number;
   updateProfileData: (data: Partial<UserProfileData>) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
-  calculateMaturityScores: () => any;
-  getRecommendedAgents: (scores: any) => any;
-  handleCompleteWizard: () => void;
-  isCurrentStepValid: () => boolean;
-  showBifurcation: boolean;
-  analysisType: 'quick' | 'deep' | null;
-  handleAnalysisChoice: (type: 'quick' | 'deep') => void;
+  language: 'en' | 'es';
+  currentStepNumber: number;
+  totalSteps: number;
+  onNext: () => void;
+  onPrevious?: () => void;
+  isStepValid: boolean;
 }

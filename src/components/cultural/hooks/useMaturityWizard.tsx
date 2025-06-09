@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -48,18 +47,19 @@ export const useMaturityWizard = (
     economicSustainability: ''
   });
   
-  // Define step sequence
+  // Define step sequence - now includes dynamic questions
   const stepSequence: WizardStepId[] = [
     'culturalProfile',    
     'businessMaturity',   
     'managementStyle',    
     'bifurcation',        
     'extendedQuestions',  
+    'dynamicQuestions',   // New step
     'results'             
   ];
   
   const currentStepIndex = stepSequence.indexOf(currentStepId);
-  const totalSteps = analysisType === 'deep' ? 6 : 5;
+  const totalSteps = analysisType === 'deep' ? 7 : 6; // Updated step count
   const currentStepNumber = currentStepIndex + 1;
   
   // Check if current step is valid
@@ -79,7 +79,7 @@ export const useMaturityWizard = (
   const handleNext = () => {
     if (currentStepId === 'bifurcation') {
       if (analysisType === 'quick') {
-        setCurrentStepId('results');
+        setCurrentStepId('dynamicQuestions'); // Go to dynamic questions for both paths
       } else if (analysisType === 'deep') {
         setCurrentStepId('extendedQuestions');
       }
@@ -92,7 +92,7 @@ export const useMaturityWizard = (
       const nextStep = stepSequence[nextIndex];
       
       if (nextStep === 'extendedQuestions' && analysisType === 'quick') {
-        setCurrentStepId('results');
+        setCurrentStepId('dynamicQuestions');
       } else {
         setCurrentStepId(nextStep);
       }
@@ -100,17 +100,22 @@ export const useMaturityWizard = (
   };
   
   const handlePrevious = () => {
+    if (currentStepId === 'dynamicQuestions') {
+      if (analysisType === 'deep') {
+        setCurrentStepId('extendedQuestions');
+      } else {
+        setCurrentStepId('bifurcation');
+      }
+      return;
+    }
+    
     if (currentStepId === 'extendedQuestions') {
       setCurrentStepId('bifurcation');
       return;
     }
     
     if (currentStepId === 'results') {
-      if (analysisType === 'deep') {
-        setCurrentStepId('extendedQuestions');
-      } else {
-        setCurrentStepId('bifurcation');
-      }
+      setCurrentStepId('dynamicQuestions');
       return;
     }
     

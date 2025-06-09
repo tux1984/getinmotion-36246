@@ -38,6 +38,13 @@ serve(async (req) => {
       (scores.ideaValidation + scores.userExperience + scores.marketFit + scores.monetization) / 4
     );
 
+    // Include dynamic question answers in the analysis
+    const dynamicAnswersText = profileData.dynamicQuestionAnswers 
+      ? Object.entries(profileData.dynamicQuestionAnswers)
+          .map(([key, answer]) => `${key}: ${answer}`)
+          .join('\n')
+      : 'No additional insights provided';
+
     const systemPrompt = language === 'es' 
       ? `Eres un experto consultor en negocios creativos y culturales. Analiza los resultados de evaluación de madurez de un creador cultural.
 
@@ -50,11 +57,15 @@ Puntuaciones de madurez (0-100):
 
 Información del perfil: ${JSON.stringify(profileData)}
 
+Respuestas adicionales del usuario:
+${dynamicAnswersText}
+
 Proporciona entre 3 y 5 recomendaciones de acción específicas, prácticas y accionables para mejorar su negocio creativo. Cada recomendación debe:
 1. Ser específica para su nivel de madurez actual
 2. Dirigirse a las áreas más débiles identificadas
 3. Ser accionable en los próximos 30-90 días
 4. Ser relevante para el sector creativo/cultural
+5. Considerar las respuestas adicionales proporcionadas por el usuario
 
 Responde SOLO con un JSON en este formato:
 {
@@ -78,11 +89,15 @@ Maturity scores (0-100):
 
 Profile information: ${JSON.stringify(profileData)}
 
+Additional user insights:
+${dynamicAnswersText}
+
 Provide between 3 and 5 specific, practical, and actionable recommendations to improve their creative business. Each recommendation should:
 1. Be specific to their current maturity level
 2. Target the weakest areas identified
 3. Be actionable within the next 30-90 days
 4. Be relevant to the creative/cultural sector
+5. Consider the additional insights provided by the user
 
 Respond ONLY with a JSON in this format:
 {
