@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
 
 interface Option {
   id: string;
@@ -13,91 +12,68 @@ interface Option {
 interface CheckboxCardsProps {
   options: Option[];
   selectedValues: string[];
-  onChange: (value: string, isChecked: boolean) => void;
+  onChange: (value: string, checked: boolean) => void;
   withIcons?: boolean;
 }
 
-export const CheckboxCards: React.FC<CheckboxCardsProps> = ({ 
-  options, 
-  selectedValues, 
+export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
+  options,
+  selectedValues,
   onChange,
-  withIcons 
+  withIcons = false
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {options.map((option) => {
+      {options.map((option, index) => {
         const isSelected = selectedValues.includes(option.id);
+        
         return (
           <motion.div
             key={option.id}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            layout
-            className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative overflow-hidden ${
-              isSelected 
-                ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-100 shadow-md' 
-                : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/30'
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={`relative cursor-pointer rounded-xl border-2 transition-all duration-200 ${
+              isSelected
+                ? 'border-purple-500 bg-purple-50 shadow-lg'
+                : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
             }`}
             onClick={() => onChange(option.id, !isSelected)}
           >
-            <div className="flex items-center space-x-3 relative z-10">
-              <div className="relative flex h-5 w-5 shrink-0 items-center justify-center">
-                <Checkbox
-                  id={option.id}
-                  checked={isSelected}
-                  onCheckedChange={() => onChange(option.id, !isSelected)}
-                  className="h-5 w-5 border-2 border-emerald-200 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
-                />
-                {isSelected && (
-                  <motion.div
-                    className="absolute inset-0 -z-10 rounded-sm"
-                    layoutId="checkbox-highlight"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  />
-                )}
-              </div>
-              
-              {option.icon && withIcons && (
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  isSelected 
-                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md' 
-                    : 'bg-gray-100 text-gray-500'
+            <div className="p-4">
+              {withIcons && option.icon && (
+                <div className={`mb-3 flex justify-center ${
+                  isSelected ? 'text-purple-600' : 'text-gray-500'
                 }`}>
                   {option.icon}
                 </div>
               )}
               
-              <Label
-                htmlFor={option.id}
-                className={`flex-1 cursor-pointer text-lg ${isSelected ? 'text-emerald-900 font-medium' : 'text-gray-700'}`}
-              >
-                {option.label}
-              </Label>
+              <div className="text-center">
+                <span className={`font-medium ${
+                  isSelected ? 'text-purple-800' : 'text-gray-700'
+                }`}>
+                  {option.label}
+                </span>
+              </div>
+              
+              {isSelected && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-3 right-3 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center"
+                >
+                  <Check className="w-4 h-4 text-white" />
+                </motion.div>
+              )}
             </div>
             
-            {/* Enhanced visual feedback */}
-            {isSelected && (
-              <>
-                <motion.div 
-                  className="absolute -inset-px rounded-2xl bg-emerald-300/10 blur-sm"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.7 }}
-                  exit={{ opacity: 0 }}
-                />
-                
-                <motion.div 
-                  className="absolute -bottom-8 right-0 w-32 h-32 rounded-full bg-gradient-to-r from-emerald-400/10 to-teal-400/20 blur-xl"
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, 0], 
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
-              </>
-            )}
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onChange(option.id, !isSelected)}
+              className="sr-only"
+            />
           </motion.div>
         );
       })}

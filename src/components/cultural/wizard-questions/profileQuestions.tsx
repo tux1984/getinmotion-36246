@@ -18,32 +18,32 @@ export const getProfileQuestions = (language: 'en' | 'es'): Record<string, Quest
         { 
           id: 'music', 
           label: language === 'en' ? 'Music' : 'Música',
-          icon: <Music className="w-6 h-6 text-blue-500" />
+          icon: <Music className="w-8 h-8" />
         },
         { 
           id: 'visual-arts', 
           label: language === 'en' ? 'Visual Arts' : 'Artes Visuales',
-          icon: <Palette className="w-6 h-6 text-green-500" />
+          icon: <Palette className="w-8 h-8" />
         },
         { 
           id: 'performing-arts', 
           label: language === 'en' ? 'Performing Arts' : 'Artes Escénicas',
-          icon: <Drama className="w-6 h-6 text-red-500" />
+          icon: <Drama className="w-8 h-8" />
         },
         { 
           id: 'literature', 
           label: language === 'en' ? 'Literature' : 'Literatura',
-          icon: <BookOpen className="w-6 h-6 text-purple-500" />
+          icon: <BookOpen className="w-8 h-8" />
         },
         { 
           id: 'audiovisual', 
           label: language === 'en' ? 'Audiovisual' : 'Audiovisual',
-          icon: <Video className="w-6 h-6 text-indigo-500" />
+          icon: <Video className="w-8 h-8" />
         },
         { 
           id: 'digital-arts', 
           label: language === 'en' ? 'Digital Arts' : 'Artes Digitales',
-          icon: <Smartphone className="w-6 h-6 text-teal-500" />
+          icon: <Smartphone className="w-8 h-8" />
         }
       ]
     },
