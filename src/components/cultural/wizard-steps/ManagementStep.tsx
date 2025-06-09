@@ -20,7 +20,8 @@ interface ManagementStepProps {
 }
 
 export const ManagementStep: React.FC<ManagementStepProps> = (props) => {
-  const questions = getManagementQuestions(props.language);
+  const questionsObject = getManagementQuestions(props.language);
+  const questions = Object.values(questionsObject);
   
   return (
     <>

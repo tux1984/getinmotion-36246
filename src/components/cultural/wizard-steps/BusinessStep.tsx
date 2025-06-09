@@ -20,7 +20,8 @@ interface BusinessStepProps {
 }
 
 export const BusinessStep: React.FC<BusinessStepProps> = (props) => {
-  const questions = getBusinessQuestions(props.language);
+  const questionsObject = getBusinessQuestions(props.language);
+  const questions = Object.values(questionsObject);
   
   return (
     <>

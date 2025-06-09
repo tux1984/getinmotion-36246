@@ -20,7 +20,8 @@ interface DetailedAnalysisStepProps {
 }
 
 export const DetailedAnalysisStep: React.FC<DetailedAnalysisStepProps> = (props) => {
-  const questions = getAnalysisQuestions(props.language);
+  const questionsObject = getAnalysisQuestions(props.language);
+  const questions = Object.values(questionsObject);
   
   return (
     <>
