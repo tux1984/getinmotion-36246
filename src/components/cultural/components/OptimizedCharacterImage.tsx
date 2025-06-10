@@ -19,7 +19,7 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
   const [hasError, setHasError] = useState(false);
   const [imgSrc, setImgSrc] = useState(src);
 
-  // Fallback image
+  // Fallback image - using the default cultural assessment image
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
   const handleLoad = useCallback(() => {
@@ -35,24 +35,28 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
   }, [preloadNext, imgSrc]);
 
   const handleError = useCallback(() => {
-    console.warn('Character image failed to load:', imgSrc, 'Trying fallback...');
+    console.warn('Character image failed to load:', imgSrc);
     if (imgSrc !== fallbackImage) {
+      console.log('Switching to fallback image:', fallbackImage);
       setImgSrc(fallbackImage);
       setHasError(false);
+      setIsLoaded(false);
     } else {
+      console.error('Fallback image also failed to load');
       setHasError(true);
     }
   }, [imgSrc, fallbackImage]);
 
   // Update src when prop changes
   React.useEffect(() => {
-    if (src && src !== imgSrc) {
+    if (src !== imgSrc && !hasError) {
       setImgSrc(src);
       setIsLoaded(false);
       setHasError(false);
     }
-  }, [src, imgSrc]);
+  }, [src, imgSrc, hasError]);
 
+  // If all images fail, show a styled placeholder
   if (hasError) {
     return (
       <div className={`${className} bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center border border-purple-200`}>
@@ -70,11 +74,18 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
 
   return (
     <div className="relative">
+      {/* Loading skeleton */}
+      {!isLoaded && (
+        <div className={`${className} bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse rounded-lg flex items-center justify-center`}>
+          <div className="w-8 h-8 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 0.95 }}
         transition={{ duration: 0.3 }}
-        className="relative"
+        className={isLoaded ? "relative" : "absolute inset-0"}
       >
         <img
           src={imgSrc}
@@ -82,17 +93,11 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
           className={className}
           onLoad={handleLoad}
           onError={handleError}
-          loading="lazy"
+          loading="eager"
           decoding="async"
+          style={{ display: isLoaded ? 'block' : 'none' }}
         />
       </motion.div>
-      
-      {/* Loading skeleton */}
-      {!isLoaded && !hasError && (
-        <div className={`${className} bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse rounded-lg absolute inset-0 flex items-center justify-center`}>
-          <div className="w-8 h-8 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
     </div>
   );
 });

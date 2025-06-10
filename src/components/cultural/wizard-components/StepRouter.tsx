@@ -47,19 +47,23 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   analysisType,
   handleAnalysisChoice
 }) => {
+  // Get the appropriate image for the current step
   const characterImage = getStepImage(currentStepId, calculateMaturityScores);
   
-  // Fallback image in case the primary image fails
+  // Always ensure we have a fallback image
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
+  const finalImageSrc = characterImage || fallbackImage;
 
-  // Common layout with character image - Enhanced with better error handling
+  console.log('StepRouter - Current step:', currentStepId, 'Image:', finalImageSrc);
+
+  // Common layout with character image
   const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
     <div className="flex gap-8 items-start max-w-6xl mx-auto">
-      {/* Character Image - Always visible on desktop */}
+      {/* Character Image - Desktop */}
       <div className="w-1/3 flex-shrink-0 hidden md:block">
         <div className="sticky top-4">
           <OptimizedCharacterImage
-            src={characterImage || fallbackImage}
+            src={finalImageSrc}
             alt="Cultural assessment guide"
             className="w-full h-auto max-w-sm mx-auto rounded-lg shadow-sm"
             preloadNext={getStepImage('results', calculateMaturityScores)}
@@ -67,10 +71,10 @@ export const StepRouter: React.FC<StepRouterProps> = ({
         </div>
       </div>
       
-      {/* Mobile Character Image - Smaller version */}
+      {/* Mobile Character Image */}
       <div className="w-full flex justify-center mb-6 md:hidden">
         <OptimizedCharacterImage
-          src={characterImage || fallbackImage}
+          src={finalImageSrc}
           alt="Cultural assessment guide"
           className="w-48 h-auto rounded-lg shadow-sm"
         />
@@ -176,7 +180,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
           recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
           language={language}
           onComplete={onComplete}
-          illustration={characterImage || fallbackImage}
+          illustration={finalImageSrc}
         />
       );
     
