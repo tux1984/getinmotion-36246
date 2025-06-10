@@ -14,7 +14,17 @@ export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () 
     results: '/lovable-uploads/f8038b45-1f3e-4034-9af0-f7c1fd90dcab.png'
   };
 
-  console.log('CharacterImageSelector - Getting image for step:', stepId);
+  console.log('🎯 IMAGE SELECTOR: Getting image for step:', stepId);
+  console.log('   - Available step images:', Object.keys(stepImages));
+
+  // Test image availability by trying to create image objects
+  console.log('🧪 TESTING: Image availability');
+  Object.entries(stepImages).forEach(([key, path]) => {
+    const testImg = new Image();
+    testImg.onload = () => console.log(`✅ AVAILABLE: ${key} -> ${path}`);
+    testImg.onerror = () => console.error(`❌ NOT FOUND: ${key} -> ${path}`);
+    testImg.src = path;
+  });
 
   // Return the appropriate image for the current step
   if (stepId === 'results' && calculateMaturityScores) {
@@ -23,17 +33,25 @@ export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () 
       (scores.ideaValidation + scores.userExperience + scores.marketFit + scores.monetization) / 4
     );
     
+    console.log('📊 RESULTS STEP: Calculated overall score:', overallScore);
+    
     if (overallScore >= 80) {
-      return '/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png';
+      const highScoreImage = '/lovable-uploads/e5849e7b-cac1-4c76-9858-c7d5222cce96.png';
+      console.log('🏆 HIGH SCORE: Using high score image:', highScoreImage);
+      return highScoreImage;
     } else if (overallScore >= 60) {
-      return '/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png';
+      const mediumScoreImage = '/lovable-uploads/390caed4-1006-489e-9da8-b17d9f8fb814.png';
+      console.log('📈 MEDIUM SCORE: Using medium score image:', mediumScoreImage);
+      return mediumScoreImage;
     } else {
-      return '/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png';
+      const lowScoreImage = '/lovable-uploads/4da82626-7a63-45bd-a402-64023f2f2d44.png';
+      console.log('📉 LOW SCORE: Using low score image:', lowScoreImage);
+      return lowScoreImage;
     }
   }
 
   const selectedImage = stepImages[stepId] || stepImages.culturalProfile;
-  console.log('CharacterImageSelector - Selected image:', selectedImage);
+  console.log('🎨 STEP IMAGE: Selected image for', stepId, '->', selectedImage);
   
   return selectedImage;
 };

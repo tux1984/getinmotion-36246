@@ -23,7 +23,10 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
   const handleLoad = useCallback(() => {
-    console.log('✅ Character image loaded successfully:', imgSrc);
+    console.log('✅ SUCCESS: Image loaded successfully');
+    console.log('   - Image source:', imgSrc);
+    console.log('   - Original prop src:', src);
+    console.log('   - Alt text:', alt);
     setIsLoaded(true);
     setHasError(false);
     
@@ -33,38 +36,50 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
       img.src = preloadNext;
       console.log('🔄 Preloading next image:', preloadNext);
     }
-  }, [preloadNext, imgSrc]);
+  }, [preloadNext, imgSrc, src, alt]);
 
   const handleError = useCallback(() => {
-    console.error('❌ Character image failed to load:', imgSrc);
+    console.error('❌ FAILED: Image failed to load');
+    console.error('   - Failed source:', imgSrc);
+    console.error('   - Original prop src:', src);
+    console.error('   - Alt text:', alt);
+    console.error('   - Will try fallback:', fallbackImage);
+    
     if (imgSrc !== fallbackImage) {
-      console.log('🔄 Switching to fallback image:', fallbackImage);
+      console.log('🔄 RETRY: Switching to fallback image');
       setImgSrc(fallbackImage);
       setHasError(false);
       setIsLoaded(false);
     } else {
-      console.error('💥 Fallback image also failed to load');
+      console.error('💥 CRITICAL: Even fallback image failed to load');
       setHasError(true);
     }
-  }, [imgSrc, fallbackImage]);
+  }, [imgSrc, fallbackImage, src, alt]);
 
   // Update src when prop changes and ensure we always have a valid source
   React.useEffect(() => {
-    console.log('🔍 OptimizedCharacterImage useEffect - src prop:', src);
+    console.log('🔍 EFFECT: OptimizedCharacterImage useEffect triggered');
+    console.log('   - New src prop:', src);
+    console.log('   - Current imgSrc state:', imgSrc);
+    console.log('   - Has error:', hasError);
+    console.log('   - Is loaded:', isLoaded);
+    
     const validSrc = src || fallbackImage;
-    console.log('🎯 Using image source:', validSrc);
+    console.log('   - Resolved valid src:', validSrc);
     
     if (validSrc !== imgSrc && !hasError) {
-      console.log('🔄 Updating image source from', imgSrc, 'to', validSrc);
+      console.log('🔄 UPDATING: Image source changed');
+      console.log('   - From:', imgSrc);
+      console.log('   - To:', validSrc);
       setImgSrc(validSrc);
       setIsLoaded(false);
       setHasError(false);
     }
-  }, [src, imgSrc, hasError, fallbackImage]);
+  }, [src, imgSrc, hasError, fallbackImage, isLoaded]);
 
   // If all images fail, show a styled placeholder
   if (hasError) {
-    console.log('📦 Showing placeholder due to image error');
+    console.log('📦 PLACEHOLDER: Showing placeholder due to image error');
     return (
       <div className={`${className} bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center border border-purple-200`}>
         <div className="text-center p-4">
@@ -79,7 +94,10 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
     );
   }
 
-  console.log('🖼️ Rendering image - loaded:', isLoaded, 'src:', imgSrc);
+  console.log('🖼️ RENDER: Rendering image component');
+  console.log('   - Current imgSrc:', imgSrc);
+  console.log('   - Is loaded:', isLoaded);
+  console.log('   - Has error:', hasError);
 
   return (
     <div className="relative">
