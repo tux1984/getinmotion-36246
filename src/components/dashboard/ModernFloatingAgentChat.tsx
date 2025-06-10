@@ -53,12 +53,10 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
     });
   }, [agentId, currentConversationId, messages.length, isNewChat, isProcessing, messagesLoading, showHeader]);
 
-  const handleSendMessage = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || isProcessing) return;
+  const handleSendMessage = useCallback(async (message: string) => {
+    if (!message.trim() || isProcessing) return;
 
-    const messageContent = inputMessage.trim();
-    setInputMessage('');
+    const messageContent = message.trim();
     setIsProcessing(true);
 
     try {
@@ -93,7 +91,15 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
     } finally {
       setIsProcessing(false);
     }
-  }, [inputMessage, isProcessing, currentConversationId, createConversation, addMessage, sendAIMessage, setIsProcessing, toast]);
+  }, [isProcessing, currentConversationId, createConversation, addMessage, sendAIMessage, setIsProcessing, toast]);
+
+  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || isProcessing) return;
+    
+    await handleSendMessage(inputMessage);
+    setInputMessage('');
+  }, [inputMessage, isProcessing, handleSendMessage]);
 
   // Show loading state for messages
   if (messagesLoading) {
@@ -127,11 +133,10 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 
       {isNewChat ? (
         <ChatWelcomeScreen
+          agentId={agentId}
+          agentName="Asistente IA"
           language={language}
-          inputMessage={inputMessage}
-          isProcessing={isProcessing}
-          onInputChange={setInputMessage}
-          onSubmit={handleSendMessage}
+          onSendMessage={handleSendMessage}
         />
       ) : (
         <>
@@ -146,7 +151,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
             isProcessing={isProcessing}
             language={language}
             onInputChange={setInputMessage}
-            onSubmit={handleSendMessage}
+            onSubmit={handleFormSubmit}
           />
         </>
       )}
