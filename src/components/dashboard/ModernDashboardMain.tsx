@@ -1,10 +1,7 @@
 
 import React from 'react';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { ModernWelcomeSection } from './ModernWelcomeSection';
-import { ModernMaturityOverview } from './ModernMaturityOverview';
-import { ModernAgentsGrid } from './ModernAgentsGrid';
-import { useLanguage } from '@/context/LanguageContext';
+import { TaskBasedDashboard } from './TaskBasedDashboard';
 
 interface ModernDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -18,37 +15,16 @@ interface ModernDashboardMainProps {
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
-  onAgentManagerClick,
   agents,
   maturityScores,
   recommendedAgents
 }) => {
-  const { language } = useLanguage();
-
   return (
-    <div className="space-y-8">
-      {/* Two-column layout for Welcome and Maturity sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ModernWelcomeSection 
-          language={language}
-        />
-        
-        {maturityScores && (
-          <ModernMaturityOverview 
-            currentScores={maturityScores}
-            language={language}
-            onRetakeAssessment={onMaturityCalculatorClick}
-          />
-        )}
-      </div>
-      
-      <ModernAgentsGrid 
-        agents={agents}
-        recommendedAgents={recommendedAgents}
-        maturityScores={maturityScores}
-        onSelectAgent={onSelectAgent}
-        language={language}
-      />
-    </div>
+    <TaskBasedDashboard
+      agents={agents}
+      maturityScores={maturityScores}
+      onSelectAgent={onSelectAgent}
+      onMaturityCalculatorClick={onMaturityCalculatorClick}
+    />
   );
 };
