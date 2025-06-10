@@ -19,7 +19,7 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
   const [hasError, setHasError] = useState(false);
   const [imgSrc, setImgSrc] = useState(src);
 
-  // Fallback image - using the default cultural assessment image
+  // Fallback image - using a direct public path
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
   const handleLoad = useCallback(() => {
@@ -47,14 +47,15 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
     }
   }, [imgSrc, fallbackImage]);
 
-  // Update src when prop changes
+  // Update src when prop changes and ensure we always have a valid source
   React.useEffect(() => {
-    if (src !== imgSrc && !hasError) {
-      setImgSrc(src);
+    const validSrc = src || fallbackImage;
+    if (validSrc !== imgSrc && !hasError) {
+      setImgSrc(validSrc);
       setIsLoaded(false);
       setHasError(false);
     }
-  }, [src, imgSrc, hasError]);
+  }, [src, imgSrc, hasError, fallbackImage]);
 
   // If all images fail, show a styled placeholder
   if (hasError) {

@@ -3,7 +3,7 @@ import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 
 export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () => CategoryScore): string => {
-  // Base images for different steps
+  // Base images for different steps - using public folder paths
   const stepImages = {
     culturalProfile: '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png',
     businessMaturity: '/lovable-uploads/9a2715d7-552b-4658-9c27-78866aaea8b4.png',
@@ -13,6 +13,8 @@ export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () 
     dynamicQuestions: '/lovable-uploads/e2faf820-4987-4cf2-a69b-0b534fbbecbd.png',
     results: '/lovable-uploads/f8038b45-1f3e-4034-9af0-f7c1fd90dcab.png'
   };
+
+  console.log('CharacterImageSelector - Getting image for step:', stepId);
 
   // Return the appropriate image for the current step
   if (stepId === 'results' && calculateMaturityScores) {
@@ -30,5 +32,8 @@ export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () 
     }
   }
 
-  return stepImages[stepId] || stepImages.culturalProfile;
+  const selectedImage = stepImages[stepId] || stepImages.culturalProfile;
+  console.log('CharacterImageSelector - Selected image:', selectedImage);
+  
+  return selectedImage;
 };
