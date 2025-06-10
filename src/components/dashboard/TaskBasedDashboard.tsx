@@ -14,27 +14,17 @@ import {
   Target,
   Zap,
   TrendingUp,
-  Calendar
+  Calendar,
+  ArrowRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useRecommendedTasks } from '@/hooks/useRecommendedTasks';
 
 interface TaskBasedDashboardProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
-}
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  agentId: string;
-  agentName: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in_progress' | 'completed';
-  estimatedTime: string;
-  category: string;
 }
 
 export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
@@ -44,12 +34,13 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
   onMaturityCalculatorClick
 }) => {
   const { language } = useLanguage();
+  const { tasks, loading, markTaskCompleted } = useRecommendedTasks(maturityScores);
 
   const t = {
     en: {
       welcomeTitle: "Welcome to Your Creative Workspace",
       welcomeSubtitle: "Ready to bring your creative project to life?",
-      priorityTasks: "Priority Tasks",
+      priorityTasks: "Priority Tasks Based on Your Assessment",
       activeAgents: "Active AI Assistants",
       quickActions: "Quick Actions",
       projectProgress: "Project Progress",
@@ -63,12 +54,13 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
       low: "Low",
       pending: "Pending",
       inProgress: "In Progress",
-      completed: "Completed"
+      completed: "Completed",
+      startWithAgent: "Start with"
     },
     es: {
       welcomeTitle: "Bienvenido a tu Espacio Creativo",
       welcomeSubtitle: "¿Listo para dar vida a tu proyecto creativo?",
-      priorityTasks: "Tareas Prioritarias",
+      priorityTasks: "Tareas Prioritarias Basadas en tu Evaluación",
       activeAgents: "Asistentes IA Activos",
       quickActions: "Acciones Rápidas",
       projectProgress: "Progreso del Proyecto",
@@ -82,63 +74,11 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
       low: "Baja",
       pending: "Pendiente",
       inProgress: "En Progreso",
-      completed: "Completada"
+      completed: "Completada",
+      startWithAgent: "Empezar con"
     }
   };
 
-  // Generate sample tasks based on maturity scores
-  const generateTasks = (): Task[] => {
-    if (!maturityScores) return [];
-
-    const tasks: Task[] = [];
-
-    // Add tasks based on low scores (areas that need improvement)
-    if (maturityScores.ideaValidation < 60) {
-      tasks.push({
-        id: '1',
-        title: language === 'en' ? 'Validate Your Creative Concept' : 'Valida tu Concepto Creativo',
-        description: language === 'en' ? 'Research your target audience and validate market demand' : 'Investiga tu público objetivo y valida la demanda del mercado',
-        agentId: 'cultural',
-        agentName: language === 'en' ? 'Creative Specialist' : 'Especialista Creativo',
-        priority: 'high',
-        status: 'pending',
-        estimatedTime: '2 hours',
-        category: 'Research'
-      });
-    }
-
-    if (maturityScores.userExperience < 60) {
-      tasks.push({
-        id: '2',
-        title: language === 'en' ? 'Design User Journey Map' : 'Diseña el Mapa de Experiencia del Usuario',
-        description: language === 'en' ? 'Create a detailed user experience flow for your creative service' : 'Crea un flujo detallado de experiencia de usuario para tu servicio creativo',
-        agentId: 'admin',
-        agentName: language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo',
-        priority: 'medium',
-        status: 'pending',
-        estimatedTime: '1.5 hours',
-        category: 'Design'
-      });
-    }
-
-    if (maturityScores.monetization < 60) {
-      tasks.push({
-        id: '3',
-        title: language === 'en' ? 'Create Pricing Strategy' : 'Crea Estrategia de Precios',
-        description: language === 'en' ? 'Develop a competitive pricing model for your creative services' : 'Desarrolla un modelo de precios competitivo para tus servicios creativos',
-        agentId: 'accounting',
-        agentName: language === 'en' ? 'Financial Advisor' : 'Asesor Financiero',
-        priority: 'high',
-        status: 'pending',
-        estimatedTime: '1 hour',
-        category: 'Finance'
-      });
-    }
-
-    return tasks;
-  };
-
-  const tasks = generateTasks();
   const activeAgents = agents.filter(agent => agent.status === 'active');
 
   const getPriorityColor = (priority: string) => {
@@ -150,13 +90,25 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'text-green-600';
-      case 'in_progress': return 'text-blue-600';
-      case 'pending': return 'text-gray-600';
-      default: return 'text-gray-600';
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high': return '🔥';
+      case 'medium': return '⚡';
+      case 'low': return '📝';
+      default: return '📋';
     }
+  };
+
+  const handleStartTask = (task: any) => {
+    // Store the task prompt in localStorage for the agent to use
+    localStorage.setItem(`agent-${task.agentId}-prompt`, task.prompt);
+    localStorage.setItem(`agent-${task.agentId}-task`, JSON.stringify({
+      title: task.title,
+      description: task.description
+    }));
+    
+    // Navigate to the agent
+    onSelectAgent(task.agentId);
   };
 
   const overallProgress = maturityScores 
@@ -189,10 +141,20 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
               <CardTitle className="flex items-center gap-3 text-white">
                 <Target className="w-6 h-6 text-purple-400" />
                 {t[language].priorityTasks}
+                {tasks.length > 0 && (
+                  <Badge className="bg-purple-600 text-white">
+                    {tasks.length} tareas
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {tasks.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-white/60">Generando recomendaciones personalizadas...</p>
+                </div>
+              ) : tasks.length === 0 ? (
                 <div className="text-center py-12">
                   <Clock className="w-16 h-16 text-white/40 mx-auto mb-4" />
                   <h3 className="text-white font-semibold mb-2">{t[language].noTasks}</h3>
@@ -209,30 +171,44 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-white/10 rounded-xl p-4 border border-white/10"
+                      className="bg-white/10 rounded-xl p-6 border border-white/10 hover:bg-white/15 transition-all"
                     >
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-white">{task.title}</h4>
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-lg">{getPriorityIcon(task.priority)}</span>
+                            <h4 className="font-semibold text-white text-lg">{task.title}</h4>
                             <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
                               {t[language][task.priority as keyof typeof t[typeof language]]}
                             </Badge>
+                            {task.category && (
+                              <Badge variant="outline" className="text-white/70 border-white/30">
+                                {task.category}
+                              </Badge>
+                            )}
                           </div>
-                          <p className="text-white/70 text-sm mb-2">{task.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-white/50">
+                          <p className="text-white/80 text-sm mb-4 leading-relaxed">
+                            {task.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-white/50 mb-4">
                             <span>👤 {task.agentName}</span>
                             <span>⏱️ {task.estimatedTime}</span>
-                            <span>📁 {task.category}</span>
                           </div>
                         </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="text-white/60 text-sm">
+                          Asistente recomendado: <span className="text-white font-medium">{task.agentName}</span>
+                        </div>
                         <Button
+                          onClick={() => handleStartTask(task)}
+                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
                           size="sm"
-                          onClick={() => onSelectAgent(task.agentId)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white"
                         >
-                          <Play className="w-4 h-4 mr-1" />
-                          {t[language].startTask}
+                          <Play className="w-4 h-4 mr-2" />
+                          {t[language].startWithAgent} {task.agentName}
+                          <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </div>
                     </motion.div>
