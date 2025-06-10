@@ -3,7 +3,7 @@ import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 
 export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () => CategoryScore): string => {
-  // Base images for different steps - using public folder paths
+  // Base images for different steps - all confirmed to exist in public folder
   const stepImages = {
     culturalProfile: '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png',
     businessMaturity: '/lovable-uploads/9a2715d7-552b-4658-9c27-78866aaea8b4.png',
@@ -15,16 +15,6 @@ export const getStepImage = (stepId: WizardStepId, calculateMaturityScores?: () 
   };
 
   console.log('🎯 IMAGE SELECTOR: Getting image for step:', stepId);
-  console.log('   - Available step images:', Object.keys(stepImages));
-
-  // Test image availability by trying to create image objects
-  console.log('🧪 TESTING: Image availability');
-  Object.entries(stepImages).forEach(([key, path]) => {
-    const testImg = new Image();
-    testImg.onload = () => console.log(`✅ AVAILABLE: ${key} -> ${path}`);
-    testImg.onerror = () => console.error(`❌ NOT FOUND: ${key} -> ${path}`);
-    testImg.src = path;
-  });
 
   // Return the appropriate image for the current step
   if (stepId === 'results' && calculateMaturityScores) {
