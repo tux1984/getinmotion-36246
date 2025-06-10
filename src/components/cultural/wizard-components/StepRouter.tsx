@@ -48,13 +48,14 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   handleAnalysisChoice
 }) => {
   // Get the appropriate image for the current step
+  console.log('🎯 StepRouter - Current step:', currentStepId);
   const characterImage = getStepImage(currentStepId, calculateMaturityScores);
+  console.log('🖼️ StepRouter - Character image selected:', characterImage);
   
   // Always ensure we have a fallback image
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
   const finalImageSrc = characterImage || fallbackImage;
-
-  console.log('StepRouter - Current step:', currentStepId, 'Image:', finalImageSrc);
+  console.log('✅ StepRouter - Final image source:', finalImageSrc);
 
   // Common layout with character image
   const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
@@ -90,6 +91,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   // Route to appropriate step component
   switch (currentStepId) {
     case 'culturalProfile':
+      console.log('📋 Rendering culturalProfile step');
       return renderStepWithCharacter(
         <CulturalProfileStep
           profileData={profileData}
@@ -103,6 +105,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
     
     case 'businessMaturity':
+      console.log('💼 Rendering businessMaturity step');
       return renderStepWithCharacter(
         <BusinessMaturityStep
           profileData={profileData}
@@ -117,6 +120,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
     
     case 'managementStyle':
+      console.log('👥 Rendering managementStyle step');
       return renderStepWithCharacter(
         <ManagementStyleStep
           profileData={profileData}
@@ -131,6 +135,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
     
     case 'bifurcation':
+      console.log('🔀 Rendering bifurcation step');
       return renderStepWithCharacter(
         <BifurcationStep
           profileData={profileData}
@@ -145,6 +150,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
     
     case 'extendedQuestions':
+      console.log('📝 Rendering extendedQuestions step');
       return renderStepWithCharacter(
         <ExtendedQuestionsStep
           profileData={profileData}
@@ -159,6 +165,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
 
     case 'dynamicQuestions':
+      console.log('🎯 Rendering dynamicQuestions step');
       return renderStepWithCharacter(
         <DynamicQuestionsStep
           profileData={profileData}
@@ -173,6 +180,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
 
     case 'results':
+      console.log('🎉 Rendering results step');
       return renderStepWithCharacter(
         <ResultsStep 
           profileData={profileData}
@@ -185,6 +193,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
       );
     
     default:
+      console.log('❓ Unknown step, returning null:', currentStepId);
       return null;
   }
 };

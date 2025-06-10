@@ -23,34 +23,39 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
   const fallbackImage = '/lovable-uploads/4d2abc22-b792-462b-8247-6cc413c71b23.png';
 
   const handleLoad = useCallback(() => {
+    console.log('✅ Character image loaded successfully:', imgSrc);
     setIsLoaded(true);
     setHasError(false);
-    console.log('Character image loaded successfully:', imgSrc);
     
     // Preload next image if provided
     if (preloadNext && preloadNext !== imgSrc) {
       const img = new Image();
       img.src = preloadNext;
+      console.log('🔄 Preloading next image:', preloadNext);
     }
   }, [preloadNext, imgSrc]);
 
   const handleError = useCallback(() => {
-    console.warn('Character image failed to load:', imgSrc);
+    console.error('❌ Character image failed to load:', imgSrc);
     if (imgSrc !== fallbackImage) {
-      console.log('Switching to fallback image:', fallbackImage);
+      console.log('🔄 Switching to fallback image:', fallbackImage);
       setImgSrc(fallbackImage);
       setHasError(false);
       setIsLoaded(false);
     } else {
-      console.error('Fallback image also failed to load');
+      console.error('💥 Fallback image also failed to load');
       setHasError(true);
     }
   }, [imgSrc, fallbackImage]);
 
   // Update src when prop changes and ensure we always have a valid source
   React.useEffect(() => {
+    console.log('🔍 OptimizedCharacterImage useEffect - src prop:', src);
     const validSrc = src || fallbackImage;
+    console.log('🎯 Using image source:', validSrc);
+    
     if (validSrc !== imgSrc && !hasError) {
+      console.log('🔄 Updating image source from', imgSrc, 'to', validSrc);
       setImgSrc(validSrc);
       setIsLoaded(false);
       setHasError(false);
@@ -59,6 +64,7 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
 
   // If all images fail, show a styled placeholder
   if (hasError) {
+    console.log('📦 Showing placeholder due to image error');
     return (
       <div className={`${className} bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg flex items-center justify-center border border-purple-200`}>
         <div className="text-center p-4">
@@ -72,6 +78,8 @@ export const OptimizedCharacterImage: React.FC<OptimizedCharacterImageProps> = R
       </div>
     );
   }
+
+  console.log('🖼️ Rendering image - loaded:', isLoaded, 'src:', imgSrc);
 
   return (
     <div className="relative">
