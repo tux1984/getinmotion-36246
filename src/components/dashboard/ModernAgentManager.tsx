@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
@@ -7,8 +8,10 @@ import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { OptimizedAgentCategoryCard } from './OptimizedAgentCategoryCard';
 import { CompactTwoColumnHeader } from './CompactTwoColumnHeader';
 import { SimpleMasonryGrid } from '../agent-manager/SimpleMasonryGrid';
+import { MobileAgentManager } from '../agent-manager/MobileAgentManager';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
@@ -23,6 +26,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
 }) => {
   const { agents: userAgents, loading } = useUserData();
   const { togglingAgents, handleToggleAgent } = useAgentToggle(onAgentToggle);
+  const isMobile = useIsMobile();
 
   const translations = {
     en: {
@@ -44,6 +48,17 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   };
 
   const t = translations[language];
+
+  // Use mobile version on small screens
+  if (isMobile) {
+    return (
+      <MobileAgentManager
+        currentAgents={currentAgents}
+        onAgentToggle={onAgentToggle}
+        language={language}
+      />
+    );
+  }
 
   // Get unique categories
   const categories = useMemo(() => {
