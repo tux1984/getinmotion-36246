@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
+import { useOptimizedRecommendedTasks, OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
 import { TaskCard } from './TaskCard';
 import { MaturityScoreDisplay } from './MaturityScoreDisplay';
 import { QuickStatsCards } from './QuickStatsCards';
