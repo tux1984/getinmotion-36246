@@ -9,13 +9,14 @@ import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Wrench, CheckCircle } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Wrench, CheckCircle, Home } from 'lucide-react';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [forceShow, setForceShow] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   
   const {
     agents,
@@ -35,41 +36,83 @@ const DashboardHome = () => {
     checkAndRepair
   } = useDataRecovery();
 
-  console.log('DashboardHome: Comprehensive state:', {
-    isLoading,
-    error,
-    hasOnboarding,
-    needsRecovery,
-    recovering,
-    recovered,
-    agentsCount: agents.length,
-    activeAgents: agents.filter(a => a.status === 'active').length,
-    maturityScores: !!maturityScores,
-    forceShow
-  });
-
-  // Lógica mejorada de redirección
+  // Debug logging mejorado
   useEffect(() => {
-    if (isLoading || recovering) return;
+    const debugData = {
+      timestamp: new Date().toISOString(),
+      user: !!user,
+      userId: user?.id,
+      isLoading,
+      error,
+      hasOnboarding,
+      needsRecovery,
+      recovering,
+      recovered,
+      agentsCount: agents?.length || 0,
+      activeAgents: agents?.filter(a => a.status === 'active')?.length || 0,
+      maturityScores: !!maturityScores,
+      maturityScoresData: maturityScores,
+      recommendedAgentsKeys: recommendedAgents ? Object.keys(recommendedAgents) : [],
+      forceShow
+    };
+    
+    setDebugInfo(debugData);
+    console.log('DashboardHome: Comprehensive state update:', debugData);
+  }, [
+    user, isLoading, error, hasOnboarding, needsRecovery, 
+    recovering, recovered, agents, maturityScores, recommendedAgents, forceShow
+  ]);
 
-    // Si no hay onboarding Y no hay maturity scores Y no se está recuperando
-    const shouldRedirect = !hasOnboarding && 
-                          !maturityScores && 
+  // Lógica mejorada de redirección con más validaciones
+  useEffect(() => {
+    if (!user) {
+      console.log('DashboardHome: No user, redirecting to auth');
+      return;
+    }
+
+    if (isLoading || recovering) {
+      console.log('DashboardHome: Loading or recovering, waiting...');
+      return;
+    }
+
+    // Verificar si realmente necesita onboarding
+    const hasAnyData = maturityScores || 
+                       agents?.some(a => a.status === 'active') || 
+                       hasOnboarding;
+
+    const shouldRedirect = !hasAnyData && 
                           !needsRecovery && 
                           !recovered && 
-                          !forceShow;
+                          !forceShow &&
+                          !error;
+
+    console.log('DashboardHome: Redirect check:', {
+      hasAnyData,
+      shouldRedirect,
+      maturityScores: !!maturityScores,
+      activeAgents: agents?.filter(a => a.status === 'active')?.length || 0,
+      hasOnboarding,
+      needsRecovery,
+      recovered,
+      forceShow,
+      error
+    });
 
     if (shouldRedirect) {
       console.log('User needs onboarding, redirecting to maturity calculator');
       navigate('/maturity-calculator', { replace: true });
     }
-  }, [isLoading, recovering, hasOnboarding, maturityScores, needsRecovery, recovered, forceShow, navigate]);
+  }, [
+    user, isLoading, recovering, hasOnboarding, maturityScores, 
+    agents, needsRecovery, recovered, forceShow, error, navigate
+  ]);
 
   const handleNavigateToMaturityCalculator = () => {
     navigate('/maturity-calculator');
   };
 
   const handleSelectAgent = (agentId: string) => {
+    console.log('DashboardHome: Selecting agent:', agentId);
     navigate(`/dashboard/agent/${agentId}`);
   };
 
@@ -78,19 +121,33 @@ const DashboardHome = () => {
   };
 
   const handleForceAccess = () => {
+    console.log('DashboardHome: Force access triggered');
     setForceShow(true);
   };
 
   const handleEmergencyRepair = async () => {
+    console.log('DashboardHome: Emergency repair triggered');
     const success = await performEmergencyRecovery();
     if (success) {
-      window.location.reload();
+      console.log('Emergency repair successful, reloading page');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     }
   };
 
   const handleManualRepair = async () => {
+    console.log('DashboardHome: Manual repair triggered');
     await checkAndRepair();
-    window.location.reload();
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
+  const handleCompleteReset = () => {
+    console.log('DashboardHome: Complete reset triggered');
+    localStorage.clear();
+    navigate('/maturity-calculator', { replace: true });
   };
 
   // Mostrar pantalla de carga mejorada
@@ -104,7 +161,7 @@ const DashboardHome = () => {
         <div className="pt-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
+              <div className="text-center max-w-md">
                 <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-purple-600" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   {language === 'en' ? 'Loading your workspace...' : 'Cargando tu espacio de trabajo...'}
@@ -115,9 +172,15 @@ const DashboardHome = () => {
                     : 'Configurando tu dashboard personalizado...'
                   }
                 </p>
-                <Button onClick={handleForceAccess} variant="outline" size="sm">
-                  {language === 'en' ? 'Force Access' : 'Acceder Directamente'}
-                </Button>
+                <div className="space-y-3">
+                  <Button onClick={handleForceAccess} variant="outline" size="sm">
+                    {language === 'en' ? 'Force Access' : 'Acceder Directamente'}
+                  </Button>
+                  <Button onClick={handleEmergencyRepair} variant="outline" size="sm">
+                    <Wrench className="w-4 h-4 mr-2" />
+                    {language === 'en' ? 'Emergency Setup' : 'Configuración de Emergencia'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -126,7 +189,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar pantalla de recuperación si está recuperando
+  // Mostrar pantalla de recuperación
   if (recovering) {
     return (
       <DashboardBackground>
@@ -178,12 +241,16 @@ const DashboardHome = () => {
                     : 'Tu espacio de trabajo ha sido reparado automáticamente y está listo para usar.'
                   }
                 </p>
-                <Button onClick={() => setForceShow(true)} className="mr-4">
-                  {language === 'en' ? 'Continue to Dashboard' : 'Continuar al Dashboard'}
-                </Button>
-                <Button onClick={() => window.location.reload()} variant="outline">
-                  {language === 'en' ? 'Refresh Page' : 'Actualizar Página'}
-                </Button>
+                <div className="space-y-3">
+                  <Button onClick={() => setForceShow(true)} className="mr-4">
+                    <Home className="w-4 h-4 mr-2" />
+                    {language === 'en' ? 'Continue to Dashboard' : 'Continuar al Dashboard'}
+                  </Button>
+                  <Button onClick={() => window.location.reload()} variant="outline">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    {language === 'en' ? 'Refresh Page' : 'Actualizar Página'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -235,7 +302,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar error con opciones de reparación
+  // Mostrar error con opciones de reparación mejoradas
   if (error && !forceShow) {
     return (
       <DashboardBackground>
@@ -256,9 +323,13 @@ const DashboardHome = () => {
                   <Wrench className="w-4 h-4 mr-2" />
                   {language === 'en' ? 'Auto-Repair' : 'Auto-Reparar'}
                 </Button>
-                <Button onClick={() => window.location.reload()} variant="outline" className="w-full">
+                <Button onClick={handleEmergencyRepair} variant="outline" className="w-full">
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  {language === 'en' ? 'Refresh Page' : 'Actualizar Página'}
+                  {language === 'en' ? 'Emergency Setup' : 'Configuración de Emergencia'}
+                </Button>
+                <Button onClick={handleCompleteReset} variant="outline" className="w-full">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  {language === 'en' ? 'Complete Reset' : 'Reset Completo'}
                 </Button>
                 <Button onClick={handleForceAccess} variant="ghost" className="w-full">
                   {language === 'en' ? 'Force Access' : 'Acceso Forzado'}
@@ -271,11 +342,17 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar dashboard principal
+  // Mostrar dashboard principal con validaciones adicionales
+  const safeAgents = agents || [];
+  const safeMaturityScores = maturityScores || null;
+  const safeRecommendedAgents = recommendedAgents || {};
+
   console.log('DashboardHome: Showing main dashboard with data:', {
-    agentsCount: agents.length,
-    hasMaturityScores: !!maturityScores,
-    recommendedAgentsKeys: Object.keys(recommendedAgents || {})
+    agentsCount: safeAgents.length,
+    activeAgents: safeAgents.filter(a => a?.status === 'active').length,
+    hasMaturityScores: !!safeMaturityScores,
+    recommendedAgentsKeys: Object.keys(safeRecommendedAgents),
+    debugInfo
   });
 
   return (
@@ -291,9 +368,9 @@ const DashboardHome = () => {
             onSelectAgent={handleSelectAgent}
             onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
             onAgentManagerClick={handleOpenAgentManager}
-            agents={agents}
-            maturityScores={maturityScores}
-            recommendedAgents={recommendedAgents}
+            agents={safeAgents}
+            maturityScores={safeMaturityScores}
+            recommendedAgents={safeRecommendedAgents}
           />
         </div>
       </div>

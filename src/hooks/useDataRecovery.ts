@@ -23,6 +23,11 @@ export const useDataRecovery = () => {
 
   // NUEVA FUNCIÓN: Auto-reparar basado en maturity scores existentes
   const autoRepairFromMaturityScores = useCallback(async (scores: CategoryScore): Promise<boolean> => {
+    if (!user?.id || !scores) {
+      console.error('autoRepairFromMaturityScores: Missing user or scores');
+      return false;
+    }
+
     try {
       console.log('Auto-repairing user data based on maturity scores:', scores);
       
@@ -32,30 +37,48 @@ export const useDataRecovery = () => {
         secondary: []
       };
 
-      // Si monetización es baja (35), agregar agentes financieros
-      if (scores.monetization < 50) {
-        recommendedAgents.primary?.push('cost-calculator');
-        recommendedAgents.secondary?.push('marketing-advisor');
-      }
+      // Lógica mejorada para recomendación de agentes
+      const scoreEntries = [
+        { key: 'monetization', value: scores.monetization || 0, agents: ['cost-calculator', 'pricing-assistant'] },
+        { key: 'ideaValidation', value: scores.ideaValidation || 0, agents: ['cultural-consultant', 'maturity-evaluator'] },
+        { key: 'userExperience', value: scores.userExperience || 0, agents: ['project-manager', 'marketing-advisor'] },
+        { key: 'marketFit', value: scores.marketFit || 0, agents: ['marketing-advisor', 'export-advisor'] }
+      ].sort((a, b) => a.value - b.value); // Ordenar por puntuación más baja
 
-      // Si idea validation es media-baja (55), agregar consultores
-      if (scores.ideaValidation < 70) {
+      // Agregar agentes para las 2 áreas más débiles
+      scoreEntries.slice(0, 2).forEach(area => {
+        if (area.value < 70) {
+          area.agents.forEach(agentId => {
+            if (!recommendedAgents.primary?.includes(agentId)) {
+              recommendedAgents.primary?.push(agentId);
+            }
+          });
+        }
+      });
+
+      // Siempre incluir agentes esenciales
+      if (!recommendedAgents.primary?.includes('cultural-consultant')) {
         recommendedAgents.primary?.push('cultural-consultant');
-        recommendedAgents.secondary?.push('maturity-evaluator');
+      }
+      if (!recommendedAgents.primary?.includes('cost-calculator')) {
+        recommendedAgents.primary?.push('cost-calculator');
       }
 
-      // Si user experience necesita mejora (60)
-      if (scores.userExperience < 70) {
-        recommendedAgents.secondary?.push('project-manager');
+      // Limitar a 6 agentes primarios
+      if (recommendedAgents.primary && recommendedAgents.primary.length > 6) {
+        recommendedAgents.primary = recommendedAgents.primary.slice(0, 6);
       }
 
-      // Siempre incluir al menos un agente básico
-      if (!recommendedAgents.primary?.length) {
-        recommendedAgents.primary = ['cultural-consultant'];
-      }
+      // Agregar agentes secundarios
+      const secondaryAgents = ['collaboration-agreement', 'funding-routes', 'contract-generator'];
+      recommendedAgents.secondary = secondaryAgents.filter(
+        agentId => !recommendedAgents.primary?.includes(agentId)
+      );
+
+      console.log('Generated recommended agents:', recommendedAgents);
 
       // Crear agentes en la base de datos
-      const success = await createUserAgentsFromRecommendations(user!.id, recommendedAgents);
+      const success = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
       
       if (success) {
         // Marcar onboarding como completo
@@ -71,23 +94,38 @@ export const useDataRecovery = () => {
     }
   }, [user]);
 
-  const checkAndRepair = useCallback(async () => {
-    if (!user) return;
+  const checkAndRepair = useCallback(async (): Promise<void> => {
+    if (!user?.id) {
+      console.log('checkAndRepair: No user found');
+      return;
+    }
 
     try {
       console.log('Starting comprehensive data check and repair...');
       
       // Verificar maturity scores
-      const { data: scores } = await supabase.rpc('get_latest_maturity_scores', {
+      const { data: scores, error: scoresError } = await supabase.rpc('get_latest_maturity_scores', {
         user_uuid: user.id
       });
 
+      if (scoresError) {
+        console.error('Error fetching maturity scores:', scoresError);
+        setStatus(prev => ({ ...prev, error: 'Error verificando scores de madurez' }));
+        return;
+      }
+
       // Verificar agentes habilitados
-      const { data: userAgents } = await supabase
+      const { data: userAgents, error: agentsError } = await supabase
         .from('user_agents')
         .select('*')
         .eq('user_id', user.id)
         .eq('is_enabled', true);
+
+      if (agentsError) {
+        console.error('Error fetching user agents:', agentsError);
+        setStatus(prev => ({ ...prev, error: 'Error verificando agentes del usuario' }));
+        return;
+      }
 
       const hasScores = scores && scores.length > 0;
       const hasUsefulAgents = userAgents && userAgents.length > 1; // Más de 1 agente
@@ -100,15 +138,15 @@ export const useDataRecovery = () => {
       });
 
       // Si tiene scores pero no agentes útiles, auto-reparar
-      if (hasScores && !hasUsefulAgents) {
+      if (hasScores && !hasUsefulAgents && scores[0]) {
         console.log('User has scores but insufficient agents, auto-repairing...');
         setStatus(prev => ({ ...prev, recovering: true }));
         
-        const scoresData = {
-          ideaValidation: scores[0].idea_validation,
-          userExperience: scores[0].user_experience,
-          marketFit: scores[0].market_fit,
-          monetization: scores[0].monetization
+        const scoresData: CategoryScore = {
+          ideaValidation: scores[0].idea_validation || 50,
+          userExperience: scores[0].user_experience || 50,
+          marketFit: scores[0].market_fit || 50,
+          monetization: scores[0].monetization || 30
         };
         
         const repaired = await autoRepairFromMaturityScores(scoresData);
@@ -126,7 +164,11 @@ export const useDataRecovery = () => {
 
       // Si no tiene nada, necesita recovery completo
       if (!hasScores) {
+        console.log('User needs complete recovery - no scores found');
         setStatus(prev => ({ ...prev, needsRecovery: true }));
+      } else {
+        console.log('User data seems complete');
+        setStatus(prev => ({ ...prev, needsRecovery: false }));
       }
 
     } catch (err) {
@@ -135,14 +177,17 @@ export const useDataRecovery = () => {
     }
   }, [user, autoRepairFromMaturityScores]);
 
-  const performEmergencyRecovery = useCallback(async () => {
-    if (!user) return false;
+  const performEmergencyRecovery = useCallback(async (): Promise<boolean> => {
+    if (!user?.id) {
+      console.error('performEmergencyRecovery: No user found');
+      return false;
+    }
 
     try {
-      setStatus(prev => ({ ...prev, recovering: true }));
+      setStatus(prev => ({ ...prev, recovering: true, error: null }));
       
       // Crear datos mínimos funcionales
-      const emergencyScores = {
+      const emergencyScores: CategoryScore = {
         ideaValidation: 50,
         userExperience: 50,
         marketFit: 50,
@@ -151,23 +196,30 @@ export const useDataRecovery = () => {
 
       const emergencyAgents: RecommendedAgents = {
         primary: ['cultural-consultant', 'cost-calculator'],
-        secondary: ['marketing-advisor']
+        secondary: ['marketing-advisor', 'project-manager']
       };
+
+      console.log('Creating emergency recovery data:', { emergencyScores, emergencyAgents });
 
       // Guardar en localStorage
       markOnboardingComplete(emergencyScores, emergencyAgents);
       
       // Crear agentes en BD
-      await createUserAgentsFromRecommendations(user.id, emergencyAgents);
+      const success = await createUserAgentsFromRecommendations(user.id, emergencyAgents);
       
-      setStatus({
-        needsRecovery: false,
-        recovering: false,
-        recovered: true,
-        error: null
-      });
+      if (success) {
+        setStatus({
+          needsRecovery: false,
+          recovering: false,
+          recovered: true,
+          error: null
+        });
+        console.log('Emergency recovery completed successfully');
+        return true;
+      } else {
+        throw new Error('Failed to create user agents');
+      }
       
-      return true;
     } catch (err) {
       console.error('Emergency recovery failed:', err);
       setStatus(prev => ({ 
@@ -180,14 +232,14 @@ export const useDataRecovery = () => {
   }, [user]);
 
   useEffect(() => {
-    if (user && !status.recovered) {
+    if (user && !status.recovered && !status.recovering) {
       const timer = setTimeout(() => {
         checkAndRepair();
-      }, 500);
+      }, 1000); // Delay slightly to allow other hooks to initialize
       
       return () => clearTimeout(timer);
     }
-  }, [user, checkAndRepair, status.recovered]);
+  }, [user, checkAndRepair, status.recovered, status.recovering]);
 
   return {
     ...status,

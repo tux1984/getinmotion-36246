@@ -1,3 +1,4 @@
+
 import { 
   User, 
   Palette, 
@@ -30,7 +31,7 @@ export interface CulturalAgent {
 export const culturalAgentsDatabase: CulturalAgent[] = [
   {
     id: 'cost-calculator',
-    code: 'A1',
+    code: 'A01',
     name: 'Cálculo de Costos + Rentabilidad',
     category: 'Financiera',
     impact: 4,
@@ -45,7 +46,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'collaboration-agreement',
-    code: 'A2',
+    code: 'A02',
     name: 'Acuerdo de Colaboración / Cesión',
     category: 'Legal',
     impact: 4,
@@ -60,7 +61,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'maturity-evaluator',
-    code: 'A3',
+    code: 'A03',
     name: 'Evaluador de Madurez del Negocio',
     category: 'Diagnóstico',
     impact: 3,
@@ -75,7 +76,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'cultural-consultant',
-    code: 'A4',
+    code: 'A04',
     name: 'Especialista Creativo',
     category: 'Operativo',
     impact: 3,
@@ -90,7 +91,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'project-manager',
-    code: 'A5',
+    code: 'A05',
     name: 'Gestor de Proyectos',
     category: 'Operativo',
     impact: 3,
@@ -105,7 +106,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'marketing-advisor',
-    code: 'A6',
+    code: 'A06',
     name: 'Asesor de Marketing',
     category: 'Comercial',
     impact: 3,
@@ -120,7 +121,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'export-advisor',
-    code: 'A4',
+    code: 'A07',
     name: 'Exportación + Cobros Internacionales',
     category: 'Legal',
     impact: 4,
@@ -132,7 +133,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'collaboration-pitch',
-    code: 'A5',
+    code: 'A08',
     name: 'Pitch para Colaboraciones',
     category: 'Comercial',
     impact: 2,
@@ -143,7 +144,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'portfolio-catalog',
-    code: 'A6',
+    code: 'A09',
     name: 'Catálogo de Obras / Productos',
     category: 'Comercial',
     impact: 3,
@@ -155,7 +156,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'artwork-description',
-    code: 'A7',
+    code: 'A10',
     name: 'Descripción Optimizada de Obra',
     category: 'Comercial',
     impact: 2,
@@ -166,7 +167,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'income-calculator',
-    code: 'A8',
+    code: 'A11',
     name: 'Calculadora de Ingresos/Gastos',
     category: 'Financiera',
     impact: 3,
@@ -177,7 +178,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'branding-strategy',
-    code: 'A9',
+    code: 'A12',
     name: 'Estrategia de Branding y Exposición',
     category: 'Comercial',
     impact: 3,
@@ -188,7 +189,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'personal-brand-eval',
-    code: 'A10',
+    code: 'A13',
     name: 'Evaluación de Marca Personal',
     category: 'Diagnóstico',
     impact: 2,
@@ -199,7 +200,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'funding-routes',
-    code: 'A11',
+    code: 'A14',
     name: 'Rutas de Fondeo y Convocatorias',
     category: 'Legal',
     impact: 3,
@@ -210,7 +211,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'contract-generator',
-    code: 'A12',
+    code: 'A15',
     name: 'Generador General de Contratos',
     category: 'Legal',
     impact: 4,
@@ -221,7 +222,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'tax-compliance',
-    code: 'A13',
+    code: 'A16',
     name: 'Rendición de Cuentas e Impuestos',
     category: 'Legal',
     impact: 4,
@@ -232,7 +233,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'social-impact-eval',
-    code: 'A14',
+    code: 'A17',
     name: 'Evaluador de Impacto en Redes Sociales',
     category: 'Comercial',
     impact: 2,
@@ -243,7 +244,7 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   },
   {
     id: 'pricing-assistant',
-    code: 'A15',
+    code: 'A18',
     name: 'Asistente de Precios por Canal de Venta',
     category: 'Comercial',
     impact: 4,
@@ -253,52 +254,8 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
     color: 'bg-lime-500'
   },
   {
-    id: 'portfolio-visualization',
-    code: 'A16',
-    name: 'Visualización de Portafolio',
-    category: 'Comercial',
-    impact: 3,
-    priority: 'Baja',
-    description: 'Crea visualizaciones atractivas y profesionales del portafolio',
-    icon: Palette,
-    color: 'bg-sky-500'
-  },
-  {
-    id: 'active-calls-curator',
-    code: 'A17',
-    name: 'Curador de Convocatorias Activas',
-    category: 'Comercial',
-    impact: 3,
-    priority: 'Media',
-    description: 'Rastrea y cura convocatorias activas relevantes para el perfil del creador',
-    icon: Lightbulb,
-    color: 'bg-fuchsia-500'
-  },
-  {
-    id: 'advisor-hiring-guide',
-    code: 'A18',
-    name: 'Guía para Contratar Asesores Legales/Contables',
-    category: 'Legal',
-    impact: 3,
-    priority: 'Media',
-    description: 'Proporciona guías para seleccionar y contratar profesionales especializados',
-    icon: Users,
-    color: 'bg-yellow-500'
-  },
-  {
-    id: 'collaborator-management',
-    code: 'A19',
-    name: 'Gestión de Colaboradores (tipo RRHH)',
-    category: 'Operativo',
-    impact: 3,
-    priority: 'Media',
-    description: 'Gestiona equipos de trabajo y colaboradores en proyectos culturales',
-    icon: Users,
-    color: 'bg-slate-500'
-  },
-  {
     id: 'stakeholder-matching',
-    code: 'A20',
+    code: 'A19',
     name: 'Matching de Stakeholders Creativos',
     category: 'Comunidad',
     impact: 4,
@@ -309,26 +266,66 @@ export const culturalAgentsDatabase: CulturalAgent[] = [
   }
 ];
 
-// Helper functions
-export const getAgentById = (id: string) => culturalAgentsDatabase.find(agent => agent.id === id);
-export const getAgentsByCategory = (category: string) => culturalAgentsDatabase.filter(agent => agent.category === category);
-export const getAgentsByExpertise = (expertise: string) => culturalAgentsDatabase.filter(agent => 
-  agent.expertise?.some(exp => exp.toLowerCase().includes(expertise.toLowerCase()))
-);
-export const getAllAgentIds = () => culturalAgentsDatabase.map(agent => agent.id);
-export const getRecommendedAgentsForProfile = (profileType: string) => {
+// Helper functions with proper error handling
+export const getAgentById = (id: string): CulturalAgent | undefined => {
+  if (!id || typeof id !== 'string') {
+    console.warn('getAgentById: Invalid agent ID provided:', id);
+    return undefined;
+  }
+  return culturalAgentsDatabase.find(agent => agent?.id === id);
+};
+
+export const getAgentsByCategory = (category: string): CulturalAgent[] => {
+  if (!category || typeof category !== 'string') {
+    console.warn('getAgentsByCategory: Invalid category provided:', category);
+    return [];
+  }
+  return culturalAgentsDatabase.filter(agent => agent?.category === category) || [];
+};
+
+export const getAgentsByExpertise = (expertise: string): CulturalAgent[] => {
+  if (!expertise || typeof expertise !== 'string') {
+    console.warn('getAgentsByExpertise: Invalid expertise provided:', expertise);
+    return [];
+  }
   return culturalAgentsDatabase.filter(agent => 
-    agent.profiles?.includes(profileType) || 
-    agent.priority === 'Alta' || 
-    agent.impact >= 3
-  );
+    agent?.expertise?.some(exp => 
+      exp && typeof exp === 'string' && exp.toLowerCase().includes(expertise.toLowerCase())
+    )
+  ) || [];
 };
 
-// Legacy compatibility - keep old function names working
-export const getAgentsByPriority = (priority: string) => {
-  return culturalAgentsDatabase.filter(agent => agent.priority === priority);
+export const getAllAgentIds = (): string[] => {
+  return culturalAgentsDatabase
+    .filter(agent => agent?.id && typeof agent.id === 'string')
+    .map(agent => agent.id);
 };
 
-export const getAgentsByImpact = (impact: number) => {
-  return culturalAgentsDatabase.filter(agent => agent.impact === impact);
+export const getRecommendedAgentsForProfile = (profileType: string): CulturalAgent[] => {
+  if (!profileType || typeof profileType !== 'string') {
+    console.warn('getRecommendedAgentsForProfile: Invalid profile type:', profileType);
+    return [];
+  }
+  
+  return culturalAgentsDatabase.filter(agent => 
+    agent?.profiles?.includes(profileType) || 
+    agent?.priority === 'Alta' || 
+    (agent?.impact && agent.impact >= 3)
+  ) || [];
+};
+
+export const getAgentsByPriority = (priority: string): CulturalAgent[] => {
+  if (!priority || typeof priority !== 'string') {
+    console.warn('getAgentsByPriority: Invalid priority provided:', priority);
+    return [];
+  }
+  return culturalAgentsDatabase.filter(agent => agent?.priority === priority) || [];
+};
+
+export const getAgentsByImpact = (impact: number): CulturalAgent[] => {
+  if (typeof impact !== 'number' || impact < 1 || impact > 4) {
+    console.warn('getAgentsByImpact: Invalid impact level provided:', impact);
+    return [];
+  }
+  return culturalAgentsDatabase.filter(agent => agent?.impact === impact) || [];
 };
