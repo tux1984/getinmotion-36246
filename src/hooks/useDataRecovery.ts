@@ -48,6 +48,13 @@ export const useDataRecovery = () => {
       const hasDbScores = scoresResult.data && scoresResult.data.length > 0;
       const hasDbAgents = agentsResult.data && agentsResult.data.length > 0;
 
+      console.log('Recovery check results:', { 
+        hasDbScores, 
+        hasDbAgents, 
+        scoresCount: scoresResult.data?.length || 0,
+        agentsCount: agentsResult.data?.length || 0 
+      });
+
       if (!hasDbScores || !hasDbAgents) {
         console.log('User needs data recovery:', { hasDbScores, hasDbAgents });
         setStatus(prev => ({ ...prev, needsRecovery: true }));
@@ -78,10 +85,18 @@ export const useDataRecovery = () => {
       const maturityScores: CategoryScore = JSON.parse(localMaturityScoresStr);
       console.log('Recovered maturity scores from localStorage:', maturityScores);
 
-      // Guardar maturity scores en BD
-      const scoresSaved = await saveMaturityScores(maturityScores);
-      if (!scoresSaved) {
-        throw new Error('Failed to save maturity scores to database');
+      // Guardar maturity scores en BD (si no existen)
+      const { data: existingScores } = await supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id });
+      
+      if (!existingScores || existingScores.length === 0) {
+        const scoresSaved = await saveMaturityScores(maturityScores);
+        if (!scoresSaved) {
+          console.warn('Failed to save maturity scores, but continuing with recovery');
+        } else {
+          console.log('Maturity scores saved successfully during recovery');
+        }
+      } else {
+        console.log('Maturity scores already exist in database, skipping save');
       }
 
       // Recuperar y guardar agentes recomendados
@@ -102,7 +117,12 @@ export const useDataRecovery = () => {
       // Crear agentes en BD
       const agentsCreated = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
       if (!agentsCreated) {
-        console.warn('Failed to create agents, but continuing with recovery');
+        console.warn('Failed to create agents during recovery');
+        // Crear al menos el agente cultural por defecto
+        const defaultAgents = { cultural: true };
+        await createUserAgentsFromRecommendations(user.id, defaultAgents);
+      } else {
+        console.log('User agents created successfully during recovery');
       }
 
       setStatus(prev => ({ 

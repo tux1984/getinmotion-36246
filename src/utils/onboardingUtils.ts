@@ -49,19 +49,33 @@ export const createUserAgentsFromRecommendations = async (
 
     console.log('Inserting agents:', agentsToCreate);
 
+    // ARREGLO CRÍTICO: Usar INSERT simple en lugar de UPSERT para evitar conflictos
+    // Primero verificar si ya existen y solo crear los que no existan
+    const { data: existingAgents } = await supabase
+      .from('user_agents')
+      .select('agent_id')
+      .eq('user_id', userId);
+
+    const existingAgentIds = existingAgents?.map(a => a.agent_id) || [];
+    const newAgentsToCreate = agentsToCreate.filter(
+      agent => !existingAgentIds.includes(agent.agent_id)
+    );
+
+    if (newAgentsToCreate.length === 0) {
+      console.log('All agents already exist for user');
+      return true;
+    }
+
     const { error } = await supabase
       .from('user_agents')
-      .upsert(agentsToCreate, { 
-        onConflict: 'user_id,agent_id',
-        ignoreDuplicates: false 
-      });
+      .insert(newAgentsToCreate);
 
     if (error) {
       console.error('Error creating user agents:', error);
       return false;
     }
 
-    console.log('Successfully created user agents');
+    console.log('Successfully created user agents:', newAgentsToCreate.length);
     return true;
   } catch (err) {
     console.error('Error in createUserAgentsFromRecommendations:', err);

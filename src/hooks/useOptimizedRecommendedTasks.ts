@@ -34,14 +34,29 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
   // Get available agents from the real database
   const getAvailableAgents = () => {
     const allAgents = culturalAgentsDatabase.getAll();
-    return allAgents.filter(agent => enabledAgents.includes(agent.id));
+    const availableAgents = allAgents.filter(agent => enabledAgents.includes(agent.id));
+    
+    console.log('Available agents for task generation:', {
+      totalAgents: allAgents.length,
+      enabledAgentIds: enabledAgents,
+      availableAgents: availableAgents.map(a => ({ id: a.id, name: a.name }))
+    });
+    
+    return availableAgents;
   };
 
   const generateTasksFromScores = (scores: CategoryScore): OptimizedRecommendedTask[] => {
     const generatedTasks: OptimizedRecommendedTask[] = [];
     const availableAgents = getAvailableAgents();
 
+    console.log('Generating tasks from scores:', scores);
     console.log('Available agents for task generation:', availableAgents.map(a => ({ id: a.id, name: a.name })));
+
+    // ARREGLO CRÍTICO: Verificar que hay agentes antes de generar tareas
+    if (availableAgents.length === 0) {
+      console.log('No available agents found, cannot generate tasks');
+      return [];
+    }
 
     // Generate tasks based on low scores and available agents
     if (scores.ideaValidation < 60) {
@@ -166,7 +181,12 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
       }
     }
 
-    console.log('Generated tasks from scores:', generatedTasks.length);
+    console.log('Generated tasks from scores:', {
+      scoresUsed: scores,
+      tasksGenerated: generatedTasks.length,
+      taskTitles: generatedTasks.map(t => t.title)
+    });
+    
     return generatedTasks;
   };
 
@@ -239,13 +259,23 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
 
   useEffect(() => {
     const loadTasks = async () => {
-      if (!maturityScores || enabledAgents.length === 0) {
-        console.log('No maturity scores or enabled agents, skipping task generation');
+      if (!maturityScores) {
+        console.log('No maturity scores available, cannot generate tasks');
         setTasks([]);
         return;
       }
 
-      console.log('Loading tasks with enabled agents:', enabledAgents);
+      if (enabledAgents.length === 0) {
+        console.log('No enabled agents found, cannot generate tasks');
+        setTasks([]);
+        return;
+      }
+
+      console.log('Loading tasks with:', {
+        maturityScores,
+        enabledAgents,
+        enabledAgentsCount: enabledAgents.length
+      });
 
       // Generate base tasks from maturity scores
       const scoreTasks = generateTasksFromScores(maturityScores);
@@ -269,7 +299,17 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         })
         .slice(0, 6);
 
-      console.log('Final prioritized tasks:', prioritizedTasks.length);
+      console.log('Final prioritized tasks:', {
+        totalTasks: allTasks.length,
+        finalTasks: prioritizedTasks.length,
+        taskDetails: prioritizedTasks.map(t => ({ 
+          id: t.id, 
+          title: t.title, 
+          agentId: t.agentId, 
+          priority: t.priority 
+        }))
+      });
+      
       setTasks(prioritizedTasks);
     };
 

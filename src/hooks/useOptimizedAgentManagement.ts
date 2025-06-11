@@ -43,10 +43,13 @@ export const useOptimizedAgentManagement = () => {
     const transformedAgents = culturalAgentsDatabase.map(agentInfo => {
       const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
       
+      // ARREGLO CRÍTICO: Asegurar que status sea compatible con AgentStatus type
+      const status: 'active' | 'inactive' = userAgent?.is_enabled ? 'active' : 'inactive';
+      
       return {
         id: agentInfo.id,
         name: agentInfo.name,
-        status: userAgent?.is_enabled ? 'active' : 'inactive',
+        status,
         category: agentInfo.category,
         activeTasks: userAgent?.usage_count || 0,
         lastUsed: userAgent?.last_used_at ? new Date(userAgent.last_used_at).toLocaleDateString() : undefined,
