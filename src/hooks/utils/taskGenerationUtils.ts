@@ -1,17 +1,16 @@
 
 import { CategoryScore } from '@/types/dashboard';
-import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
+import { getAgentById } from '@/data/agentsDatabase';
 import { OptimizedRecommendedTask } from '../types/recommendedTasksTypes';
 
-export const getAvailableAgents = (enabledAgentIds: string[]): CulturalAgent[] => {
-  console.log('getAvailableAgents called with:', { enabledAgentIds, totalAgents: culturalAgentsDatabase.length });
+export const getAvailableAgents = (enabledAgentIds: string[]) => {
+  console.log('getAvailableAgents called with:', { enabledAgentIds });
   
-  const availableAgents = culturalAgentsDatabase.filter(agent => 
-    enabledAgentIds.includes(agent.id)
-  );
+  const availableAgents = enabledAgentIds
+    .map(id => getAgentById(id))
+    .filter(agent => agent !== undefined);
   
   console.log('Available agents found:', {
-    totalAgents: culturalAgentsDatabase.length,
     enabledAgentIds,
     availableAgents: availableAgents.map(a => ({ id: a.id, name: a.name }))
   });
@@ -19,28 +18,30 @@ export const getAvailableAgents = (enabledAgentIds: string[]): CulturalAgent[] =
   return availableAgents;
 };
 
-export const generateTasksFromScores = (
+export const generateRobustTasksFromScores = (
   scores: CategoryScore, 
   enabledAgentIds: string[]
 ): OptimizedRecommendedTask[] => {
-  console.log('Generating tasks from scores:', scores);
+  console.log('Generating robust tasks from scores:', scores);
   console.log('Available agents for task generation:', enabledAgentIds);
   
   const availableAgents = getAvailableAgents(enabledAgentIds);
   
   if (availableAgents.length === 0) {
     console.log('No available agents found, generating fallback tasks');
-    return generateFallbackTasks(scores);
+    return generateEmergencyTasks(scores);
   }
   
   const tasks: OptimizedRecommendedTask[] = [];
   
-  // Generate tasks based on lowest scores (highest priority)
-  const scoreEntries = Object.entries(scores).sort(([,a], [,b]) => a - b);
-  
+  // Generar tareas basadas en puntuaciones más bajas (mayor prioridad)
+  const scoreEntries = Object.entries(scores)
+    .sort(([,a], [,b]) => a - b)
+    .filter(([, score]) => score < 70); // Solo crear tareas para puntuaciones bajo 70%
+
   scoreEntries.forEach(([category, score], index) => {
-    if (score < 70 && index < availableAgents.length) { // Only create tasks for scores below 70%
-      const agent = availableAgents[index % availableAgents.length];
+    if (index < availableAgents.length) {
+      const agent = availableAgents[index];
       const priority = score < 30 ? 'high' : score < 60 ? 'medium' : 'low';
       
       const task: OptimizedRecommendedTask = {
@@ -82,47 +83,47 @@ export const generateTasksFromScores = (
   return tasks;
 };
 
-const generateFallbackTasks = (scores: CategoryScore): OptimizedRecommendedTask[] => {
-  console.log('Generating fallback tasks for scores:', scores);
+const generateEmergencyTasks = (scores: CategoryScore): OptimizedRecommendedTask[] => {
+  console.log('Generating emergency tasks for scores:', scores);
   
-  const fallbackTasks: OptimizedRecommendedTask[] = [];
+  const emergencyTasks: OptimizedRecommendedTask[] = [];
   
-  // Get the lowest scoring area
+  // Obtener el área con puntuación más baja
   const lowestScore = Math.min(...Object.values(scores));
   const lowestCategory = Object.entries(scores).find(([, score]) => score === lowestScore)?.[0];
   
   if (lowestCategory) {
-    fallbackTasks.push({
-      id: 'fallback-task-1',
+    emergencyTasks.push({
+      id: 'emergency-task-1',
       title: `Mejorar ${getCategoryDisplayName(lowestCategory)}`,
-      description: `Tu puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. Te sugerimos enfocarte en esta área.`,
-      agentId: 'cultural-consultant', // Default agent
+      description: `Tu puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. Te sugerimos enfocarte en esta área prioritaria.`,
+      agentId: 'cultural-consultant',
       agentName: 'Especialista Creativo',
       priority: 'high',
       category: 'Área de Mejora',
       estimatedTime: '1-2 horas',
-      prompt: `Mi puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. ¿Cómo puedo mejorar en esta área específicamente?`,
+      prompt: `Mi puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. ¿Cómo puedo mejorar específicamente en esta área?`,
       completed: false,
-      isRealAgent: false // Mark as fallback
+      isRealAgent: false
     });
   }
   
-  // Agregar una tarea adicional general
-  fallbackTasks.push({
-    id: 'fallback-task-2',
-    title: 'Comenzar con lo Básico',
-    description: 'Enfócate en establecer los fundamentos de tu proyecto creativo paso a paso.',
+  // Agregar tarea general
+  emergencyTasks.push({
+    id: 'emergency-task-2',
+    title: 'Comenzar con los Fundamentos',
+    description: 'Enfócate en establecer los elementos básicos de tu proyecto creativo paso a paso.',
     agentId: 'cultural-consultant',
     agentName: 'Especialista Creativo',
     priority: 'medium',
     category: 'Fundamentos',
     estimatedTime: '30 min',
-    prompt: '¿Cuáles son los primeros pasos más importantes para mi proyecto creativo?',
+    prompt: '¿Cuáles son los primeros pasos más importantes para desarrollar mi proyecto creativo?',
     completed: false,
     isRealAgent: false
   });
   
-  return fallbackTasks;
+  return emergencyTasks;
 };
 
 const getTaskTitleForCategory = (category: string): string => {

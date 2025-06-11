@@ -20,56 +20,55 @@ interface AIRecommendationsRequest {
   language: 'en' | 'es';
 }
 
-// Fallback recommendations when OpenAI fails
-const getFallbackRecommendations = (scores: any) => {
+// Recomendaciones robustas cuando OpenAI falla
+const getRobustFallbackRecommendations = (scores: any) => {
   const recommendations = [];
   
-  // Generate basic recommendations based on scores
-  const sortedScores = Object.entries(scores).sort(([,a], [,b]) => (a as number) - (b as number));
-  
-  for (const [category, score] of sortedScores.slice(0, 3)) {
-    if ((score as number) < 70) {
-      let title = '';
-      let description = '';
-      
-      switch (category) {
-        case 'ideaValidation':
-          title = 'Validar tu Propuesta de Valor';
-          description = 'Realiza entrevistas con clientes potenciales para validar que tu idea resuelve un problema real y significativo.';
-          break;
-        case 'userExperience':
-          title = 'Mejorar la Experiencia del Usuario';
-          description = 'Diseña prototipos simples y obtén feedback directo de usuarios para optimizar la experiencia.';
-          break;
-        case 'marketFit':
-          title = 'Analizar tu Mercado Objetivo';
-          description = 'Investiga a fondo tu mercado, competencia y posicionamiento para encontrar tu nicho específico.';
-          break;
-        case 'monetization':
-          title = 'Desarrollar Modelo de Ingresos';
-          description = 'Define una estrategia clara de monetización adaptada a tu mercado y tipo de cliente.';
-          break;
-      }
-      
-      recommendations.push({
-        title,
-        description,
-        priority: (score as number) < 30 ? 'Alta' : (score as number) < 60 ? 'Media' : 'Baja',
-        timeframe: '1-2 semanas'
-      });
+  // Analizar cada área específicamente
+  const areas = [
+    { key: 'monetization', value: scores.monetization, name: 'Monetización' },
+    { key: 'ideaValidation', value: scores.ideaValidation, name: 'Validación de Idea' },
+    { key: 'userExperience', value: scores.userExperience, name: 'Experiencia de Usuario' },
+    { key: 'marketFit', value: scores.marketFit, name: 'Ajuste al Mercado' }
+  ].sort((a, b) => a.value - b.value);
+
+  // Generar recomendaciones específicas para las 3 áreas más débiles
+  areas.slice(0, 3).forEach((area) => {
+    let title = '';
+    let description = '';
+    let priority = area.value < 40 ? 'Alta' : area.value < 60 ? 'Media' : 'Baja';
+    let timeframe = priority === 'Alta' ? '1-2 semanas' : '2-4 semanas';
+    
+    switch (area.key) {
+      case 'monetization':
+        title = 'Desarrollar Estrategia de Monetización Sólida';
+        description = `Tu puntuación en monetización es ${area.value}%. Enfócate en definir modelos de ingresos claros, calcular costos de producción precisos y establecer precios competitivos. Considera múltiples fuentes de ingresos para diversificar tu propuesta de valor económica.`;
+        break;
+      case 'ideaValidation':
+        title = 'Validar Profundamente tu Propuesta de Valor';
+        description = `Con ${area.value}% en validación de idea, necesitas confirmar que tu concepto resuelve problemas reales y significativos. Realiza entrevistas estructuradas con clientes potenciales, crea prototipos mínimos viables y prueba tu idea con audiencias específicas.`;
+        break;
+      case 'userExperience':
+        title = 'Optimizar Integralmente la Experiencia del Usuario';
+        description = `Tu puntuación de ${area.value}% en experiencia de usuario indica oportunidades importantes de mejora. Simplifica procesos complejos, mejora la usabilidad de tus interfaces y establece canales efectivos para recolectar feedback directo y continuo de tus usuarios.`;
+        break;
+      case 'marketFit':
+        title = 'Perfeccionar el Ajuste al Mercado Objetivo';
+        description = `Con ${area.value}% en ajuste al mercado, debes investigar exhaustivamente tu competencia, definir con precisión tu nicho específico y ajustar tu propuesta para destacar significativamente en tu mercado objetivo.`;
+        break;
     }
-  }
-  
-  // Ensure we always have at least one recommendation
-  if (recommendations.length === 0) {
-    recommendations.push({
-      title: 'Continuar Desarrollando tu Proyecto',
-      description: 'Mantén el momentum y sigue trabajando en las áreas que has identificado como prioritarias.',
-      priority: 'Media',
-      timeframe: '1 semana'
-    });
-  }
-  
+    
+    recommendations.push({ title, description, priority, timeframe });
+  });
+
+  // Agregar recomendación estratégica general
+  recommendations.push({
+    title: 'Implementar Desarrollo Iterativo y Medible',
+    description: 'Establece un sistema de mejora continua con métricas claras, metas semanales alcanzables y revisiones regulares de progreso. Mantén un enfoque constante en la validación de cada cambio implementado.',
+    priority: 'Media',
+    timeframe: 'Continuo'
+  });
+
   return recommendations;
 };
 
@@ -82,124 +81,90 @@ serve(async (req) => {
   try {
     const { scores, profileData, language }: AIRecommendationsRequest = await req.json();
 
-    console.log('AI Recommendations request:', { scores, profileData: Object.keys(profileData || {}), language });
+    console.log('AI Recommendations request received:', { 
+      scores, 
+      profileData: Object.keys(profileData || {}), 
+      language 
+    });
 
-    // If OpenAI API key is not configured, return fallback recommendations
+    // Si no hay clave de OpenAI, usar fallbacks robustos inmediatamente
     if (!openAIApiKey) {
-      console.log('OpenAI API key not configured, using fallback recommendations');
-      const fallbackRecommendations = getFallbackRecommendations(scores);
+      console.log('OpenAI API key not configured, using robust fallback recommendations');
+      const fallbackRecommendations = getRobustFallbackRecommendations(scores);
       return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Calculate overall maturity level
+    // Calcular nivel general de madurez
     const overallScore = Math.round(
       (scores.ideaValidation + scores.userExperience + scores.marketFit + scores.monetization) / 4
     );
 
-    // Include dynamic question answers in the analysis with proper formatting
-    const dynamicAnswersText = profileData?.dynamicQuestionAnswers 
-      ? Object.entries(profileData.dynamicQuestionAnswers)
-          .map(([questionId, answer]) => `Q: ${questionId.replace('dynamic_', 'Question ')}\nA: ${answer}`)
-          .join('\n\n')
-      : 'No additional insights provided through open-ended questions';
+    console.log('Calculated overall maturity score:', overallScore);
 
-    console.log('Dynamic answers processed:', dynamicAnswersText.length > 0 ? 'Yes' : 'No');
-
-    // Create comprehensive profile summary
-    const profileSummary = `
-Industry: ${profileData?.industry || 'Not specified'}
-Activities: ${Array.isArray(profileData?.activities) ? profileData.activities.join(', ') : profileData?.activities || 'Not specified'}
-Experience: ${profileData?.experience || 'Not specified'}
-Payment Methods: ${profileData?.paymentMethods || 'Not specified'}
-Brand Identity: ${profileData?.brandIdentity || 'Not specified'}
-Financial Control: ${profileData?.financialControl || 'Not specified'}
-Team Structure: ${profileData?.teamStructure || 'Not specified'}
-Task Organization: ${profileData?.taskOrganization || 'Not specified'}
-Decision Making: ${profileData?.decisionMaking || 'Not specified'}
-Analysis Type: ${profileData?.analysisPreference || 'Not specified'}
-    `.trim();
-
+    // Crear prompt optimizado y conciso
     const systemPrompt = language === 'es' 
-      ? `Eres un experto consultor en negocios creativos y culturales. Analiza los resultados de evaluación de madurez de un creador cultural y sus respuestas detalladas.
+      ? `Eres un consultor experto en negocios creativos. Analiza estas puntuaciones de madurez y proporciona 3-4 recomendaciones específicas y accionables.
 
-PUNTUACIONES DE MADUREZ (0-100):
+PUNTUACIONES:
 - Validación de Idea: ${scores.ideaValidation}%
 - Experiencia de Usuario: ${scores.userExperience}%
 - Ajuste al Mercado: ${scores.marketFit}%
 - Monetización: ${scores.monetization}%
 - Puntuación General: ${overallScore}%
 
-PERFIL DEL USUARIO:
-${profileSummary}
-
-RESPUESTAS ABIERTAS DETALLADAS:
-${dynamicAnswersText}
-
 INSTRUCCIONES:
-Basándote en TODA la información (puntuaciones + perfil + respuestas abiertas), proporciona entre 3 y 5 recomendaciones de acción específicas y accionables.
+1. Enfócate en las 2-3 áreas más débiles
+2. Proporciona acciones específicas y medibles
+3. Incluye timeframes realistas
+4. Considera el contexto creativo/cultural
 
-CADA RECOMENDACIÓN DEBE:
-1. Ser específica para su nivel de madurez actual y contexto personal
-2. Dirigirse a las áreas más débiles identificadas en las puntuaciones
-3. Considerar las respuestas abiertas para personalización profunda
-4. Ser accionable en los próximos 30-90 días
-5. Ser relevante para el sector creativo/cultural
-6. Incluir pasos concretos, no solo consejos generales
-
-RESPONDE SOLO CON UN JSON VÁLIDO:
+Responde SOLO con JSON válido:
 {
   "recommendations": [
     {
-      "title": "Título específico y accionable",
-      "description": "Descripción detallada con pasos concretos (2-3 oraciones que incluyan qué hacer específicamente)",
+      "title": "Título específico",
+      "description": "Descripción detallada con pasos concretos",
       "priority": "Alta" | "Media" | "Baja",
-      "timeframe": "Tiempo estimado realista para completar"
+      "timeframe": "Tiempo estimado"
     }
   ]
 }`
-      : `You are an expert consultant in creative and cultural businesses. Analyze the maturity assessment results for a cultural creator and their detailed responses.
+      : `You are an expert consultant in creative businesses. Analyze these maturity scores and provide 3-4 specific, actionable recommendations.
 
-MATURITY SCORES (0-100):
+SCORES:
 - Idea Validation: ${scores.ideaValidation}%
 - User Experience: ${scores.userExperience}%
 - Market Fit: ${scores.marketFit}%
 - Monetization: ${scores.monetization}%
 - Overall Score: ${overallScore}%
 
-USER PROFILE:
-${profileSummary}
-
-DETAILED OPEN-ENDED RESPONSES:
-${dynamicAnswersText}
-
 INSTRUCTIONS:
-Based on ALL the information (scores + profile + open-ended responses), provide between 3 and 5 specific, actionable recommendations.
+1. Focus on the 2-3 weakest areas
+2. Provide specific, measurable actions
+3. Include realistic timeframes
+4. Consider creative/cultural context
 
-EACH RECOMMENDATION MUST:
-1. Be specific to their current maturity level and personal context
-2. Target the weakest areas identified in the scores
-3. Consider the open-ended responses for deep personalization
-4. Be actionable within the next 30-90 days
-5. Be relevant to the creative/cultural sector
-6. Include concrete steps, not just general advice
-
-RESPOND ONLY WITH VALID JSON:
+Respond ONLY with valid JSON:
 {
   "recommendations": [
     {
-      "title": "Specific and actionable title",
-      "description": "Detailed description with concrete steps (2-3 sentences that include what specifically to do)",
-      "priority": "High" | "Medium" | "Low",
-      "timeframe": "Realistic estimated time to complete"
+      "title": "Specific title",
+      "description": "Detailed description with concrete steps",
+      "priority": "High" | "Medium" | "Low", 
+      "timeframe": "Estimated time"
     }
   ]
 }`;
 
-    console.log('Making OpenAI request...');
+    console.log('Making optimized OpenAI request...');
 
     try {
+      // Hacer request con timeout más corto
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos timeout
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -210,43 +175,41 @@ RESPOND ONLY WITH VALID JSON:
           model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: 'Analyze these comprehensive results and provide personalized recommendations.' }
+            { role: 'user', content: 'Generate personalized recommendations based on these scores.' }
           ],
           temperature: 0.7,
-          max_tokens: 2000,
+          max_tokens: 1500, // Reducido para respuestas más rápidas
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('OpenAI API error:', response.status, errorText);
-        
-        // Return fallback recommendations on OpenAI error
-        console.log('OpenAI failed, using fallback recommendations');
-        const fallbackRecommendations = getFallbackRecommendations(scores);
-        return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();
       const analysisResult = data.choices[0].message.content;
 
-      console.log('OpenAI response received, length:', analysisResult.length);
+      console.log('OpenAI response received successfully, length:', analysisResult.length);
 
-      // Parse the JSON response
+      // Parsear respuesta JSON con manejo de errores robusto
       let recommendations;
       try {
         const parsed = JSON.parse(analysisResult);
         recommendations = parsed.recommendations;
-        console.log('Successfully parsed recommendations:', recommendations.length);
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', analysisResult);
-        console.error('Parse error:', parseError);
         
-        // Return fallback recommendations on parse error
-        console.log('Parse failed, using fallback recommendations');
-        const fallbackRecommendations = getFallbackRecommendations(scores);
+        if (!Array.isArray(recommendations) || recommendations.length === 0) {
+          throw new Error('Invalid recommendations format');
+        }
+        
+        console.log('Successfully parsed AI recommendations:', recommendations.length);
+      } catch (parseError) {
+        console.error('Failed to parse AI response, using fallbacks:', parseError);
+        const fallbackRecommendations = getRobustFallbackRecommendations(scores);
         return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -259,9 +222,9 @@ RESPOND ONLY WITH VALID JSON:
     } catch (openaiError) {
       console.error('OpenAI request failed:', openaiError);
       
-      // Return fallback recommendations on request failure
-      console.log('OpenAI request failed, using fallback recommendations');
-      const fallbackRecommendations = getFallbackRecommendations(scores);
+      // Usar fallbacks robustos en cualquier error de OpenAI
+      console.log('Using robust fallback due to OpenAI failure');
+      const fallbackRecommendations = getRobustFallbackRecommendations(scores);
       return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -270,20 +233,30 @@ RESPOND ONLY WITH VALID JSON:
   } catch (error) {
     console.error('Error in ai-recommendations function:', error);
     
-    // Return fallback recommendations on any error
-    const fallbackRecommendations = [
+    // Fallback final con recomendaciones básicas pero útiles
+    const finalFallbackRecommendations = [
       {
-        title: 'Desarrollar tu Proyecto Paso a Paso',
-        description: 'Enfócate en completar una tarea pequeña a la vez y busca feedback regular de tu audiencia objetivo.',
+        title: 'Desarrollar Estrategia Básica de Negocio',
+        description: 'Enfócate en definir claramente tu propuesta de valor, identificar tu mercado objetivo y establecer un modelo de ingresos básico pero funcional.',
+        priority: 'Alta',
+        timeframe: '2-3 semanas'
+      },
+      {
+        title: 'Validar Concepto con Audiencia Real', 
+        description: 'Realiza pruebas simples con usuarios potenciales para confirmar que tu idea resuelve un problema real y significativo.',
         priority: 'Alta',
         timeframe: '1-2 semanas'
+      },
+      {
+        title: 'Mejorar Experiencia del Usuario',
+        description: 'Simplifica procesos, mejora la usabilidad y establece canales para recibir feedback continuo de tus usuarios.',
+        priority: 'Media',
+        timeframe: '2-4 semanas'
       }
     ];
     
     return new Response(
-      JSON.stringify({ 
-        recommendations: fallbackRecommendations
-      }), 
+      JSON.stringify({ recommendations: finalFallbackRecommendations }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
