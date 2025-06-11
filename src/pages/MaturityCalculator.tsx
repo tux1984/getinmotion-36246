@@ -24,30 +24,30 @@ const MaturityCalculator = () => {
   }, []);
 
   const handleMaturityCalculatorClick = () => {
-    navigate('/dashboard/maturity-calculator');
+    navigate('/maturity-calculator');
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    // ARREGLO: Navegar específicamente a dashboard/home
+    navigate('/dashboard/home');
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    // Save to localStorage
-    localStorage.setItem('maturityScores', JSON.stringify(scores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
-    localStorage.setItem('onboardingCompleted', 'true');
+    console.log('MaturityCalculator: Onboarding completed, navigating to dashboard');
     
-    // Navigate to dashboard
-    navigate('/dashboard');
+    // ARREGLO CRÍTICO: Usar setTimeout para asegurar que localStorage se actualice
+    setTimeout(() => {
+      navigate('/dashboard/home', { replace: true });
+    }, 100);
   };
 
   const handleStandaloneComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    // For standalone calculator usage
-    localStorage.setItem('maturityScores', JSON.stringify(scores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(recommendedAgents));
+    console.log('MaturityCalculator: Standalone calculator completed');
     
-    // Navigate to dashboard
-    navigate('/dashboard');
+    // Para uso independiente del calculador
+    setTimeout(() => {
+      navigate('/dashboard/home', { replace: true });
+    }, 100);
   };
 
   return (

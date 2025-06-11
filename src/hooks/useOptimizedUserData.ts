@@ -52,9 +52,41 @@ export const useOptimizedUserData = (): OptimizedUserData => {
     error: null,
   });
 
+  // ARREGLO CRÍTICO: Mejorar la detección de onboarding completado
   const hasOnboarding = useMemo(() => {
-    if (!data.agents.length) return false;
-    return data.agents.some(agent => agent.is_enabled);
+    // 1. Verificar localStorage primero (más confiable)
+    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+    if (onboardingCompleted === 'true') {
+      console.log('useOptimizedUserData: hasOnboarding = true (localStorage)');
+      return true;
+    }
+
+    // 2. Verificar si tiene maturityScores guardados (indicador secundario)
+    const savedMaturityScores = localStorage.getItem('maturityScores');
+    if (savedMaturityScores) {
+      try {
+        const scores = JSON.parse(savedMaturityScores);
+        if (scores && typeof scores === 'object') {
+          console.log('useOptimizedUserData: hasOnboarding = true (maturityScores)');
+          // Auto-marcar como completado si tiene scores pero no el flag
+          localStorage.setItem('onboardingCompleted', 'true');
+          return true;
+        }
+      } catch (e) {
+        console.warn('useOptimizedUserData: Error parsing maturityScores:', e);
+      }
+    }
+
+    // 3. Como último recurso, verificar agentes habilitados
+    if (data.agents.length > 0 && data.agents.some(agent => agent.is_enabled)) {
+      console.log('useOptimizedUserData: hasOnboarding = true (enabled agents)');
+      // Auto-marcar como completado si tiene agentes pero no el flag
+      localStorage.setItem('onboardingCompleted', 'true');
+      return true;
+    }
+
+    console.log('useOptimizedUserData: hasOnboarding = false (no indicators)');
+    return false;
   }, [data.agents]);
 
   useEffect(() => {
