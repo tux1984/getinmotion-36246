@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { RecommendedAgents } from '@/types/dashboard';
-import { getAllAgentIds } from '@/data/culturalAgentsDatabase';
+import { getAllAgentIds } from '@/data/agentsDatabase';
 
 export const createUserAgentsFromRecommendations = async (
   userId: string, 
@@ -91,5 +91,52 @@ export const markOnboardingComplete = (
     console.log('Onboarding marked as complete in localStorage');
   } catch (err) {
     console.error('Error marking onboarding complete:', err);
+  }
+};
+
+// NUEVA FUNCIÓN: Resetear completamente el onboarding
+export const resetOnboarding = (): void => {
+  try {
+    localStorage.removeItem('maturityScores');
+    localStorage.removeItem('recommendedAgents');
+    localStorage.removeItem('onboardingCompleted');
+    console.log('Onboarding data reset from localStorage');
+  } catch (err) {
+    console.error('Error resetting onboarding:', err);
+  }
+};
+
+// NUEVA FUNCIÓN: Crear datos de fallback
+export const createFallbackData = async (userId: string): Promise<boolean> => {
+  try {
+    console.log('Creating fallback data for user:', userId);
+    
+    const fallbackScores = {
+      ideaValidation: 30,
+      userExperience: 25,
+      marketFit: 20,
+      monetization: 15
+    };
+    
+    const fallbackAgents = {
+      cultural: true,
+      admin: false,
+      accounting: false,
+      legal: false,
+      operations: false
+    };
+    
+    // Guardar en localStorage
+    markOnboardingComplete(fallbackScores, fallbackAgents);
+    
+    // Crear agentes en BD si hay usuario
+    if (userId) {
+      await createUserAgentsFromRecommendations(userId, fallbackAgents);
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error creating fallback data:', err);
+    return false;
   }
 };

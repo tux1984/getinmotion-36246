@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
@@ -10,10 +11,12 @@ import { DashboardErrorState } from '@/components/dashboard/DashboardErrorState'
 import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
 import { DataSyncStatus } from '@/components/dashboard/DataSyncStatus';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react';
+import { resetOnboarding, createFallbackData } from '@/utils/onboardingUtils';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [redirectAttempts, setRedirectAttempts] = useState(0);
   const [showEscapeHatch, setShowEscapeHatch] = useState(false);
@@ -49,7 +52,7 @@ const DashboardHome = () => {
         console.log('DashboardHome: Loading timeout reached, showing escape hatch');
         setShowEscapeHatch(true);
         setLoadingStage('Tiempo de carga agotado');
-      }, 20000); // 20 segundos
+      }, 15000); // 15 segundos
 
       return () => clearTimeout(timeout);
     }
@@ -68,8 +71,8 @@ const DashboardHome = () => {
       return;
     }
 
-    // Solo redirigir si realmente no tiene onboarding
-    if (!hasOnboarding && !maturityScores) {
+    // Solo redirigir si realmente no tiene onboarding Y no tiene datos de agentes
+    if (!hasOnboarding && !maturityScores && agents.filter(a => a.status === 'active').length === 0) {
       console.log('DashboardHome: User needs onboarding, redirecting to maturity calculator');
       setRedirectAttempts(prev => prev + 1);
       
@@ -78,7 +81,7 @@ const DashboardHome = () => {
         navigate('/maturity-calculator', { replace: true });
       }, 100);
     }
-  }, [isLoading, hasOnboarding, maturityScores, navigate, redirectAttempts]);
+  }, [isLoading, hasOnboarding, maturityScores, agents, navigate, redirectAttempts]);
   
   const handleNavigateToMaturityCalculator = () => {
     console.log('DashboardHome: Navigating to maturity calculator');
@@ -100,32 +103,22 @@ const DashboardHome = () => {
     window.location.reload();
   };
 
+  // NUEVO: Resetear onboarding completamente
+  const handleResetOnboarding = () => {
+    console.log('DashboardHome: Resetting onboarding');
+    resetOnboarding();
+    window.location.reload();
+  };
+
   // NUEVO: Escape hatch para usuarios atascados
-  const handleForceAccess = () => {
+  const handleForceAccess = async () => {
     console.log('DashboardHome: Force access - setting default onboarding data');
     
-    // Crear datos mínimos para permitir acceso
-    const defaultScores = {
-      ideaValidation: 20,
-      userExperience: 15,
-      marketFit: 10,
-      monetization: 5
-    };
-    
-    const defaultRecommendations = {
-      cultural: true,
-      admin: false,
-      accounting: false,
-      legal: false,
-      operations: false
-    };
-
-    localStorage.setItem('maturityScores', JSON.stringify(defaultScores));
-    localStorage.setItem('recommendedAgents', JSON.stringify(defaultRecommendations));
-    localStorage.setItem('onboardingCompleted', 'true');
-    
-    // Recargar la página para aplicar cambios
-    window.location.reload();
+    const success = await createFallbackData(user?.id || '');
+    if (success) {
+      // Recargar la página para aplicar cambios
+      window.location.reload();
+    }
   };
 
   // ARREGLO: Mostrar indicador específico de qué está cargando
@@ -178,8 +171,8 @@ const DashboardHome = () => {
               </h2>
               <p className="text-gray-600 mb-6">
                 {language === 'en' 
-                  ? 'The dashboard is taking too long to load. You can try refreshing or force access.'
-                  : 'El dashboard está tardando demasiado en cargar. Puedes intentar actualizar o forzar el acceso.'
+                  ? 'The dashboard is taking too long to load. You can try different solutions below.'
+                  : 'El dashboard está tardando demasiado en cargar. Puedes probar diferentes soluciones abajo.'
                 }
               </p>
               <div className="space-y-3">
@@ -187,15 +180,19 @@ const DashboardHome = () => {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   {language === 'en' ? 'Refresh Page' : 'Actualizar Página'}
                 </Button>
+                <Button onClick={handleResetOnboarding} variant="outline" className="w-full">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  {language === 'en' ? 'Reset Assessment' : 'Resetear Evaluación'}
+                </Button>
                 <Button onClick={handleForceAccess} className="w-full">
-                  {language === 'en' ? 'Force Access to Dashboard' : 'Forzar Acceso al Dashboard'}
+                  {language === 'en' ? 'Create Basic Setup' : 'Crear Configuración Básica'}
                 </Button>
                 <Button 
                   onClick={handleNavigateToMaturityCalculator} 
                   variant="outline" 
                   className="w-full"
                 >
-                  {language === 'en' ? 'Try Assessment Again' : 'Intentar Evaluación de Nuevo'}
+                  {language === 'en' ? 'Start New Assessment' : 'Comenzar Nueva Evaluación'}
                 </Button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 
 import { CategoryScore } from '@/types/dashboard';
-import { culturalAgentsDatabase, CulturalAgent } from '@/data/culturalAgentsDatabase';
+import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
 import { OptimizedRecommendedTask } from '../types/recommendedTasksTypes';
 
 export const getAvailableAgents = (enabledAgentIds: string[]): CulturalAgent[] => {
@@ -61,6 +61,24 @@ export const generateTasksFromScores = (
     }
   });
   
+  // Si no se generaron tareas desde scores, crear al menos una tarea básica
+  if (tasks.length === 0 && availableAgents.length > 0) {
+    const primaryAgent = availableAgents[0];
+    tasks.push({
+      id: 'default-task-1',
+      title: 'Desarrollar tu Proyecto Creativo',
+      description: 'Comienza a trabajar en los aspectos fundamentales de tu proyecto creativo.',
+      agentId: primaryAgent.id,
+      agentName: primaryAgent.name,
+      priority: 'medium',
+      category: 'Desarrollo',
+      estimatedTime: '1-2 horas',
+      prompt: '¿Cómo puedo empezar a desarrollar mi proyecto creativo de manera efectiva?',
+      completed: false,
+      isRealAgent: true
+    });
+  }
+  
   return tasks;
 };
 
@@ -88,6 +106,21 @@ const generateFallbackTasks = (scores: CategoryScore): OptimizedRecommendedTask[
       isRealAgent: false // Mark as fallback
     });
   }
+  
+  // Agregar una tarea adicional general
+  fallbackTasks.push({
+    id: 'fallback-task-2',
+    title: 'Comenzar con lo Básico',
+    description: 'Enfócate en establecer los fundamentos de tu proyecto creativo paso a paso.',
+    agentId: 'cultural-consultant',
+    agentName: 'Especialista Creativo',
+    priority: 'medium',
+    category: 'Fundamentos',
+    estimatedTime: '30 min',
+    prompt: '¿Cuáles son los primeros pasos más importantes para mi proyecto creativo?',
+    completed: false,
+    isRealAgent: false
+  });
   
   return fallbackTasks;
 };
