@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Agent, CategoryScore } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
@@ -19,6 +18,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRecommendedTasks } from '@/hooks/useRecommendedTasks';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileTaskBasedDashboard } from './mobile/MobileTaskBasedDashboard';
 
 interface TaskBasedDashboardProps {
   agents: Agent[];
@@ -35,6 +36,19 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
 }) => {
   const { language } = useLanguage();
   const { tasks, loading, markTaskCompleted } = useRecommendedTasks(maturityScores);
+  const isMobile = useIsMobile();
+
+  // Use mobile version on small screens
+  if (isMobile) {
+    return (
+      <MobileTaskBasedDashboard
+        agents={agents}
+        maturityScores={maturityScores}
+        onSelectAgent={onSelectAgent}
+        onMaturityCalculatorClick={onMaturityCalculatorClick}
+      />
+    );
+  }
 
   const t = {
     en: {
@@ -100,14 +114,11 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
   };
 
   const handleStartTask = (task: any) => {
-    // Store the task prompt in localStorage for the agent to use
     localStorage.setItem(`agent-${task.agentId}-prompt`, task.prompt);
     localStorage.setItem(`agent-${task.agentId}-task`, JSON.stringify({
       title: task.title,
       description: task.description
     }));
-    
-    // Navigate to the agent
     onSelectAgent(task.agentId);
   };
 
