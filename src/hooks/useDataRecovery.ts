@@ -13,6 +13,8 @@ interface RecoveryStatus {
   error: string | null;
 }
 
+const RECOVERY_TIMEOUT = 15000; // 15 segundos
+
 export const useDataRecovery = () => {
   const { user } = useAuth();
   const { saveMaturityScores } = useMaturityScoresSaver();
@@ -39,27 +41,39 @@ export const useDataRecovery = () => {
         return;
       }
 
-      // Verificar si ya tiene datos en la BD
-      const [scoresResult, agentsResult] = await Promise.all([
-        supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
-        supabase.from('user_agents').select('*').eq('user_id', user.id).eq('is_enabled', true)
-      ]);
-
-      const hasDbScores = scoresResult.data && scoresResult.data.length > 0;
-      const hasDbAgents = agentsResult.data && agentsResult.data.length > 0;
-
-      console.log('Recovery check results:', { 
-        hasDbScores, 
-        hasDbAgents, 
-        scoresCount: scoresResult.data?.length || 0,
-        agentsCount: agentsResult.data?.length || 0 
+      // ARREGLO: Añadir timeout a las consultas de verificación
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Check timeout')), 5000);
       });
 
-      if (!hasDbScores || !hasDbAgents) {
-        console.log('User needs data recovery:', { hasDbScores, hasDbAgents });
+      try {
+        const [scoresResult, agentsResult] = await Promise.race([
+          Promise.all([
+            supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
+            supabase.from('user_agents').select('*').eq('user_id', user.id).eq('is_enabled', true)
+          ]),
+          timeoutPromise
+        ]) as any[];
+
+        const hasDbScores = scoresResult.data && scoresResult.data.length > 0;
+        const hasDbAgents = agentsResult.data && agentsResult.data.length > 0;
+
+        console.log('Recovery check results:', { 
+          hasDbScores, 
+          hasDbAgents, 
+          scoresCount: scoresResult.data?.length || 0,
+          agentsCount: agentsResult.data?.length || 0 
+        });
+
+        if (!hasDbScores || !hasDbAgents) {
+          console.log('User needs data recovery:', { hasDbScores, hasDbAgents });
+          setStatus(prev => ({ ...prev, needsRecovery: true }));
+        } else {
+          console.log('User has complete data in database, no recovery needed');
+        }
+      } catch (checkErr) {
+        console.warn('Recovery check failed, assuming recovery needed:', checkErr);
         setStatus(prev => ({ ...prev, needsRecovery: true }));
-      } else {
-        console.log('User has complete data in database, no recovery needed');
       }
     } catch (err) {
       console.error('Error checking recovery needs:', err);
@@ -85,18 +99,38 @@ export const useDataRecovery = () => {
       const maturityScores: CategoryScore = JSON.parse(localMaturityScoresStr);
       console.log('Recovered maturity scores from localStorage:', maturityScores);
 
-      // Guardar maturity scores en BD (si no existen)
-      const { data: existingScores } = await supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id });
-      
-      if (!existingScores || existingScores.length === 0) {
-        const scoresSaved = await saveMaturityScores(maturityScores);
-        if (!scoresSaved) {
-          console.warn('Failed to save maturity scores, but continuing with recovery');
-        } else {
-          console.log('Maturity scores saved successfully during recovery');
+      // ARREGLO: Usar timeout para las operaciones de recovery
+      const recoveryTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Recovery timeout')), RECOVERY_TIMEOUT);
+      });
+
+      // Guardar maturity scores en BD (si no existen) con retry
+      let scoresSaved = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const { data: existingScores } = await Promise.race([
+            supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
+            recoveryTimeout
+          ]) as any;
+          
+          if (!existingScores || existingScores.length === 0) {
+            scoresSaved = await saveMaturityScores(maturityScores);
+            if (scoresSaved) {
+              console.log('Maturity scores saved successfully during recovery');
+              break;
+            }
+          } else {
+            console.log('Maturity scores already exist in database, skipping save');
+            scoresSaved = true;
+            break;
+          }
+        } catch (err) {
+          console.warn(`Recovery attempt ${attempt} failed:`, err);
+          if (attempt === 3) {
+            console.warn('All recovery attempts failed, but continuing');
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s between attempts
         }
-      } else {
-        console.log('Maturity scores already exist in database, skipping save');
       }
 
       // Recuperar y guardar agentes recomendados
@@ -114,15 +148,28 @@ export const useDataRecovery = () => {
 
       console.log('Recovered recommended agents from localStorage:', recommendedAgents);
 
-      // Crear agentes en BD
-      const agentsCreated = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
-      if (!agentsCreated) {
-        console.warn('Failed to create agents during recovery');
-        // Crear al menos el agente cultural por defecto
-        const defaultAgents = { cultural: true };
-        await createUserAgentsFromRecommendations(user.id, defaultAgents);
-      } else {
-        console.log('User agents created successfully during recovery');
+      // ARREGLO: Crear agentes en BD con retry y mejor manejo de errores
+      let agentsCreated = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          agentsCreated = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
+          if (agentsCreated) {
+            console.log('User agents created successfully during recovery');
+            break;
+          }
+        } catch (err) {
+          console.warn(`Agent creation attempt ${attempt} failed:`, err);
+          if (attempt === 3) {
+            // Crear al menos el agente cultural por defecto
+            try {
+              const defaultAgents = { cultural: true };
+              agentsCreated = await createUserAgentsFromRecommendations(user.id, defaultAgents);
+            } catch (fallbackErr) {
+              console.error('Even fallback agent creation failed:', fallbackErr);
+            }
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s between attempts
+        }
       }
 
       setStatus(prev => ({ 
@@ -147,7 +194,12 @@ export const useDataRecovery = () => {
 
   useEffect(() => {
     if (user && !status.recovered) {
-      checkNeedsRecovery();
+      // ARREGLO: Añadir delay antes de verificar recovery para evitar calls inmediatos
+      const timer = setTimeout(() => {
+        checkNeedsRecovery();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     }
   }, [user, checkNeedsRecovery, status.recovered]);
 

@@ -12,7 +12,6 @@ export const createUserAgentsFromRecommendations = async (
     const agentsToCreate = [];
     
     // Mapear recomendaciones usando el formato correcto del tipo RecommendedAgents
-    // Verificar el formato primary/secondary primero
     if (recommendations.primary && Array.isArray(recommendations.primary)) {
       recommendations.primary.forEach(agentId => {
         agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
@@ -49,33 +48,20 @@ export const createUserAgentsFromRecommendations = async (
 
     console.log('Inserting agents:', agentsToCreate);
 
-    // ARREGLO CRÍTICO: Usar INSERT simple en lugar de UPSERT para evitar conflictos
-    // Primero verificar si ya existen y solo crear los que no existan
-    const { data: existingAgents } = await supabase
-      .from('user_agents')
-      .select('agent_id')
-      .eq('user_id', userId);
-
-    const existingAgentIds = existingAgents?.map(a => a.agent_id) || [];
-    const newAgentsToCreate = agentsToCreate.filter(
-      agent => !existingAgentIds.includes(agent.agent_id)
-    );
-
-    if (newAgentsToCreate.length === 0) {
-      console.log('All agents already exist for user');
-      return true;
-    }
-
+    // ARREGLO CRÍTICO: Usar UPSERT con ON CONFLICT para evitar errores de duplicados
     const { error } = await supabase
       .from('user_agents')
-      .insert(newAgentsToCreate);
+      .upsert(agentsToCreate, {
+        onConflict: 'user_id,agent_id',
+        ignoreDuplicates: false
+      });
 
     if (error) {
       console.error('Error creating user agents:', error);
       return false;
     }
 
-    console.log('Successfully created user agents:', newAgentsToCreate.length);
+    console.log('Successfully created/updated user agents:', agentsToCreate.length);
     return true;
   } catch (err) {
     console.error('Error in createUserAgentsFromRecommendations:', err);

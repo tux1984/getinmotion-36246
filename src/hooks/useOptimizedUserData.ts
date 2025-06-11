@@ -42,6 +42,14 @@ interface OptimizedUserData {
   hasOnboarding: boolean;
 }
 
+const FETCH_TIMEOUT = 10000; // 10 segundos
+
+const createTimeoutPromise = (timeout: number) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout')), timeout);
+  });
+};
+
 export const useOptimizedUserData = (): OptimizedUserData => {
   const { user } = useAuth();
   const [data, setData] = useState<Omit<OptimizedUserData, 'hasOnboarding'>>({
@@ -99,41 +107,60 @@ export const useOptimizedUserData = (): OptimizedUserData => {
       try {
         setData(prev => ({ ...prev, loading: true, error: null }));
 
-        // Fetch all user data in parallel for better performance
-        const [profileResult, projectsResult, agentsResult] = await Promise.all([
-          supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle(),
-          
-          supabase
-            .from('user_projects')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(10), // Limit initial load
-          
-          supabase
-            .from('user_agents')
-            .select('*')
-            .eq('user_id', user.id)
-        ]);
+        // ARREGLO: Añadir timeout a todas las consultas
+        const profilePromise = supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        const projectsPromise = supabase
+          .from('user_projects')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        const agentsPromise = supabase
+          .from('user_agents')
+          .select('*')
+          .eq('user_id', user.id);
+
+        // Ejecutar todas las consultas con timeout
+        const [profileResult, projectsResult, agentsResult] = await Promise.race([
+          Promise.all([profilePromise, projectsPromise, agentsPromise]),
+          createTimeoutPromise(FETCH_TIMEOUT)
+        ]) as any[];
 
         // Handle profile creation if it doesn't exist
         let profile = profileResult.data;
         if (!profile && !profileResult.error) {
-          const { data: newProfile, error: createError } = await supabase
-            .from('user_profiles')
-            .insert({
-              user_id: user.id,
-              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'
-            })
-            .select()
-            .single();
+          try {
+            const { data: newProfile, error: createError } = await Promise.race([
+              supabase
+                .from('user_profiles')
+                .insert({
+                  user_id: user.id,
+                  full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'
+                })
+                .select()
+                .single(),
+              createTimeoutPromise(5000)
+            ]) as any;
 
-          if (createError) throw createError;
-          profile = newProfile;
+            if (createError) throw createError;
+            profile = newProfile;
+          } catch (createErr) {
+            console.warn('Could not create profile, using fallback');
+            profile = {
+              id: user.id,
+              user_id: user.id,
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+              avatar_url: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }
         }
 
         if (profileResult.error && profileResult.error.code !== 'PGRST116') {
@@ -152,11 +179,33 @@ export const useOptimizedUserData = (): OptimizedUserData => {
 
       } catch (err) {
         console.error('Error fetching user data:', err);
-        setData(prev => ({
-          ...prev,
-          loading: false,
-          error: 'Error al cargar los datos del usuario'
-        }));
+        
+        // ARREGLO: Fallback con datos de localStorage si falla
+        try {
+          const fallbackProfile = {
+            id: user.id,
+            user_id: user.id,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          setData({
+            profile: fallbackProfile,
+            projects: [],
+            agents: [],
+            loading: false,
+            error: null,
+          });
+        } catch (fallbackErr) {
+          console.error('Fallback failed:', fallbackErr);
+          setData(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Error al cargar los datos del usuario'
+          }));
+        }
       }
     };
 
