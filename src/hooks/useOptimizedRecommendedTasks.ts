@@ -6,7 +6,7 @@ import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 import { generateTasksFromScores } from './utils/taskGenerationUtils';
 import { useAIRecommendations } from './useAIRecommendations';
 
-export { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
+export type { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 
 export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, enabledAgents: string[] = []) => {
   const { user } = useAuth();
