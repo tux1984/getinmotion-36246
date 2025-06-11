@@ -9,12 +9,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
 import { useLanguage } from '@/context/LanguageContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const { signIn, user, isAuthorized, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -39,7 +41,9 @@ const Login = () => {
       invalidCredentialsMessage: "Please check your email and password",
       errorOccurred: "An error occurred",
       welcomeBack: "Welcome back!",
-      loginSuccessful: "Login successful"
+      loginSuccessful: "Login successful",
+      showDebug: "Show Debug Info",
+      hideDebug: "Hide Debug Info"
     },
     es: {
       title: "Acceder a GET IN MOTION",
@@ -56,7 +60,9 @@ const Login = () => {
       invalidCredentialsMessage: "Por favor verifica tu email y contraseña",
       errorOccurred: "Ocurrió un error",
       welcomeBack: "¡Bienvenido de vuelta!",
-      loginSuccessful: "Inicio de sesión exitoso"
+      loginSuccessful: "Inicio de sesión exitoso",
+      showDebug: "Mostrar Info Debug",
+      hideDebug: "Ocultar Info Debug"
     }
   };
   
@@ -95,7 +101,7 @@ const Login = () => {
         
         console.log('Login: Redirecting to:', redirectTo);
         navigate(redirectTo, { replace: true });
-      }, 100);
+      }, 200); // Increased delay for better stability
 
       return () => clearTimeout(redirectTimer);
     }
@@ -112,9 +118,25 @@ const Login = () => {
       
       if (error) {
         console.error('Login: Error during sign in:', error);
+        
+        // Better error handling based on error type
+        let errorTitle = t.errorOccurred;
+        let errorDescription = error.message || t.unauthorizedMessage;
+        
+        if (error.message?.includes('Invalid') || error.message?.includes('credentials')) {
+          errorTitle = t.invalidCredentials;
+          errorDescription = t.invalidCredentialsMessage;
+        } else if (error.message?.includes('Email not confirmed')) {
+          errorTitle = "Email not confirmed";
+          errorDescription = "Please check your email and click the confirmation link";
+        } else if (error.message?.includes('Too many requests')) {
+          errorTitle = "Too many attempts";
+          errorDescription = "Please wait a moment before trying again";
+        }
+        
         toast({
-          title: error.message?.includes('Invalid') || error.message?.includes('credentials') ? t.invalidCredentials : t.unauthorized,
-          description: error.message?.includes('Invalid') || error.message?.includes('credentials') ? t.invalidCredentialsMessage : error.message || t.unauthorizedMessage,
+          title: errorTitle,
+          description: errorDescription,
           variant: "destructive",
         });
       } else {
@@ -159,7 +181,7 @@ const Login = () => {
       </header>
       
       <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md space-y-4">
           <Card className="bg-indigo-900/40 border-indigo-800/30 text-white">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
@@ -196,7 +218,7 @@ const Login = () => {
                   />
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-col gap-2">
                 <Button 
                   type="submit" 
                   className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
@@ -204,9 +226,21 @@ const Login = () => {
                 >
                   {isLoading ? t.signingIn : t.signIn}
                 </Button>
+                
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="text-indigo-300 hover:text-white"
+                >
+                  {showDebug ? t.hideDebug : t.showDebug}
+                </Button>
               </CardFooter>
             </form>
           </Card>
+          
+          {showDebug && <AuthDebugPanel />}
         </div>
       </div>
     </div>

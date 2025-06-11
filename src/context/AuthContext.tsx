@@ -11,6 +11,11 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   checkAuthorization: () => Promise<boolean>;
+  debugInfo: {
+    authStateChangeCount: number;
+    lastAuthEvent: string | null;
+    authorizationAttempts: number;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,8 +25,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [debugInfo, setDebugInfo] = useState({
+    authStateChangeCount: 0,
+    lastAuthEvent: null as string | null,
+    authorizationAttempts: 0
+  });
 
-  const checkAuthorization = async (userEmail?: string): Promise<boolean> => {
+  const updateDebugInfo = (field: string, value: any) => {
+    setDebugInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const checkAuthorization = async (userEmail?: string, retryCount = 0): Promise<boolean> => {
+    const maxRetries = 3;
+    
     try {
       const email = userEmail || user?.email;
       if (!email) {
@@ -30,9 +46,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
       
-      console.log('AuthContext: Checking authorization for:', email);
+      updateDebugInfo('authorizationAttempts', debugInfo.authorizationAttempts + 1);
+      console.log(`AuthContext: Checking authorization for: ${email} (attempt ${retryCount + 1})`);
       
-      // Use RLS-enabled query instead of direct table access
+      // Use RLS-enabled query with retry logic
       const { data, error } = await supabase
         .from('admin_users')
         .select('email, is_active')
@@ -42,6 +59,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('AuthContext: Error checking authorization:', error);
+        
+        // Retry logic for transient errors
+        if (retryCount < maxRetries && (
+          error.message?.includes('Failed to fetch') || 
+          error.message?.includes('timeout') ||
+          error.code === 'PGRST301'
+        )) {
+          console.log(`AuthContext: Retrying authorization check in ${(retryCount + 1) * 1000}ms...`);
+          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+          return checkAuthorization(userEmail, retryCount + 1);
+        }
+        
         setIsAuthorized(false);
         return false;
       }
@@ -52,6 +81,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return authorized;
     } catch (error) {
       console.error('AuthContext: Exception checking authorization:', error);
+      
+      // Retry for network errors
+      if (retryCount < maxRetries) {
+        console.log(`AuthContext: Retrying authorization check due to exception...`);
+        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+        return checkAuthorization(userEmail, retryCount + 1);
+      }
+      
       setIsAuthorized(false);
       return false;
     }
@@ -65,6 +102,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        updateDebugInfo('authStateChangeCount', debugInfo.authStateChangeCount + 1);
+        updateDebugInfo('lastAuthEvent', event);
+        
         console.log('AuthContext: Auth state changed:', event, session?.user?.email || 'No session');
         
         if (!isMounted) return;
@@ -72,15 +112,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check authorization for authenticated users
+        // Check authorization for authenticated users with delay to prevent deadlocks
         if (session?.user?.email) {
           console.log('AuthContext: Auth state change - checking authorization...');
-          // Use setTimeout to prevent potential deadlocks
           setTimeout(() => {
             if (isMounted) {
               checkAuthorization(session.user.email);
             }
-          }, 0);
+          }, 100); // Increased delay to prevent potential issues
         } else {
           console.log('AuthContext: Auth state change - no user, setting unauthorized');
           setIsAuthorized(false);
@@ -127,8 +166,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    // Initialize
-    getInitialSession();
+    // Initialize with small delay to ensure DOM is ready
+    setTimeout(getInitialSession, 50);
 
     return () => {
       console.log('AuthContext: Cleaning up auth listener');
@@ -193,7 +232,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isAuthorized,
       signIn,
       signOut,
-      checkAuthorization
+      checkAuthorization,
+      debugInfo
     }}>
       {children}
     </AuthContext.Provider>
