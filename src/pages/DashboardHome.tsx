@@ -8,6 +8,7 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
 import { DashboardLoadingState } from '@/components/dashboard/DashboardLoadingState';
 import { DashboardErrorState } from '@/components/dashboard/DashboardErrorState';
 import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
+import { DataSyncStatus } from '@/components/dashboard/DataSyncStatus';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
@@ -88,12 +89,11 @@ const DashboardHome = () => {
     };
     
     const defaultRecommendations = {
-      culturalConsultant: true,
-      projectManager: false,
-      marketingAdvisor: false,
-      costCalculator: false,
-      collaborationAgreement: false,
-      maturityEvaluator: false
+      cultural: true,
+      admin: false,
+      accounting: false,
+      legal: false,
+      operations: false
     };
 
     localStorage.setItem('maturityScores', JSON.stringify(defaultScores));
@@ -186,6 +186,9 @@ const DashboardHome = () => {
       
       <div className="pt-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* Componente de sincronización de datos */}
+          <DataSyncStatus />
+          
           <ModernDashboardMain 
             onSelectAgent={handleSelectAgent}
             onMaturityCalculatorClick={handleNavigateToMaturityCalculator}

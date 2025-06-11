@@ -4,6 +4,7 @@ import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { CulturalMaturityWizard } from './CulturalMaturityWizard';
 import { useAuth } from '@/context/AuthContext';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
+import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 
 interface AIRecommendation {
   title: string;
@@ -22,6 +23,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   onComplete
 }) => {
   const { user } = useAuth();
+  const { saveMaturityScores, saving: savingScores } = useMaturityScoresSaver();
 
   const handleWizardComplete = useCallback(async (
     scores: CategoryScore, 
@@ -30,15 +32,29 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   ) => {
     console.log('SimpleCulturalMaturityCalculator: Wizard completed', { scores, recommendedAgents });
     
-    // ARREGLO CRÍTICO: Marcar onboarding como completado y crear agentes
     try {
       // 1. Marcar en localStorage inmediatamente
       markOnboardingComplete(scores, recommendedAgents);
       
-      // 2. Si hay usuario autenticado, crear agentes en la BD
+      // 2. Si hay usuario autenticado, guardar en BD
       if (user?.id) {
-        console.log('Creating user agents for user:', user.id);
-        await createUserAgentsFromRecommendations(user.id, recommendedAgents);
+        console.log('Saving maturity scores and creating agents for user:', user.id);
+        
+        // Guardar maturity scores en BD
+        const scoresSaved = await saveMaturityScores(scores);
+        if (scoresSaved) {
+          console.log('Maturity scores saved to database successfully');
+        } else {
+          console.warn('Failed to save maturity scores to database');
+        }
+        
+        // Crear agentes en BD
+        const agentsCreated = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
+        if (agentsCreated) {
+          console.log('User agents created in database successfully');
+        } else {
+          console.warn('Failed to create user agents in database');
+        }
       }
       
       // 3. Llamar callback original
@@ -48,7 +64,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       // Aún así completar el onboarding para no bloquear al usuario
       onComplete(scores, recommendedAgents, aiRecommendations);
     }
-  }, [onComplete, user]);
+  }, [onComplete, user, saveMaturityScores]);
 
   return (
     <div className="w-full">

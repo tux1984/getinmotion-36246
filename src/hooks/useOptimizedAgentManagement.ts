@@ -27,9 +27,20 @@ export const useOptimizedAgentManagement = () => {
     userProfile: profile
   });
 
+  // DEBUG: Log del estado actual
+  console.log('useOptimizedAgentManagement: Current state:', {
+    hasOnboarding,
+    maturityScores,
+    userAgentsCount: userAgents.length,
+    enabledUserAgents: userAgents.filter(ua => ua.is_enabled).length,
+    userDataLoading,
+    scoresLoading,
+    profile: !!profile
+  });
+
   // Memoize the agents transformation to avoid recalculation
   const agents: Agent[] = useMemo(() => {
-    return culturalAgentsDatabase.map(agentInfo => {
+    const transformedAgents = culturalAgentsDatabase.map(agentInfo => {
       const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
       
       return {
@@ -43,6 +54,14 @@ export const useOptimizedAgentManagement = () => {
         icon: agentInfo.icon
       };
     });
+
+    console.log('useOptimizedAgentManagement: Transformed agents:', {
+      totalAgents: transformedAgents.length,
+      activeAgents: transformedAgents.filter(a => a.status === 'active').length,
+      agentStatuses: transformedAgents.map(a => ({ id: a.id, status: a.status }))
+    });
+
+    return transformedAgents;
   }, [userAgents]);
 
   const isLoading = userDataLoading || scoresLoading;
