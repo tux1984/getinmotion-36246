@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export const DataSyncStatus: React.FC = () => {
   const { language } = useLanguage();
-  const { needsRecovery, recovering, recovered, error, performRecovery } = useDataRecovery();
+  const { needsRecovery, recovering, recovered, error, performEmergencyRecovery } = useDataRecovery();
 
   const translations = {
     en: {
@@ -42,7 +42,7 @@ export const DataSyncStatus: React.FC = () => {
   }
 
   const handleSync = async () => {
-    const success = await performRecovery();
+    const success = await performEmergencyRecovery();
     if (success) {
       // Recargar la página después de un breve delay para mostrar los cambios
       setTimeout(() => {
