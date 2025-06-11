@@ -11,28 +11,39 @@ export const createUserAgentsFromRecommendations = async (
     
     const agentsToCreate = [];
     
-    // Mapear recomendaciones a IDs de agentes
-    if (recommendations.culturalConsultant) {
+    // Mapear recomendaciones usando el formato correcto del tipo RecommendedAgents
+    // Verificar el formato primary/secondary primero
+    if (recommendations.primary && Array.isArray(recommendations.primary)) {
+      recommendations.primary.forEach(agentId => {
+        agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+      });
+    }
+    
+    if (recommendations.secondary && Array.isArray(recommendations.secondary)) {
+      recommendations.secondary.forEach(agentId => {
+        agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+      });
+    }
+    
+    // También verificar el formato legacy para compatibilidad
+    if (recommendations.cultural) {
       agentsToCreate.push({ user_id: userId, agent_id: 'cultural-consultant', is_enabled: true });
     }
-    if (recommendations.projectManager) {
+    if (recommendations.admin) {
       agentsToCreate.push({ user_id: userId, agent_id: 'project-manager', is_enabled: true });
     }
-    if (recommendations.marketingAdvisor) {
-      agentsToCreate.push({ user_id: userId, agent_id: 'marketing-advisor', is_enabled: true });
-    }
-    if (recommendations.costCalculator) {
+    if (recommendations.accounting) {
       agentsToCreate.push({ user_id: userId, agent_id: 'cost-calculator', is_enabled: true });
     }
-    if (recommendations.collaborationAgreement) {
+    if (recommendations.legal) {
       agentsToCreate.push({ user_id: userId, agent_id: 'collaboration-agreement', is_enabled: true });
     }
-    if (recommendations.maturityEvaluator) {
+    if (recommendations.operations) {
       agentsToCreate.push({ user_id: userId, agent_id: 'maturity-evaluator', is_enabled: true });
     }
 
+    // Si no hay agentes recomendados, crear al menos el consultor cultural
     if (agentsToCreate.length === 0) {
-      // Si no hay agentes recomendados, crear al menos el consultor cultural
       agentsToCreate.push({ user_id: userId, agent_id: 'cultural-consultant', is_enabled: true });
     }
 
