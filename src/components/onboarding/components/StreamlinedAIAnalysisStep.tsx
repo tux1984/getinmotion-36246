@@ -4,6 +4,7 @@ import { ProfileType, CategoryScore } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain, Zap, Target, Clock } from 'lucide-react';
 import { DynamicQuestionsStep } from '@/components/cultural/wizard-steps/DynamicQuestionsStep';
+import { UserProfileData } from '@/components/cultural/types/wizardTypes';
 
 interface StreamlinedAIAnalysisStepProps {
   profileType: ProfileType;
@@ -25,11 +26,22 @@ export const StreamlinedAIAnalysisStep: React.FC<StreamlinedAIAnalysisStepProps>
   analysisType
 }) => {
   const [showDynamicQuestions, setShowDynamicQuestions] = useState(false);
-  const [profileData, setProfileData] = useState({
+  const [profileData, setProfileData] = useState<UserProfileData>({
     profileType,
     industry: '',
     activities: [],
     experience: '',
+    paymentMethods: '',
+    brandIdentity: '',
+    financialControl: '',
+    teamStructure: '',
+    taskOrganization: '',
+    decisionMaking: '',
+    pricingMethod: '',
+    internationalSales: '',
+    formalizedBusiness: '',
+    collaboration: '',
+    economicSustainability: '',
     dynamicQuestionAnswers: {}
   });
 
@@ -97,7 +109,7 @@ export const StreamlinedAIAnalysisStep: React.FC<StreamlinedAIAnalysisStepProps>
     onComplete();
   };
 
-  const updateProfileData = (data: any) => {
+  const updateProfileData = (data: Partial<UserProfileData>) => {
     setProfileData(prev => ({ ...prev, ...data }));
   };
 

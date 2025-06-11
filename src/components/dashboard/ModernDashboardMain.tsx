@@ -25,8 +25,8 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
   const [enabledAgents, setEnabledAgents] = useState<string[]>([]);
 
   useEffect(() => {
-    // Extract enabled agents from the agents array
-    const enabled = agents.filter(agent => agent.enabled).map(agent => agent.id);
+    // Extract enabled agents from the agents array based on status
+    const enabled = agents.filter(agent => agent.status === 'active').map(agent => agent.id);
     console.log('Enabled agents for dashboard:', enabled);
     setEnabledAgents(enabled);
   }, [agents]);

@@ -7,6 +7,7 @@ import { ModernDashboardMain } from './ModernDashboardMain';
 interface NewDashboardMainProps {
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
+  onAgentManagerClick: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
   recommendedAgents: RecommendedAgents;
@@ -15,6 +16,7 @@ interface NewDashboardMainProps {
 export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({ 
   onSelectAgent,
   onMaturityCalculatorClick,
+  onAgentManagerClick,
   agents,
   maturityScores,
   recommendedAgents
@@ -23,6 +25,7 @@ export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({
     <ModernDashboardMain
       onSelectAgent={onSelectAgent}
       onMaturityCalculatorClick={onMaturityCalculatorClick}
+      onAgentManagerClick={onAgentManagerClick}
       agents={agents}
       maturityScores={maturityScores}
       recommendedAgents={recommendedAgents}
