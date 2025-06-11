@@ -1,162 +1,133 @@
 
 import { CategoryScore } from '@/types/dashboard';
-import { culturalAgentsDatabase } from '@/data/culturalAgentsDatabase';
+import { culturalAgentsDatabase, CulturalAgent } from '@/data/culturalAgentsDatabase';
 import { OptimizedRecommendedTask } from '../types/recommendedTasksTypes';
 
-export const getAvailableAgents = (enabledAgents: string[]) => {
-  const allAgents = culturalAgentsDatabase.getAll();
-  const availableAgents = allAgents.filter(agent => enabledAgents.includes(agent.id));
+export const getAvailableAgents = (enabledAgentIds: string[]): CulturalAgent[] => {
+  console.log('getAvailableAgents called with:', { enabledAgentIds, totalAgents: culturalAgentsDatabase.length });
   
-  console.log('Available agents for task generation:', {
-    totalAgents: allAgents.length,
-    enabledAgentIds: enabledAgents,
+  const availableAgents = culturalAgentsDatabase.filter(agent => 
+    enabledAgentIds.includes(agent.id)
+  );
+  
+  console.log('Available agents found:', {
+    totalAgents: culturalAgentsDatabase.length,
+    enabledAgentIds,
     availableAgents: availableAgents.map(a => ({ id: a.id, name: a.name }))
   });
   
   return availableAgents;
 };
 
-export const generateTasksFromScores = (scores: CategoryScore, enabledAgents: string[]): OptimizedRecommendedTask[] => {
-  const generatedTasks: OptimizedRecommendedTask[] = [];
-  const availableAgents = getAvailableAgents(enabledAgents);
-
+export const generateTasksFromScores = (
+  scores: CategoryScore, 
+  enabledAgentIds: string[]
+): OptimizedRecommendedTask[] => {
   console.log('Generating tasks from scores:', scores);
-  console.log('Available agents for task generation:', availableAgents.map(a => ({ id: a.id, name: a.name })));
-
-  // ARREGLO CRÍTICO: Verificar que hay agentes antes de generar tareas
+  console.log('Available agents for task generation:', enabledAgentIds);
+  
+  const availableAgents = getAvailableAgents(enabledAgentIds);
+  
   if (availableAgents.length === 0) {
-    console.log('No available agents found, cannot generate tasks');
-    return [];
+    console.log('No available agents found, generating fallback tasks');
+    return generateFallbackTasks(scores);
   }
-
-  // Generate tasks based on low scores and available agents
-  if (scores.ideaValidation < 60) {
-    const culturalAgent = availableAgents.find(agent => 
-      agent.expertise.includes('idea validation') || 
-      agent.name.toLowerCase().includes('cultural') ||
-      agent.name.toLowerCase().includes('creative')
-    );
-    
-    if (culturalAgent) {
-      generatedTasks.push({
-        id: 'validate-concept',
-        title: 'Valida tu Concepto Creativo',
-        description: 'Investiga tu público objetivo y valida la demanda del mercado para tu propuesta creativa',
-        agentId: culturalAgent.id,
-        agentName: culturalAgent.name,
-        priority: 'high',
-        category: 'Validación',
-        estimatedTime: '2 horas',
-        prompt: `Ayúdame a validar mi concepto creativo. Necesito investigar mi público objetivo y entender la demanda del mercado. ¿Qué pasos específicos debería seguir para validar esta idea?`,
+  
+  const tasks: OptimizedRecommendedTask[] = [];
+  
+  // Generate tasks based on lowest scores (highest priority)
+  const scoreEntries = Object.entries(scores).sort(([,a], [,b]) => a - b);
+  
+  scoreEntries.forEach(([category, score], index) => {
+    if (score < 70 && index < availableAgents.length) { // Only create tasks for scores below 70%
+      const agent = availableAgents[index % availableAgents.length];
+      const priority = score < 30 ? 'high' : score < 60 ? 'medium' : 'low';
+      
+      const task: OptimizedRecommendedTask = {
+        id: `score-task-${category}`,
+        title: getTaskTitleForCategory(category),
+        description: getTaskDescriptionForCategory(category, score),
+        agentId: agent.id,
+        agentName: agent.name,
+        priority: priority as 'high' | 'medium' | 'low',
+        category: 'Mejora Recomendada',
+        estimatedTime: '2-3 horas',
+        prompt: getTaskPromptForCategory(category, score),
         completed: false,
         isRealAgent: true
-      });
+      };
+      
+      tasks.push(task);
     }
-  }
-
-  if (scores.userExperience < 60) {
-    const projectAgent = availableAgents.find(agent => 
-      agent.expertise.includes('project management') || 
-      agent.name.toLowerCase().includes('project') ||
-      agent.name.toLowerCase().includes('admin')
-    );
-    
-    if (projectAgent) {
-      generatedTasks.push({
-        id: 'user-journey',
-        title: 'Diseña la Experiencia del Usuario',
-        description: 'Crea un mapa detallado de la experiencia que tendrán tus usuarios con tu servicio creativo',
-        agentId: projectAgent.id,
-        agentName: projectAgent.name,
-        priority: 'medium',
-        category: 'Experiencia',
-        estimatedTime: '1.5 horas',
-        prompt: `Necesito diseñar la experiencia completa del usuario para mi servicio creativo. ¿Puedes ayudarme a crear un mapa de experiencia que incluya todos los puntos de contacto desde que conocen mi servicio hasta que se convierten en clientes satisfechos?`,
-        completed: false,
-        isRealAgent: true
-      });
-    }
-  }
-
-  if (scores.marketFit < 60) {
-    const marketingAgent = availableAgents.find(agent => 
-      agent.expertise.includes('marketing') || 
-      agent.expertise.includes('market analysis') ||
-      agent.name.toLowerCase().includes('marketing')
-    );
-    
-    if (marketingAgent) {
-      generatedTasks.push({
-        id: 'market-analysis',
-        title: 'Analiza tu Posición en el Mercado',
-        description: 'Estudia a tu competencia y define tu propuesta de valor única en el mercado cultural',
-        agentId: marketingAgent.id,
-        agentName: marketingAgent.name,
-        priority: 'high',
-        category: 'Mercado',
-        estimatedTime: '2.5 horas',
-        prompt: `Ayúdame a analizar mi posición en el mercado cultural. Necesito entender quiénes son mis competidores directos e indirectos, y cómo puedo diferenciarme. ¿Cómo puedo crear una propuesta de valor única?`,
-        completed: false,
-        isRealAgent: true
-      });
-    }
-  }
-
-  if (scores.monetization < 60) {
-    const financeAgent = availableAgents.find(agent => 
-      agent.expertise.includes('financial') || 
-      agent.expertise.includes('pricing') ||
-      agent.name.toLowerCase().includes('cost') ||
-      agent.name.toLowerCase().includes('financial')
-    );
-    
-    if (financeAgent) {
-      generatedTasks.push({
-        id: 'pricing-strategy',
-        title: 'Desarrolla tu Estrategia de Precios',
-        description: 'Crea un modelo de precios competitivo y sostenible para tus servicios creativos',
-        agentId: financeAgent.id,
-        agentName: financeAgent.name,
-        priority: 'high',
-        category: 'Monetización',
-        estimatedTime: '1 hora',
-        prompt: `Necesito desarrollar una estrategia de precios para mi servicio creativo. ¿Puedes ayudarme a analizar diferentes modelos de precios, calcular mis costos base y determinar precios competitivos que me permitan ser rentable?`,
-        completed: false,
-        isRealAgent: true
-      });
-    }
-  }
-
-  // Add growth tasks for higher-scoring areas
-  if (scores.ideaValidation >= 60 && scores.monetization < 80) {
-    const businessAgent = availableAgents.find(agent => 
-      agent.expertise.includes('business development') || 
-      agent.expertise.includes('revenue optimization') ||
-      agent.name.toLowerCase().includes('business')
-    );
-    
-    if (businessAgent) {
-      generatedTasks.push({
-        id: 'revenue-optimization',
-        title: 'Optimiza tus Fuentes de Ingresos',
-        description: 'Explora nuevas formas de monetizar tu talento creativo y diversificar ingresos',
-        agentId: businessAgent.id,
-        agentName: businessAgent.name,
-        priority: 'medium',
-        category: 'Crecimiento',
-        estimatedTime: '1.5 horas',
-        prompt: `Mi negocio creativo ya está validado, pero quiero optimizar y diversificar mis fuentes de ingresos. ¿Qué estrategias puedes sugerirme para maximizar la monetización de mi talento creativo?`,
-        completed: false,
-        isRealAgent: true
-      });
-    }
-  }
-
-  console.log('Generated tasks from scores:', {
-    scoresUsed: scores,
-    tasksGenerated: generatedTasks.length,
-    taskTitles: generatedTasks.map(t => t.title)
   });
   
-  return generatedTasks;
+  return tasks;
+};
+
+const generateFallbackTasks = (scores: CategoryScore): OptimizedRecommendedTask[] => {
+  console.log('Generating fallback tasks for scores:', scores);
+  
+  const fallbackTasks: OptimizedRecommendedTask[] = [];
+  
+  // Get the lowest scoring area
+  const lowestScore = Math.min(...Object.values(scores));
+  const lowestCategory = Object.entries(scores).find(([, score]) => score === lowestScore)?.[0];
+  
+  if (lowestCategory) {
+    fallbackTasks.push({
+      id: 'fallback-task-1',
+      title: `Mejorar ${getCategoryDisplayName(lowestCategory)}`,
+      description: `Tu puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. Te sugerimos enfocarte en esta área.`,
+      agentId: 'cultural-consultant', // Default agent
+      agentName: 'Especialista Creativo',
+      priority: 'high',
+      category: 'Área de Mejora',
+      estimatedTime: '1-2 horas',
+      prompt: `Mi puntuación en ${getCategoryDisplayName(lowestCategory)} es ${lowestScore}%. ¿Cómo puedo mejorar en esta área específicamente?`,
+      completed: false,
+      isRealAgent: false // Mark as fallback
+    });
+  }
+  
+  return fallbackTasks;
+};
+
+const getTaskTitleForCategory = (category: string): string => {
+  const titles = {
+    ideaValidation: 'Validar y Refinar tu Idea de Negocio',
+    userExperience: 'Mejorar la Experiencia del Usuario',
+    marketFit: 'Analizar el Ajuste al Mercado',
+    monetization: 'Desarrollar Estrategia de Monetización'
+  };
+  return titles[category as keyof typeof titles] || 'Mejorar Área de Negocio';
+};
+
+const getTaskDescriptionForCategory = (category: string, score: number): string => {
+  const descriptions = {
+    ideaValidation: `Tu puntuación de validación de idea es ${score}%. Necesitas validar mejor tu propuesta de valor.`,
+    userExperience: `Tu puntuación de experiencia de usuario es ${score}%. Mejora cómo interactúan los usuarios con tu producto.`,
+    marketFit: `Tu puntuación de ajuste al mercado es ${score}%. Analiza mejor tu mercado objetivo y competencia.`,
+    monetization: `Tu puntuación de monetización es ${score}%. Desarrolla una estrategia de ingresos más sólida.`
+  };
+  return descriptions[category as keyof typeof descriptions] || `Mejora necesaria en esta área (${score}%)`;
+};
+
+const getTaskPromptForCategory = (category: string, score: number): string => {
+  const prompts = {
+    ideaValidation: `Mi puntuación de validación de idea es ${score}%. ¿Cómo puedo validar mejor mi propuesta de valor y asegurarme de que resuelve un problema real?`,
+    userExperience: `Mi puntuación de experiencia de usuario es ${score}%. ¿Qué pasos específicos puedo tomar para mejorar la experiencia de mis usuarios?`,
+    marketFit: `Mi puntuación de ajuste al mercado es ${score}%. ¿Cómo puedo analizar mejor mi mercado objetivo y entender a mi competencia?`,
+    monetization: `Mi puntuación de monetización es ${score}%. ¿Qué estrategias de monetización son más apropiadas para mi tipo de negocio creativo?`
+  };
+  return prompts[category as keyof typeof prompts] || `Ayúdame a mejorar en esta área donde tengo ${score}% de puntuación.`;
+};
+
+const getCategoryDisplayName = (category: string): string => {
+  const displayNames = {
+    ideaValidation: 'Validación de Idea',
+    userExperience: 'Experiencia de Usuario',
+    marketFit: 'Ajuste al Mercado',
+    monetization: 'Monetización'
+  };
+  return displayNames[category as keyof typeof displayNames] || category;
 };

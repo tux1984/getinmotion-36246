@@ -21,23 +21,17 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         return;
       }
 
-      if (enabledAgents.length === 0) {
-        console.log('No enabled agents found, cannot generate tasks');
-        setTasks([]);
-        return;
-      }
-
       console.log('Loading tasks with:', {
         maturityScores,
         enabledAgents,
         enabledAgentsCount: enabledAgents.length
       });
 
-      // Generate base tasks from maturity scores
+      // Always generate base tasks from maturity scores
       const scoreTasks = generateTasksFromScores(maturityScores, enabledAgents);
       console.log('Score-based tasks generated:', scoreTasks.length);
       
-      // Fetch AI-powered recommendations
+      // Try to fetch AI-powered recommendations
       const aiRecommendations = await fetchAIRecommendations(maturityScores);
       console.log('AI recommendations fetched:', aiRecommendations.length);
       
@@ -47,8 +41,13 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
       // Combine and prioritize tasks
       const allTasks = [...aiTasks, ...scoreTasks];
       
+      // Remove duplicates based on similar titles
+      const uniqueTasks = allTasks.filter((task, index, arr) => {
+        return arr.findIndex(t => t.title.toLowerCase().includes(task.title.toLowerCase().substring(0, 20))) === index;
+      });
+      
       // Sort by priority and limit to top 6 tasks
-      const prioritizedTasks = allTasks
+      const prioritizedTasks = uniqueTasks
         .sort((a, b) => {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           return priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -57,6 +56,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
 
       console.log('Final prioritized tasks:', {
         totalTasks: allTasks.length,
+        uniqueTasks: uniqueTasks.length,
         finalTasks: prioritizedTasks.length,
         taskDetails: prioritizedTasks.map(t => ({ 
           id: t.id, 

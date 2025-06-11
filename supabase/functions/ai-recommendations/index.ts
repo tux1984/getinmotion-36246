@@ -20,6 +20,59 @@ interface AIRecommendationsRequest {
   language: 'en' | 'es';
 }
 
+// Fallback recommendations when OpenAI fails
+const getFallbackRecommendations = (scores: any) => {
+  const recommendations = [];
+  
+  // Generate basic recommendations based on scores
+  const sortedScores = Object.entries(scores).sort(([,a], [,b]) => (a as number) - (b as number));
+  
+  for (const [category, score] of sortedScores.slice(0, 3)) {
+    if ((score as number) < 70) {
+      let title = '';
+      let description = '';
+      
+      switch (category) {
+        case 'ideaValidation':
+          title = 'Validar tu Propuesta de Valor';
+          description = 'Realiza entrevistas con clientes potenciales para validar que tu idea resuelve un problema real y significativo.';
+          break;
+        case 'userExperience':
+          title = 'Mejorar la Experiencia del Usuario';
+          description = 'Diseña prototipos simples y obtén feedback directo de usuarios para optimizar la experiencia.';
+          break;
+        case 'marketFit':
+          title = 'Analizar tu Mercado Objetivo';
+          description = 'Investiga a fondo tu mercado, competencia y posicionamiento para encontrar tu nicho específico.';
+          break;
+        case 'monetization':
+          title = 'Desarrollar Modelo de Ingresos';
+          description = 'Define una estrategia clara de monetización adaptada a tu mercado y tipo de cliente.';
+          break;
+      }
+      
+      recommendations.push({
+        title,
+        description,
+        priority: (score as number) < 30 ? 'Alta' : (score as number) < 60 ? 'Media' : 'Baja',
+        timeframe: '1-2 semanas'
+      });
+    }
+  }
+  
+  // Ensure we always have at least one recommendation
+  if (recommendations.length === 0) {
+    recommendations.push({
+      title: 'Continuar Desarrollando tu Proyecto',
+      description: 'Mantén el momentum y sigue trabajando en las áreas que has identificado como prioritarias.',
+      priority: 'Media',
+      timeframe: '1 semana'
+    });
+  }
+  
+  return recommendations;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -27,13 +80,18 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
-    }
-
     const { scores, profileData, language }: AIRecommendationsRequest = await req.json();
 
-    console.log('AI Recommendations request:', { scores, profileData: Object.keys(profileData), language });
+    console.log('AI Recommendations request:', { scores, profileData: Object.keys(profileData || {}), language });
+
+    // If OpenAI API key is not configured, return fallback recommendations
+    if (!openAIApiKey) {
+      console.log('OpenAI API key not configured, using fallback recommendations');
+      const fallbackRecommendations = getFallbackRecommendations(scores);
+      return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Calculate overall maturity level
     const overallScore = Math.round(
@@ -41,7 +99,7 @@ serve(async (req) => {
     );
 
     // Include dynamic question answers in the analysis with proper formatting
-    const dynamicAnswersText = profileData.dynamicQuestionAnswers 
+    const dynamicAnswersText = profileData?.dynamicQuestionAnswers 
       ? Object.entries(profileData.dynamicQuestionAnswers)
           .map(([questionId, answer]) => `Q: ${questionId.replace('dynamic_', 'Question ')}\nA: ${answer}`)
           .join('\n\n')
@@ -51,16 +109,16 @@ serve(async (req) => {
 
     // Create comprehensive profile summary
     const profileSummary = `
-Industry: ${profileData.industry || 'Not specified'}
-Activities: ${Array.isArray(profileData.activities) ? profileData.activities.join(', ') : profileData.activities || 'Not specified'}
-Experience: ${profileData.experience || 'Not specified'}
-Payment Methods: ${profileData.paymentMethods || 'Not specified'}
-Brand Identity: ${profileData.brandIdentity || 'Not specified'}
-Financial Control: ${profileData.financialControl || 'Not specified'}
-Team Structure: ${profileData.teamStructure || 'Not specified'}
-Task Organization: ${profileData.taskOrganization || 'Not specified'}
-Decision Making: ${profileData.decisionMaking || 'Not specified'}
-Analysis Type: ${profileData.analysisPreference || 'Not specified'}
+Industry: ${profileData?.industry || 'Not specified'}
+Activities: ${Array.isArray(profileData?.activities) ? profileData.activities.join(', ') : profileData?.activities || 'Not specified'}
+Experience: ${profileData?.experience || 'Not specified'}
+Payment Methods: ${profileData?.paymentMethods || 'Not specified'}
+Brand Identity: ${profileData?.brandIdentity || 'Not specified'}
+Financial Control: ${profileData?.financialControl || 'Not specified'}
+Team Structure: ${profileData?.teamStructure || 'Not specified'}
+Task Organization: ${profileData?.taskOrganization || 'Not specified'}
+Decision Making: ${profileData?.decisionMaking || 'Not specified'}
+Analysis Type: ${profileData?.analysisPreference || 'Not specified'}
     `.trim();
 
     const systemPrompt = language === 'es' 
@@ -80,7 +138,7 @@ RESPUESTAS ABIERTAS DETALLADAS:
 ${dynamicAnswersText}
 
 INSTRUCCIONES:
-Basándote en TODA la información (puntuaciones + perfil + respuestas abiertas), proporciona entre 4 y 6 recomendaciones de acción específicas y accionables.
+Basándote en TODA la información (puntuaciones + perfil + respuestas abiertas), proporciona entre 3 y 5 recomendaciones de acción específicas y accionables.
 
 CADA RECOMENDACIÓN DEBE:
 1. Ser específica para su nivel de madurez actual y contexto personal
@@ -117,7 +175,7 @@ DETAILED OPEN-ENDED RESPONSES:
 ${dynamicAnswersText}
 
 INSTRUCTIONS:
-Based on ALL the information (scores + profile + open-ended responses), provide between 4 and 6 specific, actionable recommendations.
+Based on ALL the information (scores + profile + open-ended responses), provide between 3 and 5 specific, actionable recommendations.
 
 EACH RECOMMENDATION MUST:
 1. Be specific to their current maturity level and personal context
@@ -141,59 +199,92 @@ RESPOND ONLY WITH VALID JSON:
 
     console.log('Making OpenAI request...');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Analyze these comprehensive results and provide personalized recommendations.' }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const analysisResult = data.choices[0].message.content;
-
-    console.log('OpenAI response received, length:', analysisResult.length);
-
-    // Parse the JSON response
-    let recommendations;
     try {
-      const parsed = JSON.parse(analysisResult);
-      recommendations = parsed.recommendations;
-      console.log('Successfully parsed recommendations:', recommendations.length);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', analysisResult);
-      console.error('Parse error:', parseError);
-      throw new Error('Failed to parse AI recommendations');
-    }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Analyze these comprehensive results and provide personalized recommendations.' }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      });
 
-    return new Response(JSON.stringify({ recommendations }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        
+        // Return fallback recommendations on OpenAI error
+        console.log('OpenAI failed, using fallback recommendations');
+        const fallbackRecommendations = getFallbackRecommendations(scores);
+        return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const data = await response.json();
+      const analysisResult = data.choices[0].message.content;
+
+      console.log('OpenAI response received, length:', analysisResult.length);
+
+      // Parse the JSON response
+      let recommendations;
+      try {
+        const parsed = JSON.parse(analysisResult);
+        recommendations = parsed.recommendations;
+        console.log('Successfully parsed recommendations:', recommendations.length);
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', analysisResult);
+        console.error('Parse error:', parseError);
+        
+        // Return fallback recommendations on parse error
+        console.log('Parse failed, using fallback recommendations');
+        const fallbackRecommendations = getFallbackRecommendations(scores);
+        return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify({ recommendations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
+    } catch (openaiError) {
+      console.error('OpenAI request failed:', openaiError);
+      
+      // Return fallback recommendations on request failure
+      console.log('OpenAI request failed, using fallback recommendations');
+      const fallbackRecommendations = getFallbackRecommendations(scores);
+      return new Response(JSON.stringify({ recommendations: fallbackRecommendations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
   } catch (error) {
     console.error('Error in ai-recommendations function:', error);
+    
+    // Return fallback recommendations on any error
+    const fallbackRecommendations = [
+      {
+        title: 'Desarrollar tu Proyecto Paso a Paso',
+        description: 'Enfócate en completar una tarea pequeña a la vez y busca feedback regular de tu audiencia objetivo.',
+        priority: 'Alta',
+        timeframe: '1-2 semanas'
+      }
+    ];
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        recommendations: [] // Return empty array as fallback
+        recommendations: fallbackRecommendations
       }), 
       {
-        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

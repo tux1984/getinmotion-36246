@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { RecommendedAgents } from '@/types/dashboard';
+import { getAllAgentIds } from '@/data/culturalAgentsDatabase';
 
 export const createUserAgentsFromRecommendations = async (
   userId: string, 
@@ -10,17 +11,27 @@ export const createUserAgentsFromRecommendations = async (
     console.log('Creating user agents from recommendations:', recommendations);
     
     const agentsToCreate = [];
+    const validAgentIds = getAllAgentIds();
+    console.log('Valid agent IDs from database:', validAgentIds);
     
     // Mapear recomendaciones usando el formato correcto del tipo RecommendedAgents
     if (recommendations.primary && Array.isArray(recommendations.primary)) {
       recommendations.primary.forEach(agentId => {
-        agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+        if (validAgentIds.includes(agentId)) {
+          agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+        } else {
+          console.warn(`Agent ID ${agentId} not found in valid agents list`);
+        }
       });
     }
     
     if (recommendations.secondary && Array.isArray(recommendations.secondary)) {
       recommendations.secondary.forEach(agentId => {
-        agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+        if (validAgentIds.includes(agentId)) {
+          agentsToCreate.push({ user_id: userId, agent_id: agentId, is_enabled: true });
+        } else {
+          console.warn(`Agent ID ${agentId} not found in valid agents list`);
+        }
       });
     }
     

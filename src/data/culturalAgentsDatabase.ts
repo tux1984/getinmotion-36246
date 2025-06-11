@@ -79,11 +79,12 @@ const agents: CulturalAgent[] = [
   }
 ];
 
-export const culturalAgentsDatabase = {
-  getAll: () => agents,
-  getById: (id: string) => agents.find(agent => agent.id === id),
-  getByCategory: (category: string) => agents.filter(agent => agent.category === category),
-  getByExpertise: (expertise: string) => agents.filter(agent => 
-    agent.expertise.some(exp => exp.toLowerCase().includes(expertise.toLowerCase()))
-  )
-};
+export const culturalAgentsDatabase = agents;
+
+// Helper functions
+export const getAgentById = (id: string) => agents.find(agent => agent.id === id);
+export const getAgentsByCategory = (category: string) => agents.filter(agent => agent.category === category);
+export const getAgentsByExpertise = (expertise: string) => agents.filter(agent => 
+  agent.expertise.some(exp => exp.toLowerCase().includes(expertise.toLowerCase()))
+);
+export const getAllAgentIds = () => agents.map(agent => agent.id);
