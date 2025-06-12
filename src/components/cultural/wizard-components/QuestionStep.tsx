@@ -1,14 +1,14 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import { StepContainer } from './StepContainer';
+import { UserProfileData } from '../types/wizardTypes';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileWizardLayout } from '../components/MobileWizardLayout';
+import { MobileRadioCards } from './MobileRadioCards';
+import { MobileCheckboxCards } from './MobileCheckboxCards';
+import { MobileWizardNavigation } from './MobileWizardNavigation';
+import { IconOption } from './IconOption';
 import { RadioCards } from './RadioCards';
 import { CheckboxCards } from './CheckboxCards';
-import { IconOption } from './IconOption';
-import { UserProfileData } from '../types/wizardTypes';
-import { MotionLogo } from '@/components/MotionLogo';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface QuestionConfig {
   id: string;
@@ -58,12 +58,10 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   const isMobile = useIsMobile();
 
   const handleSingleSelect = (value: string) => {
-    // For radio buttons and icon selects
     updateProfileData({ [question.fieldName]: value } as any);
   };
 
   const handleMultiSelect = (value: string, isChecked: boolean) => {
-    // For checkbox selections
     const currentValues = [...(profileData[question.fieldName as keyof UserProfileData] as string[] || [])];
     
     if (isChecked && !currentValues.includes(value)) {
@@ -80,7 +78,14 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   const renderQuestionInput = () => {
     switch (question.type) {
       case 'radio':
-        return (
+        return isMobile ? (
+          <MobileRadioCards
+            options={question.options}
+            selectedValue={profileData[question.fieldName as keyof UserProfileData] as string}
+            onChange={handleSingleSelect}
+            withIcons
+          />
+        ) : (
           <RadioCards
             name={question.id}
             options={question.options}
@@ -91,7 +96,14 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         );
       
       case 'checkbox':
-        return (
+        return isMobile ? (
+          <MobileCheckboxCards
+            options={question.options}
+            selectedValues={profileData[question.fieldName as keyof UserProfileData] as string[] || []}
+            onChange={handleMultiSelect}
+            withIcons
+          />
+        ) : (
           <CheckboxCards
             options={question.options}
             selectedValues={profileData[question.fieldName as keyof UserProfileData] as string[] || []}
@@ -104,8 +116,8 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         return (
           <div className={`grid ${
             isMobile 
-              ? 'grid-cols-1 gap-3 mt-4' 
-              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6'
+              ? 'grid-cols-1 gap-3' 
+              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'
           }`}>
             {question.options.map(option => (
               <IconOption
@@ -125,50 +137,86 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         return <p>Question type not supported</p>;
     }
   };
-  
-  // Sticky header with logo and language switcher
-  const StickyHeader = () => (
-    <div className={`bg-white border-b border-gray-200 shadow-sm flex justify-between items-center ${
-      isMobile ? 'py-2 px-3' : 'py-3 px-4'
-    }`}>
-      <div className="flex-shrink-0">
-        <MotionLogo variant="dark" size={isMobile ? "sm" : "sm"} />
-      </div>
-      <div className="flex items-center">
-        <LanguageSwitcher />
-      </div>
-    </div>
-  );
+
+  // Mobile Layout
+  if (isMobile) {
+    const navigationSlot = onNext && onPrevious ? (
+      <MobileWizardNavigation
+        onNext={onNext}
+        onPrevious={onPrevious}
+        isFirstStep={isFirstStep || false}
+        isLastStep={false}
+        language={language}
+        isValid={isStepValid}
+      />
+    ) : null;
+
+    return (
+      <MobileWizardLayout
+        currentStep={currentStepNumber || 1}
+        totalSteps={totalSteps || 1}
+        title={question.title}
+        subtitle={question.subtitle}
+        language={language}
+        showCharacter={!!illustration}
+        characterImage={illustration}
+        navigationSlot={navigationSlot}
+      >
+        {renderQuestionInput()}
+      </MobileWizardLayout>
+    );
+  }
 
   return (
-    <StepContainer
-      title={question.title}
-      subtitle={question.subtitle}
-      industry={industry}
-      illustration={illustration}
-      currentStep={currentStepNumber}
-      totalSteps={totalSteps}
-      language={language}
-      showNavigation={!!onNext && !!onPrevious}
-      onNext={onNext}
-      onPrevious={onPrevious}
-      isFirstStep={isFirstStep}
-      currentStepId={currentStepId}
-      profileData={profileData}
-      isStepValid={isStepValid}
-      className="w-full max-w-full"
-      stickyHeader={<StickyHeader />}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      className="w-full h-full flex flex-col"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="w-full"
-      >
-        <div className="rounded-lg">
-          {renderQuestionInput()}
+      <div className="flex-1 flex flex-col md:flex-row gap-6 p-4">
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="text-left mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-purple-800 mb-2">
+                {question.title}
+              </h2>
+              {question.subtitle && (
+                <p className="text-gray-600 text-base">
+                  {question.subtitle}
+                </p>
+              )}
+            </div>
+            
+            <div className="flex-1">
+              {renderQuestionInput()}
+            </div>
+          </div>
         </div>
-      </motion.div>
-    </StepContainer>
+        
+        {illustration && (
+          <div className="w-full md:w-1/2 lg:w-2/5 h-auto md:min-h-[400px] flex justify-center items-center">
+            <motion.div 
+              className="relative w-full h-full min-h-[300px] md:min-h-[400px]"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                duration: 0.5,
+                delay: 0.2,
+                type: "spring",
+                stiffness: 100
+              }}
+            >
+              <img 
+                src={illustration} 
+                alt="Step illustration"
+                className="w-full h-full object-cover object-center rounded-xl" 
+              />
+            </motion.div>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };

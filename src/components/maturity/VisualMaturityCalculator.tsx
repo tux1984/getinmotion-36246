@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { ArrowRight } from 'lucide-react';
 import { Language, ProfileType } from './types';
 import { getQuestions } from './getQuestions';
@@ -10,6 +9,8 @@ import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 import { CompletionScreen } from './CompletionScreen';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileWizardLayout } from '../cultural/components/MobileWizardLayout';
 
 interface VisualMaturityCalculatorProps {
   language: Language;
@@ -26,6 +27,7 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const questions = getQuestions(language, profileType);
 
   const handleSelectOption = (questionId: string, value: number) => {
@@ -67,6 +69,12 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
     }
   };
 
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
   // Convert the Question type from getQuestions to match QuestionCard's expected format
   const adaptQuestionForCard = (question: any) => ({
     id: question.id,
@@ -81,6 +89,62 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
     return <CompletionScreen language={language} />;
   }
 
+  // Mobile Layout
+  if (isMobile) {
+    const navigationSlot = (
+      <div className="flex justify-between items-center gap-4">
+        <Button 
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={currentStep === 0}
+          className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1"
+          size="lg"
+        >
+          {language === 'en' ? 'Back' : 'Atrás'}
+        </Button>
+        
+        <Button 
+          onClick={handleNext}
+          className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
+          size="lg"
+        >
+          {currentStep < questions.length - 1 
+            ? (language === 'en' ? 'Next' : 'Siguiente')
+            : (language === 'en' ? 'Complete' : 'Completar')}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    );
+
+    return (
+      <MobileWizardLayout
+        currentStep={currentStep + 1}
+        totalSteps={questions.length}
+        title={language === 'en' ? 'Cultural Maturity Assessment' : 'Evaluación de Madurez Cultural'}
+        subtitle={currentQuestion.title}
+        language={language}
+        navigationSlot={navigationSlot}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <QuestionCard 
+              question={currentQuestion}
+              selectedValue={answers[currentQuestion.id]}
+              onSelectOption={handleSelectOption}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </MobileWizardLayout>
+    );
+  }
+
+  // Desktop Layout - keep existing
   return (
     <div className="w-full max-w-3xl mx-auto">
       <Card className="border-2 border-purple-100 rounded-3xl shadow-lg bg-white/95 backdrop-blur-sm">
