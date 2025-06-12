@@ -132,7 +132,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       isMobile ? 'py-2 px-3' : 'py-3 px-4'
     }`}>
       <div className="flex-shrink-0">
-        <MotionLogo variant="dark" size={isMobile ? "xs" : "sm"} />
+        <MotionLogo variant="dark" size={isMobile ? "sm" : "sm"} />
       </div>
       <div className="flex items-center">
         <LanguageSwitcher />

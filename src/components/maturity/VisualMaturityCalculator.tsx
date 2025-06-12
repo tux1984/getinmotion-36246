@@ -67,7 +67,15 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
     }
   };
 
-  const currentQuestion = questions[currentStep];
+  // Convert the Question type from getQuestions to match QuestionCard's expected format
+  const adaptQuestionForCard = (question: any) => ({
+    id: question.id,
+    title: question.question, // Map 'question' property to 'title'
+    subtitle: undefined,
+    options: question.options
+  });
+
+  const currentQuestion = adaptQuestionForCard(questions[currentStep]);
 
   if (isCompleted) {
     return <CompletionScreen language={language} />;
