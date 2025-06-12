@@ -59,31 +59,25 @@ export const MobileWizardNavigation: React.FC<MobileWizardNavigationProps> = ({
   }
   
   return (
-    <motion.div 
-      className="flex justify-between items-center gap-4"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="flex gap-3">
       <Button
         variant="outline"
         onClick={onPrevious}
         disabled={isFirstStep}
-        className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1 border-gray-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 disabled:opacity-50"
-        size="lg"
+        className="flex-1 h-12 border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 mr-2" />
         {t[language].previous}
       </Button>
       
       <Button
         onClick={handleNext}
-        className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-md"
-        size="lg"
+        disabled={!isValid}
+        className="flex-1 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {t[language].next}
-        <ArrowRight className="w-4 h-4" />
+        <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
-    </motion.div>
+    </div>
   );
 };

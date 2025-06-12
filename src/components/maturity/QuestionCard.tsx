@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -34,13 +35,13 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   // Mobile version
   if (isMobile) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-purple-900 mb-2 leading-tight">
+          <h3 className="text-xl font-bold text-purple-900 mb-3 leading-tight">
             {question.title}
           </h3>
           {question.subtitle && (
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 text-base leading-relaxed">
               {question.subtitle}
             </p>
           )}
@@ -49,29 +50,29 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         <RadioGroup
           value={selectedValue?.toString()}
           onValueChange={(value) => onSelectOption(question.id, parseInt(value))}
-          className="space-y-3"
+          className="space-y-4"
         >
           {question.options.map((option, index) => (
             <motion.div
               key={option.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className={`flex items-start space-x-4 p-4 rounded-xl border-2 transition-all cursor-pointer min-h-[64px] ${
+              transition={{ delay: index * 0.08, duration: 0.3 }}
+              className={`flex items-start p-4 rounded-xl border-2 transition-all cursor-pointer min-h-[68px] ${
                 selectedValue === option.value
-                  ? 'border-purple-500 bg-purple-50 shadow-sm'
-                  : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25 active:bg-purple-50'
+                  ? 'border-purple-500 bg-purple-50 shadow-md scale-[1.02]'
+                  : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25 hover:shadow-sm bg-white'
               }`}
               onClick={() => onSelectOption(question.id, option.value)}
             >
               <RadioGroupItem 
                 value={option.value.toString()} 
                 id={option.id}
-                className="mt-1 border-2 border-purple-300 text-purple-600 flex-shrink-0"
+                className="mt-1 border-2 border-purple-300 text-purple-600 flex-shrink-0 w-5 h-5"
               />
               <Label 
                 htmlFor={option.id} 
-                className="text-base text-gray-700 cursor-pointer leading-relaxed flex-1 font-medium"
+                className="text-base text-gray-700 cursor-pointer leading-relaxed flex-1 ml-4 font-medium"
               >
                 {option.text}
               </Label>

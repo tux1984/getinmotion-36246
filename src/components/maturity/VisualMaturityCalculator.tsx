@@ -11,6 +11,7 @@ import { CompletionScreen } from './CompletionScreen';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileWizardLayout } from '../cultural/components/MobileWizardLayout';
+import { MobileWizardNavigation } from '../cultural/wizard-components/MobileWizardNavigation';
 
 interface VisualMaturityCalculatorProps {
   language: Language;
@@ -92,28 +93,17 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
   // Mobile Layout
   if (isMobile) {
     const navigationSlot = (
-      <div className="flex justify-between items-center gap-4">
-        <Button 
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1"
-          size="lg"
-        >
-          {language === 'en' ? 'Back' : 'Atrás'}
-        </Button>
-        
-        <Button 
-          onClick={handleNext}
-          className="flex items-center gap-2 px-6 py-3 text-base min-h-[52px] flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
-          size="lg"
-        >
-          {currentStep < questions.length - 1 
-            ? (language === 'en' ? 'Next' : 'Siguiente')
-            : (language === 'en' ? 'Complete' : 'Completar')}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      <MobileWizardNavigation
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        isFirstStep={currentStep === 0}
+        isLastStep={currentStep >= questions.length - 1}
+        language={language}
+        isValid={!!answers[currentQuestion.id]}
+        nextLabel={currentStep < questions.length - 1 
+          ? (language === 'en' ? 'Next' : 'Siguiente')
+          : (language === 'en' ? 'Complete' : 'Completar')}
+      />
     );
 
     return (
@@ -121,7 +111,6 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
         currentStep={currentStep + 1}
         totalSteps={questions.length}
         title={language === 'en' ? 'Cultural Maturity Assessment' : 'Evaluación de Madurez Cultural'}
-        subtitle={currentQuestion.title}
         language={language}
         navigationSlot={navigationSlot}
       >

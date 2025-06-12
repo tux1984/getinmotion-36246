@@ -31,21 +31,23 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-gray-50">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex flex-col">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
         <div className="px-4 py-3">
+          {/* Top Row: Logo and Language Switcher */}
           <div className="flex justify-between items-center mb-3">
             <MotionLogo variant="dark" size="sm" />
             <LanguageSwitcher />
           </div>
           
-          <div className="space-y-2">
+          {/* Title and Progress */}
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-bold text-gray-900 truncate flex-1 mr-2">
+              <h1 className="text-lg font-bold text-gray-900 leading-tight">
                 {title}
               </h1>
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium whitespace-nowrap">
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
                 {currentStep}/{totalSteps}
               </span>
             </div>
@@ -56,45 +58,48 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
               </p>
             )}
             
-            <Progress value={progressPercentage} className="h-2" />
+            <Progress value={progressPercentage} className="h-2 bg-gray-100" />
           </div>
         </div>
       </div>
 
-      {/* Character Image - Mobile */}
-      {showCharacter && characterImage && (
-        <div className="px-4 py-4 bg-white">
+      {/* Content Area with top padding for fixed header */}
+      <div className="flex-1 pt-32 pb-24">
+        {/* Character Image */}
+        {showCharacter && characterImage && (
+          <div className="px-4 py-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center"
+            >
+              <img 
+                src={characterImage} 
+                alt="Cultural assessment guide"
+                className="w-40 h-auto rounded-xl shadow-md"
+              />
+            </motion.div>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="px-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
           >
-            <img 
-              src={characterImage} 
-              alt="Cultural assessment guide"
-              className="w-32 h-auto rounded-lg shadow-sm"
-            />
+            {children}
           </motion.div>
         </div>
-      )}
-
-      {/* Content Area */}
-      <div className="flex-1 px-4 py-4">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 min-h-[400px]"
-        >
-          {children}
-        </motion.div>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* Fixed Bottom Navigation */}
       {navigationSlot && (
-        <div className="sticky bottom-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-lg">
-          <div className="px-4 py-3">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-lg">
+          <div className="px-4 py-4">
             {navigationSlot}
           </div>
         </div>

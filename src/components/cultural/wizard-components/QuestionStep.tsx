@@ -116,7 +116,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         return (
           <div className={`grid ${
             isMobile 
-              ? 'grid-cols-1 gap-3' 
+              ? 'grid-cols-1 gap-4' 
               : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'
           }`}>
             {question.options.map(option => (
@@ -167,6 +167,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     );
   }
 
+  // Desktop Layout - keep existing
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
