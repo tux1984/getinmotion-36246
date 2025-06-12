@@ -8,6 +8,7 @@ import { IconOption } from './IconOption';
 import { UserProfileData } from '../types/wizardTypes';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface QuestionConfig {
   id: string;
@@ -54,6 +55,8 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   currentStepId,
   isStepValid = true
 }) => {
+  const isMobile = useIsMobile();
+
   const handleSingleSelect = (value: string) => {
     // For radio buttons and icon selects
     updateProfileData({ [question.fieldName]: value } as any);
@@ -99,7 +102,11 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       
       case 'icon-select':
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+          <div className={`grid ${
+            isMobile 
+              ? 'grid-cols-1 gap-3 mt-4' 
+              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6'
+          }`}>
             {question.options.map(option => (
               <IconOption
                 key={option.id}
@@ -108,6 +115,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
                 icon={option.icon}
                 selected={profileData[question.fieldName as keyof UserProfileData] === option.id}
                 onClick={handleSingleSelect}
+                isMobile={isMobile}
               />
             ))}
           </div>
@@ -120,9 +128,11 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   
   // Sticky header with logo and language switcher
   const StickyHeader = () => (
-    <div className="bg-white border-b border-gray-200 py-3 px-4 shadow-sm flex justify-between items-center">
+    <div className={`bg-white border-b border-gray-200 shadow-sm flex justify-between items-center ${
+      isMobile ? 'py-2 px-3' : 'py-3 px-4'
+    }`}>
       <div className="flex-shrink-0">
-        <MotionLogo variant="dark" size="sm" />
+        <MotionLogo variant="dark" size={isMobile ? "xs" : "sm"} />
       </div>
       <div className="flex items-center">
         <LanguageSwitcher />

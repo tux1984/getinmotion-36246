@@ -4,61 +4,48 @@ import { motion } from 'framer-motion';
 
 interface IconOptionProps {
   id: string;
-  icon: React.ReactNode;
   label: string;
+  icon?: React.ReactNode;
   selected: boolean;
-  onClick: (id: string) => void;
+  onClick: (value: string) => void;
+  isMobile?: boolean;
 }
 
-export const IconOption: React.FC<IconOptionProps> = ({ 
-  id, 
-  icon, 
-  label, 
-  selected, 
-  onClick 
+export const IconOption: React.FC<IconOptionProps> = ({
+  id,
+  label,
+  icon,
+  selected,
+  onClick,
+  isMobile = false
 }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.03, y: -2 }}
+      whileHover={!isMobile ? { scale: 1.02 } : {}}
       whileTap={{ scale: 0.98 }}
-      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-        selected 
-          ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-purple-100 shadow-md' 
-          : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/30'
-      }`}
+      className={`
+        cursor-pointer rounded-xl border-2 transition-all duration-200
+        ${selected 
+          ? 'border-purple-400 bg-purple-50 shadow-md' 
+          : 'border-gray-200 hover:border-purple-200 hover:bg-purple-25'
+        }
+        ${isMobile ? 'p-4 min-h-[60px]' : 'p-6 min-h-[80px]'}
+      `}
       onClick={() => onClick(id)}
-      layout
     >
-      <div className="flex flex-col items-center text-center">
-        <motion.div 
-          className={`w-16 h-16 mb-4 rounded-lg flex items-center justify-center relative ${
-            selected 
-              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md' 
-              : 'bg-gray-100 text-gray-600'
-          }`}
-          animate={selected ? { y: [0, -3, 0] } : { y: 0 }}
-          transition={selected ? { 
-            duration: 0.5, 
-            ease: "easeInOut", 
-            delay: 0.1
-          } : {}}
-        >
-          <div className="text-2xl">
+      <div className="flex items-center space-x-3">
+        {icon && (
+          <div className={`flex-shrink-0 ${
+            selected ? 'text-purple-600' : 'text-gray-400'
+          }`}>
             {icon}
           </div>
-          
-          {/* Subtle glow effect for selected state */}
-          {selected && (
-            <motion.div 
-              className="absolute -inset-1 rounded-lg bg-purple-300/20 blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            />
-          )}
-        </motion.div>
-        
-        <span className={`font-medium text-base ${selected ? 'text-purple-800' : 'text-gray-700'}`}>
+        )}
+        <span className={`${
+          isMobile ? 'text-sm' : 'text-base'
+        } font-medium ${
+          selected ? 'text-purple-800' : 'text-gray-700'
+        }`}>
           {label}
         </span>
       </div>

@@ -7,6 +7,7 @@ import { OnboardingHeader } from './components/OnboardingHeader';
 import { StepsHeader } from './components/StepsHeader';
 import { OnboardingContent } from './components/OnboardingContent';
 import { buildOnboardingSteps } from './utils/stepUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OnboardingWizardProps {
   profileType: ProfileType;
@@ -15,6 +16,7 @@ interface OnboardingWizardProps {
 
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType, onComplete }) => {
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
   const [showExtendedQuestions, setShowExtendedQuestions] = useState(false);
   
   const {
@@ -34,10 +36,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
   const steps = buildOnboardingSteps(profileType, language, showExtendedQuestions);
 
   return (
-    <div className="max-w-4xl mx-auto px-0 py-0">
+    <div className={`w-full mx-auto ${isMobile ? 'px-0 py-0' : 'max-w-4xl px-0 py-0'}`}>
       <OnboardingHeader />
       
-      <div className="px-4 py-6">
+      <div className={`${isMobile ? 'px-3 py-4' : 'px-4 py-6'}`}>
         <StepsHeader currentStep={currentStep} steps={steps} />
         
         <OnboardingContent

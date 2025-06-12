@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { StepProgress } from './StepProgress';
 import { WizardNavigation } from './WizardNavigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StepContainerProps {
   title: string;
@@ -45,6 +46,8 @@ export const StepContainer: React.FC<StepContainerProps> = ({
   isStepValid = true,
   stickyHeader
 }) => {
+  const isMobile = useIsMobile();
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -59,13 +62,13 @@ export const StepContainer: React.FC<StepContainerProps> = ({
         </div>
       )}
       
-      <div className="flex-1 flex flex-col md:flex-row gap-6 p-4">
+      <div className={`flex-1 flex ${isMobile ? 'flex-col gap-4' : 'flex-col md:flex-row gap-6'} ${isMobile ? 'p-3' : 'p-4'}`}>
         {/* Left column with all content */}
         <div className="flex-1 flex flex-col">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className={`bg-white rounded-xl shadow-sm ${isMobile ? 'p-4' : 'p-6'}`}>
             {/* Step progress indicator at the top if provided */}
             {currentStep && totalSteps && (
-              <div className="mb-6">
+              <div className={`${isMobile ? 'mb-4' : 'mb-6'}`}>
                 <StepProgress 
                   currentStep={currentStep}
                   totalSteps={totalSteps}
@@ -74,19 +77,23 @@ export const StepContainer: React.FC<StepContainerProps> = ({
               </div>
             )}
             
-            <div className="text-left mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-purple-800 mb-2">
+            <div className={`text-left ${isMobile ? 'mb-4' : 'mb-6'}`}>
+              <h2 className={`${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} font-bold text-purple-800 mb-2`}>
                 {title}
               </h2>
-              {subtitle && <p className="text-gray-600 text-base">{subtitle}</p>}
+              {subtitle && (
+                <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                  {subtitle}
+                </p>
+              )}
             </div>
             
             <div className="flex-1">
               {children}
             </div>
             
-            {/* Navigation buttons */}
-            {showNavigation && onNext && onPrevious && (
+            {/* Navigation buttons - Only show on desktop when enabled */}
+            {showNavigation && onNext && onPrevious && !isMobile && (
               <div className="mt-8">
                 <WizardNavigation 
                   onNext={onNext}
@@ -103,8 +110,8 @@ export const StepContainer: React.FC<StepContainerProps> = ({
           </div>
         </div>
         
-        {/* Right column with illustration - Fixed width and responsive sizing */}
-        {illustration && (
+        {/* Right column with illustration - Hide on mobile */}
+        {illustration && !isMobile && (
           <div className="w-full md:w-1/2 lg:w-2/5 h-auto md:min-h-[400px] flex justify-center items-center">
             <motion.div 
               className="relative w-full h-full min-h-[300px] md:min-h-[400px]"
@@ -126,6 +133,22 @@ export const StepContainer: React.FC<StepContainerProps> = ({
           </div>
         )}
       </div>
+
+      {/* Mobile Navigation - Sticky bottom */}
+      {showNavigation && onNext && onPrevious && isMobile && (
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg z-30 mt-4">
+          <WizardNavigation 
+            onNext={onNext}
+            onPrevious={onPrevious}
+            isFirstStep={isFirstStep}
+            isLastStep={false}
+            language={language}
+            currentStepId={currentStepId}
+            profileData={profileData}
+            isValid={isStepValid}
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
