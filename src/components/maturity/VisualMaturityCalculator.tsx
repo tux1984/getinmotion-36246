@@ -90,7 +90,7 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
     return <CompletionScreen language={language} />;
   }
 
-  // Mobile Layout
+  // Mobile Layout - Single Column, No Image
   if (isMobile) {
     const navigationSlot = (
       <MobileWizardNavigation

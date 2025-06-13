@@ -5,6 +5,7 @@ import { StreamlinedWelcomeStep } from './StreamlinedWelcomeStep';
 import { StreamlinedMaturityStep } from './StreamlinedMaturityStep';
 import { StreamlinedAIAnalysisStep } from './StreamlinedAIAnalysisStep';
 import { StreamlinedResultsStep } from './StreamlinedResultsStep';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StreamlinedOnboardingContentProps {
   currentStep: number;
@@ -35,8 +36,10 @@ export const StreamlinedOnboardingContent: React.FC<StreamlinedOnboardingContent
   onComplete,
   setBasicRecommendations
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className={`${isMobile ? 'w-full' : 'bg-white rounded-xl shadow-lg'} overflow-hidden`}>
       {currentStep === 0 && (
         <StreamlinedWelcomeStep
           profileType={profileType}

@@ -82,34 +82,35 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
 
   return (
     <div className={`${isMobile ? 'w-full' : 'max-w-4xl'} mx-auto`}>
-      <OnboardingHeader />
+      {/* Only show header on desktop */}
+      {!isMobile && <OnboardingHeader />}
       
       <div className={`${isMobile ? 'px-3 py-4' : 'px-4 py-6'}`}>
-        {/* Progress Indicator */}
-        <div className={`${isMobile ? 'mb-6' : 'mb-8'}`}>
-          <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
-            <h2 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900`}>
-              {t.steps[currentStep]}
-            </h2>
-            <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 ${
-              isMobile ? 'bg-gray-100 px-2 py-1 rounded-full' : ''
-            }`}>
-              {language === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
-            </span>
+        {/* Progress Indicator - Only on desktop */}
+        {!isMobile && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t.steps[currentStep]}
+              </h2>
+              <span className="text-sm text-gray-500">
+                {language === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
+              </span>
+            </div>
+            
+            <p className="text-gray-600 text-sm mb-4">
+              {t.stepDescriptions[currentStep]}
+            </p>
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+              />
+            </div>
           </div>
-          
-          <p className={`text-gray-600 ${isMobile ? 'text-sm mb-3' : 'text-sm mb-4'}`}>
-            {t.stepDescriptions[currentStep]}
-          </p>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         <StreamlinedOnboardingContent
           currentStep={currentStep}

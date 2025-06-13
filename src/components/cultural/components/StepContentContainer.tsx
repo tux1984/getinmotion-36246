@@ -64,7 +64,7 @@ export const StepContentContainer: React.FC<StepContentContainerProps> = ({
 
   return (
     <div className={`flex gap-6 items-start ${isMobile ? 'flex-col gap-4' : ''}`}>
-      {/* Character Image - Always show on desktop, hide on mobile for questions */}
+      {/* Character Image - Only show on desktop */}
       {!isMobile && (
         <div className="w-1/3 flex-shrink-0">
           <OptimizedCharacterImage
@@ -76,18 +76,7 @@ export const StepContentContainer: React.FC<StepContentContainerProps> = ({
         </div>
       )}
 
-      {/* Mobile character image - smaller and only for certain steps */}
-      {isMobile && (currentStep === 'profileType' || currentStep === 'results') && (
-        <div className="w-full flex justify-center mb-4">
-          <OptimizedCharacterImage
-            src={characterImage}
-            alt="Character guide"
-            className="w-48 h-auto"
-          />
-        </div>
-      )}
-
-      {/* Content */}
+      {/* Content - Full width on mobile */}
       <div className={`${isMobile ? 'w-full' : 'flex-1'} min-w-0`}>
         <AnimatePresence mode="wait">
           {currentStep === 'profileType' && (

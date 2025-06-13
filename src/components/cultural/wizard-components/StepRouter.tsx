@@ -13,6 +13,7 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { getStepImage } from './CharacterImageSelector';
 import { OptimizedCharacterImage } from '../components/OptimizedCharacterImage';
 import { DynamicQuestionsStep } from '../wizard-steps/DynamicQuestionsStep';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StepRouterProps {
   currentStepId: WizardStepId;
@@ -47,6 +48,8 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   analysisType,
   handleAnalysisChoice
 }) => {
+  const isMobile = useIsMobile();
+  
   // Get the appropriate image for the current step
   console.log('🎯 StepRouter - Current step:', currentStepId);
   const characterImage = getStepImage(currentStepId, calculateMaturityScores);
@@ -57,7 +60,118 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   const finalImageSrc = characterImage || fallbackImage;
   console.log('✅ StepRouter - Final image source:', finalImageSrc);
 
-  // Common layout with character image
+  // Mobile layout - single column, no character image
+  if (isMobile) {
+    switch (currentStepId) {
+      case 'culturalProfile':
+        console.log('📋 Rendering culturalProfile step (mobile)');
+        return (
+          <CulturalProfileStep
+            profileData={profileData}
+            updateProfileData={updateProfileData}
+            language={language}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+            onNext={handleNext}
+            isStepValid={isCurrentStepValid()}
+          />
+        );
+      
+      case 'businessMaturity':
+        console.log('💼 Rendering businessMaturity step (mobile)');
+        return (
+          <BusinessMaturityStep
+            profileData={profileData}
+            updateProfileData={updateProfileData}
+            language={language}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            isStepValid={isCurrentStepValid()}
+          />
+        );
+      
+      case 'managementStyle':
+        console.log('👥 Rendering managementStyle step (mobile)');
+        return (
+          <ManagementStyleStep
+            profileData={profileData}
+            updateProfileData={updateProfileData}
+            language={language}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            isStepValid={isCurrentStepValid()}
+          />
+        );
+      
+      case 'bifurcation':
+        console.log('🔀 Rendering bifurcation step (mobile)');
+        return (
+          <BifurcationStep
+            profileData={profileData}
+            language={language}
+            selectedAnalysisType={analysisType}
+            onAnalysisChoice={handleAnalysisChoice!}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+          />
+        );
+      
+      case 'extendedQuestions':
+        console.log('📝 Rendering extendedQuestions step (mobile)');
+        return (
+          <ExtendedQuestionsStep
+            profileData={profileData}
+            updateProfileData={updateProfileData}
+            language={language}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            isStepValid={isCurrentStepValid()}
+          />
+        );
+
+      case 'dynamicQuestions':
+        console.log('🎯 Rendering dynamicQuestions step (mobile)');
+        return (
+          <DynamicQuestionsStep
+            profileData={profileData}
+            updateProfileData={updateProfileData}
+            language={language}
+            currentStepNumber={currentStepNumber}
+            totalSteps={totalSteps}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            isStepValid={isCurrentStepValid()}
+          />
+        );
+
+      case 'results':
+        console.log('🎉 Rendering results step (mobile)');
+        return (
+          <ResultsStep 
+            profileData={profileData}
+            scores={calculateMaturityScores()}
+            recommendedAgents={getRecommendedAgents(calculateMaturityScores())}
+            language={language}
+            onComplete={onComplete}
+            illustration={finalImageSrc}
+          />
+        );
+      
+      default:
+        console.log('❓ Unknown step, returning null:', currentStepId);
+        return null;
+    }
+  }
+
+  // Desktop layout - with character image (existing)
   const renderStepWithCharacter = (stepComponent: React.ReactNode) => (
     <div className="flex gap-8 items-start max-w-6xl mx-auto">
       {/* Character Image - Desktop */}
@@ -72,15 +186,6 @@ export const StepRouter: React.FC<StepRouterProps> = ({
         </div>
       </div>
       
-      {/* Mobile Character Image */}
-      <div className="w-full flex justify-center mb-6 md:hidden">
-        <OptimizedCharacterImage
-          src={finalImageSrc}
-          alt="Cultural assessment guide"
-          className="w-48 h-auto rounded-lg shadow-sm"
-        />
-      </div>
-      
       {/* Step Content */}
       <div className="flex-1 min-w-0 md:w-2/3">
         {stepComponent}
@@ -88,7 +193,7 @@ export const StepRouter: React.FC<StepRouterProps> = ({
     </div>
   );
 
-  // Route to appropriate step component
+  // Route to appropriate step component (desktop)
   switch (currentStepId) {
     case 'culturalProfile':
       console.log('📋 Rendering culturalProfile step');

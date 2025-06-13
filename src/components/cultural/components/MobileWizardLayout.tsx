@@ -12,8 +12,6 @@ interface MobileWizardLayoutProps {
   title: string;
   subtitle?: string;
   language: 'en' | 'es';
-  showCharacter?: boolean;
-  characterImage?: string;
   navigationSlot?: ReactNode;
 }
 
@@ -24,8 +22,6 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
   title,
   subtitle,
   language,
-  showCharacter = false,
-  characterImage,
   navigationSlot
 }) => {
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -63,27 +59,9 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
         </div>
       </div>
 
-      {/* Content Area with top padding for fixed header */}
-      <div className="flex-1 pt-32 pb-24">
-        {/* Character Image */}
-        {showCharacter && characterImage && (
-          <div className="px-4 py-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex justify-center"
-            >
-              <img 
-                src={characterImage} 
-                alt="Cultural assessment guide"
-                className="w-40 h-auto rounded-xl shadow-md"
-              />
-            </motion.div>
-          </div>
-        )}
-
-        {/* Main Content */}
+      {/* Content Area with top padding for fixed header - Single Column Layout */}
+      <div className="flex-1 pt-28 pb-24">
+        {/* Main Content - Single Column */}
         <div className="px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -138,7 +138,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     }
   };
 
-  // Mobile Layout
+  // Mobile Layout - NO CHARACTER IMAGE
   if (isMobile) {
     const navigationSlot = onNext && onPrevious ? (
       <MobileWizardNavigation
@@ -158,8 +158,6 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         title={question.title}
         subtitle={question.subtitle}
         language={language}
-        showCharacter={!!illustration}
-        characterImage={illustration}
         navigationSlot={navigationSlot}
       >
         {renderQuestionInput()}
@@ -167,7 +165,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     );
   }
 
-  // Desktop Layout - keep existing
+  // Desktop Layout - keep existing with image
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
