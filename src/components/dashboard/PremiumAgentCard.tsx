@@ -26,6 +26,18 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
     }
   };
 
+  const renderIcon = () => {
+    if (typeof agent.icon === 'string') {
+      return <span className="text-lg">{agent.icon}</span>;
+    } else if (React.isValidElement(agent.icon)) {
+      return agent.icon;
+    } else if (typeof agent.icon === 'function') {
+      const IconComponent = agent.icon;
+      return <IconComponent className="w-5 h-5" />;
+    }
+    return <Zap className="w-5 h-5" />;
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -34,11 +46,7 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       className="flex items-center p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/50 cursor-pointer transition-all group"
     >
       <div className={`w-10 h-10 rounded-lg ${agent.color || 'bg-purple-500'} flex items-center justify-center text-white mr-3 group-hover:scale-110 transition-transform`}>
-        {typeof agent.icon === 'string' ? (
-          <span className="text-lg">{agent.icon}</span>
-        ) : (
-          agent.icon
-        )}
+        {renderIcon()}
       </div>
       
       <div className="flex-1 min-w-0">
