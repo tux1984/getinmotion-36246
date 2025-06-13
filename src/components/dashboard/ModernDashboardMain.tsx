@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { OptimizedTaskBasedDashboard } from './OptimizedTaskBasedDashboard';
-import { useLanguage } from '@/context/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { PremiumDashboardMain } from './PremiumDashboardMain';
+import { MobileTaskBasedDashboard } from './mobile/MobileTaskBasedDashboard';
 
 interface ModernDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -13,32 +14,20 @@ interface ModernDashboardMainProps {
   recommendedAgents: RecommendedAgents;
 }
 
-export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = ({
-  onSelectAgent,
-  onMaturityCalculatorClick,
-  onAgentManagerClick,
-  agents,
-  maturityScores,
-  recommendedAgents
-}) => {
-  const { language } = useLanguage();
-  const [enabledAgents, setEnabledAgents] = useState<string[]>([]);
+export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) => {
+  const isMobile = useIsMobile();
 
-  useEffect(() => {
-    // Extract enabled agents from the agents array based on status
-    const enabled = agents.filter(agent => agent.status === 'active').map(agent => agent.id);
-    console.log('Enabled agents for dashboard:', enabled);
-    setEnabledAgents(enabled);
-  }, [agents]);
+  // Use the appropriate dashboard based on device
+  if (isMobile) {
+    return (
+      <MobileTaskBasedDashboard
+        agents={props.agents}
+        maturityScores={props.maturityScores}
+        onSelectAgent={props.onSelectAgent}
+        onMaturityCalculatorClick={props.onMaturityCalculatorClick}
+      />
+    );
+  }
 
-  return (
-    <OptimizedTaskBasedDashboard
-      maturityScores={maturityScores}
-      recommendedAgents={recommendedAgents}
-      enabledAgents={enabledAgents}
-      language={language}
-      onSelectAgent={onSelectAgent}
-      onMaturityCalculatorClick={onMaturityCalculatorClick}
-    />
-  );
+  return <PremiumDashboardMain {...props} />;
 };

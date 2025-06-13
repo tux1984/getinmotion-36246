@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Clock, ArrowRight, CheckCircle } from 'lucide-react';
 import { OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
+import { useAgentPrompts } from '@/hooks/useAgentPrompts';
 
 interface TaskCardProps {
   task: OptimizedRecommendedTask;
@@ -15,6 +16,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   language,
   onAction
 }) => {
+  const { generatePrompt } = useAgentPrompts();
+
   const translations = {
     en: {
       startTask: 'Start Task',
@@ -46,6 +49,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       case 'low': return 'bg-green-100 text-green-700';
       default: return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const handleStartTask = () => {
+    console.log('Starting task:', task.title, 'with agent:', task.agentId);
+    
+    // Generate and store the prompt
+    generatePrompt(
+      task.agentId,
+      task.title,
+      task.description,
+      task.agentName
+    );
+    
+    // Call the parent action (navigation to agent)
+    onAction();
   };
 
   return (
@@ -80,7 +98,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         ) : (
           <Button
             size="sm"
-            onClick={onAction}
+            onClick={handleStartTask}
             className="bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs px-3 py-1 h-8"
           >
             {t.startTask}
