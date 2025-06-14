@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { WelcomeStep } from './WelcomeStep';
 import { ProfileQuestions } from './ProfileQuestions';
@@ -19,6 +18,7 @@ interface OnboardingContentProps {
   setInitialRecommendations: (recommendations: RecommendedAgents) => void;
   setShowExtendedQuestions: (show: boolean) => void;
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents) => void;
+  isMobile: boolean;
 }
 
 export const OnboardingContent: React.FC<OnboardingContentProps> = ({
@@ -32,7 +32,8 @@ export const OnboardingContent: React.FC<OnboardingContentProps> = ({
   handleMaturityComplete,
   setInitialRecommendations,
   setShowExtendedQuestions,
-  onComplete
+  onComplete,
+  isMobile
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-0 mb-8 overflow-hidden">
@@ -53,6 +54,7 @@ export const OnboardingContent: React.FC<OnboardingContentProps> = ({
           }}
           showExtendedQuestions={false}
           language={language}
+          isMobile={isMobile}
         />
       )}
       
@@ -97,6 +99,7 @@ export const OnboardingContent: React.FC<OnboardingContentProps> = ({
           }}
           showExtendedQuestions={true}
           language={language}
+          isMobile={isMobile}
         />
       )}
       

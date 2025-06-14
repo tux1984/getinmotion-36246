@@ -54,6 +54,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
           setInitialRecommendations={setInitialRecommendations}
           setShowExtendedQuestions={setShowExtendedQuestions}
           onComplete={onComplete}
+          isMobile={isMobile}
         />
       </div>
     </div>

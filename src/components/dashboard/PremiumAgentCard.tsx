@@ -37,7 +37,7 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
   
     const IconComponent = agent.icon as React.ElementType;
     // Check if it's a renderable component type (function or forwardRef object)
-    if (typeof IconComponent === 'function' || (typeof IconComponent === 'object' && IconComponent !== null && 'render' in IconComponent)) {
+    if (IconComponent && (typeof IconComponent === 'function' || (typeof IconComponent === 'object' && 'render' in IconComponent))) {
       return <IconComponent className="w-5 h-5" />;
     }
   

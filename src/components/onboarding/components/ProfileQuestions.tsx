@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -13,13 +12,15 @@ interface ProfileQuestionsProps {
   onComplete: (initialRecommendations: RecommendedAgents) => void;
   showExtendedQuestions: boolean;
   language: 'en' | 'es';
+  isMobile: boolean;
 }
 
 export const ProfileQuestions: React.FC<ProfileQuestionsProps> = ({
   profileType,
   onComplete,
   showExtendedQuestions,
-  language
+  language,
+  isMobile
 }) => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -232,11 +233,10 @@ export const ProfileQuestions: React.FC<ProfileQuestionsProps> = ({
     }
     
     const questionProps = {
-      currentQuestionIndex,
-      showExtendedQuestions: selectedAnalysisType === 'deep' && currentQuestionIndex >= getQuestionCount(),
       answers,
-      onAnswer: handleAnswer,
-      language
+      onAnswerChange: handleAnswer,
+      language,
+      isMobile,
     };
 
     switch (profileType) {
