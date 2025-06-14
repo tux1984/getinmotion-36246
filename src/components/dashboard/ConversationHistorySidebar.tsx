@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAgentConversations } from '@/hooks/useAgentConversations';
+import { AgentConversation } from '@/hooks/useAgentConversations';
 import { MessageSquare, Plus, Clock, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,25 +14,26 @@ interface ConversationHistorySidebarProps {
   language: 'en' | 'es';
   compact?: boolean;
   onConversationSelect?: (conversationId: string) => void;
+  conversations: AgentConversation[];
+  currentConversationId: string | null;
+  selectConversation: (id: string) => Promise<void>;
+  startNewConversation: () => void;
+  loading: boolean;
 }
 
 export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProps> = ({
   agentId,
   language,
   compact = false,
-  onConversationSelect
+  onConversationSelect,
+  conversations,
+  currentConversationId,
+  selectConversation,
+  startNewConversation,
+  loading,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Call the hook directly at the top level - this is the correct way
-  const {
-    conversations,
-    currentConversationId,
-    selectConversation,
-    startNewConversation,
-    loading
-  } = useAgentConversations(agentId);
-
   const t = {
     en: {
       conversations: "Conversations",

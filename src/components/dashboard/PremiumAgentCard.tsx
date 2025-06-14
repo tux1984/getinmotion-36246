@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Agent } from '@/types/dashboard';
 import { ArrowRight, Zap } from 'lucide-react';
+import { getAgentTranslation } from '@/data/agentTranslations';
 
 interface PremiumAgentCardProps {
   agent: Agent;
@@ -25,6 +25,8 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       tasks: 'tareas activas'
     }
   };
+
+  const agentTranslation = getAgentTranslation(agent.id, language);
 
   const renderIcon = () => {
     if (typeof agent.icon === 'string') {
@@ -64,7 +66,7 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-900 truncate">{agent.name}</div>
+        <div className="font-medium text-gray-900 truncate">{agentTranslation.name}</div>
         <div className="text-xs text-gray-500">
           {agent.activeTasks || 0} {t[language].tasks}
         </div>

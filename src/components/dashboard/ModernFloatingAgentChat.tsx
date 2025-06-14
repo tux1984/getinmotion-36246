@@ -1,6 +1,5 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
-import { useAgentConversations } from '@/hooks/useAgentConversations';
+import { AgentMessage } from '@/hooks/useAgentConversations';
 import { useAIAgent } from '@/hooks/use-ai-agent';
 import { useToast } from '@/hooks/use-toast';
 import { ChatHeader } from './chat/ChatHeader';
@@ -13,26 +12,30 @@ interface ModernFloatingAgentChatProps {
   language: 'en' | 'es';
   onBack?: () => void;
   showHeader?: boolean;
+  messages: AgentMessage[];
+  currentConversationId: string | null;
+  isProcessing: boolean;
+  messagesLoading: boolean;
+  setIsProcessing: (isProcessing: boolean) => void;
+  createConversation: (firstMessage: string) => Promise<string | null>;
+  addMessage: (conversationId: string, content: string, messageType: 'user' | 'agent') => Promise<any>;
 }
 
 export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = ({
   agentId,
   language,
   onBack,
-  showHeader = false
+  showHeader = false,
+  messages,
+  currentConversationId,
+  isProcessing,
+  messagesLoading,
+  setIsProcessing,
+  createConversation,
+  addMessage,
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
-  
-  const {
-    messages,
-    currentConversationId,
-    isProcessing,
-    messagesLoading,
-    setIsProcessing,
-    createConversation,
-    addMessage
-  } = useAgentConversations(agentId);
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
 

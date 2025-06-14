@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { useAgentConversations } from '@/hooks/useAgentConversations';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
 import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
@@ -22,6 +24,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<'chat' | 'conversations' | 'dashboard' | 'actions'>('chat');
 
+  const conversationManager = useAgentConversations(selectedAgent);
+
   const t = {
     en: {
       chat: "Chat",
@@ -44,18 +48,30 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           {/* Main content area with tab switching - sin header interno */}
           <div className="flex-1 mx-4 mb-20 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             {activeTab === 'chat' && (
-              <ModernFloatingAgentChat 
-                agentId={selectedAgent} 
+              <ModernFloatingAgentChat
+                agentId={selectedAgent}
                 language={language}
                 showHeader={false}
+                messages={conversationManager.messages}
+                currentConversationId={conversationManager.currentConversationId}
+                isProcessing={conversationManager.isProcessing}
+                messagesLoading={conversationManager.messagesLoading}
+                setIsProcessing={conversationManager.setIsProcessing}
+                createConversation={conversationManager.createConversation}
+                addMessage={conversationManager.addMessage}
               />
             )}
             
             {activeTab === 'conversations' && (
               <div className="h-full p-4">
-                <ConversationHistorySidebar 
-                  agentId={selectedAgent} 
-                  language={language} 
+                <ConversationHistorySidebar
+                  agentId={selectedAgent}
+                  language={language}
+                  conversations={conversationManager.conversations}
+                  currentConversationId={conversationManager.currentConversationId}
+                  selectConversation={conversationManager.selectConversation}
+                  startNewConversation={conversationManager.startNewConversation}
+                  loading={conversationManager.loading}
                 />
               </div>
             )}
@@ -145,49 +161,47 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
-      <div className="max-h-[65vh] p-2 lg:p-3">
-        {/* Contenedor transparente con efecto de cristal muy sutil */}
-        <div className="bg-transparent backdrop-blur-md rounded-3xl border border-white/10 h-full max-w-7xl mx-auto overflow-hidden">
-          <div className="grid grid-cols-12 auto-rows-max gap-2 lg:gap-3 h-full p-3 lg:p-4">
-            {/* Chat principal - sin header interno */}
-            <div className="col-span-12 lg:col-span-7 row-span-3 lg:row-span-3 min-h-[400px]">
-              <ModernFloatingAgentChat 
-                agentId={selectedAgent} 
-                language={language}
-                showHeader={false}
-              />
-            </div>
-            
-            {/* Conversation History */}
-            <div className="hidden lg:block lg:col-span-3 lg:row-span-3 min-h-[400px] overflow-y-auto">
-              <ConversationHistorySidebar 
-                agentId={selectedAgent} 
-                language={language} 
-              />
-            </div>
-            
-            {/* Mini Dashboard */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
-              <AgentMiniDashboard 
-                agentId={selectedAgent} 
-                language={language} 
-              />
-            </div>
-            
-            {/* Quick Actions - Colapsable */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
-              <AgentQuickActions 
-                agentId={selectedAgent} 
-                language={language} 
-              />
-            </div>
-            
-            {/* More Tools - Colapsable */}
-            <div className="hidden lg:block lg:col-span-2 lg:row-span-1">
-              <CollapsibleMoreTools language={language} />
-            </div>
-          </div>
+    <div className="h-full w-full grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
+      {/* Sidebar */}
+      <div className="md:col-span-3 h-full">
+        <ConversationHistorySidebar
+          agentId={selectedAgent}
+          language={language}
+          conversations={conversationManager.conversations}
+          currentConversationId={conversationManager.currentConversationId}
+          selectConversation={conversationManager.selectConversation}
+          startNewConversation={conversationManager.startNewConversation}
+          loading={conversationManager.loading}
+        />
+      </div>
+
+      {/* Main chat */}
+      <div className="md:col-span-6 h-full">
+        <ModernFloatingAgentChat
+          agentId={selectedAgent}
+          language={language}
+          onBack={onBack}
+          showHeader={true}
+          messages={conversationManager.messages}
+          currentConversationId={conversationManager.currentConversationId}
+          isProcessing={conversationManager.isProcessing}
+          messagesLoading={conversationManager.messagesLoading}
+          setIsProcessing={conversationManager.setIsProcessing}
+          createConversation={conversationManager.createConversation}
+          addMessage={conversationManager.addMessage}
+        />
+      </div>
+
+      {/* Right widgets */}
+      <div className="md:col-span-3 h-full flex flex-col gap-4">
+        <div className="flex-1">
+          <AgentMiniDashboard agentId={selectedAgent} language={language} />
+        </div>
+        <div className="flex-1">
+          <AgentQuickActions agentId={selectedAgent} language={language} />
+        </div>
+        <div className="flex-1">
+          <CollapsibleMoreTools agentId={selectedAgent} language={language} />
         </div>
       </div>
     </div>

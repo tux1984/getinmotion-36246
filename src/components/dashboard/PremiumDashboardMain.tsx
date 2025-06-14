@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
@@ -8,6 +7,9 @@ import { PremiumTaskCard } from './PremiumTaskCard';
 import { PremiumStatsCard } from './PremiumStatsCard';
 import { PremiumAgentCard } from './PremiumAgentCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserActivity } from '@/hooks/useUserActivity';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { 
   Sparkles, 
   TrendingUp, 
@@ -37,7 +39,8 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
 }) => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const { tasks, loading } = useOptimizedRecommendedTasks(maturityScores, agents.filter(a => a.status === 'active').map(a => a.id));
+  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, agents.filter(a => a.status === 'active').map(a => a.id));
+  const { recentConversations, loading: activityLoading } = useUserActivity();
 
   const t = {
     en: {
@@ -53,7 +56,8 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
       startAssessment: 'Start Creative Assessment',
       activeAgents: 'Active Assistants',
       completedTasks: 'Completed Today',
-      projectProgress: 'Project Progress'
+      projectProgress: 'Project Progress',
+      recentActivity: 'Recent Activity'
     },
     es: {
       welcome: 'Bienvenido a tu Universo Creativo',
@@ -68,7 +72,8 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
       startAssessment: 'Iniciar Evaluación Creativa',
       activeAgents: 'Asistentes Activos',
       completedTasks: 'Completadas Hoy',
-      projectProgress: 'Progreso del Proyecto'
+      projectProgress: 'Progreso del Proyecto',
+      recentActivity: 'Actividad Reciente'
     }
   };
 
@@ -299,6 +304,42 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
                       </div>
                     ))}
                   </div>
+                </motion.div>
+              )}
+
+              {/* Recent Activity */}
+              {(activityLoading || recentConversations.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.1, duration: 0.5 }}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t[language].recentActivity}</h3>
+                  {activityLoading ? (
+                     <div className="flex justify-center items-center h-24">
+                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
+                     </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentConversations.map((conv) => (
+                        <div key={conv.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => onSelectAgent(conv.agent_id)}>
+                           <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></div>
+                           <div className="flex-1 min-w-0">
+                               <p className="text-sm font-medium truncate text-gray-800">
+                                   {conv.title || 'Nueva conversación'}
+                               </p>
+                               <p className="text-xs text-gray-500">
+                                   {formatDistanceToNow(new Date(conv.updated_at), { 
+                                     addSuffix: true, 
+                                     locale: language === 'es' ? es : undefined 
+                                   })}
+                               </p>
+                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>
