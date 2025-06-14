@@ -35,12 +35,13 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       return agent.icon;
     }
   
-    const IconComponent = agent.icon as React.ElementType;
+    const IconComponent = agent.icon as React.ComponentType<{ className: string }>;
     
     if (IconComponent) {
-      // Check if it's a renderable component type (function or forwardRef object)
-      if (typeof IconComponent === 'function' || (typeof IconComponent === 'object' && 'render' in IconComponent)) {
+      try {
         return <IconComponent className="w-5 h-5" />;
+      } catch (e) {
+        console.error("Failed to render icon component", e);
       }
     }
   
