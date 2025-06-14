@@ -122,9 +122,9 @@ export const SoloProfileQuestions: React.FC<SoloProfileQuestionsProps> = ({
               <label key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(answers.skills) && answers.skills.includes(typeof option === 'string' ? option : option.value)}
+                  checked={Array.isArray(answers.skills) && answers.skills.includes(option.value)}
                   onChange={(e) => {
-                    const value = typeof option === 'string' ? option : option.value;
+                    const value = option.value;
                     const currentValues = Array.isArray(answers.skills) ? answers.skills : [];
                     const newValues = e.target.checked
                       ? [...currentValues, value]
@@ -134,7 +134,7 @@ export const SoloProfileQuestions: React.FC<SoloProfileQuestionsProps> = ({
                   className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                 />
                 <span className="text-sm text-gray-700">
-                  {typeof option === 'string' ? option : option.label}
+                  {option.label}
                 </span>
               </label>
             ))}
@@ -150,9 +150,9 @@ export const SoloProfileQuestions: React.FC<SoloProfileQuestionsProps> = ({
               <label key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(answers.challenges) && answers.challenges.includes(typeof option === 'string' ? option : option.value)}
+                  checked={Array.isArray(answers.challenges) && answers.challenges.includes(option.value)}
                   onChange={(e) => {
-                    const value = typeof option === 'string' ? option : option.value;
+                    const value = option.value;
                     const currentValues = Array.isArray(answers.challenges) ? answers.challenges : [];
                     const newValues = e.target.checked
                       ? [...currentValues, value]
@@ -162,7 +162,7 @@ export const SoloProfileQuestions: React.FC<SoloProfileQuestionsProps> = ({
                   className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                 />
                 <span className="text-sm text-gray-700">
-                  {typeof option === 'string' ? option : option.label}
+                  {option.label}
                 </span>
               </label>
             ))}

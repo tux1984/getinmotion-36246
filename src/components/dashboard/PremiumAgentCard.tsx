@@ -29,12 +29,18 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
   const renderIcon = () => {
     if (typeof agent.icon === 'string') {
       return <span className="text-lg">{agent.icon}</span>;
-    } else if (React.isValidElement(agent.icon)) {
+    }
+  
+    if (React.isValidElement(agent.icon)) {
       return agent.icon;
-    } else if (typeof agent.icon === 'function') {
-      const IconComponent = agent.icon;
+    }
+  
+    const IconComponent = agent.icon as React.ElementType;
+    // Check if it's a renderable component type (function or forwardRef object)
+    if (typeof IconComponent === 'function' || (typeof IconComponent === 'object' && IconComponent !== null && 'render' in IconComponent)) {
       return <IconComponent className="w-5 h-5" />;
     }
+  
     return <Zap className="w-5 h-5" />;
   };
 
