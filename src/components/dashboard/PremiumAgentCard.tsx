@@ -34,10 +34,13 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
     if (React.isValidElement(agent.icon)) {
       return agent.icon;
     }
-  
-    const IconComponent = agent.icon as React.ComponentType<{ className: string }>;
+
+    // The type of agent.icon is ReactNode, which is too broad.
+    // We cast to `unknown` first to safely convert to a component type, resolving the TS error.
+    const IconComponent = agent.icon as unknown as React.ComponentType<{ className: string }>;
     
-    if (IconComponent) {
+    // This runtime check ensures we only try to render if it's a function (i.e., a component).
+    if (typeof IconComponent === 'function') {
       try {
         return <IconComponent className="w-5 h-5" />;
       } catch (e) {
@@ -45,6 +48,7 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       }
     }
   
+    // Fallback for all other cases or if rendering fails.
     return <Zap className="w-5 h-5" />;
   };
 
