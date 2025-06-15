@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Users, Target, TrendingUp } from 'lucide-react';
@@ -45,7 +44,7 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
       
       <motion.div 
-        className={`relative z-10 ${isMobile ? 'px-4 py-8' : 'px-6 py-8'}`}
+        className={`relative z-10 ${isMobile ? 'px-4 py-6' : 'px-6 py-4'}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -55,7 +54,7 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 mb-6"
+            className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 mb-3"
           >
             <Sparkles className="w-4 h-4 text-yellow-400 mr-2" />
             <span className="text-white/90 text-sm font-medium">
@@ -64,7 +63,7 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
           </motion.div>
           
           <motion.h1 
-            className={`font-bold text-white mb-4 ${isMobile ? 'text-3xl' : 'text-4xl'}`}
+            className={`font-bold text-white mb-2 ${isMobile ? 'text-2xl' : 'text-3xl'}`}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -73,7 +72,7 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
           </motion.h1>
           
           <motion.p 
-            className={`text-white/80 mb-6 ${isMobile ? 'text-base px-4' : 'text-xl max-w-2xl mx-auto'}`}
+            className={`text-white/80 mb-4 ${isMobile ? 'text-base px-4' : 'text-lg max-w-2xl mx-auto'}`}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -82,7 +81,7 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
           </motion.p>
 
           <motion.div 
-            className={`grid gap-6 mb-6 ${isMobile ? 'grid-cols-1 px-2' : 'grid-cols-3 max-w-2xl mx-auto'}`}
+            className={`grid gap-4 ${isMobile ? 'grid-cols-1 px-2' : 'grid-cols-3 max-w-2xl mx-auto'}`}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
