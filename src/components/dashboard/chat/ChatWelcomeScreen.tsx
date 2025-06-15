@@ -46,14 +46,16 @@ export const ChatWelcomeScreen: React.FC<ChatWelcomeScreenProps> = ({
       description: "I'm here to help you with your creative project.",
       startTask: "Start Recommended Task",
       askAnything: "Ask me anything",
-      pendingTask: "You have a recommended task ready to start"
+      pendingTask: "You have a recommended task ready to start",
+      askAnythingPrompt: `Hi ${agentName}, how can you help me today?`
     },
     es: {
       welcome: `¡Hola! Soy ${agentName}`,
       description: "Estoy aquí para ayudarte con tu proyecto creativo.",
       startTask: "Iniciar Tarea Recomendada",
       askAnything: "Pregúntame lo que necesites",
-      pendingTask: "Tienes una tarea recomendada lista para empezar"
+      pendingTask: "Tienes una tarea recomendada lista para empezar",
+      askAnythingPrompt: `Hola ${agentName}, ¿cómo puedes ayudarme hoy?`
     }
   };
 
@@ -93,9 +95,9 @@ export const ChatWelcomeScreen: React.FC<ChatWelcomeScreenProps> = ({
 
         {/* General Action */}
         <Button
-          variant="outline"
-          onClick={() => onSendMessage(`Hola ${agentName}, ¿cómo puedes ayudarme hoy?`)}
-          className="border-white/30 text-white hover:bg-white/10"
+          variant="ghost"
+          onClick={() => onSendMessage(t[language].askAnythingPrompt)}
+          className="bg-white/10 border border-white/20 text-white hover:bg-white/20"
         >
           <MessageCircle className="w-4 h-4 mr-2" />
           {t[language].askAnything}

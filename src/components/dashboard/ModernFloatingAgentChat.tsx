@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { AgentMessage } from '@/hooks/useAgentConversations';
 import { useAIAgent } from '@/hooks/use-ai-agent';
@@ -6,6 +7,7 @@ import { ChatHeader } from './chat/ChatHeader';
 import { ChatWelcomeScreen } from './chat/ChatWelcomeScreen';
 import { ChatMessagesArea } from './chat/ChatMessagesArea';
 import { ChatInputBar } from './chat/ChatInputBar';
+import { getAgentTranslation } from '@/data/agentTranslations';
 
 interface ModernFloatingAgentChatProps {
   agentId: string;
@@ -36,6 +38,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
+  const agentTranslation = getAgentTranslation(agentId, language);
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
 
@@ -137,7 +140,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       {isNewChat ? (
         <ChatWelcomeScreen
           agentId={agentId}
-          agentName="Asistente IA"
+          agentName={agentTranslation.name}
           language={language}
           onSendMessage={handleSendMessage}
         />
