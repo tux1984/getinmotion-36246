@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
@@ -363,16 +362,14 @@ const DashboardHome = () => {
       />
       
       <div className="pt-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <ModernDashboardMain 
-            onSelectAgent={handleSelectAgent}
-            onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
-            onAgentManagerClick={handleOpenAgentManager}
-            agents={safeAgents}
-            maturityScores={safeMaturityScores}
-            recommendedAgents={safeRecommendedAgents}
-          />
-        </div>
+        <ModernDashboardMain 
+          onSelectAgent={handleSelectAgent}
+          onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
+          onAgentManagerClick={handleOpenAgentManager}
+          agents={safeAgents}
+          maturityScores={safeMaturityScores}
+          recommendedAgents={safeRecommendedAgents}
+        />
       </div>
     </DashboardBackground>
   );

@@ -59,7 +59,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div>
       <PremiumDashboardHero
         language={language}
         welcomeText={t[language].welcome}
