@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +11,7 @@ import {
   CheckCircle,
   Circle
 } from 'lucide-react';
+import { AgentIcon } from './AgentIcon';
 
 interface OptimizedAgentCategoryCardProps {
   category: string;
@@ -127,7 +127,7 @@ export const OptimizedAgentCategoryCard: React.FC<OptimizedAgentCategoryCardProp
               <div className="space-y-2">
                 {/* Header with icon and title */}
                 <div className="flex items-start gap-2">
-                  <span className="text-xl flex-shrink-0">{agent.icon}</span>
+                  <AgentIcon icon={agent.icon} className="text-xl flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-white text-sm leading-tight">
                       {translation.name}
