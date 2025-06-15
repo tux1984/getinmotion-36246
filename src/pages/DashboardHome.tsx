@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
@@ -11,6 +10,8 @@ import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain'
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Wrench, CheckCircle, Home } from 'lucide-react';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
+import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
+import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
@@ -39,6 +40,43 @@ const DashboardHome = () => {
     checkAndRepair
   } = useDataRecovery();
 
+  // --- Task Synchronization Logic ---
+  const activeAgents = agents?.filter(a => a.status === 'active') || [];
+  const agentPool = activeAgents.map(a => a.id);
+  
+  const { tasks: recommendedTasks, loading: recommendedTasksLoading } = useOptimizedRecommendedTasks(maturityScores, profileData, agentPool);
+  const { tasks: persistentTasks, createTask } = useAgentTasks();
+
+  useEffect(() => {
+    if (recommendedTasks.length === 0 || !persistentTasks || !createTask) return;
+
+    const syncTasks = async () => {
+      const newTasksToCreate = recommendedTasks.filter(recTask => 
+        !persistentTasks.some(persistedTask => persistedTask.title === recTask.title)
+      );
+
+      if (newTasksToCreate.length > 0) {
+        console.log(`DashboardHome: Syncing ${newTasksToCreate.length} recommended tasks to DB.`);
+        
+        const creationPromises = newTasksToCreate.map(recTask => {
+          const taskToCreate: Partial<AgentTask> = {
+            title: recTask.title,
+            description: recTask.description,
+            agent_id: recTask.agentId,
+            relevance: recTask.priority,
+          };
+          return createTask(taskToCreate);
+        });
+        
+        await Promise.all(creationPromises);
+        console.log("DashboardHome: Sync complete.");
+      }
+    };
+    
+    syncTasks();
+  }, [recommendedTasks, persistentTasks, createTask]);
+  // --- End Task Synchronization Logic ---
+
   // Debug logging mejorado
   useEffect(() => {
     const debugData = {
@@ -57,7 +95,9 @@ const DashboardHome = () => {
       profileData: !!profileData,
       maturityScoresData: maturityScores,
       recommendedAgentsKeys: recommendedAgents ? Object.keys(recommendedAgents) : [],
-      forceShow
+      forceShow,
+      recommendedTasksCount: recommendedTasks?.length,
+      persistentTasksCount: persistentTasks?.length,
     };
     
     setDebugInfo(debugData);
@@ -65,7 +105,7 @@ const DashboardHome = () => {
   }, [
     user, isLoading, error, hasOnboarding, needsRecovery, 
     recovering, recovered, agents, maturityScores, recommendedAgents, forceShow,
-    profileData
+    profileData, recommendedTasks, persistentTasks
   ]);
 
   // Lógica mejorada de redirección con más validaciones
@@ -156,7 +196,7 @@ const DashboardHome = () => {
   };
 
   // Mostrar pantalla de carga mejorada
-  if ((isLoading || scoresLoading) && !forceShow) {
+  if ((isLoading || scoresLoading || recommendedTasksLoading) && !forceShow) {
     return (
       <DashboardBackground>
         <NewDashboardHeader 
