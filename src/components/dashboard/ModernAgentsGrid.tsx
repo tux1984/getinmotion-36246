@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { Agent, RecommendedAgents, CategoryScore } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { CollapsibleAgentsSection } from './CollapsibleAgentsSection';
 import { CollapsibleRecommendationsSection } from './CollapsibleRecommendationsSection';
 import { useAgentToggle } from '@/hooks/useAgentToggle';
 import { useRealtimeAgents } from '@/hooks/useRealtimeAgents';
+import { AgentIcon } from './AgentIcon';
 
 interface ModernAgentsGridProps {
   agents: Agent[];
@@ -192,7 +192,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">
-              {agent.icon}
+              <AgentIcon icon={agent.icon} />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-white text-lg group-hover:text-purple-200 transition-colors leading-tight mb-2">

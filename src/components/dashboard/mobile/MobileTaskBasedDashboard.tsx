@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Agent, CategoryScore } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,6 +17,7 @@ import { MobileTaskCard } from './MobileTaskCard';
 import { MobileStatsCard } from './MobileStatsCard';
 import { MobileCollapsibleSection } from './MobileCollapsibleSection';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
+import { AgentIcon } from '../AgentIcon';
 
 interface MobileTaskBasedDashboardProps {
   agents: Agent[];
@@ -161,7 +161,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className={`w-8 h-8 rounded-lg ${agent.color} flex items-center justify-center text-white text-sm flex-shrink-0`}>
-                    {agent.icon}
+                    <AgentIcon icon={agent.icon} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-white text-sm truncate">{agent.name}</div>
