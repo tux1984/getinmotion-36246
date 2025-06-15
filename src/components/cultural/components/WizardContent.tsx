@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
@@ -45,7 +44,7 @@ export const WizardContent: React.FC<WizardContentProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="w-full h-full flex flex-col bg-white shadow-xl rounded-none overflow-hidden"
+      className="w-full h-full flex flex-col bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden"
     >
       <WizardHeader 
         step={currentStepNumber} 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
@@ -79,7 +78,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <OnboardingHeader />
       
       <div className="px-4 py-6">

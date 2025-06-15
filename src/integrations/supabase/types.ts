@@ -250,6 +250,33 @@ export type Database = {
         }
         Relationships: []
       }
+      calculator_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          step_name: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          step_name: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          step_name?: string
+        }
+        Relationships: []
+      }
       user_agents: {
         Row: {
           agent_id: string
@@ -280,6 +307,36 @@ export type Database = {
           updated_at?: string
           usage_count?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_chat_context: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          role: string
+          session_id: string
+          step_context: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          role: string
+          session_id: string
+          step_context?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          role?: string
+          session_id?: string
+          step_context?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

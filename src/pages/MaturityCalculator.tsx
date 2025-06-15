@@ -8,6 +8,7 @@ import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { StreamlinedOnboardingWizard } from '@/components/onboarding/StreamlinedOnboardingWizard';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
 import { useState, useEffect } from 'react';
+import { AIAssistant } from '@/components/assistant/AIAssistant';
 
 const MaturityCalculator = () => {
   const { language } = useLanguage();
@@ -57,14 +58,14 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-32">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 pt-32">
         {showOnboarding ? (
           <StreamlinedOnboardingWizard
             profileType={profileType}
             onComplete={handleComplete}
           />
         ) : (
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full">
             <SimpleCulturalMaturityCalculator
               language={language}
               onComplete={handleStandaloneComplete}
@@ -72,6 +73,7 @@ const MaturityCalculator = () => {
           </div>
         )}
       </div>
+      <AIAssistant stepContext="maturity_calculator" />
     </DashboardBackground>
   );
 };
