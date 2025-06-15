@@ -32,7 +32,7 @@ export const CulturalMaturityWizard: React.FC<{
     isCurrentStepValid,
     analysisType,
     handleAnalysisChoice
-  } = useMaturityWizard(onComplete);
+  } = useMaturityWizard(onComplete, language);
 
   return (
     <WizardContent

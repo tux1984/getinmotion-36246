@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
@@ -22,7 +21,8 @@ interface AIRecommendation {
 export type { WizardStepId } from './types/wizardTypes';
 
 export const useMaturityWizard = (
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void,
+  language: 'en' | 'es'
 ): WizardHookReturn => {
   // Start with cultural profile step
   const [currentStepId, setCurrentStepId] = useState<WizardStepId>('culturalProfile');
@@ -138,7 +138,7 @@ export const useMaturityWizard = (
 
   // Score calculation functions
   const calculateMaturityScores = (): CategoryScore => {
-    return computeScores(profileData);
+    return computeScores(profileData, language).scores;
   };
   
   const getRecommendedAgents = (scores: CategoryScore): RecommendedAgents => {

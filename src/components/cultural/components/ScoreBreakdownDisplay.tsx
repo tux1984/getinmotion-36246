@@ -48,11 +48,14 @@ export const ScoreBreakdownDisplay: React.FC<ScoreBreakdownDisplayProps> = ({ br
       <Accordion type="single" collapsible className="w-full">
         {categoryOrder.map((category) => {
           const entries = breakdown[category];
-          const details = t[category as keyof typeof t];
-          const Icon = details.icon;
+          const details = t[category];
           const score = scores[category as keyof CategoryScore];
 
-          if (entries.length === 0) return null;
+          if (entries.length === 0 || typeof details === 'string' || !details) {
+            return null;
+          }
+          
+          const Icon = details.icon;
 
           return (
             <AccordionItem value={category} key={category}>
