@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Agent, CategoryScore } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -13,14 +13,16 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useRecommendedTasks } from '@/hooks/useRecommendedTasks';
+import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
 import { MobileTaskCard } from './MobileTaskCard';
 import { MobileStatsCard } from './MobileStatsCard';
 import { MobileCollapsibleSection } from './MobileCollapsibleSection';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 interface MobileTaskBasedDashboardProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
+  profileData: any | null;
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
 }
@@ -28,11 +30,13 @@ interface MobileTaskBasedDashboardProps {
 export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> = ({
   agents,
   maturityScores,
+  profileData,
   onSelectAgent,
   onMaturityCalculatorClick
 }) => {
   const { language } = useLanguage();
-  const { tasks, loading, markTaskCompleted } = useRecommendedTasks(maturityScores);
+  const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
+  const { tasks, loading, markTaskCompleted } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
 
   const t = {
     en: {

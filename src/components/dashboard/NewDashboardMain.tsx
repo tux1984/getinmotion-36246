@@ -11,6 +11,7 @@ interface NewDashboardMainProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
   recommendedAgents: RecommendedAgents;
+  profileData: any | null;
 }
 
 export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({ 
@@ -19,7 +20,8 @@ export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({
   onAgentManagerClick,
   agents,
   maturityScores,
-  recommendedAgents
+  recommendedAgents,
+  profileData
 }) => {
   return (
     <ModernDashboardMain
@@ -29,6 +31,7 @@ export const NewDashboardMain: React.FC<NewDashboardMainProps> = ({
       agents={agents}
       maturityScores={maturityScores}
       recommendedAgents={recommendedAgents}
+      profileData={profileData}
     />
   );
 };

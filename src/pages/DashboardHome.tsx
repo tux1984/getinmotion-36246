@@ -9,6 +9,7 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
 import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Wrench, CheckCircle, Home } from 'lucide-react';
+import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
@@ -26,14 +27,7 @@ const DashboardHome = () => {
     hasOnboarding
   } = useOptimizedAgentManagement();
 
-  const {
-    needsRecovery,
-    recovering,
-    recovered,
-    error: recoveryError,
-    performEmergencyRecovery,
-    checkAndRepair
-  } = useDataRecovery();
+  const { profileData, loading: scoresLoading, error: scoresError } = useOptimizedMaturityScores();
 
   // Debug logging mejorado
   useEffect(() => {
@@ -50,6 +44,7 @@ const DashboardHome = () => {
       agentsCount: agents?.length || 0,
       activeAgents: agents?.filter(a => a.status === 'active')?.length || 0,
       maturityScores: !!maturityScores,
+      profileData: !!profileData,
       maturityScoresData: maturityScores,
       recommendedAgentsKeys: recommendedAgents ? Object.keys(recommendedAgents) : [],
       forceShow
@@ -59,7 +54,8 @@ const DashboardHome = () => {
     console.log('DashboardHome: Comprehensive state update:', debugData);
   }, [
     user, isLoading, error, hasOnboarding, needsRecovery, 
-    recovering, recovered, agents, maturityScores, recommendedAgents, forceShow
+    recovering, recovered, agents, maturityScores, recommendedAgents, forceShow,
+    profileData
   ]);
 
   // Lógica mejorada de redirección con más validaciones
@@ -150,7 +146,7 @@ const DashboardHome = () => {
   };
 
   // Mostrar pantalla de carga mejorada
-  if (isLoading && !forceShow) {
+  if ((isLoading || scoresLoading) && !forceShow) {
     return (
       <DashboardBackground>
         <NewDashboardHeader 
@@ -302,7 +298,8 @@ const DashboardHome = () => {
   }
 
   // Mostrar error con opciones de reparación mejoradas
-  if (error && !forceShow) {
+  const combinedError = error || scoresError;
+  if (combinedError && !forceShow) {
     return (
       <DashboardBackground>
         <NewDashboardHeader 
@@ -316,7 +313,7 @@ const DashboardHome = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 {language === 'en' ? 'Error Loading Dashboard' : 'Error Cargando Dashboard'}
               </h2>
-              <p className="text-gray-600 mb-6">{error}</p>
+              <p className="text-gray-600 mb-6">{combinedError}</p>
               <div className="space-y-3">
                 <Button onClick={handleManualRepair} className="w-full">
                   <Wrench className="w-4 h-4 mr-2" />
@@ -345,11 +342,13 @@ const DashboardHome = () => {
   const safeAgents = agents || [];
   const safeMaturityScores = maturityScores || null;
   const safeRecommendedAgents = recommendedAgents || {};
+  const safeProfileData = profileData || null;
 
   console.log('DashboardHome: Showing main dashboard with data:', {
     agentsCount: safeAgents.length,
     activeAgents: safeAgents.filter(a => a?.status === 'active').length,
     hasMaturityScores: !!safeMaturityScores,
+    hasProfileData: !!safeProfileData,
     recommendedAgentsKeys: Object.keys(safeRecommendedAgents),
     debugInfo
   });
@@ -369,6 +368,7 @@ const DashboardHome = () => {
           agents={safeAgents}
           maturityScores={safeMaturityScores}
           recommendedAgents={safeRecommendedAgents}
+          profileData={safeProfileData}
         />
       </div>
     </DashboardBackground>
