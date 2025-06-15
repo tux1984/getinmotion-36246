@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Agent } from '@/types/dashboard';
@@ -59,20 +60,20 @@ export const PremiumAgentCard: React.FC<PremiumAgentCardProps> = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onSelect}
-      className="flex items-center p-4 rounded-xl border border-gray-100 hover:border-purple-200 hover:bg-purple-50/50 cursor-pointer transition-all group"
+      className="flex items-center p-4 rounded-xl border border-slate-700/80 hover:border-purple-500 bg-black/20 hover:bg-black/40 cursor-pointer transition-all group"
     >
       <div className={`w-10 h-10 rounded-lg ${agent.color || 'bg-purple-500'} flex items-center justify-center text-white mr-3 group-hover:scale-110 transition-transform`}>
         {renderIcon()}
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-900 truncate">{agentTranslation.name}</div>
-        <div className="text-xs text-gray-500">
+        <div className="font-medium text-slate-100 truncate">{agentTranslation.name}</div>
+        <div className="text-xs text-slate-400">
           {agent.activeTasks || 0} {t[language].tasks}
         </div>
       </div>
       
-      <div className="flex items-center text-purple-600 group-hover:text-purple-700">
+      <div className="flex items-center text-purple-400 group-hover:text-purple-300">
         <span className="text-sm font-medium mr-1">{t[language].chat}</span>
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </div>
