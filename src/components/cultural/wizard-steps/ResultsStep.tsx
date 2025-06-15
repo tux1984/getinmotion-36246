@@ -163,7 +163,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       try {
         setIsLoadingRecommendations(true);
         
-        const { data, error } = await supabase.functions.invoke('ai-recommendations', {
+        const { data, error } = await supabase.functions.invoke('maturity-analysis', {
           body: { scores, profileData, language }
         });
 

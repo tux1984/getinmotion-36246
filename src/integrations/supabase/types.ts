@@ -531,6 +531,7 @@ export type Database = {
           market_fit: number
           monetization: number
           created_at: string
+          profile_data: Json
         }[]
       }
       is_admin: {

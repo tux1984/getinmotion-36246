@@ -2,9 +2,10 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore } from '@/components/maturity/types';
-import { ProfileType, RecommendedAgents } from '@/types/dashboard';
+import { RecommendedAgents } from '@/types/dashboard';
 import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
+import { UserProfileData } from './types/wizardTypes';
 
 interface AIRecommendation {
   title: string;
@@ -14,7 +15,7 @@ interface AIRecommendation {
 }
 
 export const CulturalMaturityWizard: React.FC<{
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData) => void;
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   

@@ -6,6 +6,7 @@ import { CategoryScore } from '@/types/dashboard';
 
 interface OptimizedMaturityData {
   currentScores: CategoryScore | null;
+  profileData: any | null;
   loading: boolean;
   error: string | null;
 }
@@ -22,6 +23,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
   const { user } = useAuth();
   const [data, setData] = useState<OptimizedMaturityData>({
     currentScores: null,
+    profileData: null,
     loading: true,
     error: null,
   });
@@ -36,7 +38,6 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
       try {
         setData(prev => ({ ...prev, loading: true, error: null }));
 
-        // ARREGLO: Añadir timeout y fallback
         const scoresPromise = supabase.rpc('get_latest_maturity_scores', {
           user_uuid: user.id
         });
@@ -55,23 +56,28 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
           monetization: scores[0].monetization
         } : null;
 
+        const profileData = scores && scores.length > 0 ? scores[0].profile_data : null;
+
         setData({
           currentScores,
+          profileData,
           loading: false,
           error: null,
         });
       } catch (err) {
         console.error('Error fetching maturity scores:', err);
         
-        // ARREGLO: Fallback con localStorage si falla la BD
         try {
           const localScores = localStorage.getItem('maturityScores');
+          const localProfileData = localStorage.getItem('profileData');
           if (localScores) {
             const parsedScores = JSON.parse(localScores);
+            const parsedProfileData = localProfileData ? JSON.parse(localProfileData) : null;
             console.log('Using localStorage fallback for maturity scores');
             
             setData({
               currentScores: parsedScores,
+              profileData: parsedProfileData,
               loading: false,
               error: null
             });
@@ -83,6 +89,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
 
         setData({
           currentScores: null,
+          profileData: null,
           loading: false,
           error: 'Error al cargar las puntuaciones de madurez'
         });

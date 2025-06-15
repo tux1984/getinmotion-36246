@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
@@ -20,6 +19,7 @@ interface PremiumDashboardMainProps {
   onAgentManagerClick: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
+  profileData: any | null;
   recommendedAgents: RecommendedAgents;
 }
 
@@ -29,12 +29,13 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
   onAgentManagerClick,
   agents,
   maturityScores,
+  profileData,
   recommendedAgents
 }) => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
   const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
-  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, allAgentIds);
+  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
   const { recentConversations, loading: activityLoading } = useUserActivity();
 
   const t = {

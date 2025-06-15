@@ -1,26 +1,30 @@
-
 import { useState, useEffect } from 'react';
 import { CategoryScore } from '@/types/dashboard';
 import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 import { generateRobustTasksFromScores } from './utils/taskGenerationUtils';
-import { useRobustAIRecommendations } from './useRobustAIRecommendations';
+import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/context/LanguageContext';
 
 export type { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 
-export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, agentPool: string[] = []) => {
+export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, profileData: any | null, agentPool: string[] = []) => {
   const [tasks, setTasks] = useState<OptimizedRecommendedTask[]>([]);
-  const { fetchRecommendationsWithFallback, loading } = useRobustAIRecommendations();
+  const [loading, setLoading] = useState(true);
+  const { language } = useLanguage();
 
   useEffect(() => {
     const loadRobustTasks = async () => {
+      setLoading(true);
       if (!maturityScores) {
         console.log('No maturity scores available, cannot generate tasks');
         setTasks([]);
+        setLoading(false);
         return;
       }
 
       console.log('Loading robust tasks with:', {
         maturityScores,
+        profileData,
         agentPool: agentPool,
         agentPoolCount: agentPool.length
       });
@@ -30,9 +34,25 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         const scoreTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         console.log('Score-based tasks generated:', scoreTasks.length);
         
-        // Intentar obtener recomendaciones de IA con fallback inteligente
-        const aiRecommendations = await fetchRecommendationsWithFallback(maturityScores);
-        console.log('AI recommendations obtained:', aiRecommendations.length);
+        let aiRecommendations = [];
+        if (profileData) {
+            try {
+                const { data, error } = await supabase.functions.invoke('maturity-analysis', {
+                    body: { scores: maturityScores, profileData, language }
+                });
+
+                if (error) {
+                  throw error;
+                }
+                
+                if (data?.recommendations) {
+                  aiRecommendations = data.recommendations;
+                  console.log('AI recommendations obtained:', aiRecommendations.length);
+                }
+            } catch (e) {
+                console.error("AI recommendations fetch failed, using fallback tasks.", e);
+            }
+        }
         
         // Convertir recomendaciones de IA a tareas
         const aiTasks = convertAIRecommendationsToTasks(aiRecommendations, agentPool);
@@ -57,11 +77,13 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         // En caso de error total, usar tareas de emergencia
         const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         setTasks(emergencyTasks);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadRobustTasks();
-  }, [maturityScores, agentPool, fetchRecommendationsWithFallback]);
+  }, [maturityScores, profileData, agentPool, language]);
 
   const convertAIRecommendationsToTasks = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
     if (!recommendations.length || !agentPool.length) return [];
