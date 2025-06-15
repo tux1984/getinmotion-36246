@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
@@ -59,7 +58,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
       startAssessment: 'Start Creative Assessment',
       activeAgents: 'Active Assistants',
       completedTasks: 'Completed Today',
-      projectProgress: 'Project Progress',
+      ideaMaturity: 'Idea Maturity',
       recentActivity: 'Recent Activity'
     },
     es: {
@@ -75,7 +74,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
       startAssessment: 'Iniciar Evaluación Creativa',
       activeAgents: 'Asistentes Activos',
       completedTasks: 'Completadas Hoy',
-      projectProgress: 'Progreso del Proyecto',
+      ideaMaturity: 'Madurez de Idea',
       recentActivity: 'Actividad Reciente'
     }
   };
@@ -98,7 +97,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         
         <motion.div 
-          className={`relative z-10 ${isMobile ? 'px-4 py-8' : 'px-6 py-12'}`}
+          className={`relative z-10 ${isMobile ? 'px-4 py-8' : 'px-6 py-8'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -117,7 +116,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
             </motion.div>
             
             <motion.h1 
-              className={`font-bold text-white mb-4 ${isMobile ? 'text-3xl' : 'text-5xl'}`}
+              className={`font-bold text-white mb-4 ${isMobile ? 'text-3xl' : 'text-4xl'}`}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -126,7 +125,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
             </motion.h1>
             
             <motion.p 
-              className={`text-white/80 mb-8 ${isMobile ? 'text-base px-4' : 'text-xl max-w-2xl mx-auto'}`}
+              className={`text-white/80 mb-6 ${isMobile ? 'text-base px-4' : 'text-xl max-w-2xl mx-auto'}`}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
@@ -136,7 +135,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
 
             {/* Quick Stats */}
             <motion.div 
-              className={`grid gap-6 mb-8 ${isMobile ? 'grid-cols-1 px-2' : 'grid-cols-3 max-w-2xl mx-auto'}`}
+              className={`grid gap-6 mb-6 ${isMobile ? 'grid-cols-1 px-2' : 'grid-cols-3 max-w-2xl mx-auto'}`}
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
@@ -157,7 +156,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
               />
               <PremiumStatsCard
                 icon={TrendingUp}
-                title={t[language].projectProgress}
+                title={t[language].ideaMaturity}
                 value={`${overallProgress}%`}
                 color="text-purple-400"
                 bgColor="bg-purple-500/20"
