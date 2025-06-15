@@ -12,10 +12,12 @@ import {
 
 interface CollapsibleMoreToolsProps {
   language: 'en' | 'es';
+  agentId: string;
 }
 
 export const CollapsibleMoreTools: React.FC<CollapsibleMoreToolsProps> = ({
-  language
+  language,
+  agentId
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 

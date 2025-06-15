@@ -201,7 +201,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           <AgentQuickActions agentId={selectedAgent} language={language} />
         </div>
         <div className="flex-1">
-          <CollapsibleMoreTools agentId={selectedAgent} language={language} />
+          <CollapsibleMoreTools language={language} agentId={selectedAgent} />
         </div>
       </div>
     </div>

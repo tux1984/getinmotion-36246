@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
@@ -188,7 +189,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
                   <Star className="w-5 h-5 text-yellow-500" />
                 </div>
 
-                {loading ? (
+                {tasksLoading ? (
                   <div className="grid gap-4 md:grid-cols-2">
                     {[1, 2, 3, 4].map(i => (
                       <div key={i} className="h-48 bg-gray-200 rounded-xl animate-pulse"></div>
