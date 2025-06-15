@@ -7,7 +7,7 @@ import { useRobustAIRecommendations } from './useRobustAIRecommendations';
 
 export type { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 
-export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, enabledAgents: string[] = []) => {
+export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, agentPool: string[] = []) => {
   const [tasks, setTasks] = useState<OptimizedRecommendedTask[]>([]);
   const { fetchRecommendationsWithFallback, loading } = useRobustAIRecommendations();
 
@@ -21,13 +21,13 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
 
       console.log('Loading robust tasks with:', {
         maturityScores,
-        enabledAgents,
-        enabledAgentsCount: enabledAgents.length
+        agentPool: agentPool,
+        agentPoolCount: agentPool.length
       });
 
       try {
         // Generar tareas base desde maturity scores (siempre funciona)
-        const scoreTasks = generateRobustTasksFromScores(maturityScores, enabledAgents);
+        const scoreTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         console.log('Score-based tasks generated:', scoreTasks.length);
         
         // Intentar obtener recomendaciones de IA con fallback inteligente
@@ -35,7 +35,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         console.log('AI recommendations obtained:', aiRecommendations.length);
         
         // Convertir recomendaciones de IA a tareas
-        const aiTasks = convertAIRecommendationsToTasks(aiRecommendations, enabledAgents);
+        const aiTasks = convertAIRecommendationsToTasks(aiRecommendations, agentPool);
         console.log('AI tasks converted:', aiTasks.length);
         
         // Combinar y priorizar tareas
@@ -55,21 +55,21 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
       } catch (error) {
         console.error('Error loading robust tasks:', error);
         // En caso de error total, usar tareas de emergencia
-        const emergencyTasks = generateRobustTasksFromScores(maturityScores, enabledAgents);
+        const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         setTasks(emergencyTasks);
       }
     };
 
     loadRobustTasks();
-  }, [maturityScores, enabledAgents, fetchRecommendationsWithFallback]);
+  }, [maturityScores, agentPool, fetchRecommendationsWithFallback]);
 
-  const convertAIRecommendationsToTasks = (recommendations: any[], enabledAgents: string[]): OptimizedRecommendedTask[] => {
-    if (!recommendations.length || !enabledAgents.length) return [];
+  const convertAIRecommendationsToTasks = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
+    if (!recommendations.length || !agentPool.length) return [];
 
     return recommendations.map((rec, index) => {
       // Usar el primer agente disponible o rotar entre agentes
-      const agentIndex = index % enabledAgents.length;
-      const agentId = enabledAgents[agentIndex];
+      const agentIndex = index % agentPool.length;
+      const agentId = agentPool[agentIndex];
       
       const priority = (rec.priority === 'Alta' || rec.priority === 'High') ? 'high' : 
                       (rec.priority === 'Media' || rec.priority === 'Medium') ? 'medium' : 'low';

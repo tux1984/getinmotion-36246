@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
@@ -20,6 +20,7 @@ import {
   Zap,
   Star
 } from 'lucide-react';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 interface PremiumDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -40,7 +41,8 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
 }) => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, agents.filter(a => a.status === 'active').map(a => a.id));
+  const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
+  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, allAgentIds);
   const { recentConversations, loading: activityLoading } = useUserActivity();
 
   const t = {

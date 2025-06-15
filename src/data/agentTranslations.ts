@@ -80,6 +80,18 @@ export const agentTranslations = {
     'stakeholder-matching': {
       name: 'Creative Stakeholder Matching',
       description: 'Connects creators with relevant stakeholders from the cultural ecosystem'
+    },
+    'cultural-consultant': {
+      name: 'Creative Specialist',
+      description: 'Provides expert advice and guidance on creative and cultural projects.'
+    },
+    'project-manager': {
+      name: 'Project Manager',
+      description: 'Organizes, plans, and executes projects while managing teams and resources.'
+    },
+    'marketing-advisor': {
+      name: 'Marketing Advisor',
+      description: 'Develops marketing strategies to promote cultural products and reach audiences.'
     }
   },
   es: {
@@ -162,6 +174,18 @@ export const agentTranslations = {
     'stakeholder-matching': {
       name: 'Matching de Stakeholders Creativos',
       description: 'Conecta creadores con stakeholders relevantes del ecosistema cultural'
+    },
+    'cultural-consultant': {
+      name: 'Especialista Creativo',
+      description: 'Proporciona asesoramiento experto y orientación en proyectos creativos y culturales.'
+    },
+    'project-manager': {
+      name: 'Gestor de Proyectos',
+      description: 'Organiza, planifica y ejecuta proyectos gestionando equipos y recursos.'
+    },
+    'marketing-advisor': {
+      name: 'Asesor de Marketing',
+      description: 'Desarrolla estrategias de marketing para promocionar productos culturales y alcanzar audiencias.'
     }
   }
 };
