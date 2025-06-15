@@ -24,7 +24,8 @@ export const AgentIcon: React.FC<AgentIconProps> = ({ icon, className }) => {
   
   // This handles special component objects from React.memo or React.forwardRef
   if (typeof icon === 'object' && icon !== null && '$$typeof' in icon) {
-    const IconComponent = icon as React.ElementType;
+    // We cast to unknown first to satisfy TypeScript's strict checking
+    const IconComponent = icon as unknown as React.ElementType;
     return <IconComponent className={className} />;
   }
 
