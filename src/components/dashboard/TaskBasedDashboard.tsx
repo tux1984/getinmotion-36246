@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { Agent, CategoryScore } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,25 +18,29 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useRecommendedTasks } from '@/hooks/useRecommendedTasks';
+import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileTaskBasedDashboard } from './mobile/MobileTaskBasedDashboard';
+import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 interface TaskBasedDashboardProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
+  profileData: any | null;
 }
 
 export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
   agents,
   maturityScores,
   onSelectAgent,
-  onMaturityCalculatorClick
+  onMaturityCalculatorClick,
+  profileData
 }) => {
   const { language } = useLanguage();
-  const { tasks, loading, markTaskCompleted } = useRecommendedTasks(maturityScores);
+  const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
+  const { tasks, loading, markTaskCompleted } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
   const isMobile = useIsMobile();
 
   // Use mobile version on small screens
@@ -44,6 +49,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
       <MobileTaskBasedDashboard
         agents={agents}
         maturityScores={maturityScores}
+        profileData={profileData}
         onSelectAgent={onSelectAgent}
         onMaturityCalculatorClick={onMaturityCalculatorClick}
       />

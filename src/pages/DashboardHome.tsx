@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
@@ -28,6 +29,15 @@ const DashboardHome = () => {
   } = useOptimizedAgentManagement();
 
   const { profileData, loading: scoresLoading, error: scoresError } = useOptimizedMaturityScores();
+
+  const {
+    needsRecovery,
+    recovering,
+    recovered,
+    error: recoveryError,
+    performEmergencyRecovery,
+    checkAndRepair
+  } = useDataRecovery();
 
   // Debug logging mejorado
   useEffect(() => {
