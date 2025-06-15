@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
@@ -8,7 +7,6 @@ import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { StreamlinedOnboardingWizard } from '@/components/onboarding/StreamlinedOnboardingWizard';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
 import { useState, useEffect } from 'react';
-import { AIAssistant } from '@/components/assistant/AIAssistant';
 
 const MaturityCalculator = () => {
   const { language } = useLanguage();
@@ -73,7 +71,6 @@ const MaturityCalculator = () => {
           </div>
         )}
       </div>
-      <AIAssistant stepContext="maturity_calculator" />
     </DashboardBackground>
   );
 };

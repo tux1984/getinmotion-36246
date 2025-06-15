@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
 import { WizardStepContent } from '../wizard-components/WizardStepContent';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId } from '../hooks/useMaturityWizard';
+import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
 
 interface WizardContentProps {
   currentStepId: WizardStepId;
@@ -74,6 +76,7 @@ export const WizardContent: React.FC<WizardContentProps> = ({
             />
           </AnimatePresence>
         </div>
+        <AIAssistantIntegrated stepContext={currentStepId} />
       </div>
     </motion.div>
   );
