@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -186,7 +185,6 @@ export const useDataRecovery = () => {
     try {
       setStatus(prev => ({ ...prev, recovering: true, error: null }));
       
-      // Crear datos mínimos funcionales
       const emergencyScores: CategoryScore = {
         ideaValidation: 50,
         userExperience: 50,
@@ -201,6 +199,37 @@ export const useDataRecovery = () => {
 
       console.log('Creating emergency recovery data:', { emergencyScores, emergencyAgents });
 
+      // Upsert user profile to ensure it exists
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (profileError) {
+        console.warn('Emergency recovery: could not upsert profile.', profileError);
+      }
+
+      // Save maturity scores to DB
+      const { error: scoresError } = await supabase
+        .from('user_maturity_scores')
+        .insert({
+          user_id: user.id,
+          idea_validation: emergencyScores.ideaValidation,
+          user_experience: emergencyScores.userExperience,
+          market_fit: emergencyScores.marketFit,
+          monetization: emergencyScores.monetization,
+          profile_data: { emergencySetup: true, recoveredAt: new Date().toISOString() }
+        });
+      
+      if (scoresError) {
+        console.error('Emergency recovery: failed to save scores', scoresError);
+        // Don't throw, as agents might still be created. The checkAndRepair might fix this later.
+      }
+      
       // Guardar en localStorage
       markOnboardingComplete(emergencyScores, emergencyAgents);
       

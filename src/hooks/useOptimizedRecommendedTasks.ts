@@ -15,75 +15,74 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
   useEffect(() => {
     const loadRobustTasks = async () => {
       setLoading(true);
-      if (!maturityScores) {
-        console.log('No maturity scores available, cannot generate tasks');
-        setTasks([]);
-        setLoading(false);
-        return;
-      }
-
-      console.log('Loading robust tasks with:', {
-        maturityScores,
-        profileData,
-        agentPool: agentPool,
-        agentPoolCount: agentPool.length
-      });
-
       try {
-        // Generar tareas base desde maturity scores (siempre funciona)
+        if (!maturityScores) {
+          console.log('No maturity scores available, cannot generate tasks');
+          setTasks([]);
+          return;
+        }
+
+        console.log('Loading robust tasks with:', {
+          maturityScores,
+          profileData,
+          agentPool: agentPool,
+          agentPoolCount: agentPool.length
+        });
+
+        // Generar tareas base desde maturity scores (siempre funciona como fallback)
         const scoreTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         console.log('Score-based tasks generated:', scoreTasks.length);
         
-        let aiRecommendations = [];
+        let combinedTasks = [...scoreTasks];
+
         if (profileData) {
             try {
                 const { data, error } = await supabase.functions.invoke('maturity-analysis', {
                     body: { scores: maturityScores, profileData, language }
                 });
 
-                if (error) {
-                  throw error;
-                }
+                if (error) throw error;
                 
-                if (data?.recommendations) {
-                  aiRecommendations = data.recommendations;
-                  console.log('AI recommendations obtained:', aiRecommendations.length);
+                if (data?.recommendations?.length > 0) {
+                  console.log('AI recommendations obtained:', data.recommendations.length);
+                  const aiTasks = convertAIRecommendationsToTasks(data.recommendations, agentPool);
+                  console.log('AI tasks converted:', aiTasks.length);
+                  combinedTasks = [...aiTasks, ...scoreTasks];
+                } else {
+                    console.log('AI analysis completed but returned no recommendations.');
                 }
             } catch (e) {
-                console.error("AI recommendations fetch failed, using fallback tasks.", e);
+                console.error("AI recommendations fetch failed, using score-based tasks as fallback.", e);
             }
         }
         
-        // Convertir recomendaciones de IA a tareas
-        const aiTasks = convertAIRecommendationsToTasks(aiRecommendations, agentPool);
-        console.log('AI tasks converted:', aiTasks.length);
-        
-        // Combinar y priorizar tareas
-        const allTasks = [...aiTasks, ...scoreTasks];
-        
-        // Remover duplicados y limitar a 6 tareas
-        const uniqueTasks = removeDuplicateTasks(allTasks);
+        // Combinar, priorizar y limitar tareas
+        const uniqueTasks = removeDuplicateTasks(combinedTasks);
         const finalTasks = prioritizeAndLimitTasks(uniqueTasks, 6);
 
         console.log('Final robust tasks:', {
-          totalTasks: allTasks.length,
+          totalCombined: combinedTasks.length,
           uniqueTasks: uniqueTasks.length,
-          finalTasks: finalTasks.length
+          finalTasksCount: finalTasks.length
         });
         
         setTasks(finalTasks);
       } catch (error) {
         console.error('Error loading robust tasks:', error);
-        // En caso de error total, usar tareas de emergencia
-        const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
-        setTasks(emergencyTasks);
+        // En caso de error total, usar tareas de emergencia (que son las de scores)
+        if (maturityScores) {
+            const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
+            setTasks(prioritizeAndLimitTasks(emergencyTasks, 6));
+        } else {
+            setTasks([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadRobustTasks();
-  }, [maturityScores, profileData, agentPool, language]);
+  }, [maturityScores, profileData, agentPool.join(','), language]); // Added agentPool to dependency array
 
   const convertAIRecommendationsToTasks = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
     if (!recommendations.length || !agentPool.length) return [];
