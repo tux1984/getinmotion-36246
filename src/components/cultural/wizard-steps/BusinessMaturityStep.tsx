@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
@@ -109,7 +108,11 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
 
       {/* AI Assistant */}
       <div className="max-w-2xl mx-auto">
-        <AIAssistantIntegrated stepContext="business-info" />
+        <AIAssistantIntegrated
+          stepContext="business-info"
+          questionId={currentQuestion.id}
+          questionTitle={currentQuestion.title}
+        />
       </div>
 
       {/* Navigation */}

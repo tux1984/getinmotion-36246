@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
@@ -9,32 +8,22 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface AIAssistantIntegratedProps {
   stepContext: string;
+  questionId: string;
+  questionTitle?: string;
 }
 
 const stepTitles = {
   en: {
-    'profile': 'Want to add more details about your project or artistic vision?',
-    'business-info': 'Tell us more about your business model or how you operate.',
-    'management-style': 'Any other thoughts on your management style or team dynamics?',
-    'analysis-choice': 'Provide any extra context for a more personalized analysis.',
-    'extended-questions': 'Any other details you want to share for the deep analysis?',
-    'results': 'Any questions about your results? Ask away!',
-    'default': 'Need help or want to add more details?',
+    'default': 'Want to add more details about your answer?',
   },
   es: {
-    'profile': '¿Quieres añadir más detalles sobre tu proyecto o visión artística?',
-    'business-info': 'Cuéntanos más sobre tu modelo de negocio o cómo operas.',
-    'management-style': '¿Alguna otra reflexión sobre tu estilo de gestión o la dinámica del equipo?',
-    'analysis-choice': 'Proporciona cualquier contexto adicional para un análisis más personalizado.',
-    'extended-questions': '¿Algún otro detalle que quieras compartir para el análisis profundo?',
-    'results': '¿Preguntas sobre tus resultados? ¡Consulta aquí!',
-    'default': '¿Necesitas ayuda o quieres añadir más detalles?',
+    'default': '¿Quieres añadir más detalles sobre tu respuesta?',
   },
 };
 
-export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({ stepContext }) => {
+export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({ stepContext, questionId, questionTitle }) => {
   const { language } = useLanguage();
-  const { messages, isLoading, sendMessage } = useAIAssistant(stepContext);
+  const { messages, isLoading, sendMessage } = useAIAssistant(stepContext, questionId, questionTitle);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +39,9 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({ st
     }
   };
   
-  const title = (stepTitles[language] as Record<string, string>)[stepContext] || stepTitles[language].default;
+  const title = questionTitle 
+    ? (language === 'es' ? `¿Necesitas ayuda con "${questionTitle}"?` : `Need help with "${questionTitle}"?`)
+    : stepTitles[language].default;
 
   return (
     <div className="mt-8 pt-6 border-t border-slate-200">
@@ -61,7 +52,7 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({ st
             {messages.length === 0 && !isLoading && (
                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
                     <Bot size={32} className="mb-2" />
-                    <p className="text-sm text-center">{language === 'es' ? 'Soy tu asistente. Pregúntame cualquier cosa o añade más detalles.' : 'I am your assistant. Ask me anything or add more details.'}</p>
+                    <p className="text-sm text-center">{language === 'es' ? `Soy tu asistente. Pregúntame sobre "${questionTitle || 'esto'}".` : `I'm your assistant. Ask me about "${questionTitle || 'this'}".`}</p>
                  </div>
             )}
             {messages.map((msg, index) => (

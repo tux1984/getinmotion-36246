@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -10,20 +9,30 @@ export interface ChatMessage {
   content: string;
 }
 
-export const useAIAssistant = (stepContext: string) => {
+export const useAIAssistant = (stepContext: string, questionId: string, questionTitle?: string) => {
   const { user } = useAuth();
   const { language } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionId] = useState(uuidv4());
+  const [sessionId, setSessionId] = useState('');
+
+  useEffect(() => {
+    if (questionId) {
+      const newSessionId = `${stepContext}-${questionId}`;
+      setSessionId(newSessionId);
+      setMessages([]); // Reset messages for new question
+    }
+  }, [questionId, stepContext]);
 
   const saveMessage = async (message: ChatMessage) => {
+    if (!sessionId) return;
     const { error } = await supabase.from('user_chat_context').insert({
       user_id: user?.id,
       session_id: sessionId,
       message: message.content,
       role: message.role,
-      step_context: stepContext
+      step_context: stepContext,
+      question_id: questionId
     });
     if (error) {
       console.error('Error saving chat message:', error);
@@ -31,6 +40,8 @@ export const useAIAssistant = (stepContext: string) => {
   };
 
   const sendMessage = useCallback(async (content: string) => {
+    if (!sessionId) return;
+
     const userMessage: ChatMessage = { role: 'user', content };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
@@ -39,7 +50,14 @@ export const useAIAssistant = (stepContext: string) => {
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: { messages: newMessages, language },
+        body: { 
+          messages: newMessages, 
+          language,
+          questionContext: {
+            id: questionId,
+            title: questionTitle
+          }
+        },
       });
 
       if (error) throw error;
@@ -58,7 +76,7 @@ export const useAIAssistant = (stepContext: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, language, user, sessionId, stepContext]);
+  }, [messages, language, user, sessionId, stepContext, questionId, questionTitle]);
 
   return { messages, isLoading, sendMessage };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
@@ -153,7 +152,11 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
 
       {/* AI Assistant */}
       <div className="max-w-2xl mx-auto">
-        <AIAssistantIntegrated stepContext="profile" />
+        <AIAssistantIntegrated
+          stepContext="profile"
+          questionId={currentQuestion.id}
+          questionTitle={currentQuestion.title}
+        />
       </div>
 
       {/* Navigation */}

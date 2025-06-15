@@ -12,6 +12,11 @@ const corsHeaders = {
 interface ChatRequest {
   messages: { role: 'user' | 'assistant'; content: string }[];
   language: 'en' | 'es';
+  questionContext?: {
+    id: string;
+    title: string;
+    subtitle?: string;
+  };
 }
 
 serve(async (req) => {
@@ -24,11 +29,20 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { messages, language }: ChatRequest = await req.json();
+    const { messages, language, questionContext }: ChatRequest = await req.json();
 
-    const systemPrompt = language === 'es'
-      ? `Eres un asistente de IA especializado en negocios creativos y culturales. Tu objetivo es ayudar a los usuarios a completar su evaluación de madurez. Haz preguntas de seguimiento para obtener más detalles sobre su proyecto, sus desafíos y sus metas. Esta información adicional se utilizará para generar recomendaciones más precisas al final. Sé amable, conciso y directo.`
-      : `You are an AI assistant specializing in creative and cultural businesses. Your goal is to help users complete their maturity assessment. Ask follow-up questions to get more details about their project, challenges, and goals. This additional information will be used to generate more accurate recommendations at the end. Be friendly, concise, and to the point.`;
+    let systemPrompt: string;
+
+    if (questionContext && questionContext.title) {
+      const questionInfo = `Current question: "${questionContext.title}" ${questionContext.subtitle ? `(${questionContext.subtitle})` : ''}.`;
+      systemPrompt = language === 'es'
+        ? `Eres un asistente de IA experto en negocios creativos. Ayuda al usuario a profundizar en su respuesta para la pregunta: "${questionContext.title}" ${questionContext.subtitle ? `(${questionContext.subtitle})` : ''}. Haz preguntas de seguimiento para obtener detalles clave que mejoren sus recomendaciones finales. Sé amable, conciso y directo.`
+        : `You are an AI assistant expert in creative businesses. Help the user elaborate on their answer for the question: "${questionContext.title}" ${questionContext.subtitle ? `(${questionContext.subtitle})` : ''}. Ask follow-up questions to get key details for their final recommendations. Be friendly, concise, and to the point.`;
+    } else {
+      systemPrompt = language === 'es'
+        ? `Eres un asistente de IA especializado en negocios creativos y culturales. Tu objetivo es ayudar a los usuarios a completar su evaluación de madurez. Haz preguntas de seguimiento para obtener más detalles sobre su proyecto, sus desafíos y sus metas. Esta información adicional se utilizará para generar recomendaciones más precisas al final. Sé amable, conciso y directo.`
+        : `You are an AI assistant specializing in creative and cultural businesses. Your goal is to help users complete their maturity assessment. Ask follow-up questions to get more details about their project, challenges, and goals. This additional information will be used to generate more accurate recommendations at the end. Be friendly, concise, and to the point.`;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

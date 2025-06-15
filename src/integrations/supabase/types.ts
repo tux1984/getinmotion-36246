@@ -315,6 +315,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          question_id: string | null
           role: string
           session_id: string
           step_context: string | null
@@ -324,6 +325,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          question_id?: string | null
           role: string
           session_id: string
           step_context?: string | null
@@ -333,6 +335,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          question_id?: string | null
           role?: string
           session_id?: string
           step_context?: string | null
