@@ -12,10 +12,18 @@ export const AgentIcon: React.FC<AgentIconProps> = ({ icon, className }) => {
   }
 
   if (React.isValidElement(icon)) {
-    return icon;
+    // If it's already an element, we should clone it to add the className
+    return React.cloneElement(icon as React.ReactElement, { className });
   }
 
-  if (icon && typeof icon !== 'boolean') {
+  // This handles function components (including class components)
+  if (typeof icon === 'function') {
+    const IconComponent = icon;
+    return <IconComponent className={className} />;
+  }
+  
+  // This handles special component objects from React.memo or React.forwardRef
+  if (typeof icon === 'object' && icon !== null && '$$typeof' in icon) {
     const IconComponent = icon as React.ElementType;
     return <IconComponent className={className} />;
   }
