@@ -1,4 +1,31 @@
+
 import React from 'react';
+
+const getKeywordEmoji = (text: string): string => {
+    const lowerText = text.toLowerCase();
+    // Un mapa simple de palabras clave a emojis para dar un toque visual
+    const emojiMap: { [key: string]: string } = {
+        'costo': '💰',
+        'costos': '💰',
+        'material': '🔨',
+        'materiales': '🔨',
+        'precio': '💲',
+        'precios': '💲',
+        'marketing': '📢',
+        'idea': '💡',
+        'resumen': '📝',
+        'pasos': '👣',
+        'siguiente': '➡️',
+        'lista': '📋',
+    };
+
+    for (const keyword in emojiMap) {
+        if (lowerText.includes(keyword)) {
+            return `${emojiMap[keyword]} `;
+        }
+    }
+    return '';
+};
 
 const applyInlineFormatting = (text: string, keyPrefix: string): (string | JSX.Element)[] => {
     // This regex will split the string by **bold** or _italic_ parts, keeping the delimiters.
@@ -17,32 +44,93 @@ const applyInlineFormatting = (text: string, keyPrefix: string): (string | JSX.E
 };
 
 export const RichTextRenderer: React.FC<{ content: string }> = ({ content }) => {
-    // Split content into lines to process each one for block-level elements like headings.
     const lines = content.split('\n');
+    const elements: JSX.Element[] = [];
+    let i = 0;
+
+    while (i < lines.length) {
+        const line = lines[i];
+        const key = `line-${i}`;
+
+        if (line.startsWith('#### ')) {
+            const text = line.substring(5);
+            elements.push(<h4 key={key} className="text-base font-semibold mt-2 mb-1">{getKeywordEmoji(text)}{applyInlineFormatting(text, key)}</h4>);
+            i++;
+            continue;
+        }
+        if (line.startsWith('### ')) {
+            const text = line.substring(4);
+            elements.push(<h3 key={key} className="text-lg font-semibold mt-3 mb-1">{getKeywordEmoji(text)}{applyInlineFormatting(text, key)}</h3>);
+            i++;
+            continue;
+        }
+        if (line.startsWith('## ')) {
+            const text = line.substring(3);
+            elements.push(<h2 key={key} className="text-xl font-bold mt-4 mb-2">{getKeywordEmoji(text)}{applyInlineFormatting(text, key)}</h2>);
+            i++;
+            continue;
+        }
+        if (line.startsWith('# ')) {
+            const text = line.substring(2);
+            elements.push(<h1 key={key} className="text-2xl font-bold mt-4 mb-2">{getKeywordEmoji(text)}{applyInlineFormatting(text, key)}</h1>);
+            i++;
+            continue;
+        }
+        
+        // Manejar listas no ordenadas
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+            const listItems: string[] = [];
+            const listKey = `ul-${i}`;
+            while (i < lines.length && (lines[i].startsWith('- ') || lines[i].startsWith('* '))) {
+                listItems.push(lines[i].substring(2));
+                i++;
+            }
+            elements.push(
+                <ul key={listKey} className="list-none pl-2 space-y-1 my-2">
+                    {listItems.map((item, itemIndex) => (
+                        <li key={`${listKey}-li-${itemIndex}`} className="flex items-start">
+                            <span className="mr-2 text-purple-400 mt-1.5">●</span>
+                            <span>{applyInlineFormatting(item, `${listKey}-li-${itemIndex}`)}</span>
+                        </li>
+                    ))}
+                </ul>
+            );
+            continue;
+        }
+
+        // Manejar listas ordenadas
+        if (/^\d+\.\s/.test(line)) {
+            const listItems: string[] = [];
+            const listKey = `ol-${i}`;
+            while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+                listItems.push(lines[i].replace(/^\d+\.\s/, ''));
+                i++;
+            }
+            elements.push(
+                <ol key={listKey} className="list-decimal list-inside space-y-1 my-2">
+                    {listItems.map((item, itemIndex) => (
+                        <li key={`${listKey}-li-${itemIndex}`} className="pl-2">
+                             {applyInlineFormatting(item, `${listKey}-li-${itemIndex}`)}
+                        </li>
+                    ))}
+                </ol>
+            );
+            continue;
+        }
+
+        if (line.trim() === '') {
+            elements.push(<div key={key} className="h-4" />);
+            i++;
+            continue;
+        }
+        
+        elements.push(<p key={key} className="my-0.5">{applyInlineFormatting(line, key)}</p>);
+        i++;
+    }
 
     return (
-        <div className="text-white/90 leading-relaxed">
-            {lines.map((line, index) => {
-                const key = `line-${index}`;
-                if (line.startsWith('#### ')) {
-                    return <h4 key={key} className="text-base font-semibold mt-2 mb-1">{applyInlineFormatting(line.substring(5), key)}</h4>;
-                }
-                if (line.startsWith('### ')) {
-                    return <h3 key={key} className="text-lg font-semibold mt-3 mb-1">{applyInlineFormatting(line.substring(4), key)}</h3>;
-                }
-                if (line.startsWith('## ')) {
-                    return <h2 key={key} className="text-xl font-bold mt-4 mb-2">{applyInlineFormatting(line.substring(3), key)}</h2>;
-                }
-                if (line.startsWith('# ')) {
-                    return <h1 key={key} className="text-2xl font-bold mt-4 mb-2">{applyInlineFormatting(line.substring(2), key)}</h1>;
-                }
-                if (line.trim() === '') {
-                    // Using a div for a more consistent break than <br>
-                    return <div key={key} className="h-4" />;
-                }
-                
-                return <p key={key} className="my-0.5">{applyInlineFormatting(line, key)}</p>;
-            })}
+        <div className="text-white/90 leading-relaxed text-left">
+            {elements}
         </div>
     );
 };
