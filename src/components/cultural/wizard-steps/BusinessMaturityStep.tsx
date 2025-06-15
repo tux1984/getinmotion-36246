@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { getBusinessQuestions } from '../wizard-questions/businessQuestions';
+import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
 
 interface BusinessMaturityStepProps {
   profileData: UserProfileData;
@@ -104,6 +105,11 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
           onChange={handleSingleSelect}
           withIcons
         />
+      </div>
+
+      {/* AI Assistant */}
+      <div className="max-w-2xl mx-auto">
+        <AIAssistantIntegrated stepContext="business-info" />
       </div>
 
       {/* Navigation */}

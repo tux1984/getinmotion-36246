@@ -5,6 +5,7 @@ import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { CheckboxCards } from '../wizard-components/CheckboxCards';
 import { getProfileQuestions } from '../wizard-questions/profileQuestions';
+import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
 
 interface CulturalProfileStepProps {
   profileData: UserProfileData;
@@ -148,6 +149,11 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
             withIcons
           />
         )}
+      </div>
+
+      {/* AI Assistant */}
+      <div className="max-w-2xl mx-auto">
+        <AIAssistantIntegrated stepContext="profile" />
       </div>
 
       {/* Navigation */}

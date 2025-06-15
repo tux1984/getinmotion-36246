@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { getManagementQuestions } from '../wizard-questions/managementQuestions';
+import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
 
 interface ManagementStyleStepProps {
   profileData: UserProfileData;
@@ -104,6 +105,11 @@ export const ManagementStyleStep: React.FC<ManagementStyleStepProps> = ({
           onChange={handleSingleSelect}
           withIcons
         />
+      </div>
+
+      {/* AI Assistant */}
+      <div className="max-w-2xl mx-auto">
+        <AIAssistantIntegrated stepContext="management-style" />
       </div>
 
       {/* Navigation */}
