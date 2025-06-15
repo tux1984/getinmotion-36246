@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface AgentIconProps {
-  icon: React.ReactNode;
+  icon: React.ElementType | React.ReactNode;
   className?: string;
 }
 
