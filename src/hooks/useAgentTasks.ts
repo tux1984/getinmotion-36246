@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,8 +27,12 @@ export function useAgentTasks(agentId?: string) {
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchTasks = async () => {
-    if (!user) return;
+  const fetchTasks = useCallback(async () => {
+    if (!user) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       let query = supabase
@@ -44,7 +48,6 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      // Type cast the data to ensure it matches our interface
       const typedTasks: AgentTask[] = (data || []).map(task => ({
         ...task,
         relevance: task.relevance as 'low' | 'medium' | 'high',
@@ -62,7 +65,7 @@ export function useAgentTasks(agentId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, agentId, toast]);
 
   const createTask = async (taskData: Partial<AgentTask>) => {
     if (!user) return null;
@@ -157,8 +160,36 @@ export function useAgentTasks(agentId?: string) {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchTasks();
-  }, [user, agentId]);
+  }, [fetchTasks]);
+
+  // Realtime subscription for tasks
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`realtime-tasks-user-${user.id}-agent-${agentId || 'all'}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'agent_tasks',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Task change detected, refreshing...', payload);
+          fetchTasks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, agentId, fetchTasks]);
+
 
   return {
     tasks,
