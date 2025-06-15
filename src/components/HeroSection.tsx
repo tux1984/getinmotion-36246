@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { heroTranslations } from './hero/heroTranslations';
 import { HeroBackground } from './hero/HeroBackground';
@@ -27,8 +26,16 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
 
   const slides = React.useMemo(() => {
     return heroImages.map((image, index) => {
-      const slideKey = `slide${index + 1}` as keyof typeof t;
-      const slideContent = t[slideKey] || { title: 'Creative Power', subtitle: 'Unleash your potential with our tools.', cta: 'Learn More' };
+      // Usamos la 'key' de la base de datos, que es más fiable que el índice.
+      const slideKey = image.key as keyof typeof t;
+      const slideContentCandidate = t[slideKey];
+      
+      const defaultSlideContent = { title: 'Creative Power', subtitle: 'Unleash your potential with our tools.', cta: 'Learn More' };
+      
+      // Esto asegura que slideContent sea siempre un objeto, corrigiendo el error del operador spread.
+      const slideContent = (typeof slideContentCandidate === 'object' && slideContentCandidate !== null && 'title' in slideContentCandidate)
+        ? slideContentCandidate
+        : defaultSlideContent;
       
       const isLastSlide = index === heroImages.length - 1;
       const action = isLastSlide ? onJoinWaitlist : () => {
@@ -46,7 +53,7 @@ export const HeroSection = ({ language, onJoinWaitlist }: HeroSectionProps) => {
         isLastSlide: isLastSlide,
       };
     });
-  }, [heroImages, language, onJoinWaitlist, t]);
+  }, [heroImages, t, onJoinWaitlist]);
 
   const autoplay = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: true })
