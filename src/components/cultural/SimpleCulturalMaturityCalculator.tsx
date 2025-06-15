@@ -29,7 +29,8 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   const handleWizardComplete = useCallback(async (
     scores: CategoryScore, 
     recommendedAgents: RecommendedAgents, 
-    profileData: UserProfileData
+    profileData: UserProfileData,
+    aiRecommendations?: AIRecommendation[]
   ) => {
     console.log('SimpleCulturalMaturityCalculator: Wizard completed', { scores, recommendedAgents, profileData });
     
@@ -60,11 +61,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       }
       
       // 3. Llamar callback original
-      onComplete(scores, recommendedAgents, profileData);
+      onComplete(scores, recommendedAgents, profileData, aiRecommendations);
     } catch (err) {
       console.error('Error completing onboarding:', err);
       // Aún así completar el onboarding para no bloquear al usuario
-      onComplete(scores, recommendedAgents, profileData);
+      onComplete(scores, recommendedAgents, profileData, aiRecommendations);
     }
   }, [onComplete, user, saveMaturityScores]);
 

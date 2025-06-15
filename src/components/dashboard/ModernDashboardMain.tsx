@@ -12,6 +12,7 @@ interface ModernDashboardMainProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
   recommendedAgents: RecommendedAgents;
+  profileData: any | null;
 }
 
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) => {
@@ -23,6 +24,7 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) =
       <MobileTaskBasedDashboard
         agents={props.agents}
         maturityScores={props.maturityScores}
+        profileData={props.profileData}
         onSelectAgent={props.onSelectAgent}
         onMaturityCalculatorClick={props.onMaturityCalculatorClick}
       />

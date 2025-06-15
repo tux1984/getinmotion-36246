@@ -15,6 +15,7 @@ interface DashboardContentProps {
   agents: Agent[];
   maturityScores: CategoryScore | null;
   recommendedAgents: RecommendedAgents;
+  profileData: any | null;
   language: 'en' | 'es';
   onSelectAgent: (id: string) => void;
   onMaturityCalculatorClick: () => void;
@@ -30,6 +31,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   agents,
   maturityScores,
   recommendedAgents,
+  profileData,
   language,
   onSelectAgent,
   onMaturityCalculatorClick,
@@ -50,7 +52,8 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
             onAgentManagerClick={onOpenAgentManager} 
             agents={agents} 
             maturityScores={maturityScores} 
-            recommendedAgents={recommendedAgents} 
+            recommendedAgents={recommendedAgents}
+            profileData={profileData}
           />
         )}
 

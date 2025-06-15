@@ -21,7 +21,7 @@ interface AIRecommendation {
 export type { WizardStepId } from './types/wizardTypes';
 
 export const useMaturityWizard = (
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void,
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiRecommendations?: AIRecommendation[]) => void,
   language: 'en' | 'es'
 ): WizardHookReturn => {
   // Start with cultural profile step
@@ -150,7 +150,7 @@ export const useMaturityWizard = (
     console.log('Completing wizard with profile data:', profileData);
     const finalScores = scores || calculateMaturityScores();
     const finalRecommendedAgents = recommendedAgents || getRecommendedAgents(finalScores);
-    onComplete(finalScores, finalRecommendedAgents, aiRecommendations);
+    onComplete(finalScores, finalRecommendedAgents, profileData, aiRecommendations);
   };
 
   // Handle analysis choice

@@ -1,10 +1,18 @@
-
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
 import { WizardStepContent } from '../wizard-components/WizardStepContent';
 import { UserProfileData } from '../types/wizardTypes';
 import { WizardStepId } from '../hooks/useMaturityWizard';
+import { CategoryScore } from '@/components/maturity/types';
+import { RecommendedAgents } from '@/types/dashboard';
+
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
 
 interface WizardContentProps {
   currentStepId: WizardStepId;
@@ -16,9 +24,9 @@ interface WizardContentProps {
   updateProfileData: (data: Partial<UserProfileData>) => void;
   handleNext: () => void;
   handlePrevious: () => void;
-  calculateMaturityScores: () => any;
-  getRecommendedAgents: (scores: any) => any;
-  handleCompleteWizard: () => void;
+  calculateMaturityScores: () => CategoryScore;
+  getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
+  handleCompleteWizard: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
   showBifurcation?: boolean;
   analysisType?: 'quick' | 'deep' | null;
   handleAnalysisChoice?: (type: 'quick' | 'deep') => void;

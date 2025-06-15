@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { UserProfileData } from '../types/wizardTypes';
@@ -34,6 +33,13 @@ export const pageVariants = {
   }
 };
 
+interface AIRecommendation {
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+  timeframe: string;
+}
+
 interface StepContentRendererProps {
   currentStepId: WizardStepId;
   profileData: UserProfileData;
@@ -41,7 +47,7 @@ interface StepContentRendererProps {
   language: 'en' | 'es';
   calculateMaturityScores: () => CategoryScore;
   getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
-  onComplete: () => void;
+  onComplete: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
   currentStepNumber: number;
   totalSteps: number;
   handleNext: () => void;

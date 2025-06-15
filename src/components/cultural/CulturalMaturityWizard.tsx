@@ -15,7 +15,7 @@ interface AIRecommendation {
 }
 
 export const CulturalMaturityWizard: React.FC<{
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiRecommendations?: AIRecommendation[]) => void;
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   

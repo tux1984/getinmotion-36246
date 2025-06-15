@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CulturalProfileStep } from '../wizard-steps/CulturalProfileStep';
 import { BusinessMaturityStep } from '../wizard-steps/BusinessMaturityStep';
@@ -15,6 +14,13 @@ import { OptimizedCharacterImage } from '../components/OptimizedCharacterImage';
 import { DynamicQuestionsStep } from '../wizard-steps/DynamicQuestionsStep';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+interface AIRecommendation {
+    title: string;
+    description: string;
+    priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
+    timeframe: string;
+}
+
 interface StepRouterProps {
   currentStepId: WizardStepId;
   profileData: UserProfileData;
@@ -22,7 +28,7 @@ interface StepRouterProps {
   language: 'en' | 'es';
   calculateMaturityScores: () => CategoryScore;
   getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
-  onComplete: () => void;
+  onComplete: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
   currentStepNumber: number;
   totalSteps: number;
   handleNext: () => void;
