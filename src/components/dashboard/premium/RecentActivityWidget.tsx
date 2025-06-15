@@ -28,7 +28,7 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.1, duration: 0.5 }}
-            className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6"
+            className="bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-700/80 p-6"
         >
             <h3 className="text-lg font-semibold text-white mb-4">{t[language].recentActivity}</h3>
             {activityLoading ? (
@@ -38,7 +38,7 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({
             ) : (
                 <div className="space-y-3">
                     {recentConversations.map((conv) => (
-                        <div key={conv.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700/80 transition-colors cursor-pointer" onClick={() => onSelectAgent(conv.agent_id)}>
+                        <div key={conv.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-black/20 hover:bg-black/40 transition-colors cursor-pointer" onClick={() => onSelectAgent(conv.agent_id)}>
                             <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate text-slate-200">

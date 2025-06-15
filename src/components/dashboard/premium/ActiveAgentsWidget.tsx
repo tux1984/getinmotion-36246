@@ -33,7 +33,7 @@ export const ActiveAgentsWidget: React.FC<ActiveAgentsWidgetProps> = ({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6"
+            className="bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-700/80 p-6"
         >
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">{t[language].myAgents}</h3>

@@ -81,7 +81,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
         </div>
       ) : (
         <motion.div 
-          className="text-center py-16 bg-slate-800/50 rounded-2xl border border-slate-700"
+          className="text-center py-16 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-slate-700/80"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.7, duration: 0.5 }}
