@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
@@ -11,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
+import { SiteImageManager } from '@/components/admin/SiteImageManager';
 
 const Admin = () => {
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
@@ -129,7 +129,7 @@ const Admin = () => {
           </div>
           
           <Tabs defaultValue="waitlist" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-indigo-900/50">
+            <TabsList className="grid w-full grid-cols-5 bg-indigo-900/50">
               <TabsTrigger 
                 value="waitlist"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
@@ -146,7 +146,13 @@ const Admin = () => {
                 value="images"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
               >
-                Gestión de Imágenes
+                Galería de Imágenes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="site-images"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white"
+              >
+                Imágenes del Sitio
               </TabsTrigger>
               <TabsTrigger 
                 value="documents"
@@ -172,6 +178,10 @@ const Admin = () => {
 
             <TabsContent value="images" className="mt-6">
               <ImageManager />
+            </TabsContent>
+            
+            <TabsContent value="site-images" className="mt-6">
+              <SiteImageManager />
             </TabsContent>
 
             <TabsContent value="documents" className="mt-6">

@@ -277,6 +277,39 @@ export type Database = {
         }
         Relationships: []
       }
+      site_images: {
+        Row: {
+          alt_text: string | null
+          context: string
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          context: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          context?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_agents: {
         Row: {
           agent_id: string
