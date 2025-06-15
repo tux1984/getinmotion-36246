@@ -2,32 +2,28 @@
 import React from 'react';
 
 interface AgentIconProps {
-  icon: React.ElementType | React.ReactNode;
+  icon: React.ReactNode;
   className?: string;
 }
 
 export const AgentIcon: React.FC<AgentIconProps> = ({ icon, className }) => {
+  // Primitives
   if (typeof icon === 'string' || typeof icon === 'number') {
     return <span className={className}>{icon}</span>;
   }
-
+  
+  // React Elements
   if (React.isValidElement(icon)) {
-    // If it's already an element, we should clone it to add the className
     return React.cloneElement(icon as React.ReactElement, { className });
   }
 
-  // This handles function components (including class components)
-  if (typeof icon === 'function') {
-    const IconComponent = icon;
-    return <IconComponent className={className} />;
-  }
-  
-  // This handles special component objects from React.memo or React.forwardRef
-  if (typeof icon === 'object' && icon !== null && '$$typeof' in icon) {
-    // We cast to unknown first to satisfy TypeScript's strict checking
-    const IconComponent = icon as unknown as React.ElementType;
+  // Component Type (function or object like forwardRef/memo)
+  if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null && '$$typeof' in icon)) {
+    const IconComponent = icon as React.ElementType;
     return <IconComponent className={className} />;
   }
 
-  return null;
+  // Fallback for other valid ReactNode types like null, undefined, boolean, array, fragment
+  // which can be rendered directly inside a fragment.
+  return <>{icon}</>;
 };
