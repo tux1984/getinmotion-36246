@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AgentConversation } from '@/hooks/useAgentConversations';
@@ -22,9 +21,7 @@ interface ConversationHistorySidebarProps {
 }
 
 export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProps> = ({
-  agentId,
   language,
-  compact = false,
   onConversationSelect,
   conversations,
   currentConversationId,
@@ -59,7 +56,6 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
   const handleNewChat = () => {
     console.log('New chat button clicked - starting new conversation');
     startNewConversation();
-    // Notify parent component if callback provided
     if (onConversationSelect) {
       onConversationSelect('new');
     }
@@ -71,7 +67,6 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
       await selectConversation(conversationId);
       console.log('Conversation selection completed successfully');
       
-      // Notify parent component about the selection
       if (onConversationSelect) {
         onConversationSelect(conversationId);
       }
@@ -80,60 +75,37 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
     }
   };
 
-  if (compact) {
-    return (
-      <Button 
-        onClick={handleNewChat}
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-        size="sm"
-      >
-        <MessageSquare className="w-4 h-4 mr-1" />
-        {conversations.length}
-      </Button>
-    );
-  }
-
   if (loading) {
     return (
-      <Card className="bg-white/5 backdrop-blur-xl border border-white/10 h-full">
-        <CardContent className="p-4 flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
-        </CardContent>
-      </Card>
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
+      </div>
     );
   }
 
   return (
-    <Card className="bg-white/5 backdrop-blur-xl border border-white/10 h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white text-sm flex items-center gap-2">
-          <MessageSquare className="w-4 h-4" />
-          {t[language].conversations}
-        </CardTitle>
-        <Button 
-          onClick={handleNewChat}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
-          size="sm"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          {t[language].newChat}
-        </Button>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-0 h-[calc(100%-120px)]">
-        <div className="mb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t[language].search}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40"
-            />
-          </div>
-        </div>
+    <div className="bg-transparent h-full flex flex-col">
+      <Button 
+        onClick={handleNewChat}
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white mb-3 flex-shrink-0"
+        size="sm"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        {t[language].newChat}
+      </Button>
 
-        <ScrollArea className="h-full">
+      <div className="relative mb-3 flex-shrink-0">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t[language].search}
+          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40"
+        />
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full pr-3">
           {filteredConversations.length === 0 ? (
             <div className="text-center py-8 text-white/60">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -167,7 +139,7 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
             </div>
           )}
         </ScrollArea>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

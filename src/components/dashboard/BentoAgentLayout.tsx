@@ -8,7 +8,8 @@ import { AgentQuickActions } from './AgentQuickActions';
 import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, BarChart3, Zap, Menu } from 'lucide-react';
+import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo } from 'lucide-react';
+import { AgentTasksPanel } from './AgentTasksPanel';
 
 interface BentoAgentLayoutProps {
   selectedAgent: string;
@@ -23,6 +24,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<'chat' | 'conversations' | 'dashboard' | 'actions'>('chat');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'conversations' | 'tasks'>('conversations');
 
   const conversationManager = useAgentConversations(selectedAgent);
 
@@ -31,13 +34,15 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       chat: "Chat",
       conversations: "History", 
       dashboard: "Stats",
-      actions: "Actions"
+      actions: "Actions",
+      tasks: "Tasks"
     },
     es: {
       chat: "Chat",
       conversations: "Historial",
       dashboard: "Stats", 
-      actions: "Acciones"
+      actions: "Acciones",
+      tasks: "Tareas"
     }
   };
 
@@ -161,22 +166,93 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="h-full w-full grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
+    <div className="h-full w-full flex gap-4 p-4">
       {/* Sidebar */}
-      <div className="md:col-span-3 h-full">
-        <ConversationHistorySidebar
-          agentId={selectedAgent}
-          language={language}
-          conversations={conversationManager.conversations}
-          currentConversationId={conversationManager.currentConversationId}
-          selectConversation={conversationManager.selectConversation}
-          startNewConversation={conversationManager.startNewConversation}
-          loading={conversationManager.loading}
-        />
+      <div className={`h-full transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarCollapsed ? 'w-[68px]' : 'w-[340px]'}`}>
+        {isSidebarCollapsed ? (
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full p-2 flex flex-col items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setIsSidebarCollapsed(false)} className="text-white hover:bg-white/10 w-full">
+              <PanelRightClose className="w-5 h-5" />
+            </Button>
+            <div className="flex-1 flex flex-col gap-2 w-full mt-2">
+              <Button
+                variant={sidebarTab === 'conversations' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setSidebarTab('conversations')}
+                className={`text-white w-full h-12 ${sidebarTab === 'conversations' ? 'bg-purple-500/30' : 'hover:bg-white/10'}`}
+                title={t[language].conversations}
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={sidebarTab === 'tasks' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setSidebarTab('tasks')}
+                className={`text-white w-full h-12 ${sidebarTab === 'tasks' ? 'bg-blue-500/30' : 'hover:bg-white/10'}`}
+                title={t[language].tasks}
+              >
+                <ListTodo className="w-5 h-5" />
+              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={conversationManager.startNewConversation}
+              className="text-white bg-purple-600 hover:bg-purple-700 w-full h-12"
+              title="New Chat"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          </div>
+        ) : (
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full flex flex-col p-3">
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
+              <div className="flex items-center gap-1 p-1 bg-black/20 rounded-lg">
+                <Button 
+                  size="sm" 
+                  onClick={() => setSidebarTab('conversations')}
+                  className={`text-xs px-3 py-1 h-auto transition-colors ${sidebarTab === 'conversations' ? 'bg-purple-600 text-white' : 'bg-transparent text-white/70 hover:bg-white/10'}`}
+                >
+                  <MessageSquare className="w-3 h-3 mr-2"/>
+                  {t[language].conversations}
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => setSidebarTab('tasks')}
+                  className={`text-xs px-3 py-1 h-auto transition-colors ${sidebarTab === 'tasks' ? 'bg-blue-600 text-white' : 'bg-transparent text-white/70 hover:bg-white/10'}`}
+                >
+                  <ListTodo className="w-3 h-3 mr-2"/>
+                  {t[language].tasks}
+                </Button>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsSidebarCollapsed(true)} className="text-white hover:bg-white/10">
+                <PanelLeftClose className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="flex-1 min-h-0">
+              {sidebarTab === 'conversations' ? (
+                <ConversationHistorySidebar
+                  agentId={selectedAgent}
+                  language={language}
+                  conversations={conversationManager.conversations}
+                  currentConversationId={conversationManager.currentConversationId}
+                  selectConversation={conversationManager.selectConversation}
+                  startNewConversation={conversationManager.startNewConversation}
+                  loading={conversationManager.loading}
+                />
+              ) : (
+                <AgentTasksPanel 
+                  agentId={selectedAgent} 
+                  language={language}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main chat */}
-      <div className="md:col-span-6 h-full">
+      <div className="flex-1 h-full min-w-0">
         <ModernFloatingAgentChat
           agentId={selectedAgent}
           language={language}
@@ -193,14 +269,14 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       </div>
 
       {/* Right widgets */}
-      <div className="md:col-span-3 h-full flex flex-col gap-4">
-        <div className="flex-1">
+      <div className="w-[340px] h-full flex flex-col gap-4 flex-shrink-0">
+        <div className="flex-1 min-h-0">
           <AgentMiniDashboard agentId={selectedAgent} language={language} />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <AgentQuickActions agentId={selectedAgent} language={language} />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <CollapsibleMoreTools language={language} agentId={selectedAgent} />
         </div>
       </div>
