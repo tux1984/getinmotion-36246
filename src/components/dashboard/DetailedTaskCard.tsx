@@ -86,14 +86,14 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow w-full">
+    <Card className="hover:shadow-md transition-shadow w-full bg-slate-800/50 border-slate-700 text-white">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
                 <div className={`w-3 h-3 rounded-full flex-shrink-0 ${getRelevanceColor(task.relevance)}`} />
-                <h4 className="font-medium text-slate-900 truncate flex-1">
+                <h4 className="font-medium text-slate-100 truncate flex-1">
                   {task.title}
                 </h4>
                 <Badge className={`text-xs whitespace-nowrap ${getStatusColor(task.status)}`}>
@@ -103,13 +103,13 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
               <div className="space-y-2 mb-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-600">{t[language].progress}</span>
-                  <span className="font-medium">{task.progress_percentage}%</span>
+                  <span className="text-slate-400">{t[language].progress}</span>
+                  <span className="text-slate-200">{task.progress_percentage}%</span>
                 </div>
                 <Progress value={task.progress_percentage} className="h-2" />
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-slate-500">
+              <div className="flex items-center gap-4 text-xs text-slate-400">
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   <span>
@@ -130,7 +130,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
             <div className="flex flex-col items-center gap-2">
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full">
+                <Button variant="ghost" size="sm" className="w-full text-slate-400 hover:bg-slate-700 hover:text-white">
                   <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </CollapsibleTrigger>
@@ -148,18 +148,18 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
           </div>
         </CardContent>
         <CollapsibleContent className="px-4 pb-4">
-          <div className="border-t pt-4 mt-2 space-y-4">
+          <div className="border-t border-slate-700 pt-4 mt-2 space-y-4">
             {task.description && (
               <div>
-                <h5 className="text-sm font-medium text-slate-800 mb-1">{t[language].description}</h5>
-                <p className="text-sm text-slate-600 whitespace-pre-wrap">
+                <h5 className="text-sm font-medium text-slate-300 mb-1">{t[language].description}</h5>
+                <p className="text-sm text-slate-400 whitespace-pre-wrap">
                   {task.description}
                 </p>
               </div>
             )}
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-slate-500">
+              <div className="flex items-center gap-4 text-xs text-slate-400">
                   <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       <span>{t[language].updatedAt}: {format(new Date(task.updated_at), "PPpp", { locale: language === 'es' ? es : undefined })}</span>
@@ -172,12 +172,12 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
                     variant="outline"
                     onClick={() => onStatusChange(task.id, 'in_progress')}
                     disabled={isUpdating}
-                    className="text-xs"
+                    className="text-xs text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-white"
                   >
                     {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : t[language].markInProgress}
                   </Button>
                 )}
-                <Button size="sm" variant="outline" disabled={isUpdating} title={t[language].edit}>
+                <Button size="sm" variant="outline" disabled={isUpdating} title={t[language].edit} className="text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-white">
                   <Edit className="w-3 h-3" />
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => onDelete(task.id)} disabled={isUpdating} title={t[language].delete}>
