@@ -59,7 +59,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-900">
       <PremiumDashboardHero
         language={language}
         welcomeText={t[language].welcome}
@@ -69,7 +69,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
         overallProgress={overallProgress}
       />
 
-      <div className={`${isMobile ? 'px-4 py-6' : 'px-6 py-8'} bg-gray-50`}>
+      <div className={`${isMobile ? 'px-4 py-6' : 'px-6 py-8'}`}>
         <div className="max-w-7xl mx-auto">
           <div className={`grid gap-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
             

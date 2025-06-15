@@ -33,13 +33,13 @@ export const ActiveAgentsWidget: React.FC<ActiveAgentsWidgetProps> = ({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+            className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6"
         >
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{t[language].myAgents}</h3>
+                <h3 className="text-lg font-semibold text-white">{t[language].myAgents}</h3>
                 <button
                     onClick={onAgentManagerClick}
-                    className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                    className="text-purple-400 hover:text-purple-300 text-sm font-medium"
                 >
                     {t[language].exploreAgents}
                 </button>

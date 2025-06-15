@@ -49,7 +49,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
           <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mr-3">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <h2 className={`font-bold text-gray-900 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+          <h2 className={`font-bold text-white ${isMobile ? 'text-xl' : 'text-2xl'}`}>
             {t[language].priorityTasks}
           </h2>
         </div>
@@ -81,7 +81,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
         </div>
       ) : (
         <motion.div 
-          className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100"
+          className="text-center py-16 bg-slate-800/50 rounded-2xl border border-slate-700"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.7, duration: 0.5 }}
@@ -89,8 +89,8 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
           <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">{t[language].noTasks}</h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">{t[language].noTasksDesc}</p>
+          <h3 className="text-xl font-semibold text-white mb-2">{t[language].noTasks}</h3>
+          <p className="text-slate-300 mb-6 max-w-md mx-auto">{t[language].noTasksDesc}</p>
           <button
             onClick={onMaturityCalculatorClick}
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"

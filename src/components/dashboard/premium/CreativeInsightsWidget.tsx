@@ -22,9 +22,9 @@ export const CreativeInsightsWidget: React.FC<CreativeInsightsWidgetProps> = ({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.0, duration: 0.5 }}
-            className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100 p-6"
+            className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6"
         >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t[language].insights}</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">{t[language].insights}</h3>
             <div className="space-y-4">
                 {[
                     { label: 'Idea Validation', value: maturityScores.ideaValidation, color: 'bg-blue-500' },
@@ -34,10 +34,10 @@ export const CreativeInsightsWidget: React.FC<CreativeInsightsWidgetProps> = ({
                 ].map((item) => (
                     <div key={item.label} className="space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-700">{item.label}</span>
-                            <span className="font-medium text-gray-900">{item.value}%</span>
+                            <span className="text-slate-300">{item.label}</span>
+                            <span className="font-medium text-white">{item.value}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-slate-700 rounded-full h-2">
                             <motion.div
                                 className={`h-2 rounded-full ${item.color}`}
                                 initial={{ width: 0 }}
