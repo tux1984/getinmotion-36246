@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
@@ -11,6 +10,8 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { calculateMaturityScores, ScoreBreakdown } from '../hooks/utils/scoreCalculation';
+import { ScoreBreakdownDisplay } from '../components/ScoreBreakdownDisplay';
 
 interface AIRecommendation {
   title: string;
@@ -30,7 +31,6 @@ interface ResultsStepProps {
 
 export const ResultsStep: React.FC<ResultsStepProps> = ({ 
   profileData,
-  scores,
   recommendedAgents, 
   language,
   onComplete,
@@ -40,6 +40,9 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Recalculate scores and get breakdown for detailed view
+  const { scores, breakdown } = calculateMaturityScores(profileData, language);
 
   const t = {
     en: {
@@ -245,12 +248,28 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
         </motion.div>
 
+        {/* Score Breakdown Display */}
+        {breakdown && (
+          <motion.div
+            className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <ScoreBreakdownDisplay 
+              breakdown={breakdown}
+              scores={scores}
+              language={language}
+            />
+          </motion.div>
+        )}
+
         {/* Recommended Agents */}
         <motion.div
           className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.5 }}
         >
           <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             {t[language].recommendedAgents}

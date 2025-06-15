@@ -1,164 +1,245 @@
-
 import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
-export const calculateMaturityScores = (profileData: UserProfileData): CategoryScore => {
-  // Initialize scores
-  let ideaValidation = 0;
-  let userExperience = 0;
-  let marketFit = 0;
-  let monetization = 0;
+interface BreakdownEntry {
+  points: number;
+  reason: string;
+}
+
+export interface ScoreBreakdown {
+  ideaValidation: BreakdownEntry[];
+  userExperience: BreakdownEntry[];
+  marketFit: BreakdownEntry[];
+  monetization: BreakdownEntry[];
+}
+
+const getTranslations = (language: 'en' | 'es') => ({
+  en: {
+    industry: "For defining your creative industry.",
+    activities: "For detailing your project activities.",
+    experience: {
+      beginner: "For your beginner experience level.",
+      intermediate: "For your intermediate experience level.",
+      advanced: "For your advanced experience level."
+    },
+    paymentMethods: {
+      base: "For having defined payment methods.",
+      multiple: "For offering multiple payment methods.",
+      billing_system: "For using a billing system.",
+      digital_platforms: "For selling on digital platforms."
+    },
+    brandIdentity: "For having a brand identity.",
+    financialControl: "For having financial control.",
+    teamStructure: "For having a team structure.",
+    taskOrganization: {
+      base: "For organizing your tasks.",
+      multiple: "For using multiple organization methods.",
+      digital_tools: "For using digital management tools.",
+      formal_processes: "For having formal work processes."
+    },
+    decisionMaking: "For your decision-making method.",
+    deepAnalysis: {
+      pricingMethod: "Deep analysis: For defining your pricing method.",
+      internationalSales: "Deep analysis: For having international sales.",
+      formalizedBusiness: "Deep analysis: For having a formalized business.",
+      collaboration: {
+        base: "Deep analysis: For collaborating with others.",
+        multiple: "Deep analysis: For having multiple collaboration types.",
+        businesses: "Deep analysis: For collaborating with businesses.",
+        institutions: "Deep analysis: For collaborating with institutions."
+      }
+    }
+  },
+  es: {
+    industry: "Por definir tu industria creativa.",
+    activities: "Por detallar las actividades de tu proyecto.",
+    experience: {
+      beginner: "Por tu experiencia de nivel principiante.",
+      intermediate: "Por tu experiencia de nivel intermedio.",
+      advanced: "Por tu experiencia de nivel avanzado."
+    },
+    paymentMethods: {
+      base: "Por tener métodos de pago definidos.",
+      multiple: "Por ofrecer múltiples métodos de pago.",
+      billing_system: "Por usar un sistema de facturación.",
+      digital_platforms: "Por vender en plataformas digitales."
+    },
+    brandIdentity: "Por tener una identidad de marca.",
+    financialControl: "Por tener control financiero.",
+    teamStructure: "Por tener una estructura de equipo.",
+    taskOrganization: {
+      base: "Por organizar tus tareas.",
+      multiple: "Por usar varios métodos de organización.",
+      digital_tools: "Por usar herramientas digitales de gestión.",
+      formal_processes: "Por tener procesos formales de trabajo."
+    },
+    decisionMaking: "Por tu método para tomar decisiones.",
+    deepAnalysis: {
+      pricingMethod: "Análisis profundo: Por definir tu método de fijación de precios.",
+      internationalSales: "Análisis profundo: Por tener ventas internacionales.",
+      formalizedBusiness: "Análisis profundo: Por tener un negocio formalizado.",
+      collaboration: {
+        base: "Análisis profundo: Por colaborar con otros.",
+        multiple: "Análisis profundo: Por tener múltiples tipos de colaboración.",
+        businesses: "Análisis profundo: Por colaborar con empresas.",
+        institutions: "Análisis profundo: Por colaborar con instituciones."
+      }
+    }
+  }
+}[language]);
+
+export const calculateMaturityScores = (profileData: UserProfileData, language: 'en' | 'es'): { scores: CategoryScore; breakdown: ScoreBreakdown } => {
+  const t = getTranslations(language);
+  const breakdown: ScoreBreakdown = {
+    ideaValidation: [],
+    userExperience: [],
+    marketFit: [],
+    monetization: [],
+  };
 
   // Cultural Profile scoring
   if (profileData.industry) {
-    ideaValidation += 20;
-    marketFit += 15;
+    breakdown.ideaValidation.push({ points: 20, reason: t.industry });
+    breakdown.marketFit.push({ points: 15, reason: t.industry });
   }
 
   if (profileData.activities && profileData.activities.length > 0) {
-    userExperience += 15;
-    ideaValidation += 10;
+    breakdown.userExperience.push({ points: 15, reason: t.activities });
+    breakdown.ideaValidation.push({ points: 10, reason: t.activities });
   }
 
   // Business Maturity scoring
   if (profileData.experience) {
     switch (profileData.experience) {
       case 'beginner':
-        ideaValidation += 10;
+        breakdown.ideaValidation.push({ points: 10, reason: t.experience.beginner });
         break;
       case 'intermediate':
-        ideaValidation += 20;
-        userExperience += 15;
+        breakdown.ideaValidation.push({ points: 20, reason: t.experience.intermediate });
+        breakdown.userExperience.push({ points: 15, reason: t.experience.intermediate });
         break;
       case 'advanced':
-        ideaValidation += 30;
-        userExperience += 25;
-        marketFit += 20;
+        breakdown.ideaValidation.push({ points: 30, reason: t.experience.advanced });
+        breakdown.userExperience.push({ points: 25, reason: t.experience.advanced });
+        breakdown.marketFit.push({ points: 20, reason: t.experience.advanced });
         break;
     }
   }
 
-  // Handle payment methods (can be array or string)
+  // Handle payment methods
   if (profileData.paymentMethods) {
     const paymentMethodsArray = Array.isArray(profileData.paymentMethods) 
       ? profileData.paymentMethods 
       : [profileData.paymentMethods];
     
-    // Base score for having any payment method
-    monetization += 15;
-    marketFit += 10;
+    breakdown.monetization.push({ points: 15, reason: t.paymentMethods.base });
+    breakdown.marketFit.push({ points: 10, reason: t.paymentMethods.base });
     
-    // Bonus for multiple payment methods (shows maturity)
     if (paymentMethodsArray.length > 1) {
-      monetization += 10;
-      marketFit += 5;
+      breakdown.monetization.push({ points: 10, reason: t.paymentMethods.multiple });
+      breakdown.marketFit.push({ points: 5, reason: t.paymentMethods.multiple });
     }
     
-    // Specific bonuses for advanced payment methods
     if (paymentMethodsArray.includes('billing_system')) {
-      monetization += 15;
+      breakdown.monetization.push({ points: 15, reason: t.paymentMethods.billing_system });
     }
     if (paymentMethodsArray.includes('digital_platforms')) {
-      marketFit += 10;
+      breakdown.marketFit.push({ points: 10, reason: t.paymentMethods.digital_platforms });
     }
   }
 
   if (profileData.brandIdentity) {
-    userExperience += 20;
-    marketFit += 15;
+    breakdown.userExperience.push({ points: 20, reason: t.brandIdentity });
+    breakdown.marketFit.push({ points: 15, reason: t.brandIdentity });
   }
 
   // Management Style scoring
   if (profileData.financialControl) {
-    monetization += 20;
+    breakdown.monetization.push({ points: 20, reason: t.financialControl });
   }
 
   if (profileData.teamStructure) {
-    userExperience += 15;
-    marketFit += 10;
+    breakdown.userExperience.push({ points: 15, reason: t.teamStructure });
+    breakdown.marketFit.push({ points: 10, reason: t.teamStructure });
   }
 
-  // Handle task organization (can be array or string)
+  // Handle task organization
   if (profileData.taskOrganization) {
     const taskOrgArray = Array.isArray(profileData.taskOrganization) 
       ? profileData.taskOrganization 
       : [profileData.taskOrganization];
     
-    // Base score for any organization
-    userExperience += 10;
-    ideaValidation += 5;
+    breakdown.userExperience.push({ points: 10, reason: t.taskOrganization.base });
+    breakdown.ideaValidation.push({ points: 5, reason: t.taskOrganization.base });
     
-    // Bonus for multiple organization methods
     if (taskOrgArray.length > 1) {
-      userExperience += 10;
-      ideaValidation += 5;
+      breakdown.userExperience.push({ points: 10, reason: t.taskOrganization.multiple });
+      breakdown.ideaValidation.push({ points: 5, reason: t.taskOrganization.multiple });
     }
     
-    // Specific bonuses for advanced organization
     if (taskOrgArray.includes('digital_tools')) {
-      userExperience += 10;
+      breakdown.userExperience.push({ points: 10, reason: t.taskOrganization.digital_tools });
     }
     if (taskOrgArray.includes('formal_processes')) {
-      userExperience += 15;
-      ideaValidation += 10;
+      breakdown.userExperience.push({ points: 15, reason: t.taskOrganization.formal_processes });
+      breakdown.ideaValidation.push({ points: 10, reason: t.taskOrganization.formal_processes });
     }
   }
 
   if (profileData.decisionMaking) {
-    marketFit += 15;
-    ideaValidation += 10;
+    breakdown.marketFit.push({ points: 15, reason: t.decisionMaking });
+    breakdown.ideaValidation.push({ points: 10, reason: t.decisionMaking });
   }
 
-  // Extended questions bonus (for deep analysis)
+  // Extended questions bonus
   if (profileData.analysisPreference === 'deep') {
     if (profileData.pricingMethod) {
-      monetization += 15;
+      breakdown.monetization.push({ points: 15, reason: t.deepAnalysis.pricingMethod });
     }
     if (profileData.internationalSales) {
-      marketFit += 10;
+      breakdown.marketFit.push({ points: 10, reason: t.deepAnalysis.internationalSales });
     }
     if (profileData.formalizedBusiness) {
-      monetization += 10;
-      marketFit += 10;
+      breakdown.monetization.push({ points: 10, reason: t.deepAnalysis.formalizedBusiness });
+      breakdown.marketFit.push({ points: 10, reason: t.deepAnalysis.formalizedBusiness });
     }
     
-    // Handle collaboration (can be array or string)
     if (profileData.collaboration) {
       const collaborationArray = Array.isArray(profileData.collaboration) 
         ? profileData.collaboration 
         : [profileData.collaboration];
       
-      // Base score for any collaboration
       if (!collaborationArray.includes('none')) {
-        marketFit += 10;
-        userExperience += 5;
+        breakdown.marketFit.push({ points: 10, reason: t.deepAnalysis.collaboration.base });
+        breakdown.userExperience.push({ points: 5, reason: t.deepAnalysis.collaboration.base });
         
-        // Bonus for multiple collaboration types
         if (collaborationArray.length > 1) {
-          marketFit += 5;
-          userExperience += 5;
+          breakdown.marketFit.push({ points: 5, reason: t.deepAnalysis.collaboration.multiple });
+          breakdown.userExperience.push({ points: 5, reason: t.deepAnalysis.collaboration.multiple });
         }
         
-        // Specific bonuses
         if (collaborationArray.includes('businesses')) {
-          monetization += 10;
+          breakdown.monetization.push({ points: 10, reason: t.deepAnalysis.collaboration.businesses });
         }
         if (collaborationArray.includes('institutions')) {
-          marketFit += 10;
+          breakdown.marketFit.push({ points: 10, reason: t.deepAnalysis.collaboration.institutions });
         }
       }
     }
   }
 
-  // Ensure scores don't exceed 100
-  return {
-    ideaValidation: Math.min(100, ideaValidation),
-    userExperience: Math.min(100, userExperience),
-    marketFit: Math.min(100, marketFit),
-    monetization: Math.min(100, monetization)
+  const calculateTotal = (entries: BreakdownEntry[]) => entries.reduce((sum, entry) => sum + entry.points, 0);
+
+  const scores = {
+    ideaValidation: Math.min(100, calculateTotal(breakdown.ideaValidation)),
+    userExperience: Math.min(100, calculateTotal(breakdown.userExperience)),
+    marketFit: Math.min(100, calculateTotal(breakdown.marketFit)),
+    monetization: Math.min(100, calculateTotal(breakdown.monetization))
   };
+
+  return { scores, breakdown };
 };
 
 export const getRecommendedAgents = (profileData: UserProfileData, scores: CategoryScore): RecommendedAgents => {
