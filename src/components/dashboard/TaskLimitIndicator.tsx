@@ -46,6 +46,11 @@ export const TaskLimitIndicator: React.FC<TaskLimitIndicatorProps> = ({
     }
   };
 
+  // Only show if user actually has active tasks or is near/at limit
+  if (activeTasksCount === 0) {
+    return null;
+  }
+
   if (compact) {
     return (
       <div className="flex items-center gap-2">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useOptimizedRecommendedTasks, OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
@@ -37,14 +38,14 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   onSelectAgent
 }) => {
   const { tasks: realTasks, loading: realTasksLoading, createTask, updateTask, deleteTask } = useAgentTasks();
-  const { tasks: suggestedTasks, loading: suggestedLoading, convertToRealTask } = useOptimizedRecommendedTasks(
+  const { tasks: suggestedTasks, loading: suggestedLoading } = useOptimizedRecommendedTasks(
     maturityScores, 
     profileData, 
     enabledAgents
   );
   
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
-  const { isAtLimit, isNearLimit } = useTaskLimits(realTasks);
+  const { isAtLimit, isNearLimit, activeTasksCount, limit } = useTaskLimits(realTasks);
 
   const t = {
     en: {
@@ -61,7 +62,9 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
       filterPending: 'Pending',
       filterInProgress: 'In Progress',
       filterCompleted: 'Completed',
-      chatWithAgent: 'Chat with Agent'
+      chatWithAgent: 'Chat with Agent',
+      limitReached: 'Task limit reached. Complete pending tasks to create new ones.',
+      limitWarning: 'You have {count}/{limit} active tasks. Complete some to create new ones.'
     },
     es: {
       taskManagement: 'Gestión de Tareas',
@@ -77,7 +80,9 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
       filterPending: 'Pendientes',
       filterInProgress: 'En Progreso',
       filterCompleted: 'Completadas',
-      chatWithAgent: 'Chatear con Agente'
+      chatWithAgent: 'Chatear con Agente',
+      limitReached: 'Límite de tareas alcanzado. Completa tareas pendientes para crear nuevas.',
+      limitWarning: 'Tienes {count}/{limit} tareas activas. Completa algunas para crear nuevas.'
     }
   };
 
@@ -127,11 +132,13 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
           {t[language].taskManagement}
         </CardTitle>
         
-        {/* Task Limit Indicator */}
-        <TaskLimitIndicator 
-          tasks={realTasks} 
-          language={language}
-        />
+        {/* Only show Task Limit Indicator if user has active tasks */}
+        {activeTasksCount > 0 && (
+          <TaskLimitIndicator 
+            tasks={realTasks} 
+            language={language}
+          />
+        )}
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="tasks" className="w-full">
@@ -147,7 +154,7 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-4">
-            {/* Filtros para tareas reales */}
+            {/* Task filters */}
             <div className="flex items-center gap-2 flex-wrap">
               <Filter className="w-4 h-4 text-gray-500" />
               <Button 
@@ -245,15 +252,25 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
           </TabsContent>
 
           <TabsContent value="suggestions" className="space-y-4">
-            {isAtLimit && (
+            {/* Only show limit warning if user actually has many active tasks */}
+            {isAtLimit && activeTasksCount > 10 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                 <div className="flex items-center gap-2 text-red-700">
                   <AlertTriangle className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    {language === 'es' 
-                      ? 'Límite de tareas alcanzado. Completa tareas pendientes para crear nuevas.'
-                      : 'Task limit reached. Complete pending tasks to create new ones.'
-                    }
+                    {t[language].limitReached}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Show warning if approaching limit */}
+            {isNearLimit && !isAtLimit && activeTasksCount > 20 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-yellow-700">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {t[language].limitWarning.replace('{count}', activeTasksCount.toString()).replace('{limit}', limit.toString())}
                   </span>
                 </div>
               </div>

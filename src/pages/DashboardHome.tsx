@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
@@ -10,15 +11,12 @@ import { ModernDashboardMain } from '@/components/dashboard/ModernDashboardMain'
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Wrench, CheckCircle, Home } from 'lucide-react';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
-import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
-import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [forceShow, setForceShow] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
   
   const {
     agents,
@@ -40,49 +38,10 @@ const DashboardHome = () => {
     checkAndRepair
   } = useDataRecovery();
 
-  // --- Task Synchronization Logic ---
-  const activeAgents = agents?.filter(a => a.status === 'active') || [];
-  const agentPool = activeAgents.map(a => a.id);
-  
-  const { tasks: recommendedTasks, loading: recommendedTasksLoading } = useOptimizedRecommendedTasks(maturityScores, profileData, agentPool);
-  const { tasks: persistentTasks, createTask } = useAgentTasks();
-
+  // Debug logging
   useEffect(() => {
-    if (recommendedTasks.length === 0 || !persistentTasks || !createTask) return;
-
-    const syncTasks = async () => {
-      const newTasksToCreate = recommendedTasks.filter(recTask => 
-        !persistentTasks.some(persistedTask => persistedTask.title === recTask.title)
-      );
-
-      if (newTasksToCreate.length > 0) {
-        console.log(`DashboardHome: Syncing ${newTasksToCreate.length} recommended tasks to DB.`);
-        
-        const creationPromises = newTasksToCreate.map(recTask => {
-          const taskToCreate: Partial<AgentTask> = {
-            title: recTask.title,
-            description: recTask.description,
-            agent_id: recTask.agentId,
-            relevance: recTask.priority,
-          };
-          return createTask(taskToCreate);
-        });
-        
-        await Promise.all(creationPromises);
-        console.log("DashboardHome: Sync complete.");
-      }
-    };
-    
-    syncTasks();
-  }, [recommendedTasks, persistentTasks, createTask]);
-  // --- End Task Synchronization Logic ---
-
-  // Debug logging mejorado
-  useEffect(() => {
-    const debugData = {
-      timestamp: new Date().toISOString(),
+    console.log('DashboardHome: State update:', {
       user: !!user,
-      userId: user?.id,
       isLoading,
       error,
       hasOnboarding,
@@ -93,34 +52,36 @@ const DashboardHome = () => {
       activeAgents: agents?.filter(a => a.status === 'active')?.length || 0,
       maturityScores: !!maturityScores,
       profileData: !!profileData,
-      maturityScoresData: maturityScores,
-      recommendedAgentsKeys: recommendedAgents ? Object.keys(recommendedAgents) : [],
-      forceShow,
-      recommendedTasksCount: recommendedTasks?.length,
-      persistentTasksCount: persistentTasks?.length,
-    };
-    
-    setDebugInfo(debugData);
-    console.log('DashboardHome: Comprehensive state update:', debugData);
+      forceShow
+    });
   }, [
     user, isLoading, error, hasOnboarding, needsRecovery, 
-    recovering, recovered, agents, maturityScores, recommendedAgents, forceShow,
-    profileData, recommendedTasks, persistentTasks
+    recovering, recovered, agents, maturityScores, forceShow, profileData
   ]);
 
-  // Lógica mejorada de redirección con más validaciones
+  // Simplified redirect logic with timeout
   useEffect(() => {
     if (!user) {
       console.log('DashboardHome: No user, redirecting to auth');
       return;
     }
 
-    if (isLoading || recovering) {
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isLoading || scoresLoading) {
+        console.log('DashboardHome: Loading timeout, forcing show');
+        setForceShow(true);
+      }
+    }, 10000); // 10 second timeout
+
+    if (isLoading || scoresLoading || recovering) {
       console.log('DashboardHome: Loading or recovering, waiting...');
-      return;
+      return () => clearTimeout(timeoutId);
     }
 
-    // Verificar si realmente necesita onboarding
+    clearTimeout(timeoutId);
+
+    // Check if really needs onboarding
     const hasAnyData = maturityScores || 
                        agents?.some(a => a.status === 'active') || 
                        hasOnboarding;
@@ -131,24 +92,14 @@ const DashboardHome = () => {
                           !forceShow &&
                           !error;
 
-    console.log('DashboardHome: Redirect check:', {
-      hasAnyData,
-      shouldRedirect,
-      maturityScores: !!maturityScores,
-      activeAgents: agents?.filter(a => a.status === 'active')?.length || 0,
-      hasOnboarding,
-      needsRecovery,
-      recovered,
-      forceShow,
-      error
-    });
-
     if (shouldRedirect) {
       console.log('User needs onboarding, redirecting to maturity calculator');
       navigate('/maturity-calculator', { replace: true });
     }
+
+    return () => clearTimeout(timeoutId);
   }, [
-    user, isLoading, recovering, hasOnboarding, maturityScores, 
+    user, isLoading, scoresLoading, recovering, hasOnboarding, maturityScores, 
     agents, needsRecovery, recovered, forceShow, error, navigate
   ]);
 
@@ -195,8 +146,8 @@ const DashboardHome = () => {
     navigate('/maturity-calculator', { replace: true });
   };
 
-  // Mostrar pantalla de carga mejorada
-  if ((isLoading || scoresLoading || recommendedTasksLoading) && !forceShow) {
+  // Show loading screen with improved timeout handling
+  if ((isLoading || scoresLoading) && !forceShow) {
     return (
       <DashboardBackground>
         <NewDashboardHeader 
@@ -234,7 +185,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar pantalla de recuperación
+  // Show recovery screen
   if (recovering) {
     return (
       <DashboardBackground>
@@ -264,7 +215,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar mensaje de recuperación exitosa
+  // Show recovery success
   if (recovered && !forceShow) {
     return (
       <DashboardBackground>
@@ -304,7 +255,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar opciones de reparación si necesita recovery
+  // Show repair options if needs recovery
   if (needsRecovery && !forceShow) {
     return (
       <DashboardBackground>
@@ -347,7 +298,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar error con opciones de reparación mejoradas
+  // Show error with repair options
   const combinedError = error || scoresError;
   if (combinedError && !forceShow) {
     return (
@@ -388,7 +339,7 @@ const DashboardHome = () => {
     );
   }
 
-  // Mostrar dashboard principal con validaciones adicionales
+  // Show main dashboard with safe defaults
   const safeAgents = agents || [];
   const safeMaturityScores = maturityScores || null;
   const safeRecommendedAgents = recommendedAgents || {};
@@ -398,9 +349,7 @@ const DashboardHome = () => {
     agentsCount: safeAgents.length,
     activeAgents: safeAgents.filter(a => a?.status === 'active').length,
     hasMaturityScores: !!safeMaturityScores,
-    hasProfileData: !!safeProfileData,
-    recommendedAgentsKeys: Object.keys(safeRecommendedAgents),
-    debugInfo
+    hasProfileData: !!safeProfileData
   });
 
   return (

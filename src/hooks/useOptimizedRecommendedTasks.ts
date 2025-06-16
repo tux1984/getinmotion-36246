@@ -10,85 +10,85 @@ export type { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 
 export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, profileData: any | null, agentPool: string[] = []) => {
   const [tasks, setTasks] = useState<OptimizedRecommendedTask[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false by default
   const { language } = useLanguage();
 
   useEffect(() => {
-    const loadRobustTasks = async () => {
+    // Only generate suggestions if we have the necessary data
+    if (!maturityScores || agentPool.length === 0) {
+      console.log('useOptimizedRecommendedTasks: Missing required data', {
+        maturityScores: !!maturityScores,
+        agentPoolLength: agentPool.length
+      });
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+
+    const loadSuggestions = async () => {
       setLoading(true);
       try {
-        if (!maturityScores) {
-          console.log('No maturity scores available, cannot generate tasks');
-          setTasks([]);
-          return;
-        }
-
-        console.log('Loading robust tasks with:', {
+        console.log('useOptimizedRecommendedTasks: Generating task suggestions', {
           maturityScores,
-          profileData,
-          agentPool: agentPool,
           agentPoolCount: agentPool.length
         });
 
-        // Generar SOLO 3 tareas sugeridas como máximo (no persistir automáticamente)
+        // Generate ONLY suggestions (never persist automatically)
         const scoreTasks = generateRobustTasksFromScores(maturityScores, agentPool);
-        console.log('Score-based tasks generated:', scoreTasks.length);
+        console.log('Score-based suggestions generated:', scoreTasks.length);
         
-        let combinedTasks = [...scoreTasks];
+        let combinedSuggestions = [...scoreTasks];
 
+        // Try to get AI recommendations if profile data exists
         if (profileData) {
-            try {
-                const { data, error } = await supabase.functions.invoke('maturity-analysis', {
-                    body: { scores: maturityScores, profileData, language }
-                });
+          try {
+            const { data, error } = await supabase.functions.invoke('maturity-analysis', {
+              body: { scores: maturityScores, profileData, language }
+            });
 
-                if (error) throw error;
-                
-                if (data?.recommendations?.length > 0) {
-                  console.log('AI recommendations obtained:', data.recommendations.length);
-                  const aiTasks = convertAIRecommendationsToTasks(data.recommendations.slice(0, 2), agentPool);
-                  console.log('AI tasks converted:', aiTasks.length);
-                  combinedTasks = [...aiTasks, ...scoreTasks];
-                } else {
-                    console.log('AI analysis completed but returned no recommendations.');
-                }
-            } catch (e) {
-                console.error("AI recommendations fetch failed, using score-based tasks as fallback.", e);
+            if (error) {
+              console.warn('AI recommendations failed:', error);
+            } else if (data?.recommendations?.length > 0) {
+              console.log('AI recommendations obtained:', data.recommendations.length);
+              const aiSuggestions = convertAIRecommendationsToSuggestions(data.recommendations.slice(0, 2), agentPool);
+              combinedSuggestions = [...aiSuggestions, ...scoreTasks];
             }
+          } catch (e) {
+            console.warn("AI recommendations fetch failed, using score-based suggestions.", e);
+          }
         }
         
-        // Limitar estrictamente a máximo 3 tareas sugeridas
-        const uniqueTasks = removeDuplicateTasks(combinedTasks);
-        const finalTasks = prioritizeAndLimitTasks(uniqueTasks, 3);
+        // Limit suggestions to maximum 3
+        const uniqueSuggestions = removeDuplicateSuggestions(combinedSuggestions);
+        const finalSuggestions = prioritizeAndLimitSuggestions(uniqueSuggestions, 3);
 
-        console.log('Final robust tasks:', {
-          totalCombined: combinedTasks.length,
-          uniqueTasks: uniqueTasks.length,
-          finalTasksCount: finalTasks.length
+        console.log('Final suggestions ready:', {
+          totalCombined: combinedSuggestions.length,
+          uniqueSuggestions: uniqueSuggestions.length,
+          finalCount: finalSuggestions.length
         });
         
-        setTasks(finalTasks);
+        setTasks(finalSuggestions);
       } catch (error) {
-        console.error('Error loading robust tasks:', error);
-        // En caso de error total, usar máximo 2 tareas de emergencia
+        console.error('Error loading task suggestions:', error);
+        // Fallback to simple score-based suggestions
         if (maturityScores) {
-            const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
-            setTasks(prioritizeAndLimitTasks(emergencyTasks, 2));
+          const emergencySuggestions = generateRobustTasksFromScores(maturityScores, agentPool);
+          setTasks(prioritizeAndLimitSuggestions(emergencySuggestions, 2));
         } else {
-            setTasks([]);
+          setTasks([]);
         }
       } finally {
         setLoading(false);
       }
     };
 
-    loadRobustTasks();
+    loadSuggestions();
   }, [maturityScores, profileData, agentPool.join(','), language]);
 
-  const convertAIRecommendationsToTasks = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
+  const convertAIRecommendationsToSuggestions = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
     if (!recommendations.length || !agentPool.length) return [];
 
-    // Limitar a máximo 2 recomendaciones AI
     return recommendations.slice(0, 2).map((rec, index) => {
       const agentIndex = index % agentPool.length;
       const agentId = agentPool[agentIndex];
@@ -97,7 +97,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
                       (rec.priority === 'Media' || rec.priority === 'Medium') ? 'medium' : 'low';
 
       return {
-        id: `ai-rec-${index}-${Date.now()}`,
+        id: `ai-suggestion-${index}-${Date.now()}`,
         title: rec.title,
         description: rec.description,
         agentId,
@@ -112,19 +112,19 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     });
   };
 
-  const removeDuplicateTasks = (tasks: OptimizedRecommendedTask[]): OptimizedRecommendedTask[] => {
+  const removeDuplicateSuggestions = (suggestions: OptimizedRecommendedTask[]): OptimizedRecommendedTask[] => {
     const seen = new Set<string>();
-    return tasks.filter(task => {
-      const key = task.title.toLowerCase().substring(0, 30);
+    return suggestions.filter(suggestion => {
+      const key = suggestion.title.toLowerCase().substring(0, 30);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
   };
 
-  const prioritizeAndLimitTasks = (tasks: OptimizedRecommendedTask[], limit: number): OptimizedRecommendedTask[] => {
+  const prioritizeAndLimitSuggestions = (suggestions: OptimizedRecommendedTask[], limit: number): OptimizedRecommendedTask[] => {
     const priorityOrder = { high: 3, medium: 2, low: 1 };
-    return tasks
+    return suggestions
       .sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority])
       .slice(0, limit);
   };
@@ -137,9 +137,8 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     );
   };
 
-  // Nueva función para convertir tarea sugerida en tarea real
+  // Function to convert suggested task to real task (will be handled by createTask in TaskManagementInterface)
   const convertToRealTask = async (task: OptimizedRecommendedTask) => {
-    // Esta función será implementada para crear una tarea real en la BD
     console.log('Converting suggested task to real task:', task);
     return null;
   };
