@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ACTIVE_TASKS_LIMIT } from './useTaskLimits';
 
 export interface AgentTask {
   id: string;
@@ -70,6 +70,20 @@ export function useAgentTasks(agentId?: string) {
   const createTask = async (taskData: Partial<AgentTask>) => {
     if (!user) return null;
 
+    // Check active tasks limit before creating
+    const activeTasks = tasks.filter(task => 
+      task.status === 'pending' || task.status === 'in_progress'
+    );
+
+    if (activeTasks.length >= ACTIVE_TASKS_LIMIT) {
+      toast({
+        title: 'Límite alcanzado',
+        description: `No puedes crear más tareas. Tienes ${activeTasks.length}/${ACTIVE_TASKS_LIMIT} tareas activas. Completa algunas tareas pendientes primero.`,
+        variant: 'destructive',
+      });
+      return null;
+    }
+
     try {
       const { data, error } = await supabase
         .from('agent_tasks')
@@ -96,6 +110,12 @@ export function useAgentTasks(agentId?: string) {
       };
       
       setTasks(prev => [typedTask, ...prev]);
+      
+      toast({
+        title: 'Tarea creada',
+        description: `Nueva tarea creada. Tienes ${activeTasks.length + 1}/${ACTIVE_TASKS_LIMIT} tareas activas.`,
+      });
+      
       return typedTask;
     } catch (error) {
       console.error('Error creating task:', error);

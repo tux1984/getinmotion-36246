@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useOptimizedRecommendedTasks, OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
+import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { TaskLimitIndicator } from './TaskLimitIndicator';
 import { 
   ListTodo, 
   Plus, 
@@ -15,7 +16,8 @@ import {
   Clock, 
   Trash2,
   Filter,
-  Star
+  Star,
+  AlertTriangle
 } from 'lucide-react';
 import { CategoryScore } from '@/types/dashboard';
 
@@ -42,6 +44,7 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   );
   
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
+  const { isAtLimit, isNearLimit } = useTaskLimits(realTasks);
 
   const t = {
     en: {
@@ -84,6 +87,10 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   });
 
   const handleConvertSuggestedTask = async (suggestedTask: OptimizedRecommendedTask) => {
+    if (isAtLimit) {
+      return; // createTask will show the toast
+    }
+    
     await createTask({
       agent_id: suggestedTask.agentId,
       title: suggestedTask.title,
@@ -119,6 +126,12 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
           <ListTodo className="w-5 h-5" />
           {t[language].taskManagement}
         </CardTitle>
+        
+        {/* Task Limit Indicator */}
+        <TaskLimitIndicator 
+          tasks={realTasks} 
+          language={language}
+        />
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="tasks" className="w-full">
@@ -232,6 +245,20 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
           </TabsContent>
 
           <TabsContent value="suggestions" className="space-y-4">
+            {isAtLimit && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-red-700">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {language === 'es' 
+                      ? 'Límite de tareas alcanzado. Completa tareas pendientes para crear nuevas.'
+                      : 'Task limit reached. Complete pending tasks to create new ones.'
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
+
             {suggestedLoading ? (
               <div className="space-y-2">
                 {[...Array(3)].map((_, i) => (
@@ -273,6 +300,7 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
                           size="sm" 
                           onClick={() => handleConvertSuggestedTask(task)}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                          disabled={isAtLimit}
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           {t[language].convertToTask}
