@@ -1,17 +1,17 @@
+
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserActivity } from '@/hooks/useUserActivity';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
-// New components
+// Components
 import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
-import { PriorityTasks } from './premium/PriorityTasks';
 import { ActiveAgentsWidget } from './premium/ActiveAgentsWidget';
 import { CreativeInsightsWidget } from './premium/CreativeInsightsWidget';
 import { RecentActivityWidget } from './premium/RecentActivityWidget';
+import { TaskManagementInterface } from './TaskManagementInterface';
 
 interface PremiumDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -34,8 +34,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
 }) => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
-  const { tasks, loading: tasksLoading } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
+  const enabledAgents = useMemo(() => agents.filter(a => a.status === 'active').map(a => a.id), [agents]);
   const { recentConversations, loading: activityLoading } = useUserActivity();
 
   const t = {
@@ -54,11 +53,6 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
     ? Math.round((maturityScores.ideaValidation + maturityScores.userExperience + maturityScores.marketFit + maturityScores.monetization) / 4)
     : 0;
 
-  const handleTaskAction = (taskId: string, agentId: string) => {
-    console.log('Starting task:', taskId, 'with agent:', agentId);
-    onSelectAgent(agentId);
-  };
-
   return (
     <div>
       <PremiumDashboardHero
@@ -66,7 +60,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
         welcomeText={t[language].welcome}
         subtitleText={t[language].subtitle}
         activeAgentsCount={activeAgents.length}
-        completedTasksCount={tasks.filter(t => t.completed).length}
+        completedTasksCount={0} // Se calculará desde TaskManagementInterface
         overallProgress={overallProgress}
       />
 
@@ -74,16 +68,19 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
         <div className="max-w-7xl mx-auto">
           <div className={`grid gap-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
             
+            {/* Main Content Area */}
             <div className={`${isMobile ? '' : 'lg:col-span-2'} space-y-6`}>
-              <PriorityTasks
+              {/* Task Management Interface - Principal Feature */}
+              <TaskManagementInterface
+                maturityScores={maturityScores}
+                profileData={profileData}
+                enabledAgents={enabledAgents}
                 language={language}
-                tasks={tasks}
-                tasksLoading={tasksLoading}
-                onTaskAction={handleTaskAction}
-                onMaturityCalculatorClick={onMaturityCalculatorClick}
+                onSelectAgent={onSelectAgent}
               />
             </div>
 
+            {/* Sidebar */}
             <div className="space-y-6">
               <ActiveAgentsWidget
                 language={language}

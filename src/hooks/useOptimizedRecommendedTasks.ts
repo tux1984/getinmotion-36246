@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CategoryScore } from '@/types/dashboard';
 import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
@@ -29,7 +30,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
           agentPoolCount: agentPool.length
         });
 
-        // Generar tareas base desde maturity scores (siempre funciona como fallback)
+        // Generar SOLO 3 tareas sugeridas como máximo (no persistir automáticamente)
         const scoreTasks = generateRobustTasksFromScores(maturityScores, agentPool);
         console.log('Score-based tasks generated:', scoreTasks.length);
         
@@ -45,7 +46,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
                 
                 if (data?.recommendations?.length > 0) {
                   console.log('AI recommendations obtained:', data.recommendations.length);
-                  const aiTasks = convertAIRecommendationsToTasks(data.recommendations, agentPool);
+                  const aiTasks = convertAIRecommendationsToTasks(data.recommendations.slice(0, 2), agentPool);
                   console.log('AI tasks converted:', aiTasks.length);
                   combinedTasks = [...aiTasks, ...scoreTasks];
                 } else {
@@ -56,9 +57,9 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
             }
         }
         
-        // Combinar, priorizar y limitar tareas
+        // Limitar estrictamente a máximo 3 tareas sugeridas
         const uniqueTasks = removeDuplicateTasks(combinedTasks);
-        const finalTasks = prioritizeAndLimitTasks(uniqueTasks, 6);
+        const finalTasks = prioritizeAndLimitTasks(uniqueTasks, 3);
 
         console.log('Final robust tasks:', {
           totalCombined: combinedTasks.length,
@@ -69,10 +70,10 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
         setTasks(finalTasks);
       } catch (error) {
         console.error('Error loading robust tasks:', error);
-        // En caso de error total, usar tareas de emergencia (que son las de scores)
+        // En caso de error total, usar máximo 2 tareas de emergencia
         if (maturityScores) {
             const emergencyTasks = generateRobustTasksFromScores(maturityScores, agentPool);
-            setTasks(prioritizeAndLimitTasks(emergencyTasks, 6));
+            setTasks(prioritizeAndLimitTasks(emergencyTasks, 2));
         } else {
             setTasks([]);
         }
@@ -82,13 +83,13 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     };
 
     loadRobustTasks();
-  }, [maturityScores, profileData, agentPool.join(','), language]); // Added agentPool to dependency array
+  }, [maturityScores, profileData, agentPool.join(','), language]);
 
   const convertAIRecommendationsToTasks = (recommendations: any[], agentPool: string[]): OptimizedRecommendedTask[] => {
     if (!recommendations.length || !agentPool.length) return [];
 
-    return recommendations.map((rec, index) => {
-      // Usar el primer agente disponible o rotar entre agentes
+    // Limitar a máximo 2 recomendaciones AI
+    return recommendations.slice(0, 2).map((rec, index) => {
       const agentIndex = index % agentPool.length;
       const agentId = agentPool[agentIndex];
       
@@ -96,13 +97,13 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
                       (rec.priority === 'Media' || rec.priority === 'Medium') ? 'medium' : 'low';
 
       return {
-        id: `ai-rec-${index}`,
+        id: `ai-rec-${index}-${Date.now()}`,
         title: rec.title,
         description: rec.description,
         agentId,
         agentName: `Agente IA ${index + 1}`,
         priority,
-        category: 'IA Recomendado',
+        category: 'Sugerida',
         estimatedTime: rec.timeframe || '1-2 horas',
         prompt: `Basado en mi evaluación: "${rec.title}". ${rec.description}. ¿Puedes ayudarme a desarrollar un plan específico?`,
         completed: false,
@@ -136,9 +137,17 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     );
   };
 
+  // Nueva función para convertir tarea sugerida en tarea real
+  const convertToRealTask = async (task: OptimizedRecommendedTask) => {
+    // Esta función será implementada para crear una tarea real en la BD
+    console.log('Converting suggested task to real task:', task);
+    return null;
+  };
+
   return {
     tasks,
     loading,
-    markTaskCompleted
+    markTaskCompleted,
+    convertToRealTask
   };
 };
