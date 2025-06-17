@@ -130,10 +130,10 @@ const AgentsGallery = () => {
           onSearchChange={(value) => updateFilter('searchTerm', value)}
           selectedCategory={filters.selectedCategories.length > 0 ? filters.selectedCategories[0] : null}
           onCategoryChange={(value) => updateFilter('selectedCategories', value ? [value] : [])}
-          selectedPriority={filters.selectedPriority}
-          onPriorityChange={(value) => updateFilter('selectedPriority', value)}
-          selectedImpact={filters.selectedImpact}
-          onImpactChange={(value) => updateFilter('selectedImpact', value)}
+          selectedPriority={filters.selectedPriority === 'all' ? null : filters.selectedPriority}
+          onPriorityChange={(value) => updateFilter('selectedPriority', value || 'all')}
+          selectedImpact={filters.selectedImpact === 'all' ? null : filters.selectedImpact}
+          onImpactChange={(value) => updateFilter('selectedImpact', value || 'all')}
           categories={categories}
           categoryTranslations={t.categories}
           translations={{
