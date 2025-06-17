@@ -3,10 +3,26 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AgentConversation } from '@/hooks/useAgentConversations';
-import { MessageSquare, Plus, Clock, Search } from 'lucide-react';
+import { MessageSquare, Plus, Clock, Search, Trash2, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ConversationHistorySidebarProps {
   agentId: string;
@@ -17,6 +33,7 @@ interface ConversationHistorySidebarProps {
   currentConversationId: string | null;
   selectConversation: (id: string) => Promise<void>;
   startNewConversation: () => void;
+  deleteConversation: (id: string) => Promise<boolean>;
   loading: boolean;
 }
 
@@ -27,9 +44,11 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
   currentConversationId,
   selectConversation,
   startNewConversation,
+  deleteConversation,
   loading,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
   
   const t = {
     en: {
@@ -37,14 +56,24 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
       newChat: "New Chat",
       search: "Search conversations...",
       noConversations: "No conversations yet",
-      startFirst: "Start your first chat!"
+      startFirst: "Start your first chat!",
+      deleteConversation: "Delete conversation",
+      confirmDelete: "Are you sure you want to delete this conversation?",
+      deleteWarning: "This action cannot be undone. All messages in this conversation will be permanently removed.",
+      cancel: "Cancel",
+      delete: "Delete"
     },
     es: {
       conversations: "Conversaciones",
       newChat: "Chat Nuevo",
       search: "Buscar conversaciones...",
       noConversations: "No hay conversaciones",
-      startFirst: "¡Inicia tu primer chat!"
+      startFirst: "¡Inicia tu primer chat!",
+      deleteConversation: "Eliminar conversación",
+      confirmDelete: "¿Estás seguro de que quieres eliminar esta conversación?",
+      deleteWarning: "Esta acción no se puede deshacer. Todos los mensajes de esta conversación se eliminarán permanentemente.",
+      cancel: "Cancelar",
+      delete: "Eliminar"
     }
   };
 
@@ -72,6 +101,13 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
       }
     } catch (error) {
       console.error('Error selecting conversation:', error);
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    const success = await deleteConversation(conversationId);
+    if (success) {
+      setConversationToDelete(null);
     }
   };
 
@@ -117,22 +153,53 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
               {filteredConversations.map((conv) => (
                 <div
                   key={conv.id}
-                  onClick={() => handleSelectConversation(conv.id)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-white/10 ${
+                  className={`group relative p-3 rounded-lg cursor-pointer transition-all hover:bg-white/10 ${
                     currentConversationId === conv.id 
                       ? 'bg-purple-500/30 border border-purple-400/50' 
                       : 'bg-white/5 hover:bg-white/10 border border-white/10'
                   }`}
                 >
-                  <p className="text-white text-sm font-medium truncate">
-                    {conv.title || 'Nueva conversación'}
-                  </p>
-                  <div className="flex items-center text-xs text-white/60 mt-1">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {formatDistanceToNow(new Date(conv.updated_at), { 
-                      addSuffix: true, 
-                      locale: language === 'es' ? es : undefined 
-                    })}
+                  <div 
+                    onClick={() => handleSelectConversation(conv.id)}
+                    className="flex-1 min-w-0 pr-8"
+                  >
+                    <p className="text-white text-sm font-medium truncate">
+                      {conv.title || 'Nueva conversación'}
+                    </p>
+                    <div className="flex items-center text-xs text-white/60 mt-1">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {formatDistanceToNow(new Date(conv.updated_at), { 
+                        addSuffix: true, 
+                        locale: language === 'es' ? es : undefined 
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/20"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConversationToDelete(conv.id);
+                          }}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {t[language].deleteConversation}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
@@ -140,6 +207,27 @@ export const ConversationHistorySidebar: React.FC<ConversationHistorySidebarProp
           )}
         </ScrollArea>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!conversationToDelete} onOpenChange={() => setConversationToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t[language].confirmDelete}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t[language].deleteWarning}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t[language].cancel}</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => conversationToDelete && handleDeleteConversation(conversationToDelete)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {t[language].delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAgentConversations } from '@/hooks/useAgentConversations';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
@@ -9,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo, ArrowLeft } from 'lucide-react';
 import { AgentTasksPanel } from './AgentTasksPanel';
+import { useToast } from '@/hooks/use-toast';
 
 interface BentoAgentLayoutProps {
   selectedAgent: string;
@@ -22,9 +24,11 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   onBack
 }) => {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'chat' | 'conversations' | 'dashboard' | 'actions'>('chat');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'conversations' | 'tasks'>('conversations');
+  const [isCreatingTaskConversation, setIsCreatingTaskConversation] = useState(false);
 
   const conversationManager = useAgentConversations(selectedAgent);
 
@@ -35,7 +39,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       dashboard: "Stats",
       actions: "Actions",
       tasks: "Tasks",
-      back: "Back"
+      back: "Back",
+      creatingTaskConversation: "Starting conversation with agent..."
     },
     es: {
       chat: "Chat",
@@ -43,27 +48,46 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       dashboard: "Stats", 
       actions: "Acciones",
       tasks: "Tareas",
-      back: "Volver"
+      back: "Volver",
+      creatingTaskConversation: "Iniciando conversación con el agente..."
     }
   };
 
   // Function to handle chat with task context - ALWAYS creates new conversation
   const handleChatWithTaskContext = async (taskId: string, taskTitle: string) => {
-    // Switch to chat tab in mobile view
-    if (isMobile) {
-      setActiveTab('chat');
-    }
+    setIsCreatingTaskConversation(true);
     
-    // Switch to conversations in sidebar
-    setSidebarTab('conversations');
-    
-    // Always create a new conversation for the task
-    console.log('Creating new task conversation for:', taskTitle);
-    const conversationId = await conversationManager.createTaskConversation(taskId, taskTitle);
-    
-    if (conversationId) {
-      console.log('Task conversation created successfully:', conversationId);
-      // The conversation manager will automatically select this new conversation
+    try {
+      // Switch to chat tab in mobile view
+      if (isMobile) {
+        setActiveTab('chat');
+      }
+      
+      // Switch to conversations in sidebar
+      setSidebarTab('conversations');
+      
+      // Always create a new conversation for the task
+      console.log('Creating new task conversation for:', taskTitle);
+      const conversationId = await conversationManager.createTaskConversation(taskId, taskTitle);
+      
+      if (conversationId) {
+        console.log('Task conversation created successfully:', conversationId);
+        toast({
+          title: 'Conversación iniciada',
+          description: `Conversación creada para la tarea: ${taskTitle}`,
+        });
+      } else {
+        throw new Error('No se pudo crear la conversación');
+      }
+    } catch (error) {
+      console.error('Error creating task conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo iniciar la conversación con el agente',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingTaskConversation(false);
     }
   };
 
@@ -93,7 +117,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
                 showHeader={false}
                 messages={conversationManager.messages}
                 currentConversationId={conversationManager.currentConversationId}
-                isProcessing={conversationManager.isProcessing}
+                isProcessing={conversationManager.isProcessing || isCreatingTaskConversation}
                 messagesLoading={conversationManager.messagesLoading}
                 setIsProcessing={conversationManager.setIsProcessing}
                 createConversation={conversationManager.createConversation}
@@ -110,6 +134,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
                   currentConversationId={conversationManager.currentConversationId}
                   selectConversation={conversationManager.selectConversation}
                   startNewConversation={conversationManager.startNewConversation}
+                  deleteConversation={conversationManager.deleteConversation}
                   loading={conversationManager.loading}
                 />
               </div>
@@ -272,6 +297,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
                   currentConversationId={conversationManager.currentConversationId}
                   selectConversation={conversationManager.selectConversation}
                   startNewConversation={conversationManager.startNewConversation}
+                  deleteConversation={conversationManager.deleteConversation}
                   loading={conversationManager.loading}
                 />
               ) : (
@@ -288,6 +314,14 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
       {/* Main chat */}
       <div className="flex-1 h-full min-w-0">
+        {isCreatingTaskConversation && (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+            <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-3"></div>
+              <p className="text-white">{t[language].creatingTaskConversation}</p>
+            </div>
+          </div>
+        )}
         <ModernFloatingAgentChat
           agentId={selectedAgent}
           language={language}
@@ -295,7 +329,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           showHeader={true}
           messages={conversationManager.messages}
           currentConversationId={conversationManager.currentConversationId}
-          isProcessing={conversationManager.isProcessing}
+          isProcessing={conversationManager.isProcessing || isCreatingTaskConversation}
           messagesLoading={conversationManager.messagesLoading}
           setIsProcessing={conversationManager.setIsProcessing}
           createConversation={conversationManager.createConversation}

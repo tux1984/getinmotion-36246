@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -160,7 +159,7 @@ export function useAgentConversations(agentId: string) {
       });
       return null;
     } finally {
-      // Note: isProcessing is handled by the component sending the message
+      setIsProcessing(false);
     }
   };
 
@@ -168,6 +167,46 @@ export function useAgentConversations(agentId: string) {
   const createTaskConversation = async (taskId: string, taskTitle: string) => {
     const firstMessage = `Trabajemos en la tarea: "${taskTitle}". ¿Cómo puedo ayudarte con esta tarea?`;
     return await createConversation(firstMessage, taskId);
+  };
+
+  // Delete conversation - archives it and removes messages
+  const deleteConversation = async (conversationId: string) => {
+    if (!user) return false;
+
+    try {
+      // Archive the conversation
+      const { error: archiveError } = await supabase
+        .from('agent_conversations')
+        .update({ is_archived: true })
+        .eq('id', conversationId)
+        .eq('user_id', user.id);
+
+      if (archiveError) throw archiveError;
+
+      // Remove from local state
+      setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+
+      // If this was the current conversation, clear it
+      if (currentConversationId === conversationId) {
+        setCurrentConversationId(null);
+        setMessages([]);
+      }
+
+      toast({
+        title: 'Conversación eliminada',
+        description: 'La conversación ha sido eliminada exitosamente',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la conversación',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
 
   // Add message to conversation
@@ -292,6 +331,7 @@ export function useAgentConversations(agentId: string) {
     setIsProcessing,
     createConversation,
     createTaskConversation,
+    deleteConversation,
     addMessage,
     selectConversation,
     startNewConversation,
