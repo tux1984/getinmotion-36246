@@ -40,7 +40,7 @@ export function useAgentConversations(agentId: string) {
     try {
       const { data, error } = await supabase
         .from('agent_conversations')
-        .select('*, task_id') // Include task_id in the select
+        .select('*')
         .eq('user_id', user.id)
         .eq('agent_id', agentId)
         .eq('is_archived', false)
@@ -138,7 +138,7 @@ export function useAgentConversations(agentId: string) {
       const { data: conversation, error: convError } = await supabase
         .from('agent_conversations')
         .insert(conversationData)
-        .select('*, task_id') // Include task_id in the response
+        .select('*')
         .single();
 
       if (convError) throw convError;
@@ -233,7 +233,7 @@ export function useAgentConversations(agentId: string) {
         try {
           const { data, error } = await supabase
             .from('agent_conversations')
-            .select('*, task_id') // Include task_id in the select
+            .select('*')
             .eq('user_id', user.id)
             .eq('agent_id', agentId)
             .eq('is_archived', false)

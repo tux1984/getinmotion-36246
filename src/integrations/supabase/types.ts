@@ -42,6 +42,7 @@ export type Database = {
           created_at: string
           id: string
           is_archived: boolean
+          task_id: string | null
           title: string | null
           updated_at: string
           user_id: string
@@ -51,6 +52,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_archived?: boolean
+          task_id?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
@@ -60,11 +62,20 @@ export type Database = {
           created_at?: string
           id?: string
           is_archived?: boolean
+          task_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_conversations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_deliverables: {
         Row: {
