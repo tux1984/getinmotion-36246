@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +31,13 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const questions = getQuestions(language, profileType);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (!isMobile) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep, isMobile]);
 
   const handleSelectOption = (questionId: string, value: number) => {
     setAnswers(prev => ({

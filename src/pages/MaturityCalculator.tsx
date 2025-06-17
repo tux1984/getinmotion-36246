@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
@@ -6,13 +7,18 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { StreamlinedOnboardingWizard } from '@/components/onboarding/StreamlinedOnboardingWizard';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const MaturityCalculator = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [profileType, setProfileType] = useState<'idea' | 'solo' | 'team'>('solo');
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -27,14 +33,12 @@ const MaturityCalculator = () => {
   };
 
   const handleBackToDashboard = () => {
-    // ARREGLO: Navegar específicamente a dashboard/home
     navigate('/dashboard/home');
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
     console.log('MaturityCalculator: Onboarding completed, navigating to dashboard');
     
-    // ARREGLO CRÍTICO: Usar setTimeout para asegurar que localStorage se actualice
     setTimeout(() => {
       navigate('/dashboard/home', { replace: true });
     }, 100);
@@ -43,7 +47,6 @@ const MaturityCalculator = () => {
   const handleStandaloneComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
     console.log('MaturityCalculator: Standalone calculator completed');
     
-    // Para uso independiente del calculador
     setTimeout(() => {
       navigate('/dashboard/home', { replace: true });
     }, 100);
@@ -56,7 +59,7 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 pt-32">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 pt-20">
         {showOnboarding ? (
           <StreamlinedOnboardingWizard
             profileType={profileType}

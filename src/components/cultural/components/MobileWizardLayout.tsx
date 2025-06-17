@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -25,6 +25,11 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
   navigationSlot
 }) => {
   const progressPercentage = (currentStep / totalSteps) * 100;
+
+  // Scroll to top when layout mounts or step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex flex-col">
@@ -59,8 +64,8 @@ export const MobileWizardLayout: React.FC<MobileWizardLayoutProps> = ({
         </div>
       </div>
 
-      {/* Content Area with top padding for fixed header - Single Column Layout */}
-      <div className="flex-1 pt-28 pb-24">
+      {/* Content Area with optimized top padding */}
+      <div className="flex-1 pt-24 pb-24">
         {/* Main Content - Single Column */}
         <div className="px-4">
           <motion.div

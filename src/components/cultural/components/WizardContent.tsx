@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { WizardHeader } from '../wizard-components/WizardHeader';
 import { WizardStepContent } from '../wizard-components/WizardStepContent';
@@ -48,6 +49,11 @@ export const WizardContent: React.FC<WizardContentProps> = ({
   analysisType,
   handleAnalysisChoice
 }) => {
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStepId]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -62,7 +68,7 @@ export const WizardContent: React.FC<WizardContentProps> = ({
         industry={profileData.industry} 
       />
       
-      <div className="flex-1 flex flex-col p-6 md:p-8 overflow-auto">
+      <div className="flex-1 flex flex-col p-6 md:p-8">
         <div className="flex-1">
           <AnimatePresence mode="wait">
             <WizardStepContent

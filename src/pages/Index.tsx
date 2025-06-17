@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeroSection } from '@/components/HeroSection';
 import { ProductExplanation } from '@/components/ProductExplanation';
 import { FeaturesSection } from '@/components/FeaturesSection';
@@ -12,6 +12,11 @@ import { useLanguage } from '@/context/LanguageContext';
 const Index = () => {
   const { language } = useLanguage();
   const [showWaitlist, setShowWaitlist] = useState(false);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const translations = {
     en: {
@@ -51,7 +56,7 @@ const Index = () => {
         onAccessClick={handleAccessClick}
       />
       {/* Add padding top to account for floating header */}
-      <div className="pt-24">
+      <div className="pt-20">
         <HeroSection 
           language={language}
           onJoinWaitlist={handleJoinWaitlist}
