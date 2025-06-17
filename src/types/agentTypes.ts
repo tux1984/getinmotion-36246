@@ -4,6 +4,7 @@ export interface AgentFilter {
   selectedCategories: string[];
   selectedStatus: 'all' | 'active' | 'inactive' | 'recommended';
   selectedPriority: 'all' | 'Alta' | 'Media' | 'Baja';
+  selectedImpact: 'all' | number | null;
   sortBy: 'name' | 'usage' | 'impact';
 }
 

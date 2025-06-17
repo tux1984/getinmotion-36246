@@ -96,6 +96,13 @@ export const filterAgents = (
     );
   }
 
+  // Impact filter
+  if (filters.selectedImpact !== 'all' && filters.selectedImpact !== null) {
+    filteredAgents = filteredAgents.filter(agent => 
+      agent.impact === filters.selectedImpact
+    );
+  }
+
   return filteredAgents;
 };
 

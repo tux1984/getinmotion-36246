@@ -9,6 +9,7 @@ const initialFilters: AgentFilter = {
   selectedCategories: [],
   selectedStatus: 'all',
   selectedPriority: 'all',
+  selectedImpact: 'all',
   sortBy: 'name'
 };
 
@@ -47,6 +48,7 @@ export const useAgentFilters = (
       filters.selectedCategories.length > 0 ||
       filters.selectedStatus !== 'all' ||
       filters.selectedPriority !== 'all' ||
+      filters.selectedImpact !== 'all' ||
       filters.sortBy !== 'name'
     );
   }, [filters]);
