@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, LayoutGrid, List, Kanban, Loader2 } from 'lucide-react';
@@ -22,6 +23,7 @@ type ViewMode = 'list' | 'grid';
 
 export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   language,
+  onTaskAction,
 }) => {
   const { tasks, loading, updateTask, deleteTask } = useAgentTasks();
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
@@ -35,6 +37,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
       listView: "List View",
       gridView: "Grid View",
       kanbanView: "Kanban View",
+      chatWithAgent: "Chat with Agent",
     },
     es: {
       tasks: "Mis Tareas",
@@ -43,6 +46,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
       listView: "Vista de Lista",
       gridView: "Vista de Mosaico",
       kanbanView: "Vista Kanban",
+      chatWithAgent: "Chatear con Agente",
     }
   };
 
@@ -68,6 +72,16 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   const handleDelete = async (taskId: string) => {
     setUpdatingTasks(prev => new Set(prev).add(taskId));
     await deleteTask(taskId);
+  };
+
+  const handleStartTask = (task: AgentTask) => {
+    // Call the parent's onTaskAction to potentially open a detailed view
+    onTaskAction(task.id, task.agent_id);
+  };
+
+  const handleChatWithAgent = (task: AgentTask) => {
+    // Call the parent's onTaskAction to open chat with agent
+    onTaskAction(task.id, task.agent_id);
   };
 
   return (
@@ -123,6 +137,8 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
               language={language}
               onStatusChange={handleStatusChange}
               onDelete={handleDelete}
+              onStartTask={handleStartTask}
+              onChatWithAgent={handleChatWithAgent}
               isUpdating={updatingTasks.has(task.id)}
             />
           ))}

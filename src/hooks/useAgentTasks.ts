@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +49,34 @@ export interface PaginatedTasks {
   currentPage: number;
 }
 
+// Helper function to safely parse JSON data from database
+const parseJsonField = <T>(field: any, defaultValue: T): T => {
+  if (field === null || field === undefined) return defaultValue;
+  if (typeof field === 'string') {
+    try {
+      return JSON.parse(field);
+    } catch {
+      return defaultValue;
+    }
+  }
+  if (Array.isArray(field) || typeof field === 'object') {
+    return field as T;
+  }
+  return defaultValue;
+};
+
+// Helper function to convert database row to AgentTask
+const convertToAgentTask = (data: any): AgentTask => ({
+  ...data,
+  relevance: data.relevance as 'low' | 'medium' | 'high',
+  status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+  subtasks: parseJsonField<TaskSubtask[]>(data.subtasks, []),
+  notes: data.notes || '',
+  steps_completed: parseJsonField<Record<string, boolean>>(data.steps_completed, {}),
+  resources: parseJsonField<TaskResource[]>(data.resources, []),
+  time_spent: data.time_spent || 0
+});
+
 export function useAgentTasks(agentId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -77,16 +106,7 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      const typedTasks: AgentTask[] = (data || []).map(task => ({
-        ...task,
-        relevance: task.relevance as 'low' | 'medium' | 'high',
-        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
-        subtasks: task.subtasks || [],
-        notes: task.notes || '',
-        steps_completed: task.steps_completed || {},
-        resources: task.resources || [],
-        time_spent: task.time_spent || 0
-      }));
+      const typedTasks: AgentTask[] = (data || []).map(convertToAgentTask);
       
       setTasks(typedTasks);
       setTotalCount(count || 0);
@@ -134,16 +154,7 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      const typedTasks: AgentTask[] = (data || []).map(task => ({
-        ...task,
-        relevance: task.relevance as 'low' | 'medium' | 'high',
-        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
-        subtasks: task.subtasks || [],
-        notes: task.notes || '',
-        steps_completed: task.steps_completed || {},
-        resources: task.resources || [],
-        time_spent: task.time_spent || 0
-      }));
+      const typedTasks: AgentTask[] = (data || []).map(convertToAgentTask);
       
       const totalPages = Math.ceil((count || 0) / pageSize);
 
@@ -185,7 +196,6 @@ export function useAgentTasks(agentId?: string) {
       const { data, error } = await supabase
         .from('agent_tasks')
         .insert({
-          user_id: user.id,
           agent_id: taskData.agent_id,
           conversation_id: taskData.conversation_id,
           title: taskData.title,
@@ -204,16 +214,7 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      const typedTask: AgentTask = {
-        ...data,
-        relevance: data.relevance as 'low' | 'medium' | 'high',
-        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
-        subtasks: data.subtasks || [],
-        notes: data.notes || '',
-        steps_completed: data.steps_completed || {},
-        resources: data.resources || [],
-        time_spent: data.time_spent || 0
-      };
+      const typedTask = convertToAgentTask(data);
       
       setTasks(prev => [typedTask, ...prev]);
       setTotalCount(prev => prev + 1);
@@ -246,16 +247,7 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      const typedTask: AgentTask = {
-        ...data,
-        relevance: data.relevance as 'low' | 'medium' | 'high',
-        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
-        subtasks: data.subtasks || [],
-        notes: data.notes || '',
-        steps_completed: data.steps_completed || {},
-        resources: data.resources || [],
-        time_spent: data.time_spent || 0
-      };
+      const typedTask = convertToAgentTask(data);
       
       setTasks(prev => prev.map(task => task.id === taskId ? typedTask : task));
       return typedTask;

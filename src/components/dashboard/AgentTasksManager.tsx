@@ -10,11 +10,13 @@ import { DetailedTaskCard } from './DetailedTaskCard';
 interface AgentTasksManagerProps {
   agentId: string;
   language: 'en' | 'es';
+  onSelectAgent?: (agentId: string) => void;
 }
 
 export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
   agentId,
-  language
+  language,
+  onSelectAgent
 }) => {
   const { tasks, loading, updateTask, deleteTask } = useAgentTasks(agentId);
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
@@ -24,11 +26,13 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
       tasks: "Tasks",
       noTasks: "No tasks yet",
       createFirst: "Tasks will appear here when created by the agent",
+      chatWithAgent: "Chat with Agent",
     },
     es: {
       tasks: "Tareas",
       noTasks: "No hay tareas aún",
       createFirst: "Las tareas aparecerán aquí cuando las cree el agente",
+      chatWithAgent: "Chatear con Agente",
     }
   };
 
@@ -55,6 +59,17 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
     setUpdatingTasks(prev => new Set(prev).add(taskId));
     await deleteTask(taskId);
     // No need to remove from setUpdatingTasks as the component will disappear
+  };
+
+  const handleStartTask = (task: AgentTask) => {
+    // For now, just change status to in_progress
+    handleStatusChange(task.id, 'in_progress');
+  };
+
+  const handleChatWithAgent = (task: AgentTask) => {
+    if (onSelectAgent) {
+      onSelectAgent(task.agent_id);
+    }
   };
 
   if (loading) {
@@ -96,6 +111,8 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
               language={language}
               onStatusChange={handleStatusChange}
               onDelete={handleDelete}
+              onStartTask={handleStartTask}
+              onChatWithAgent={handleChatWithAgent}
               isUpdating={updatingTasks.has(task.id)}
             />
           ))}
