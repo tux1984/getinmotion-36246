@@ -45,7 +45,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   return (
     <div className="flex flex-col min-h-screen">
       <div className={`flex-1 container mx-auto px-4 sm:px-6 lg:px-8 ${
-        activeSection === 'agent-details' ? 'py-2' : 'py-6'
+        activeSection === 'dashboard' ? 'pt-24 pb-6' : 'pt-4 pb-6'
       } ${isMobile ? 'pb-20' : ''}`}>
         {activeSection === 'dashboard' && (
           <ModernDashboardMain 
