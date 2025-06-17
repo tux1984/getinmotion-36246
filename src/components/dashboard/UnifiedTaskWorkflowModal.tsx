@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import { 
-  MessageSquare, 
   CheckCircle2, 
+  Clock, 
   Plus, 
+  Trash2, 
+  Play, 
+  Pause, 
+  MessageSquare,
+  Link as LinkIcon,
   FileText,
-  Play,
+  Save,
+  Timer,
   Target
 } from 'lucide-react';
 import { AgentTask, TaskSubtask, TaskResource } from '@/hooks/useAgentTasks';
@@ -38,16 +45,15 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
   onStartTask,
   showWorkflowActions = true
 }) => {
+  const [subtasks, setSubtasks] = useState<TaskSubtask[]>(task.subtasks || []);
+  const [notes, setNotes] = useState(task.notes || '');
+  const [resources, setResources] = useState<TaskResource[]>(task.resources || []);
+  const [newSubtask, setNewSubtask] = useState('');
+  const [newResource, setNewResource] = useState({ title: '', url: '', type: 'link' as const });
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [currentSession, setCurrentSession] = useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'subtasks' | 'notes' | 'resources'>('overview');
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    title: task.title,
-    description: task.description || '',
-    notes: task.notes || '',
-    due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '',
-    status: task.status,
-    priority: task.priority
-  });
 
   const t = {
     en: {
@@ -64,7 +70,7 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       priority: 'Priority',
       dueDate: 'Due Date',
       progress: 'Progress',
-      save: 'Save',
+      save: 'Save Changes',
       cancel: 'Cancel',
       edit: 'Edit',
       addSubtask: 'Add Subtask',
@@ -77,7 +83,15 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       medium: 'Medium',
       low: 'Low',
       timeSpent: 'Time Spent',
-      minutes: 'minutes'
+      minutes: 'minutes',
+      timeTracking: 'Time Tracking',
+      totalTime: 'Total Time',
+      currentSession: 'Current Session',
+      startTimer: 'Start Timer',
+      stopTimer: 'Stop Timer',
+      close: 'Close',
+      resourceTitle: 'Resource Title',
+      resourceUrl: 'URL (optional)'
     },
     es: {
       taskDetails: 'Detalles de la Tarea',
@@ -93,7 +107,7 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       priority: 'Prioridad',
       dueDate: 'Fecha Límite',
       progress: 'Progreso',
-      save: 'Guardar',
+      save: 'Guardar Cambios',
       cancel: 'Cancelar',
       edit: 'Editar',
       addSubtask: 'Agregar Subtarea',
@@ -106,24 +120,96 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       medium: 'Media',
       low: 'Baja',
       timeSpent: 'Tiempo Dedicado',
-      minutes: 'minutos'
+      minutes: 'minutos',
+      timeTracking: 'Seguimiento de Tiempo',
+      totalTime: 'Tiempo Total',
+      currentSession: 'Sesión Actual',
+      startTimer: 'Iniciar Timer',
+      stopTimer: 'Parar Timer',
+      close: 'Cerrar',
+      resourceTitle: 'Título del Recurso',
+      resourceUrl: 'URL (opcional)'
     }
   };
 
-  const handleSave = async (field: string) => {
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setCurrentSession(prev => prev + 1);
+      }, 60000); // Every minute
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  const handleAddSubtask = () => {
+    if (!newSubtask.trim()) return;
+    
+    const newSub: TaskSubtask = {
+      id: Date.now().toString(),
+      title: newSubtask,
+      completed: false,
+      created_at: new Date().toISOString()
+    };
+    
+    const updatedSubtasks = [...subtasks, newSub];
+    setSubtasks(updatedSubtasks);
+    setNewSubtask('');
+    setHasUnsavedChanges(true);
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    const updatedSubtasks = subtasks.map(st => 
+      st.id === subtaskId ? { ...st, completed: !st.completed } : st
+    );
+    setSubtasks(updatedSubtasks);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteSubtask = (subtaskId: string) => {
+    const updatedSubtasks = subtasks.filter(st => st.id !== subtaskId);
+    setSubtasks(updatedSubtasks);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAddResource = () => {
+    if (!newResource.title.trim()) return;
+    
+    const resource: TaskResource = {
+      id: Date.now().toString(),
+      title: newResource.title,
+      url: newResource.url || undefined,
+      type: newResource.type
+    };
+    
+    const updatedResources = [...resources, resource];
+    setResources(updatedResources);
+    setNewResource({ title: '', url: '', type: 'link' });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteResource = (resourceId: string) => {
+    const updatedResources = resources.filter(r => r.id !== resourceId);
+    setResources(updatedResources);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveChanges = async () => {
     if (!onUpdateTask) return;
     
-    const updates: Partial<AgentTask> = {};
-    
-    if (field === 'title') updates.title = formData.title;
-    if (field === 'description') updates.description = formData.description;
-    if (field === 'notes') updates.notes = formData.notes;
-    if (field === 'due_date') updates.due_date = formData.due_date ? new Date(formData.due_date).toISOString() : null;
-    if (field === 'status') updates.status = formData.status as AgentTask['status'];
-    if (field === 'priority') updates.priority = formData.priority;
+    await onUpdateTask({
+      subtasks,
+      notes,
+      resources,
+      time_spent: task.time_spent + currentSession
+    });
+    setHasUnsavedChanges(false);
+    setCurrentSession(0);
+  };
 
-    await onUpdateTask(updates);
-    setEditingField(null);
+  const toggleTimer = () => {
+    setIsTimerRunning(!isTimerRunning);
   };
 
   const handleWorkWithAgent = () => {
@@ -137,6 +223,9 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
     }
     onClose();
   };
+
+  const completedSubtasks = subtasks.filter(st => st.completed).length;
+  const progress = subtasks.length > 0 ? Math.round((completedSubtasks / subtasks.length) * 100) : task.progress_percentage || 0;
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -153,68 +242,65 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
     return 'bg-green-100 text-green-800';
   };
 
-  const getMainAction = () => {
-    switch (task.status) {
-      case 'pending':
-        return {
-          label: t[language].startTask,
-          icon: Play,
-          onClick: handleStartTask,
-          className: 'bg-green-600 hover:bg-green-700'
-        };
-      case 'in_progress':
-        return {
-          label: t[language].workWithAgent,
-          icon: Target,
-          onClick: handleWorkWithAgent,
-          className: 'bg-blue-600 hover:bg-blue-700'
-        };
-      case 'completed':
-        return {
-          label: t[language].workWithAgent,
-          icon: CheckCircle2,
-          onClick: handleWorkWithAgent,
-          className: 'bg-gray-600 hover:bg-gray-700'
-        };
-      default:
-        return {
-          label: t[language].workWithAgent,
-          icon: MessageSquare,
-          onClick: handleWorkWithAgent,
-          className: 'bg-purple-600 hover:bg-purple-700'
-        };
-    }
-  };
-
-  const mainAction = getMainAction();
-  const MainActionIcon = mainAction.icon;
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>{t[language].taskDetails}</span>
-            {showWorkflowActions && (
-              <div className="flex gap-2">
-                <Button onClick={handleWorkWithAgent} className="bg-purple-600 hover:bg-purple-700">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  {t[language].workWithAgent}
-                </Button>
-                <Button onClick={mainAction.onClick} className={mainAction.className}>
-                  <MainActionIcon className="w-4 h-4 mr-2" />
-                  {mainAction.label}
-                </Button>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <CardTitle className="flex items-center gap-3">
+                <Target className="w-5 h-5" />
+                {task.title}
+              </CardTitle>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className={`${
+                  task.relevance === 'high' ? 'border-red-300 text-red-600' :
+                  task.relevance === 'medium' ? 'border-yellow-300 text-yellow-600' :
+                  'border-green-300 text-green-600'
+                }`}>
+                  {task.relevance}
+                </Badge>
+                <Badge variant="secondary">
+                  {progress}% {t[language].completed}
+                </Badge>
               </div>
-            )}
-          </DialogTitle>
-        </DialogHeader>
+            </div>
+            <div className="flex items-center gap-2">
+              {showWorkflowActions && (
+                <>
+                  <Button onClick={handleWorkWithAgent} variant="outline" size="sm">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {t[language].workWithAgent}
+                  </Button>
+                  {task.status === 'pending' && onStartTask && (
+                    <Button onClick={handleStartTask} size="sm" className="bg-green-600 hover:bg-green-700">
+                      <Play className="w-4 h-4 mr-2" />
+                      {t[language].startTask}
+                    </Button>
+                  )}
+                </>
+              )}
+              <Button onClick={onClose} variant="ghost" size="sm">
+                {t[language].close}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
 
-        <div className="space-y-6">
+        <CardContent className="space-y-6">
+          {/* Description */}
+          {task.description && (
+            <div>
+              <p className="text-gray-600 text-sm">{task.description}</p>
+            </div>
+          )}
+
           {/* Quick Stats */}
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{task.progress_percentage}%</div>
+              <div className="text-2xl font-bold text-purple-600">{progress}%</div>
               <div className="text-sm text-gray-600">{t[language].progress}</div>
             </div>
             <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -230,19 +316,63 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
               <div className="text-sm text-gray-600 mt-1">{t[language].priority}</div>
             </div>
             <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{task.time_spent || 0}</div>
+              <div className="text-2xl font-bold text-blue-600">{(task.time_spent || 0) + currentSession}</div>
               <div className="text-sm text-gray-600">{t[language].minutes}</div>
             </div>
           </div>
 
-          {/* Progress Bar */}
+          {/* Progress bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>{t[language].progress}</span>
-              <span>{task.progress_percentage}%</span>
+              <span>{progress}%</span>
             </div>
-            <Progress value={task.progress_percentage} className="h-2" />
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
+
+          <Separator />
+
+          {/* Time Tracking */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Timer className="w-4 h-4" />
+              {t[language].timeTracking}
+            </h3>
+            <div className="flex items-center gap-4">
+              <div className="text-sm">
+                <span className="text-gray-600">{t[language].totalTime}:</span>
+                <span className="ml-2 font-medium">{(task.time_spent || 0) + currentSession} {t[language].minutes}</span>
+              </div>
+              <div className="text-sm">
+                <span className="text-gray-600">{t[language].currentSession}:</span>
+                <span className="ml-2 font-medium">{currentSession} {t[language].minutes}</span>
+              </div>
+              <Button
+                onClick={toggleTimer}
+                size="sm"
+                variant={isTimerRunning ? "destructive" : "default"}
+              >
+                {isTimerRunning ? (
+                  <>
+                    <Pause className="w-4 h-4 mr-2" />
+                    {t[language].stopTimer}
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    {t[language].startTimer}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
 
           {/* Tabs */}
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
@@ -265,201 +395,135 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
           <div className="space-y-4">
             {activeTab === 'overview' && (
               <div className="space-y-4">
-                {/* Title */}
-                <div>
-                  <Label>{t[language].title}</Label>
-                  {editingField === 'title' && onUpdateTask ? (
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        value={formData.title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                        className="flex-1"
-                      />
-                      <Button size="sm" onClick={() => handleSave('title')}>
-                        {t[language].save}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingField(null)}>
-                        {t[language].cancel}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between mt-1 p-2 bg-gray-50 rounded">
-                      <span>{task.title}</span>
-                      {onUpdateTask && (
-                        <Button size="sm" variant="ghost" onClick={() => setEditingField('title')}>
-                          {t[language].edit}
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    {task.description || 'Sin descripción adicional disponible.'}
+                  </p>
                 </div>
-
-                {/* Description */}
-                <div>
-                  <Label>{t[language].description}</Label>
-                  {editingField === 'description' && onUpdateTask ? (
-                    <div className="space-y-2 mt-1">
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                        rows={3}
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleSave('description')}>
-                          {t[language].save}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingField(null)}>
-                          {t[language].cancel}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between mt-1 p-2 bg-gray-50 rounded">
-                      <span className="text-sm text-gray-600">
-                        {task.description || 'Sin descripción'}
-                      </span>
-                      {onUpdateTask && (
-                        <Button size="sm" variant="ghost" onClick={() => setEditingField('description')}>
-                          {t[language].edit}
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Status and Priority - only show if can update */}
-                {onUpdateTask && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>{t[language].status}</Label>
-                      <Select value={formData.status} onValueChange={(value) => {
-                        setFormData(prev => ({ ...prev, status: value as AgentTask['status'] }));
-                        setTimeout(() => handleSave('status'), 100);
-                      }}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">{t[language].pending}</SelectItem>
-                          <SelectItem value="in_progress">{t[language].in_progress}</SelectItem>
-                          <SelectItem value="completed">{t[language].completed}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label>{t[language].dueDate}</Label>
-                      <Input
-                        type="date"
-                        value={formData.due_date}
-                        onChange={(e) => {
-                          setFormData(prev => ({ ...prev, due_date: e.target.value }));
-                          setTimeout(() => handleSave('due_date'), 100);
-                        }}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
             {activeTab === 'subtasks' && (
               <div className="space-y-3">
-                {task.subtasks?.map((subtask, index) => (
-                  <div key={subtask.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <CheckCircle2 
-                      className={`w-5 h-5 cursor-pointer ${
-                        subtask.completed ? 'text-green-600' : 'text-gray-400'
-                      }`} 
-                    />
-                    <span className={subtask.completed ? 'line-through text-gray-500' : ''}>
-                      {subtask.title}
-                    </span>
-                  </div>
-                ))}
-                {(!task.subtasks || task.subtasks.length === 0) && (
-                  <div className="text-center text-gray-500 py-4">
-                    No hay subtareas creadas
-                  </div>
-                )}
-                <Button className="w-full" variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t[language].addSubtask}
-                </Button>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={t[language].addSubtask}
+                    value={newSubtask}
+                    onChange={(e) => setNewSubtask(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddSubtask()}
+                  />
+                  <Button onClick={handleAddSubtask} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {subtasks.map((subtask) => (
+                    <div key={subtask.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                      <button
+                        onClick={() => handleToggleSubtask(subtask.id)}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                          subtask.completed 
+                            ? 'bg-green-500 border-green-500 text-white' 
+                            : 'border-gray-300 hover:border-green-500'
+                        }`}
+                      >
+                        {subtask.completed && <CheckCircle2 className="w-3 h-3" />}
+                      </button>
+                      <span className={`flex-1 ${subtask.completed ? 'line-through text-gray-500' : ''}`}>
+                        {subtask.title}
+                      </span>
+                      <Button
+                        onClick={() => handleDeleteSubtask(subtask.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             {activeTab === 'notes' && (
               <div className="space-y-3">
-                {editingField === 'notes' ? (
-                  <div className="space-y-2">
-                    <Textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Agregar notas sobre la tarea..."
-                      rows={6}
-                    />
-                    <div className="flex gap-2">
-                      <Button onClick={() => handleSave('notes')}>
-                        {t[language].save}
-                      </Button>
-                      <Button variant="outline" onClick={() => setEditingField(null)}>
-                        {t[language].cancel}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="p-4 bg-gray-50 rounded-lg min-h-32">
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                        {task.notes || 'No hay notas para esta tarea.'}
-                      </p>
-                    </div>
-                    <Button onClick={() => setEditingField('notes')}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      {task.notes ? t[language].edit : t[language].addNote}
-                    </Button>
-                  </div>
-                )}
+                <Textarea
+                  placeholder="Añade notas sobre tu progreso..."
+                  value={notes}
+                  onChange={(e) => {
+                    setNotes(e.target.value);
+                    setHasUnsavedChanges(true);
+                  }}
+                  rows={6}
+                />
               </div>
             )}
 
             {activeTab === 'resources' && (
               <div className="space-y-3">
-                {task.resources?.map((resource, index) => (
-                  <div key={resource.id} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">{resource.title}</h4>
-                        {resource.description && (
-                          <p className="text-sm text-gray-600">{resource.description}</p>
-                        )}
+                <div className="space-y-2">
+                  <Input
+                    placeholder={t[language].resourceTitle}
+                    value={newResource.title}
+                    onChange={(e) => setNewResource({...newResource, title: e.target.value})}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder={t[language].resourceUrl}
+                      value={newResource.url}
+                      onChange={(e) => setNewResource({...newResource, url: e.target.value})}
+                    />
+                    <Button onClick={handleAddResource} size="sm">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {resources.map((resource) => (
+                    <div key={resource.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                      <LinkIcon className="w-4 h-4 text-blue-500" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{resource.title}</p>
                         {resource.url && (
-                          <a href={resource.url} target="_blank" rel="noopener noreferrer" 
-                             className="text-sm text-blue-600 hover:underline">
-                            Ver recurso
+                          <a 
+                            href={resource.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline text-sm truncate block"
+                          >
+                            {resource.url}
                           </a>
                         )}
                       </div>
-                      <Badge variant="outline">{resource.type}</Badge>
+                      <Button
+                        onClick={() => handleDeleteResource(resource.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>
-                ))}
-                {(!task.resources || task.resources.length === 0) && (
-                  <div className="text-center text-gray-500 py-4">
-                    No hay recursos agregados
-                  </div>
-                )}
-                <Button className="w-full" variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t[language].addResource}
-                </Button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          {/* Save Button */}
+          {hasUnsavedChanges && onUpdateTask && (
+            <div className="flex justify-end pt-4">
+              <Button onClick={handleSaveChanges} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {t[language].save}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
