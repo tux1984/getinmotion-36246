@@ -1,20 +1,28 @@
 
-import React, { useState } from 'react';
-import { AgentTask } from '@/hooks/useAgentTasks';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { CheckCircle2, Clock, Calendar, ChevronDown, Edit, Trash, Loader2 } from 'lucide-react';
-import { formatDistanceToNow, format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { Badge } from '@/components/ui/badge';
+import { 
+  CheckCircle2, 
+  Clock, 
+  Trash2, 
+  Play, 
+  RotateCcw, 
+  Eye,
+  Target,
+  Timer,
+  MessageSquare
+} from 'lucide-react';
+import { AgentTask } from '@/hooks/useAgentTasks';
 
 interface DetailedTaskCardProps {
   task: AgentTask;
   language: 'en' | 'es';
-  onStatusChange: (taskId: string, newStatus: AgentTask['status']) => Promise<void>;
-  onDelete: (taskId: string) => Promise<void>;
+  onStatusChange: (taskId: string, status: AgentTask['status']) => void;
+  onDelete: (taskId: string) => void;
+  onStartTask: (task: AgentTask) => void;
+  onChatWithAgent: (task: AgentTask) => void;
   isUpdating: boolean;
 }
 
@@ -23,171 +31,194 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   language,
   onStatusChange,
   onDelete,
-  isUpdating,
+  onStartTask,
+  onChatWithAgent,
+  isUpdating
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const t = {
     en: {
-      pending: "Pending",
-      inProgress: "In Progress",
-      completed: "Completed",
-      cancelled: "Cancelled",
-      high: "High",
-      medium: "Medium",
-      low: "Low",
-      dueDate: "Due date",
-      createdAt: "Created",
-      progress: "Progress",
-      markComplete: "Mark as Complete",
-      markInProgress: "Mark as In Progress",
-      description: "Description",
-      updatedAt: "Last updated",
-      delete: "Delete",
-      edit: "Edit"
+      startTask: 'Start Task',
+      continueTask: 'Continue',
+      reviewTask: 'Review',
+      completed: 'Completed',
+      delete: 'Delete',
+      chatWithAgent: 'Chat with Agent',
+      subtasks: 'subtasks',
+      timeSpent: 'Time spent',
+      minutes: 'min',
+      dueDate: 'Due',
+      progress: 'Progress'
     },
     es: {
-      pending: "Pendiente",
-      inProgress: "En Progreso",
-      completed: "Completada",
-      cancelled: "Cancelada",
-      high: "Alta",
-      medium: "Media",
-      low: "Baja",
-      dueDate: "Fecha límite",
-      createdAt: "Creada",
-      progress: "Progreso",
-      markComplete: "Marcar como Completada",
-      markInProgress: "Marcar como En Progreso",
-      description: "Descripción",
-      updatedAt: "Última actualización",
-      delete: "Eliminar",
-      edit: "Editar"
+      startTask: 'Empezar Tarea',
+      continueTask: 'Continuar',
+      reviewTask: 'Revisar',
+      completed: 'Completada',
+      delete: 'Eliminar',
+      chatWithAgent: 'Chatear con Agente',
+      subtasks: 'subtareas',
+      timeSpent: 'Tiempo dedicado',
+      minutes: 'min',
+      dueDate: 'Vence',
+      progress: 'Progreso'
     }
   };
 
-  const getRelevanceColor = (relevance: string) => {
-    switch (relevance) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+  const getStatusBadge = (status: AgentTask['status']) => {
+    const statusConfig = {
+      pending: { variant: 'secondary' as const, color: 'text-yellow-600', icon: Clock },
+      in_progress: { variant: 'default' as const, color: 'text-blue-600', icon: Play },
+      completed: { variant: 'default' as const, color: 'text-green-600', icon: CheckCircle2 },
+      cancelled: { variant: 'outline' as const, color: 'text-gray-600', icon: RotateCcw }
+    };
+    return statusConfig[status] || statusConfig.pending;
+  };
+
+  const getMainCTA = () => {
+    switch (task.status) {
+      case 'pending':
+        return {
+          label: t[language].startTask,
+          icon: Play,
+          onClick: () => onStartTask(task),
+          variant: 'default' as const,
+          className: 'bg-green-600 hover:bg-green-700 text-white'
+        };
+      case 'in_progress':
+        return {
+          label: t[language].continueTask,
+          icon: Target,
+          onClick: () => onStartTask(task),
+          variant: 'default' as const,
+          className: 'bg-blue-600 hover:bg-blue-700 text-white'
+        };
+      case 'completed':
+        return {
+          label: t[language].reviewTask,
+          icon: Eye,
+          onClick: () => onStartTask(task),
+          variant: 'outline' as const,
+          className: ''
+        };
+      default:
+        return null;
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  const statusBadge = getStatusBadge(task.status);
+  const StatusIcon = statusBadge.icon;
+  const mainCTA = getMainCTA();
+  const MainCTAIcon = mainCTA?.icon;
+
+  const completedSubtasks = task.subtasks?.filter(st => st.completed)?.length || 0;
+  const totalSubtasks = task.subtasks?.length || 0;
 
   return (
-    <Card className="hover:shadow-md transition-shadow w-full bg-slate-800/50 border-slate-700 text-white">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`w-3 h-3 rounded-full flex-shrink-0 ${getRelevanceColor(task.relevance)}`} />
-                <h4 className="font-medium text-slate-100 truncate flex-1">
-                  {task.title}
-                </h4>
-                <Badge className={`text-xs whitespace-nowrap ${getStatusColor(task.status)}`}>
-                  {t[language][task.status as keyof typeof t[typeof language]]}
-                </Badge>
-              </div>
+    <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-purple-400">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h4 className="font-semibold text-sm truncate">{task.title}</h4>
+              <Badge variant={statusBadge.variant} className={`text-xs ${statusBadge.color}`}>
+                <StatusIcon className="w-3 h-3 mr-1" />
+                {task.status}
+              </Badge>
+            </div>
+            
+            {task.description && (
+              <p className="text-xs text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+            )}
 
-              <div className="space-y-2 mb-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">{t[language].progress}</span>
-                  <span className="text-slate-200">{task.progress_percentage}%</span>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              {/* Progress */}
+              <div className="flex items-center gap-1">
+                <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${task.progress_percentage}%` }}
+                  />
                 </div>
-                <Progress value={task.progress_percentage} className="h-2" />
+                <span>{task.progress_percentage}%</span>
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-slate-400">
+              {/* Subtasks count */}
+              {totalSubtasks > 0 && (
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>{completedSubtasks}/{totalSubtasks} {t[language].subtasks}</span>
+                </div>
+              )}
+
+              {/* Time spent */}
+              {task.time_spent > 0 && (
+                <div className="flex items-center gap-1">
+                  <Timer className="w-3 h-3" />
+                  <span>{task.time_spent} {t[language].minutes}</span>
+                </div>
+              )}
+
+              {/* Due date */}
+              {task.due_date && (
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>
-                    {formatDistanceToNow(new Date(task.created_at), { 
-                      addSuffix: true,
-                      locale: language === 'es' ? es : undefined 
-                    })}
-                  </span>
+                  <span>{t[language].dueDate}: {new Date(task.due_date).toLocaleDateString()}</span>
                 </div>
-                {task.due_date && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-2">
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full text-slate-400 hover:bg-slate-700 hover:text-white">
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                </Button>
-              </CollapsibleTrigger>
-              {task.status !== 'completed' && task.status !== 'cancelled' && (
-                <Button
-                  size="sm"
-                  onClick={() => onStatusChange(task.id, 'completed')}
-                  disabled={isUpdating}
-                  className="text-xs bg-green-600 hover:bg-green-700 w-full"
-                >
-                  {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                </Button>
               )}
             </div>
           </div>
-        </CardContent>
-        <CollapsibleContent className="px-4 pb-4">
-          <div className="border-t border-slate-700 pt-4 mt-2 space-y-4">
-            {task.description && (
-              <div>
-                <h5 className="text-sm font-medium text-slate-300 mb-1">{t[language].description}</h5>
-                <p className="text-sm text-slate-400 whitespace-pre-wrap">
-                  {task.description}
-                </p>
-              </div>
+
+          <div className="flex items-center gap-1 ml-3">
+            {/* Main CTA */}
+            {mainCTA && MainCTAIcon && (
+              <Button 
+                onClick={mainCTA.onClick}
+                size="sm" 
+                variant={mainCTA.variant}
+                className={`${mainCTA.className} h-8 px-3`}
+                disabled={isUpdating}
+              >
+                <MainCTAIcon className="w-3 h-3 mr-1" />
+                <span className="text-xs">{mainCTA.label}</span>
+              </Button>
             )}
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-slate-400">
-                  <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{t[language].updatedAt}: {format(new Date(task.updated_at), "PPpp", { locale: language === 'es' ? es : undefined })}</span>
-                  </div>
-              </div>
-              <div className="flex gap-2">
-                {task.status === 'pending' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onStatusChange(task.id, 'in_progress')}
-                    disabled={isUpdating}
-                    className="text-xs text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-white"
-                  >
-                    {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : t[language].markInProgress}
-                  </Button>
-                )}
-                <Button size="sm" variant="outline" disabled={isUpdating} title={t[language].edit} className="text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-white">
-                  <Edit className="w-3 h-3" />
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(task.id)} disabled={isUpdating} title={t[language].delete}>
-                  {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash className="w-3 h-3" />}
-                </Button>
-              </div>
-            </div>
+
+            {/* Chat with Agent */}
+            <Button 
+              onClick={() => onChatWithAgent(task)}
+              size="sm" 
+              variant="outline"
+              className="h-8 px-2"
+            >
+              <MessageSquare className="w-3 h-3" />
+            </Button>
+
+            {/* Quick status actions */}
+            {task.status !== 'completed' && (
+              <Button 
+                onClick={() => onStatusChange(task.id, 'completed')}
+                size="sm" 
+                variant="ghost"
+                className="h-8 px-2 text-green-600 hover:text-green-700"
+                disabled={isUpdating}
+              >
+                <CheckCircle2 className="w-3 h-3" />
+              </Button>
+            )}
+
+            {/* Delete */}
+            <Button 
+              onClick={() => onDelete(task.id)}
+              size="sm" 
+              variant="ghost"
+              className="h-8 px-2 text-red-500 hover:text-red-700"
+              disabled={isUpdating}
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </div>
+      </CardContent>
     </Card>
   );
 };

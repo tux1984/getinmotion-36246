@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAgentTasks, AgentTask, PaginatedTasks } from '@/hooks/useAgentTasks';
 import { useOptimizedRecommendedTasks, OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
@@ -11,6 +12,7 @@ import { TaskLimitIndicator } from './TaskLimitIndicator';
 import { TaskPagination } from '@/components/ui/task-pagination';
 import { ClearAllTasksDialog } from './ClearAllTasksDialog';
 import { DetailedTaskCard } from './DetailedTaskCard';
+import { TaskDetailView } from './TaskDetailView';
 import { 
   ListTodo, 
   Plus, 
@@ -42,7 +44,21 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   language,
   onSelectAgent
 }) => {
-  const { tasks: allTasks, totalCount, loading: realTasksLoading, createTask, updateTask, deleteTask, deleteAllTasks, fetchPaginatedTasks } = useAgentTasks();
+  const { 
+    tasks: allTasks, 
+    totalCount, 
+    loading: realTasksLoading, 
+    createTask, 
+    updateTask, 
+    deleteTask, 
+    deleteAllTasks, 
+    fetchPaginatedTasks,
+    updateSubtasks,
+    updateNotes,
+    updateResources,
+    updateTimeSpent
+  } = useAgentTasks();
+  
   const { tasks: suggestedTasks, loading: suggestedLoading } = useOptimizedRecommendedTasks(
     maturityScores, 
     profileData, 
@@ -60,6 +76,7 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<AgentTask | null>(null);
 
   const { isAtLimit, isNearLimit, activeTasksCount, limit } = useTaskLimits(allTasks);
 
@@ -191,14 +208,17 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
     }
   };
 
-  const getStatusBadge = (status: AgentTask['status']) => {
-    const statusConfig = {
-      pending: { variant: 'secondary' as const, color: 'text-yellow-600' },
-      in_progress: { variant: 'default' as const, color: 'text-blue-600' },
-      completed: { variant: 'default' as const, color: 'text-green-600' },
-      cancelled: { variant: 'outline' as const, color: 'text-gray-600' }
-    };
-    return statusConfig[status] || statusConfig.pending;
+  const handleStartTask = (task: AgentTask) => {
+    setSelectedTaskForDetail(task);
+  };
+
+  const handleChatWithAgent = (task: AgentTask) => {
+    onSelectAgent(task.agent_id);
+  };
+
+  const refreshPaginatedData = async () => {
+    const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
+    setPaginatedData(data);
   };
 
   return (
@@ -319,6 +339,8 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
                         language={language}
                         onStatusChange={handleTaskStatusChange}
                         onDelete={handleDeleteTask}
+                        onStartTask={handleStartTask}
+                        onChatWithAgent={handleChatWithAgent}
                         isUpdating={updatingTasks.has(task.id)}
                       />
                     ))}
@@ -432,6 +454,26 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
         taskCount={totalCount}
         language={language}
       />
+
+      {/* Task Detail View Modal */}
+      {selectedTaskForDetail && (
+        <TaskDetailView
+          task={selectedTaskForDetail}
+          language={language}
+          onUpdateSubtasks={updateSubtasks}
+          onUpdateNotes={updateNotes}
+          onUpdateResources={updateResources}
+          onUpdateTimeSpent={updateTimeSpent}
+          onClose={() => {
+            setSelectedTaskForDetail(null);
+            refreshPaginatedData();
+          }}
+          onChatWithAgent={() => {
+            onSelectAgent(selectedTaskForDetail.agent_id);
+            setSelectedTaskForDetail(null);
+          }}
+        />
+      )}
     </>
   );
 };

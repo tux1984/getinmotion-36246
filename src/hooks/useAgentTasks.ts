@@ -1,9 +1,23 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ACTIVE_TASKS_LIMIT } from './useTaskLimits';
+
+export interface TaskSubtask {
+  id: string;
+  title: string;
+  completed: boolean;
+  created_at: string;
+}
+
+export interface TaskResource {
+  id: string;
+  title: string;
+  url?: string;
+  description?: string;
+  type: 'link' | 'file' | 'note';
+}
 
 export interface AgentTask {
   id: string;
@@ -20,6 +34,11 @@ export interface AgentTask {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  subtasks: TaskSubtask[];
+  notes: string;
+  steps_completed: Record<string, boolean>;
+  resources: TaskResource[];
+  time_spent: number;
 }
 
 export interface PaginatedTasks {
@@ -61,7 +80,12 @@ export function useAgentTasks(agentId?: string) {
       const typedTasks: AgentTask[] = (data || []).map(task => ({
         ...task,
         relevance: task.relevance as 'low' | 'medium' | 'high',
-        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+        subtasks: task.subtasks || [],
+        notes: task.notes || '',
+        steps_completed: task.steps_completed || {},
+        resources: task.resources || [],
+        time_spent: task.time_spent || 0
       }));
       
       setTasks(typedTasks);
@@ -113,7 +137,12 @@ export function useAgentTasks(agentId?: string) {
       const typedTasks: AgentTask[] = (data || []).map(task => ({
         ...task,
         relevance: task.relevance as 'low' | 'medium' | 'high',
-        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+        subtasks: task.subtasks || [],
+        notes: task.notes || '',
+        steps_completed: task.steps_completed || {},
+        resources: task.resources || [],
+        time_spent: task.time_spent || 0
       }));
       
       const totalPages = Math.ceil((count || 0) / pageSize);
@@ -163,18 +192,27 @@ export function useAgentTasks(agentId?: string) {
           description: taskData.description,
           relevance: taskData.relevance || 'medium',
           priority: taskData.priority || 3,
-          due_date: taskData.due_date
+          due_date: taskData.due_date,
+          subtasks: taskData.subtasks || [],
+          notes: taskData.notes || '',
+          steps_completed: taskData.steps_completed || {},
+          resources: taskData.resources || [],
+          time_spent: taskData.time_spent || 0
         })
         .select()
         .single();
 
       if (error) throw error;
       
-      // Type cast the returned data
       const typedTask: AgentTask = {
         ...data,
         relevance: data.relevance as 'low' | 'medium' | 'high',
-        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+        subtasks: data.subtasks || [],
+        notes: data.notes || '',
+        steps_completed: data.steps_completed || {},
+        resources: data.resources || [],
+        time_spent: data.time_spent || 0
       };
       
       setTasks(prev => [typedTask, ...prev]);
@@ -208,11 +246,15 @@ export function useAgentTasks(agentId?: string) {
 
       if (error) throw error;
       
-      // Type cast the returned data
       const typedTask: AgentTask = {
         ...data,
         relevance: data.relevance as 'low' | 'medium' | 'high',
-        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+        status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+        subtasks: data.subtasks || [],
+        notes: data.notes || '',
+        steps_completed: data.steps_completed || {},
+        resources: data.resources || [],
+        time_spent: data.time_spent || 0
       };
       
       setTasks(prev => prev.map(task => task.id === taskId ? typedTask : task));
@@ -226,6 +268,30 @@ export function useAgentTasks(agentId?: string) {
       });
       return null;
     }
+  };
+
+  const updateSubtasks = async (taskId: string, subtasks: TaskSubtask[]) => {
+    const completedSubtasks = subtasks.filter(st => st.completed).length;
+    const progressPercentage = subtasks.length > 0 ? Math.round((completedSubtasks / subtasks.length) * 100) : 0;
+    
+    return updateTask(taskId, {
+      subtasks,
+      progress_percentage: progressPercentage,
+      status: progressPercentage === 100 ? 'completed' : progressPercentage > 0 ? 'in_progress' : 'pending',
+      completed_at: progressPercentage === 100 ? new Date().toISOString() : null
+    });
+  };
+
+  const updateNotes = async (taskId: string, notes: string) => {
+    return updateTask(taskId, { notes });
+  };
+
+  const updateResources = async (taskId: string, resources: TaskResource[]) => {
+    return updateTask(taskId, { resources });
+  };
+
+  const updateTimeSpent = async (taskId: string, timeSpent: number) => {
+    return updateTask(taskId, { time_spent: timeSpent });
   };
 
   const deleteTask = async (taskId: string) => {
@@ -326,6 +392,10 @@ export function useAgentTasks(agentId?: string) {
     deleteTask,
     deleteAllTasks,
     fetchPaginatedTasks,
-    refreshTasks: fetchTasks
+    refreshTasks: fetchTasks,
+    updateSubtasks,
+    updateNotes,
+    updateResources,
+    updateTimeSpent
   };
 }

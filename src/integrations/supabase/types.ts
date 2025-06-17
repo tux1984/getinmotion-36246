@@ -173,10 +173,15 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          notes: string | null
           priority: number
           progress_percentage: number
           relevance: string
+          resources: Json | null
           status: string
+          steps_completed: Json | null
+          subtasks: Json | null
+          time_spent: number | null
           title: string
           updated_at: string
           user_id: string
@@ -189,10 +194,15 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          notes?: string | null
           priority?: number
           progress_percentage?: number
           relevance?: string
+          resources?: Json | null
           status?: string
+          steps_completed?: Json | null
+          subtasks?: Json | null
+          time_spent?: number | null
           title: string
           updated_at?: string
           user_id: string
@@ -205,10 +215,15 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          notes?: string | null
           priority?: number
           progress_percentage?: number
           relevance?: string
+          resources?: Json | null
           status?: string
+          steps_completed?: Json | null
+          subtasks?: Json | null
+          time_spent?: number | null
           title?: string
           updated_at?: string
           user_id?: string
