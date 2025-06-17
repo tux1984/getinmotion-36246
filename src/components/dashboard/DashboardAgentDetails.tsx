@@ -14,10 +14,12 @@ export const DashboardAgentDetails: React.FC<DashboardAgentDetailsProps> = ({
   onBack
 }) => {
   return (
-    <BentoAgentLayout 
-      selectedAgent={selectedAgent}
-      language={language}
-      onBack={onBack}
-    />
+    <div className="min-h-[calc(100vh-8rem)] pt-4">
+      <BentoAgentLayout 
+        selectedAgent={selectedAgent}
+        language={language}
+        onBack={onBack}
+      />
+    </div>
   );
 };

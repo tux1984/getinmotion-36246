@@ -8,7 +8,7 @@ import { AgentQuickActions } from './AgentQuickActions';
 import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo } from 'lucide-react';
+import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo, ArrowLeft } from 'lucide-react';
 import { AgentTasksPanel } from './AgentTasksPanel';
 
 interface BentoAgentLayoutProps {
@@ -35,23 +35,38 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       conversations: "History", 
       dashboard: "Stats",
       actions: "Actions",
-      tasks: "Tasks"
+      tasks: "Tasks",
+      back: "Back"
     },
     es: {
       chat: "Chat",
       conversations: "Historial",
       dashboard: "Stats", 
       actions: "Acciones",
-      tasks: "Tareas"
+      tasks: "Tareas",
+      back: "Volver"
     }
   };
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
-        <div className="flex flex-col max-h-[85vh]">
-          {/* Main content area with tab switching - sin header interno */}
-          <div className="flex-1 mx-4 mb-20 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
+      <div className="min-h-[calc(100vh-6rem)] bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
+        {/* Mobile back button */}
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onBack}
+            className="flex items-center gap-2 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t[language].back}
+          </Button>
+        </div>
+
+        <div className="flex flex-col h-[calc(100vh-10rem)]">
+          {/* Main content area with tab switching */}
+          <div className="flex-1 mb-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             {activeTab === 'chat' && (
               <ModernFloatingAgentChat
                 agentId={selectedAgent}
@@ -101,8 +116,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           </div>
           
           {/* Mobile bottom navigation */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/10 p-4">
-            <div className="flex justify-around items-center max-w-md mx-auto">
+          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4">
+            <div className="flex justify-around items-center">
               <Button
                 variant={activeTab === 'chat' ? 'default' : 'ghost'}
                 size="sm"
@@ -166,7 +181,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="h-full w-full flex gap-4 p-4">
+    <div className="h-[calc(100vh-8rem)] w-full flex gap-4">
       {/* Sidebar */}
       <div className={`h-full transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarCollapsed ? 'w-[68px]' : 'w-[340px]'}`}>
         {isSidebarCollapsed ? (
