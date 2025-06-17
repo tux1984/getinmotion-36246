@@ -80,8 +80,7 @@ const convertToAgentTask = (data: any): AgentTask => ({
 const convertForDatabase = (data: Partial<AgentTask>) => {
   const dbData: any = { ...data };
   
-  // Remove user_id if present as it's not part of the insert schema
-  delete dbData.user_id;
+  // Remove fields that are auto-generated or managed by the database
   delete dbData.id;
   delete dbData.created_at;
   delete dbData.updated_at;
@@ -207,18 +206,24 @@ export function useAgentTasks(agentId?: string) {
     try {
       const dbData = convertForDatabase(taskData);
       
+      // IMPORTANT: Ensure user_id is included for RLS policies
+      const insertData = {
+        ...dbData,
+        user_id: user.id, // Explicitly include user_id for RLS
+        relevance: dbData.relevance || 'medium',
+        priority: dbData.priority || 3,
+        subtasks: dbData.subtasks || [],
+        notes: dbData.notes || '',
+        steps_completed: dbData.steps_completed || {},
+        resources: dbData.resources || [],
+        time_spent: dbData.time_spent || 0
+      };
+
+      console.log('Creating task with data:', insertData);
+
       const { data, error } = await supabase
         .from('agent_tasks')
-        .insert({
-          ...dbData,
-          relevance: dbData.relevance || 'medium',
-          priority: dbData.priority || 3,
-          subtasks: dbData.subtasks || [],
-          notes: dbData.notes || '',
-          steps_completed: dbData.steps_completed || {},
-          resources: dbData.resources || [],
-          time_spent: dbData.time_spent || 0
-        })
+        .insert(insertData)
         .select()
         .single();
 
