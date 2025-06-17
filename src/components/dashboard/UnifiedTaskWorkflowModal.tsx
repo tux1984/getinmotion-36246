@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,8 @@ import {
   Timer,
   Target,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { AgentTask, TaskSubtask, TaskResource } from '@/hooks/useAgentTasks';
 
@@ -86,7 +86,9 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       description: 'Description',
       high: 'High',
       medium: 'Medium',
-      low: 'Low'
+      low: 'Low',
+      title: 'Title',
+      in_progress: 'In Progress'
     },
     es: {
       taskDetails: 'Detalles de la Tarea',
@@ -117,7 +119,9 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       description: 'Descripción',
       high: 'Alta',
       medium: 'Media',
-      low: 'Baja'
+      low: 'Baja',
+      title: 'Título',
+      in_progress: 'En Progreso'
     }
   };
 
@@ -218,17 +222,17 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: number) => {
-    if (priority === 1) return 'bg-red-100 text-red-800 border-red-200';
-    if (priority === 2) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    return 'bg-green-100 text-green-800 border-green-200';
+    if (priority === 1) return 'bg-red-100 text-red-800';
+    if (priority === 2) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-green-100 text-green-800';
   };
 
   const getPriorityLabel = (priority: number) => {
@@ -241,20 +245,14 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        {/* Header with Task Title and Action Buttons */}
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <Target className="w-6 h-6 text-purple-600" />
-                {task.title}
-              </CardTitle>
-              {task.description && (
-                <p className="text-gray-600 text-sm mt-2">{task.description}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 ml-4">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+        {/* Header */}
+        <CardHeader className="pb-4 border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold">
+              {t[language].taskDetails}
+            </CardTitle>
+            <div className="flex items-center gap-2">
               {showWorkflowActions && (
                 <>
                   <Button onClick={handleWorkWithAgent} className="bg-purple-600 hover:bg-purple-700 text-white">
@@ -270,136 +268,72 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
                 </>
               )}
               <Button onClick={onClose} variant="ghost" size="sm">
-                {t[language].close}
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Statistics Header */}
-          <div className="grid grid-cols-4 gap-4">
-            {/* Progress */}
-            <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-700">{t[language].progress}</span>
-              </div>
-              <div className="text-2xl font-bold text-purple-900">{progress}%</div>
-              <div className="w-full bg-purple-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-gray-50 p-3 rounded-lg border">
+              <div className="text-xs text-gray-600 mb-1">{t[language].progress}</div>
+              <div className="text-lg font-semibold">{progress}%</div>
             </div>
-
-            {/* Status */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">{t[language].status}</span>
-              </div>
-              <Badge className={`${getStatusColor(task.status)} font-medium`}>
+            <div className="bg-gray-50 p-3 rounded-lg border">
+              <div className="text-xs text-gray-600 mb-1">{t[language].status}</div>
+              <Badge className={`text-xs ${getStatusColor(task.status)}`}>
                 {t[language][task.status] || task.status}
               </Badge>
             </div>
-
-            {/* Priority */}
-            <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Target className="w-4 h-4 text-orange-600" />
-                <span className="text-sm font-medium text-orange-700">{t[language].priority}</span>
-              </div>
-              <Badge className={`${getPriorityColor(task.priority)} font-medium`}>
+            <div className="bg-gray-50 p-3 rounded-lg border">
+              <div className="text-xs text-gray-600 mb-1">{t[language].priority}</div>
+              <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
                 {getPriorityLabel(task.priority)}
               </Badge>
             </div>
-
-            {/* Time */}
-            <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Timer className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">{t[language].totalTime}</span>
-              </div>
-              <div className="text-2xl font-bold text-green-900">
-                {(task.time_spent || 0) + currentSession}
-              </div>
-              <div className="text-xs text-green-600">{t[language].minutes}</div>
+            <div className="bg-gray-50 p-3 rounded-lg border">
+              <div className="text-xs text-gray-600 mb-1">{t[language].totalTime}</div>
+              <div className="text-lg font-semibold">{(task.time_spent || 0) + currentSession}</div>
+              <div className="text-xs text-gray-500">{t[language].minutes}</div>
             </div>
           </div>
 
-          {/* Tabs Navigation */}
+          {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger 
-                value="overview" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
-              >
-                {t[language].overview}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="subtasks" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
-              >
-                {t[language].subtasks} ({completedSubtasks}/{subtasks.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="notes" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
-              >
-                {t[language].notes}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="resources" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
-              >
-                {t[language].resources}
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 bg-gray-100">
+              <TabsTrigger value="overview">{t[language].overview}</TabsTrigger>
+              <TabsTrigger value="subtasks">{t[language].subtasks}</TabsTrigger>
+              <TabsTrigger value="notes">{t[language].notes}</TabsTrigger>
+              <TabsTrigger value="resources">{t[language].resources}</TabsTrigger>
             </TabsList>
 
-            {/* Tab Contents */}
+            {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-4 mt-6">
-              {/* Time Tracking */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold flex items-center gap-2 mb-3">
-                  <Timer className="w-4 h-4" />
-                  {t[language].timeTracking}
-                </h3>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm">
-                    <span className="text-gray-600">{t[language].currentSession}:</span>
-                    <span className="ml-2 font-medium">{currentSession} {t[language].minutes}</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">{t[language].title}</label>
+                  <Input value={task.title} readOnly className="bg-gray-50" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">{t[language].status}</label>
+                  <Input value={t[language][task.status] || task.status} readOnly className="bg-gray-50" />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-medium text-gray-700">{t[language].description}</label>
+                  <Textarea value={task.description || ''} readOnly className="bg-gray-50" rows={3} />
+                </div>
+                {task.due_date && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">{t[language].dueDate}</label>
+                    <Input value={new Date(task.due_date).toLocaleDateString()} readOnly className="bg-gray-50" />
                   </div>
-                  <Button
-                    onClick={toggleTimer}
-                    size="sm"
-                    variant={isTimerRunning ? "destructive" : "default"}
-                  >
-                    {isTimerRunning ? (
-                      <>
-                        <Pause className="w-4 h-4 mr-2" />
-                        {t[language].stopTimer}
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        {t[language].startTimer}
-                      </>
-                    )}
-                  </Button>
-                </div>
+                )}
               </div>
-
-              {/* Due Date */}
-              {task.due_date && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  <span>{t[language].dueDate}: {new Date(task.due_date).toLocaleDateString()}</span>
-                </div>
-              )}
             </TabsContent>
 
+            {/* Subtasks Tab */}
             <TabsContent value="subtasks" className="space-y-4 mt-6">
               <div className="flex gap-2">
                 <Input
@@ -447,6 +381,7 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
               </div>
             </TabsContent>
 
+            {/* Notes Tab */}
             <TabsContent value="notes" className="space-y-4 mt-6">
               <div className="space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -466,6 +401,7 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
               </div>
             </TabsContent>
 
+            {/* Resources Tab */}
             <TabsContent value="resources" className="space-y-4 mt-6">
               <div className="space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
