@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAgentConversations } from '@/hooks/useAgentConversations';
 import { ConversationHistorySidebar } from './ConversationHistorySidebar';
@@ -48,8 +47,8 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     }
   };
 
-  // Function to handle chat with task context
-  const handleChatWithTaskContext = async (taskContext?: string) => {
+  // Function to handle chat with task context - ALWAYS creates new conversation
+  const handleChatWithTaskContext = async (taskId: string, taskTitle: string) => {
     // Switch to chat tab in mobile view
     if (isMobile) {
       setActiveTab('chat');
@@ -58,17 +57,13 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     // Switch to conversations in sidebar
     setSidebarTab('conversations');
     
-    // If we have task context, create a new conversation or add to current one
-    if (taskContext) {
-      let conversationId = conversationManager.currentConversationId;
-      
-      if (!conversationId) {
-        // Create new conversation with the task context
-        conversationId = await conversationManager.createConversation(taskContext);
-      } else {
-        // Add the task context as a new message
-        await conversationManager.addMessage(conversationId, taskContext, 'user');
-      }
+    // Always create a new conversation for the task
+    console.log('Creating new task conversation for:', taskTitle);
+    const conversationId = await conversationManager.createTaskConversation(taskId, taskTitle);
+    
+    if (conversationId) {
+      console.log('Task conversation created successfully:', conversationId);
+      // The conversation manager will automatically select this new conversation
     }
   };
 

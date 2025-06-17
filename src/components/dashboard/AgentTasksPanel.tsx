@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TaskWorkflowModal } from './TaskWorkflowModal';
+import { UnifiedTaskWorkflowModal } from './UnifiedTaskWorkflowModal';
 import { CreateTaskModal } from './CreateTaskModal';
 import {
   DropdownMenu,
@@ -31,7 +30,7 @@ import {
 interface AgentTasksPanelProps {
   agentId: string;
   language: 'en' | 'es';
-  onChatWithAgent?: (taskContext?: string) => void;
+  onChatWithAgent?: (taskId: string, taskTitle: string) => void;
 }
 
 export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({ 
@@ -117,15 +116,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
 
   const handleWorkWithAgent = (task: AgentTask) => {
     if (onChatWithAgent) {
-      const taskContext = `Trabajemos en la tarea: "${task.title}". ${task.description || ''}
-      
-Estado actual: ${getStatusLabel(task.status)}
-Progreso: ${task.progress_percentage}%
-${task.notes ? `Notas adicionales: ${task.notes}` : ''}
-
-¿Cómo puedo ayudarte con esta tarea?`;
-      
-      onChatWithAgent(taskContext);
+      onChatWithAgent(task.id, task.title);
     }
   };
 
@@ -346,12 +337,12 @@ ${task.notes ? `Notas adicionales: ${task.notes}` : ''}
 
       {/* Task Detail Modal */}
       {selectedTask && (
-        <TaskWorkflowModal
+        <UnifiedTaskWorkflowModal
           task={selectedTask}
           language={language}
           isOpen={!!selectedTask}
           onClose={() => setSelectedTask(null)}
-          onWorkWithAgent={() => handleWorkWithAgent(selectedTask)}
+          onWorkWithAgent={(taskId, taskTitle) => handleWorkWithAgent(selectedTask)}
           onUpdateTask={handleUpdateTask}
         />
       )}

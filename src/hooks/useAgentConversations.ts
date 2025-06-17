@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,7 @@ export interface AgentConversation {
   created_at: string;
   updated_at: string;
   is_archived: boolean;
+  task_id: string | null;
 }
 
 export interface AgentMessage {
@@ -106,25 +108,42 @@ export function useAgentConversations(agentId: string) {
     console.log('Conversation selection completed for:', conversationId);
   };
 
-  // Create new conversation
-  const createConversation = async (firstMessage: string) => {
+  // Create new conversation - enhanced to support task-specific conversations
+  const createConversation = async (firstMessage: string, taskId?: string) => {
     if (!user) return null;
 
     setIsProcessing(true);
     try {
+      const conversationData: any = {
+        user_id: user.id,
+        agent_id: agentId,
+        title: firstMessage.substring(0, 50) + (firstMessage.length > 50 ? '...' : '')
+      };
+
+      // If this conversation is for a specific task, add task_id and modify title
+      if (taskId) {
+        conversationData.task_id = taskId;
+        // Get task details to create a better title
+        const { data: taskData } = await supabase
+          .from('agent_tasks')
+          .select('title')
+          .eq('id', taskId)
+          .single();
+        
+        if (taskData) {
+          conversationData.title = `Tarea: ${taskData.title}`;
+        }
+      }
+
       const { data: conversation, error: convError } = await supabase
         .from('agent_conversations')
-        .insert({
-          user_id: user.id,
-          agent_id: agentId,
-          title: firstMessage.substring(0, 50) + (firstMessage.length > 50 ? '...' : '')
-        })
+        .insert(conversationData)
         .select()
         .single();
 
       if (convError) throw convError;
 
-      console.log('Created new conversation:', conversation.id);
+      console.log('Created new conversation:', conversation.id, taskId ? `for task: ${taskId}` : '');
       
       // Update state locally to show the new conversation immediately
       setConversations(prev => [conversation, ...prev]);
@@ -143,6 +162,12 @@ export function useAgentConversations(agentId: string) {
     } finally {
       // Note: isProcessing is handled by the component sending the message
     }
+  };
+
+  // Create conversation specifically for a task
+  const createTaskConversation = async (taskId: string, taskTitle: string) => {
+    const firstMessage = `Trabajemos en la tarea: "${taskTitle}". ¿Cómo puedo ayudarte con esta tarea?`;
+    return await createConversation(firstMessage, taskId);
   };
 
   // Add message to conversation
@@ -266,6 +291,7 @@ export function useAgentConversations(agentId: string) {
     messagesLoading,
     setIsProcessing,
     createConversation,
+    createTaskConversation,
     addMessage,
     selectConversation,
     startNewConversation,
