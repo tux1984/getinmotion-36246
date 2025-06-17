@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { 
   CheckCircle2, 
@@ -53,82 +51,53 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [currentSession, setCurrentSession] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'subtasks' | 'notes' | 'resources'>('overview');
 
   const t = {
     en: {
       taskDetails: 'Task Details',
       workWithAgent: 'Work with Agent',
       startTask: 'Start Task',
-      overview: 'Overview',
       subtasks: 'Subtasks',
+      addSubtask: 'Add Subtask',
       notes: 'Notes',
       resources: 'Resources',
-      title: 'Title',
-      description: 'Description',
-      status: 'Status',
-      priority: 'Priority',
-      dueDate: 'Due Date',
-      progress: 'Progress',
-      save: 'Save Changes',
-      cancel: 'Cancel',
-      edit: 'Edit',
-      addSubtask: 'Add Subtask',
-      addNote: 'Add Note',
       addResource: 'Add Resource',
-      pending: 'Pending',
-      in_progress: 'In Progress',
-      completed: 'Completed',
-      high: 'High',
-      medium: 'Medium',
-      low: 'Low',
-      timeSpent: 'Time Spent',
-      minutes: 'minutes',
       timeTracking: 'Time Tracking',
       totalTime: 'Total Time',
       currentSession: 'Current Session',
       startTimer: 'Start Timer',
       stopTimer: 'Stop Timer',
+      save: 'Save Changes',
       close: 'Close',
+      minutes: 'minutes',
       resourceTitle: 'Resource Title',
-      resourceUrl: 'URL (optional)'
+      resourceUrl: 'URL (optional)',
+      completed: 'Completed',
+      pending: 'Pending',
+      progress: 'Progress'
     },
     es: {
       taskDetails: 'Detalles de la Tarea',
       workWithAgent: 'Trabajar con Agente',
       startTask: 'Iniciar Tarea',
-      overview: 'Resumen',
       subtasks: 'Subtareas',
+      addSubtask: 'Añadir Subtarea',
       notes: 'Notas',
       resources: 'Recursos',
-      title: 'Título',
-      description: 'Descripción',
-      status: 'Estado',
-      priority: 'Prioridad',
-      dueDate: 'Fecha Límite',
-      progress: 'Progreso',
-      save: 'Guardar Cambios',
-      cancel: 'Cancelar',
-      edit: 'Editar',
-      addSubtask: 'Agregar Subtarea',
-      addNote: 'Agregar Nota',
-      addResource: 'Agregar Recurso',
-      pending: 'Pendiente',
-      in_progress: 'En Progreso',
-      completed: 'Completada',
-      high: 'Alta',
-      medium: 'Media',
-      low: 'Baja',
-      timeSpent: 'Tiempo Dedicado',
-      minutes: 'minutos',
+      addResource: 'Añadir Recurso',
       timeTracking: 'Seguimiento de Tiempo',
       totalTime: 'Tiempo Total',
       currentSession: 'Sesión Actual',
       startTimer: 'Iniciar Timer',
       stopTimer: 'Parar Timer',
+      save: 'Guardar Cambios',
       close: 'Cerrar',
+      minutes: 'minutos',
       resourceTitle: 'Título del Recurso',
-      resourceUrl: 'URL (opcional)'
+      resourceUrl: 'URL (opcional)',
+      completed: 'Completada',
+      pending: 'Pendiente',
+      progress: 'Progreso'
     }
   };
 
@@ -202,7 +171,7 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
       subtasks,
       notes,
       resources,
-      time_spent: task.time_spent + currentSession
+      time_spent: (task.time_spent || 0) + currentSession
     });
     setHasUnsavedChanges(false);
     setCurrentSession(0);
@@ -226,21 +195,6 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
 
   const completedSubtasks = subtasks.filter(st => st.completed).length;
   const progress = subtasks.length > 0 ? Math.round((completedSubtasks / subtasks.length) * 100) : task.progress_percentage || 0;
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityBadgeColor = (priority: number) => {
-    if (priority === 1) return 'bg-red-100 text-red-800';
-    if (priority === 2) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
-  };
 
   if (!isOpen) return null;
 
@@ -297,30 +251,6 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
             </div>
           )}
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{progress}%</div>
-              <div className="text-sm text-gray-600">{t[language].progress}</div>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <Badge className={getStatusBadgeColor(task.status)}>
-                {t[language][task.status] || task.status}
-              </Badge>
-              <div className="text-sm text-gray-600 mt-1">{t[language].status}</div>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <Badge className={getPriorityBadgeColor(task.priority)}>
-                {task.priority === 1 ? t[language].high : task.priority === 2 ? t[language].medium : t[language].low}
-              </Badge>
-              <div className="text-sm text-gray-600 mt-1">{t[language].priority}</div>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{(task.time_spent || 0) + currentSession}</div>
-              <div className="text-sm text-gray-600">{t[language].minutes}</div>
-            </div>
-          </div>
-
           {/* Progress bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
@@ -374,143 +304,128 @@ export const UnifiedTaskWorkflowModal: React.FC<UnifiedTaskWorkflowModalProps> =
 
           <Separator />
 
-          {/* Tabs */}
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-            {['overview', 'subtasks', 'notes', 'resources'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === tab
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {t[language][tab]}
-              </button>
-            ))}
-          </div>
+          {/* Subtasks */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              {t[language].subtasks} ({completedSubtasks}/{subtasks.length})
+            </h3>
+            
+            <div className="flex gap-2">
+              <Input
+                placeholder={t[language].addSubtask}
+                value={newSubtask}
+                onChange={(e) => setNewSubtask(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddSubtask()}
+              />
+              <Button onClick={handleAddSubtask} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
 
-          {/* Tab Content */}
-          <div className="space-y-4">
-            {activeTab === 'overview' && (
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">
-                    {task.description || 'Sin descripción adicional disponible.'}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'subtasks' && (
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder={t[language].addSubtask}
-                    value={newSubtask}
-                    onChange={(e) => setNewSubtask(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddSubtask()}
-                  />
-                  <Button onClick={handleAddSubtask} size="sm">
-                    <Plus className="w-4 h-4" />
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {subtasks.map((subtask) => (
+                <div key={subtask.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                  <button
+                    onClick={() => handleToggleSubtask(subtask.id)}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                      subtask.completed 
+                        ? 'bg-green-500 border-green-500 text-white' 
+                        : 'border-gray-300 hover:border-green-500'
+                    }`}
+                  >
+                    {subtask.completed && <CheckCircle2 className="w-3 h-3" />}
+                  </button>
+                  <span className={`flex-1 ${subtask.completed ? 'line-through text-gray-500' : ''}`}>
+                    {subtask.title}
+                  </span>
+                  <Button
+                    onClick={() => handleDeleteSubtask(subtask.id)}
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {subtasks.map((subtask) => (
-                    <div key={subtask.id} className="flex items-center gap-3 p-2 border rounded-lg">
-                      <button
-                        onClick={() => handleToggleSubtask(subtask.id)}
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                          subtask.completed 
-                            ? 'bg-green-500 border-green-500 text-white' 
-                            : 'border-gray-300 hover:border-green-500'
-                        }`}
-                      >
-                        {subtask.completed && <CheckCircle2 className="w-3 h-3" />}
-                      </button>
-                      <span className={`flex-1 ${subtask.completed ? 'line-through text-gray-500' : ''}`}>
-                        {subtask.title}
-                      </span>
-                      <Button
-                        onClick={() => handleDeleteSubtask(subtask.id)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <Separator />
 
-            {activeTab === 'notes' && (
-              <div className="space-y-3">
-                <Textarea
-                  placeholder="Añade notas sobre tu progreso..."
-                  value={notes}
-                  onChange={(e) => {
-                    setNotes(e.target.value);
-                    setHasUnsavedChanges(true);
-                  }}
-                  rows={6}
+          {/* Notes */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              {t[language].notes}
+            </h3>
+            <Textarea
+              placeholder="Añade notas sobre tu progreso..."
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                setHasUnsavedChanges(true);
+              }}
+              rows={4}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Resources */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <LinkIcon className="w-4 h-4" />
+              {t[language].resources}
+            </h3>
+            
+            <div className="space-y-2">
+              <Input
+                placeholder={t[language].resourceTitle}
+                value={newResource.title}
+                onChange={(e) => setNewResource({...newResource, title: e.target.value})}
+              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder={t[language].resourceUrl}
+                  value={newResource.url}
+                  onChange={(e) => setNewResource({...newResource, url: e.target.value})}
                 />
+                <Button onClick={handleAddResource} size="sm">
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
-            )}
+            </div>
 
-            {activeTab === 'resources' && (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Input
-                    placeholder={t[language].resourceTitle}
-                    value={newResource.title}
-                    onChange={(e) => setNewResource({...newResource, title: e.target.value})}
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder={t[language].resourceUrl}
-                      value={newResource.url}
-                      onChange={(e) => setNewResource({...newResource, url: e.target.value})}
-                    />
-                    <Button onClick={handleAddResource} size="sm">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {resources.map((resource) => (
-                    <div key={resource.id} className="flex items-center gap-3 p-2 border rounded-lg">
-                      <LinkIcon className="w-4 h-4 text-blue-500" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{resource.title}</p>
-                        {resource.url && (
-                          <a 
-                            href={resource.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline text-sm truncate block"
-                          >
-                            {resource.url}
-                          </a>
-                        )}
-                      </div>
-                      <Button
-                        onClick={() => handleDeleteResource(resource.id)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-500 hover:text-red-700"
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {resources.map((resource) => (
+                <div key={resource.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                  <LinkIcon className="w-4 h-4 text-blue-500" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{resource.title}</p>
+                    {resource.url && (
+                      <a 
+                        href={resource.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline text-sm truncate block"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
+                        {resource.url}
+                      </a>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => handleDeleteResource(resource.id)}
+                    size="sm"
+                    variant="ghost"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
 
           {/* Save Button */}
