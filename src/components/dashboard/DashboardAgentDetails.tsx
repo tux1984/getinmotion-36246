@@ -14,7 +14,7 @@ export const DashboardAgentDetails: React.FC<DashboardAgentDetailsProps> = ({
   onBack
 }) => {
   return (
-    <div className="min-h-[calc(100vh-8rem)] pt-4">
+    <div className="min-h-[calc(100vh-8rem)] pt-20">
       <BentoAgentLayout 
         selectedAgent={selectedAgent}
         language={language}

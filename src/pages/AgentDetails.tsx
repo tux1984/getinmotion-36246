@@ -28,7 +28,7 @@ const AgentDetails = () => {
         onBack={handleBack}
       />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 min-h-screen">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
         <BentoAgentLayout 
           selectedAgent={agentId}
           language={language}
