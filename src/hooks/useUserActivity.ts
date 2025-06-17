@@ -22,7 +22,7 @@ export function useUserActivity() {
       try {
         const { data, error } = await supabase
           .from('agent_conversations')
-          .select('*')
+          .select('*, task_id') // Include task_id in the select
           .eq('user_id', user.id)
           .eq('is_archived', false)
           .order('updated_at', { ascending: false })

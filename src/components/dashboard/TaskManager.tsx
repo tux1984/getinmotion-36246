@@ -19,6 +19,7 @@ const convertToAgentTask = (task: Task): AgentTask => ({
   id: task.id.toString(),
   user_id: 'mock-user',
   agent_id: 'task-manager',
+  conversation_id: null, // Add missing conversation_id field
   title: task.title,
   description: null,
   status: task.completed ? 'completed' : 'pending',
