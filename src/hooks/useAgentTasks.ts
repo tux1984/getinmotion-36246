@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,6 +75,19 @@ const convertToAgentTask = (data: any): AgentTask => ({
   resources: parseJsonField<TaskResource[]>(data.resources, []),
   time_spent: data.time_spent || 0
 });
+
+// Helper function to convert AgentTask fields to database format
+const convertForDatabase = (data: Partial<AgentTask>) => {
+  const dbData: any = { ...data };
+  
+  // Remove user_id if present as it's not part of the insert schema
+  delete dbData.user_id;
+  delete dbData.id;
+  delete dbData.created_at;
+  delete dbData.updated_at;
+  
+  return dbData;
+};
 
 export function useAgentTasks(agentId?: string) {
   const { user } = useAuth();
@@ -193,21 +205,19 @@ export function useAgentTasks(agentId?: string) {
     }
 
     try {
+      const dbData = convertForDatabase(taskData);
+      
       const { data, error } = await supabase
         .from('agent_tasks')
         .insert({
-          agent_id: taskData.agent_id,
-          conversation_id: taskData.conversation_id,
-          title: taskData.title,
-          description: taskData.description,
-          relevance: taskData.relevance || 'medium',
-          priority: taskData.priority || 3,
-          due_date: taskData.due_date,
-          subtasks: taskData.subtasks || [],
-          notes: taskData.notes || '',
-          steps_completed: taskData.steps_completed || {},
-          resources: taskData.resources || [],
-          time_spent: taskData.time_spent || 0
+          ...dbData,
+          relevance: dbData.relevance || 'medium',
+          priority: dbData.priority || 3,
+          subtasks: dbData.subtasks || [],
+          notes: dbData.notes || '',
+          steps_completed: dbData.steps_completed || {},
+          resources: dbData.resources || [],
+          time_spent: dbData.time_spent || 0
         })
         .select()
         .single();
@@ -238,9 +248,11 @@ export function useAgentTasks(agentId?: string) {
 
   const updateTask = async (taskId: string, updates: Partial<AgentTask>) => {
     try {
+      const dbUpdates = convertForDatabase(updates);
+      
       const { data, error } = await supabase
         .from('agent_tasks')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', taskId)
         .select()
         .single();

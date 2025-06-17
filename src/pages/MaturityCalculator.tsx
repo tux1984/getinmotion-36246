@@ -7,6 +7,8 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { StreamlinedOnboardingWizard } from '@/components/onboarding/StreamlinedOnboardingWizard';
 import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCulturalMaturityCalculator';
+import { SEOHead } from '@/components/seo/SEOHead';
+import { SEO_CONFIG } from '@/config/seo';
 import { useState } from 'react';
 
 const MaturityCalculator = () => {
@@ -52,8 +54,19 @@ const MaturityCalculator = () => {
     }, 100);
   };
 
+  const seoData = SEO_CONFIG.pages.maturityCalculator[language];
+
   return (
     <DashboardBackground>
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={`${SEO_CONFIG.siteUrl}/maturity-calculator`}
+        type="website"
+        noIndex={true}
+      />
+
       <NewDashboardHeader 
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
         onAgentManagerClick={handleBackToDashboard}

@@ -7,7 +7,9 @@ import { ValueProposition } from '@/components/ValueProposition';
 import { CollapsibleWaitlistForm } from '@/components/waitlist/CollapsibleWaitlistForm';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
+import { SEOHead } from '@/components/seo/SEOHead';
 import { useLanguage } from '@/context/LanguageContext';
+import { SEO_CONFIG } from '@/config/seo';
 
 const Index = () => {
   const { language } = useLanguage();
@@ -32,6 +34,7 @@ const Index = () => {
   };
 
   const t = translations[language];
+  const seoData = SEO_CONFIG.pages.home[language];
 
   const handleAccessClick = () => {
     setShowWaitlist(true);
@@ -51,6 +54,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={SEO_CONFIG.siteUrl}
+        type="website"
+      />
+      
       <Header 
         translations={t}
         onAccessClick={handleAccessClick}

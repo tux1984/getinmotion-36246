@@ -1,174 +1,113 @@
 
-import React, { useState, useMemo } from 'react';
-import { culturalAgentsDatabase } from '@/data/agentsDatabase';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
-import { Header } from '@/components/layout/Header';
-import { CompactAgentCard } from '@/components/agents-gallery/CompactAgentCard';
-import { CompactAgentsGalleryHeader } from '@/components/agents-gallery/CompactAgentsGalleryHeader';
+import { SEOHead } from '@/components/seo/SEOHead';
+import { SEO_CONFIG } from '@/config/seo';
+import { AgentsGalleryHeader } from '@/components/agents-gallery/AgentsGalleryHeader';
 import { AgentsSearchAndFilters } from '@/components/agents-gallery/AgentsSearchAndFilters';
+import { AgentsGridView } from '@/components/agents-gallery/AgentsGridView';
 import { AgentsEmptyState } from '@/components/agents-gallery/AgentsEmptyState';
+import { useAgentFilters } from '@/hooks/useAgentFilters';
 
 const AgentsGallery = () => {
   const { language } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
-  const [selectedImpact, setSelectedImpact] = useState<number | null>(null);
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategories,
+    setSelectedCategories,
+    sortBy,
+    setSortBy,
+    viewMode,
+    setViewMode,
+    filteredAgents
+  } = useAgentFilters();
+
+  const seoData = SEO_CONFIG.pages.agents[language];
 
   const translations = {
     en: {
-      title: "AI Agents Collection",
-      subtitle: "Discover our comprehensive suite of specialized AI agents designed to transform your creative business operations",
-      navAgents: "Agents",
-      navAccess: "Get Access",
-      navLogin: "Login",
-      backToDashboard: "Back to Dashboard",
-      search: "Search agents by name, category, or description...",
-      allCategories: "All Categories",
-      allPriorities: "All Priorities",
-      allImpacts: "All Impacts",
-      clearFilters: "Clear Filters",
-      priority: "Priority",
-      impact: "Impact",
-      exampleQuestion: "Example Question",
-      exampleAnswer: "Example Answer",
-      noResults: "No agents found",
-      noResultsDescription: "Try adjusting your search or filters to find what you're looking for.",
-      categories: {
-        Financiera: "Financial",
-        Legal: "Legal",
-        Diagnóstico: "Diagnostic", 
-        Comercial: "Commercial",
-        Operativo: "Operations",
-        Comunidad: "Community"
-      }
+      backToHome: "Back to Home",
+      title: "AI Agents Gallery",
+      subtitle: "Discover specialized agents for your cultural business"
     },
     es: {
-      title: "Colección de Agentes IA",
-      subtitle: "Descubre nuestra suite integral de agentes de IA especializados diseñados para transformar las operaciones de tu negocio creativo",
-      navAgents: "Agentes",
-      navAccess: "Obtener Acceso",
-      navLogin: "Iniciar Sesión",
-      backToDashboard: "Volver al Dashboard",
-      search: "Buscar agentes por nombre, categoría o descripción...",
-      allCategories: "Todas las Categorías",
-      allPriorities: "Todas las Prioridades",
-      allImpacts: "Todos los Impactos",
-      clearFilters: "Limpiar Filtros",
-      priority: "Prioridad",
-      impact: "Impacto",
-      exampleQuestion: "Pregunta Ejemplo",
-      exampleAnswer: "Respuesta Ejemplo",
-      noResults: "No se encontraron agentes",
-      noResultsDescription: "Intenta ajustar tu búsqueda o filtros para encontrar lo que buscas.",
-      categories: {
-        Financiera: "Financiera",
-        Legal: "Legal",
-        Diagnóstico: "Diagnóstico",
-        Comercial: "Comercial", 
-        Operativo: "Operativo",
-        Comunidad: "Comunidad"
-      }
+      backToHome: "Volver al Inicio",
+      title: "Galería de Agentes IA",
+      subtitle: "Descubre agentes especializados para tu negocio cultural"
     }
   };
 
   const t = translations[language];
 
-  // Get unique categories from agents
-  const categories = useMemo(() => {
-    return Array.from(new Set(culturalAgentsDatabase.map(agent => agent.category)));
-  }, []);
-
-  // Filter agents based on search and filters
-  const filteredAgents = useMemo(() => {
-    return culturalAgentsDatabase.filter(agent => {
-      // Search filter
-      const searchMatch = !searchTerm || 
-        agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        agent.category.toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Category filter
-      const categoryMatch = !selectedCategory || agent.category === selectedCategory;
-
-      // Priority filter
-      const priorityMatch = !selectedPriority || agent.priority === selectedPriority;
-
-      // Impact filter
-      const impactMatch = !selectedImpact || agent.impact === selectedImpact;
-
-      return searchMatch && categoryMatch && priorityMatch && impactMatch;
-    });
-  }, [searchTerm, selectedCategory, selectedPriority, selectedImpact]);
-
-  const agentTranslations = {
-    priority: t.priority,
-    impact: t.impact,
-    exampleQuestion: t.exampleQuestion,
-    exampleAnswer: t.exampleAnswer,
-    categories: t.categories
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
-      {/* Header */}
-      <Header 
-        translations={{
-          navAgents: t.navAgents,
-          navAccess: t.navAccess,
-          navLogin: t.navLogin
-        }}
-        onAccessClick={() => {}}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={`${SEO_CONFIG.siteUrl}/agents`}
+        type="website"
       />
 
-      {/* Compact Hero Section */}
-      <CompactAgentsGalleryHeader
-        title={t.title}
-        subtitle={t.subtitle}
-        backToDashboard={t.backToDashboard}
-      />
+      {/* Navigation Header */}
+      <div className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/">
+              <Button variant="ghost" className="text-slate-600 hover:text-slate-900">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToHome}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filters */}
+      <div className="container mx-auto px-4 py-8">
+        <AgentsGalleryHeader 
+          title={t.title}
+          subtitle={t.subtitle}
+          language={language}
+        />
+        
         <AgentsSearchAndFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedPriority={selectedPriority}
-          onPriorityChange={setSelectedPriority}
-          selectedImpact={selectedImpact}
-          onImpactChange={setSelectedImpact}
-          categories={categories}
-          categoryTranslations={t.categories}
-          translations={{
-            search: t.search,
-            allCategories: t.allCategories,
-            allPriorities: t.allPriorities,
-            allImpacts: t.allImpacts,
-            clearFilters: t.clearFilters,
-            priority: t.priority,
-            impact: t.impact
-          }}
+          selectedCategories={selectedCategories}
+          onCategoriesChange={setSelectedCategories}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          language={language}
         />
 
-        {/* Results */}
         {filteredAgents.length === 0 ? (
-          <AgentsEmptyState
-            title={t.noResults}
-            description={t.noResultsDescription}
+          <AgentsEmptyState 
+            searchTerm={searchTerm}
+            selectedCategories={selectedCategories}
+            language={language}
+            onClearFilters={() => {
+              setSearchTerm('');
+              setSelectedCategories([]);
+            }}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredAgents.map((agent) => (
-              <CompactAgentCard
-                key={agent.id}
-                agent={agent}
-                translations={agentTranslations}
-              />
-            ))}
-          </div>
+          <AgentsGridView 
+            agents={filteredAgents}
+            viewMode={viewMode}
+            language={language}
+          />
         )}
       </div>
     </div>
