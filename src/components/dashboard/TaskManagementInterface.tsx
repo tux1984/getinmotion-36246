@@ -59,7 +59,11 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
     updateTimeSpent
   } = useAgentTasks();
   
-  const { tasks: suggestedTasks, loading: suggestedLoading } = useOptimizedRecommendedTasks(
+  const { 
+    tasks: suggestedTasks, 
+    loading: suggestedLoading,
+    removeSuggestion 
+  } = useOptimizedRecommendedTasks(
     maturityScores, 
     profileData, 
     enabledAgents
@@ -77,6 +81,7 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<AgentTask | null>(null);
+  const [convertingTasks, setConvertingTasks] = useState<Set<string>>(new Set());
 
   const { isAtLimit, isNearLimit, activeTasksCount, limit } = useTaskLimits(allTasks);
 
@@ -99,7 +104,8 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
       chatWithAgent: 'Chat with Agent',
       limitReached: 'Task limit reached. Complete pending tasks to create new ones.',
       limitWarning: 'You have {count}/{limit} active tasks. Complete some to create new ones.',
-      startFresh: 'Ready for a fresh start? You can now perform the maturity assessment to get new personalized recommendations.'
+      startFresh: 'Ready for a fresh start? You can now perform the maturity assessment to get new personalized recommendations.',
+      converting: 'Converting...'
     },
     es: {
       taskManagement: 'Gestión de Tareas',
@@ -119,7 +125,8 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
       chatWithAgent: 'Chatear con Agente',
       limitReached: 'Límite de tareas alcanzado. Completa tareas pendientes para crear nuevas.',
       limitWarning: 'Tienes {count}/{limit} tareas activas. Completa algunas para crear nuevas.',
-      startFresh: '¿Listo para empezar de nuevo? Ahora puedes realizar la evaluación de madurez para obtener nuevas recomendaciones personalizadas.'
+      startFresh: '¿Listo para empezar de nuevo? Ahora puedes realizar la evaluación de madurez para obtener nuevas recomendaciones personalizadas.',
+      converting: 'Convirtiendo...'
     }
   };
 
@@ -145,17 +152,38 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
       return; // createTask will show the toast
     }
     
-    await createTask({
-      agent_id: suggestedTask.agentId,
-      title: suggestedTask.title,
-      description: suggestedTask.description,
-      relevance: suggestedTask.priority as 'low' | 'medium' | 'high',
-      priority: suggestedTask.priority === 'high' ? 1 : suggestedTask.priority === 'medium' ? 2 : 3
-    });
+    // Marcar como convirtiendo
+    setConvertingTasks(prev => new Set(prev).add(suggestedTask.id));
+    
+    try {
+      const success = await createTask({
+        agent_id: suggestedTask.agentId,
+        title: suggestedTask.title,
+        description: suggestedTask.description,
+        relevance: suggestedTask.priority as 'low' | 'medium' | 'high',
+        priority: suggestedTask.priority === 'high' ? 1 : suggestedTask.priority === 'medium' ? 2 : 3
+      });
 
-    // Refresh current page after creating task
-    const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-    setPaginatedData(data);
+      if (success) {
+        // Remover la sugerencia después de convertirla exitosamente
+        console.log('Task created successfully, removing suggestion:', suggestedTask.id);
+        removeSuggestion(suggestedTask.id);
+        
+        // Refresh current page after creating task
+        const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
+        setPaginatedData(data);
+      }
+    } catch (error) {
+      console.error('Error converting suggested task:', error);
+      // En caso de error, no removemos la sugerencia
+    } finally {
+      // Quitar el estado de conversión
+      setConvertingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(suggestedTask.id);
+        return newSet;
+      });
+    }
   };
 
   const handleTaskStatusChange = async (taskId: string, newStatus: AgentTask['status']) => {
@@ -396,50 +424,64 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {suggestedTasks.map((task) => (
-                    <Card key={task.id} className="p-4 border-l-4 border-l-yellow-400">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Star className="w-4 h-4 text-yellow-500" />
-                            <h4 className="font-medium text-sm">{task.title}</h4>
+                  {suggestedTasks.map((task) => {
+                    const isConverting = convertingTasks.has(task.id);
+                    
+                    return (
+                      <Card key={task.id} className="p-4 border-l-4 border-l-yellow-400">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Star className="w-4 h-4 text-yellow-500" />
+                              <h4 className="font-medium text-sm">{task.title}</h4>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2">{task.description}</p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={`text-xs ${
+                                task.priority === 'high' ? 'border-red-300 text-red-600' :
+                                task.priority === 'medium' ? 'border-yellow-300 text-yellow-600' :
+                                'border-green-300 text-green-600'
+                              }`}>
+                                {task.priority}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {task.estimatedTime}
+                              </Badge>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-600 mb-2">{task.description}</p>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={`text-xs ${
-                              task.priority === 'high' ? 'border-red-300 text-red-600' :
-                              task.priority === 'medium' ? 'border-yellow-300 text-yellow-600' :
-                              'border-green-300 text-green-600'
-                            }`}>
-                              {task.priority}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {task.estimatedTime}
-                            </Badge>
+                          <div className="flex items-center gap-1 ml-2">
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleConvertSuggestedTask(task)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                              disabled={isAtLimit || isConverting}
+                            >
+                              {isConverting ? (
+                                <>
+                                  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                                  {t[language].converting}
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  {t[language].convertToTask}
+                                </>
+                              )}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => onSelectAgent(task.agentId)}
+                              disabled={isConverting}
+                            >
+                              {t[language].chatWithAgent}
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 ml-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleConvertSuggestedTask(task)}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                            disabled={isAtLimit}
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            {t[language].convertToTask}
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => onSelectAgent(task.agentId)}
-                          >
-                            {t[language].chatWithAgent}
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>

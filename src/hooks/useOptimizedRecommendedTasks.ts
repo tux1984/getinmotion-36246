@@ -137,9 +137,17 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     );
   };
 
+  // Nueva función para remover una sugerencia específica
+  const removeSuggestion = (taskId: string) => {
+    console.log('Removing suggestion:', taskId);
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+
   // Function to convert suggested task to real task (will be handled by createTask in TaskManagementInterface)
   const convertToRealTask = async (task: OptimizedRecommendedTask) => {
     console.log('Converting suggested task to real task:', task);
+    // La lógica real de conversión se maneja en TaskManagementInterface
+    // Esta función ahora solo se usa para logging
     return null;
   };
 
@@ -147,6 +155,7 @@ export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | nul
     tasks,
     loading,
     markTaskCompleted,
-    convertToRealTask
+    convertToRealTask,
+    removeSuggestion // Nueva función exportada
   };
 };
