@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,15 +22,24 @@ export interface AgentTask {
   updated_at: string;
 }
 
+export interface PaginatedTasks {
+  tasks: AgentTask[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 export function useAgentTasks(agentId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchTasks = useCallback(async () => {
     if (!user) {
       setTasks([]);
+      setTotalCount(0);
       setLoading(false);
       return;
     }
@@ -37,14 +47,14 @@ export function useAgentTasks(agentId?: string) {
     try {
       let query = supabase
         .from('agent_tasks')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('user_id', user.id);
 
       if (agentId) {
         query = query.eq('agent_id', agentId);
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error, count } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -55,6 +65,7 @@ export function useAgentTasks(agentId?: string) {
       }));
       
       setTasks(typedTasks);
+      setTotalCount(count || 0);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -64,6 +75,63 @@ export function useAgentTasks(agentId?: string) {
       });
     } finally {
       setLoading(false);
+    }
+  }, [user, agentId, toast]);
+
+  const fetchPaginatedTasks = useCallback(async (
+    page: number = 1, 
+    pageSize: number = 10, 
+    filter: 'all' | 'pending' | 'in_progress' | 'completed' = 'all'
+  ): Promise<PaginatedTasks> => {
+    if (!user) {
+      return { tasks: [], totalCount: 0, totalPages: 0, currentPage: page };
+    }
+
+    try {
+      let query = supabase
+        .from('agent_tasks')
+        .select('*', { count: 'exact' })
+        .eq('user_id', user.id);
+
+      if (agentId) {
+        query = query.eq('agent_id', agentId);
+      }
+
+      if (filter !== 'all') {
+        query = query.eq('status', filter);
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      
+      const typedTasks: AgentTask[] = (data || []).map(task => ({
+        ...task,
+        relevance: task.relevance as 'low' | 'medium' | 'high',
+        status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled'
+      }));
+      
+      const totalPages = Math.ceil((count || 0) / pageSize);
+
+      return {
+        tasks: typedTasks,
+        totalCount: count || 0,
+        totalPages,
+        currentPage: page
+      };
+    } catch (error) {
+      console.error('Error fetching paginated tasks:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar las tareas',
+        variant: 'destructive',
+      });
+      return { tasks: [], totalCount: 0, totalPages: 0, currentPage: page };
     }
   }, [user, agentId, toast]);
 
@@ -110,6 +178,7 @@ export function useAgentTasks(agentId?: string) {
       };
       
       setTasks(prev => [typedTask, ...prev]);
+      setTotalCount(prev => prev + 1);
       
       toast({
         title: 'Tarea creada',
@@ -169,6 +238,7 @@ export function useAgentTasks(agentId?: string) {
       if (error) throw error;
       
       setTasks(prev => prev.filter(task => task.id !== taskId));
+      setTotalCount(prev => prev - 1);
     } catch (error) {
       console.error('Error deleting task:', error);
       toast({
@@ -176,6 +246,43 @@ export function useAgentTasks(agentId?: string) {
         description: 'No se pudo eliminar la tarea',
         variant: 'destructive',
       });
+    }
+  };
+
+  const deleteAllTasks = async () => {
+    if (!user) return false;
+
+    try {
+      let query = supabase
+        .from('agent_tasks')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (agentId) {
+        query = query.eq('agent_id', agentId);
+      }
+
+      const { error } = await query;
+
+      if (error) throw error;
+      
+      setTasks([]);
+      setTotalCount(0);
+      
+      toast({
+        title: 'Todas las tareas eliminadas',
+        description: 'Se han eliminado todas las tareas exitosamente.',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting all tasks:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron eliminar todas las tareas',
+        variant: 'destructive',
+      });
+      return false;
     }
   };
 
@@ -210,13 +317,15 @@ export function useAgentTasks(agentId?: string) {
     };
   }, [user, agentId, fetchTasks]);
 
-
   return {
     tasks,
+    totalCount,
     loading,
     createTask,
     updateTask,
     deleteTask,
+    deleteAllTasks,
+    fetchPaginatedTasks,
     refreshTasks: fetchTasks
   };
 }

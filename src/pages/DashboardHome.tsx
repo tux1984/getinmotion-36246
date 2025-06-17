@@ -59,6 +59,11 @@ const DashboardHome = () => {
     recovering, recovered, agents, maturityScores, forceShow, profileData
   ]);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Simplified redirect logic with timeout
   useEffect(() => {
     if (!user) {
@@ -359,7 +364,7 @@ const DashboardHome = () => {
         onAgentManagerClick={handleOpenAgentManager}
       />
       
-      <div className="pt-24">
+      <div className="pt-20">
         <ModernDashboardMain 
           onSelectAgent={handleSelectAgent}
           onMaturityCalculatorClick={handleNavigateToMaturityCalculator}
