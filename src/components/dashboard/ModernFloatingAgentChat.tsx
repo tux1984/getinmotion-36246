@@ -8,6 +8,7 @@ import { ChatWelcomeScreen } from './chat/ChatWelcomeScreen';
 import { ChatMessagesArea } from './chat/ChatMessagesArea';
 import { ChatInputBar } from './chat/ChatInputBar';
 import { getAgentTranslation } from '@/data/agentTranslations';
+import { getAgentById } from '@/data/agentsDatabase';
 
 interface ModernFloatingAgentChatProps {
   agentId: string;
@@ -39,17 +40,18 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
   const agentTranslation = getAgentTranslation(agentId, language);
+  const agent = getAgentById(agentId);
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
 
   // Fixed logic: we're in new chat state when there's no conversation AND no messages
-  // OR when we explicitly have no conversation selected
   const isNewChat = !currentConversationId && messages.length === 0;
 
   // Log state for debugging
   useEffect(() => {
     console.log('ModernFloatingAgentChat state:', {
       agentId,
+      agentName: agent?.name,
       currentConversationId,
       messagesCount: messages.length,
       isNewChat,
@@ -57,7 +59,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       messagesLoading,
       showHeader
     });
-  }, [agentId, currentConversationId, messages.length, isNewChat, isProcessing, messagesLoading, showHeader]);
+  }, [agentId, agent?.name, currentConversationId, messages.length, isNewChat, isProcessing, messagesLoading, showHeader]);
 
   const handleSendMessage = useCallback(async (message: string) => {
     if (!message.trim() || isProcessing) return;
@@ -69,7 +71,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       let conversationId = currentConversationId;
       
       if (!conversationId) {
-        console.log('Creating new conversation...');
+        console.log('Creating new conversation for agent:', agentId);
         conversationId = await createConversation(messageContent);
         if (!conversationId) {
           throw new Error('Failed to create conversation');
@@ -80,24 +82,31 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       console.log('Adding user message...');
       await addMessage(conversationId, messageContent, 'user');
       
-      console.log('Sending message to AI...');
+      console.log('Sending message to AI agent:', agentId);
       const aiResponse = await sendAIMessage(messageContent);
       
       if (aiResponse) {
         console.log('Adding AI response...');
         await addMessage(conversationId, aiResponse, 'agent');
+      } else {
+        console.error('No AI response received');
+        toast({
+          title: 'Error',
+          description: language === 'en' ? 'No response from AI agent' : 'Sin respuesta del agente IA',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo enviar el mensaje',
+        description: language === 'en' ? 'Failed to send message' : 'No se pudo enviar el mensaje',
         variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, currentConversationId, createConversation, addMessage, sendAIMessage, setIsProcessing, toast]);
+  }, [isProcessing, currentConversationId, createConversation, addMessage, sendAIMessage, setIsProcessing, toast, agentId, language]);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,16 +120,19 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   if (messagesLoading) {
     return (
       <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-        {showHeader && (
-          <ChatHeader 
-            agentId={agentId}
-            language={language}
-            onBack={onBack}
-            showHeader={showHeader}
-          />
-        )}
+        <ChatHeader 
+          agentId={agentId}
+          language={language}
+          onBack={onBack}
+          showHeader={true}
+        />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-2"></div>
+            <p className="text-purple-200 text-sm">
+              {language === 'en' ? 'Loading...' : 'Cargando...'}
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -128,19 +140,17 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 
   return (
     <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-      {showHeader && (
-        <ChatHeader 
-          agentId={agentId}
-          language={language}
-          onBack={onBack}
-          showHeader={showHeader}
-        />
-      )}
+      <ChatHeader 
+        agentId={agentId}
+        language={language}
+        onBack={onBack}
+        showHeader={true}
+      />
 
       {isNewChat ? (
         <ChatWelcomeScreen
           agentId={agentId}
-          agentName={agentTranslation.name}
+          agentName={agentTranslation?.name || agent?.name || 'AI Assistant'}
           language={language}
           onSendMessage={handleSendMessage}
         />

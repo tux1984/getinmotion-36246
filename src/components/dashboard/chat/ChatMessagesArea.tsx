@@ -9,12 +9,14 @@ interface ChatMessagesAreaProps {
   messages: AgentMessage[];
   isProcessing: boolean;
   language: 'en' | 'es';
+  agentId?: string;
 }
 
 export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
   messages,
   isProcessing,
-  language
+  language,
+  agentId
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -24,27 +26,29 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isProcessing]);
 
   return (
-    <div className="flex-1 overflow-hidden">
-      <ScrollArea className="h-full p-2">
-        <div className="space-y-3 max-w-4xl mx-auto">
-          {messages.map((message) => (
-            <MessageBubble 
-              key={message.id}
-              message={message}
-              language={language}
-            />
-          ))}
-          
-          {isProcessing && (
-            <ChatThinkingIndicator language={language} />
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-    </div>
+    <ScrollArea className="flex-1 p-6">
+      <div className="space-y-4">
+        {messages.map((message) => (
+          <MessageBubble
+            key={message.id}
+            message={message}
+            language={language}
+            agentId={agentId}
+          />
+        ))}
+        
+        {isProcessing && (
+          <ChatThinkingIndicator 
+            language={language} 
+            agentId={agentId}
+          />
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+    </ScrollArea>
   );
 };

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Calculator, Palette, Scale, Settings, FileText, Users, Target, TrendingUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AgentMessage } from '@/hooks/useAgentConversations';
@@ -9,34 +9,65 @@ import { RichTextRenderer } from './RichTextRenderer';
 interface MessageBubbleProps {
   message: AgentMessage;
   language: 'en' | 'es';
+  agentId?: string;
 }
+
+const getAgentIcon = (agentId?: string) => {
+  if (!agentId) return Bot;
+  
+  const iconMap = {
+    'cost-calculator': Calculator,
+    'collaboration-agreement': Scale,
+    'maturity-evaluator': TrendingUp,
+    'cultural-consultant': Palette,
+    'project-manager': Settings,
+    'marketing-advisor': Target,
+    'export-advisor': FileText,
+    'collaboration-pitch': Users,
+    'portfolio-catalog': FileText,
+    'artwork-description': FileText,
+    'income-calculator': Calculator,
+    'branding-strategy': Palette,
+    'personal-brand-eval': Users,
+    'funding-routes': Target,
+    'contract-generator': Scale,
+    'tax-compliance': FileText,
+    'social-impact-eval': Target,
+    'pricing-assistant': Calculator,
+    'stakeholder-matching': Users
+  };
+  
+  return iconMap[agentId as keyof typeof iconMap] || Bot;
+};
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
-  language
+  language,
+  agentId
 }) => {
   const isUser = message.message_type === 'user';
+  const IconComponent = getAgentIcon(agentId);
 
   return (
-    <div 
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
-    >
-      <div className={`flex items-start gap-3 w-full max-w-[85%] md:max-w-[75%]`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className="flex items-start gap-4 max-w-[80%]">
         {!isUser && (
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white flex-shrink-0 flex items-center justify-center mt-1 shadow-lg">
-            <Bot className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white flex items-center justify-center mt-1 shadow-lg">
+            <IconComponent className="w-5 h-5" />
           </div>
         )}
         
         <div 
-          className={`p-4 rounded-2xl shadow-lg backdrop-blur-sm relative flex-1 ${
+          className={`p-4 rounded-2xl ${
             isUser 
-              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-br-lg' 
-              : 'bg-white/10 text-white border border-white/20 rounded-bl-lg'
+              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg' 
+              : 'bg-white/10 backdrop-blur-sm text-white border border-white/20 shadow-lg'
           }`}
         >
-          <RichTextRenderer content={message.content} />
-          <div className="text-xs opacity-70 mt-2 text-right">
+          <div className="whitespace-pre-wrap">
+            <RichTextRenderer content={message.content} />
+          </div>
+          <div className="text-xs opacity-70 mt-2">
             {formatDistanceToNow(new Date(message.created_at), { 
               addSuffix: true,
               locale: language === 'es' ? es : undefined
@@ -45,7 +76,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
         
         {isUser && (
-          <div className="w-9 h-9 rounded-full bg-white/20 text-white flex-shrink-0 flex items-center justify-center mt-1 backdrop-blur shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mt-1 shadow-lg">
             <User className="w-5 h-5" />
           </div>
         )}
