@@ -4,7 +4,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserActivity } from '@/hooks/useUserActivity';
-import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 
 // Components
 import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
@@ -27,14 +26,17 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
   onAgentManagerClick,
-  agents,
+  agents = [], // Default to empty array to prevent undefined errors
   maturityScores,
   profileData,
   recommendedAgents
 }) => {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
-  const enabledAgents = useMemo(() => agents.filter(a => a.status === 'active').map(a => a.id), [agents]);
+  const enabledAgents = useMemo(() => 
+    (agents || []).filter(a => a.status === 'active').map(a => a.id), 
+    [agents]
+  );
   const { recentConversations, loading: activityLoading } = useUserActivity();
 
   const t = {
@@ -48,7 +50,7 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
     }
   };
 
-  const activeAgents = agents.filter(agent => agent.status === 'active');
+  const activeAgents = (agents || []).filter(agent => agent.status === 'active');
   const overallProgress = maturityScores 
     ? Math.round((maturityScores.ideaValidation + maturityScores.userExperience + maturityScores.marketFit + maturityScores.monetization) / 4)
     : 0;

@@ -21,15 +21,10 @@ const AgentsGallery = () => {
   }, []);
 
   const {
-    searchTerm,
-    setSearchTerm,
-    selectedCategories,
-    setSelectedCategories,
-    sortBy,
-    setSortBy,
-    viewMode,
-    setViewMode,
-    filteredAgents
+    filters,
+    updateFilter,
+    clearFilters,
+    filteredAndGroupedAgents
   } = useAgentFilters();
 
   const seoData = SEO_CONFIG.pages.agents[language];
@@ -48,6 +43,9 @@ const AgentsGallery = () => {
   };
 
   const t = translations[language];
+
+  // Convert grouped agents to flat array for display
+  const flatAgents = Object.values(filteredAndGroupedAgents).flat();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
@@ -77,35 +75,26 @@ const AgentsGallery = () => {
         <AgentsGalleryHeader 
           title={t.title}
           subtitle={t.subtitle}
-          language={language}
         />
         
         <AgentsSearchAndFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedCategories={selectedCategories}
-          onCategoriesChange={setSelectedCategories}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
+          searchTerm={filters.searchTerm}
+          onSearchChange={(value) => updateFilter('searchTerm', value)}
+          selectedCategory={filters.category}
+          onCategoryChange={(value) => updateFilter('category', value)}
+          sortBy={filters.sortBy}
+          onSortChange={(value) => updateFilter('sortBy', value)}
           language={language}
         />
 
-        {filteredAgents.length === 0 ? (
+        {flatAgents.length === 0 ? (
           <AgentsEmptyState 
-            searchTerm={searchTerm}
-            selectedCategories={selectedCategories}
             language={language}
-            onClearFilters={() => {
-              setSearchTerm('');
-              setSelectedCategories([]);
-            }}
+            onClearFilters={clearFilters}
           />
         ) : (
           <AgentsGridView 
-            agents={filteredAgents}
-            viewMode={viewMode}
+            agents={flatAgents}
             language={language}
           />
         )}
