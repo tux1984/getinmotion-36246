@@ -48,6 +48,30 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
     }
   };
 
+  // Function to handle chat with task context
+  const handleChatWithTaskContext = async (taskContext?: string) => {
+    // Switch to chat tab in mobile view
+    if (isMobile) {
+      setActiveTab('chat');
+    }
+    
+    // Switch to conversations in sidebar
+    setSidebarTab('conversations');
+    
+    // If we have task context, create a new conversation or add to current one
+    if (taskContext) {
+      let conversationId = conversationManager.currentConversationId;
+      
+      if (!conversationId) {
+        // Create new conversation with the task context
+        conversationId = await conversationManager.createConversation(taskContext);
+      } else {
+        // Add the task context as a new message
+        await conversationManager.addMessage(conversationId, taskContext, 'user');
+      }
+    }
+  };
+
   if (isMobile) {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20 pt-20">
@@ -259,6 +283,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
                 <AgentTasksPanel 
                   agentId={selectedAgent} 
                   language={language}
+                  onChatWithAgent={handleChatWithTaskContext}
                 />
               )}
             </div>
