@@ -13,6 +13,7 @@ import { TaskPagination } from '@/components/ui/task-pagination';
 import { ClearAllTasksDialog } from './ClearAllTasksDialog';
 import { DetailedTaskCard } from './DetailedTaskCard';
 import { TaskDetailView } from './TaskDetailView';
+import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
 import { 
   ListTodo, 
   Plus, 
@@ -33,6 +34,8 @@ interface TaskManagementInterfaceProps {
   enabledAgents: string[];
   language: 'en' | 'es';
   onSelectAgent: (agentId: string) => void;
+  agentId?: string; // Nuevo prop para identificar el agente
+  onBack?: () => void; // Nuevo prop para manejar navegación
 }
 
 const TASKS_PER_PAGE = 10;
@@ -42,7 +45,9 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
   profileData,
   enabledAgents,
   language,
-  onSelectAgent
+  onSelectAgent,
+  agentId,
+  onBack
 }) => {
   const { 
     tasks: allTasks, 
@@ -251,7 +256,18 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
 
   return (
     <>
-      <Card className="w-full">
+      {/* Header unificado si se proporciona agentId */}
+      {agentId && (
+        <UnifiedAgentHeader
+          agentId={agentId}
+          language={language}
+          onBack={onBack}
+          variant="embedded"
+          showHeader={true}
+        />
+      )}
+
+      <Card className={`w-full ${agentId ? 'rounded-t-none' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">

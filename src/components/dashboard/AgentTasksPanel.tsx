@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
 import { 
   Plus, 
   CheckCircle2, 
@@ -31,12 +33,16 @@ interface AgentTasksPanelProps {
   agentId: string;
   language: 'en' | 'es';
   onChatWithAgent?: (taskId: string, taskTitle: string) => void;
+  showHeader?: boolean; // Nuevo prop para mostrar/ocultar header
+  onBack?: () => void; // Nuevo prop para navegación
 }
 
 export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({ 
   agentId, 
   language, 
-  onChatWithAgent 
+  onChatWithAgent,
+  showHeader = false,
+  onBack
 }) => {
   const { tasks, loading, createTask, updateTask } = useAgentTasks(agentId);
   const [searchQuery, setSearchQuery] = useState('');
@@ -165,6 +171,19 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-transparent">
+      {/* Header unificado opcional */}
+      {showHeader && (
+        <div className="mb-4">
+          <UnifiedAgentHeader
+            agentId={agentId}
+            language={language}
+            onBack={onBack}
+            variant="embedded"
+            showHeader={true}
+          />
+        </div>
+      )}
+
       {/* Header with Create Button */}
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <h3 className="text-sm font-medium text-white">{t[language].tasks}</h3>
