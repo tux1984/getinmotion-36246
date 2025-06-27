@@ -1,16 +1,12 @@
 
-import React, { useMemo } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import React from 'react';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useUserActivity } from '@/hooks/useUserActivity';
-
-// Components
-import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
-import { ActiveAgentsWidget } from './premium/ActiveAgentsWidget';
-import { CreativeInsightsWidget } from './premium/CreativeInsightsWidget';
-import { RecentActivityWidget } from './premium/RecentActivityWidget';
+import { AgentMiniDashboard } from './AgentMiniDashboard';
+import { AgentQuickActions } from './AgentQuickActions';
+import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { TaskManagementInterface } from './TaskManagementInterface';
+import { ModernAgentsGrid } from './ModernAgentsGrid';
+import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
 
 interface PremiumDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -18,94 +14,77 @@ interface PremiumDashboardMainProps {
   onAgentManagerClick: () => void;
   agents: Agent[];
   maturityScores: CategoryScore | null;
-  profileData: any | null;
   recommendedAgents: RecommendedAgents;
+  profileData: any | null;
 }
 
 export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
   onSelectAgent,
   onMaturityCalculatorClick,
   onAgentManagerClick,
-  agents = [], // Default to empty array to prevent undefined errors
+  agents,
   maturityScores,
-  profileData,
-  recommendedAgents
+  recommendedAgents,
+  profileData
 }) => {
-  const { language } = useLanguage();
-  const isMobile = useIsMobile();
-  const enabledAgents = useMemo(() => 
-    (agents || []).filter(a => a.status === 'active').map(a => a.id), 
-    [agents]
-  );
-  const { recentConversations, loading: activityLoading } = useUserActivity();
-
-  const t = {
-    en: {
-      welcome: 'Welcome to your Creative Universe',
-      subtitle: 'Where art meets innovation and dreams become reality',
-    },
-    es: {
-      welcome: 'Bienvenido a tu Universo Creativo',
-      subtitle: 'Donde el arte se encuentra con la innovación y los sueños se hacen realidad',
-    }
-  };
-
-  const activeAgents = (agents || []).filter(agent => agent.status === 'active');
-  const overallProgress = maturityScores 
-    ? Math.round((maturityScores.ideaValidation + maturityScores.userExperience + maturityScores.marketFit + maturityScores.monetization) / 4)
-    : 0;
-
   return (
-    <div>
-      <PremiumDashboardHero
-        language={language}
-        welcomeText={t[language].welcome}
-        subtitleText={t[language].subtitle}
-        activeAgentsCount={activeAgents.length}
-        completedTasksCount={0} // Se calculará desde TaskManagementInterface
-        overallProgress={overallProgress}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20">
+      <div className="max-w-7xl mx-auto p-6 pt-24">
+        {/* Hero Section */}
+        <PremiumDashboardHero 
+          maturityScores={maturityScores}
+          profileData={profileData}
+          onMaturityCalculatorClick={onMaturityCalculatorClick}
+        />
 
-      <div className={`${isMobile ? 'px-4 py-6' : 'px-6 py-8'}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className={`grid gap-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
-            
-            {/* Main Content Area */}
-            <div className={`${isMobile ? '' : 'lg:col-span-2'} space-y-6`}>
-              {/* Task Management Interface - Principal Feature */}
-              <TaskManagementInterface
-                maturityScores={maturityScores}
-                profileData={profileData}
-                enabledAgents={enabledAgents}
-                language={language}
-                onSelectAgent={onSelectAgent}
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-12 gap-6 mt-8">
+          {/* Left Column - Primary Content */}
+          <div className="col-span-12 lg:col-span-8 space-y-6">
+            {/* Task Management - Now properly positioned */}
+            <div className="relative z-10">
+              <TaskManagementInterface 
+                language="es"
+                onTaskCreate={() => {}}
+                onTaskUpdate={() => {}}
               />
             </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <ActiveAgentsWidget
-                language={language}
-                agents={activeAgents}
+            
+            {/* Agents Grid */}
+            <div className="relative z-0">
+              <ModernAgentsGrid 
+                agents={agents}
                 onSelectAgent={onSelectAgent}
                 onAgentManagerClick={onAgentManagerClick}
+                language="es"
               />
+            </div>
+          </div>
 
-              {maturityScores && (
-                <CreativeInsightsWidget
-                  language={language}
-                  maturityScores={maturityScores}
-                />
-              )}
-
-              {(activityLoading || recentConversations.length > 0) && (
-                <RecentActivityWidget
-                  language={language}
-                  activityLoading={activityLoading}
-                  recentConversations={recentConversations}
-                  onSelectAgent={onSelectAgent}
-                />
-              )}
+          {/* Right Column - Sidebar */}
+          <div className="col-span-12 lg:col-span-4 space-y-6">
+            {/* Mini Dashboard */}
+            <div className="h-[300px]">
+              <AgentMiniDashboard 
+                agentId="general" 
+                language="es" 
+              />
+            </div>
+            
+            {/* Quick Actions */}
+            <div className="h-[250px]">
+              <AgentQuickActions 
+                agentId="general" 
+                language="es" 
+              />
+            </div>
+            
+            {/* More Tools */}
+            <div className="h-[200px]">
+              <CollapsibleMoreTools 
+                language="es" 
+                agentId="general" 
+              />
             </div>
           </div>
         </div>

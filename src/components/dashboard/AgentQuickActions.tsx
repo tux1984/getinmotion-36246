@@ -12,6 +12,11 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
+import { CreateTaskModal } from './CreateTaskModal';
+import { DocumentCreator } from './DocumentCreator';
+import { FileUploader } from './FileUploader';
+import { UserSettings } from './UserSettings';
+import { useAgentTasks } from '@/hooks/useAgentTasks';
 
 interface AgentQuickActionsProps {
   agentId: string;
@@ -25,6 +30,11 @@ export const AgentQuickActions: React.FC<AgentQuickActionsProps> = ({
   compact = false
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showCreateTask, setShowCreateTask] = useState(false);
+  const [showDocumentCreator, setShowDocumentCreator] = useState(false);
+  const [showFileUploader, setShowFileUploader] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const { createTask } = useAgentTasks(agentId);
 
   const t = {
     en: {
@@ -57,72 +67,107 @@ export const AgentQuickActions: React.FC<AgentQuickActionsProps> = ({
   }
 
   return (
-    <Card className="bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl h-full">
-      <CardHeader className="pb-2">
-        <Button
-          variant="ghost"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full justify-between text-white hover:bg-white/10 p-2 h-auto"
-        >
-          <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-medium">{t[language].quickActions}</span>
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
-        </Button>
-      </CardHeader>
-      
-      {isExpanded && (
-        <CardContent className="p-3 pt-0">
-          <div className="space-y-1">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
-            >
-              <Plus className="w-3 h-3 mr-2" />
-              <span className="text-xs">{t[language].newTask}</span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
-            >
-              <FileText className="w-3 h-3 mr-2" />
-              <span className="text-xs">{t[language].newDocument}</span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
-            >
-              <Calendar className="w-3 h-3 mr-2" />
-              <span className="text-xs">{t[language].schedule}</span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
-            >
-              <Upload className="w-3 h-3 mr-2" />
-              <span className="text-xs">{t[language].upload}</span>
-            </Button>
-            
-            <div className="border-t border-white/10 pt-1 mt-2">
+    <>
+      <Card className="bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl h-full">
+        <CardHeader className="pb-2">
+          <Button
+            variant="ghost"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full justify-between text-white hover:bg-white/10 p-2 h-auto"
+          >
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-purple-400" />
+              <span className="text-sm font-medium">{t[language].quickActions}</span>
+            </div>
+            {isExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </Button>
+        </CardHeader>
+        
+        {isExpanded && (
+          <CardContent className="p-3 pt-0">
+            <div className="space-y-1">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start text-purple-300 hover:bg-white/10 h-auto p-2"
+                className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
+                onClick={() => setShowCreateTask(true)}
               >
-                <Settings className="w-3 h-3 mr-2" />
-                <span className="text-xs">{t[language].settings}</span>
+                <Plus className="w-3 h-3 mr-2" />
+                <span className="text-xs">{t[language].newTask}</span>
               </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
+                onClick={() => setShowDocumentCreator(true)}
+              >
+                <FileText className="w-3 h-3 mr-2" />
+                <span className="text-xs">{t[language].newDocument}</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
+                onClick={() => alert(language === 'es' ? 'Función de programación próximamente' : 'Schedule feature coming soon')}
+              >
+                <Calendar className="w-3 h-3 mr-2" />
+                <span className="text-xs">{t[language].schedule}</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-white/10 h-auto p-2"
+                onClick={() => setShowFileUploader(true)}
+              >
+                <Upload className="w-3 h-3 mr-2" />
+                <span className="text-xs">{t[language].upload}</span>
+              </Button>
+              
+              <div className="border-t border-white/10 pt-1 mt-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-purple-300 hover:bg-white/10 h-auto p-2"
+                  onClick={() => setShowSettings(true)}
+                >
+                  <Settings className="w-3 h-3 mr-2" />
+                  <span className="text-xs">{t[language].settings}</span>
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      )}
-    </Card>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Modals */}
+      <CreateTaskModal
+        agentId={agentId}
+        language={language}
+        isOpen={showCreateTask}
+        onClose={() => setShowCreateTask(false)}
+        onCreateTask={createTask}
+      />
+      
+      <DocumentCreator
+        agentId={agentId}
+        language={language}
+        isOpen={showDocumentCreator}
+        onClose={() => setShowDocumentCreator(false)}
+      />
+      
+      <FileUploader
+        language={language}
+        isOpen={showFileUploader}
+        onClose={() => setShowFileUploader(false)}
+      />
+      
+      <UserSettings
+        language={language}
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
+    </>
   );
 };

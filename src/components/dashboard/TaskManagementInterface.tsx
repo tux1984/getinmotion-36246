@@ -1,535 +1,251 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAgentTasks, AgentTask, PaginatedTasks } from '@/hooks/useAgentTasks';
-import { useOptimizedRecommendedTasks, OptimizedRecommendedTask } from '@/hooks/useOptimizedRecommendedTasks';
-import { useTaskLimits } from '@/hooks/useTaskLimits';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { TaskLimitIndicator } from './TaskLimitIndicator';
-import { TaskPagination } from '@/components/ui/task-pagination';
-import { ClearAllTasksDialog } from './ClearAllTasksDialog';
-import { DetailedTaskCard } from './DetailedTaskCard';
-import { TaskDetailView } from './TaskDetailView';
-import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
+import { Progress } from '@/components/ui/progress';
 import { 
-  ListTodo, 
   Plus, 
-  Lightbulb, 
   CheckCircle2, 
   Clock, 
-  Trash2,
-  Filter,
-  Star,
-  AlertTriangle,
-  RefreshCw
+  Target,
+  MoreHorizontal,
+  Calendar,
+  User
 } from 'lucide-react';
-import { CategoryScore } from '@/types/dashboard';
+import { useAgentTasks } from '@/hooks/useAgentTasks';
+import { CreateTaskModal } from './CreateTaskModal';
+import { UnifiedTaskWorkflowModal } from './UnifiedTaskWorkflowModal';
+import { AgentTask } from '@/hooks/useAgentTasks';
 
 interface TaskManagementInterfaceProps {
-  maturityScores: CategoryScore | null;
-  profileData: any | null;
-  enabledAgents: string[];
   language: 'en' | 'es';
-  onSelectAgent: (agentId: string) => void;
-  agentId?: string; // Nuevo prop para identificar el agente
-  onBack?: () => void; // Nuevo prop para manejar navegación
+  onTaskCreate?: () => void;
+  onTaskUpdate?: () => void;
 }
 
-const TASKS_PER_PAGE = 10;
-
 export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = ({
-  maturityScores,
-  profileData,
-  enabledAgents,
   language,
-  onSelectAgent,
-  agentId,
-  onBack
+  onTaskCreate,
+  onTaskUpdate
 }) => {
-  const { 
-    tasks: allTasks, 
-    totalCount, 
-    loading: realTasksLoading, 
-    createTask, 
-    updateTask, 
-    deleteTask, 
-    deleteAllTasks, 
-    fetchPaginatedTasks,
-    updateSubtasks,
-    updateNotes,
-    updateResources,
-    updateTimeSpent
-  } = useAgentTasks();
-  
-  const { 
-    tasks: suggestedTasks, 
-    loading: suggestedLoading,
-    removeSuggestion 
-  } = useOptimizedRecommendedTasks(
-    maturityScores, 
-    profileData, 
-    enabledAgents
-  );
-  
-  const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [paginatedData, setPaginatedData] = useState<PaginatedTasks>({
-    tasks: [],
-    totalCount: 0,
-    totalPages: 0,
-    currentPage: 1
-  });
-  const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
-  const [showClearDialog, setShowClearDialog] = useState(false);
-  const [paginationLoading, setPaginationLoading] = useState(false);
-  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<AgentTask | null>(null);
-  const [convertingTasks, setConvertingTasks] = useState<Set<string>>(new Set());
-
-  const { isAtLimit, isNearLimit, activeTasksCount, limit } = useTaskLimits(allTasks);
+  const { tasks, createTask, updateTask, loading } = useAgentTasks();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<AgentTask | null>(null);
 
   const t = {
     en: {
       taskManagement: 'Task Management',
-      realTasks: 'My Tasks',
-      suggestions: 'Suggestions',
-      createTask: 'Create Task',
-      convertToTask: 'Create Task',
-      markComplete: 'Complete',
-      deleteTask: 'Delete',
-      clearAllTasks: 'Clear All Tasks',
+      newTask: 'New Task',
+      allTasks: 'All Tasks',
+      inProgress: 'In Progress',
+      completed: 'Completed',
+      pending: 'Pending',
       noTasks: 'No tasks yet',
-      noSuggestions: 'No suggestions available',
-      filterAll: 'All',
-      filterPending: 'Pending',
-      filterInProgress: 'In Progress',
-      filterCompleted: 'Completed',
-      chatWithAgent: 'Chat with Agent',
-      limitReached: 'Task limit reached. Complete pending tasks to create new ones.',
-      limitWarning: 'You have {count}/{limit} active tasks. Complete some to create new ones.',
-      startFresh: 'Ready for a fresh start? You can now perform the maturity assessment to get new personalized recommendations.',
-      converting: 'Converting...'
+      createFirst: 'Create your first task!',
+      dueDate: 'Due',
+      progress: 'Progress'
     },
     es: {
       taskManagement: 'Gestión de Tareas',
-      realTasks: 'Mis Tareas',
-      suggestions: 'Sugerencias',
-      createTask: 'Crear Tarea',
-      convertToTask: 'Crear Tarea',
-      markComplete: 'Completar',
-      deleteTask: 'Eliminar',
-      clearAllTasks: 'Limpiar Todas las Tareas',
+      newTask: 'Nueva Tarea',
+      allTasks: 'Todas las Tareas',
+      inProgress: 'En Progreso',
+      completed: 'Completadas',
+      pending: 'Pendientes',
       noTasks: 'No hay tareas aún',
-      noSuggestions: 'No hay sugerencias disponibles',
-      filterAll: 'Todas',
-      filterPending: 'Pendientes',
-      filterInProgress: 'En Progreso',
-      filterCompleted: 'Completadas',
-      chatWithAgent: 'Chatear con Agente',
-      limitReached: 'Límite de tareas alcanzado. Completa tareas pendientes para crear nuevas.',
-      limitWarning: 'Tienes {count}/{limit} tareas activas. Completa algunas para crear nuevas.',
-      startFresh: '¿Listo para empezar de nuevo? Ahora puedes realizar la evaluación de madurez para obtener nuevas recomendaciones personalizadas.',
-      converting: 'Convirtiendo...'
+      createFirst: '¡Crea tu primera tarea!',
+      dueDate: 'Vence',
+      progress: 'Progreso'
     }
   };
 
-  // Load paginated tasks when filter or page changes
-  useEffect(() => {
-    const loadPaginatedTasks = async () => {
-      setPaginationLoading(true);
-      const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-      setPaginatedData(data);
-      setPaginationLoading(false);
-    };
+  const getStatusColor = (status: AgentTask['status']) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-    loadPaginatedTasks();
-  }, [currentPage, filter, fetchPaginatedTasks]);
+  const getPriorityColor = (priority: number) => {
+    if (priority === 1) return 'border-l-red-500';
+    if (priority === 2) return 'border-l-yellow-500';
+    return 'border-l-green-500';
+  };
 
-  // Reset to first page when filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filter]);
-
-  const handleConvertSuggestedTask = async (suggestedTask: OptimizedRecommendedTask) => {
-    if (isAtLimit) {
-      return; // createTask will show the toast
+  const handleCreateTask = async (taskData: Partial<AgentTask>) => {
+    const newTask = await createTask({
+      ...taskData,
+      agent_id: 'general' // Default agent for general tasks
+    });
+    
+    if (newTask && onTaskCreate) {
+      onTaskCreate();
     }
     
-    // Marcar como convirtiendo
-    setConvertingTasks(prev => new Set(prev).add(suggestedTask.id));
-    
-    try {
-      const success = await createTask({
-        agent_id: suggestedTask.agentId,
-        title: suggestedTask.title,
-        description: suggestedTask.description,
-        relevance: suggestedTask.priority as 'low' | 'medium' | 'high',
-        priority: suggestedTask.priority === 'high' ? 1 : suggestedTask.priority === 'medium' ? 2 : 3
-      });
+    return newTask;
+  };
 
-      if (success) {
-        // Remover la sugerencia después de convertirla exitosamente
-        console.log('Task created successfully, removing suggestion:', suggestedTask.id);
-        removeSuggestion(suggestedTask.id);
-        
-        // Refresh current page after creating task
-        const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-        setPaginatedData(data);
+  const handleUpdateTask = async (updates: Partial<AgentTask>) => {
+    if (selectedTask) {
+      await updateTask(selectedTask.id, updates);
+      if (onTaskUpdate) {
+        onTaskUpdate();
       }
-    } catch (error) {
-      console.error('Error converting suggested task:', error);
-      // En caso de error, no removemos la sugerencia
-    } finally {
-      // Quitar el estado de conversión
-      setConvertingTasks(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(suggestedTask.id);
-        return newSet;
-      });
     }
   };
 
-  const handleTaskStatusChange = async (taskId: string, newStatus: AgentTask['status']) => {
-    setUpdatingTasks(prev => new Set(prev).add(taskId));
-    
-    const updates: Partial<AgentTask> = { status: newStatus };
-    if (newStatus === 'completed') {
-      updates.completed_at = new Date().toISOString();
-      updates.progress_percentage = 100;
-    }
-    
-    await updateTask(taskId, updates);
-    
-    // Refresh current page after updating
-    const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-    setPaginatedData(data);
-    
-    setUpdatingTasks(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(taskId);
-      return newSet;
-    });
+  // Get task statistics
+  const taskStats = {
+    total: tasks.length,
+    pending: tasks.filter(t => t.status === 'pending').length,
+    inProgress: tasks.filter(t => t.status === 'in_progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    setUpdatingTasks(prev => new Set(prev).add(taskId));
-    await deleteTask(taskId);
-    
-    // Refresh current page after deletion
-    const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-    setPaginatedData(data);
-    
-    setUpdatingTasks(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(taskId);
-      return newSet;
-    });
-  };
+  // Get recent tasks (last 5)
+  const recentTasks = tasks.slice(0, 5);
 
-  const handleClearAllTasks = async () => {
-    const success = await deleteAllTasks();
-    if (success) {
-      setCurrentPage(1);
-      setPaginatedData({
-        tasks: [],
-        totalCount: 0,
-        totalPages: 0,
-        currentPage: 1
-      });
-    }
-  };
-
-  const handleStartTask = (task: AgentTask) => {
-    setSelectedTaskForDetail(task);
-  };
-
-  const handleChatWithAgent = (task: AgentTask) => {
-    onSelectAgent(task.agent_id);
-  };
-
-  const refreshPaginatedData = async () => {
-    const data = await fetchPaginatedTasks(currentPage, TASKS_PER_PAGE, filter);
-    setPaginatedData(data);
-  };
+  if (loading) {
+    return (
+      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-white/20 rounded w-1/4"></div>
+          <div className="space-y-2">
+            <div className="h-3 bg-white/20 rounded"></div>
+            <div className="h-3 bg-white/20 rounded w-3/4"></div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <>
-      {/* Header unificado si se proporciona agentId */}
-      {agentId && (
-        <UnifiedAgentHeader
-          agentId={agentId}
-          language={language}
-          onBack={onBack}
-          variant="embedded"
-          showHeader={true}
-        />
-      )}
+      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Target className="w-5 h-5 text-purple-400" />
+            {t[language].taskManagement}
+          </h2>
+          <Button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {t[language].newTask}
+          </Button>
+        </div>
 
-      <Card className={`w-full ${agentId ? 'rounded-t-none' : ''}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ListTodo className="w-5 h-5" />
-              {t[language].taskManagement}
-            </CardTitle>
-            
-            {totalCount > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowClearDialog(true)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                {t[language].clearAllTasks}
-              </Button>
-            )}
+        {/* Task Statistics */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-white">{taskStats.total}</div>
+            <div className="text-xs text-white/70">{t[language].allTasks}</div>
           </div>
-          
-          {/* Only show Task Limit Indicator if user has active tasks */}
-          {activeTasksCount > 0 && (
-            <TaskLimitIndicator 
-              tasks={allTasks} 
-              language={language}
-            />
-          )}
+          <div className="bg-yellow-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-yellow-300">{taskStats.pending}</div>
+            <div className="text-xs text-yellow-200">{t[language].pending}</div>
+          </div>
+          <div className="bg-blue-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-blue-300">{taskStats.inProgress}</div>
+            <div className="text-xs text-blue-200">{t[language].inProgress}</div>
+          </div>
+          <div className="bg-green-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-green-300">{taskStats.completed}</div>
+            <div className="text-xs text-green-200">{t[language].completed}</div>
+          </div>
+        </div>
 
-          {/* Show fresh start message when no tasks */}
-          {totalCount === 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-green-700">
-                <CheckCircle2 className="w-5 h-5" />
-                <div>
-                  <p className="font-medium">
-                    {language === 'en' ? 'Ready for a Fresh Start!' : '¡Listo para Empezar de Nuevo!'}
-                  </p>
-                  <p className="text-sm text-green-600 mt-1">
-                    {t[language].startFresh}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="tasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="tasks" className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                {t[language].realTasks} ({totalCount})
-              </TabsTrigger>
-              <TabsTrigger value="suggestions" className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4" />
-                {t[language].suggestions} ({suggestedTasks.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="tasks" className="space-y-4">
-              {/* Task filters */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <Filter className="w-4 h-4 text-gray-500" />
-                <Button 
-                  variant={filter === 'all' ? 'default' : 'outline'} 
-                  size="sm"
-                  onClick={() => setFilter('all')}
-                >
-                  {t[language].filterAll}
-                </Button>
-                <Button 
-                  variant={filter === 'pending' ? 'default' : 'outline'} 
-                  size="sm"
-                  onClick={() => setFilter('pending')}
-                >
-                  {t[language].filterPending}
-                </Button>
-                <Button 
-                  variant={filter === 'in_progress' ? 'default' : 'outline'} 
-                  size="sm"
-                  onClick={() => setFilter('in_progress')}
-                >
-                  {t[language].filterInProgress}
-                </Button>
-                <Button 
-                  variant={filter === 'completed' ? 'default' : 'outline'} 
-                  size="sm"
-                  onClick={() => setFilter('completed')}
-                >
-                  {t[language].filterCompleted}
-                </Button>
-              </div>
-
-              <Separator />
-
-              {(realTasksLoading || paginationLoading) ? (
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
-                  ))}
-                </div>
-              ) : paginatedData.tasks.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <ListTodo className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                  <p>{t[language].noTasks}</p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-3">
-                    {paginatedData.tasks.map((task) => (
-                      <DetailedTaskCard
-                        key={task.id}
-                        task={task}
-                        language={language}
-                        onStatusChange={handleTaskStatusChange}
-                        onDelete={handleDeleteTask}
-                        onStartTask={handleStartTask}
-                        onChatWithAgent={handleChatWithAgent}
-                        isUpdating={updatingTasks.has(task.id)}
-                      />
-                    ))}
+        {/* Recent Tasks */}
+        {recentTasks.length === 0 ? (
+          <div className="text-center py-8 text-white/60">
+            <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">{t[language].noTasks}</p>
+            <p className="text-xs opacity-75">{t[language].createFirst}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentTasks.map((task) => (
+              <div
+                key={task.id}
+                className={`p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer border-l-4 ${getPriorityColor(task.priority)}`}
+                onClick={() => setSelectedTask(task)}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-white text-sm font-medium truncate">
+                      {task.title}
+                    </h4>
+                    {task.description && (
+                      <p className="text-white/70 text-xs mt-1 line-clamp-1">
+                        {task.description}
+                      </p>
+                    )}
                   </div>
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white h-6 w-6 p-0">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </div>
 
-                  <TaskPagination
-                    currentPage={paginatedData.currentPage}
-                    totalPages={paginatedData.totalPages}
-                    totalItems={paginatedData.totalCount}
-                    itemsPerPage={TASKS_PER_PAGE}
-                    onPageChange={setCurrentPage}
-                    language={language}
-                  />
-                </>
-              )}
-            </TabsContent>
-
-            <TabsContent value="suggestions" className="space-y-4">
-              {/* Only show limit warning if user actually has many active tasks */}
-              {isAtLimit && activeTasksCount > 10 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <div className="flex items-center gap-2 text-red-700">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                      {t[language].limitReached}
-                    </span>
+                {/* Progress Bar */}
+                {task.progress_percentage > 0 && (
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-white/60">{t[language].progress}</span>
+                      <span className="text-xs text-white/60">{task.progress_percentage}%</span>
+                    </div>
+                    <Progress value={task.progress_percentage} className="h-1 bg-white/20" />
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Show warning if approaching limit */}
-              {isNearLimit && !isAtLimit && activeTasksCount > 20 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                  <div className="flex items-center gap-2 text-yellow-700">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                      {t[language].limitWarning.replace('{count}', activeTasksCount.toString()).replace('{limit}', limit.toString())}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {suggestedLoading ? (
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
-                  ))}
-                </div>
-              ) : suggestedTasks.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Lightbulb className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                  <p>{t[language].noSuggestions}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {suggestedTasks.map((task) => {
-                    const isConverting = convertingTasks.has(task.id);
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className={`text-xs ${getStatusColor(task.status)}`}>
+                      {t[language][task.status] || task.status}
+                    </Badge>
                     
-                    return (
-                      <Card key={task.id} className="p-4 border-l-4 border-l-yellow-400">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Star className="w-4 h-4 text-yellow-500" />
-                              <h4 className="font-medium text-sm">{task.title}</h4>
-                            </div>
-                            <p className="text-xs text-gray-600 mb-2">{task.description}</p>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className={`text-xs ${
-                                task.priority === 'high' ? 'border-red-300 text-red-600' :
-                                task.priority === 'medium' ? 'border-yellow-300 text-yellow-600' :
-                                'border-green-300 text-green-600'
-                              }`}>
-                                {task.priority}
-                              </Badge>
-                              <Badge variant="secondary" className="text-xs">
-                                <Clock className="w-3 h-3 mr-1" />
-                                {task.estimatedTime}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 ml-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleConvertSuggestedTask(task)}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                              disabled={isAtLimit || isConverting}
-                            >
-                              {isConverting ? (
-                                <>
-                                  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                                  {t[language].converting}
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="w-3 h-3 mr-1" />
-                                  {t[language].convertToTask}
-                                </>
-                              )}
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => onSelectAgent(task.agentId)}
-                              disabled={isConverting}
-                            >
-                              {t[language].chatWithAgent}
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
+                    {task.due_date && (
+                      <div className="flex items-center gap-1 text-xs text-white/60">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 text-xs text-white/60">
+                    <User className="w-3 h-3" />
+                    <span>General</span>
+                  </div>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
-      <ClearAllTasksDialog
-        isOpen={showClearDialog}
-        onClose={() => setShowClearDialog(false)}
-        onConfirm={handleClearAllTasks}
-        taskCount={totalCount}
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        agentId="general"
         language={language}
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreateTask={handleCreateTask}
       />
 
-      {/* Task Detail View Modal */}
-      {selectedTaskForDetail && (
-        <TaskDetailView
-          task={selectedTaskForDetail}
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <UnifiedTaskWorkflowModal
+          task={selectedTask}
           language={language}
-          onUpdateSubtasks={updateSubtasks}
-          onUpdateNotes={updateNotes}
-          onUpdateResources={updateResources}
-          onUpdateTimeSpent={updateTimeSpent}
-          onClose={() => {
-            setSelectedTaskForDetail(null);
-            refreshPaginatedData();
-          }}
-          onChatWithAgent={() => {
-            onSelectAgent(selectedTaskForDetail.agent_id);
-            setSelectedTaskForDetail(null);
-          }}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onWorkWithAgent={() => {}}
+          onUpdateTask={handleUpdateTask}
         />
       )}
     </>

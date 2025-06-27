@@ -1,12 +1,22 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Target } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Plus } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { AgentTask } from '@/hooks/useAgentTasks';
 
 interface CreateTaskModalProps {
@@ -14,7 +24,7 @@ interface CreateTaskModalProps {
   language: 'en' | 'es';
   isOpen: boolean;
   onClose: () => void;
-  onCreateTask: (taskData: Partial<AgentTask>) => Promise<void>;
+  onCreateTask: (task: Partial<AgentTask>) => Promise<AgentTask | null>;
 }
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
@@ -24,131 +34,132 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
   onCreateTask
 }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    relevance: 'medium' as 'low' | 'medium' | 'high',
-    priority: 3,
-    due_date: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<number>(3);
+  const [relevance, setRelevance] = useState<'low' | 'medium' | 'high'>('medium');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const t = {
     en: {
       createTask: 'Create New Task',
       title: 'Title',
-      titlePlaceholder: 'Enter task title...',
       description: 'Description',
-      descriptionPlaceholder: 'Describe what needs to be done...',
-      relevance: 'Relevance',
       priority: 'Priority',
+      relevance: 'Relevance',
       dueDate: 'Due Date',
-      create: 'Create Task',
       cancel: 'Cancel',
+      create: 'Create Task',
+      titlePlaceholder: 'Enter task title...',
+      descriptionPlaceholder: 'Enter task description...',
+      selectDate: 'Select date',
       high: 'High',
       medium: 'Medium',
-      low: 'Low',
-      titleRequired: 'Title is required'
+      low: 'Low'
     },
     es: {
       createTask: 'Crear Nueva Tarea',
       title: 'Título',
-      titlePlaceholder: 'Ingresa el título de la tarea...',
       description: 'Descripción',
-      descriptionPlaceholder: 'Describe qué necesita ser hecho...',
-      relevance: 'Relevancia',
       priority: 'Prioridad',
+      relevance: 'Relevancia',
       dueDate: 'Fecha Límite',
-      create: 'Crear Tarea',
       cancel: 'Cancelar',
+      create: 'Crear Tarea',
+      titlePlaceholder: 'Ingresa el título de la tarea...',
+      descriptionPlaceholder: 'Ingresa la descripción de la tarea...',
+      selectDate: 'Seleccionar fecha',
       high: 'Alta',
       medium: 'Media',
-      low: 'Baja',
-      titleRequired: 'El título es requerido'
+      low: 'Baja'
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title.trim()) {
-      return;
-    }
+    if (!title.trim()) return;
 
-    setIsSubmitting(true);
-    
+    setIsCreating(true);
     try {
       await onCreateTask({
         agent_id: agentId,
-        title: formData.title.trim(),
-        description: formData.description.trim() || null,
-        relevance: formData.relevance,
-        priority: formData.priority,
-        due_date: formData.due_date ? new Date(formData.due_date).toISOString() : null
+        title: title.trim(),
+        description: description.trim() || null,
+        priority,
+        relevance,
+        due_date: dueDate?.toISOString() || null,
+        status: 'pending'
       });
       
       // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        relevance: 'medium',
-        priority: 3,
-        due_date: ''
-      });
-      
+      setTitle('');
+      setDescription('');
+      setPriority(3);
+      setRelevance('medium');
+      setDueDate(null);
       onClose();
     } catch (error) {
       console.error('Error creating task:', error);
     } finally {
-      setIsSubmitting(false);
+      setIsCreating(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5" />
+            <Plus className="w-5 h-5" />
             {t[language].createTask}
           </DialogTitle>
         </DialogHeader>
-
+        
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">{t[language].title} *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="title">{t[language].title}</Label>
             <Input
               id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder={t[language].titlePlaceholder}
-              className="mt-1"
               required
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="description">{t[language].description}</Label>
             <Textarea
               id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder={t[language].descriptionPlaceholder}
-              className="mt-1"
               rows={3}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
+              <Label>{t[language].priority}</Label>
+              <Select value={priority.toString()} onValueChange={(value) => setPriority(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">{t[language].high} (1)</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">{t[language].medium} (3)</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">{t[language].low} (5)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label>{t[language].relevance}</Label>
-              <Select 
-                value={formData.relevance} 
-                onValueChange={(value: 'low' | 'medium' | 'high') => 
-                  setFormData(prev => ({ ...prev, relevance: value }))
-                }
-              >
-                <SelectTrigger className="mt-1">
+              <Select value={relevance} onValueChange={(value: 'low' | 'medium' | 'high') => setRelevance(value)}>
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -158,48 +169,42 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label>{t[language].priority}</Label>
-              <Select 
-                value={formData.priority.toString()} 
-                onValueChange={(value) => 
-                  setFormData(prev => ({ ...prev, priority: parseInt(value) }))
-                }
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">{t[language].high} (1)</SelectItem>
-                  <SelectItem value="2">{t[language].medium} (2)</SelectItem>
-                  <SelectItem value="3">{t[language].low} (3)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          <div>
-            <Label htmlFor="due_date">{t[language].dueDate}</Label>
-            <Input
-              id="due_date"
-              type="date"
-              value={formData.due_date}
-              onChange={(e) => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
-              className="mt-1"
-              min={new Date().toISOString().split('T')[0]}
-            />
+          <div className="space-y-2">
+            <Label>{t[language].dueDate}</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : t[language].selectDate}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate || undefined}
+                  onSelect={(date) => setDueDate(date || null)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={isSubmitting || !formData.title.trim()} className="flex-1">
-              <Plus className="w-4 h-4 mr-2" />
-              {isSubmitting ? 'Creando...' : t[language].create}
-            </Button>
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t[language].cancel}
             </Button>
-          </div>
+            <Button type="submit" disabled={!title.trim() || isCreating}>
+              {isCreating ? 'Creando...' : t[language].create}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
