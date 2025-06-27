@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,17 +16,26 @@ import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { CreateTaskModal } from './CreateTaskModal';
 import { UnifiedTaskWorkflowModal } from './UnifiedTaskWorkflowModal';
 import { AgentTask } from '@/hooks/useAgentTasks';
+import { CategoryScore } from '@/types/dashboard';
 
 interface TaskManagementInterfaceProps {
   language: 'en' | 'es';
   onTaskCreate?: () => void;
   onTaskUpdate?: () => void;
+  maturityScores?: CategoryScore | null;
+  profileData?: any;
+  enabledAgents?: string[];
+  onSelectAgent?: (id: string) => void;
 }
 
 export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = ({
   language,
   onTaskCreate,
-  onTaskUpdate
+  onTaskUpdate,
+  maturityScores,
+  profileData,
+  enabledAgents,
+  onSelectAgent
 }) => {
   const { tasks, createTask, updateTask, loading } = useAgentTasks();
   const [showCreateModal, setShowCreateModal] = useState(false);
