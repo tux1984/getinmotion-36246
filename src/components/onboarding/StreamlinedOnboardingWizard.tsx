@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,6 +19,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
   const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
   const [basicRecommendations, setBasicRecommendations] = useState<RecommendedAgents | null>(null);
+  const [userProfileData, setUserProfileData] = useState<any>({});
 
   const translations = {
     en: {
@@ -56,16 +58,38 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
   };
 
   const handleMaturityComplete = (scores: CategoryScore) => {
+    console.log('Maturity scores completed:', scores);
     setMaturityScores(scores);
     handleNext();
   };
 
   const handleAnalysisChoice = (type: 'quick' | 'deep') => {
+    console.log('Analysis type selected:', type);
     setAnalysisType(type);
     handleNext();
   };
 
+  const handleProfileDataUpdate = (newData: any) => {
+    console.log('Updating profile data:', newData);
+    setUserProfileData(prev => ({
+      ...prev,
+      ...newData
+    }));
+  };
+
   const handleComplete = (finalRecommendations: RecommendedAgents) => {
+    console.log('Onboarding completed with:', {
+      maturityScores,
+      finalRecommendations,
+      userProfileData
+    });
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('userProfileData', JSON.stringify(userProfileData));
+    localStorage.setItem('maturityScores', JSON.stringify(maturityScores));
+    localStorage.setItem('recommendedAgents', JSON.stringify(finalRecommendations));
+    localStorage.setItem('onboardingCompleted', 'true');
+    
     onComplete(
       maturityScores || {
         ideaValidation: 20,
@@ -113,11 +137,13 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
           maturityScores={maturityScores}
           analysisType={analysisType}
           basicRecommendations={basicRecommendations}
+          userProfileData={userProfileData}
           onNext={handleNext}
           onPrevious={handlePrevious}
           onMaturityComplete={handleMaturityComplete}
           onAnalysisChoice={handleAnalysisChoice}
           onComplete={handleComplete}
+          onProfileDataUpdate={handleProfileDataUpdate}
           setBasicRecommendations={setBasicRecommendations}
         />
       </div>

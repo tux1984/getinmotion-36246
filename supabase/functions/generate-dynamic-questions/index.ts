@@ -15,32 +15,35 @@ interface GenerateDynamicQuestionsRequest {
 }
 
 // Fallback questions when OpenAI fails
-const getFallbackQuestions = (language: 'en' | 'es') => {
+const getFallbackQuestions = (language: 'en' | 'es', profileData: any) => {
+  const industry = profileData?.industry || 'creativo';
+  const experience = profileData?.experience || 'principiante';
+  
   const questions = language === 'es' ? [
     {
-      question: "¿Cuál es el mayor desafío que enfrentas actualmente en tu proyecto creativo?",
-      context: "Esta pregunta nos ayuda a entender tus obstáculos principales para ofrecerte mejor orientación."
+      question: `Como ${experience} en ${industry}, ¿cuáles son los principales obstáculos que enfrentas para hacer crecer tu proyecto?`,
+      context: "Esta pregunta nos ayuda a entender tus desafíos específicos según tu nivel de experiencia."
     },
     {
-      question: "¿Qué te motivó a comenzar este proyecto y qué esperas lograr con él?",
-      context: "Conocer tu motivación nos permite personalizar las recomendaciones según tus objetivos."
+      question: `¿Qué estrategias has probado hasta ahora para desarrollar tu proyecto en ${industry} y cuáles han funcionado mejor?`,
+      context: "Conocer tus experiencias previas nos permite sugerir mejores enfoques."
     },
     {
-      question: "¿Cómo mides actualmente el éxito de tu trabajo creativo?",
-      context: "Entender tus métricas de éxito nos ayuda a sugerir estrategias más efectivas."
+      question: `Si pudieras resolver solo una cosa en tu proyecto de ${industry} en los próximos 3 meses, ¿qué sería y por qué?`,
+      context: "Esta pregunta nos ayuda a priorizar recomendaciones según tus objetivos inmediatos."
     }
   ] : [
     {
-      question: "What is the biggest challenge you currently face in your creative project?",
-      context: "This question helps us understand your main obstacles to provide better guidance."
+      question: `As a ${experience} in ${industry}, what are the main obstacles you face in growing your project?`,
+      context: "This question helps us understand your specific challenges based on your experience level."
     },
     {
-      question: "What motivated you to start this project and what do you hope to achieve?",
-      context: "Knowing your motivation allows us to personalize recommendations according to your goals."
+      question: `What strategies have you tried so far to develop your ${industry} project and which have worked best?`,
+      context: "Knowing your previous experiences allows us to suggest better approaches."
     },
     {
-      question: "How do you currently measure the success of your creative work?",
-      context: "Understanding your success metrics helps us suggest more effective strategies."
+      question: `If you could solve just one thing in your ${industry} project in the next 3 months, what would it be and why?`,
+      context: "This question helps us prioritize recommendations based on your immediate goals."
     }
   ];
 
@@ -57,76 +60,75 @@ serve(async (req) => {
     const { profileData, language }: GenerateDynamicQuestionsRequest = await req.json();
 
     console.log('Generate Dynamic Questions request:', { 
-      profileData: Object.keys(profileData || {}), 
-      language 
+      profileData: profileData ? Object.keys(profileData) : 'null', 
+      language,
+      industry: profileData?.industry,
+      experience: profileData?.experience
     });
 
     // If OpenAI API key is not configured, return fallback questions
     if (!openAIApiKey) {
       console.log('OpenAI API key not configured, using fallback questions');
-      const fallbackQuestions = getFallbackQuestions(language);
+      const fallbackQuestions = getFallbackQuestions(language, profileData);
       return new Response(JSON.stringify({ questions: fallbackQuestions }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Create a comprehensive prompt based on the user's profile data
-    const systemPrompt = language === 'es' 
-      ? `Eres un experto consultor en negocios creativos y culturales. Basándote en las respuestas previas del usuario, genera entre 3 y 5 preguntas abiertas reflexivas que profundicen en su evaluación.
-
-Información del perfil del usuario:
+    const userContext = `
 - Industria: ${profileData?.industry || 'No especificada'}
-- Actividades: ${profileData?.activities ? profileData.activities.join(', ') : 'No especificadas'}
 - Experiencia: ${profileData?.experience || 'No especificada'}
-- Métodos de pago: ${profileData?.paymentMethods || 'No especificados'}
+- Actividades principales: ${profileData?.activities ? profileData.activities.join(', ') : 'No especificadas'}
+- Métodos de pago actuales: ${profileData?.paymentMethods || 'No especificados'}
 - Identidad de marca: ${profileData?.brandIdentity || 'No especificada'}
 - Control financiero: ${profileData?.financialControl || 'No especificado'}
-- Estructura de equipo: ${profileData?.teamStructure || 'No especificada'}
+- Estructura del equipo: ${profileData?.teamStructure || 'No especificada'}
 - Organización de tareas: ${profileData?.taskOrganization || 'No especificada'}
 - Toma de decisiones: ${profileData?.decisionMaking || 'No especificada'}
+- Respuestas adicionales: ${profileData?.extendedAnswers ? Object.values(profileData.extendedAnswers).join(', ') : 'Ninguna'}
+    `.trim();
 
-Genera preguntas que:
-1. Exploren el "por qué" y "cómo" detrás de sus elecciones
-2. Sean relevantes para su contexto empresarial específico
-3. Estén escritas en un tono natural y amigable
-4. Eviten ser genéricas o repetitivas
-5. Ayuden a generar insights más profundos para recomendaciones personalizadas
+    const systemPrompt = language === 'es' 
+      ? `Eres un experto consultor en negocios creativos y culturales. Basándote en el perfil específico del usuario, genera exactamente 3 preguntas abiertas y personalizadas que profundicen en su situación particular.
+
+INFORMACIÓN DEL USUARIO:
+${userContext}
+
+INSTRUCCIONES ESPECÍFICAS:
+1. Las preguntas DEBEN ser específicas a su industria (${profileData?.industry || 'creativa'}) y nivel de experiencia (${profileData?.experience || 'principiante'})
+2. Referenciar directamente sus respuestas anteriores cuando sea relevante
+3. Hacer preguntas que lleven a recomendaciones de tareas concretas y accionables
+4. Usar un tono natural y conversacional
+5. Evitar preguntas genéricas que podrían aplicar a cualquier persona
 
 Responde SOLO con un JSON en este formato:
 {
   "questions": [
     {
-      "question": "Pregunta abierta aquí",
-      "context": "Contexto opcional sobre por qué esta pregunta es relevante para su perfil"
+      "question": "Pregunta específica y personalizada aquí",
+      "context": "Por qué esta pregunta es relevante para su perfil específico"
     }
   ]
 }`
-      : `You are an expert consultant in creative and cultural businesses. Based on the user's previous responses, generate 3 to 5 thoughtful open-ended questions that deepen their assessment.
+      : `You are an expert consultant in creative and cultural businesses. Based on the user's specific profile, generate exactly 3 personalized open-ended questions that dive deeper into their particular situation.
 
-User profile information:
-- Industry: ${profileData?.industry || 'Not specified'}
-- Activities: ${profileData?.activities ? profileData.activities.join(', ') : 'Not specified'}
-- Experience: ${profileData?.experience || 'Not specified'}
-- Payment methods: ${profileData?.paymentMethods || 'Not specified'}
-- Brand identity: ${profileData?.brandIdentity || 'Not specified'}
-- Financial control: ${profileData?.financialControl || 'Not specified'}
-- Team structure: ${profileData?.teamStructure || 'Not specified'}
-- Task organization: ${profileData?.taskOrganization || 'Not specified'}
-- Decision making: ${profileData?.decisionMaking || 'Not specified'}
+USER INFORMATION:
+${userContext}
 
-Generate questions that:
-1. Explore the "why" and "how" behind their choices
-2. Are relevant to their specific business context
-3. Are written in a natural, friendly tone
-4. Avoid being generic or repetitive
-5. Help generate deeper insights for personalized recommendations
+SPECIFIC INSTRUCTIONS:
+1. Questions MUST be specific to their industry (${profileData?.industry || 'creative'}) and experience level (${profileData?.experience || 'beginner'})
+2. Reference their previous answers directly when relevant
+3. Ask questions that lead to concrete, actionable task recommendations
+4. Use a natural, conversational tone
+5. Avoid generic questions that could apply to anyone
 
 Respond ONLY with a JSON in this format:
 {
   "questions": [
     {
-      "question": "Open-ended question here",
-      "context": "Optional context about why this question is relevant to their profile"
+      "question": "Specific and personalized question here",
+      "context": "Why this question is relevant to their specific profile"
     }
   ]
 }`;
@@ -144,10 +146,10 @@ Respond ONLY with a JSON in this format:
           model: 'gpt-4o-mini',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: 'Generate personalized follow-up questions based on this user profile.' }
+            { role: 'user', content: 'Generate 3 personalized follow-up questions based on this specific user profile.' }
           ],
-          temperature: 0.8,
-          max_tokens: 1000,
+          temperature: 0.7,
+          max_tokens: 800,
         }),
       });
 
@@ -157,7 +159,7 @@ Respond ONLY with a JSON in this format:
         
         // Return fallback questions on OpenAI error
         console.log('OpenAI failed, using fallback questions');
-        const fallbackQuestions = getFallbackQuestions(language);
+        const fallbackQuestions = getFallbackQuestions(language, profileData);
         return new Response(JSON.stringify({ questions: fallbackQuestions }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -180,7 +182,7 @@ Respond ONLY with a JSON in this format:
         
         // Return fallback questions on parse error
         console.log('Parse failed, using fallback questions');
-        const fallbackQuestions = getFallbackQuestions(language);
+        const fallbackQuestions = getFallbackQuestions(language, profileData);
         return new Response(JSON.stringify({ questions: fallbackQuestions }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -195,7 +197,7 @@ Respond ONLY with a JSON in this format:
       
       // Return fallback questions on request failure
       console.log('OpenAI request failed, using fallback questions');
-      const fallbackQuestions = getFallbackQuestions(language);
+      const fallbackQuestions = getFallbackQuestions(language, profileData);
       return new Response(JSON.stringify({ questions: fallbackQuestions }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -205,7 +207,7 @@ Respond ONLY with a JSON in this format:
     console.error('Error in generate-dynamic-questions function:', error);
     
     // Return fallback questions on any error
-    const fallbackQuestions = getFallbackQuestions('es'); // Default to Spanish
+    const fallbackQuestions = getFallbackQuestions('es', {}); // Default to Spanish
     
     return new Response(
       JSON.stringify({ 

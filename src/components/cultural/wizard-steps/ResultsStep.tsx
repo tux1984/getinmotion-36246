@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { UserProfileData } from '../types/wizardTypes';
 import { StepContainer } from '../wizard-components/StepContainer';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Check, ChevronRight, Stars, Loader2 } from 'lucide-react';
+import { Check, ChevronRight, Stars, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { motion } from 'framer-motion';
@@ -12,13 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { calculateMaturityScores, ScoreBreakdown } from '../hooks/utils/scoreCalculation';
 import { ScoreBreakdownDisplay } from '../components/ScoreBreakdownDisplay';
-
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
-}
 
 interface ResultsStepProps {
   profileData: UserProfileData;
@@ -36,8 +30,9 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
   onComplete,
   illustration
 }) => {
-  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([]);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
+  const [tasksCreated, setTasksCreated] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -51,8 +46,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       overallMaturity: "Overall Project Maturity",
       categoriesTitle: "Categories Breakdown",
       recommendedAgents: "Recommended AI Assistants",
-      aiRecommendations: "Priority Actions",
-      loadingRecommendations: "Generating recommendations...",
+      generatingTasks: "Generating Personalized Tasks",
+      generatingTasksDesc: "Creating actionable recommendations based on your profile...",
+      tasksCreated: "Tasks Created Successfully!",
+      tasksCreatedDesc: "We've created {count} personalized tasks for you",
       levels: {
         beginner: "Early Stage",
         developing: "Developing", 
@@ -72,8 +69,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         operations: "Operations Manager",
         cultural: "Creative Specialist"
       },
-      primaryButtonText: "Start Working with AI Agents",
-      secondaryButtonText: "View Dashboard"
+      primaryButtonText: "Go to Dashboard",
+      secondaryButtonText: "View My Tasks"
     },
     es: {
       title: "Resultados de tu Evaluación",
@@ -81,8 +78,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       overallMaturity: "Madurez General del Proyecto",
       categoriesTitle: "Desglose por Categorías",
       recommendedAgents: "Asistentes IA Recomendados",
-      aiRecommendations: "Acciones Prioritarias",
-      loadingRecommendations: "Generando recomendaciones...",
+      generatingTasks: "Generando Tareas Personalizadas",
+      generatingTasksDesc: "Creando recomendaciones accionables basadas en tu perfil...",
+      tasksCreated: "¡Tareas Creadas con Éxito!",
+      tasksCreatedDesc: "Hemos creado {count} tareas personalizadas para ti",
       levels: {
         beginner: "Etapa Inicial",
         developing: "Desarrollándose",
@@ -102,8 +101,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         operations: "Gerente de Operaciones",
         cultural: "Especialista Creativo"
       },
-      primaryButtonText: "Comenzar a Trabajar con Agentes IA",
-      secondaryButtonText: "Ver Dashboard"
+      primaryButtonText: "Ir al Dashboard",
+      secondaryButtonText: "Ver Mis Tareas"
     }
   };
   
@@ -150,37 +149,76 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
     return agents;
   };
 
+  // Generate task recommendations when component mounts
+  useEffect(() => {
+    const generateTaskRecommendations = async () => {
+      try {
+        setIsGeneratingTasks(true);
+        
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('No user found');
+          return;
+        }
+
+        console.log('Generating task recommendations for user:', user.id);
+        console.log('Profile data:', profileData);
+        console.log('Maturity scores:', scores);
+
+        const { data, error } = await supabase.functions.invoke('generate-task-recommendations', {
+          body: {
+            userId: user.id,
+            profileData,
+            maturityScores: scores,
+            language
+          }
+        });
+
+        if (error) {
+          console.error('Error generating task recommendations:', error);
+          toast({
+            title: language === 'es' ? 'Error' : 'Error',
+            description: language === 'es' 
+              ? 'No se pudieron generar las recomendaciones de tareas' 
+              : 'Could not generate task recommendations',
+            variant: 'destructive'
+          });
+        } else {
+          console.log('Task recommendations generated:', data);
+          setTasksCreated(data?.tasksCreated || 0);
+          setIsCompleted(true);
+          
+          toast({
+            title: language === 'es' ? '¡Tareas creadas!' : 'Tasks created!',
+            description: language === 'es' 
+              ? `Se han creado ${data?.tasksCreated || 0} tareas personalizadas para ti`
+              : `${data?.tasksCreated || 0} personalized tasks have been created for you`
+          });
+        }
+      } catch (error) {
+        console.error('Error generating task recommendations:', error);
+        toast({
+          title: 'Error',
+          description: language === 'es' 
+            ? 'Hubo un problema generando las recomendaciones' 
+            : 'There was a problem generating recommendations',
+          variant: 'destructive'
+        });
+      } finally {
+        setIsGeneratingTasks(false);
+      }
+    };
+
+    generateTaskRecommendations();
+  }, [profileData, scores, language, toast]);
+
   // Handle navigation to dashboard
-  const handleActivateAgents = () => {
+  const handleGoToDashboard = () => {
     console.log('🚀 Navigating to dashboard home');
     onComplete();
     navigate('/dashboard/home');
   };
-
-  // Fetch AI recommendations
-  useEffect(() => {
-    const fetchAIRecommendations = async () => {
-      try {
-        setIsLoadingRecommendations(true);
-        
-        const { data, error } = await supabase.functions.invoke('maturity-analysis', {
-          body: { scores, profileData, language }
-        });
-
-        if (error) {
-          console.error('Error fetching AI recommendations:', error);
-        } else if (data?.recommendations) {
-          setAiRecommendations(data.recommendations);
-        }
-      } catch (error) {
-        console.error('Error fetching AI recommendations:', error);
-      } finally {
-        setIsLoadingRecommendations(false);
-      }
-    };
-
-    fetchAIRecommendations();
-  }, [scores, profileData, language, toast]);
   
   return (
     <StepContainer
@@ -264,6 +302,46 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </motion.div>
         )}
 
+        {/* Task Generation Status */}
+        <motion.div
+          className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          {isGeneratingTasks && (
+            <div className="text-center py-8">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {t[language].generatingTasks}
+              </h3>
+              <p className="text-gray-600">
+                {t[language].generatingTasksDesc}
+              </p>
+            </div>
+          )}
+
+          {isCompleted && (
+            <div className="text-center py-8">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {t[language].tasksCreated}
+              </h3>
+              <p className="text-gray-600">
+                {t[language].tasksCreatedDesc.replace('{count}', tasksCreated.toString())}
+              </p>
+            </div>
+          )}
+        </motion.div>
+
         {/* Recommended Agents */}
         <motion.div
           className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8"
@@ -293,12 +371,22 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           </div>
           
           <Button 
-            onClick={handleActivateAgents}
+            onClick={handleGoToDashboard}
             className="w-full gap-3 bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 font-semibold py-4 text-lg shadow-lg"
             size="lg"
+            disabled={isGeneratingTasks}
           >
-            <span>{t[language].primaryButtonText}</span>
-            <ChevronRight className="w-5 h-5" />
+            {isGeneratingTasks ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>{language === 'es' ? 'Generando...' : 'Generating...'}</span>
+              </>
+            ) : (
+              <>
+                <span>{t[language].primaryButtonText}</span>
+                <ChevronRight className="w-5 h-5" />
+              </>
+            )}
           </Button>
         </motion.div>
       </div>

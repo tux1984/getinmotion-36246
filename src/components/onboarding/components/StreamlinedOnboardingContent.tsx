@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { StreamlinedWelcomeStep } from './StreamlinedWelcomeStep';
-import { StreamlinedMaturityStep } from './StreamlinedMaturityStep';
-import { StreamlinedAIAnalysisStep } from './StreamlinedAIAnalysisStep';
+import { CulturalMaturityWizard } from '@/components/cultural/CulturalMaturityWizard';
+import { StreamlinedAnalysisStep } from './StreamlinedAnalysisStep';
 import { StreamlinedResultsStep } from './StreamlinedResultsStep';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { ProfileSetupStep } from './ProfileSetupStep';
 
 interface StreamlinedOnboardingContentProps {
   currentStep: number;
@@ -14,11 +13,13 @@ interface StreamlinedOnboardingContentProps {
   maturityScores: CategoryScore | null;
   analysisType: 'quick' | 'deep' | null;
   basicRecommendations: RecommendedAgents | null;
+  userProfileData: any;
   onNext: () => void;
   onPrevious: () => void;
   onMaturityComplete: (scores: CategoryScore) => void;
   onAnalysisChoice: (type: 'quick' | 'deep') => void;
   onComplete: (recommendations: RecommendedAgents) => void;
+  onProfileDataUpdate: (data: any) => void;
   setBasicRecommendations: (recommendations: RecommendedAgents) => void;
 }
 
@@ -29,57 +30,70 @@ export const StreamlinedOnboardingContent: React.FC<StreamlinedOnboardingContent
   maturityScores,
   analysisType,
   basicRecommendations,
+  userProfileData,
   onNext,
   onPrevious,
   onMaturityComplete,
   onAnalysisChoice,
   onComplete,
+  onProfileDataUpdate,
   setBasicRecommendations
 }) => {
-  const isMobile = useIsMobile();
-
-  return (
-    <div className={`${isMobile ? 'w-full' : 'bg-white rounded-xl shadow-lg'} overflow-hidden`}>
-      {currentStep === 0 && (
-        <StreamlinedWelcomeStep
+  switch (currentStep) {
+    case 0:
+      return (
+        <ProfileSetupStep
           profileType={profileType}
           language={language}
           onNext={onNext}
+          onProfileDataUpdate={onProfileDataUpdate}
+          profileData={userProfileData}
         />
-      )}
+      );
 
-      {currentStep === 1 && (
-        <StreamlinedMaturityStep
-          profileType={profileType}
+    case 1:
+      return (
+        <div className="w-full">
+          <CulturalMaturityWizard
+            onComplete={(scores, recommendedAgents, profileData) => {
+              console.log('Cultural wizard completed with:', { scores, recommendedAgents, profileData });
+              // Update profile data with cultural wizard results
+              if (profileData) {
+                onProfileDataUpdate(profileData);
+              }
+              onMaturityComplete(scores);
+            }}
+          />
+        </div>
+      );
+
+    case 2:
+      return (
+        <StreamlinedAnalysisStep
           language={language}
-          onComplete={onMaturityComplete}
+          maturityScores={maturityScores}
+          profileData={userProfileData}
+          onAnalysisChoice={onAnalysisChoice}
+          onNext={onNext}
           onPrevious={onPrevious}
           setBasicRecommendations={setBasicRecommendations}
         />
-      )}
+      );
 
-      {currentStep === 2 && (
-        <StreamlinedAIAnalysisStep
-          profileType={profileType}
-          maturityScores={maturityScores}
-          language={language}
-          onAnalysisChoice={onAnalysisChoice}
-          onComplete={onNext}
-          onPrevious={onPrevious}
-          analysisType={analysisType}
-        />
-      )}
-
-      {currentStep === 3 && (
+    case 3:
+      return (
         <StreamlinedResultsStep
           maturityScores={maturityScores}
           basicRecommendations={basicRecommendations}
           analysisType={analysisType}
           language={language}
+          profileData={userProfileData}
           onComplete={onComplete}
           onPrevious={onPrevious}
         />
-      )}
-    </div>
-  );
+      );
+
+    default:
+      return null;
+  }
 };
