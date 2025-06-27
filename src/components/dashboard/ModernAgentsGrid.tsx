@@ -18,6 +18,7 @@ interface ModernAgentsGridProps {
   maturityScores: CategoryScore | null;
   onSelectAgent: (id: string) => void;
   language: 'en' | 'es';
+  onAgentManagerClick: () => void; // Add this prop
 }
 
 export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
@@ -25,7 +26,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
   recommendedAgents,
   maturityScores,
   onSelectAgent,
-  language
+  language,
+  onAgentManagerClick
 }) => {
   const { agents: userAgents, trackAgentUsage, enableAgent, disableAgent, loading, refetch } = useUserData();
   

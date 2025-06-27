@@ -32,6 +32,12 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
       <div className="max-w-7xl mx-auto p-6 pt-24">
         {/* Hero Section */}
         <PremiumDashboardHero 
+          language="es"
+          welcomeText="Bienvenido a tu Espacio Creativo"
+          subtitleText="Tu plataforma personalizada de asistencia creativa impulsada por IA"
+          activeAgentsCount={agents.length}
+          completedTasksCount={0}
+          overallProgress={maturityScores ? Math.round((maturityScores.idea_validation + maturityScores.user_experience + maturityScores.market_fit + maturityScores.monetization) / 4) : 0}
           maturityScores={maturityScores}
           profileData={profileData}
           onMaturityCalculatorClick={onMaturityCalculatorClick}
@@ -54,6 +60,8 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
             <div className="relative z-0">
               <ModernAgentsGrid 
                 agents={agents}
+                recommendedAgents={recommendedAgents}
+                maturityScores={maturityScores}
                 onSelectAgent={onSelectAgent}
                 onAgentManagerClick={onAgentManagerClick}
                 language="es"

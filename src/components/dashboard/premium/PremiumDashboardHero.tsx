@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Users, Target, TrendingUp } from 'lucide-react';
 import { PremiumStatsCard } from '../PremiumStatsCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CategoryScore } from '@/types/dashboard';
 
 interface PremiumDashboardHeroProps {
   language: 'en' | 'es';
@@ -12,6 +13,9 @@ interface PremiumDashboardHeroProps {
   activeAgentsCount: number;
   completedTasksCount: number;
   overallProgress: number;
+  maturityScores?: CategoryScore | null;
+  profileData?: any;
+  onMaturityCalculatorClick?: () => void;
 }
 
 const t = {
@@ -36,6 +40,9 @@ export const PremiumDashboardHero: React.FC<PremiumDashboardHeroProps> = ({
   activeAgentsCount,
   completedTasksCount,
   overallProgress,
+  maturityScores,
+  profileData,
+  onMaturityCalculatorClick,
 }) => {
   const isMobile = useIsMobile();
 

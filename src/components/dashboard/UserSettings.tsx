@@ -193,7 +193,10 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
               
               <div className="space-y-2">
                 <Label>{t[language].language}</Label>
-                <Select value={settings.language} onValueChange={(value) => setSettings(prev => ({ ...prev, language: value }))}>
+                <Select 
+                  value={settings.language} 
+                  onValueChange={(value: 'en' | 'es') => setSettings(prev => ({ ...prev, language: value }))}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -33,8 +33,8 @@ interface AgentTasksPanelProps {
   agentId: string;
   language: 'en' | 'es';
   onChatWithAgent?: (taskId: string, taskTitle: string) => void;
-  showHeader?: boolean; // Nuevo prop para mostrar/ocultar header
-  onBack?: () => void; // Nuevo prop para navegación
+  showHeader?: boolean;
+  onBack?: () => void;
 }
 
 export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({ 
@@ -126,9 +126,13 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
     }
   };
 
-  const handleCreateTask = async (taskData: Partial<AgentTask>) => {
-    await createTask(taskData);
-    setShowCreateModal(false);
+  // Fix: Return the created task instead of void
+  const handleCreateTask = async (taskData: Partial<AgentTask>): Promise<AgentTask | null> => {
+    const newTask = await createTask(taskData);
+    if (newTask) {
+      setShowCreateModal(false);
+    }
+    return newTask;
   };
 
   const handleUpdateTask = async (updates: Partial<AgentTask>) => {
