@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ interface StreamlinedResultsStepProps {
   basicRecommendations: RecommendedAgents | null;
   analysisType: 'quick' | 'deep' | null;
   language: 'en' | 'es';
+  profileData: any;
   onComplete: (recommendations: RecommendedAgents) => void;
   onPrevious: () => void;
 }
@@ -19,6 +19,7 @@ export const StreamlinedResultsStep: React.FC<StreamlinedResultsStepProps> = ({
   basicRecommendations,
   analysisType,
   language,
+  profileData,
   onComplete,
   onPrevious
 }) => {
@@ -78,6 +79,7 @@ export const StreamlinedResultsStep: React.FC<StreamlinedResultsStepProps> = ({
   const maturityLevel = getMaturityLevel();
 
   const handleComplete = () => {
+    console.log('Completing onboarding with profile data:', profileData);
     onComplete(finalRecommendations);
   };
 
