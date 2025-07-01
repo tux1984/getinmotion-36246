@@ -11,34 +11,26 @@ import { DashboardEmergencyFallback } from '@/components/dashboard/DashboardEmer
 import { DashboardDebugPanel } from '@/components/dashboard/DashboardDebugPanel';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
-import { useDashboardState } from '@/hooks/useDashboardState';
-import { useOnboardingValidation } from '@/hooks/useOnboardingValidation';
+import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
 
 const DashboardHome = () => {
   const { language } = useLanguage();
   const { user, isAuthorized } = useAuth();
   const navigate = useNavigate();
-  const [retryCount, setRetryCount] = useState(0);
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'agent-details' | 'agent-manager'>('dashboard');
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [showEmergencyFallback, setShowEmergencyFallback] = useState(false);
 
-  // Validation hooks
-  const { hasCompletedOnboarding, isValidating } = useOnboardingValidation();
-
-  // Dashboard state
+  // ARREGLO CRÍTICO: Usar el hook optimizado
   const {
-    activeSection,
-    selectedAgent,
     agents,
+    profile,
     maturityScores,
     recommendedAgents,
-    profileData,
-    handleSelectAgent,
-    handleMaturityCalculatorClick,
-    handleOpenAgentManager,
-    handleBackFromAgentDetails,
-    handleBackFromAgentManager,
-    handleAgentToggle
-  } = useDashboardState();
+    isLoading,
+    error,
+    hasOnboarding
+  } = useOptimizedAgentManagement();
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -47,78 +39,84 @@ const DashboardHome = () => {
 
   // Debug logging
   useEffect(() => {
-    console.log('DashboardHome state:', {
+    console.log('DashboardHome: Current state:', {
       user: user?.email,
       isAuthorized,
-      hasCompletedOnboarding,
-      isValidating,
+      hasOnboarding,
+      isLoading,
       agents: agents.length,
       maturityScores,
-      profileData,
-      retryCount
+      profile: !!profile,
+      error
     });
-  }, [user, isAuthorized, hasCompletedOnboarding, isValidating, agents, maturityScores, profileData, retryCount]);
+  }, [user, isAuthorized, hasOnboarding, isLoading, agents, maturityScores, profile, error]);
 
-  // Handle onboarding validation
+  // ARREGLO: Manejo más inteligente de onboarding
   useEffect(() => {
-    if (!isValidating && hasCompletedOnboarding === false) {
-      console.log('Onboarding not completed, redirecting...');
+    // Solo redirigir si estamos seguros de que no hay onboarding
+    if (!isLoading && hasOnboarding === false && !error) {
+      console.log('DashboardHome: Redirecting to onboarding - no maturity scores found');
       navigate('/maturity-calculator', { replace: true });
-      return;
     }
-  }, [hasCompletedOnboarding, isValidating, navigate]);
+  }, [hasOnboarding, isLoading, error, navigate]);
 
-  // Emergency fallback logic
+  // Emergency fallback - mostrar después de un tiempo si sigue cargando
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (isValidating || (hasCompletedOnboarding && agents.length === 0)) {
-        console.log('Triggering emergency fallback after timeout');
+      if (isLoading) {
+        console.log('DashboardHome: Showing emergency fallback after timeout');
         setShowEmergencyFallback(true);
       }
-    }, 8000); // 8 seconds timeout
+    }, 15000); // 15 segundos
 
     return () => clearTimeout(timer);
-  }, [isValidating, hasCompletedOnboarding, agents.length]);
+  }, [isLoading]);
+
+  const handleSelectAgent = (agentId: string) => {
+    console.log('DashboardHome: Selecting agent:', agentId);
+    setSelectedAgent(agentId);
+    setActiveSection('agent-details');
+  };
+
+  const handleBackFromAgentDetails = () => {
+    console.log('DashboardHome: Returning from agent details');
+    setSelectedAgent(null);
+    setActiveSection('dashboard');
+  };
+
+  const handleOpenAgentManager = () => {
+    console.log('DashboardHome: Opening agent manager');
+    setActiveSection('agent-manager');
+  };
+
+  const handleBackFromAgentManager = () => {
+    console.log('DashboardHome: Returning from agent manager');
+    setActiveSection('dashboard');
+  };
+
+  const handleMaturityCalculatorClick = () => {
+    console.log('DashboardHome: Going to maturity calculator');
+    navigate('/maturity-calculator');
+  };
+
+  const handleAgentToggle = async (agentId: string, enabled: boolean) => {
+    console.log('DashboardHome: Toggling agent:', agentId, enabled);
+    // Esta funcionalidad se implementará más tarde
+  };
 
   const handleRetry = () => {
-    console.log('Retrying dashboard load...');
-    setRetryCount(prev => prev + 1);
-    setShowEmergencyFallback(false);
+    console.log('DashboardHome: Retrying...');
     window.location.reload();
   };
 
   const handleGoToOnboarding = () => {
-    console.log('Going to onboarding...');
-    navigate('/maturity-calculator', { replace: true });
-  };
-
-  const handleGoToMaturityCalculator = () => {
-    console.log('Going to maturity calculator...');
+    console.log('DashboardHome: Going to onboarding');
     navigate('/maturity-calculator', { replace: true });
   };
 
   const seoData = SEO_CONFIG.pages.dashboard[language];
 
-  // Show loading state
-  if (isValidating || hasCompletedOnboarding === null) {
-    return (
-      <>
-        <DashboardDebugPanel
-          user={user}
-          isAuthorized={isAuthorized}
-          agents={agents}
-          maturityScores={maturityScores}
-          profileData={profileData}
-          onboardingStatus={hasCompletedOnboarding || false}
-          loading={isValidating}
-          error={null}
-        />
-        <DashboardLoadingState />
-      </>
-    );
-  }
-
-  // Show emergency fallback
+  // ARREGLO CRÍTICO: Mostrar emergency fallback si hay timeout
   if (showEmergencyFallback) {
     return (
       <>
@@ -127,22 +125,41 @@ const DashboardHome = () => {
           isAuthorized={isAuthorized}
           agents={agents}
           maturityScores={maturityScores}
-          profileData={profileData}
-          onboardingStatus={hasCompletedOnboarding || false}
-          loading={false}
-          error="Dashboard no pudo cargar correctamente"
+          profileData={profile}
+          onboardingStatus={hasOnboarding}
+          loading={isLoading}
+          error={error}
         />
         <DashboardEmergencyFallback
           onRetry={handleRetry}
           onGoToOnboarding={handleGoToOnboarding}
-          onGoToMaturityCalculator={handleGoToMaturityCalculator}
-          error="El dashboard no pudo cargar los datos necesarios"
+          onGoToMaturityCalculator={handleMaturityCalculatorClick}
+          error={error}
         />
       </>
     );
   }
 
-  // Main dashboard render
+  // ARREGLO CRÍTICO: Mostrar loading solo si realmente está cargando
+  if (isLoading) {
+    return (
+      <>
+        <DashboardDebugPanel
+          user={user}
+          isAuthorized={isAuthorized}
+          agents={agents}
+          maturityScores={maturityScores}
+          profileData={profile}
+          onboardingStatus={hasOnboarding}
+          loading={isLoading}
+          error={error}
+        />
+        <DashboardLoadingState />
+      </>
+    );
+  }
+
+  // ARREGLO CRÍTICO: Mostrar dashboard incluso con datos mínimos
   return (
     <DashboardBackground>
       <SEOHead
@@ -159,10 +176,10 @@ const DashboardHome = () => {
         isAuthorized={isAuthorized}
         agents={agents}
         maturityScores={maturityScores}
-        profileData={profileData}
-        onboardingStatus={hasCompletedOnboarding || false}
-        loading={false}
-        error={null}
+        profileData={profile}
+        onboardingStatus={hasOnboarding}
+        loading={isLoading}
+        error={error}
       />
 
       <NewDashboardHeader 
@@ -176,7 +193,7 @@ const DashboardHome = () => {
         agents={agents}
         maturityScores={maturityScores}
         recommendedAgents={recommendedAgents}
-        profileData={profileData}
+        profileData={profile}
         language={language}
         onSelectAgent={handleSelectAgent}
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
