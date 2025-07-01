@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -227,16 +228,28 @@ export function useAgentTasks(agentId?: string) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's the task limit error from trigger
+        if (error.message.includes('No puedes tener más de 15 tareas activas')) {
+          toast({
+            title: 'Límite de tareas alcanzado',
+            description: 'Completa algunas tareas pendientes antes de crear nuevas.',
+            variant: 'destructive',
+          });
+          return null;
+        }
+        throw error;
+      }
       
       const typedTask = convertToAgentTask(data);
       
       setTasks(prev => [typedTask, ...prev]);
       setTotalCount(prev => prev + 1);
       
+      const newActiveCount = activeTasks.length + 1;
       toast({
         title: 'Tarea creada',
-        description: `Nueva tarea creada. Tienes ${activeTasks.length + 1}/${ACTIVE_TASKS_LIMIT} tareas activas.`,
+        description: `Nueva tarea creada. Tienes ${newActiveCount}/${ACTIVE_TASKS_LIMIT} tareas activas.`,
       });
       
       return typedTask;

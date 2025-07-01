@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,9 +11,11 @@ import {
   MessageSquare,
   Target,
   ChevronRight,
-  Heart
+  Heart,
+  AlertCircle
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
+import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { CreateTaskModal } from './CreateTaskModal';
 
 interface SimpleTaskInterfaceProps {
@@ -30,6 +31,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 }) => {
   const { tasks, loading, createTask, updateTask } = useAgentTasks(agentId);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const taskLimits = useTaskLimits(tasks);
 
   const t = {
     en: {
@@ -51,7 +53,9 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       youGotThis: "You got this!",
       greatProgress: "Great progress!",
       nextUp: "Coming up next:",
-      completed: "Completed! 🎉"
+      completed: "Completed! 🎉",
+      activeTasks: "Active Tasks",
+      taskLimit: "Task Limit"
     },
     es: {
       yourNextStep: "Tu Próximo Paso",
@@ -72,7 +76,9 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       youGotThis: "¡Tú puedes!",
       greatProgress: "¡Excelente progreso!",
       nextUp: "Lo que sigue:",
-      completed: "¡Completada! 🎉"
+      completed: "¡Completada! 🎉",
+      activeTasks: "Tareas Activas",
+      taskLimit: "Límite de Tareas"
     }
   };
 
@@ -145,11 +151,17 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 
   const handleChatWithTask = (task: any) => {
     if (onChatWithAgent) {
+      // Pasar el ID de la tarea para crear una conversación específica
       onChatWithAgent(task.id, task.title);
     }
   };
 
   const handleCreateTask = async (taskData: any) => {
+    // Verificar límite antes de crear
+    if (taskLimits.isAtLimit) {
+      return null;
+    }
+    
     const newTask = await createTask({
       ...taskData,
       agent_id: agentId
@@ -181,16 +193,40 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Task Limits */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
           <Target className="w-6 h-6 text-purple-400" />
           {t[language].yourNextStep}
         </h2>
-        {completedCount > 0 && (
-          <p className="text-white/70">
-            {completedCount} {completedCount === 1 ? 'tarea completada' : 'tareas completadas'} ✨
-          </p>
+        
+        {/* Task Limits Display */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <div className="text-white/70">
+            {completedCount > 0 && (
+              <span>{completedCount} {completedCount === 1 ? 'tarea completada' : 'tareas completadas'} ✨</span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1">
+            <span className="text-sm text-white/80">{t[language].activeTasks}:</span>
+            <span className={`text-sm font-bold ${
+              taskLimits.isAtLimit ? 'text-red-400' : 
+              taskLimits.isNearLimit ? 'text-yellow-400' : 'text-green-400'
+            }`}>
+              {taskLimits.activeTasksCount}/{taskLimits.limit}
+            </span>
+            {taskLimits.isAtLimit && <AlertCircle className="w-4 h-4 text-red-400" />}
+          </div>
+        </div>
+
+        {/* Limit Warning */}
+        {taskLimits.getLimitMessage(language) && (
+          <div className={`text-sm p-2 rounded-lg mb-4 ${
+            taskLimits.isAtLimit ? 'bg-red-500/20 text-red-300' : 'bg-yellow-500/20 text-yellow-300'
+          }`}>
+            {taskLimits.getLimitMessage(language)}
+          </div>
         )}
       </div>
 
@@ -214,7 +250,8 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
               </p>
               <Button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium"
+                disabled={taskLimits.isAtLimit}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Heart className="w-4 h-4 mr-2" />
                 {t[language].createFirstTask}

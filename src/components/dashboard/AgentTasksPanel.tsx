@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { Button } from '@/components/ui/button';
 import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
 import { SimpleTaskInterface } from './SimpleTaskInterface';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { 
   Settings,
   LayoutGrid
@@ -25,6 +27,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
   onBack
 }) => {
   const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple');
+  const { user } = useAuth();
 
   const t = {
     en: {
@@ -36,6 +39,64 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
       simpleView: "Vista Simple",
       detailedView: "Vista Detallada", 
       settings: "Configuración"
+    }
+  };
+
+  // Enhanced chat handler that creates task-specific conversations
+  const handleChatWithAgent = async (taskId: string, taskTitle: string) => {
+    if (!user || !onChatWithAgent) return;
+
+    try {
+      // Check if a conversation already exists for this task
+      const { data: existingConversation } = await supabase
+        .from('agent_conversations')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('agent_id', agentId)
+        .eq('task_id', taskId)
+        .maybeSingle();
+
+      let conversationId = existingConversation?.id;
+
+      // If no conversation exists, create one
+      if (!conversationId) {
+        const { data: newConversation, error } = await supabase
+          .from('agent_conversations')
+          .insert({
+            user_id: user.id,
+            agent_id: agentId,
+            task_id: taskId,
+            title: `Tarea: ${taskTitle}`,
+            is_archived: false
+          })
+          .select('id')
+          .single();
+
+        if (error) {
+          console.error('Error creating conversation:', error);
+          // Fallback to basic chat without task context
+          onChatWithAgent(taskId, taskTitle);
+          return;
+        }
+        
+        conversationId = newConversation.id;
+
+        // Add initial context message about the task
+        await supabase
+          .from('agent_messages')
+          .insert({
+            conversation_id: conversationId,
+            message_type: 'system',
+            content: `Conversación iniciada para la tarea: "${taskTitle}". ¿En qué puedo ayudarte con esta tarea específica?`
+          });
+      }
+
+      // Call the original handler with conversation context
+      onChatWithAgent(conversationId, taskTitle);
+    } catch (error) {
+      console.error('Error setting up task conversation:', error);
+      // Fallback to basic chat
+      onChatWithAgent(taskId, taskTitle);
     }
   };
 
@@ -92,7 +153,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
           <SimpleTaskInterface
             agentId={agentId}
             language={language}
-            onChatWithAgent={onChatWithAgent}
+            onChatWithAgent={handleChatWithAgent}
           />
         ) : (
           <div className="text-center py-8 text-white/60">
