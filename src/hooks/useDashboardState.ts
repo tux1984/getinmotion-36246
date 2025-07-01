@@ -12,22 +12,40 @@ export const useDashboardState = () => {
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
 
-  // Use real data hooks
+  // Use hooks with error handling
   const { 
     profile, 
     agents: userAgents, 
     enableAgent,
-    disableAgent
+    disableAgent,
+    loading: userDataLoading,
+    error: userDataError
   } = useUserData();
   
-  const { currentScores } = useMaturityScores();
+  const { 
+    currentScores,
+    loading: scoresLoading,
+    error: scoresError
+  } = useMaturityScores();
   
   const recommendedAgents = useAgentRecommendations({ 
     maturityScores: currentScores,
     userProfile: profile 
   });
 
-  // Convert user agents to Agent format
+  // Debug logging
+  console.log('useDashboardState:', {
+    userAgents: userAgents.length,
+    currentScores,
+    recommendedAgents,
+    profile,
+    userDataLoading,
+    scoresLoading,
+    userDataError,
+    scoresError
+  });
+
+  // Convert user agents to Agent format with fallbacks
   const agents: Agent[] = culturalAgentsDatabase.map(agentInfo => {
     const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
     
@@ -42,6 +60,16 @@ export const useDashboardState = () => {
       icon: agentInfo.icon
     };
   });
+
+  // Provide fallback maturity scores if none exist
+  const fallbackScores: CategoryScore = {
+    ideaValidation: 20,
+    userExperience: 15,
+    marketFit: 10,
+    monetization: 5
+  };
+
+  const finalScores = currentScores || fallbackScores;
 
   const handleSelectAgent = useCallback((agentId: string) => {
     console.log('Selecting agent:', agentId);
@@ -66,6 +94,7 @@ export const useDashboardState = () => {
   }, []);
 
   const handleMaturityCalculatorClick = useCallback(() => {
+    console.log('Maturity calculator clicked');
     // This will be handled by the component using this hook
   }, []);
 
@@ -86,7 +115,7 @@ export const useDashboardState = () => {
     activeSection,
     selectedAgent,
     agents,
-    maturityScores: currentScores,
+    maturityScores: finalScores,
     recommendedAgents,
     profileData: profile,
     handleSelectAgent,
