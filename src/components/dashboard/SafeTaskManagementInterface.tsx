@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,10 @@ import {
   Play,
   Edit,
   Eye,
-  MessageSquare
+  MessageSquare,
+  Sparkles,
+  Heart,
+  ChevronRight
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { CreateTaskModal } from './CreateTaskModal';
@@ -26,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { motion } from 'framer-motion';
 
 interface SafeTaskManagementInterfaceProps {
   language: 'en' | 'es';
@@ -52,40 +55,34 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
 
   const t = {
     en: {
-      taskManagement: 'Your Next Steps 🎯',
-      newTask: 'Add New Task',
-      allTasks: 'All Tasks',
-      inProgress: 'Working On',
-      completed: 'Done',
-      pending: 'To Do',
-      noTasks: "Let's create your first task!",
-      createFirst: 'I can help you get started with personalized recommendations',
-      dueDate: 'Due',
-      progress: 'Progress',
-      execute: 'Start',
-      complete: 'Finish',
-      edit: 'Edit',
-      viewDetails: 'View Details',
-      workWithAgent: 'Get Help',
-      getStarted: 'Based on your answers, I think you should start here:'
+      taskManagement: 'Your Creative Journey 🎨',
+      newTask: 'New Task',
+      noTasks: "Ready to Start Creating?",
+      createFirst: 'Let me help you with your first creative task',
+      getStarted: 'Based on your answers, here\'s where I think you should start:',
+      letsStart: "Let's Start!",
+      keepWorking: "Keep Working!",
+      chatWithMe: "Chat with me",
+      completed: "Completed! 🎉",
+      whyImportant: "Why this matters:",
+      estimatedTime: "Time needed:",
+      minutes: "minutes",
+      nextUp: "Coming up next:"
     },
     es: {
-      taskManagement: 'Tus Próximos Pasos 🎯',
-      newTask: 'Agregar Tarea',
-      allTasks: 'Todas',
-      inProgress: 'Trabajando',
-      completed: 'Listas',
-      pending: 'Por Hacer',
-      noTasks: '¡Vamos a crear tu primera tarea!',
-      createFirst: 'Te puedo ayudar a empezar con recomendaciones personalizadas',
-      dueDate: 'Vence',
-      progress: 'Progreso',
-      execute: 'Empezar',
-      complete: 'Terminar',
-      edit: 'Editar',
-      viewDetails: 'Ver Detalles',
-      workWithAgent: 'Pedir Ayuda',
-      getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:'
+      taskManagement: 'Tu Viaje Creativo 🎨',
+      newTask: 'Nueva Tarea',
+      noTasks: '¿Listo para Empezar a Crear?',
+      createFirst: 'Te ayudo con tu primera tarea creativa',
+      getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:',
+      letsStart: '¡Empecemos!',
+      keepWorking: '¡Sigamos Trabajando!',
+      chatWithMe: 'Charlemos',
+      completed: '¡Completada! 🎉',
+      whyImportant: 'Por qué es importante:',
+      estimatedTime: 'Tiempo necesario:',
+      minutes: 'minutos',
+      nextUp: 'Lo que sigue:'
     }
   };
 
@@ -171,16 +168,41 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
     }
   };
 
-  // Get task statistics
-  const taskStats = {
-    total: tasks.length,
-    pending: tasks.filter(t => t.status === 'pending').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    completed: tasks.filter(t => t.status === 'completed').length
+  // Get the most important task
+  const currentTask = tasks.find(t => t.status === 'in_progress') || 
+                     tasks.find(t => t.status === 'pending') ||
+                     tasks[0];
+
+  const nextTask = tasks.find(t => t.status === 'pending' && t.id !== currentTask?.id);
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+
+  const getTaskExplanation = (task: any) => {
+    const title = task.title.toLowerCase();
+    
+    if (title.includes('validar') || title.includes('validate')) {
+      return language === 'es' 
+        ? "Validar tu idea te asegura que realmente resuelves un problema que la gente tiene"
+        : "Validating your idea ensures you're solving a real problem people actually have";
+    }
+    
+    if (title.includes('propuesta') || title.includes('value')) {
+      return language === 'es'
+        ? "Tu propuesta de valor única es lo que te diferencia de la competencia"
+        : "Your unique value proposition is what sets you apart from competitors";
+    }
+
+    return language === 'es'
+      ? "Esta tarea te acerca a tus objetivos creativos"
+      : "This task brings you closer to your creative goals";
   };
 
-  // Get recent tasks (last 5)
-  const recentTasks = tasks.slice(0, 5);
+  const getProgressEmoji = (progress: number) => {
+    if (progress === 0) return "🎯";
+    if (progress < 30) return "🚀";
+    if (progress < 70) return "💪";
+    if (progress < 100) return "⭐";
+    return "🎉";
+  };
 
   if (loading) {
     return (
@@ -202,7 +224,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-              <Target className="w-5 h-5 text-purple-400" />
+              <Sparkles className="w-5 h-5 text-purple-400" />
               {t[language].taskManagement}
             </CardTitle>
             <Button 
@@ -214,33 +236,20 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               {t[language].newTask}
             </Button>
           </div>
+          {completedCount > 0 && (
+            <p className="text-white/70 text-sm">
+              {completedCount} {completedCount === 1 ? 'tarea completada' : 'tareas completadas'} ✨
+            </p>
+          )}
         </CardHeader>
 
         <CardContent>
-          {/* Task Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white/5 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-white">{taskStats.total}</div>
-              <div className="text-xs text-white/70">{t[language].allTasks}</div>
-            </div>
-            <div className="bg-yellow-500/20 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-yellow-300">{taskStats.pending}</div>
-              <div className="text-xs text-yellow-200">{t[language].pending}</div>
-            </div>
-            <div className="bg-blue-500/20 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-blue-300">{taskStats.inProgress}</div>
-              <div className="text-xs text-blue-200">{t[language].inProgress}</div>
-            </div>
-            <div className="bg-green-500/20 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-green-300">{taskStats.completed}</div>
-              <div className="text-xs text-green-200">{t[language].completed}</div>
-            </div>
-          </div>
-
-          {/* Recent Tasks */}
-          {recentTasks.length === 0 ? (
+          {!currentTask ? (
+            /* Empty State */
             <div className="text-center py-8 text-white/60">
-              <Target className="w-8 h-8 mx-auto mb-4 opacity-50" />
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-8 h-8 text-purple-400" />
+              </div>
               <h3 className="text-lg font-medium text-white mb-2">{t[language].noTasks}</h3>
               <p className="text-sm opacity-75 mb-4">{t[language].createFirst}</p>
               
@@ -257,113 +266,100 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               )}
             </div>
           ) : (
-            <div className="space-y-3">
-              {recentTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-white text-sm font-medium truncate">
-                        {task.title}
-                      </h4>
-                      {task.description && (
-                        <p className="text-white/70 text-xs mt-1 line-clamp-1">
-                          {task.description}
-                        </p>
-                      )}
+            /* Current Task - Simplified */
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Main Task Card */}
+              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-white/10">
+                {/* Progress Circle */}
+                <div className="text-center mb-6">
+                  <div className="relative inline-block">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center border-2 border-purple-400/40 mb-3">
+                      <span className="text-2xl">{getProgressEmoji(currentTask.progress_percentage)}</span>
                     </div>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-white/60 hover:text-white h-6 w-6 p-0">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSelectedTask(task)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          {t[language].viewDetails}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleWorkWithAgent(task)}>
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          {t[language].workWithAgent}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="text-lg font-bold text-white mb-1">
+                      {currentTask.progress_percentage}%
+                    </div>
                   </div>
+                  
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {currentTask.title}
+                  </h3>
+                  
+                  <Progress 
+                    value={currentTask.progress_percentage} 
+                    className="w-full h-2 bg-white/20 mb-4"
+                  />
+                </div>
 
-                  {/* Progress Bar */}
-                  {task.progress_percentage > 0 && (
-                    <div className="mb-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-white/60">{t[language].progress}</span>
-                        <span className="text-xs text-white/60">{task.progress_percentage}%</span>
-                      </div>
-                      <Progress value={task.progress_percentage} className="h-1 bg-white/20" />
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className={`text-xs ${getStatusColor(task.status)}`}>
-                        {t[language][task.status] || task.status}
-                      </Badge>
-                      
-                      {task.due_date && (
-                        <div className="flex items-center gap-1 text-xs text-white/60">
-                          <Calendar className="w-3 h-3" />
-                          <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 text-xs text-white/60">
-                        <User className="w-3 h-3" />
-                        <span>General</span>
-                      </div>
-                      
-                      {/* Task CTAs */}
-                      <div className="flex gap-1">
-                        {task.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleExecuteTask(task)}
-                            className="bg-green-600 hover:bg-green-700 text-white h-6 px-2"
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            <span className="text-xs">{t[language].execute}</span>
-                          </Button>
-                        )}
-                        
-                        {task.status === 'in_progress' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleCompleteTask(task)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2"
-                          >
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            <span className="text-xs">{t[language].complete}</span>
-                          </Button>
-                        )}
-                        
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedTask(task)}
-                          variant="outline"
-                          className="border-white/20 text-white hover:bg-white/10 h-6 px-2"
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          <span className="text-xs">{t[language].edit}</span>
-                        </Button>
-                      </div>
+                {/* Task Context */}
+                <div className="bg-white/5 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-2 text-sm">
+                    <Sparkles className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium text-purple-300">{t[language].whyImportant}</span>
+                      <p className="text-white/80 mt-1">{getTaskExplanation(currentTask)}</p>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    onClick={() => currentTask.status === 'completed' ? null : currentTask.status === 'pending' ? handleExecuteTask(currentTask) : handleCompleteTask(currentTask)}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-xl font-medium"
+                    disabled={currentTask.status === 'completed'}
+                  >
+                    {currentTask.status === 'completed' ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        {t[language].completed}
+                      </>
+                    ) : currentTask.status === 'pending' ? (
+                      <>
+                        <Play className="w-4 h-4 mr-2" />
+                        {t[language].letsStart}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        {t[language].keepWorking}
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleWorkWithAgent(currentTask)}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10 py-2 px-4 rounded-xl"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {t[language].chatWithMe}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Next Task Preview */}
+              {nextTask && (
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-white/90 mb-1 flex items-center gap-2">
+                        <ChevronRight className="w-4 h-4 text-purple-400" />
+                        {t[language].nextUp}
+                      </h4>
+                      <p className="text-white/70 text-sm">{nextTask.title}</p>
+                    </div>
+                    <div className="text-white/50">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
           )}
         </CardContent>
       </Card>
