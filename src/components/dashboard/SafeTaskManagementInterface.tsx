@@ -11,10 +11,21 @@ import {
   Target,
   MoreHorizontal,
   Calendar,
-  User
+  User,
+  Play,
+  Edit,
+  Eye,
+  MessageSquare
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { CreateTaskModal } from './CreateTaskModal';
+import { UnifiedTaskWorkflowModal } from './UnifiedTaskWorkflowModal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface SafeTaskManagementInterfaceProps {
   language: 'en' | 'es';
@@ -37,6 +48,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
 }) => {
   const { tasks, createTask, updateTask, loading } = useAgentTasks();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   const t = {
     en: {
@@ -49,7 +61,12 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
       noTasks: 'No tasks yet',
       createFirst: 'Create your first task!',
       dueDate: 'Due',
-      progress: 'Progress'
+      progress: 'Progress',
+      execute: 'Execute',
+      complete: 'Complete',
+      edit: 'Edit',
+      viewDetails: 'View Details',
+      workWithAgent: 'Work with Agent'
     },
     es: {
       taskManagement: 'Gestión de Tareas',
@@ -61,7 +78,12 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
       noTasks: 'No hay tareas aún',
       createFirst: '¡Crea tu primera tarea!',
       dueDate: 'Vence',
-      progress: 'Progreso'
+      progress: 'Progreso',
+      execute: 'Ejecutar',
+      complete: 'Completar',
+      edit: 'Editar',
+      viewDetails: 'Ver Detalles',
+      workWithAgent: 'Trabajar con Agente'
     }
   };
 
@@ -89,6 +111,29 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
     } catch (error) {
       console.error('Error creating task:', error);
       return null;
+    }
+  };
+
+  const handleExecuteTask = async (task: any) => {
+    await updateTask(task.id, { 
+      status: 'in_progress',
+      progress_percentage: Math.max(task.progress_percentage, 10)
+    });
+    if (onTaskUpdate) onTaskUpdate();
+  };
+
+  const handleCompleteTask = async (task: any) => {
+    await updateTask(task.id, { 
+      status: 'completed',
+      progress_percentage: 100,
+      completed_at: new Date().toISOString()
+    });
+    if (onTaskUpdate) onTaskUpdate();
+  };
+
+  const handleWorkWithAgent = (task: any) => {
+    if (onSelectAgent) {
+      onSelectAgent(task.agent_id);
     }
   };
 
@@ -183,9 +228,24 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                         </p>
                       )}
                     </div>
-                    <Button variant="ghost" size="sm" className="text-white/60 hover:text-white h-6 w-6 p-0">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-white/60 hover:text-white h-6 w-6 p-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setSelectedTask(task)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          {t[language].viewDetails}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleWorkWithAgent(task)}>
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          {t[language].workWithAgent}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   {/* Progress Bar */}
@@ -213,9 +273,46 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 text-xs text-white/60">
-                      <User className="w-3 h-3" />
-                      <span>General</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 text-xs text-white/60">
+                        <User className="w-3 h-3" />
+                        <span>General</span>
+                      </div>
+                      
+                      {/* Task CTAs */}
+                      <div className="flex gap-1">
+                        {task.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleExecuteTask(task)}
+                            className="bg-green-600 hover:bg-green-700 text-white h-6 px-2"
+                          >
+                            <Play className="w-3 h-3 mr-1" />
+                            <span className="text-xs">{t[language].execute}</span>
+                          </Button>
+                        )}
+                        
+                        {task.status === 'in_progress' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleCompleteTask(task)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2"
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            <span className="text-xs">{t[language].complete}</span>
+                          </Button>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          onClick={() => setSelectedTask(task)}
+                          variant="outline"
+                          className="border-white/20 text-white hover:bg-white/10 h-6 px-2"
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          <span className="text-xs">{t[language].edit}</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -233,6 +330,21 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
         onClose={() => setShowCreateModal(false)}
         onCreateTask={handleCreateTask}
       />
+
+      {/* Task Details Modal */}
+      {selectedTask && (
+        <UnifiedTaskWorkflowModal
+          task={selectedTask}
+          language={language}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onWorkWithAgent={() => handleWorkWithAgent(selectedTask)}
+          onUpdateTask={async (updates) => {
+            await updateTask(selectedTask.id, updates);
+            if (onTaskUpdate) onTaskUpdate();
+          }}
+        />
+      )}
     </>
   );
 };

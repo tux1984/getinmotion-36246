@@ -22,7 +22,7 @@ export const RobustPremiumDashboard: React.FC = () => {
 
   const handleSelectAgent = (agentId: string) => {
     console.log('Selecting agent:', agentId);
-    navigate(`/agent-details/${agentId}`);
+    navigate(`/dashboard/agent/${agentId}`);
   };
 
   const handleMaturityCalculator = () => {

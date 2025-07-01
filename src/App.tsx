@@ -63,6 +63,15 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              {/* Legacy agent details route - redirect to new route */}
+              <Route 
+                path="/agent-details/:agentId" 
+                element={
+                  <ProtectedRoute>
+                    <AgentDetails />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/maturity-calculator" 
                 element={
