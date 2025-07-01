@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +13,9 @@ import {
   Target,
   ChevronRight,
   Heart,
-  AlertCircle
+  AlertCircle,
+  List,
+  Eye
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -31,6 +34,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 }) => {
   const { tasks, loading, createTask, updateTask } = useAgentTasks(agentId);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'simple' | 'all'>('simple');
   const taskLimits = useTaskLimits(tasks);
 
   const t = {
@@ -55,7 +59,11 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       nextUp: "Coming up next:",
       completed: "Completed! 🎉",
       activeTasks: "Active Tasks",
-      taskLimit: "Task Limit"
+      taskLimit: "Task Limit",
+      viewAll: "View All Tasks",
+      simpleView: "Simple View",
+      completeThisFirst: "Complete this task first",
+      needToComplete: "Complete some tasks to create new ones"
     },
     es: {
       yourNextStep: "Tu Próximo Paso",
@@ -78,7 +86,11 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       nextUp: "Lo que sigue:",
       completed: "¡Completada! 🎉",
       activeTasks: "Tareas Activas",
-      taskLimit: "Límite de Tareas"
+      taskLimit: "Límite de Tareas",
+      viewAll: "Ver Todas las Tareas",
+      simpleView: "Vista Simple",
+      completeThisFirst: "Completa esta tarea primero",
+      needToComplete: "Completa algunas tareas para crear nuevas"
     }
   };
 
@@ -124,7 +136,6 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       };
     }
 
-    // Default explanation
     return {
       why: language === 'es'
         ? "Esta tarea te acerca a tus objetivos creativos"
@@ -136,28 +147,35 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   };
 
   const handleStartTask = async (task: any) => {
-    await updateTask(task.id, { 
-      status: 'in_progress',
-      progress_percentage: Math.max(task.progress_percentage, 10)
-    });
-  };
-
-  const handleCompleteTask = async (task: any) => {
-    await updateTask(task.id, { 
-      status: 'completed',
-      progress_percentage: 100
-    });
+    // Verificar si ya está en progreso o si podemos iniciarla
+    if (task.status === 'completed') return;
+    
+    if (task.status === 'pending') {
+      // Verificar límite antes de iniciar
+      if (taskLimits.isAtLimit) {
+        return; // No hacer nada si estamos en el límite
+      }
+      await updateTask(task.id, { 
+        status: 'in_progress',
+        progress_percentage: Math.max(task.progress_percentage, 10)
+      });
+    } else {
+      // Si ya está en progreso, completarla
+      await updateTask(task.id, { 
+        status: 'completed',
+        progress_percentage: 100,
+        completed_at: new Date().toISOString()
+      });
+    }
   };
 
   const handleChatWithTask = (task: any) => {
     if (onChatWithAgent) {
-      // Pasar el ID de la tarea para crear una conversación específica
       onChatWithAgent(task.id, task.title);
     }
   };
 
   const handleCreateTask = async (taskData: any) => {
-    // Verificar límite antes de crear
     if (taskLimits.isAtLimit) {
       return null;
     }
@@ -179,6 +197,8 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 
   const nextTask = tasks.find(t => t.status === 'pending' && t.id !== currentTask?.id);
   const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const pendingTasks = tasks.filter(t => t.status === 'pending');
+  const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
 
   if (loading) {
     return (
@@ -193,7 +213,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header with Task Limits */}
+      {/* Header with Task Limits and View Toggle */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
           <Target className="w-6 h-6 text-purple-400" />
@@ -220,6 +240,38 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
           </div>
         </div>
 
+        {/* View Toggle */}
+        {tasks.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Button
+              size="sm"
+              variant={viewMode === 'simple' ? "secondary" : "ghost"}
+              onClick={() => setViewMode('simple')}
+              className={`text-xs px-3 py-1 h-auto transition-colors ${
+                viewMode === 'simple' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Eye className="w-3 h-3 mr-1" />
+              {t[language].simpleView}
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === 'all' ? "secondary" : "ghost"}
+              onClick={() => setViewMode('all')}
+              className={`text-xs px-3 py-1 h-auto transition-colors ${
+                viewMode === 'all' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <List className="w-3 h-3 mr-1" />
+              {t[language].viewAll}
+            </Button>
+          </div>
+        )}
+
         {/* Limit Warning */}
         {taskLimits.getLimitMessage(language) && (
           <div className={`text-sm p-2 rounded-lg mb-4 ${
@@ -230,147 +282,238 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
         )}
       </div>
 
-      {!currentTask ? (
-        /* Empty State */
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-12"
-        >
-          <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-white/20 max-w-md mx-auto">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">
-                {t[language].noTasksYet}
-              </h3>
-              <p className="text-white/70 mb-6">
-                {t[language].noTasksDesc}
-              </p>
-              <Button 
-                onClick={() => setShowCreateModal(true)}
-                disabled={taskLimits.isAtLimit}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                {t[language].createFirstTask}
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {viewMode === 'all' ? (
+        /* All Tasks View */
+        <div className="space-y-4">
+          {tasks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-12"
+            >
+              <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-white/20 max-w-md mx-auto">
+                <CardContent className="p-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    {t[language].noTasksYet}
+                  </h3>
+                  <p className="text-white/70 mb-6">
+                    {t[language].noTasksDesc}
+                  </p>
+                  <Button 
+                    onClick={() => setShowCreateModal(true)}
+                    disabled={taskLimits.isAtLimit}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    {t[language].createFirstTask}
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <div className="space-y-3">
+              {tasks.map((task) => (
+                <Card key={task.id} className="bg-white/10 backdrop-blur-xl border border-white/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium mb-1">{task.title}</h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            task.status === 'completed' ? 'bg-green-500/20 text-green-300' :
+                            task.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300' :
+                            'bg-yellow-500/20 text-yellow-300'
+                          }`}>
+                            {task.status === 'completed' ? 'Completada' :
+                             task.status === 'in_progress' ? 'En progreso' : 'Pendiente'}
+                          </span>
+                          <span className="text-xs text-white/60">{task.progress_percentage}%</span>
+                        </div>
+                        <Progress value={task.progress_percentage} className="h-1 bg-white/20 mb-2" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => handleStartTask(task)}
+                        disabled={task.status === 'completed' || (task.status === 'pending' && taskLimits.isAtLimit)}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg text-sm disabled:opacity-50"
+                      >
+                        {task.status === 'completed' ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            {t[language].completed}
+                          </>
+                        ) : task.status === 'pending' ? (
+                          <>
+                            <Play className="w-4 h-4 mr-1" />
+                            {taskLimits.isAtLimit ? t[language].completeThisFirst : t[language].letsStart}
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            {t[language].letsKeepWorking}
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => handleChatWithTask(task)}
+                        className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-2 px-4 rounded-lg text-sm"
+                      >
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        {t[language].chatWithMe}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
-        /* Current Task */
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl mx-auto"
-        >
-          <Card className="bg-white/10 backdrop-blur-xl border border-white/20 overflow-hidden">
-            <CardContent className="p-8">
-              {/* Task Title */}
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  <span className="text-white/70">{t[language].howIsGoing} </span>
-                  <span className="text-purple-300">"{currentTask.title}"</span>
-                  <span className="text-white/70"> {t[language].going}</span>
+        /* Simple View - Current Task Focus */
+        !currentTask ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-white/20 max-w-md mx-auto">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  {t[language].noTasksYet}
                 </h3>
-              </div>
-
-              {/* Progress Circle */}
-              <div className="text-center mb-8">
-                <div className="relative inline-block">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border-4 border-purple-400/30 mb-4">
-                    <span className="text-3xl">{getProgressEmoji(currentTask.progress_percentage)}</span>
-                  </div>
-                  <div className="text-2xl font-bold text-white">
-                    {currentTask.progress_percentage}%
-                  </div>
-                  <p className="text-purple-300 font-medium">
-                    {getMotivationalMessage(currentTask.progress_percentage)}
-                  </p>
-                </div>
-                
-                <Progress 
-                  value={currentTask.progress_percentage} 
-                  className="w-full mt-4 h-2 bg-white/20"
-                />
-              </div>
-
-              {/* Task Context */}
-              <div className="bg-white/5 rounded-2xl p-6 mb-6 space-y-4">
-                <div>
-                  <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    {t[language].whyImportant}
-                  </h4>
-                  <p className="text-white/80 text-sm">
-                    {getTaskExplanation(currentTask).why}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4" />
-                    {t[language].whatYoullAchieve}
-                  </h4>
-                  <p className="text-white/80 text-sm">
-                    {getTaskExplanation(currentTask).what}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {t[language].estimatedTime}
-                  </h4>
-                  <p className="text-white/80 text-sm">
-                    15-20 {t[language].minutes}
-                  </p>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3">
+                <p className="text-white/70 mb-6">
+                  {t[language].noTasksDesc}
+                </p>
                 <Button 
-                  onClick={() => currentTask.status === 'completed' ? null : currentTask.status === 'pending' ? handleStartTask(currentTask) : handleCompleteTask(currentTask)}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-medium"
-                  disabled={currentTask.status === 'completed'}
+                  onClick={() => setShowCreateModal(true)}
+                  disabled={taskLimits.isAtLimit}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {currentTask.status === 'completed' ? (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 mr-2" />
-                      {t[language].completed}
-                    </>
-                  ) : currentTask.status === 'pending' ? (
-                    <>
-                      <Play className="w-5 h-5 mr-2" />
-                      {t[language].letsStart}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 mr-2" />
-                      {t[language].letsKeepWorking}
-                    </>
-                  )}
+                  <Heart className="w-4 h-4 mr-2" />
+                  {t[language].createFirstTask}
                 </Button>
-                
-                <Button 
-                  onClick={() => handleChatWithTask(currentTask)}
-                  variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10 py-3 px-6 rounded-xl"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  {t[language].chatWithMe}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-2xl mx-auto"
+          >
+            <Card className="bg-white/10 backdrop-blur-xl border border-white/20 overflow-hidden">
+              <CardContent className="p-8">
+                {/* Task Title */}
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    <span className="text-white/70">{t[language].howIsGoing} </span>
+                    <span className="text-purple-300">"{currentTask.title}"</span>
+                    <span className="text-white/70"> {t[language].going}</span>
+                  </h3>
+                </div>
+
+                {/* Progress Circle */}
+                <div className="text-center mb-8">
+                  <div className="relative inline-block">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border-4 border-purple-400/30 mb-4">
+                      <span className="text-3xl">{getProgressEmoji(currentTask.progress_percentage)}</span>
+                    </div>
+                    <div className="text-2xl font-bold text-white">
+                      {currentTask.progress_percentage}%
+                    </div>
+                    <p className="text-purple-300 font-medium">
+                      {getMotivationalMessage(currentTask.progress_percentage)}
+                    </p>
+                  </div>
+                  
+                  <Progress 
+                    value={currentTask.progress_percentage} 
+                    className="w-full mt-4 h-2 bg-white/20"
+                  />
+                </div>
+
+                {/* Task Context */}
+                <div className="bg-white/5 rounded-2xl p-6 mb-6 space-y-4">
+                  <div>
+                    <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      {t[language].whyImportant}
+                    </h4>
+                    <p className="text-white/80 text-sm">
+                      {getTaskExplanation(currentTask).why}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      {t[language].whatYoullAchieve}
+                    </h4>
+                    <p className="text-white/80 text-sm">
+                      {getTaskExplanation(currentTask).what}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      {t[language].estimatedTime}
+                    </h4>
+                    <p className="text-white/80 text-sm">
+                      15-20 {t[language].minutes}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    onClick={() => handleStartTask(currentTask)}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-medium disabled:opacity-50"
+                    disabled={currentTask.status === 'completed' || (currentTask.status === 'pending' && taskLimits.isAtLimit)}
+                  >
+                    {currentTask.status === 'completed' ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 mr-2" />
+                        {t[language].completed}
+                      </>
+                    ) : currentTask.status === 'pending' ? (
+                      <>
+                        <Play className="w-5 h-5 mr-2" />
+                        {taskLimits.isAtLimit ? t[language].completeThisFirst : t[language].letsStart}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 mr-2" />
+                        {t[language].letsKeepWorking}
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleChatWithTask(currentTask)}
+                    className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-3 px-6 rounded-xl"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {t[language].chatWithMe}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )
       )}
 
-      {/* Next Task Preview */}
-      {nextTask && (
+      {/* Next Task Preview - Solo en vista simple */}
+      {viewMode === 'simple' && nextTask && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
