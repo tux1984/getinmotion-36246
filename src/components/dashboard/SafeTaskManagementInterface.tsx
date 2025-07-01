@@ -52,38 +52,40 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
 
   const t = {
     en: {
-      taskManagement: 'Task Management',
-      newTask: 'New Task',
+      taskManagement: 'Your Next Steps 🎯',
+      newTask: 'Add New Task',
       allTasks: 'All Tasks',
-      inProgress: 'In Progress',
-      completed: 'Completed',
-      pending: 'Pending',
-      noTasks: 'No tasks yet',
-      createFirst: 'Create your first task!',
+      inProgress: 'Working On',
+      completed: 'Done',
+      pending: 'To Do',
+      noTasks: "Let's create your first task!",
+      createFirst: 'I can help you get started with personalized recommendations',
       dueDate: 'Due',
       progress: 'Progress',
-      execute: 'Execute',
-      complete: 'Complete',
+      execute: 'Start',
+      complete: 'Finish',
       edit: 'Edit',
       viewDetails: 'View Details',
-      workWithAgent: 'Work with Agent'
+      workWithAgent: 'Get Help',
+      getStarted: 'Based on your answers, I think you should start here:'
     },
     es: {
-      taskManagement: 'Gestión de Tareas',
-      newTask: 'Nueva Tarea',
-      allTasks: 'Todas las Tareas',
-      inProgress: 'En Progreso',
-      completed: 'Completadas',
-      pending: 'Pendientes',
-      noTasks: 'No hay tareas aún',
-      createFirst: '¡Crea tu primera tarea!',
+      taskManagement: 'Tus Próximos Pasos 🎯',
+      newTask: 'Agregar Tarea',
+      allTasks: 'Todas',
+      inProgress: 'Trabajando',
+      completed: 'Listas',
+      pending: 'Por Hacer',
+      noTasks: '¡Vamos a crear tu primera tarea!',
+      createFirst: 'Te puedo ayudar a empezar con recomendaciones personalizadas',
       dueDate: 'Vence',
       progress: 'Progreso',
-      execute: 'Ejecutar',
-      complete: 'Completar',
+      execute: 'Empezar',
+      complete: 'Terminar',
       edit: 'Editar',
       viewDetails: 'Ver Detalles',
-      workWithAgent: 'Trabajar con Agente'
+      workWithAgent: 'Pedir Ayuda',
+      getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:'
     }
   };
 
@@ -93,6 +95,38 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPersonalizedRecommendation = () => {
+    if (!maturityScores) return '';
+    
+    const { ideaValidation, userExperience, marketFit, monetization } = maturityScores;
+    
+    if (language === 'es') {
+      if (ideaValidation < 50) {
+        return "Validar tu idea con potenciales usuarios - es súper importante antes de seguir";
+      } else if (userExperience < 50) {
+        return "Mejorar la experiencia que le das a tus usuarios - acá está la clave del éxito";
+      } else if (marketFit < 50) {
+        return "Investigar mejor tu mercado y competencia - conoce a quién le vendes";
+      } else if (monetization < 50) {
+        return "Definir cómo vas a generar ingresos - es hora de monetizar tu proyecto";
+      } else {
+        return "¡Estás muy bien! Ahora enfócate en escalar y optimizar lo que ya tienes";
+      }
+    } else {
+      if (ideaValidation < 50) {
+        return "Validate your idea with potential users - super important before moving forward";
+      } else if (userExperience < 50) {
+        return "Improve the experience you give your users - this is key to success";
+      } else if (marketFit < 50) {
+        return "Better research your market and competition - know who you're selling to";
+      } else if (monetization < 50) {
+        return "Define how you're going to generate income - time to monetize your project";
+      } else {
+        return "You're doing great! Now focus on scaling and optimizing what you already have";
+      }
     }
   };
 
@@ -206,9 +240,21 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
           {/* Recent Tasks */}
           {recentTasks.length === 0 ? (
             <div className="text-center py-8 text-white/60">
-              <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">{t[language].noTasks}</p>
-              <p className="text-xs opacity-75">{t[language].createFirst}</p>
+              <Target className="w-8 h-8 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-white mb-2">{t[language].noTasks}</h3>
+              <p className="text-sm opacity-75 mb-4">{t[language].createFirst}</p>
+              
+              {/* Personalized recommendation */}
+              {maturityScores && (
+                <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg p-4 mt-4 border border-white/10">
+                  <p className="text-sm font-medium text-purple-200 mb-2">
+                    {t[language].getStarted}
+                  </p>
+                  <p className="text-white text-sm">
+                    {getPersonalizedRecommendation()}
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

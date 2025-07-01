@@ -29,6 +29,16 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
      maturityScores.marketFit + maturityScores.monetization) / 4
   );
 
+  const getMotivationalMessage = () => {
+    if (totalScore < 40) {
+      return "¡Perfecto momento para empezar a construir algo increíble! 🚀";
+    } else if (totalScore < 70) {
+      return "¡Ya estás en marcha! Sigamos potenciando tu proyecto 💪";
+    } else {
+      return "¡Estás haciendo un trabajo increíble! Mantengamos este ritmo 🔥";
+    }
+  };
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -50,7 +60,7 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
             >
               <Sparkles className="w-4 h-4 text-yellow-400 mr-2" />
               <span className="text-white/90 text-sm font-medium">
-                Asistente Creativo con IA
+                Tu Espacio Creativo Personal
               </span>
             </motion.div>
             
@@ -60,16 +70,25 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              ¡Hola, {profile.name}! 👋
+              ¡Hola de nuevo, {profile.name}! 👋
             </motion.h1>
             
             <motion.p 
-              className="text-white/80 text-lg max-w-2xl mx-auto"
+              className="text-white/80 text-lg max-w-2xl mx-auto mb-2"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              Tu plataforma personalizada de asistencia creativa impulsada por IA
+              {getMotivationalMessage()}
+            </motion.p>
+
+            <motion.p 
+              className="text-white/70 text-base max-w-2xl mx-auto"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              Sigamos trabajando en tu proyecto creativo con tus asistentes de IA
             </motion.p>
           </div>
 
@@ -86,7 +105,7 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
                   <Users className="w-6 h-6 text-blue-400" />
                 </div>
                 <div className="text-2xl font-bold text-white mb-1">{activeAgentsCount}</div>
-                <div className="text-white/70 text-sm">Asistentes Activos</div>
+                <div className="text-white/70 text-sm">Asistentes Trabajando Para Vos</div>
               </CardContent>
             </Card>
 
@@ -106,7 +125,7 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
                   <TrendingUp className="w-6 h-6 text-purple-400" />
                 </div>
                 <div className="text-2xl font-bold text-white mb-1">{totalScore}%</div>
-                <div className="text-white/70 text-sm">Madurez de Idea</div>
+                <div className="text-white/70 text-sm">Nivel de Tu Proyecto</div>
                 <Progress value={totalScore} className="mt-2" />
               </CardContent>
             </Card>
@@ -118,7 +137,10 @@ export const StablePremiumDashboardHero: React.FC<StablePremiumDashboardHeroProp
               onClick={onMaturityCalculatorClick}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105"
             >
-              Actualizar Evaluación de Madurez
+              {totalScore < 40 
+                ? "Vamos a Evaluar Tu Proyecto 🎯" 
+                : "Actualizar Mi Evaluación 📈"
+              }
             </Button>
           </div>
         </div>
