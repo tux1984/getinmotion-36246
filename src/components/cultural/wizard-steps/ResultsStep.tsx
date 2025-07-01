@@ -33,11 +33,44 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   const [tasksCreated, setTasksCreated] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Recalculate scores and get breakdown for detailed view
   const { scores, breakdown } = calculateMaturityScores(profileData, language);
+
+  // Safety timeout to prevent infinite loading
+  useEffect(() => {
+    const safetyTimeout = setTimeout(() => {
+      if (isGeneratingTasks && !isCompleted) {
+        console.log('Safety timeout triggered - allowing navigation');
+        setIsGeneratingTasks(false);
+        setIsCompleted(true);
+        setHasError(true);
+        toast({
+          title: language === 'es' ? 'Continuando...' : 'Continuing...',
+          description: language === 'es' 
+            ? 'Podés continuar al dashboard. Las tareas se crearán en segundo plano.'
+            : 'You can continue to the dashboard. Tasks will be created in the background.',
+        });
+      }
+    }, 30000); // 30 seconds timeout
+
+    return () => clearTimeout(safetyTimeout);
+  }, [isGeneratingTasks, isCompleted, language, toast]);
+
+  // Auto-navigate after showing success for 3 seconds
+  useEffect(() => {
+    if (isCompleted && !hasError) {
+      const autoNavigateTimeout = setTimeout(() => {
+        console.log('Auto-navigating to dashboard after success');
+        handleGoToDashboard();
+      }, 3000);
+
+      return () => clearTimeout(autoNavigateTimeout);
+    }
+  }, [isCompleted, hasError]);
 
   // Generate personalized insights based on user responses
   const getPersonalizedInsight = () => {
@@ -106,6 +139,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       generatingTasksDesc: "Hold on, I'm creating tasks based on everything you told me 🚀",
       tasksCreated: "Done! Your tasks are ready 🎯",
       tasksCreatedDesc: "I created {count} specific tasks for you to start working on",
+      tasksError: "Let's get started anyway! 🚀",
+      tasksErrorDesc: "I'll create your personalized tasks once you're in the dashboard",
       levels: {
         beginner: "Just getting started (and that's perfect!)",
         developing: "Building momentum", 
@@ -126,7 +161,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         cultural: "Creative Specialist"
       },
       primaryButtonText: "Let's start working! 🚀",
-      secondaryButtonText: "Show me my tasks"
+      secondaryButtonText: "Show me my tasks",
+      continueAnyway: "Continue to Dashboard"
     },
     es: {
       title: "¡Genial! Ya tenemos tus respuestas 🎉",
@@ -140,6 +176,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
       generatingTasksDesc: "Esperá un toque, estoy creando tareas basándome en todo lo que me contaste 🚀",
       tasksCreated: "¡Listo! Tus tareas están preparadas 🎯",
       tasksCreatedDesc: "Te creé {count} tareas específicas para que empieces a trabajar",
+      tasksError: "¡Arranquemos igual! 🚀",
+      tasksErrorDesc: "Te voy a crear las tareas personalizadas una vez que estés en el dashboard",
       levels: {
         beginner: "Recién empezando (¡y está perfecto!)",
         developing: "Agarrando ritmo",
@@ -160,7 +198,8 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         cultural: "Especialista Creativo"
       },
       primaryButtonText: "¡Vamos a trabajar! 🚀",
-      secondaryButtonText: "Mostrame mis tareas"
+      secondaryButtonText: "Mostrame mis tareas",
+      continueAnyway: "Ir al Dashboard"
     }
   };
   
@@ -212,11 +251,15 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
     const generateTaskRecommendations = async () => {
       try {
         setIsGeneratingTasks(true);
+        setHasError(false);
         
         // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.error('No user found');
+          setIsGeneratingTasks(false);
+          setIsCompleted(true);
+          setHasError(true);
           return;
         }
 
@@ -235,17 +278,16 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
 
         if (error) {
           console.error('Error generating task recommendations:', error);
+          setHasError(true);
           toast({
-            title: language === 'es' ? 'Error' : 'Error',
+            title: language === 'es' ? 'Continuemos igual' : 'Let\'s continue anyway',
             description: language === 'es' 
-              ? 'No se pudieron generar las recomendaciones de tareas' 
-              : 'Could not generate task recommendations',
-            variant: 'destructive'
+              ? 'Te voy a crear las tareas una vez que estés en el dashboard' 
+              : 'I\'ll create your tasks once you\'re in the dashboard',
           });
         } else {
           console.log('Task recommendations generated:', data);
           setTasksCreated(data?.tasksCreated || 0);
-          setIsCompleted(true);
           
           toast({
             title: language === 'es' ? '¡Tareas creadas!' : 'Tasks created!',
@@ -256,15 +298,16 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
         }
       } catch (error) {
         console.error('Error generating task recommendations:', error);
+        setHasError(true);
         toast({
-          title: 'Error',
+          title: language === 'es' ? 'Continuemos igual' : 'Let\'s continue anyway',
           description: language === 'es' 
-            ? 'Hubo un problema generando las recomendaciones' 
-            : 'There was a problem generating recommendations',
-          variant: 'destructive'
+            ? 'Te voy a crear las tareas una vez que estés en el dashboard' 
+            : 'I\'ll create your tasks once you\'re in the dashboard',
         });
       } finally {
         setIsGeneratingTasks(false);
+        setIsCompleted(true);
       }
     };
 
@@ -377,7 +420,7 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          {isGeneratingTasks && (
+          {isGeneratingTasks && !isCompleted && (
             <div className="text-center py-8">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -396,15 +439,26 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
           {isCompleted && (
             <div className="text-center py-8">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-white" />
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  hasError 
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                    : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                }`}>
+                  {hasError ? (
+                    <ChevronRight className="w-8 h-8 text-white" />
+                  ) : (
+                    <CheckCircle2 className="w-8 h-8 text-white" />
+                  )}
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                {t[language].tasksCreated}
+                {hasError ? t[language].tasksError : t[language].tasksCreated}
               </h3>
               <p className="text-gray-600">
-                {t[language].tasksCreatedDesc.replace('{count}', tasksCreated.toString())}
+                {hasError 
+                  ? t[language].tasksErrorDesc 
+                  : t[language].tasksCreatedDesc.replace('{count}', tasksCreated.toString())
+                }
               </p>
             </div>
           )}
@@ -442,19 +496,10 @@ export const ResultsStep: React.FC<ResultsStepProps> = ({
             onClick={handleGoToDashboard}
             className="w-full gap-3 bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 font-semibold py-4 text-lg shadow-lg"
             size="lg"
-            disabled={isGeneratingTasks}
+            disabled={false} // Always enable the button
           >
-            {isGeneratingTasks ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>{language === 'es' ? 'Generando...' : 'Generating...'}</span>
-              </>
-            ) : (
-              <>
-                <span>{t[language].primaryButtonText}</span>
-                <ChevronRight className="w-5 h-5" />
-              </>
-            )}
+            <span>{t[language].primaryButtonText}</span>
+            <ChevronRight className="w-5 h-5" />
           </Button>
         </motion.div>
       </div>
