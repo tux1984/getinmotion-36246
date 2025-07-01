@@ -312,7 +312,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
         )}
       </div>
 
-      {/* Main chat */}
+      {/* Main chat - Now takes full remaining width */}
       <div className="flex-1 h-full min-w-0">
         {isCreatingTaskConversation && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
@@ -337,7 +337,9 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
         />
       </div>
 
-      {/* Right widgets */}
+      {/* Right widgets - TEMPORARILY REMOVED TO GIVE MORE SPACE TO CHAT */}
+      {/* Uncomment this section to restore the right sidebar modules */}
+      {/*
       <div className="w-[340px] h-full flex flex-col gap-4 flex-shrink-0">
         <div className="flex-1 min-h-0">
           <AgentMiniDashboard agentId={selectedAgent} language={language} />
@@ -349,6 +351,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           <CollapsibleMoreTools language={language} agentId={selectedAgent} />
         </div>
       </div>
+      */}
     </div>
   );
 };
