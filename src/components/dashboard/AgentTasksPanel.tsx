@@ -32,7 +32,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
   const t = {
     en: {
       simpleView: "Simple View",
-      detailedView: "Detailed View",
+      detailedView: "Detailed View", 
       settings: "Settings"
     },
     es: {
@@ -42,7 +42,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
     }
   };
 
-  // Enhanced chat handler that creates task-specific conversations
+  // Enhanced chat handler that creates task-specific conversations and opens chat immediately
   const handleChatWithAgent = async (taskId: string, taskTitle: string) => {
     if (!user || !onChatWithAgent) return;
 
@@ -66,7 +66,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
             user_id: user.id,
             agent_id: agentId,
             task_id: taskId,
-            title: `Tarea: ${taskTitle}`,
+            title: `Desarrollo: ${taskTitle}`,
             is_archived: false
           })
           .select('id')
@@ -81,13 +81,37 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
         
         conversationId = newConversation.id;
 
-        // Add initial context message about the task
+        // Add initial context message about the task development
+        const initialMessage = language === 'es' 
+          ? `¡Perfecto! Vamos a desarrollar juntos la tarea "${taskTitle}". 
+
+Como tu agente especializado, te voy a guiar paso a paso para completar esta tarea de manera exitosa. 
+
+🎯 **Mi enfoque será:**
+- Dividir la tarea en pasos claros y manejables
+- Proporcionarte recursos y herramientas específicas
+- Resolver cualquier duda que tengas en el proceso
+- Ayudarte a superar obstáculos que puedan surgir
+
+¿Estás listo para empezar? Cuéntame, ¿hay algún aspecto específico de esta tarea con el que te gustaría comenzar o alguna pregunta inicial que tengas?`
+          : `Perfect! Let's develop the task "${taskTitle}" together.
+
+As your specialized agent, I'll guide you step by step to complete this task successfully.
+
+🎯 **My approach will be:**
+- Break down the task into clear, manageable steps
+- Provide you with specific resources and tools
+- Resolve any questions you have in the process
+- Help you overcome obstacles that may arise
+
+Are you ready to start? Tell me, is there any specific aspect of this task you'd like to begin with, or do you have any initial questions?`;
+
         await supabase
           .from('agent_messages')
           .insert({
             conversation_id: conversationId,
-            message_type: 'system',
-            content: `Conversación iniciada para la tarea: "${taskTitle}". ¿En qué puedo ayudarte con esta tarea específica?`
+            message_type: 'agent',
+            content: initialMessage
           });
       }
 

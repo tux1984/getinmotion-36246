@@ -264,6 +264,63 @@ export function useAgentTasks(agentId?: string) {
     }
   };
 
+  const startTaskDevelopment = async (taskId: string) => {
+    if (!user || !agentId) return null;
+
+    try {
+      // Primero pausar cualquier otra tarea in_progress del mismo agente
+      const otherActiveTasks = tasks.filter(task => 
+        task.agent_id === agentId && 
+        task.status === 'in_progress' && 
+        task.id !== taskId
+      );
+
+      // Pausar otras tareas activas del mismo agente
+      for (const task of otherActiveTasks) {
+        await supabase
+          .from('agent_tasks')
+          .update({ status: 'pending' })
+          .eq('id', task.id);
+      }
+
+      // Activar la tarea seleccionada
+      const { data, error } = await supabase
+        .from('agent_tasks')
+        .update({ 
+          status: 'in_progress',
+          progress_percentage: Math.max(10, tasks.find(t => t.id === taskId)?.progress_percentage || 0)
+        })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updatedTask = convertToAgentTask(data);
+      
+      // Actualizar estado local
+      setTasks(prev => prev.map(task => {
+        if (task.agent_id === agentId && task.status === 'in_progress' && task.id !== taskId) {
+          return { ...task, status: 'pending' };
+        }
+        if (task.id === taskId) {
+          return updatedTask;
+        }
+        return task;
+      }));
+
+      return updatedTask;
+    } catch (error) {
+      console.error('Error starting task development:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo iniciar el desarrollo de la tarea',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   const updateTask = async (taskId: string, updates: Partial<AgentTask>) => {
     try {
       const dbUpdates = convertForDatabase(updates);
@@ -418,6 +475,7 @@ export function useAgentTasks(agentId?: string) {
     updateSubtasks,
     updateNotes,
     updateResources,
-    updateTimeSpent
+    updateTimeSpent,
+    startTaskDevelopment
   };
 }

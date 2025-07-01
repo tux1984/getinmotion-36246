@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,7 +31,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   language,
   onChatWithAgent
 }) => {
-  const { tasks, loading, createTask, updateTask } = useAgentTasks(agentId);
+  const { tasks, loading, createTask, updateTask, startTaskDevelopment } = useAgentTasks(agentId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<'simple' | 'all'>('simple');
   const taskLimits = useTaskLimits(tasks);
@@ -146,27 +145,28 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
     };
   };
 
-  const handleStartTask = async (task: any) => {
-    // Verificar si ya está en progreso o si podemos iniciarla
+  const handleStartTaskDevelopment = async (task: any) => {
     if (task.status === 'completed') return;
     
-    if (task.status === 'pending') {
-      // Verificar límite antes de iniciar
-      if (taskLimits.isAtLimit) {
-        return; // No hacer nada si estamos en el límite
+    try {
+      // Iniciar desarrollo de la tarea (esto la pone como única tarea activa del agente)
+      const updatedTask = await startTaskDevelopment(task.id);
+      
+      if (updatedTask && onChatWithAgent) {
+        // Abrir inmediatamente el chat dedicado para esta tarea
+        onChatWithAgent(task.id, task.title);
       }
-      await updateTask(task.id, { 
-        status: 'in_progress',
-        progress_percentage: Math.max(task.progress_percentage, 10)
-      });
-    } else {
-      // Si ya está en progreso, completarla
-      await updateTask(task.id, { 
-        status: 'completed',
-        progress_percentage: 100,
-        completed_at: new Date().toISOString()
-      });
+    } catch (error) {
+      console.error('Error starting task development:', error);
     }
+  };
+
+  const handleCompleteTask = async (task: any) => {
+    await updateTask(task.id, { 
+      status: 'completed',
+      progress_percentage: 100,
+      completed_at: new Date().toISOString()
+    });
   };
 
   const handleChatWithTask = (task: any) => {
@@ -190,12 +190,13 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
     return newTask;
   };
 
-  // Get the most important task (pending or in_progress)
-  const currentTask = tasks.find(t => t.status === 'in_progress') || 
-                     tasks.find(t => t.status === 'pending') ||
-                     tasks[0];
-
-  const nextTask = tasks.find(t => t.status === 'pending' && t.id !== currentTask?.id);
+  // Get the active task for this agent (only one should be in_progress)
+  const activeTask = tasks.find(t => t.status === 'in_progress');
+  // Get the next pending task if no active task
+  const nextTask = !activeTask ? tasks.find(t => t.status === 'pending') : null;
+  // The current actionable task is either active or next pending
+  const currentTask = activeTask || nextTask;
+  
   const completedCount = tasks.filter(t => t.status === 'completed').length;
   const pendingTasks = tasks.filter(t => t.status === 'pending');
   const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
@@ -328,7 +329,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                             'bg-yellow-500/20 text-yellow-300'
                           }`}>
                             {task.status === 'completed' ? 'Completada' :
-                             task.status === 'in_progress' ? 'En progreso' : 'Pendiente'}
+                             task.status === 'in_progress' ? 'En desarrollo' : 'Pendiente'}
                           </span>
                           <span className="text-xs text-white/60">{task.progress_percentage}%</span>
                         </div>
@@ -337,8 +338,8 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     </div>
                     <div className="flex gap-2">
                       <Button 
-                        onClick={() => handleStartTask(task)}
-                        disabled={task.status === 'completed' || (task.status === 'pending' && taskLimits.isAtLimit)}
+                        onClick={() => task.status === 'in_progress' ? handleCompleteTask(task) : handleStartTaskDevelopment(task)}
+                        disabled={task.status === 'completed'}
                         className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg text-sm disabled:opacity-50"
                       >
                         {task.status === 'completed' ? (
@@ -346,15 +347,15 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             {t[language].completed}
                           </>
-                        ) : task.status === 'pending' ? (
+                        ) : task.status === 'in_progress' ? (
                           <>
-                            <Play className="w-4 h-4 mr-1" />
-                            {taskLimits.isAtLimit ? t[language].completeThisFirst : t[language].letsStart}
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Finalizar Tarea
                           </>
                         ) : (
                           <>
-                            <CheckCircle2 className="w-4 h-4 mr-1" />
-                            {t[language].letsKeepWorking}
+                            <Play className="w-4 h-4 mr-1" />
+                            Desarrollar con Agente
                           </>
                         )}
                       </Button>
@@ -364,7 +365,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                         className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-2 px-4 rounded-lg text-sm"
                       >
                         <MessageSquare className="w-4 h-4 mr-1" />
-                        {t[language].chatWithMe}
+                        Chat
                       </Button>
                     </div>
                   </CardContent>
@@ -374,7 +375,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
           )}
         </div>
       ) : (
-        /* Simple View - Current Task Focus */
+        /* Simple View - Single Actionable Task */
         !currentTask ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -418,6 +419,16 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     <span className="text-purple-300">"{currentTask.title}"</span>
                     <span className="text-white/70"> {t[language].going}</span>
                   </h3>
+                  
+                  {/* Task Status Badge */}
+                  <div className="flex justify-center mb-4">
+                    <span className={`text-sm px-3 py-1 rounded-full ${
+                      currentTask.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300' :
+                      'bg-yellow-500/20 text-yellow-300'
+                    }`}>
+                      {currentTask.status === 'in_progress' ? '🚀 En Desarrollo' : '⏳ Lista para Desarrollar'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Progress Circle */}
@@ -473,38 +484,35 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                {/* Main Action - Development with Agent */}
+                <div className="space-y-3">
                   <Button 
-                    onClick={() => handleStartTask(currentTask)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-medium disabled:opacity-50"
-                    disabled={currentTask.status === 'completed' || (currentTask.status === 'pending' && taskLimits.isAtLimit)}
+                    onClick={() => handleStartTaskDevelopment(currentTask)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl font-medium text-lg disabled:opacity-50"
+                    disabled={currentTask.status === 'completed'}
                   >
-                    {currentTask.status === 'completed' ? (
+                    {currentTask.status === 'in_progress' ? (
                       <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        {t[language].completed}
-                      </>
-                    ) : currentTask.status === 'pending' ? (
-                      <>
-                        <Play className="w-5 h-5 mr-2" />
-                        {taskLimits.isAtLimit ? t[language].completeThisFirst : t[language].letsStart}
+                        <MessageSquare className="w-5 h-5 mr-2" />
+                        Continuar Desarrollo con Agente
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        {t[language].letsKeepWorking}
+                        <Play className="w-5 h-5 mr-2" />
+                        Desarrollar con Agente
                       </>
                     )}
                   </Button>
                   
-                  <Button 
-                    onClick={() => handleChatWithTask(currentTask)}
-                    className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-3 px-6 rounded-xl"
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    {t[language].chatWithMe}
-                  </Button>
+                  {currentTask.status === 'in_progress' && (
+                    <Button 
+                      onClick={() => handleCompleteTask(currentTask)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Marcar como Completada
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -512,8 +520,8 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
         )
       )}
 
-      {/* Next Task Preview - Solo en vista simple */}
-      {viewMode === 'simple' && nextTask && (
+      {/* Other Pending Tasks Preview - Solo en vista simple */}
+      {viewMode === 'simple' && tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -526,13 +534,18 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                 <div>
                   <h4 className="font-medium text-white/90 mb-1 flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 text-purple-400" />
-                    {t[language].nextUp}
+                    Otras tareas pendientes: {tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length}
                   </h4>
-                  <p className="text-white/70 text-sm">{nextTask.title}</p>
+                  <p className="text-white/70 text-sm">Completa la tarea actual para continuar</p>
                 </div>
-                <div className="text-white/50">
-                  <Clock className="w-5 h-5" />
-                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setViewMode('all')}
+                  className="text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  Ver todas
+                </Button>
               </div>
             </CardContent>
           </Card>
