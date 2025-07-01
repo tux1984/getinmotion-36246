@@ -24,6 +24,7 @@ export function useAgentTasks(agentId?: string) {
   // Initialize special operations hooks
   const { 
     startTaskDevelopment,
+    completeTaskQuickly,
     updateSubtasks,
     updateNotes,
     updateResources,
@@ -80,7 +81,8 @@ export function useAgentTasks(agentId?: string) {
     updateNotes,
     updateResources,
     updateTimeSpent,
-    startTaskDevelopment
+    startTaskDevelopment,
+    completeTaskQuickly
   };
 }
 

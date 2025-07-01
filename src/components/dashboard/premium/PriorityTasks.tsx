@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, LayoutGrid, List, Kanban, Loader2 } from 'lucide-react';
@@ -25,7 +24,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   language,
   onTaskAction,
 }) => {
-  const { tasks, loading, updateTask, deleteTask, startTaskDevelopment } = useAgentTasks();
+  const { tasks, loading, updateTask, deleteTask, startTaskDevelopment, completeTaskQuickly } = useAgentTasks();
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -74,11 +73,8 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   const handleCompleteTask = async (task: AgentTask) => {
     setUpdatingTasks(prev => new Set(prev).add(task.id));
     
-    await updateTask(task.id, { 
-      status: 'completed',
-      progress_percentage: 100,
-      completed_at: new Date().toISOString()
-    });
+    // Use the quick complete function for faster completion
+    await completeTaskQuickly(task.id);
     
     setUpdatingTasks(prev => {
       const newSet = new Set(prev);

@@ -13,7 +13,8 @@ import {
   Target,
   Timer,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Check
 } from 'lucide-react';
 import { AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -46,6 +47,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
       developWithAgent: 'Develop with Agent',
       continueTask: 'Continue',
       completeTask: 'Complete Task',
+      markCompleted: 'Mark as Done',
       completed: 'Completed',
       delete: 'Delete',
       chatWithAgent: 'Chat',
@@ -55,12 +57,14 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
       dueDate: 'Due',
       progress: 'Progress',
       limitReached: 'Task limit reached',
-      completeOthers: 'Complete some tasks first'
+      completeOthers: 'Complete some tasks first',
+      quickComplete: 'Quick complete'
     },
     es: {
       developWithAgent: 'Desarrollar con Agente',
       continueTask: 'Continuar',
       completeTask: 'Completar Tarea',
+      markCompleted: 'Marcar Terminada',
       completed: 'Completada',
       delete: 'Eliminar',
       chatWithAgent: 'Chat',
@@ -70,7 +74,8 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
       dueDate: 'Vence',
       progress: 'Progreso',
       limitReached: 'Límite de tareas alcanzado',
-      completeOthers: 'Completa algunas tareas primero'
+      completeOthers: 'Completa algunas tareas primero',
+      quickComplete: 'Completar rápido'
     }
   };
 
@@ -129,10 +134,26 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     };
   };
 
+  const getQuickCompleteButton = () => {
+    // Show quick complete for pending tasks when at limit
+    if (task.status === 'pending' || task.status === 'in_progress') {
+      return {
+        label: t[language].markCompleted,
+        icon: Check,
+        onClick: handleCompleteTask,
+        variant: 'outline' as const,
+        className: 'border-green-500 text-green-600 hover:bg-green-50'
+      };
+    }
+    return null;
+  };
+
   const statusBadge = getStatusBadge(task.status);
   const StatusIcon = statusBadge.icon;
   const mainCTA = getMainCTA();
   const MainCTAIcon = mainCTA?.icon;
+  const quickComplete = getQuickCompleteButton();
+  const QuickCompleteIcon = quickComplete?.icon;
 
   const completedSubtasks = task.subtasks?.filter(st => st.completed)?.length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
@@ -156,9 +177,9 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
             {/* Limit warning for pending tasks */}
             {task.status === 'pending' && taskLimits.isAtLimit && (
-              <div className="flex items-center gap-1 text-xs text-red-600 mb-2">
+              <div className="flex items-center gap-1 text-xs text-red-600 mb-2 bg-red-50 p-2 rounded">
                 <AlertCircle className="w-3 h-3" />
-                <span>{t[language].limitReached}</span>
+                <span>{t[language].limitReached} ({taskLimits.activeTasksCount}/{taskLimits.limit})</span>
               </div>
             )}
 
@@ -212,6 +233,20 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               >
                 <MainCTAIcon className="w-3 h-3 mr-1" />
                 <span className="text-xs">{mainCTA.label}</span>
+              </Button>
+            )}
+
+            {/* Quick Complete - Show for pending/in_progress when at limit */}
+            {quickComplete && QuickCompleteIcon && (taskLimits.isAtLimit || task.status === 'in_progress') && (
+              <Button 
+                onClick={quickComplete.onClick}
+                size="sm" 
+                variant={quickComplete.variant}
+                className={`${quickComplete.className} h-8 px-2`}
+                disabled={isUpdating}
+                title={t[language].quickComplete}
+              >
+                <QuickCompleteIcon className="w-3 h-3" />
               </Button>
             )}
 
