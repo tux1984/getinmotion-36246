@@ -1,33 +1,49 @@
 
 import React from 'react';
+import { LucideIcon } from 'lucide-react';
 
 interface AgentIconProps {
-  icon: React.ReactNode;
+  icon: React.ReactNode | LucideIcon | string;
   className?: string;
 }
 
 export const AgentIcon: React.FC<AgentIconProps> = ({ icon, className = "" }) => {
-  // ARREGLO CRÍTICO: Manejo más robusto de diferentes tipos de iconos
-  console.log('AgentIcon: Rendering with icon type:', typeof icon, icon);
+  console.log('AgentIcon: Rendering with icon:', typeof icon);
 
-  // Handle null/undefined - return placeholder
+  // Handle null/undefined
   if (!icon) {
-    return <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
-      <span className="text-xs text-gray-600">?</span>
-    </div>;
+    return (
+      <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
+        <span className="text-xs text-gray-600">?</span>
+      </div>
+    );
   }
 
-  // Handle string (emoji or text) - most common case
+  // Handle string (emoji or text)
   if (typeof icon === 'string') {
-    return <span className={`inline-flex items-center justify-center w-6 h-6 ${className}`}>{icon}</span>;
+    return (
+      <span className={`inline-flex items-center justify-center w-6 h-6 ${className}`}>
+        {icon}
+      </span>
+    );
   }
 
-  // Handle number - convert to string
-  if (typeof icon === 'number') {
-    return <span className={`inline-flex items-center justify-center w-6 h-6 ${className}`}>{icon.toString()}</span>;
+  // Handle Lucide React components (functions)
+  if (typeof icon === 'function') {
+    try {
+      const IconComponent = icon as LucideIcon;
+      return <IconComponent className={`w-6 h-6 ${className}`} size={24} />;
+    } catch (error) {
+      console.warn('AgentIcon: Error rendering Lucide icon:', error);
+      return (
+        <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
+          <span className="text-xs text-gray-600">⚠</span>
+        </div>
+      );
+    }
   }
-  
-  // Handle React elements - clone with proper props
+
+  // Handle React elements
   if (React.isValidElement(icon)) {
     try {
       return React.cloneElement(icon as React.ReactElement, { 
@@ -35,28 +51,19 @@ export const AgentIcon: React.FC<AgentIconProps> = ({ icon, className = "" }) =>
       });
     } catch (error) {
       console.warn('AgentIcon: Error cloning React element:', error);
-      return <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
-        <span className="text-xs text-gray-600">⚠</span>
-      </div>;
+      return (
+        <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
+          <span className="text-xs text-gray-600">⚠</span>
+        </div>
+      );
     }
   }
 
-  // Handle component functions (like Lucide icons)
-  if (typeof icon === 'function') {
-    try {
-      const IconComponent = icon as React.ComponentType<{ className?: string; size?: number }>;
-      return <IconComponent className={`w-6 h-6 ${className}`} size={24} />;
-    } catch (error) {
-      console.warn('AgentIcon: Error rendering icon component:', error);
-      return <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
-        <span className="text-xs text-gray-600">⚠</span>
-      </div>;
-    }
-  }
-
-  // ARREGLO CRÍTICO: Si llegamos aquí, es un objeto que no es React element
-  console.warn('AgentIcon: Unknown icon type, returning fallback:', typeof icon, icon);
-  return <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
-    <span className="text-xs text-gray-600">?</span>
-  </div>;
+  // Fallback for any other case
+  console.warn('AgentIcon: Unknown icon type, using fallback');
+  return (
+    <div className={`w-6 h-6 bg-gray-300 rounded flex items-center justify-center ${className}`}>
+      <span className="text-xs text-gray-600">?</span>
+    </div>
+  );
 };

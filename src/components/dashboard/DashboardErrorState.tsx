@@ -28,7 +28,7 @@ export const DashboardErrorState: React.FC<DashboardErrorStateProps> = ({
   return (
     <DashboardBackground>
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -72,7 +72,7 @@ export const DashboardErrorState: React.FC<DashboardErrorStateProps> = ({
 
             <div className="text-center mt-6">
               <p className="text-xs text-gray-500">
-                Si el problema persiste, intenta limpiar el caché del navegador o contacta soporte.
+                Si el problema persiste, intenta limpiar el caché del navegador.
               </p>
             </div>
           </CardContent>

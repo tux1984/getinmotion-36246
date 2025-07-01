@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
+import { Agent } from '@/types/dashboard';
 import { culturalAgentsDatabase } from '@/data/agentsDatabase';
 import { useOptimizedUserData } from './useOptimizedUserData';
 import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
@@ -27,24 +27,17 @@ export const useOptimizedAgentManagement = () => {
     userProfile: profile
   });
 
-  console.log('useOptimizedAgentManagement: State check:', {
-    hasOnboarding,
-    maturityScores: !!maturityScores,
-    userAgentsCount: userAgents.length,
-    userDataLoading,
-    scoresLoading,
-    hasProfile: !!profile
-  });
+  console.log('useOptimizedAgentManagement: Processing data');
 
-  // ARREGLO CRÍTICO: Memoize agents transformation
+  // Transform agents with error handling
   const agents: Agent[] = useMemo(() => {
     if (!culturalAgentsDatabase || !Array.isArray(culturalAgentsDatabase)) {
-      console.warn('useOptimizedAgentManagement: culturalAgentsDatabase is not available');
+      console.warn('useOptimizedAgentManagement: agentsDatabase not available');
       return [];
     }
 
     try {
-      const transformedAgents = culturalAgentsDatabase.map(agentInfo => {
+      return culturalAgentsDatabase.map(agentInfo => {
         const userAgent = userAgents.find(ua => ua.agent_id === agentInfo.id);
         
         return {
@@ -58,13 +51,6 @@ export const useOptimizedAgentManagement = () => {
           icon: agentInfo.icon
         };
       });
-
-      console.log('useOptimizedAgentManagement: Agents transformed successfully:', {
-        totalAgents: transformedAgents.length,
-        activeAgents: transformedAgents.filter(a => a.status === 'active').length
-      });
-
-      return transformedAgents;
     } catch (error) {
       console.error('useOptimizedAgentManagement: Error transforming agents:', error);
       return [];
@@ -74,12 +60,10 @@ export const useOptimizedAgentManagement = () => {
   const isLoading = userDataLoading || scoresLoading;
   const error = userDataError || scoresError;
 
-  console.log('useOptimizedAgentManagement: Final state:', {
+  console.log('useOptimizedAgentManagement: Final state', {
     agentsCount: agents.length,
     isLoading,
-    error,
-    hasOnboarding,
-    hasMaturityScores: !!maturityScores
+    hasOnboarding
   });
 
   return {

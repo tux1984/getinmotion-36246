@@ -19,16 +19,16 @@ interface ModernDashboardMainProps {
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) => {
   const isMobile = useIsMobile();
 
-  console.log('ModernDashboardMain: Rendering with props:', {
+  console.log('ModernDashboardMain: Rendering', {
     agentsCount: props.agents.length,
     hasMaturityScores: !!props.maturityScores,
     hasProfileData: !!props.profileData,
     isMobile
   });
 
-  // ARREGLO CRÍTICO: Si no hay datos básicos, mostrar fallback simple
+  // Show fallback if no basic data
   if (!props.maturityScores && (!props.agents || props.agents.length === 0)) {
-    console.log('ModernDashboardMain: No basic data, showing fallback');
+    console.log('ModernDashboardMain: Showing fallback');
     return (
       <SimpleDashboardFallback 
         onMaturityCalculatorClick={props.onMaturityCalculatorClick}
@@ -36,7 +36,7 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) =
     );
   }
 
-  // ARREGLO: Usar componente apropiado según dispositivo
+  // Render appropriate version
   if (isMobile) {
     console.log('ModernDashboardMain: Rendering mobile version');
     return (
