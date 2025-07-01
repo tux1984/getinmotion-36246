@@ -42,13 +42,7 @@ interface OptimizedUserData {
   hasOnboarding: boolean;
 }
 
-const FETCH_TIMEOUT = 10000; // 10 segundos
-
-const createTimeoutPromise = (timeout: number) => {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Request timeout')), timeout);
-  });
-};
+const FETCH_TIMEOUT = 8000; // 8 segundos
 
 export const useOptimizedUserData = (): OptimizedUserData => {
   const { user } = useAuth();
@@ -60,128 +54,72 @@ export const useOptimizedUserData = (): OptimizedUserData => {
     error: null,
   });
 
-  // ARREGLO CRÍTICO: Mejorar la detección de onboarding completado
+  // ARREGLO CRÍTICO: Simplificar detección de onboarding
   const hasOnboarding = useMemo(() => {
-    // 1. Verificar localStorage primero (más confiable)
-    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
-    if (onboardingCompleted === 'true') {
-      console.log('useOptimizedUserData: hasOnboarding = true (localStorage)');
-      return true;
-    }
-
-    // 2. Verificar si tiene maturityScores guardados (indicador secundario)
-    const savedMaturityScores = localStorage.getItem('maturityScores');
-    if (savedMaturityScores) {
-      try {
-        const scores = JSON.parse(savedMaturityScores);
-        if (scores && typeof scores === 'object') {
-          console.log('useOptimizedUserData: hasOnboarding = true (maturityScores)');
-          // Auto-marcar como completado si tiene scores pero no el flag
-          localStorage.setItem('onboardingCompleted', 'true');
-          return true;
-        }
-      } catch (e) {
-        console.warn('useOptimizedUserData: Error parsing maturityScores:', e);
+    try {
+      // Verificar localStorage primero
+      const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+      if (onboardingCompleted === 'true') {
+        console.log('useOptimizedUserData: hasOnboarding = true (localStorage)');
+        return true;
       }
-    }
 
-    // 3. Como último recurso, verificar agentes habilitados
-    if (data.agents.length > 0 && data.agents.some(agent => agent.is_enabled)) {
-      console.log('useOptimizedUserData: hasOnboarding = true (enabled agents)');
-      // Auto-marcar como completado si tiene agentes pero no el flag
-      localStorage.setItem('onboardingCompleted', 'true');
-      return true;
-    }
+      // Verificar maturity scores como indicador secundario
+      const savedMaturityScores = localStorage.getItem('maturityScores');
+      if (savedMaturityScores) {
+        try {
+          const scores = JSON.parse(savedMaturityScores);
+          if (scores && typeof scores === 'object' && Object.keys(scores).length > 0) {
+            console.log('useOptimizedUserData: hasOnboarding = true (maturityScores)');
+            localStorage.setItem('onboardingCompleted', 'true');
+            return true;
+          }
+        } catch (e) {
+          console.warn('useOptimizedUserData: Error parsing maturityScores:', e);
+        }
+      }
 
-    console.log('useOptimizedUserData: hasOnboarding = false (no indicators)');
-    return false;
-  }, [data.agents]);
+      console.log('useOptimizedUserData: hasOnboarding = false');
+      return false;
+    } catch (error) {
+      console.error('useOptimizedUserData: Error checking onboarding:', error);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) {
+      console.log('useOptimizedUserData: No user, setting loading to false');
       setData(prev => ({ ...prev, loading: false }));
       return;
     }
 
-    const fetchAllUserData = async () => {
+    const fetchUserData = async () => {
+      console.log('useOptimizedUserData: Starting fetch for user:', user.id);
+      
       try {
         setData(prev => ({ ...prev, loading: true, error: null }));
 
-        // ARREGLO: Añadir timeout a todas las consultas
-        const profilePromise = supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // ARREGLO: Timeout para todas las consultas
+        const fetchPromise = Promise.all([
+          supabase.from('user_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+          supabase.from('user_projects').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+          supabase.from('user_agents').select('*').eq('user_id', user.id)
+        ]);
 
-        const projectsPromise = supabase
-          .from('user_projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), FETCH_TIMEOUT)
+        );
 
-        const agentsPromise = supabase
-          .from('user_agents')
-          .select('*')
-          .eq('user_id', user.id);
-
-        // Ejecutar todas las consultas con timeout
         const [profileResult, projectsResult, agentsResult] = await Promise.race([
-          Promise.all([profilePromise, projectsPromise, agentsPromise]),
-          createTimeoutPromise(FETCH_TIMEOUT)
+          fetchPromise,
+          timeoutPromise
         ]) as any[];
 
-        // Handle profile creation if it doesn't exist
+        // Manejo de errores de perfil
         let profile = profileResult.data;
         if (!profile && !profileResult.error) {
-          try {
-            const { data: newProfile, error: createError } = await Promise.race([
-              supabase
-                .from('user_profiles')
-                .insert({
-                  user_id: user.id,
-                  full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'
-                })
-                .select()
-                .single(),
-              createTimeoutPromise(5000)
-            ]) as any;
-
-            if (createError) throw createError;
-            profile = newProfile;
-          } catch (createErr) {
-            console.warn('Could not create profile, using fallback');
-            profile = {
-              id: user.id,
-              user_id: user.id,
-              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
-              avatar_url: null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-          }
-        }
-
-        if (profileResult.error && profileResult.error.code !== 'PGRST116') {
-          throw profileResult.error;
-        }
-        if (projectsResult.error) throw projectsResult.error;
-        if (agentsResult.error) throw agentsResult.error;
-
-        setData({
-          profile,
-          projects: projectsResult.data || [],
-          agents: agentsResult.data || [],
-          loading: false,
-          error: null,
-        });
-
-      } catch (err) {
-        console.error('Error fetching user data:', err);
-        
-        // ARREGLO: Fallback con datos de localStorage si falla
-        try {
+          // Crear perfil si no existe
           const fallbackProfile = {
             id: user.id,
             user_id: user.id,
@@ -191,26 +129,62 @@ export const useOptimizedUserData = (): OptimizedUserData => {
             updated_at: new Date().toISOString()
           };
 
-          setData({
-            profile: fallbackProfile,
-            projects: [],
-            agents: [],
-            loading: false,
-            error: null,
-          });
-        } catch (fallbackErr) {
-          console.error('Fallback failed:', fallbackErr);
-          setData(prev => ({
-            ...prev,
-            loading: false,
-            error: 'Error al cargar los datos del usuario'
-          }));
+          try {
+            const { data: newProfile } = await supabase
+              .from('user_profiles')
+              .insert(fallbackProfile)
+              .select()
+              .single();
+            profile = newProfile || fallbackProfile;
+          } catch (createError) {
+            console.warn('useOptimizedUserData: Could not create profile, using fallback');
+            profile = fallbackProfile;
+          }
         }
+
+        console.log('useOptimizedUserData: Fetch completed successfully');
+        setData({
+          profile,
+          projects: projectsResult.data || [],
+          agents: agentsResult.data || [],
+          loading: false,
+          error: null,
+        });
+
+      } catch (error) {
+        console.error('useOptimizedUserData: Fetch error:', error);
+        
+        // ARREGLO: Fallback robusto
+        const fallbackProfile = {
+          id: user.id,
+          user_id: user.id,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        setData({
+          profile: fallbackProfile,
+          projects: [],
+          agents: [],
+          loading: false,
+          error: null, // No mostrar error, usar fallback
+        });
       }
     };
 
-    fetchAllUserData();
+    fetchUserData();
   }, [user]);
+
+  console.log('useOptimizedUserData: Current state:', {
+    hasProfile: !!data.profile,
+    agentCount: data.agents.length,
+    projectCount: data.projects.length,
+    loading: data.loading,
+    hasOnboarding,
+    error: data.error
+  });
 
   return {
     ...data,

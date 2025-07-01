@@ -21,7 +21,9 @@ const DashboardHome = () => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [showEmergencyFallback, setShowEmergencyFallback] = useState(false);
 
-  // ARREGLO CRÍTICO: Usar el hook optimizado
+  console.log('DashboardHome: Component rendering');
+
+  // ARREGLO CRÍTICO: Usar hook optimizado
   const {
     agents,
     profile,
@@ -32,46 +34,50 @@ const DashboardHome = () => {
     hasOnboarding
   } = useOptimizedAgentManagement();
 
-  // Scroll to top when component mounts
+  // Scroll para arriba al cargar
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   // Debug logging
   useEffect(() => {
-    console.log('DashboardHome: Current state:', {
+    console.log('DashboardHome: State update:', {
       user: user?.email,
       isAuthorized,
       hasOnboarding,
       isLoading,
-      agents: agents.length,
-      maturityScores,
-      profile: !!profile,
+      agentsCount: agents.length,
+      hasMaturityScores: !!maturityScores,
+      hasProfile: !!profile,
       error
     });
   }, [user, isAuthorized, hasOnboarding, isLoading, agents, maturityScores, profile, error]);
 
-  // ARREGLO: Manejo más inteligente de onboarding
+  // ARREGLO CRÍTICO: Solo redirigir en casos muy específicos y sin loops
   useEffect(() => {
-    // Solo redirigir si estamos seguros de que no hay onboarding
-    if (!isLoading && hasOnboarding === false && !error) {
-      console.log('DashboardHome: Redirecting to onboarding - no maturity scores found');
-      navigate('/maturity-calculator', { replace: true });
+    // Solo redirigir si definitivamente no hay onboarding y no estamos cargando
+    if (!isLoading && !error && hasOnboarding === false) {
+      const hasLocalData = localStorage.getItem('maturityScores') || localStorage.getItem('onboardingCompleted');
+      if (!hasLocalData) {
+        console.log('DashboardHome: Redirecting to onboarding - no data found');
+        navigate('/maturity-calculator', { replace: true });
+      }
     }
   }, [hasOnboarding, isLoading, error, navigate]);
 
-  // Emergency fallback - mostrar después de un tiempo si sigue cargando
+  // Emergency fallback timer
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
         console.log('DashboardHome: Showing emergency fallback after timeout');
         setShowEmergencyFallback(true);
       }
-    }, 15000); // 15 segundos
+    }, 12000); // 12 segundos
 
     return () => clearTimeout(timer);
   }, [isLoading]);
 
+  // Event handlers
   const handleSelectAgent = (agentId: string) => {
     console.log('DashboardHome: Selecting agent:', agentId);
     setSelectedAgent(agentId);
@@ -79,7 +85,7 @@ const DashboardHome = () => {
   };
 
   const handleBackFromAgentDetails = () => {
-    console.log('DashboardHome: Returning from agent details');
+    console.log('DashboardHome: Back from agent details');
     setSelectedAgent(null);
     setActiveSection('dashboard');
   };
@@ -90,7 +96,7 @@ const DashboardHome = () => {
   };
 
   const handleBackFromAgentManager = () => {
-    console.log('DashboardHome: Returning from agent manager');
+    console.log('DashboardHome: Back from agent manager');
     setActiveSection('dashboard');
   };
 
@@ -101,11 +107,11 @@ const DashboardHome = () => {
 
   const handleAgentToggle = async (agentId: string, enabled: boolean) => {
     console.log('DashboardHome: Toggling agent:', agentId, enabled);
-    // Esta funcionalidad se implementará más tarde
+    // Implementar más tarde
   };
 
   const handleRetry = () => {
-    console.log('DashboardHome: Retrying...');
+    console.log('DashboardHome: Retrying - reloading page');
     window.location.reload();
   };
 
@@ -116,8 +122,9 @@ const DashboardHome = () => {
 
   const seoData = SEO_CONFIG.pages.dashboard[language];
 
-  // ARREGLO CRÍTICO: Mostrar emergency fallback si hay timeout
+  // ARREGLO CRÍTICO: Emergency fallback si hay timeout
   if (showEmergencyFallback) {
+    console.log('DashboardHome: Rendering emergency fallback');
     return (
       <>
         <DashboardDebugPanel
@@ -140,8 +147,9 @@ const DashboardHome = () => {
     );
   }
 
-  // ARREGLO CRÍTICO: Mostrar loading solo si realmente está cargando
-  if (isLoading) {
+  // ARREGLO CRÍTICO: Solo mostrar loading si realmente está cargando
+  if (isLoading && !showEmergencyFallback) {
+    console.log('DashboardHome: Rendering loading state');
     return (
       <>
         <DashboardDebugPanel
@@ -159,7 +167,8 @@ const DashboardHome = () => {
     );
   }
 
-  // ARREGLO CRÍTICO: Mostrar dashboard incluso con datos mínimos
+  // ARREGLO CRÍTICO: Siempre mostrar dashboard
+  console.log('DashboardHome: Rendering main dashboard');
   return (
     <DashboardBackground>
       <SEOHead

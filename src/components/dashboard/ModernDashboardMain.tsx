@@ -4,6 +4,7 @@ import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PremiumDashboardMain } from './PremiumDashboardMain';
 import { MobileTaskBasedDashboard } from './mobile/MobileTaskBasedDashboard';
+import { SimpleDashboardFallback } from './SimpleDashboardFallback';
 
 interface ModernDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -18,8 +19,26 @@ interface ModernDashboardMainProps {
 export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) => {
   const isMobile = useIsMobile();
 
-  // Use the appropriate dashboard based on device
+  console.log('ModernDashboardMain: Rendering with props:', {
+    agentsCount: props.agents.length,
+    hasMaturityScores: !!props.maturityScores,
+    hasProfileData: !!props.profileData,
+    isMobile
+  });
+
+  // ARREGLO CRÍTICO: Si no hay datos básicos, mostrar fallback simple
+  if (!props.maturityScores && (!props.agents || props.agents.length === 0)) {
+    console.log('ModernDashboardMain: No basic data, showing fallback');
+    return (
+      <SimpleDashboardFallback 
+        onMaturityCalculatorClick={props.onMaturityCalculatorClick}
+      />
+    );
+  }
+
+  // ARREGLO: Usar componente apropiado según dispositivo
   if (isMobile) {
+    console.log('ModernDashboardMain: Rendering mobile version');
     return (
       <MobileTaskBasedDashboard
         agents={props.agents}
@@ -31,5 +50,6 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) =
     );
   }
 
+  console.log('ModernDashboardMain: Rendering desktop version');
   return <PremiumDashboardMain {...props} />;
 };
