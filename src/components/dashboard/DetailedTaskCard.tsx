@@ -12,55 +12,65 @@ import {
   Eye,
   Target,
   Timer,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from 'lucide-react';
 import { AgentTask } from '@/hooks/useAgentTasks';
+import { useTaskLimits } from '@/hooks/useTaskLimits';
 
 interface DetailedTaskCardProps {
   task: AgentTask;
   language: 'en' | 'es';
-  onStatusChange: (taskId: string, status: AgentTask['status']) => void;
+  onStartDevelopment?: (task: AgentTask) => void;
+  onChatWithAgent?: (task: AgentTask) => void;
+  onCompleteTask?: (task: AgentTask) => void;
   onDelete: (taskId: string) => void;
-  onStartTask: (task: AgentTask) => void;
-  onChatWithAgent: (task: AgentTask) => void;
   isUpdating: boolean;
+  allTasks?: AgentTask[];
 }
 
 export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   task,
   language,
-  onStatusChange,
-  onDelete,
-  onStartTask,
+  onStartDevelopment,
   onChatWithAgent,
-  isUpdating
+  onCompleteTask,
+  onDelete,
+  isUpdating,
+  allTasks = []
 }) => {
+  const taskLimits = useTaskLimits(allTasks);
+  
   const t = {
     en: {
-      startTask: 'Start Task',
+      developWithAgent: 'Develop with Agent',
       continueTask: 'Continue',
-      reviewTask: 'Review',
+      completeTask: 'Complete Task',
       completed: 'Completed',
       delete: 'Delete',
-      chatWithAgent: 'Chat with Agent',
+      chatWithAgent: 'Chat',
       subtasks: 'subtasks',
       timeSpent: 'Time spent',
       minutes: 'min',
       dueDate: 'Due',
-      progress: 'Progress'
+      progress: 'Progress',
+      limitReached: 'Task limit reached',
+      completeOthers: 'Complete some tasks first'
     },
     es: {
-      startTask: 'Empezar Tarea',
+      developWithAgent: 'Desarrollar con Agente',
       continueTask: 'Continuar',
-      reviewTask: 'Revisar',
+      completeTask: 'Completar Tarea',
       completed: 'Completada',
       delete: 'Eliminar',
-      chatWithAgent: 'Chatear con Agente',
+      chatWithAgent: 'Chat',
       subtasks: 'subtareas',
       timeSpent: 'Tiempo dedicado',
       minutes: 'min',
       dueDate: 'Vence',
-      progress: 'Progreso'
+      progress: 'Progreso',
+      limitReached: 'Límite de tareas alcanzado',
+      completeOthers: 'Completa algunas tareas primero'
     }
   };
 
@@ -74,35 +84,49 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     return statusConfig[status] || statusConfig.pending;
   };
 
-  const getMainCTA = () => {
-    switch (task.status) {
-      case 'pending':
-        return {
-          label: t[language].startTask,
-          icon: Play,
-          onClick: () => onStartTask(task),
-          variant: 'default' as const,
-          className: 'bg-green-600 hover:bg-green-700 text-white'
-        };
-      case 'in_progress':
-        return {
-          label: t[language].continueTask,
-          icon: Target,
-          onClick: () => onStartTask(task),
-          variant: 'default' as const,
-          className: 'bg-blue-600 hover:bg-blue-700 text-white'
-        };
-      case 'completed':
-        return {
-          label: t[language].reviewTask,
-          icon: Eye,
-          onClick: () => onStartTask(task),
-          variant: 'outline' as const,
-          className: ''
-        };
-      default:
-        return null;
+  const handleStartDevelopment = () => {
+    if (taskLimits.isAtLimit && task.status === 'pending') {
+      return; // Prevent action when at limit
     }
+    onStartDevelopment?.(task);
+  };
+
+  const handleCompleteTask = () => {
+    onCompleteTask?.(task);
+  };
+
+  const handleChatWithAgent = () => {
+    onChatWithAgent?.(task);
+  };
+
+  const getMainCTA = () => {
+    if (task.status === 'completed') {
+      return null;
+    }
+    
+    if (task.status === 'in_progress') {
+      return {
+        label: t[language].completeTask,
+        icon: CheckCircle2,
+        onClick: handleCompleteTask,
+        variant: 'default' as const,
+        className: 'bg-green-600 hover:bg-green-700 text-white'
+      };
+    }
+    
+    // For pending tasks, check if we can start development
+    const canStartDevelopment = !taskLimits.isAtLimit;
+    
+    return {
+      label: t[language].developWithAgent,
+      icon: Play,
+      onClick: handleStartDevelopment,
+      variant: 'default' as const,
+      className: canStartDevelopment 
+        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+        : 'bg-gray-400 text-gray-600 cursor-not-allowed',
+      disabled: !canStartDevelopment
+    };
   };
 
   const statusBadge = getStatusBadge(task.status);
@@ -128,6 +152,14 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             
             {task.description && (
               <p className="text-xs text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+            )}
+
+            {/* Limit warning for pending tasks */}
+            {task.status === 'pending' && taskLimits.isAtLimit && (
+              <div className="flex items-center gap-1 text-xs text-red-600 mb-2">
+                <AlertCircle className="w-3 h-3" />
+                <span>{t[language].limitReached}</span>
+              </div>
             )}
 
             <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -176,35 +208,23 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
                 size="sm" 
                 variant={mainCTA.variant}
                 className={`${mainCTA.className} h-8 px-3`}
-                disabled={isUpdating}
+                disabled={isUpdating || mainCTA.disabled}
               >
                 <MainCTAIcon className="w-3 h-3 mr-1" />
                 <span className="text-xs">{mainCTA.label}</span>
               </Button>
             )}
 
-            {/* Chat with Agent */}
+            {/* Chat with Agent - Always available */}
             <Button 
-              onClick={() => onChatWithAgent(task)}
+              onClick={handleChatWithAgent}
               size="sm" 
               variant="outline"
               className="h-8 px-2"
+              disabled={isUpdating}
             >
               <MessageSquare className="w-3 h-3" />
             </Button>
-
-            {/* Quick status actions */}
-            {task.status !== 'completed' && (
-              <Button 
-                onClick={() => onStatusChange(task.id, 'completed')}
-                size="sm" 
-                variant="ghost"
-                className="h-8 px-2 text-green-600 hover:text-green-700"
-                disabled={isUpdating}
-              >
-                <CheckCircle2 className="w-3 h-3" />
-              </Button>
-            )}
 
             {/* Delete */}
             <Button 

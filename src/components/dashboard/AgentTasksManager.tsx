@@ -10,15 +10,21 @@ import { DetailedTaskCard } from './DetailedTaskCard';
 interface AgentTasksManagerProps {
   agentId: string;
   language: 'en' | 'es';
-  onSelectAgent?: (agentId: string) => void;
+  onChatWithAgent?: (taskId: string, taskTitle: string) => void;
 }
 
 export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
   agentId,
   language,
-  onSelectAgent
+  onChatWithAgent
 }) => {
-  const { tasks, loading, updateTask, deleteTask } = useAgentTasks(agentId);
+  const { 
+    tasks, 
+    loading, 
+    updateTask, 
+    deleteTask, 
+    startTaskDevelopment 
+  } = useAgentTasks(agentId);
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
 
   const t = {
@@ -36,21 +42,39 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
     }
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: AgentTask['status']) => {
-    setUpdatingTasks(prev => new Set(prev).add(taskId));
+  const handleStartDevelopment = async (task: AgentTask) => {
+    setUpdatingTasks(prev => new Set(prev).add(task.id));
     
-    const updates: Partial<AgentTask> = { status: newStatus };
-    if (newStatus === 'completed') {
-      updates.completed_at = new Date().toISOString();
-      updates.progress_percentage = 100;
-    } else if (newStatus === 'in_progress' && tasks.find(t => t.id === taskId)?.progress_percentage === 0) {
-      updates.progress_percentage = 10;
+    try {
+      const updatedTask = await startTaskDevelopment(task.id);
+      
+      if (updatedTask && onChatWithAgent) {
+        // Open chat immediately after starting development
+        onChatWithAgent(task.id, task.title);
+      }
+    } catch (error) {
+      console.error('Error starting task development:', error);
+    } finally {
+      setUpdatingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(task.id);
+        return newSet;
+      });
     }
+  };
+
+  const handleCompleteTask = async (task: AgentTask) => {
+    setUpdatingTasks(prev => new Set(prev).add(task.id));
     
-    await updateTask(taskId, updates);
+    await updateTask(task.id, { 
+      status: 'completed',
+      progress_percentage: 100,
+      completed_at: new Date().toISOString()
+    });
+    
     setUpdatingTasks(prev => {
       const newSet = new Set(prev);
-      newSet.delete(taskId);
+      newSet.delete(task.id);
       return newSet;
     });
   };
@@ -61,14 +85,9 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
     // No need to remove from setUpdatingTasks as the component will disappear
   };
 
-  const handleStartTask = (task: AgentTask) => {
-    // For now, just change status to in_progress
-    handleStatusChange(task.id, 'in_progress');
-  };
-
   const handleChatWithAgent = (task: AgentTask) => {
-    if (onSelectAgent) {
-      onSelectAgent(task.agent_id);
+    if (onChatWithAgent) {
+      onChatWithAgent(task.id, task.title);
     }
   };
 
@@ -109,11 +128,12 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
               key={task.id}
               task={task}
               language={language}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-              onStartTask={handleStartTask}
+              onStartDevelopment={handleStartDevelopment}
+              onCompleteTask={handleCompleteTask}
               onChatWithAgent={handleChatWithAgent}
+              onDelete={handleDelete}
               isUpdating={updatingTasks.has(task.id)}
+              allTasks={tasks}
             />
           ))}
         </div>

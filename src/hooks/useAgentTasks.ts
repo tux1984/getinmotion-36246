@@ -265,30 +265,36 @@ export function useAgentTasks(agentId?: string) {
   };
 
   const startTaskDevelopment = async (taskId: string) => {
-    if (!user || !agentId) return null;
+    if (!user) return null;
 
     try {
-      // Primero pausar cualquier otra tarea in_progress del mismo agente
-      const otherActiveTasks = tasks.filter(task => 
-        task.agent_id === agentId && 
-        task.status === 'in_progress' && 
-        task.id !== taskId
+      // Get the task to find its agent_id
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return null;
+
+      // First pause any other task in_progress from the same agent
+      const otherActiveTasks = tasks.filter(t => 
+        t.agent_id === task.agent_id && 
+        t.status === 'in_progress' && 
+        t.id !== taskId
       );
 
-      // Pausar otras tareas activas del mismo agente
-      for (const task of otherActiveTasks) {
+      console.log('Pausing other active tasks for agent:', task.agent_id, otherActiveTasks);
+
+      // Pause other tasks active from the same agent
+      for (const otherTask of otherActiveTasks) {
         await supabase
           .from('agent_tasks')
           .update({ status: 'pending' })
-          .eq('id', task.id);
+          .eq('id', otherTask.id);
       }
 
-      // Activar la tarea seleccionada
+      // Activate the selected task
       const { data, error } = await supabase
         .from('agent_tasks')
         .update({ 
           status: 'in_progress',
-          progress_percentage: Math.max(10, tasks.find(t => t.id === taskId)?.progress_percentage || 0)
+          progress_percentage: Math.max(10, task.progress_percentage || 0)
         })
         .eq('id', taskId)
         .select()
@@ -298,15 +304,15 @@ export function useAgentTasks(agentId?: string) {
 
       const updatedTask = convertToAgentTask(data);
       
-      // Actualizar estado local
-      setTasks(prev => prev.map(task => {
-        if (task.agent_id === agentId && task.status === 'in_progress' && task.id !== taskId) {
-          return { ...task, status: 'pending' };
+      // Update local state
+      setTasks(prev => prev.map(t => {
+        if (t.agent_id === task.agent_id && t.status === 'in_progress' && t.id !== taskId) {
+          return { ...t, status: 'pending' };
         }
-        if (task.id === taskId) {
+        if (t.id === taskId) {
           return updatedTask;
         }
-        return task;
+        return t;
       }));
 
       return updatedTask;
