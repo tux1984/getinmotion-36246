@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { SimpleFunctionalDashboard } from '@/components/dashboard/SimpleFunctionalDashboard';
+import { RobustPremiumDashboard } from '@/components/dashboard/RobustPremiumDashboard';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,7 +12,7 @@ const NewDashboardHome = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  console.log('NewDashboardHome: Rendering', {
+  console.log('NewDashboardHome: Rendering with new RobustPremiumDashboard', {
     user: user?.email,
     isAuthorized
   });
@@ -32,7 +32,6 @@ const NewDashboardHome = () => {
 
   const seoData = SEO_CONFIG.pages.dashboard[language];
 
-  // Always render the dashboard - let it handle its own loading/error states
   return (
     <>
       <SEOHead
@@ -44,7 +43,7 @@ const NewDashboardHome = () => {
         noIndex={true}
       />
       
-      <SimpleFunctionalDashboard />
+      <RobustPremiumDashboard />
     </>
   );
 };
