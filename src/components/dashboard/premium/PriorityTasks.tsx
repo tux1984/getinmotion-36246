@@ -25,7 +25,7 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   language,
   onTaskAction,
 }) => {
-  const { tasks, loading, updateTask, deleteTask } = useAgentTasks();
+  const { tasks, loading, updateTask, deleteTask, startTaskDevelopment } = useAgentTasks();
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -50,21 +50,39 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
     }
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: AgentTask['status']) => {
-    setUpdatingTasks(prev => new Set(prev).add(taskId));
+  const handleStartDevelopment = async (task: AgentTask) => {
+    setUpdatingTasks(prev => new Set(prev).add(task.id));
     
-    const updates: Partial<AgentTask> = { status: newStatus };
-    if (newStatus === 'completed') {
-      updates.completed_at = new Date().toISOString();
-      updates.progress_percentage = 100;
-    } else if (newStatus === 'in_progress' && tasks.find(t => t.id === taskId)?.progress_percentage === 0) {
-      updates.progress_percentage = 10;
+    try {
+      const updatedTask = await startTaskDevelopment(task.id);
+      
+      if (updatedTask) {
+        // Call the parent's onTaskAction to potentially open a detailed view or chat
+        onTaskAction(task.id, task.agent_id);
+      }
+    } catch (error) {
+      console.error('Error starting task development:', error);
+    } finally {
+      setUpdatingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(task.id);
+        return newSet;
+      });
     }
+  };
+
+  const handleCompleteTask = async (task: AgentTask) => {
+    setUpdatingTasks(prev => new Set(prev).add(task.id));
     
-    await updateTask(taskId, updates);
+    await updateTask(task.id, { 
+      status: 'completed',
+      progress_percentage: 100,
+      completed_at: new Date().toISOString()
+    });
+    
     setUpdatingTasks(prev => {
       const newSet = new Set(prev);
-      newSet.delete(taskId);
+      newSet.delete(task.id);
       return newSet;
     });
   };
@@ -72,11 +90,6 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
   const handleDelete = async (taskId: string) => {
     setUpdatingTasks(prev => new Set(prev).add(taskId));
     await deleteTask(taskId);
-  };
-
-  const handleStartTask = (task: AgentTask) => {
-    // Call the parent's onTaskAction to potentially open a detailed view
-    onTaskAction(task.id, task.agent_id);
   };
 
   const handleChatWithAgent = (task: AgentTask) => {
@@ -135,11 +148,12 @@ export const PriorityTasks: React.FC<PriorityTasksProps> = ({
               key={task.id}
               task={task}
               language={language}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-              onStartTask={handleStartTask}
+              onStartDevelopment={handleStartDevelopment}
+              onCompleteTask={handleCompleteTask}
               onChatWithAgent={handleChatWithAgent}
+              onDelete={handleDelete}
               isUpdating={updatingTasks.has(task.id)}
+              allTasks={tasks}
             />
           ))}
         </div>
