@@ -227,6 +227,14 @@ export interface Translations {
     minutes: string;
     seconds: string;
   };
+
+  // Maturity Calculator
+  maturityCalculator: {
+    title: string;
+    description: string;
+    generatingTasks: string;
+    generatingTasksDescription: string;
+  };
 }
 
 export const translations: Record<'en' | 'es', Translations> = {
@@ -439,6 +447,12 @@ export const translations: Record<'en' | 'es', Translations> = {
       minutes: 'min',
       seconds: 'seconds',
     },
+    maturityCalculator: {
+      title: 'Cultural Maturity Assessment',
+      description: 'Discover your creative project\'s strengths and get personalized recommendations',
+      generatingTasks: 'Creating Your Action Plan',
+      generatingTasksDescription: 'AI is analyzing your responses to create personalized tasks...'
+    },
   },
   es: {
     ui: {
@@ -648,6 +662,12 @@ export const translations: Record<'en' | 'es', Translations> = {
       hours: 'horas',
       minutes: 'min',
       seconds: 'segundos',
+    },
+    maturityCalculator: {
+      title: 'Evaluación de Madurez Cultural',
+      description: 'Descubre las fortalezas de tu proyecto creativo y obtén recomendaciones personalizadas',
+      generatingTasks: 'Creando tu Plan de Acción',
+      generatingTasksDescription: 'La IA está analizando tus respuestas para crear tareas personalizadas...'
     },
   },
 };
