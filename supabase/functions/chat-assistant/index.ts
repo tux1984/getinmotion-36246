@@ -26,6 +26,8 @@ interface ChatRequest {
     taskTitle: string;
     taskDescription?: string;
   };
+  userId?: string;
+  agentId?: string;
 }
 
 serve(async (req) => {
@@ -38,13 +40,33 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { messages, language, questionContext, taskContext }: ChatRequest = await req.json();
+    const { messages, language, questionContext, taskContext, userId, agentId }: ChatRequest = await req.json();
     
     // Initialize Supabase client for task context
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     let systemPrompt: string;
     let additionalContext = "";
+
+    // Check if we should use master context system
+    if (userId && agentId) {
+      try {
+        console.log('Getting master prompt for user:', userId, 'agent:', agentId);
+        
+        const { data: promptResponse, error: promptError } = await supabase.functions.invoke('master-prompt-generator', {
+          body: { agentId, userId, language }
+        });
+
+        if (promptResponse && promptResponse.success) {
+          systemPrompt = promptResponse.systemPrompt;
+          console.log('Using master context system prompt');
+        } else {
+          console.warn('Failed to get master prompt:', promptError);
+        }
+      } catch (error) {
+        console.error('Error getting master context:', error);
+      }
+    }
 
     // If we have task context, get task details and create specialized prompt
     if (taskContext) {

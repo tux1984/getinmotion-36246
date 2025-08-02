@@ -1,1 +1,7 @@
 project_id = "ylooqmqmoufqtxvetxuj"
+
+[functions.contexto-maestro]
+verify_jwt = false
+
+[functions.master-prompt-generator]
+verify_jwt = false

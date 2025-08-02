@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Message } from '@/types/chat';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define agent types and their system prompts
@@ -32,6 +33,7 @@ export function useAIAgent(agentType: string = 'admin') {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const sendMessage = async (content: string): Promise<string | null> => {
     if (!content.trim()) return null;
@@ -74,9 +76,43 @@ export function useAIAgent(agentType: string = 'admin') {
         lastMessage: content.substring(0, 50) + '...'
       });
       
-      // Call Supabase Edge Function
+      // Try to use master context system if user is authenticated
+      let finalPayload = requestPayload;
+      
+      if (user?.id) {
+        try {
+          console.log('Attempting to use master context for user:', user.id, 'agent:', agentType);
+          
+          const { data: chatResponse, error: chatError } = await supabase.functions.invoke('chat-assistant', {
+            body: {
+              messages: conversationHistory,
+              language: 'es', // Default to Spanish, could be made configurable
+              userId: user.id,
+              agentId: agentType
+            }
+          });
+          
+          if (chatResponse && !chatError) {
+            console.log('Master context response received');
+            const aiResponse = chatResponse.response;
+            
+            // Add AI message
+            const aiMessage: Message = { type: 'agent', content: aiResponse };
+            setMessages(prev => [...prev, aiMessage]);
+            
+            return aiResponse;
+          } else {
+            console.warn('Master context failed, falling back to legacy system:', chatError);
+          }
+        } catch (masterError) {
+          console.warn('Master context error, falling back to legacy system:', masterError);
+        }
+      }
+      
+      // Fallback to original openai-chat function
+      console.log('Using legacy openai-chat function');
       const { data, error } = await supabase.functions.invoke('openai-chat', {
-        body: requestPayload
+        body: finalPayload
       });
       
       console.log('Edge function response - data:', data);
