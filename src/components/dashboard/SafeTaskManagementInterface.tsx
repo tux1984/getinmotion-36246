@@ -18,9 +18,11 @@ import {
   MessageSquare,
   Sparkles,
   Heart,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
+import { useProgressiveTaskGeneration } from '@/hooks/useProgressiveTaskGeneration';
 import { CreateTaskModal } from './CreateTaskModal';
 import { UnifiedTaskWorkflowModal } from './UnifiedTaskWorkflowModal';
 import {
@@ -51,6 +53,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
   onSelectAgent
 }) => {
   const { tasks, createTask, updateTask, loading } = useAgentTasks();
+  const { generateProgressiveTasks, isGenerating } = useProgressiveTaskGeneration();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const { t } = useTranslations();
@@ -196,14 +199,28 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               <Sparkles className="w-5 h-5 text-purple-400" />
               {t.dashboard.yourCreativeJourney}
             </CardTitle>
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t.dashboard.newTask}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={generateProgressiveTasks}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                size="sm"
+                disabled={isGenerating}
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                {isGenerating 
+                  ? (language === 'es' ? 'Generando...' : 'Generating...')
+                  : (language === 'es' ? 'Más Tareas' : 'More Tasks')
+                }
+              </Button>
+              <Button 
+                onClick={() => setShowCreateModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {t.dashboard.newTask}
+              </Button>
+            </div>
           </div>
           {completedCount > 0 && (
             <p className="text-white/70 text-sm">

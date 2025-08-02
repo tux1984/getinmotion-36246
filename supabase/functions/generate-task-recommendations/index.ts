@@ -78,10 +78,10 @@ serve(async (req) => {
 INFORMACIÓN ESPECÍFICA DEL USUARIO:
 - Industria: ${profileData.industry || 'No especificada'}
 - Nivel de experiencia: ${profileData.experience || 'No especificada'}
-- Actividades específicas: ${profileData.activities ? profileData.activities.join(', ') : 'No especificadas'}
+- Actividades específicas: ${profileData.activities ? (Array.isArray(profileData.activities) ? profileData.activities.join(', ') : profileData.activities) : 'No especificadas'}
 - Control financiero: ${profileData.financialControl || 'No especificado'}
 - Estructura del equipo: ${profileData.teamStructure || 'No especificada'}
-- Medios de pago: ${profileData.paymentMethods ? profileData.paymentMethods.join(', ') : 'No especificados'}
+- Medios de pago: ${profileData.paymentMethods ? (Array.isArray(profileData.paymentMethods) ? profileData.paymentMethods.join(', ') : profileData.paymentMethods) : 'No especificados'}
 
 RESPUESTAS DETALLADAS DEL USUARIO:
 ${profileData.extendedAnswers ? Object.entries(profileData.extendedAnswers).map(([key, value]) => `- ${key}: ${value}`).join('\n') : 'Ninguna'}
