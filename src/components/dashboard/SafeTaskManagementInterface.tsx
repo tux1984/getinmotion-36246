@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Plus, 
   CheckCircle2, 
@@ -52,39 +53,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
   const { tasks, createTask, updateTask, loading } = useAgentTasks();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
-
-  const t = {
-    en: {
-      taskManagement: 'Your Creative Journey 🎨',
-      newTask: 'New Task',
-      noTasks: "Ready to Start Creating?",
-      createFirst: 'Let me help you with your first creative task',
-      getStarted: 'Based on your answers, here\'s where I think you should start:',
-      letsStart: "Let's Start!",
-      keepWorking: "Keep Working!",
-      chatWithMe: "Chat with me",
-      completed: "Completed! 🎉",
-      whyImportant: "Why this matters:",
-      estimatedTime: "Time needed:",
-      minutes: "minutes",
-      nextUp: "Coming up next:"
-    },
-    es: {
-      taskManagement: 'Tu Viaje Creativo 🎨',
-      newTask: 'Nueva Tarea',
-      noTasks: '¿Listo para Empezar a Crear?',
-      createFirst: 'Te ayudo con tu primera tarea creativa',
-      getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:',
-      letsStart: '¡Empecemos!',
-      keepWorking: '¡Sigamos Trabajando!',
-      chatWithMe: 'Charlemos',
-      completed: '¡Completada! 🎉',
-      whyImportant: 'Por qué es importante:',
-      estimatedTime: 'Tiempo necesario:',
-      minutes: 'minutos',
-      nextUp: 'Lo que sigue:'
-    }
-  };
+  const { t } = useTranslations();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -225,7 +194,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />
-              {t[language].taskManagement}
+              {t.dashboard.yourCreativeJourney}
             </CardTitle>
             <Button 
               onClick={() => setShowCreateModal(true)}
@@ -233,12 +202,12 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               size="sm"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {t[language].newTask}
+              {t.dashboard.newTask}
             </Button>
           </div>
           {completedCount > 0 && (
             <p className="text-white/70 text-sm">
-              {completedCount} {completedCount === 1 ? 'tarea completada' : 'tareas completadas'} ✨
+              {completedCount} {completedCount === 1 ? (language === 'es' ? 'tarea completada' : 'completed task') : (language === 'es' ? 'tareas completadas' : 'completed tasks')} ✨
             </p>
           )}
         </CardHeader>
@@ -250,14 +219,14 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="w-8 h-8 text-purple-400" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-2">{t[language].noTasks}</h3>
-              <p className="text-sm opacity-75 mb-4">{t[language].createFirst}</p>
+              <h3 className="text-lg font-medium text-white mb-2">{t.dashboard.noTasks}</h3>
+              <p className="text-sm opacity-75 mb-4">{t.dashboard.createFirst}</p>
               
               {/* Personalized recommendation */}
               {maturityScores && (
                 <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg p-4 mt-4 border border-white/10">
                   <p className="text-sm font-medium text-purple-200 mb-2">
-                    {t[language].getStarted}
+                    {t.dashboard.getStarted}
                   </p>
                   <p className="text-white text-sm">
                     {getPersonalizedRecommendation()}
@@ -300,7 +269,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                   <div className="flex items-start gap-2 text-sm">
                     <Sparkles className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-medium text-purple-300">{t[language].whyImportant}</span>
+                      <span className="font-medium text-purple-300">{t.dashboard.whyImportant}</span>
                       <p className="text-white/80 mt-1">{getTaskExplanation(currentTask)}</p>
                     </div>
                   </div>
@@ -316,17 +285,17 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                     {currentTask.status === 'completed' ? (
                       <>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {t[language].completed}
+                        {t.tasks.completed}
                       </>
                     ) : currentTask.status === 'pending' ? (
                       <>
                         <Play className="w-4 h-4 mr-2" />
-                        {t[language].letsStart}
+                        {t.dashboard.letsStart}
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {t[language].keepWorking}
+                        {t.dashboard.keepWorking}
                       </>
                     )}
                   </Button>
@@ -337,7 +306,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                     className="border-white/20 text-white hover:bg-white/10 py-2 px-4 rounded-xl"
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    {t[language].chatWithMe}
+                    {t.dashboard.chatWithMe}
                   </Button>
                 </div>
               </div>
@@ -349,7 +318,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
                     <div>
                       <h4 className="font-medium text-white/90 mb-1 flex items-center gap-2">
                         <ChevronRight className="w-4 h-4 text-purple-400" />
-                        {t[language].nextUp}
+                        {t.dashboard.nextUp}
                       </h4>
                       <p className="text-white/70 text-sm">{nextTask.title}</p>
                     </div>

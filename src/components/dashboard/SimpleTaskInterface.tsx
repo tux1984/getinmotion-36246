@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   Play, 
   CheckCircle2, 
@@ -35,70 +36,14 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<'simple' | 'all'>('simple');
   const taskLimits = useTaskLimits(tasks);
-
-  const t = {
-    en: {
-      yourNextStep: "Your Next Step",
-      noTasksYet: "Ready to Create Something Amazing?",
-      noTasksDesc: "Let's start with your first creative task!",
-      createFirstTask: "Create My First Task",
-      howIsGoing: "How is",
-      going: "going?",
-      whyImportant: "Why this matters:",
-      whatYoullAchieve: "What you'll achieve:",
-      estimatedTime: "Time needed:",
-      minutes: "minutes",
-      letsKeepWorking: "Let's Keep Working!",
-      letsStart: "Let's Start!",
-      chatWithMe: "Chat with me",
-      almostThere: "Almost there!",
-      keepGoing: "Keep going!",
-      youGotThis: "You got this!",
-      greatProgress: "Great progress!",
-      nextUp: "Coming up next:",
-      completed: "Completed! 🎉",
-      activeTasks: "Active Tasks",
-      taskLimit: "Task Limit",
-      viewAll: "View All Tasks",
-      simpleView: "Simple View",
-      completeThisFirst: "Complete this task first",
-      needToComplete: "Complete some tasks to create new ones"
-    },
-    es: {
-      yourNextStep: "Tu Próximo Paso",
-      noTasksYet: "¿Listo para Crear Algo Increíble?",
-      noTasksDesc: "¡Empecemos con tu primera tarea creativa!",
-      createFirstTask: "Crear Mi Primera Tarea",
-      howIsGoing: "¿Cómo va",
-      going: "?",
-      whyImportant: "Por qué es importante:",
-      whatYoullAchieve: "Lo que vas a lograr:",
-      estimatedTime: "Tiempo necesario:",
-      minutes: "minutos",
-      letsKeepWorking: "¡Sigamos Trabajando!",
-      letsStart: "¡Empecemos!",
-      chatWithMe: "Charlemos",
-      almostThere: "¡Ya casi!",
-      keepGoing: "¡Sigue así!",
-      youGotThis: "¡Tú puedes!",
-      greatProgress: "¡Excelente progreso!",
-      nextUp: "Lo que sigue:",
-      completed: "¡Completada! 🎉",
-      activeTasks: "Tareas Activas",
-      taskLimit: "Límite de Tareas",
-      viewAll: "Ver Todas las Tareas",
-      simpleView: "Vista Simple",
-      completeThisFirst: "Completa esta tarea primero",
-      needToComplete: "Completa algunas tareas para crear nuevas"
-    }
-  };
+  const { t } = useTranslations();
 
   const getMotivationalMessage = (progress: number) => {
     if (progress === 0) return "";
-    if (progress < 30) return t[language].letsStart;
-    if (progress < 70) return t[language].keepGoing;
-    if (progress < 100) return t[language].almostThere;
-    return t[language].completed;
+    if (progress < 30) return t.dashboard.letsStart;
+    if (progress < 70) return t.dashboard.keepGoing;
+    if (progress < 100) return t.dashboard.almostThere;
+    return t.tasks.completed;
   };
 
   const getProgressEmoji = (progress: number) => {
@@ -206,7 +151,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-white/70">Cargando tus tareas...</p>
+          <p className="text-white/70">{t.ui.loading}</p>
         </div>
       </div>
     );
@@ -218,19 +163,19 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
           <Target className="w-6 h-6 text-purple-400" />
-          {t[language].yourNextStep}
+          {t.dashboard.yourNextStep}
         </h2>
         
         {/* Task Limits Display */}
         <div className="flex items-center justify-center gap-4 mb-4">
           <div className="text-white/70">
             {completedCount > 0 && (
-              <span>{completedCount} {completedCount === 1 ? 'tarea completada' : 'tareas completadas'} ✨</span>
+              <span>{completedCount} {completedCount === 1 ? (language === 'es' ? 'tarea completada' : 'completed task') : (language === 'es' ? 'tareas completadas' : 'completed tasks')} ✨</span>
             )}
           </div>
           
           <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1">
-            <span className="text-sm text-white/80">{t[language].activeTasks}:</span>
+            <span className="text-sm text-white/80">{t.dashboard.activeTasks}:</span>
             <span className={`text-sm font-bold ${
               taskLimits.isAtLimit ? 'text-red-400' : 
               taskLimits.isNearLimit ? 'text-yellow-400' : 'text-green-400'
@@ -255,7 +200,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
               }`}
             >
               <Eye className="w-3 h-3 mr-1" />
-              {t[language].simpleView}
+              {t.dashboard.simpleView}
             </Button>
             <Button
               size="sm"
@@ -268,7 +213,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
               }`}
             >
               <List className="w-3 h-3 mr-1" />
-              {t[language].viewAll}
+              {t.dashboard.viewAll}
             </Button>
           </div>
         )}
@@ -298,10 +243,10 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">
-                    {t[language].noTasksYet}
+                    {t.dashboard.readyToCreate}
                   </h3>
                   <p className="text-white/70 mb-6">
-                    {t[language].noTasksDesc}
+                    {t.dashboard.noTasksDesc}
                   </p>
                   <Button 
                     onClick={() => setShowCreateModal(true)}
@@ -309,7 +254,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Heart className="w-4 h-4 mr-2" />
-                    {t[language].createFirstTask}
+                    {t.dashboard.createFirstTask}
                   </Button>
                 </CardContent>
               </Card>
@@ -328,8 +273,8 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                             task.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300' :
                             'bg-yellow-500/20 text-yellow-300'
                           }`}>
-                            {task.status === 'completed' ? 'Completada' :
-                             task.status === 'in_progress' ? 'En desarrollo' : 'Pendiente'}
+                             {task.status === 'completed' ? t.tasks.taskStatus.completed :
+                              task.status === 'in_progress' ? t.tasks.taskStatus.inProgress : t.tasks.taskStatus.pending}
                           </span>
                           <span className="text-xs text-white/60">{task.progress_percentage}%</span>
                         </div>
@@ -345,17 +290,17 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                         {task.status === 'completed' ? (
                           <>
                             <CheckCircle2 className="w-4 h-4 mr-1" />
-                            {t[language].completed}
+                            {t.tasks.completed}
                           </>
                         ) : task.status === 'in_progress' ? (
                           <>
                             <CheckCircle2 className="w-4 h-4 mr-1" />
-                            Finalizar Tarea
+                            {t.tasks.completeTask}
                           </>
                         ) : (
                           <>
                             <Play className="w-4 h-4 mr-1" />
-                            Desarrollar con Agente
+                            {t.tasks.developWithAgent}
                           </>
                         )}
                       </Button>
@@ -365,7 +310,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                         className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-2 px-4 rounded-lg text-sm"
                       >
                         <MessageSquare className="w-4 h-4 mr-1" />
-                        Chat
+                        {t.dashboard.chatWithAgent}
                       </Button>
                     </div>
                   </CardContent>
@@ -388,10 +333,10 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-3">
-                  {t[language].noTasksYet}
+                  {t.dashboard.readyToCreate}
                 </h3>
                 <p className="text-white/70 mb-6">
-                  {t[language].noTasksDesc}
+                  {t.dashboard.noTasksDesc}
                 </p>
                 <Button 
                   onClick={() => setShowCreateModal(true)}
@@ -399,7 +344,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Heart className="w-4 h-4 mr-2" />
-                  {t[language].createFirstTask}
+                  {t.dashboard.createFirstTask}
                 </Button>
               </CardContent>
             </Card>
@@ -415,9 +360,9 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                 {/* Task Title */}
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold text-white mb-2">
-                    <span className="text-white/70">{t[language].howIsGoing} </span>
+                    <span className="text-white/70">{t.dashboard.howIsGoing} </span>
                     <span className="text-purple-300">"{currentTask.title}"</span>
-                    <span className="text-white/70"> {t[language].going}</span>
+                    <span className="text-white/70"> {t.dashboard.going}</span>
                   </h3>
                   
                   {/* Task Status Badge */}
@@ -426,7 +371,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                       currentTask.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300' :
                       'bg-yellow-500/20 text-yellow-300'
                     }`}>
-                      {currentTask.status === 'in_progress' ? '🚀 En Desarrollo' : '⏳ Lista para Desarrollar'}
+                      {currentTask.status === 'in_progress' ? `🚀 ${t.tasks.taskStatus.inProgress}` : `⏳ ${t.tasks.pending}`}
                     </span>
                   </div>
                 </div>
@@ -456,7 +401,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   <div>
                     <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Sparkles className="w-4 h-4" />
-                      {t[language].whyImportant}
+                      {t.dashboard.whyImportant}
                     </h4>
                     <p className="text-white/80 text-sm">
                       {getTaskExplanation(currentTask).why}
@@ -466,7 +411,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   <div>
                     <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Target className="w-4 h-4" />
-                      {t[language].whatYoullAchieve}
+                      {t.dashboard.whatYoullAchieve}
                     </h4>
                     <p className="text-white/80 text-sm">
                       {getTaskExplanation(currentTask).what}
@@ -476,10 +421,10 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   <div>
                     <h4 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Clock className="w-4 h-4" />
-                      {t[language].estimatedTime}
+                      {t.dashboard.estimatedTime}
                     </h4>
                     <p className="text-white/80 text-sm">
-                      15-20 {t[language].minutes}
+                      15-20 {t.dashboard.minutes}
                     </p>
                   </div>
                 </div>
@@ -494,12 +439,12 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     {currentTask.status === 'in_progress' ? (
                       <>
                         <MessageSquare className="w-5 h-5 mr-2" />
-                        Continuar Desarrollo con Agente
+                        {t.tasks.continueTask} {t.tasks.developWithAgent}
                       </>
                     ) : (
                       <>
                         <Play className="w-5 h-5 mr-2" />
-                        Desarrollar con Agente
+                        {t.tasks.developWithAgent}
                       </>
                     )}
                   </Button>
@@ -510,7 +455,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                       className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Marcar como Completada
+                      {t.tasks.markCompleted}
                     </Button>
                   )}
                 </div>
@@ -534,9 +479,9 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                 <div>
                   <h4 className="font-medium text-white/90 mb-1 flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 text-purple-400" />
-                    Otras tareas pendientes: {tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length}
+                    {language === 'es' ? 'Otras tareas pendientes' : 'Other pending tasks'}: {tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length}
                   </h4>
-                  <p className="text-white/70 text-sm">Completa la tarea actual para continuar</p>
+                  <p className="text-white/70 text-sm">{language === 'es' ? 'Completa la tarea actual para continuar' : 'Complete the current task to continue'}</p>
                 </div>
                 <Button
                   size="sm"
@@ -544,7 +489,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   onClick={() => setViewMode('all')}
                   className="text-white/70 hover:text-white hover:bg-white/10"
                 >
-                  Ver todas
+                  {t.dashboard.viewAll}
                 </Button>
               </div>
             </CardContent>

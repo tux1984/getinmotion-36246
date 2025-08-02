@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
   CheckCircle2, 
   Clock, 
@@ -41,43 +42,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   allTasks = []
 }) => {
   const taskLimits = useTaskLimits(allTasks);
-  
-  const t = {
-    en: {
-      developWithAgent: 'Develop with Agent',
-      continueTask: 'Continue',
-      completeTask: 'Complete Task',
-      markCompleted: 'Mark as Done',
-      completed: 'Completed',
-      delete: 'Delete',
-      chatWithAgent: 'Chat',
-      subtasks: 'subtasks',
-      timeSpent: 'Time spent',
-      minutes: 'min',
-      dueDate: 'Due',
-      progress: 'Progress',
-      limitReached: 'Task limit reached',
-      completeOthers: 'Complete some tasks first',
-      quickComplete: 'Quick complete'
-    },
-    es: {
-      developWithAgent: 'Desarrollar con Agente',
-      continueTask: 'Continuar',
-      completeTask: 'Completar Tarea',
-      markCompleted: 'Marcar Terminada',
-      completed: 'Completada',
-      delete: 'Eliminar',
-      chatWithAgent: 'Chat',
-      subtasks: 'subtareas',
-      timeSpent: 'Tiempo dedicado',
-      minutes: 'min',
-      dueDate: 'Vence',
-      progress: 'Progreso',
-      limitReached: 'Límite de tareas alcanzado',
-      completeOthers: 'Completa algunas tareas primero',
-      quickComplete: 'Completar rápido'
-    }
-  };
+  const { t } = useTranslations();
 
   const getStatusBadge = (status: AgentTask['status']) => {
     const statusConfig = {
@@ -111,7 +76,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     
     if (task.status === 'in_progress') {
       return {
-        label: t[language].completeTask,
+        label: t.tasks.completeTask,
         icon: CheckCircle2,
         onClick: handleCompleteTask,
         variant: 'default' as const,
@@ -123,7 +88,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     const canStartDevelopment = !taskLimits.isAtLimit;
     
     return {
-      label: t[language].developWithAgent,
+      label: t.tasks.developWithAgent,
       icon: Play,
       onClick: handleStartDevelopment,
       variant: 'default' as const,
@@ -138,7 +103,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     // Show quick complete for pending tasks when at limit
     if (task.status === 'pending' || task.status === 'in_progress') {
       return {
-        label: t[language].markCompleted,
+        label: t.tasks.markCompleted,
         icon: Check,
         onClick: handleCompleteTask,
         variant: 'outline' as const,
@@ -179,7 +144,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             {task.status === 'pending' && taskLimits.isAtLimit && (
               <div className="flex items-center gap-1 text-xs text-red-600 mb-2 bg-red-50 p-2 rounded">
                 <AlertCircle className="w-3 h-3" />
-                <span>{t[language].limitReached} ({taskLimits.activeTasksCount}/{taskLimits.limit})</span>
+                <span>{t.tasks.limitReached} ({taskLimits.activeTasksCount}/{taskLimits.limit})</span>
               </div>
             )}
 
@@ -199,7 +164,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               {totalSubtasks > 0 && (
                 <div className="flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  <span>{completedSubtasks}/{totalSubtasks} {t[language].subtasks}</span>
+                  <span>{completedSubtasks}/{totalSubtasks} {t.tasks.subtasks}</span>
                 </div>
               )}
 
@@ -207,7 +172,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               {task.time_spent > 0 && (
                 <div className="flex items-center gap-1">
                   <Timer className="w-3 h-3" />
-                  <span>{task.time_spent} {t[language].minutes}</span>
+                  <span>{task.time_spent} {t.time.minutes}</span>
                 </div>
               )}
 
@@ -215,7 +180,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               {task.due_date && (
                 <div className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>{t[language].dueDate}: {new Date(task.due_date).toLocaleDateString()}</span>
+                  <span>{t.tasks.due}: {new Date(task.due_date).toLocaleDateString()}</span>
                 </div>
               )}
             </div>
@@ -244,7 +209,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
                 variant={quickComplete.variant}
                 className={`${quickComplete.className} h-8 px-2`}
                 disabled={isUpdating}
-                title={t[language].quickComplete}
+                title={t.tasks.quickComplete}
               >
                 <QuickCompleteIcon className="w-3 h-3" />
               </Button>
