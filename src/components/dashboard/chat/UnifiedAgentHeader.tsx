@@ -33,7 +33,8 @@ const getAgentIcon = (agentId: string) => {
     'tax-compliance': FileText,
     'social-impact-eval': Target,
     'pricing-assistant': Calculator,
-    'stakeholder-matching': Users
+    'stakeholder-matching': Users,
+    'admin': Settings
   };
   
   return iconMap[agentId as keyof typeof iconMap] || FileText;

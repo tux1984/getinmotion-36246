@@ -103,6 +103,13 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       }
     } catch (error) {
       console.error('Error starting task development:', error);
+      // Show user-friendly error message
+      if (error instanceof Error && error.message.includes('límite')) {
+        // Task limit error already handled by useAgentTasksSpecialOperations
+        return;
+      }
+      // Handle other errors gracefully
+      console.warn('Failed to start task development, task may already be active');
     }
   };
 
@@ -218,12 +225,23 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
           </div>
         )}
 
-        {/* Limit Warning */}
+        {/* Enhanced Limit Warning */}
         {taskLimits.getLimitMessage(language) && (
-          <div className={`text-sm p-2 rounded-lg mb-4 ${
+          <div className={`text-sm p-3 rounded-lg mb-4 flex items-center gap-2 ${
             taskLimits.isAtLimit ? 'bg-red-500/20 text-red-300' : 'bg-yellow-500/20 text-yellow-300'
           }`}>
-            {taskLimits.getLimitMessage(language)}
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div>
+              <div className="font-medium">
+                {taskLimits.isAtLimit ? 
+                  (language === 'es' ? 'Límite alcanzado' : 'Limit reached') : 
+                  (language === 'es' ? 'Acercándose al límite' : 'Approaching limit')
+                }
+              </div>
+              <div className="text-xs opacity-90">
+                {taskLimits.getLimitMessage(language)}
+              </div>
+            </div>
           </div>
         )}
       </div>

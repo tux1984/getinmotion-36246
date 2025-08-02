@@ -92,6 +92,10 @@ export const agentTranslations = {
     'marketing-advisor': {
       name: 'Marketing Advisor',
       description: 'Develops marketing strategies to promote cultural products and reach audiences.'
+    },
+    'admin': {
+      name: 'Admin Assistant',
+      description: 'Provides administrative support and system management assistance.'
     }
   },
   es: {
@@ -186,6 +190,10 @@ export const agentTranslations = {
     'marketing-advisor': {
       name: 'Asesor de Marketing',
       description: 'Desarrolla estrategias de marketing para promocionar productos culturales y alcanzar audiencias.'
+    },
+    'admin': {
+      name: 'Asistente Administrativo',
+      description: 'Proporciona soporte administrativo y asistencia en la gestión del sistema.'
     }
   }
 };
