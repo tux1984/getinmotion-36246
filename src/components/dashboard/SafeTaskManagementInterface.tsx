@@ -230,7 +230,7 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
         </CardHeader>
 
         <CardContent>
-          {!currentTask ? (
+          {tasks.length === 0 ? (
             /* Empty State */
             <div className="text-center py-8 text-white/60">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -252,96 +252,190 @@ export const SafeTaskManagementInterface: React.FC<SafeTaskManagementInterfacePr
               )}
             </div>
           ) : (
-            /* Current Task - Simplified */
+            /* All Tasks View */
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
-              {/* Main Task Card */}
-              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-white/10">
-                {/* Progress Circle */}
-                <div className="text-center mb-6">
-                  <div className="relative inline-block">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center border-2 border-purple-400/40 mb-3">
-                      <span className="text-2xl">{getProgressEmoji(currentTask.progress_percentage)}</span>
+              {/* Current Task - Prominent */}
+              {currentTask && (
+                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-white/10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center border-2 border-purple-400/40">
+                        <span className="text-xl">{getProgressEmoji(currentTask.progress_percentage)}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-1">
+                          {currentTask.title}
+                        </h3>
+                        <Badge className={getStatusColor(currentTask.status)}>
+                          {currentTask.status === 'in_progress' ? 'En progreso' : currentTask.status === 'pending' ? 'Pendiente' : 'Completada'}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-lg font-bold text-white mb-1">
-                      {currentTask.progress_percentage}%
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {currentTask.title}
-                  </h3>
-                  
-                  <Progress 
-                    value={currentTask.progress_percentage} 
-                    className="w-full h-2 bg-white/20 mb-4"
-                  />
-                </div>
-
-                {/* Task Context */}
-                <div className="bg-white/5 rounded-xl p-4 mb-4">
-                  <div className="flex items-start gap-2 text-sm">
-                    <Sparkles className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <span className="font-medium text-purple-300">{t.dashboard.whyImportant}</span>
-                      <p className="text-white/80 mt-1">{getTaskExplanation(currentTask)}</p>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-white mb-1">
+                        {currentTask.progress_percentage}%
+                      </div>
+                      <Progress 
+                        value={currentTask.progress_percentage} 
+                        className="w-24 h-2 bg-white/20"
+                      />
                     </div>
                   </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button 
-                    onClick={() => currentTask.status === 'completed' ? null : currentTask.status === 'pending' ? handleExecuteTask(currentTask) : handleCompleteTask(currentTask)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-xl font-medium"
-                    disabled={currentTask.status === 'completed'}
-                  >
-                    {currentTask.status === 'completed' ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {t.tasks.completed}
-                      </>
-                    ) : currentTask.status === 'pending' ? (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        {t.dashboard.letsStart}
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {t.dashboard.keepWorking}
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => handleWorkWithAgent(currentTask)}
-                    variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10 py-2 px-4 rounded-xl"
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    {t.dashboard.chatWithMe}
-                  </Button>
-                </div>
-              </div>
+                  {/* Task Context */}
+                  <div className="bg-white/5 rounded-xl p-4 mb-4">
+                    <div className="flex items-start gap-2 text-sm">
+                      <Sparkles className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-medium text-purple-300">{t.dashboard.whyImportant}</span>
+                        <p className="text-white/80 mt-1">{getTaskExplanation(currentTask)}</p>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Next Task Preview */}
-              {nextTask && (
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-white/90 mb-1 flex items-center gap-2">
-                        <ChevronRight className="w-4 h-4 text-purple-400" />
-                        {t.dashboard.nextUp}
-                      </h4>
-                      <p className="text-white/70 text-sm">{nextTask.title}</p>
-                    </div>
-                    <div className="text-white/50">
-                      <Clock className="w-4 h-4" />
-                    </div>
+                  {/* Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button 
+                      onClick={() => currentTask.status === 'completed' ? null : currentTask.status === 'pending' ? handleExecuteTask(currentTask) : handleCompleteTask(currentTask)}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-xl font-medium"
+                      disabled={currentTask.status === 'completed'}
+                    >
+                      {currentTask.status === 'completed' ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          {t.tasks.completed}
+                        </>
+                      ) : currentTask.status === 'pending' ? (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          {t.dashboard.letsStart}
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          {t.dashboard.keepWorking}
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => handleWorkWithAgent(currentTask)}
+                      variant="outline"
+                      className="border-white/20 text-white hover:bg-white/10 py-2 px-4 rounded-xl"
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      {t.dashboard.chatWithMe}
+                    </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setSelectedTask(currentTask)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Ver detalles
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setSelectedTask(currentTask)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              )}
+
+              {/* Other Tasks Grid */}
+              {tasks.filter(task => task.id !== currentTask?.id).length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-400" />
+                    {language === 'es' ? 'Todas mis tareas' : 'All my tasks'} ({tasks.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tasks.filter(task => task.id !== currentTask?.id).map((task, index) => (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-200 group"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center">
+                              <span className="text-sm">{getProgressEmoji(task.progress_percentage)}</span>
+                            </div>
+                            <Badge className={getStatusColor(task.status)}>
+                              {task.status === 'in_progress' ? 'En progreso' : task.status === 'pending' ? 'Pendiente' : 'Completada'}
+                            </Badge>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-white">{task.progress_percentage}%</div>
+                          </div>
+                        </div>
+                        
+                        <h5 className="font-medium text-white mb-2 line-clamp-2 group-hover:text-purple-200 transition-colors">
+                          {task.title}
+                        </h5>
+                        
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2">
+                          {task.description || getTaskExplanation(task)}
+                        </p>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => task.status === 'completed' ? null : task.status === 'pending' ? handleExecuteTask(task) : handleCompleteTask(task)}
+                              size="sm"
+                              className="bg-purple-600/80 hover:bg-purple-600 text-white"
+                              disabled={task.status === 'completed'}
+                            >
+                              {task.status === 'completed' ? (
+                                <CheckCircle2 className="w-3 h-3" />
+                              ) : task.status === 'pending' ? (
+                                <Play className="w-3 h-3" />
+                              ) : (
+                                <CheckCircle2 className="w-3 h-3" />
+                              )}
+                            </Button>
+                            <Button 
+                              onClick={() => handleWorkWithAgent(task)}
+                              size="sm"
+                              variant="outline"
+                              className="border-white/20 text-white hover:bg-white/10"
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
+                                <MoreHorizontal className="w-3 h-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => setSelectedTask(task)}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Ver detalles
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setSelectedTask(task)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               )}

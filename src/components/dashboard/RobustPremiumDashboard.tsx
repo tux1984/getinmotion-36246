@@ -59,12 +59,12 @@ export const RobustPremiumDashboard: React.FC = () => {
           onMaturityCalculatorClick={handleMaturityCalculator}
         />
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid - Tasks First Layout */}
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-12 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="col-span-12 lg:col-span-8 space-y-6">
-              {/* Task Management */}
+            {/* Full Width - Priority Tasks Section */}
+            <div className="col-span-12 space-y-6">
+              {/* Task Management - Now Full Width and Prominent */}
               <SafeTaskManagementInterface 
                 language="es"
                 maturityScores={maturityScores}
@@ -72,8 +72,11 @@ export const RobustPremiumDashboard: React.FC = () => {
                 enabledAgents={userAgents.filter(ua => ua.is_enabled).map(ua => ua.agent_id)}
                 onSelectAgent={handleSelectAgent}
               />
-              
-              {/* Agents Grid */}
+            </div>
+
+            {/* Secondary Content Grid */}
+            <div className="col-span-12 lg:col-span-8 space-y-6">
+              {/* Agents Grid - Now Secondary */}
               <RobustModernAgentsGrid 
                 userAgents={userAgents}
                 maturityScores={maturityScores}

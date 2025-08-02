@@ -236,12 +236,12 @@ export const RobustModernAgentsGrid: React.FC<RobustModernAgentsGridProps> = ({
       {/* Active Agents */}
       {activeAgents.length > 0 && (
         <Card className="bg-white/5 backdrop-blur-xl border border-white/10">
-          <CardHeader>
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center gap-3">
-                <Bot className="w-6 h-6 text-purple-400" />
+              <CardTitle className="text-lg text-white/90 flex items-center gap-2">
+                <Bot className="w-5 h-5 text-purple-400" />
                 {t[language].yourAgents}
-                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30">
+                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-xs">
                   {activeAgents.length} activo{activeAgents.length !== 1 ? 's' : ''}
                 </Badge>
               </CardTitle>
@@ -260,10 +260,10 @@ export const RobustModernAgentsGrid: React.FC<RobustModernAgentsGridProps> = ({
       {/* Available Agents */}
       {availableAgents.length > 0 && (
         <Card className="bg-white/5 backdrop-blur-xl border border-white/10">
-          <CardHeader>
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center gap-3">
-                <Bot className="w-6 h-6 text-purple-400" />
+              <CardTitle className="text-lg text-white/90 flex items-center gap-2">
+                <Bot className="w-5 h-5 text-purple-400" />
                 {t[language].availableAgents}
               </CardTitle>
               <Button 
