@@ -56,9 +56,7 @@ export const useAIAssistant = (stepContext: string, questionId: string, question
           questionContext: {
             id: questionId,
             title: questionTitle
-          },
-          userId: user?.id,
-          agentId: stepContext // stepContext typically contains the agent ID
+          }
         },
       });
 
