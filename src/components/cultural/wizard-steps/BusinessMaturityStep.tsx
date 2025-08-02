@@ -4,6 +4,7 @@ import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { getBusinessQuestions } from '../wizard-questions/businessQuestions';
 import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
+import { getContextualMessage } from '../utils/contextualMessages';
 
 interface BusinessMaturityStepProps {
   profileData: UserProfileData;
@@ -27,6 +28,8 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
   isStepValid
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showAI, setShowAI] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const questions = getBusinessQuestions(language);
   const questionsArray = Object.values(questions);
   const currentQuestion = questionsArray[currentQuestionIndex];
@@ -34,6 +37,8 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
   const handleSingleSelect = (value: string) => {
     if (currentQuestion) {
       updateProfileData({ [currentQuestion.fieldName]: value });
+      setSelectedValue(value);
+      setShowAI(true);
     }
   };
 
@@ -41,6 +46,8 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
     const totalQuestions = questionsArray.length;
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+      setShowAI(false);
+      setSelectedValue('');
     } else {
       onNext();
     }
@@ -49,6 +56,8 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
+      setShowAI(false);
+      setSelectedValue('');
     } else {
       onPrevious();
     }
@@ -107,13 +116,17 @@ export const BusinessMaturityStep: React.FC<BusinessMaturityStepProps> = ({
       </div>
 
       {/* AI Assistant */}
-      <div className="max-w-2xl mx-auto">
-        <AIAssistantIntegrated
-          stepContext="business-info"
-          questionId={currentQuestion.id}
-          questionTitle={currentQuestion.title}
-        />
-      </div>
+      {showAI && (
+        <div className="max-w-2xl mx-auto">
+          <AIAssistantIntegrated
+            stepContext="business-info"
+            questionId={currentQuestion.id}
+            questionTitle={currentQuestion.title}
+            isVisible={showAI}
+            initialMessage={getContextualMessage(currentQuestion.id, selectedValue, language)}
+          />
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="flex justify-between max-w-2xl mx-auto">

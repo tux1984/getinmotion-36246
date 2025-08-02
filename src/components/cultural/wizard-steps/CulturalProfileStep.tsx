@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../types/wizardTypes';
 import { RadioCards } from '../wizard-components/RadioCards';
 import { CheckboxCards } from '../wizard-components/CheckboxCards';
 import { getProfileQuestions } from '../wizard-questions/profileQuestions';
 import { AIAssistantIntegrated } from '@/components/assistant/AIAssistantIntegrated';
+import { getContextualMessage } from '../utils/contextualMessages';
 
 interface CulturalProfileStepProps {
   profileData: UserProfileData;
@@ -26,6 +27,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   isStepValid
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showAI, setShowAI] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const questions = getProfileQuestions(language);
   const questionsArray = Object.values(questions);
   const currentQuestion = questionsArray[currentQuestionIndex];
@@ -38,6 +41,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
     if (currentQuestion) {
       console.log('CulturalProfileStep - handleSingleSelect:', value, currentQuestion.fieldName);
       updateProfileData({ [currentQuestion.fieldName]: value });
+      setSelectedValue(value);
+      setShowAI(true);
     }
   };
 
@@ -50,6 +55,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
       updateProfileData({ 
         [currentQuestion.fieldName]: [...currentValues, value] 
       });
+      setSelectedValue(value);
+      setShowAI(true);
     } else if (!isChecked && currentValues.includes(value)) {
       updateProfileData({ 
         [currentQuestion.fieldName]: currentValues.filter(item => item !== value) 
@@ -61,6 +68,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
     const totalQuestions = questionsArray.length;
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+      setShowAI(false); // Reset AI for next question
+      setSelectedValue('');
     } else {
       onNext();
     }
@@ -69,6 +78,8 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
+      setShowAI(false); // Reset AI for previous question
+      setSelectedValue('');
     }
   };
 
@@ -151,13 +162,17 @@ export const CulturalProfileStep: React.FC<CulturalProfileStepProps> = ({
       </div>
 
       {/* AI Assistant */}
-      <div className="max-w-2xl mx-auto">
-        <AIAssistantIntegrated
-          stepContext="profile"
-          questionId={currentQuestion.id}
-          questionTitle={currentQuestion.title}
-        />
-      </div>
+      {showAI && (
+        <div className="max-w-2xl mx-auto">
+          <AIAssistantIntegrated
+            stepContext="profile"
+            questionId={currentQuestion.id}
+            questionTitle={currentQuestion.title}
+            isVisible={showAI}
+            initialMessage={getContextualMessage(currentQuestion.id, selectedValue, language)}
+          />
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="flex justify-between max-w-2xl mx-auto">
