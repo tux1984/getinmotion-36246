@@ -32,16 +32,21 @@ export const CheckboxCards: React.FC<CheckboxCardsProps> = ({
   const handleCheckboxChange = (option: CheckboxOption, checked: boolean) => {
     const value = option.value || option.id;
     
+    let updatedValues: string[];
+    if (checked) {
+      updatedValues = [...selectedValues, value];
+    } else {
+      updatedValues = selectedValues.filter(v => v !== value);
+    }
+    
+    // Call onChange first if provided
     if (onChange) {
       onChange(value, checked);
     }
     
+    // Then call onSelectionChange with the updated array
     if (onSelectionChange) {
-      if (checked) {
-        onSelectionChange([...selectedValues, value]);
-      } else {
-        onSelectionChange(selectedValues.filter(v => v !== value));
-      }
+      onSelectionChange(updatedValues);
     }
   };
 

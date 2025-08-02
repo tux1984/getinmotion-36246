@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from '@/hooks/useTranslations';
+import { TaskDetailView } from './TaskDetailView';
 import { 
   CheckCircle2, 
   Clock, 
@@ -43,6 +44,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 }) => {
   const taskLimits = useTaskLimits(allTasks);
   const { t } = useTranslations();
+  const [showTaskDetail, setShowTaskDetail] = useState(false);
 
   const getStatusBadge = (status: AgentTask['status']) => {
     const statusConfig = {
@@ -75,28 +77,39 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     }
     
     if (task.status === 'in_progress') {
-      return {
-        label: t.tasks.completeTask,
-        icon: CheckCircle2,
-        onClick: handleCompleteTask,
-        variant: 'default' as const,
-        className: 'bg-green-600 hover:bg-green-700 text-white'
-      };
+      return [
+        {
+          label: language === 'en' ? 'View Details' : 'Ver Detalles',
+          icon: Eye,
+          onClick: () => setShowTaskDetail(true),
+          variant: 'outline' as const,
+          className: 'border-blue-500 text-blue-600 hover:bg-blue-50'
+        },
+        {
+          label: t.tasks.completeTask,
+          icon: CheckCircle2,
+          onClick: handleCompleteTask,
+          variant: 'default' as const,
+          className: 'bg-green-600 hover:bg-green-700 text-white'
+        }
+      ];
     }
     
     // For pending tasks, check if we can start development
     const canStartDevelopment = !taskLimits.isAtLimit;
     
-    return {
-      label: t.tasks.developWithAgent,
-      icon: Play,
-      onClick: handleStartDevelopment,
-      variant: 'default' as const,
-      className: canStartDevelopment 
-        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-        : 'bg-gray-400 text-gray-600 cursor-not-allowed',
-      disabled: !canStartDevelopment
-    };
+    return [
+      {
+        label: language === 'en' ? 'Start Work' : 'Iniciar Trabajo',
+        icon: Play,
+        onClick: handleStartDevelopment,
+        variant: 'default' as const,
+        className: canStartDevelopment 
+          ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+          : 'bg-gray-400 text-gray-600 cursor-not-allowed',
+        disabled: !canStartDevelopment
+      }
+    ];
   };
 
   const getQuickCompleteButton = () => {
@@ -115,8 +128,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
   const statusBadge = getStatusBadge(task.status);
   const StatusIcon = statusBadge.icon;
-  const mainCTA = getMainCTA();
-  const MainCTAIcon = mainCTA?.icon;
+  const mainCTAs = getMainCTA();
   const quickComplete = getQuickCompleteButton();
   const QuickCompleteIcon = quickComplete?.icon;
 
@@ -184,22 +196,55 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Show subtasks preview when in progress */}
+            {task.status === 'in_progress' && task.subtasks && task.subtasks.length > 0 && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                <h5 className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  {language === 'en' ? 'Subtasks' : 'Subtareas'} ({completedSubtasks}/{totalSubtasks})
+                </h5>
+                <div className="space-y-1">
+                  {task.subtasks.slice(0, 3).map((subtask) => (
+                    <div key={subtask.id} className="flex items-center gap-2 text-xs">
+                      <div className={`w-2 h-2 rounded border ${
+                        subtask.completed 
+                          ? 'bg-green-500 border-green-500' 
+                          : 'border-gray-300'
+                      }`} />
+                      <span className={`${subtask.completed ? 'line-through text-gray-500' : 'text-gray-700'} truncate`}>
+                        {subtask.title}
+                      </span>
+                    </div>
+                  ))}
+                  {task.subtasks.length > 3 && (
+                    <div className="text-xs text-gray-500 pl-4">
+                      +{task.subtasks.length - 3} {language === 'en' ? 'more...' : 'más...'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-1 ml-3">
-            {/* Main CTA */}
-            {mainCTA && MainCTAIcon && (
-              <Button 
-                onClick={mainCTA.onClick}
-                size="sm" 
-                variant={mainCTA.variant}
-                className={`${mainCTA.className} h-8 px-3`}
-                disabled={isUpdating || mainCTA.disabled}
-              >
-                <MainCTAIcon className="w-3 h-3 mr-1" />
-                <span className="text-xs">{mainCTA.label}</span>
-              </Button>
-            )}
+            {/* Main CTAs */}
+            {mainCTAs && Array.isArray(mainCTAs) && mainCTAs.map((cta, index) => {
+              const CtaIcon = cta.icon;
+              return (
+                <Button 
+                  key={index}
+                  onClick={cta.onClick}
+                  size="sm" 
+                  variant={cta.variant}
+                  className={`${cta.className} h-8 px-3`}
+                  disabled={isUpdating || cta.disabled}
+                >
+                  <CtaIcon className="w-3 h-3 mr-1" />
+                  <span className="text-xs">{cta.label}</span>
+                </Button>
+              );
+            })}
 
             {/* Quick Complete - Show for pending/in_progress when at limit */}
             {quickComplete && QuickCompleteIcon && (taskLimits.isAtLimit || task.status === 'in_progress') && (
@@ -238,6 +283,20 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             </Button>
           </div>
         </div>
+
+        {/* Task Detail Modal */}
+        {showTaskDetail && (
+          <TaskDetailView
+            task={task}
+            language={language}
+            onUpdateSubtasks={() => Promise.resolve()}
+            onUpdateNotes={() => Promise.resolve()}
+            onUpdateResources={() => Promise.resolve()}
+            onUpdateTimeSpent={() => Promise.resolve()}
+            onClose={() => setShowTaskDetail(false)}
+            onChatWithAgent={() => onChatWithAgent?.(task)}
+          />
+        )}
       </CardContent>
     </Card>
   );
