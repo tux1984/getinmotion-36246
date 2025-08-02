@@ -66,15 +66,15 @@ export const UnifiedAgentHeader: React.FC<UnifiedAgentHeaderProps> = ({
   // Estilos para variante floating (chat flotante)
   if (variant === 'floating') {
     return (
-      <div className="bg-white/10 backdrop-blur-xl rounded-t-2xl border-b border-white/20 p-4">
+      <div className="bg-muted/50 border-b p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
               <IconComponent className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">{agentName}</h2>
-              <p className="text-sm text-purple-200">{agentDescription}</p>
+              <h2 className="text-lg font-semibold">{agentName}</h2>
+              <p className="text-sm text-muted-foreground">{agentDescription}</p>
             </div>
           </div>
           
@@ -83,7 +83,6 @@ export const UnifiedAgentHeader: React.FC<UnifiedAgentHeaderProps> = ({
               variant="ghost" 
               size="sm" 
               onClick={onBack}
-              className="text-white hover:bg-white/10 rounded-xl"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t[language].backToDashboard}

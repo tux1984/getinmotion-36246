@@ -25,27 +25,25 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   };
 
   return (
-    <div className="p-2">
-      <div className="max-w-4xl mx-auto">
-        <form onSubmit={onSubmit}>
-          <div className="flex gap-2 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl p-2">
-            <Input
-              value={inputMessage}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder={t[language].typeMessage}
-              className="flex-grow bg-transparent border-none text-white placeholder:text-purple-300 focus:ring-0 focus:border-none"
-              disabled={isProcessing}
-            />
-            <Button 
-              type="submit" 
-              disabled={!inputMessage.trim() || isProcessing}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl px-4"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </form>
-      </div>
+    <div className="p-4 border-t bg-muted/30">
+      <form onSubmit={onSubmit}>
+        <div className="flex gap-2">
+          <Input
+            value={inputMessage}
+            onChange={(e) => onInputChange(e.target.value)}
+            placeholder={t[language].typeMessage}
+            className="flex-grow"
+            disabled={isProcessing}
+          />
+          <Button 
+            type="submit" 
+            disabled={!inputMessage.trim() || isProcessing}
+            size="icon"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

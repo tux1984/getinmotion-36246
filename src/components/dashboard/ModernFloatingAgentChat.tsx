@@ -119,7 +119,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   // Show loading state for messages
   if (messagesLoading) {
     return (
-      <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+      <div className="flex flex-col h-full bg-card rounded-2xl border shadow-lg overflow-hidden">
         <ChatHeader 
           agentId={agentId}
           language={language}
@@ -128,8 +128,8 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-2"></div>
-            <p className="text-purple-200 text-sm">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-muted-foreground text-sm">
               {language === 'en' ? 'Loading...' : 'Cargando...'}
             </p>
           </div>
@@ -139,7 +139,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   }
 
   return (
-    <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+    <div className="flex flex-col h-full bg-card rounded-2xl border shadow-lg overflow-hidden">
       <ChatHeader 
         agentId={agentId}
         language={language}
@@ -160,6 +160,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
             messages={messages}
             isProcessing={isProcessing}
             language={language}
+            agentId={agentId}
           />
 
           <ChatInputBar
