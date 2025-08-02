@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, User, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -26,22 +26,20 @@ export const AIInterviewQuestions: React.FC<AIInterviewQuestionsProps> = ({
 
   const t = {
     en: {
-      title: "Business Interview",
-      subtitle: "Help us understand your venture better",
-      noQuestions: "No questions available at this time",
-      loading: "Preparing interview questions...",
-      answerPlaceholder: "Your answer...",
-      submitAnswers: "Submit Answers",
-      optional: "Optional"
+      title: "Tell me more",
+      subtitle: "Just curious about your project",
+      noQuestions: "No questions at the moment",
+      loading: "Preparing some questions...",
+      answerPlaceholder: "Type here...",
+      submitAnswers: "Done"
     },
     es: {
-      title: "Entrevista de Negocio",
-      subtitle: "Ayúdanos a entender mejor tu emprendimiento",
-      noQuestions: "No hay preguntas disponibles en este momento",
-      loading: "Preparando preguntas de entrevista...",
-      answerPlaceholder: "Tu respuesta...",
-      submitAnswers: "Enviar Respuestas",
-      optional: "Opcional"
+      title: "Cuéntame más",
+      subtitle: "Solo curiosidad por tu proyecto",
+      noQuestions: "No hay preguntas en este momento",
+      loading: "Preparando algunas preguntas...",
+      answerPlaceholder: "Escribe aquí...",
+      submitAnswers: "Listo"
     }
   };
 
@@ -94,46 +92,61 @@ export const AIInterviewQuestions: React.FC<AIInterviewQuestionsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 shadow-lg p-8"
+      className="bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 overflow-hidden shadow-lg max-w-2xl mx-auto"
     >
-      <div className="mb-6">
-        <div className="flex items-center space-x-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-            <MessageCircle className="w-5 h-5" />
+      {/* Header */}
+      <div className="bg-primary/5 border-b border-border/30 p-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">
+            <h3 className="text-sm font-medium text-foreground">
               {t[language].title}
             </h3>
-            <p className="text-sm text-muted-foreground">{t[language].subtitle}</p>
+            <p className="text-xs text-muted-foreground">
+              {t[language].subtitle}
+            </p>
           </div>
         </div>
       </div>
-      
-      <div className="space-y-6">
+
+      {/* Chat-style questions */}
+      <div className="p-4 space-y-4">
         {questions.map((question, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 * index }}
-            className="p-5 rounded-xl bg-muted/50 border border-border/30"
+            className="space-y-3"
           >
-            <div className="mb-3">
-              <h4 className="font-medium text-foreground mb-1">
-                {question.question}
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                {question.context} • {t[language].optional}
-              </p>
+            {/* AI Question */}
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                <Bot className="w-3 h-3 text-primary" />
+              </div>
+              <div className="bg-primary/5 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
+                <p className="text-sm text-foreground font-medium">
+                  {question.question}
+                </p>
+              </div>
             </div>
             
-            <Textarea
-              placeholder={t[language].answerPlaceholder}
-              value={answers[index] || ''}
-              onChange={(e) => handleAnswerChange(index, e.target.value)}
-              className="min-h-[80px] resize-none bg-background/60 border-border/50 focus:border-primary/50"
-            />
+            {/* User Answer */}
+            <div className="flex items-start space-x-3 justify-end">
+              <div className="max-w-[85%] w-full">
+                <Textarea
+                  placeholder={t[language].answerPlaceholder}
+                  value={answers[index] || ''}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
+                  className="min-h-[60px] resize-none bg-muted/50 border-border/30 rounded-2xl rounded-tr-md text-sm"
+                />
+              </div>
+              <div className="w-6 h-6 rounded-full bg-muted/50 flex items-center justify-center flex-shrink-0 mt-1">
+                <User className="w-3 h-3 text-muted-foreground" />
+              </div>
+            </div>
           </motion.div>
         ))}
         
@@ -141,14 +154,14 @@ export const AIInterviewQuestions: React.FC<AIInterviewQuestionsProps> = ({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-end pt-4"
+            className="pt-4 border-t border-border/20"
           >
             <Button 
               onClick={handleSubmit}
-              className="flex items-center space-x-2"
+              className="w-full rounded-xl"
+              size="sm"
             >
-              <Send className="w-4 h-4" />
-              <span>{t[language].submitAnswers}</span>
+              {t[language].submitAnswers}
             </Button>
           </motion.div>
         )}
