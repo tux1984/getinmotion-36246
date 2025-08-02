@@ -33,7 +33,7 @@ export const useMaturityWizard = (
     industry: '',
     activities: [],
     experience: '',
-    paymentMethods: '',
+    paymentMethods: [],
     brandIdentity: '',
     financialControl: '',
     teamStructure: '',

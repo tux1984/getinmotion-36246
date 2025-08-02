@@ -8,7 +8,7 @@ export const getBusinessQuestions = (language: 'en' | 'es'): Record<string, Ques
   return {
     paymentMethods: {
       id: 'paymentMethods',
-      type: 'radio',
+      type: 'checkbox',
       title: questionTranslations.paymentMethods[language].title,
       subtitle: questionTranslations.paymentMethods[language].subtitle,
       fieldName: 'paymentMethods',

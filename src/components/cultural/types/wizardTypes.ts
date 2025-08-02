@@ -10,7 +10,7 @@ export interface UserProfileData {
   experience: string;
   
   // Business maturity questions
-  paymentMethods: string;
+  paymentMethods: string[];
   brandIdentity: string;
   financialControl: string;
   

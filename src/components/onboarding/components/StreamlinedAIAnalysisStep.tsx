@@ -31,7 +31,7 @@ export const StreamlinedAIAnalysisStep: React.FC<StreamlinedAIAnalysisStepProps>
     industry: '',
     activities: [],
     experience: '',
-    paymentMethods: '',
+    paymentMethods: [],
     brandIdentity: '',
     financialControl: '',
     teamStructure: '',
