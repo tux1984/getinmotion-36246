@@ -59,32 +59,87 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
           console.log('User agents created in database successfully');
         }
         
-        // Generate personalized tasks using AI
-        setIsGeneratingTasks(true);
-        try {
-          console.log('Generating personalized tasks with profile data:', profileData);
+        // Show warning about task replacement
+        const shouldGenerateTasks = await new Promise<boolean>((resolve) => {
+          const warningDialog = document.createElement('div');
+          warningDialog.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
+          warningDialog.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+              <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                ${language === 'es' ? '¿Generar nuevas tareas personalizadas?' : 'Generate new personalized tasks?'}
+              </h3>
+              <p class="text-gray-600 mb-6">
+                ${language === 'es' 
+                  ? 'Esto generará nuevas tareas basadas en tu perfil actualizado. Si ya tienes 15 tareas activas, es posible que algunas no se puedan crear.' 
+                  : 'This will generate new tasks based on your updated profile. If you already have 15 active tasks, some may not be created.'}
+              </p>
+              <div class="flex gap-3 justify-center">
+                <button id="cancel-tasks" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  ${language === 'es' ? 'Cancelar' : 'Cancel'}
+                </button>
+                <button id="confirm-tasks" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                  ${language === 'es' ? 'Generar tareas' : 'Generate tasks'}
+                </button>
+              </div>
+            </div>
+          `;
           
-          const { data: taskResult, error: taskError } = await supabase.functions.invoke(
-            'generate-task-recommendations',
-            {
-              body: {
-                userId: user.id,
-                profileData: profileData,
-                maturityScores: scores,
-                language: language
-              }
-            }
-          );
+          document.body.appendChild(warningDialog);
+          
+          const cancelBtn = warningDialog.querySelector('#cancel-tasks');
+          const confirmBtn = warningDialog.querySelector('#confirm-tasks');
+          
+          cancelBtn?.addEventListener('click', () => {
+            document.body.removeChild(warningDialog);
+            resolve(false);
+          });
+          
+          confirmBtn?.addEventListener('click', () => {
+            document.body.removeChild(warningDialog);
+            resolve(true);
+          });
+        });
 
-          if (taskError) {
-            console.error('Error generating personalized tasks:', taskError);
-          } else {
-            console.log('Personalized tasks generated successfully:', taskResult);
+        if (shouldGenerateTasks) {
+          // Generate personalized tasks using AI
+          setIsGeneratingTasks(true);
+          try {
+            console.log('Generating personalized tasks with profile data:', profileData);
+            
+            const { data: taskResult, error: taskError } = await supabase.functions.invoke(
+              'generate-task-recommendations',
+              {
+                body: {
+                  userId: user.id,
+                  profileData: profileData,
+                  maturityScores: scores,
+                  language: language
+                }
+              }
+            );
+
+            if (taskError) {
+              console.error('Error generating personalized tasks:', taskError);
+              // Show user-friendly error message
+              alert(language === 'es' 
+                ? 'Error al generar tareas personalizadas. Por favor, revisa que no tengas más de 15 tareas activas.'
+                : 'Error generating personalized tasks. Please check that you don\'t have more than 15 active tasks.');
+            } else {
+              console.log('Personalized tasks generated successfully:', taskResult);
+            }
+          } catch (taskGenerationError) {
+            console.error('Failed to generate personalized tasks:', taskGenerationError);
+            alert(language === 'es' 
+              ? 'Error al generar tareas personalizadas. Por favor, inténtalo de nuevo más tarde.'
+              : 'Failed to generate personalized tasks. Please try again later.');
+          } finally {
+            setIsGeneratingTasks(false);
           }
-        } catch (taskGenerationError) {
-          console.error('Failed to generate personalized tasks:', taskGenerationError);
-        } finally {
-          setIsGeneratingTasks(false);
         }
       }
       
