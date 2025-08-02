@@ -111,6 +111,8 @@ Maintain a friendly, professional tone focused on results. Your goal is for the 
       }
     }
 
+    console.log('Making OpenAI request with model gpt-4.1-2025-04-14...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -118,7 +120,7 @@ Maintain a friendly, professional tone focused on results. Your goal is for the 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages
@@ -130,10 +132,29 @@ Maintain a friendly, professional tone focused on results. Your goal is for the 
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`OpenAI API error: ${response.status} ${errorText}`);
+      
+      // Provide more specific error messages
+      if (response.status === 429) {
+        throw new Error(language === 'es' 
+          ? 'Has alcanzado el límite de tu cuenta de OpenAI. Por favor revisa tu plan y facturación.'
+          : 'You have reached your OpenAI account limit. Please check your plan and billing.');
+      } else if (response.status === 401) {
+        throw new Error(language === 'es' 
+          ? 'Clave de API de OpenAI inválida. Por favor verifica tu configuración.'
+          : 'Invalid OpenAI API key. Please check your configuration.');
+      } else {
+        throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+      }
     }
 
     const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response from OpenAI API');
+    }
+    
     const assistantResponse = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ response: assistantResponse }), {
@@ -142,8 +163,17 @@ Maintain a friendly, professional tone focused on results. Your goal is for the 
 
   } catch (error) {
     console.error('Error in chat-assistant function:', error);
+    
+    // Return user-friendly error messages
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: errorMessage,
+        fallback: language === 'es' 
+          ? 'Lo siento, no puedo responder en este momento. Por favor intenta más tarde.'
+          : "I'm sorry, I can't respond right now. Please try again later."
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

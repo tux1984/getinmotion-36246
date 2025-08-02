@@ -68,11 +68,24 @@ export const useAIAssistant = (stepContext: string, questionId: string, question
 
     } catch (error) {
       console.error("Error calling chat-assistant function:", error);
-      const errorMessage: ChatMessage = {
+      
+      // Try to extract a meaningful error message
+      let errorMessage = language === 'es' ? 'Lo siento, no puedo responder en este momento.' : "I'm sorry, I can't respond right now.";
+      
+      if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          if (errorObj.message.includes('quota') || errorObj.message.includes('límite')) {
+            errorMessage = errorObj.message;
+          }
+        }
+      }
+      
+      const errorResponse: ChatMessage = {
         role: 'assistant',
-        content: language === 'es' ? 'Lo siento, no puedo responder en este momento.' : "I'm sorry, I can't respond right now."
+        content: errorMessage
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorResponse]);
     } finally {
       setIsLoading(false);
     }
