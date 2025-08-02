@@ -3,16 +3,14 @@ import { CategoryScore, ProfileType, RecommendedAgents } from '@/types/dashboard
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 export const useMaturityCalculatorLogic = (
   language: 'en' | 'es',
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, aiQuestions?: AIQuestion[]) => void
 ) => {
   const [currentStep, setCurrentStep] = useState<'profileType' | 'questions' | 'bifurcation' | 'extendedQuestions' | 'results'>('profileType');
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
@@ -22,7 +20,7 @@ export const useMaturityCalculatorLogic = (
   const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
   const [scores, setScores] = useState<CategoryScore | null>(null);
   const [recommendedAgents, setRecommendedAgents] = useState<RecommendedAgents | null>(null);
-  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([]);
+  const [aiQuestions, setAiQuestions] = useState<AIQuestion[]>([]);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const { toast } = useToast();
 
@@ -102,7 +100,7 @@ export const useMaturityCalculatorLogic = (
     return recommendations;
   }, [extendedAnswers]);
 
-  const getAIRecommendations = useCallback(async (scores: CategoryScore, profileData: any): Promise<AIRecommendation[]> => {
+  const getAIQuestions = useCallback(async (scores: CategoryScore, profileData: any): Promise<AIQuestion[]> => {
     try {
       setIsLoadingAI(true);
       
@@ -120,9 +118,9 @@ export const useMaturityCalculatorLogic = (
         return [];
       }
 
-      return data?.recommendations || [];
+      return data?.questions || [];
     } catch (error) {
-      console.error('Error getting AI recommendations:', error);
+      console.error('Error getting AI questions:', error);
       return [];
     } finally {
       setIsLoadingAI(false);
@@ -154,14 +152,14 @@ export const useMaturityCalculatorLogic = (
 
   const handleComplete = useCallback(async () => {
     if (scores && recommendedAgents) {
-      // Get AI recommendations before completing
+      // Get AI questions before completing
       const profileData = { ...answers, ...extendedAnswers, profileType, analysisType };
-      const aiRecs = await getAIRecommendations(scores, profileData);
-      setAiRecommendations(aiRecs);
+      const aiQs = await getAIQuestions(scores, profileData);
+      setAiQuestions(aiQs);
       
-      onComplete(scores, recommendedAgents, aiRecs);
+      onComplete(scores, recommendedAgents, aiQs);
     }
-  }, [scores, recommendedAgents, answers, extendedAnswers, profileType, analysisType, getAIRecommendations, onComplete]);
+  }, [scores, recommendedAgents, answers, extendedAnswers, profileType, analysisType, getAIQuestions, onComplete]);
 
   return {
     currentStep,
@@ -177,7 +175,7 @@ export const useMaturityCalculatorLogic = (
     setScores,
     recommendedAgents,
     setRecommendedAgents,
-    aiRecommendations,
+    aiQuestions,
     isLoadingAI,
     toast,
     calculateScores,

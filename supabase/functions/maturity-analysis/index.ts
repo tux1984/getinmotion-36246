@@ -34,7 +34,7 @@ serve(async (req) => {
     const { scores, profileType, profileData, language }: MaturityAnalysisRequest = await req.json();
 
     const systemPrompt = language === 'es' 
-      ? `Eres un experto consultor en negocios creativos y culturales. Tu tarea es generar recomendaciones de acción ULTRA-PERSONALIZADAS para un emprendedor.
+      ? `Eres un entrevistador profesional especializado en negocios creativos y culturales. Tu función es hacer preguntas de seguimiento específicas para recopilar más información sobre el emprendimiento del usuario.
 
 ### Contexto del Usuario:
 - **Tipo de Perfil:** ${profileType} (${profileType === 'idea' ? 'Apenas una idea' : profileType === 'solo' ? 'Trabajando solo' : 'Liderando un equipo'})
@@ -43,31 +43,28 @@ serve(async (req) => {
   - Experiencia de Usuario: ${scores.userExperience}%
   - Ajuste al Mercado: ${scores.marketFit}%
   - Monetización: ${scores.monetization}%
-- **Respuestas Detalladas del Usuario (su voz, sus palabras):**
+- **Respuestas del Usuario:**
   ${JSON.stringify(profileData, null, 2)}
 
 ### Tu Misión:
-Analiza PROFUNDAMENTE las respuestas detalladas del usuario. No te bases solo en las puntuaciones. Sumérgete en sus problemas, ideas y desafíos específicos.
+Analiza las respuestas y identifica 3-4 áreas específicas donde necesitas más información detallada. Haz preguntas directas y específicas para profundizar en su emprendimiento.
 
-Proporciona exactamente 3 recomendaciones de acción que sean:
-1.  **Hiper-Específicas:** Basadas directamente en una respuesta o un dato concreto que el usuario proporcionó. Cita la fuente de tu recomendación si es posible (ej: "Dado que mencionaste que tu mayor reto es 'encontrar colaboradores', te recomiendo...").
-2.  **Prácticas y Accionables:** Pasos claros que puede tomar en los próximos 15-30 días.
-3.  **Orientadas a sus áreas más débiles:** Usa las puntuaciones bajas como guía, pero el "porqué" de la recomendación debe venir de sus respuestas cualitativas.
-4.  **Relevantes para el sector creativo/cultural.**
+### Estilo de Preguntas:
+- **Concisas:** Una línea por pregunta
+- **Específicas:** Basadas en sus respuestas actuales
+- **Enfocadas:** En obtener información práctica del negocio
+- **Directas:** Sin mucha explicación previa
 
 ### Formato de Salida (JSON estricto):
-Responde SOLO con un JSON en este formato. No incluyas texto antes o después del JSON.
 {
-  "recommendations": [
+  "questions": [
     {
-      "title": "Título conciso y accionable de la recomendación",
-      "description": "Descripción detallada (2-3 frases) de la acción, explicando por qué es importante para ELLOS específicamente, basándote en sus respuestas.",
-      "priority": "Alta" | "Media",
-      "timeframe": "Tiempo estimado (ej: '1-2 semanas')"
+      "question": "Pregunta específica de una línea",
+      "context": "Breve contexto de por qué preguntas esto"
     }
   ]
 }`
-      : `You are an expert consultant for creative and cultural businesses. Your task is to generate ULTRA-PERSONALIZED action recommendations for an entrepreneur.
+      : `You are a professional interviewer specialized in creative and cultural businesses. Your role is to ask specific follow-up questions to gather more information about the user's venture.
 
 ### User Context:
 - **Profile Type:** ${profileType} (${profileType === 'idea' ? 'Just an idea' : profileType === 'solo' ? 'Working solo' : 'Leading a team'})
@@ -76,27 +73,24 @@ Responde SOLO con un JSON en este formato. No incluyas texto antes o después de
   - User Experience: ${scores.userExperience}%
   - Market Fit: ${scores.marketFit}%
   - Monetization: ${scores.monetization}%
-- **User's Detailed Answers (their voice, their words):**
+- **User's Answers:**
   ${JSON.stringify(profileData, null, 2)}
 
 ### Your Mission:
-DEEPLY analyze the user's detailed answers. Do not just rely on the scores. I want you to dive into their specific problems, ideas, and challenges.
+Analyze the responses and identify 3-4 specific areas where you need more detailed information. Ask direct and specific questions to deepen understanding of their venture.
 
-Provide exactly 3 action recommendations that are:
-1.  **Hyper-Specific:** Based directly on a specific answer or piece of data the user provided. Cite the source of your recommendation if possible (e.g., "Since you mentioned your biggest challenge is 'finding collaborators', I recommend...").
-2.  **Practical and Actionable:** Clear steps they can take in the next 15-30 days.
-3.  **Targeting their weakest areas:** Use the low scores as a guide, but the "why" of the recommendation must come from their qualitative answers.
-4.  **Relevant to the creative/cultural sector.**
+### Question Style:
+- **Concise:** One line per question
+- **Specific:** Based on their current answers
+- **Focused:** On getting practical business information
+- **Direct:** Without much prior explanation
 
 ### Output Format (Strict JSON):
-Respond ONLY with a JSON in this format. Do not include any text before or after the JSON.
 {
-  "recommendations": [
+  "questions": [
     {
-      "title": "Concise, actionable title for the recommendation",
-      "description": "Detailed description (2-3 sentences) of the action, explaining why it's important for THEM specifically, based on their answers.",
-      "priority": "High" | "Medium",
-      "timeframe": "Estimated time (e.g., '1-2 weeks')"
+      "question": "Specific one-line question",
+      "context": "Brief context of why you're asking this"
     }
   ]
 }`;
@@ -111,7 +105,7 @@ Respond ONLY with a JSON in this format. Do not include any text before or after
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: language === 'es' ? 'Analiza estos resultados y proporciona recomendaciones.' : 'Analyze these results and provide recommendations.' }
+          { role: 'user', content: language === 'es' ? 'Analiza las respuestas y haz preguntas de seguimiento específicas.' : 'Analyze the answers and ask specific follow-up questions.' }
         ],
         temperature: 0.7,
         max_tokens: 1000,
@@ -128,16 +122,16 @@ Respond ONLY with a JSON in this format. Do not include any text before or after
     const analysisResult = data.choices[0].message.content;
 
     // Parse the JSON response
-    let recommendations;
+    let questions;
     try {
       const parsed = JSON.parse(analysisResult);
-      recommendations = parsed.recommendations;
+      questions = parsed.questions;
     } catch (parseError) {
       console.error('Failed to parse AI response:', analysisResult);
-      throw new Error('Failed to parse AI recommendations');
+      throw new Error('Failed to parse AI questions');
     }
 
-    return new Response(JSON.stringify({ recommendations }), {
+    return new Response(JSON.stringify({ questions }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });

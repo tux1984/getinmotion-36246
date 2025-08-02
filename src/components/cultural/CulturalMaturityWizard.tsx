@@ -7,15 +7,13 @@ import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
 import { UserProfileData } from './types/wizardTypes';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 export const CulturalMaturityWizard: React.FC<{
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiRecommendations?: AIRecommendation[]) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => void;
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
   

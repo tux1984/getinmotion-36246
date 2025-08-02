@@ -11,17 +11,15 @@ import {
   getRecommendedAgents as determineRecommendedAgents
 } from './utils/scoreCalculation';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 export type { WizardStepId } from './types/wizardTypes';
 
 export const useMaturityWizard = (
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiRecommendations?: AIRecommendation[]) => void,
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => void,
   language: 'en' | 'es'
 ): WizardHookReturn => {
   // Start with cultural profile step
@@ -146,11 +144,11 @@ export const useMaturityWizard = (
   };
   
   // Handle completion - this function now properly handles the callback signature
-  const handleCompleteWizard = (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => {
+  const handleCompleteWizard = (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiQuestions?: AIQuestion[]) => {
     console.log('Completing wizard with profile data:', profileData);
     const finalScores = scores || calculateMaturityScores();
     const finalRecommendedAgents = recommendedAgents || getRecommendedAgents(finalScores);
-    onComplete(finalScores, finalRecommendedAgents, profileData, aiRecommendations);
+    onComplete(finalScores, finalRecommendedAgents, profileData, aiQuestions);
   };
 
   // Handle analysis choice

@@ -18,7 +18,7 @@ export interface WizardHookReturn {
   handlePrevious: () => void;
   calculateMaturityScores: () => any;
   getRecommendedAgents: (scores: any) => any;
-  handleCompleteWizard: (scores?: any, recommendedAgents?: any, aiRecommendations?: any) => void;
+  handleCompleteWizard: (scores?: any, recommendedAgents?: any, aiQuestions?: any) => void;
   isCurrentStepValid: () => boolean;
   showBifurcation?: boolean;
   analysisType?: 'quick' | 'deep' | null;

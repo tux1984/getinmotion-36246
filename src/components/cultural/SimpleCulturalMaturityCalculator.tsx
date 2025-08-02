@@ -7,16 +7,14 @@ import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/u
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { UserProfileData } from './types/wizardTypes';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 interface SimpleCulturalMaturityCalculatorProps {
   language: 'en' | 'es';
-  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiRecommendations?: AIRecommendation[]) => void;
+  onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => void;
 }
 
 export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCalculatorProps> = ({
@@ -30,7 +28,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
     scores: CategoryScore, 
     recommendedAgents: RecommendedAgents, 
     profileData: UserProfileData,
-    aiRecommendations?: AIRecommendation[]
+    aiQuestions?: AIQuestion[]
   ) => {
     console.log('SimpleCulturalMaturityCalculator: Wizard completed', { scores, recommendedAgents, profileData });
     
@@ -61,11 +59,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
       }
       
       // 3. Llamar callback original
-      onComplete(scores, recommendedAgents, profileData, aiRecommendations);
+      onComplete(scores, recommendedAgents, profileData, aiQuestions);
     } catch (err) {
       console.error('Error completing onboarding:', err);
       // Aún así completar el onboarding para no bloquear al usuario
-      onComplete(scores, recommendedAgents, profileData, aiRecommendations);
+      onComplete(scores, recommendedAgents, profileData, aiQuestions);
     }
   }, [onComplete, user, saveMaturityScores]);
 

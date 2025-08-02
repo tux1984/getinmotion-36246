@@ -9,11 +9,9 @@ import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/u
 import { useTranslations } from '@/hooks/useTranslations';
 import { supabase } from '@/integrations/supabase/client';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 interface MaturityCalculatorSimplifiedProps {
@@ -34,7 +32,7 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
     scores: CategoryScore, 
     recommendedAgents: RecommendedAgents, 
     profileData: UserProfileData,
-    aiRecommendations?: AIRecommendation[]
+    aiQuestions?: AIQuestion[]
   ) => {
     console.log('MaturityCalculator: Wizard completed', { scores, recommendedAgents, profileData });
     

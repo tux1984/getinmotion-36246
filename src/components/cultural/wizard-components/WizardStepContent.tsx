@@ -6,11 +6,9 @@ import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 import { StepContentRenderer, pageVariants } from './StepContentRenderer';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 interface WizardStepContentProps {
@@ -20,7 +18,7 @@ interface WizardStepContentProps {
   language: 'en' | 'es';
   calculateMaturityScores: () => CategoryScore;
   getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
-  onComplete: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
+  onComplete: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiQuestions?: AIQuestion[]) => void;
   currentStepNumber: number;
   totalSteps: number;
   handleNext: () => void;

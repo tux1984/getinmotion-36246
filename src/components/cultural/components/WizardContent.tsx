@@ -8,11 +8,9 @@ import { WizardStepId } from '../hooks/useMaturityWizard';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
 
-interface AIRecommendation {
-  title: string;
-  description: string;
-  priority: 'High' | 'Medium' | 'Low' | 'Alta' | 'Media' | 'Baja';
-  timeframe: string;
+interface AIQuestion {
+  question: string;
+  context: string;
 }
 
 interface WizardContentProps {
@@ -27,7 +25,7 @@ interface WizardContentProps {
   handlePrevious: () => void;
   calculateMaturityScores: () => CategoryScore;
   getRecommendedAgents: (scores: CategoryScore) => RecommendedAgents;
-  handleCompleteWizard: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiRecommendations?: AIRecommendation[]) => void;
+  handleCompleteWizard: (scores?: CategoryScore, recommendedAgents?: RecommendedAgents, aiQuestions?: AIQuestion[]) => void;
   showBifurcation?: boolean;
   analysisType?: 'quick' | 'deep' | null;
   handleAnalysisChoice?: (type: 'quick' | 'deep') => void;
