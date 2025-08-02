@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Music, Palette, Drama, BookOpen, Video, Smartphone } from 'lucide-react';
+import { Music, Palette, Drama, BookOpen, Video, Smartphone, Scissors } from 'lucide-react';
 import { QuestionConfig } from '../wizard-components/QuestionStep';
 import { questionTranslations } from './translations';
 
@@ -44,6 +43,11 @@ export const getProfileQuestions = (language: 'en' | 'es'): Record<string, Quest
           id: 'digital-arts', 
           label: language === 'en' ? 'Digital Arts' : 'Artes Digitales',
           icon: <Smartphone className="w-8 h-8" />
+        },
+        { 
+          id: 'arts-crafts', 
+          label: language === 'en' ? 'Arts & Crafts' : 'Artesanías',
+          icon: <Scissors className="w-8 h-8" />
         }
       ]
     },

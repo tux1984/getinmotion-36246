@@ -1,80 +1,60 @@
-export const getContextualMessage = (
-  questionId: string, 
-  selectedValue: string, 
-  language: 'en' | 'es'
-): string => {
+export const getContextualMessage = (questionId: string, selectedValue: string, language: 'en' | 'es'): string => {
   const messages = {
     en: {
-      // Industry messages
-      'industry': {
-        'visual-arts': "Hey! I see you work with visual arts. Tell me more about what you create - are you more into digital work, traditional art, or maybe a mix of both?",
-        'music': "Cool, music! What's your vibe - are you performing, producing, teaching, or maybe all of the above?",
-        'literature': "A writer! What kind of stuff do you write? Fiction, non-fiction, poetry, or something totally different?",
-        'performing-arts': "Performing arts, awesome! Are you more into theater, dance, or something else? And do you perform solo or with a group?",
-        'design': "Design is such a broad field! Are you doing graphic design, product design, UX/UI, or something else entirely?",
-        'audiovisual': "Audiovisual work, nice! Are you into film, video content, podcasts, or maybe multimedia projects?",
-        'fashion': "Fashion! That's exciting. Are you designing clothes, accessories, or maybe working more on the styling side?",
-        'crafts': "Crafts and handmade stuff! What do you love making? Is it more traditional techniques or are you putting a modern twist on things?",
-        'gastronomy': "Food! Are you cooking, baking, running a restaurant, or maybe doing something creative with food content?",
-        'technology': "Tech in the creative space - interesting combo! Are you developing apps, working with AI, gaming, or something else?",
-        'arts-crafts': "Arts & crafts! That's such a fun space. What kind of things do you make? Are they more functional pieces or purely artistic?"
+      industry: {
+        'music': "🎵 Cool, you're in music! Tell me more about what kind of music you create or perform. Are you more into traditional styles or do you experiment with modern genres?",
+        'visual-arts': "🎨 Visual arts, awesome! What's your medium? Painting, sculpture, photography? I'd love to hear about the style or themes you explore in your work.",
+        'performing-arts': "🎭 Performing arts, how exciting! Are you into theater, dance, circus, or something else? What draws you to live performance?",
+        'literature': "📚 A writer! That's fantastic. What genre do you focus on? Fiction, poetry, essays? Do you write in your native language or explore other languages too?",
+        'audiovisual': "🎬 Audiovisual work, very cool! Are you more into filmmaking, video art, documentaries? Tell me about the projects you're working on.",
+        'digital-arts': "💻 Digital arts! That's such a dynamic field. Are you creating digital illustrations, interactive media, NFTs, or something else? What tools do you love working with?",
+        'arts-crafts': "✂️ Arts & crafts, how wonderful! Tell me more about what you create. Do you work with traditional techniques passed down through generations, or do you put a modern twist on classic crafts?"
       },
-      // Payment methods messages
-      'payment-methods': {
-        'cash': "I see you're sticking with cash! How's that working out for you? Are you thinking about adding other payment options?",
-        'bank-transfer': "Bank transfers are solid and reliable! Do you find clients are comfortable with that, or do they sometimes want other options?",
-        'credit-card': "Credit cards, nice! Are you using a specific payment processor, or maybe thinking about expanding to other methods too?",
-        'digital-wallet': "Digital wallets are super convenient! Which ones are you using? And how do your clients feel about them?",
-        'cryptocurrency': "Crypto payments, that's pretty forward-thinking! How's the adoption been with your clients? Any particular cryptocurrencies you prefer?"
+      paymentMethods: {
+        'cash': "💰 I see you handle cash transactions. How's that working for you? Have you thought about exploring other payment methods to make things easier for your customers?",
+        'bank-transfer': "🏦 Bank transfers, that's quite formal! Do you find clients are comfortable with that method? Any challenges with processing times?",
+        'digital-wallet': "📱 Digital payments, nice and modern! Which platforms do you use? PayPal, Venmo, or something local? How do your clients respond to it?",
+        'mixed': "🔄 A mix of payment methods, smart approach! Which one do your clients prefer? Any particular challenges juggling different systems?"
       },
-      // Business experience messages
-      'experience': {
-        'beginner': "Just starting out? That's exciting! What's been the biggest challenge so far, and what are you most excited to learn about?",
-        'intermediate': "You've got some experience under your belt! What's working well for you, and where do you feel you could level up?",
-        'advanced': "Nice, you're experienced! What strategies have worked best for you, and are there any new areas you're looking to explore?"
-      },
-      // Default fallback
-      'default': "Interesting choice! Tell me more about this - I'd love to understand how this fits into your creative business journey."
+      brandIdentity: {
+        'none': "🤔 No worries about not having a defined brand yet! Many successful creators start exactly where you are. What comes to mind when you think about how you'd want people to see your work?",
+        'basic': "🌱 Having some basic branding is a great start! What elements do you have so far? Logo, colors, or maybe just a consistent style in how you present your work?",
+        'complete': "✨ That's fantastic that you have a complete brand identity! What's the story behind your brand? How did you develop it and what does it represent about your creative work?"
+      }
     },
     es: {
-      // Industry messages  
-      'industry': {
-        'visual-arts': "¡Oye! Veo que trabajas con artes visuales. Cuéntame más sobre lo que creas: ¿te va más lo digital, el arte tradicional, o quizás una mezcla de ambos?",
-        'music': "¡Música! ¿Cuál es tu onda? ¿Tocas, produces, enseñas, o tal vez haces de todo un poco?",
-        'literature': "¡Un escritor! ¿Qué tipo de cosas escribes? ¿Ficción, no ficción, poesía, o algo totalmente diferente?",
-        'performing-arts': "¡Artes escénicas, genial! ¿Te va más el teatro, la danza, o algo más? ¿Y actúas solo o con un grupo?",
-        'design': "¡El diseño es un campo súper amplio! ¿Haces diseño gráfico, de productos, UX/UI, o algo completamente diferente?",
-        'audiovisual': "¡Trabajo audiovisual, qué bueno! ¿Te dedicas al cine, contenido de video, podcasts, o proyectos multimedia?",
-        'fashion': "¡Moda! Eso está padrísimo. ¿Diseñas ropa, accesorios, o trabajas más del lado del styling?",
-        'crafts': "¡Artesanías y cosas hechas a mano! ¿Qué te gusta hacer? ¿Son más técnicas tradicionales o les das un toque moderno?",
-        'gastronomy': "¡Comida! ¿Cocinas, horneas, tienes restaurante, o haces algo creativo con contenido gastronómico?",
-        'technology': "Tecnología en el espacio creativo, ¡qué combo interesante! ¿Desarrollas apps, trabajas con IA, gaming, o algo más?",
-        'arts-crafts': "¡Artes y manualidades! Ese es un espacio súper divertido. ¿Qué tipo de cosas haces? ¿Son más piezas funcionales o puramente artísticas?"
+      industry: {
+        'music': "🎵 ¡Qué genial que te dediques a la música! Cuéntame más sobre qué tipo de música creates o interpretas. ¿Te va más lo tradicional o experimentas con géneros modernos?",
+        'visual-arts': "🎨 ¡Artes visuales, increíble! ¿Cuál es tu técnica? ¿Pintura, escultura, fotografía? Me encantaría saber sobre el estilo o temas que explores en tu trabajo.",
+        'performing-arts': "🎭 ¡Artes escénicas, qué emocionante! ¿Te va el teatro, danza, circo, o algo más? ¿Qué te atrae de las presentaciones en vivo?",
+        'literature': "📚 ¡Un/a escritor/a! Qué fantástico. ¿En qué género te enfocas? ¿Ficción, poesía, ensayos? ¿Escribes en tu idioma natal o también exploras otros idiomas?",
+        'audiovisual': "🎬 ¡Trabajo audiovisual, muy cool! ¿Te va más el cine, videoarte, documentales? Cuéntame sobre los proyectos en los que estás trabajando.",
+        'digital-arts': "💻 ¡Artes digitales! Es un campo súper dinámico. ¿Haces ilustraciones digitales, medios interactivos, NFTs, o algo más? ¿Con qué herramientas te gusta trabajar?",
+        'arts-crafts': "✂️ ¡Artesanías, qué maravilloso! Cuéntame más sobre lo que creates. ¿Trabajas con técnicas tradicionales que se pasan de generación en generación, o le das un toque moderno a las artesanías clásicas?"
       },
-      // Payment methods messages
-      'payment-methods': {
-        'cash': "Veo que sigues con efectivo! ¿Qué tal te va con eso? ¿Has pensado en agregar otras opciones de pago?",
-        'bank-transfer': "¡Las transferencias bancarias son sólidas y confiables! ¿Tus clientes se sienten cómodos con eso, o a veces quieren otras opciones?",
-        'credit-card': "¡Tarjetas de crédito, perfecto! ¿Usas algún procesador de pagos específico, o estás pensando en expandir a otros métodos también?",
-        'digital-wallet': "¡Las billeteras digitales son súper convenientes! ¿Cuáles usas? ¿Y cómo se sienten tus clientes con ellas?",
-        'cryptocurrency': "Pagos con cripto, ¡eso es bastante visionario! ¿Cómo ha sido la adopción con tus clientes? ¿Hay alguna criptomoneda que prefieras?"
+      paymentMethods: {
+        'cash': "💰 Veo que manejas efectivo. ¿Qué tal te va con eso? ¿Has pensado en explorar otros métodos de pago para facilitarles las cosas a tus clientes?",
+        'bank-transfer': "🏦 Transferencias bancarias, ¡qué formal! ¿Los clientes se sienten cómodos con ese método? ¿Algún desafío con los tiempos de procesamiento?",
+        'digital-wallet': "📱 Pagos digitales, ¡moderno y práctico! ¿Qué plataformas usas? ¿PayPal, alguna billetera local? ¿Cómo responden tus clientes?",
+        'mixed': "🔄 Una mezcla de métodos de pago, ¡enfoque inteligente! ¿Cuál prefieren tus clientes? ¿Algún desafío particular manejando diferentes sistemas?"
       },
-      // Business experience messages
-      'experience': {
-        'beginner': "¿Apenas empezando? ¡Qué emocionante! ¿Cuál ha sido el mayor reto hasta ahora, y qué es lo que más te emociona aprender?",
-        'intermediate': "¡Ya tienes algo de experiencia! ¿Qué te está funcionando bien, y en dónde sientes que podrías subir de nivel?",
-        'advanced': "¡Órale, ya tienes experiencia! ¿Qué estrategias te han funcionado mejor, y hay alguna área nueva que quieras explorar?"
-      },
-      // Default fallback
-      'default': "¡Interesante elección! Cuéntame más sobre esto - me encantaría entender cómo encaja en tu journey de negocio creativo."
+      brandIdentity: {
+        'none': "🤔 ¡No te preocupes por no tener una marca definida todavía! Muchos creadores exitosos empezaron exactamente donde estás tú. ¿Qué se te viene a la mente cuando piensas en cómo te gustaría que la gente vea tu trabajo?",
+        'basic': "🌱 ¡Tener algo básico de marca es un gran comienzo! ¿Qué elementos tienes hasta ahora? ¿Logo, colores, o tal vez solo un estilo consistente en cómo presentas tu trabajo?",
+        'complete': "✨ ¡Qué fantástico que tengas una identidad de marca completa! ¿Cuál es la historia detrás de tu marca? ¿Cómo la desarrollaste y qué representa sobre tu trabajo creativo?"
+      }
     }
   };
 
-  const questionMessages = messages[language][questionId as keyof typeof messages[typeof language]];
-  
+  const questionMessages = messages[language][questionId as keyof typeof messages['en']];
   if (questionMessages && typeof questionMessages === 'object') {
-    return (questionMessages as Record<string, string>)[selectedValue] || messages[language].default;
+    return (questionMessages as Record<string, string>)[selectedValue] || 
+           (language === 'es' ? 
+            '¡Interesante elección! Cuéntame más sobre eso.' : 
+            'Interesting choice! Tell me more about that.');
   }
   
-  return messages[language].default;
+  return language === 'es' ? 
+    '¡Interesante elección! Cuéntame más sobre eso.' : 
+    'Interesting choice! Tell me more about that.';
 };
