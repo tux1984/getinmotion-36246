@@ -6,10 +6,6 @@ import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
 import { SimpleTaskInterface } from './SimpleTaskInterface';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Settings,
-  LayoutGrid
-} from 'lucide-react';
 
 interface AgentTasksPanelProps {
   agentId: string;
@@ -26,21 +22,9 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
   showHeader = false,
   onBack
 }) => {
-  const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple');
+  
   const { user } = useAuth();
 
-  const t = {
-    en: {
-      simpleView: "Simple View",
-      detailedView: "Detailed View", 
-      settings: "Settings"
-    },
-    es: {
-      simpleView: "Vista Simple",
-      detailedView: "Vista Detallada", 
-      settings: "Configuración"
-    }
-  };
 
   // Enhanced chat handler that creates task-specific conversations and opens chat immediately
   const handleChatWithAgent = async (taskId: string, taskTitle: string) => {
@@ -139,52 +123,13 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
         </div>
       )}
 
-      {/* View Toggle (positioned in top right) */}
-      <div className="flex justify-end mb-4 flex-shrink-0">
-        <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1 border border-white/20">
-          <Button
-            size="sm"
-            variant={viewMode === 'simple' ? "secondary" : "ghost"}
-            onClick={() => setViewMode('simple')}
-            className={`text-xs px-3 py-1 h-auto transition-colors ${
-              viewMode === 'simple' 
-                ? 'bg-purple-600 text-white' 
-                : 'text-white/70 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <LayoutGrid className="w-3 h-3 mr-1" />
-            {t[language].simpleView}
-          </Button>
-          <Button
-            size="sm"
-            variant={viewMode === 'detailed' ? "secondary" : "ghost"}
-            onClick={() => setViewMode('detailed')}
-            className={`text-xs px-3 py-1 h-auto transition-colors ${
-              viewMode === 'detailed' 
-                ? 'bg-gray-600 text-white' 
-                : 'text-white/70 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <Settings className="w-3 h-3 mr-1" />
-            {t[language].detailedView}
-          </Button>
-        </div>
-      </div>
-      
       {/* Content */}
       <div className="flex-1 min-h-0">
-        {viewMode === 'simple' ? (
-          <SimpleTaskInterface
-            agentId={agentId}
-            language={language}
-            onChatWithAgent={handleChatWithAgent}
-          />
-        ) : (
-          <div className="text-center py-8 text-white/60">
-            <p className="text-sm">Vista detallada próximamente...</p>
-            <p className="text-xs opacity-75 mt-2">Por ahora, usa la vista simple ✨</p>
-          </div>
-        )}
+        <SimpleTaskInterface
+          agentId={agentId}
+          language={language}
+          onChatWithAgent={handleChatWithAgent}
+        />
       </div>
     </div>
   );
