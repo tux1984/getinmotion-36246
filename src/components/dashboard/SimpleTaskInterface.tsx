@@ -255,7 +255,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-12"
             >
-              <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-white/20 max-w-md mx-auto">
+            <Card className="bg-gray-800/90 border border-gray-700/50 max-w-md mx-auto">
                 <CardContent className="p-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="w-8 h-8 text-white" />
@@ -280,7 +280,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
           ) : (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <Card key={task.id} className="bg-white/10 backdrop-blur-xl border border-white/20">
+                <Card key={task.id} className="bg-gray-800/90 border border-gray-700/50">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -325,7 +325,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                       
                       <Button 
                         onClick={() => handleChatWithTask(task)}
-                        className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 py-2 px-4 rounded-lg text-sm"
+                        className="bg-gray-700/80 text-white border border-gray-600/50 hover:bg-gray-600/80 py-2 px-4 rounded-lg text-sm"
                       >
                         <MessageSquare className="w-4 h-4 mr-1" />
                         {t.dashboard.chatWithAgent}
@@ -345,7 +345,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-12"
           >
-            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl border border-white/20 max-w-md mx-auto">
+            <Card className="bg-gray-800/90 border border-gray-700/50 max-w-md mx-auto">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-white" />
@@ -373,7 +373,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl mx-auto"
           >
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/20 overflow-hidden">
+            <Card className="bg-gray-800/90 border border-gray-700/50 overflow-hidden">
               <CardContent className="p-8">
                 {/* Task Title */}
                 <div className="text-center mb-6">
