@@ -125,7 +125,7 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-900/95 backdrop-blur-sm">
+    <div className="h-full flex flex-col bg-transparent">
       {/* Header unificado opcional */}
       {showHeader && (
         <div className="mb-4">
@@ -141,7 +141,7 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
 
       {/* View Toggle (positioned in top right) */}
       <div className="flex justify-end mb-4 flex-shrink-0">
-        <div className="flex items-center gap-1 bg-gray-800/80 rounded-lg p-1 border border-gray-700/50">
+        <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1 border border-white/20">
           <Button
             size="sm"
             variant={viewMode === 'simple' ? "secondary" : "ghost"}
