@@ -225,7 +225,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="h-[calc(100vh-5rem)] w-full flex gap-4 pt-20">
+    <div className="h-[calc(100vh-8rem)] w-full flex gap-4 pt-20">
       {/* Sidebar */}
       <div className={`h-full transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarCollapsed ? 'w-[68px]' : 'w-[340px]'}`}>
         {isSidebarCollapsed ? (
