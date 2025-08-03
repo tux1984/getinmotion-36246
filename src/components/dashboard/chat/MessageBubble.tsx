@@ -61,7 +61,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           className={`p-4 rounded-2xl ${
             isUser 
               ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg' 
-              : 'bg-white/10 backdrop-blur-sm text-white border border-white/20 shadow-lg'
+              : 'bg-muted text-foreground shadow-lg border'
           }`}
         >
           <div className="whitespace-pre-wrap">

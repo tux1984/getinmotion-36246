@@ -25,7 +25,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   };
 
   return (
-    <div className="p-4 border-t bg-muted/30">
+    <div className="p-4 border-t bg-background">
       <form onSubmit={onSubmit}>
         <div className="flex gap-2">
           <Input
