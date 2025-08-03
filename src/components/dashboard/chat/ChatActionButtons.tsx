@@ -52,9 +52,9 @@ const getActionVariant = (priority: string) => {
     case 'high':
       return 'default';
     case 'medium':
-      return 'outline';
+      return 'secondary';
     case 'low':
-      return 'ghost';
+      return 'outline';
     default:
       return 'outline';
   }
@@ -102,7 +102,7 @@ export const ChatActionButtons: React.FC<ChatActionButtonsProps> = ({
             size="sm"
             onClick={() => handleActionClick(action)}
             disabled={disabled}
-            className="h-8 text-xs gap-1.5 transition-all duration-200 hover:scale-105"
+            className="h-8 text-xs gap-1.5 transition-all duration-200 hover:scale-105 !text-foreground"
           >
             <IconComponent className="w-3 h-3" />
             {action.label}
