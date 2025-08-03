@@ -11,6 +11,8 @@ import { DashboardBackground } from './DashboardBackground';
 import { MasterAgentInterface } from './MasterAgentInterface';
 import { MaturityProgressIndicator } from './MaturityProgressIndicator';
 import { IntelligentTaskSuggestions } from './IntelligentTaskSuggestions';
+import { FloatingMasterAgent } from './FloatingMasterAgent';
+import { TaskLimitManager } from './TaskLimitManager';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 
 export const RobustPremiumDashboard: React.FC = () => {
@@ -47,6 +49,25 @@ export const RobustPremiumDashboard: React.FC = () => {
 
   const handleViewProgress = () => {
     navigate('/maturity-calculator');
+  };
+
+  const handlePauseTask = (taskId: string) => {
+    // Update task status to paused
+    console.log('Pausing task:', taskId);
+  };
+
+  const handleResumeTask = (taskId: string) => {
+    // Update task status to active
+    console.log('Resuming task:', taskId);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    // Delete task
+    console.log('Deleting task:', taskId);
+  };
+
+  const handleMasterHelp = () => {
+    console.log('Master agent help requested');
   };
 
   const handleAcceptTaskSuggestion = (suggestion: any) => {
@@ -109,6 +130,24 @@ export const RobustPremiumDashboard: React.FC = () => {
               />
             </div>
 
+            {/* Task Limit Manager */}
+            <div className="col-span-12 mb-4">
+              <TaskLimitManager
+                activeTasks={tasks.map(task => ({
+                  id: task.id,
+                  title: task.title,
+                  priority: task.priority === 1 ? 'high' : task.priority === 2 ? 'medium' : 'low',
+                  status: task.status === 'completed' ? 'pending' : task.status as 'pending' | 'in_progress' | 'paused',
+                  agent_name: task.agent_id,
+                  impact: task.relevance === 'high' ? 'high' : task.relevance === 'medium' ? 'medium' : 'low'
+                }))}
+                language="es"
+                onPauseTask={handlePauseTask}
+                onResumeTask={handleResumeTask}
+                onDeleteTask={handleDeleteTask}
+              />
+            </div>
+
             {/* Full Width - Priority Tasks Section */}
             <div className="col-span-12 space-y-6">
               {/* Task Management - Now Full Width and Prominent */}
@@ -161,6 +200,17 @@ export const RobustPremiumDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Floating Master Agent */}
+        <FloatingMasterAgent
+          language="es"
+          maturityScores={maturityScores}
+          activeTasksCount={activeTasksCount}
+          completedTasksCount={completedTasksCount}
+          onStartChat={handleMasterAgentChat}
+          onViewProgress={handleViewProgress}
+          onHelp={handleMasterHelp}
+        />
       </div>
     </DashboardBackground>
   );

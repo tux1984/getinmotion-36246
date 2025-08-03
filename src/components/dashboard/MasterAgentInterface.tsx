@@ -61,24 +61,52 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
   };
 
   function getDynamicGreeting(lang: 'en' | 'es') {
+    const currentHour = new Date().getHours();
     const completionPercentage = maturityScores ? 
       Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4 : 25;
     
+    let timeGreeting = '';
+    if (currentHour < 12) {
+      timeGreeting = lang === 'es' ? '¡Buenos días!' : 'Good morning!';
+    } else if (currentHour < 18) {
+      timeGreeting = lang === 'es' ? '¡Buenas tardes!' : 'Good afternoon!';
+    } else {
+      timeGreeting = lang === 'es' ? '¡Buenas noches!' : 'Good evening!';
+    }
+
     if (lang === 'es') {
+      // More contextual and coaching-like messages
+      if (completedTasksCount === 0) {
+        return `${timeGreeting} ¡Perfecto momento para empezar! He preparado tus primeras tareas basándome en tu perfil.`;
+      }
+
+      if (activeTasksCount >= 12) {
+        return `${timeGreeting} Tienes muchas tareas activas. ¿Te ayudo a reorganizar y priorizar?`;
+      }
+
       if (completionPercentage < 40) {
-        return '¡Excelente! Estás comenzando tu transformación empresarial. Te voy a guiar paso a paso.';
+        return `${timeGreeting} Construyamos juntos las bases sólidas de tu negocio. Cada paso nos acerca al éxito.`;
       } else if (completionPercentage < 70) {
-        return '¡Vas muy bien! Ya tienes una base sólida. Ahora enfoquémonos en llevar tu negocio al siguiente nivel.';
+        return `${timeGreeting} Excelente trabajo hasta ahora. Enfoquémonos en las áreas que más impacto tendrán.`;
       } else {
-        return '¡Impresionante progreso! Estás en camino a convertirte en un experto. Sigamos refinando tu estrategia.';
+        return `${timeGreeting} ¡Increíble progreso! Tu negocio está madurando. Sigamos con los detalles avanzados.`;
       }
     } else {
+      // English translations with same logic
+      if (completedTasksCount === 0) {
+        return `${timeGreeting} Perfect time to start! I've prepared your first tasks based on your profile.`;
+      }
+
+      if (activeTasksCount >= 12) {
+        return `${timeGreeting} You have many active tasks. Shall I help you reorganize and prioritize?`;
+      }
+
       if (completionPercentage < 40) {
-        return 'Excellent! You\'re starting your business transformation. I\'ll guide you step by step.';
+        return `${timeGreeting} Let's build the solid foundations of your business together. Every step brings us closer to success.`;
       } else if (completionPercentage < 70) {
-        return 'Great progress! You have a solid foundation. Now let\'s focus on taking your business to the next level.';
+        return `${timeGreeting} Excellent work so far. Let's focus on the areas that will have the most impact.`;
       } else {
-        return 'Impressive progress! You\'re on your way to becoming an expert. Let\'s keep refining your strategy.';
+        return `${timeGreeting} Incredible progress! Your business is maturing. Let's continue with advanced details.`;
       }
     }
   }
@@ -88,6 +116,23 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
       Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4 : 25;
     
     if (lang === 'es') {
+      // More contextual suggestions based on completed vs active tasks
+      if (activeTasksCount >= 12) {
+        return [
+          'Completar 2-3 tareas pendientes antes de agregar nuevas',
+          'Revisar y pausar tareas de menor prioridad',
+          'Enfocarse en las tareas de mayor impacto primero'
+        ];
+      }
+
+      if (completedTasksCount === 0) {
+        return [
+          'Comenzar con la validación de tu idea de negocio',
+          'Definir claramente tu cliente objetivo',
+          'Crear tu primera propuesta de valor'
+        ];
+      }
+
       if (completionPercentage < 40) {
         return [
           'Define tu estructura legal básica',
@@ -108,6 +153,23 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
         ];
       }
     } else {
+      // English translations with same logic
+      if (activeTasksCount >= 12) {
+        return [
+          'Complete 2-3 pending tasks before adding new ones',
+          'Review and pause lower priority tasks',
+          'Focus on highest impact tasks first'
+        ];
+      }
+
+      if (completedTasksCount === 0) {
+        return [
+          'Start with validating your business idea',
+          'Clearly define your target customer',
+          'Create your first value proposition'
+        ];
+      }
+
       if (completionPercentage < 40) {
         return [
           'Set up your basic legal structure',
