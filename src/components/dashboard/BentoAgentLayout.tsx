@@ -7,7 +7,7 @@ import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
 import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useTaskChatActions } from './chat/TaskChatActions';
+import { useTaskChatActions } from '@/hooks/useTaskChatActions';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo, ArrowLeft } from 'lucide-react';
 import { AgentTasksPanel } from './AgentTasksPanel';
