@@ -34,7 +34,7 @@ const applyInlineFormatting = (text: string, keyPrefix: string): (string | JSX.E
     return parts.map((part, index) => {
         const key = `${keyPrefix}-${index}`;
         if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={key} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
+            return <strong key={key} className="font-semibold">{part.slice(2, -2)}</strong>;
         }
         if (part.startsWith('_') && part.endsWith('_')) {
             return <em key={key} className="italic">{part.slice(1, -1)}</em>;
@@ -89,7 +89,7 @@ export const RichTextRenderer: React.FC<{ content: string }> = ({ content }) => 
                 <ul key={listKey} className="list-none pl-2 space-y-1 my-2">
                     {listItems.map((item, itemIndex) => (
                         <li key={`${listKey}-li-${itemIndex}`} className="flex items-start">
-                            <span className="mr-2 text-purple-400 mt-1.5">●</span>
+                            <span className="mr-2 text-muted-foreground mt-1.5">●</span>
                             <span>{applyInlineFormatting(item, `${listKey}-li-${itemIndex}`)}</span>
                         </li>
                     ))}
@@ -129,7 +129,7 @@ export const RichTextRenderer: React.FC<{ content: string }> = ({ content }) => 
     }
 
     return (
-        <div className="text-white/90 leading-relaxed text-left">
+        <div className="leading-relaxed text-left">
             {elements}
         </div>
     );
