@@ -16,6 +16,8 @@ import UserProgress from './pages/UserProgress';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Admin from './pages/Admin';
+import TasksDashboard from './pages/TasksDashboard';
+import MasterCoordinatorChat from './pages/MasterCoordinatorChat';
 import OnePager from './pages/OnePager';
 import TwoPager from './pages/TwoPager';
 import ThreePager from './pages/ThreePager';
@@ -30,16 +32,16 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
-              {/* Legacy dashboard route for backward compatibility */}
+              {/* Main dashboard route - Master Coordinator as entry point */}
               <Route 
                 path="/dashboard" 
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <DashboardHome />
                   </ProtectedRoute>
                 } 
               />
-              {/* New dashboard routes */}
+              {/* Legacy home route for backward compatibility */}
               <Route 
                 path="/dashboard/home" 
                 element={
@@ -53,6 +55,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AgentManager />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/agent/master-coordinator" 
+                element={
+                  <ProtectedRoute>
+                    <MasterCoordinatorChat />
                   </ProtectedRoute>
                 } 
               />
@@ -86,6 +96,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <UserProgress />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/tasks" 
+                element={
+                  <ProtectedRoute>
+                    <TasksDashboard />
                   </ProtectedRoute>
                 } 
               />

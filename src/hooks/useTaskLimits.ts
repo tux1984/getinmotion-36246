@@ -10,7 +10,13 @@ export const useTaskLimits = (tasks: AgentTask[]) => {
     [tasks]
   );
 
+  const completedTasks = useMemo(() => 
+    tasks.filter(task => task.status === 'completed'),
+    [tasks]
+  );
+
   const activeTasksCount = activeTasks.length;
+  const completedTasksCount = completedTasks.length;
   const isAtLimit = activeTasksCount >= ACTIVE_TASKS_LIMIT;
   const isNearLimit = activeTasksCount >= ACTIVE_TASKS_LIMIT - 3; // Cambié de 5 a 3 por el límite más bajo
   const remainingSlots = ACTIVE_TASKS_LIMIT - activeTasksCount;
@@ -41,7 +47,9 @@ export const useTaskLimits = (tasks: AgentTask[]) => {
 
   return {
     activeTasks,
+    completedTasks,
     activeTasksCount,
+    completedTasksCount,
     isAtLimit,
     isNearLimit,
     remainingSlots,
