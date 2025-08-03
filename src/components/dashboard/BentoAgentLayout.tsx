@@ -93,9 +93,9 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   if (isMobile) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20 pt-20">
+      <div className="h-full flex flex-col bg-gradient-to-br from-purple-900/20 via-transparent to-indigo-900/20 pt-20">
         {/* Mobile back button */}
-        <div className="mb-4 px-4">
+        <div className="mb-4 px-4 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -107,7 +107,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           </Button>
         </div>
 
-        <div className="flex flex-col h-[calc(100vh-8rem)] px-4">
+        <div className="flex-1 min-h-0 flex flex-col px-4">
           {/* Main content area with tab switching */}
           <div className="flex-1 mb-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             {activeTab === 'chat' && (
@@ -225,7 +225,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] w-full flex gap-4 pt-20">
+    <div className="h-full w-full flex gap-4 pt-20">
       {/* Sidebar */}
       <div className={`h-full transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarCollapsed ? 'w-[68px]' : 'w-[340px]'}`}>
         {isSidebarCollapsed ? (

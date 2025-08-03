@@ -29,7 +29,7 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
   }, [messages, isProcessing]);
 
   return (
-    <ScrollArea className="flex-1 p-6">
+    <ScrollArea className="flex-1 min-h-0 p-6">
       <div className="space-y-4">
         {messages.map((message) => (
           <MessageBubble

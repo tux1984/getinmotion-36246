@@ -60,7 +60,7 @@ export const ChatWelcomeScreen: React.FC<ChatWelcomeScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-8">
+    <div className="flex-1 min-h-0 flex items-center justify-center p-8">
       <div className="text-center max-w-2xl">
         <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Sparkles className="w-10 h-10 text-primary-foreground" />
