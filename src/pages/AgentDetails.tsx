@@ -21,7 +21,7 @@ const AgentDetails = () => {
   }
 
   return (
-    <DashboardBackground>
+    <DashboardBackground showGlobalComponents={true}>
       <AgentSpecificHeader 
         agentId={agentId}
         language={language}
