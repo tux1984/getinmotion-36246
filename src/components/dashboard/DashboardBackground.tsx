@@ -41,7 +41,7 @@ export const DashboardBackground: React.FC<DashboardBackgroundProps> = ({
   };
 
   const handleViewProgress = () => {
-    navigate('/dashboard/home');
+    navigate('/dashboard/progress');
   };
 
   const handlePauseTask = (taskId: string) => {

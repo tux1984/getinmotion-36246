@@ -12,6 +12,7 @@ import DashboardHome from './pages/DashboardHome';
 import AgentManager from './pages/AgentManager';
 import AgentDetails from './pages/AgentDetails';
 import MaturityCalculator from './pages/MaturityCalculator';
+import UserProgress from './pages/UserProgress';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Admin from './pages/Admin';
@@ -77,6 +78,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MaturityCalculator />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/progress" 
+                element={
+                  <ProtectedRoute>
+                    <UserProgress />
                   </ProtectedRoute>
                 } 
               />

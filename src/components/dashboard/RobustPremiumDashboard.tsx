@@ -47,7 +47,7 @@ export const RobustPremiumDashboard: React.FC = () => {
   };
 
   const handleViewProgress = () => {
-    navigate('/maturity-calculator');
+    navigate('/dashboard/progress');
   };
 
   const handlePauseTask = (taskId: string) => {
