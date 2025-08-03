@@ -119,7 +119,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   // Show loading state for messages
   if (messagesLoading) {
     return (
-      <div className="flex flex-col h-full bg-white rounded-2xl border-2 shadow-lg overflow-hidden">
+      <div className="flex flex-col h-full bg-white/95 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg overflow-hidden">
         <ChatHeader 
           agentId={agentId}
           language={language}
@@ -139,7 +139,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl border-2 shadow-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white/95 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg overflow-hidden">
       <ChatHeader 
         agentId={agentId}
         language={language}
