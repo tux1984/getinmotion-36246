@@ -24,11 +24,16 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
 }) => {
   
   const { user } = useAuth();
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [processingTaskId, setProcessingTaskId] = useState<string | null>(null);
 
 
   // Enhanced chat handler that creates task-specific conversations and opens chat immediately
   const handleChatWithAgent = async (taskId: string, taskTitle: string) => {
-    if (!user || !onChatWithAgent) return;
+    if (!user || !onChatWithAgent || processingTaskId === taskId) return;
+
+    setIsLoadingChat(true);
+    setProcessingTaskId(taskId);
 
     try {
       // First, validate that the task exists
@@ -118,6 +123,9 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
       console.error('Error setting up task conversation:', error);
       // Fallback to basic chat with task ID
       onChatWithAgent(taskId, taskTitle);
+    } finally {
+      setIsLoadingChat(false);
+      setProcessingTaskId(null);
     }
   };
 
@@ -142,6 +150,8 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
           agentId={agentId}
           language={language}
           onChatWithAgent={handleChatWithAgent}
+          isLoadingChat={isLoadingChat}
+          processingTaskId={processingTaskId}
         />
       </div>
     </div>

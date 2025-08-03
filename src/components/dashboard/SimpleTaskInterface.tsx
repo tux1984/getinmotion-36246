@@ -26,12 +26,16 @@ interface SimpleTaskInterfaceProps {
   agentId: string;
   language: 'en' | 'es';
   onChatWithAgent?: (taskId: string, taskTitle: string) => void;
+  isLoadingChat?: boolean;
+  processingTaskId?: string | null;
 }
 
 export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   agentId,
   language,
-  onChatWithAgent
+  onChatWithAgent,
+  isLoadingChat = false,
+  processingTaskId = null
 }) => {
   const { tasks, loading, createTask, updateTask, startTaskDevelopment } = useAgentTasks(agentId);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -343,11 +347,11 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
-                        onClick={() => task.status === 'completed' ? null : handleStartTaskDevelopment(task)}
-                        disabled={task.status === 'completed'}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg text-sm disabled:opacity-50"
-                      >
+                       <Button 
+                         onClick={() => task.status === 'completed' ? null : handleStartTaskDevelopment(task)}
+                         disabled={task.status === 'completed' || isLoadingChat || processingTaskId === task.id}
+                         className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg text-sm disabled:opacity-50"
+                       >
                         {task.status === 'completed' ? (
                           <>
                             <CheckCircle2 className="w-4 h-4 mr-1" />
@@ -497,9 +501,14 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                   <Button 
                     onClick={() => handleStartTaskDevelopment(currentTask)}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl font-medium text-lg disabled:opacity-50"
-                    disabled={currentTask.status === 'completed'}
+                    disabled={currentTask.status === 'completed' || isLoadingChat || processingTaskId === currentTask.id}
                   >
-                    {currentTask.status === 'in_progress' ? (
+                    {processingTaskId === currentTask.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        {language === 'es' ? 'Abriendo chat...' : 'Opening chat...'}
+                      </>
+                    ) : currentTask.status === 'in_progress' ? (
                       <>
                         <MessageSquare className="w-5 h-5 mr-2" />
                         {t.dashboard.continueTask}
