@@ -344,7 +344,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     </div>
                     <div className="flex gap-2">
                       <Button 
-                        onClick={() => task.status === 'in_progress' ? handleCompleteTask(task) : handleStartTaskDevelopment(task)}
+                        onClick={() => task.status === 'completed' ? null : handleStartTaskDevelopment(task)}
                         disabled={task.status === 'completed'}
                         className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-2 rounded-lg text-sm disabled:opacity-50"
                       >
@@ -355,24 +355,26 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                           </>
                         ) : task.status === 'in_progress' ? (
                           <>
-                            <CheckCircle2 className="w-4 h-4 mr-1" />
-                            {t.tasks.completeTask}
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            {t.dashboard.continueTask}
                           </>
                         ) : (
                           <>
                             <Play className="w-4 h-4 mr-1" />
-                            {t.tasks.developWithAgent}
+                            {t.tasks.activateTask}
                           </>
                         )}
                       </Button>
                       
-                      <Button 
-                        onClick={() => handleChatWithTask(task)}
-                        className="bg-gray-700/80 text-white border border-gray-600/50 hover:bg-gray-600/80 py-2 px-4 rounded-lg text-sm"
-                      >
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        {t.dashboard.chatWithAgent}
-                      </Button>
+                      {task.status === 'in_progress' && (
+                        <Button 
+                          onClick={() => handleCompleteTask(task)}
+                          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1" />
+                          {t.tasks.completeTask}
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -500,12 +502,12 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     {currentTask.status === 'in_progress' ? (
                       <>
                         <MessageSquare className="w-5 h-5 mr-2" />
-                        {t.tasks.continueTask} {t.tasks.developWithAgent}
+                        {t.dashboard.continueTask}
                       </>
                     ) : (
                       <>
                         <Play className="w-5 h-5 mr-2" />
-                        {t.tasks.developWithAgent}
+                        {t.tasks.activateTask}
                       </>
                     )}
                   </Button>

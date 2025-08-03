@@ -65,6 +65,7 @@ export interface Translations {
     createFirst: string;
     getStarted: string;
     yourCreativeJourney: string;
+    continueTask: string;
   };
 
   // Tasks
@@ -75,6 +76,7 @@ export interface Translations {
     cancelled: string;
     developWithAgent: string;
     continueTask: string;
+    activateTask: string;
     completeTask: string;
     markCompleted: string;
     quickComplete: string;
@@ -301,6 +303,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       createFirst: 'Let me help you with your first creative task',
       getStarted: "Based on your answers, here's where I think you should start:",
       yourCreativeJourney: 'Your Creative Journey 🎨',
+      continueTask: 'Continue',
     },
     tasks: {
       completed: 'Completed! 🎉',
@@ -309,6 +312,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       cancelled: 'Cancelled',
       developWithAgent: 'Develop with Agent',
       continueTask: 'Continue',
+      activateTask: 'Activate Task',
       completeTask: 'Complete Task',
       markCompleted: 'Mark as Done',
       quickComplete: 'Quick complete',
@@ -517,6 +521,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       createFirst: 'Te ayudo con tu primera tarea creativa',
       getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:',
       yourCreativeJourney: 'Tu Viaje Creativo 🎨',
+      continueTask: 'Continuar',
     },
     tasks: {
       completed: '¡Completada! 🎉',
@@ -525,6 +530,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       cancelled: 'Cancelada',
       developWithAgent: 'Desarrollar con Agente',
       continueTask: 'Continuar',
+      activateTask: 'Activar Tarea',
       completeTask: 'Completar Tarea',
       markCompleted: 'Marcar Terminada',
       quickComplete: 'Completar rápido',
