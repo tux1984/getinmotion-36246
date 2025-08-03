@@ -31,6 +31,19 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
     if (!user || !onChatWithAgent) return;
 
     try {
+      // First, validate that the task exists
+      const { data: taskExists } = await supabase
+        .from('agent_tasks')
+        .select('id')
+        .eq('id', taskId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!taskExists) {
+        console.error('Task not found:', taskId);
+        return;
+      }
+
       // Check if a conversation already exists for this task
       const { data: existingConversation } = await supabase
         .from('agent_conversations')
@@ -103,7 +116,7 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
       onChatWithAgent(conversationId, taskTitle);
     } catch (error) {
       console.error('Error setting up task conversation:', error);
-      // Fallback to basic chat
+      // Fallback to basic chat with task ID
       onChatWithAgent(taskId, taskTitle);
     }
   };

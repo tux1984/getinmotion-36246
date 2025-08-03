@@ -165,8 +165,33 @@ export function useAgentConversations(agentId: string) {
 
   // Create conversation specifically for a task
   const createTaskConversation = async (taskId: string, taskTitle: string) => {
-    const firstMessage = `Trabajemos en la tarea: "${taskTitle}". ¿Cómo puedo ayudarte con esta tarea?`;
-    return await createConversation(firstMessage, taskId);
+    if (!user) return null;
+
+    try {
+      // First, validate that the task exists and belongs to the user
+      const { data: taskExists } = await supabase
+        .from('agent_tasks')
+        .select('id')
+        .eq('id', taskId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!taskExists) {
+        console.error('Task not found or does not belong to user:', taskId);
+        throw new Error('La tarea no existe o no te pertenece');
+      }
+
+      const firstMessage = `Trabajemos en la tarea: "${taskTitle}". ¿Cómo puedo ayudarte con esta tarea?`;
+      return await createConversation(firstMessage, taskId);
+    } catch (error) {
+      console.error('Error creating task conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear la conversación para esta tarea',
+        variant: 'destructive',
+      });
+      return null;
+    }
   };
 
   // Delete conversation - archives it and removes messages

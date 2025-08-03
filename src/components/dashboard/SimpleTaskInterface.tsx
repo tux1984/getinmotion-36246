@@ -104,13 +104,24 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       }
     } catch (error) {
       console.error('Error starting task development:', error);
-      // Show user-friendly error message
-      if (error instanceof Error && error.message.includes('límite')) {
-        // Task limit error already handled by useAgentTasksSpecialOperations
-        return;
+      
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('límite')) {
+          // Task limit error already handled by useAgentTasksSpecialOperations
+          return;
+        } else if (error.message.includes('foreign key constraint')) {
+          // Database constraint error - show user-friendly message
+          console.error('Database constraint error - invalid task or conversation reference');
+          return;
+        }
       }
-      // Handle other errors gracefully
-      console.warn('Failed to start task development, task may already be active');
+      
+      // Handle other errors gracefully - still try to open chat
+      console.warn('Failed to start task development, but opening chat anyway');
+      if (onChatWithAgent) {
+        onChatWithAgent(task.id, task.title);
+      }
     }
   };
 
