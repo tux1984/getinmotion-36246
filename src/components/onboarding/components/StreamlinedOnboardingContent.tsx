@@ -5,6 +5,7 @@ import { CulturalMaturityWizard } from '@/components/cultural/CulturalMaturityWi
 import { StreamlinedAnalysisStep } from './StreamlinedAnalysisStep';
 import { StreamlinedResultsStep } from './StreamlinedResultsStep';
 import { ProfileSetupStep } from './ProfileSetupStep';
+import { OnboardingCompletionScreen } from '../OnboardingCompletionScreen';
 
 interface StreamlinedOnboardingContentProps {
   currentStep: number;
@@ -90,6 +91,18 @@ export const StreamlinedOnboardingContent: React.FC<StreamlinedOnboardingContent
           profileData={userProfileData}
           onComplete={onComplete}
           onPrevious={onPrevious}
+        />
+      );
+
+    case 4:
+      // New completion screen instead of auto-redirect
+      return (
+        <OnboardingCompletionScreen
+          maturityScores={maturityScores || { ideaValidation: 20, userExperience: 15, marketFit: 10, monetization: 5 }}
+          recommendedAgents={basicRecommendations || { admin: true, cultural: true }}
+          profileData={userProfileData}
+          language={language}
+          onStartPersonalizedPlan={() => onComplete(basicRecommendations || { admin: true, cultural: true })}
         />
       );
 

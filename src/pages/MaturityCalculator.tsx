@@ -24,11 +24,9 @@ const MaturityCalculator = () => {
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    console.log('MaturityCalculator: Assessment completed, navigating to dashboard');
-    
-    setTimeout(() => {
-      navigate('/dashboard/home', { replace: true });
-    }, 100);
+    console.log('MaturityCalculator: Assessment completed');
+    // DO NOT auto-redirect - let completion screen handle navigation
+    // The new flow will show completion screen first
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator[language];

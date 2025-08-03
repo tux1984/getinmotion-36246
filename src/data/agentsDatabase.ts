@@ -30,6 +30,21 @@ export interface CulturalAgent {
 
 export const culturalAgentsDatabase: CulturalAgent[] = [
   {
+    id: 'master-coordinator',
+    code: 'M01',
+    name: 'Coordinador Maestro',
+    category: 'Diagnóstico',
+    impact: 4,
+    priority: 'Alta',
+    description: 'Agente orquestador que guía todo tu viaje empresarial, interpreta resultados y coordina otros agentes',
+    icon: Users,
+    color: 'bg-gradient-to-r from-purple-600 to-pink-600',
+    expertise: ['business coordination', 'strategic guidance', 'agent orchestration', 'progress tracking'],
+    profiles: ['musician', 'visual-artist', 'textile-artisan', 'indigenous-artisan'],
+    exampleQuestion: "¿Cómo debo priorizar mis tareas de negocio?",
+    exampleAnswer: "Te ayudo a priorizar tareas basándome en tu nivel de madurez, coordino otros agentes especializados y te guío paso a paso hacia el crecimiento de tu negocio creativo."
+  },
+  {
     id: 'cost-calculator',
     code: 'A01',
     name: 'Cálculo de Costos + Rentabilidad',

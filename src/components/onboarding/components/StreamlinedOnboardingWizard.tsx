@@ -25,27 +25,29 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
 
   const translations = {
     en: {
-      steps: ['Your Profile', 'Key Questions', 'AI Analysis', 'Your Results'],
+      steps: ['Your Profile', 'Key Questions', 'AI Analysis', 'Your Results', 'Ready to Start'],
       stepDescriptions: [
         'Tell us about your creative venture',
         'Quick assessment of your current status',
         'Personalized AI-powered recommendations',
-        'Your customized action plan'
+        'Your customized action plan',
+        'Your personalized workspace awaits'
       ]
     },
     es: {
-      steps: ['Tu Perfil', 'Preguntas Clave', 'Análisis IA', 'Tus Resultados'],
+      steps: ['Tu Perfil', 'Preguntas Clave', 'Análisis IA', 'Tus Resultados', 'Listo para Comenzar'],
       stepDescriptions: [
         'Cuéntanos sobre tu emprendimiento creativo',
         'Evaluación rápida de tu estado actual',
         'Recomendaciones personalizadas con IA',
-        'Tu plan de acción personalizado'
+        'Tu plan de acción personalizado',
+        'Tu espacio de trabajo personalizado te espera'
       ]
     }
   };
 
   const t = translations[language];
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {

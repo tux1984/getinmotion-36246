@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
@@ -8,11 +8,17 @@ import { SafeTaskManagementInterface } from './SafeTaskManagementInterface';
 import { RobustModernAgentsGrid } from './RobustModernAgentsGrid';
 import { PremiumSidebar } from './PremiumSidebar';
 import { DashboardBackground } from './DashboardBackground';
+import { MasterAgentInterface } from './MasterAgentInterface';
+import { MaturityProgressIndicator } from './MaturityProgressIndicator';
+import { IntelligentTaskSuggestions } from './IntelligentTaskSuggestions';
+import { useAgentTasks } from '@/hooks/useAgentTasks';
 
 export const RobustPremiumDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, maturityScores, userAgents, loading, error } = useRobustDashboardData();
+  const { tasks, createTask } = useAgentTasks();
+  const [showMasterChat, setShowMasterChat] = useState(false);
 
   console.log('RobustPremiumDashboard: Rendering', {
     user: user?.email,
@@ -32,6 +38,34 @@ export const RobustPremiumDashboard: React.FC = () => {
   const handleAgentManager = () => {
     navigate('/agent-manager');
   };
+
+  const handleMasterAgentChat = () => {
+    setShowMasterChat(true);
+    // Navigate to master agent chat
+    navigate('/dashboard/agent/master-coordinator');
+  };
+
+  const handleViewProgress = () => {
+    navigate('/maturity-calculator');
+  };
+
+  const handleAcceptTaskSuggestion = (suggestion: any) => {
+    // Create new task from suggestion
+    createTask({
+      title: suggestion.title,
+      description: suggestion.description,
+      agent_id: 'master-coordinator',
+      priority: suggestion.priority === 'high' ? 1 : suggestion.priority === 'medium' ? 2 : 3,
+      relevance: suggestion.priority
+    });
+  };
+
+  const handleIgnoreTaskSuggestion = (suggestionId: string) => {
+    console.log('Ignored suggestion:', suggestionId);
+  };
+
+  const completedTasksCount = tasks.filter(task => task.status === 'completed').length;
+  const activeTasksCount = tasks.filter(task => task.status === 'pending' || task.status === 'in_progress').length;
 
   if (loading) {
     return (
@@ -59,9 +93,22 @@ export const RobustPremiumDashboard: React.FC = () => {
           onMaturityCalculatorClick={handleMaturityCalculator}
         />
 
-        {/* Main Content Grid - Tasks First Layout */}
+        {/* Main Content Grid - Master Agent First Layout */}
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-12 gap-6">
+            
+            {/* Master Agent - Prominently Featured */}
+            <div className="col-span-12 mb-6">
+              <MasterAgentInterface
+                language="es"
+                maturityScores={maturityScores}
+                activeTasksCount={activeTasksCount}
+                completedTasksCount={completedTasksCount}
+                onStartChat={handleMasterAgentChat}
+                onViewProgress={handleViewProgress}
+              />
+            </div>
+
             {/* Full Width - Priority Tasks Section */}
             <div className="col-span-12 space-y-6">
               {/* Task Management - Now Full Width and Prominent */}
@@ -74,23 +121,41 @@ export const RobustPremiumDashboard: React.FC = () => {
               />
             </div>
 
-            {/* Secondary Content Grid */}
-            <div className="col-span-12 lg:col-span-8 space-y-6">
-              {/* Agents Grid - Now Secondary */}
+            {/* Three-Column Layout for Progress, Suggestions, and Agents */}
+            <div className="col-span-12 lg:col-span-4">
+              <MaturityProgressIndicator
+                maturityScores={maturityScores}
+                completedTasksCount={completedTasksCount}
+                totalTasksCount={tasks.length}
+                language="es"
+              />
+            </div>
+
+            <div className="col-span-12 lg:col-span-4">
+              <IntelligentTaskSuggestions
+                maturityScores={maturityScores}
+                completedTasks={tasks.filter(t => t.status === 'completed').map(t => t.id)}
+                language="es"
+                onAcceptSuggestion={handleAcceptTaskSuggestion}
+                onIgnoreSuggestion={handleIgnoreTaskSuggestion}
+              />
+            </div>
+
+            <div className="col-span-12 lg:col-span-4">
+              <PremiumSidebar 
+                profile={profile}
+                maturityScores={maturityScores}
+                language="es"
+              />
+            </div>
+
+            {/* Agents Grid - Now Secondary */}
+            <div className="col-span-12 space-y-6">
               <RobustModernAgentsGrid 
                 userAgents={userAgents}
                 maturityScores={maturityScores}
                 onSelectAgent={handleSelectAgent}
                 onAgentManagerClick={handleAgentManager}
-                language="es"
-              />
-            </div>
-
-            {/* Right Column - Sidebar */}
-            <div className="col-span-12 lg:col-span-4">
-              <PremiumSidebar 
-                profile={profile}
-                maturityScores={maturityScores}
                 language="es"
               />
             </div>
