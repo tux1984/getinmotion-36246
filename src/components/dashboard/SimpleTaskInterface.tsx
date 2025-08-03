@@ -20,6 +20,7 @@ import {
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { CreateTaskModal } from './CreateTaskModal';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SimpleTaskInterfaceProps {
   agentId: string;
@@ -165,7 +166,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col space-y-6">
       {/* Header with Task Limits and View Toggle */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
@@ -246,10 +247,13 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
         )}
       </div>
 
-      {viewMode === 'all' ? (
-        /* All Tasks View */
-        <div className="space-y-4">
-          {tasks.length === 0 ? (
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="space-y-6 p-2">
+            {viewMode === 'all' ? (
+              /* All Tasks View */
+              <div className="space-y-4">
+                {tasks.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -277,9 +281,9 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                 </CardContent>
               </Card>
             </motion.div>
-          ) : (
-            <div className="space-y-3">
-              {tasks.map((task) => (
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.map((task) => (
                 <Card key={task.id} className="bg-gray-800/90 border border-gray-700/50">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
@@ -333,11 +337,11 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
         /* Simple View - Single Actionable Task */
         !currentTask ? (
           <motion.div
@@ -480,11 +484,11 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
               </CardContent>
             </Card>
           </motion.div>
-        )
-      )}
+              )
+            )}
 
-      {/* Other Pending Tasks Preview - Solo en vista simple */}
-      {viewMode === 'simple' && tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length > 0 && (
+            {/* Other Pending Tasks Preview - Solo en vista simple */}
+            {viewMode === 'simple' && tasks.filter(t => t.id !== currentTask?.id && t.status === 'pending').length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -511,18 +515,21 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        </motion.div>
-      )}
+              </Card>
+            </motion.div>
+            )}
 
-      {/* Create Task Modal */}
-      <CreateTaskModal
-        agentId={agentId}
-        language={language}
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreateTask={handleCreateTask}
-      />
+            {/* Create Task Modal */}
+            <CreateTaskModal
+              agentId={agentId}
+              language={language}
+              isOpen={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
+              onCreateTask={handleCreateTask}
+            />
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
