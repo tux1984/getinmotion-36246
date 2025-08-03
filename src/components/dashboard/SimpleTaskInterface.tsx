@@ -92,23 +92,39 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   };
 
   const handleStartTaskDevelopment = async (task: any) => {
+    // Prevent multiple clicks by tracking loading state
+    if (loading) {
+      console.log('Already processing, ignoring multiple clicks');
+      return;
+    }
+
     if (task.status === 'completed') return;
     
     try {
+      console.log('=== STARTING TASK DEVELOPMENT ===');
+      console.log('Task:', { id: task.id, title: task.title, status: task.status });
+      
       // Iniciar desarrollo de la tarea (esto la pone como única tarea activa del agente)
       const updatedTask = await startTaskDevelopment(task.id);
+      console.log('Task development result:', updatedTask);
       
       if (updatedTask && onChatWithAgent) {
+        console.log('Opening chat with agent for task...');
         // Abrir inmediatamente el chat dedicado para esta tarea
+        onChatWithAgent(task.id, task.title);
+      } else if (onChatWithAgent) {
+        // Even if task update failed, still try to open chat
+        console.log('Task update may have failed, but opening chat anyway...');
         onChatWithAgent(task.id, task.title);
       }
     } catch (error) {
-      console.error('Error starting task development:', error);
+      console.error('❌ Error starting task development:', error);
       
       // Handle specific error types
       if (error instanceof Error) {
         if (error.message.includes('límite')) {
           // Task limit error already handled by useAgentTasksSpecialOperations
+          console.log('Task limit error handled by special operations');
           return;
         } else if (error.message.includes('foreign key constraint')) {
           // Database constraint error - show user-friendly message
@@ -120,6 +136,7 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
       // Handle other errors gracefully - still try to open chat
       console.warn('Failed to start task development, but opening chat anyway');
       if (onChatWithAgent) {
+        console.log('Opening chat despite development error...');
         onChatWithAgent(task.id, task.title);
       }
     }
@@ -134,8 +151,19 @@ export const SimpleTaskInterface: React.FC<SimpleTaskInterfaceProps> = ({
   };
 
   const handleChatWithTask = (task: any) => {
+    // Prevent multiple clicks
+    if (loading) {
+      console.log('Already processing, ignoring chat request');
+      return;
+    }
+
+    console.log('=== OPENING CHAT FOR TASK ===');
+    console.log('Task:', { id: task.id, title: task.title });
+    
     if (onChatWithAgent) {
       onChatWithAgent(task.id, task.title);
+    } else {
+      console.error('onChatWithAgent callback not available');
     }
   };
 

@@ -55,7 +55,17 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
 
   // Function to handle chat with task context - ALWAYS creates new conversation
   const handleChatWithTaskContext = async (taskId: string, taskTitle: string) => {
+    // Prevent multiple simultaneous calls
+    if (isCreatingTaskConversation) {
+      console.log('Already creating a task conversation, ignoring duplicate call');
+      return;
+    }
+
     setIsCreatingTaskConversation(true);
+    console.log('=== STARTING TASK CONVERSATION ===');
+    console.log('Task ID:', taskId);
+    console.log('Task Title:', taskTitle);
+    console.log('Agent ID:', selectedAgent);
     
     try {
       // Switch to chat tab in mobile view
@@ -67,26 +77,75 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
       setSidebarTab('conversations');
       
       // Always create a new conversation for the task
-      console.log('Creating new task conversation for:', taskTitle);
+      console.log('Calling createTaskConversation...');
       const conversationId = await conversationManager.createTaskConversation(taskId, taskTitle);
+      console.log('createTaskConversation returned:', conversationId);
       
       if (conversationId) {
-        console.log('Task conversation created successfully:', conversationId);
+        console.log('✅ Task conversation created successfully:', conversationId);
         toast({
           title: 'Conversación iniciada',
           description: `Conversación creada para la tarea: ${taskTitle}`,
         });
+        
+        // Ensure the conversation is selected
+        if (conversationManager.selectConversation) {
+          console.log('Selecting the new conversation...');
+          conversationManager.selectConversation(conversationId);
+        }
       } else {
-        throw new Error('No se pudo crear la conversación');
+        console.error('❌ createTaskConversation returned null/undefined');
+        
+        // Fallback: Try to start a generic conversation
+        console.log('Attempting fallback: starting generic conversation...');
+        conversationManager.startNewConversation();
+        
+        // Add initial message about the task
+        setTimeout(() => {
+          if (conversationManager.currentConversationId && conversationManager.addMessage) {
+            const initialMessage = `Quiero trabajar en la tarea: "${taskTitle}"`;
+            console.log('Adding fallback message:', initialMessage);
+            conversationManager.addMessage(
+              conversationManager.currentConversationId, 
+              initialMessage, 
+              'user'
+            );
+          }
+        }, 500);
+        
+        toast({
+          title: 'Conversación iniciada',
+          description: `Chat abierto para discutir: ${taskTitle}`,
+        });
       }
     } catch (error) {
-      console.error('Error creating task conversation:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo iniciar la conversación con el agente',
-        variant: 'destructive',
+      console.error('❌ ERROR in handleChatWithTaskContext:', error);
+      console.error('Error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack
       });
+      
+      // Fallback: Always try to open a generic chat
+      try {
+        console.log('🔄 Attempting final fallback...');
+        conversationManager.startNewConversation();
+        
+        toast({
+          title: 'Chat iniciado',
+          description: `Puedes discutir la tarea "${taskTitle}" en el chat general`,
+          variant: 'default',
+        });
+      } catch (fallbackError) {
+        console.error('❌ Even fallback failed:', fallbackError);
+        toast({
+          title: 'Error',
+          description: 'No se pudo iniciar ningún tipo de conversación. Intenta recargar la página.',
+          variant: 'destructive',
+        });
+      }
     } finally {
+      console.log('=== ENDING TASK CONVERSATION ATTEMPT ===');
       setIsCreatingTaskConversation(false);
     }
   };
