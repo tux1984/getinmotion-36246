@@ -57,31 +57,43 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
           console.log('User agents created in database successfully');
         }
         
-        // Show warning about task replacement
+        // Show warning about complete task replacement
         const shouldGenerateTasks = await new Promise<boolean>((resolve) => {
           const warningDialog = document.createElement('div');
           warningDialog.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
           warningDialog.innerHTML = `
             <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
-              <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
               </div>
               <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                ${language === 'es' ? '¿Generar nuevas tareas personalizadas?' : 'Generate new personalized tasks?'}
+                ${language === 'es' ? '¿Reiniciar todas tus tareas?' : 'Reset all your tasks?'}
               </h3>
-              <p class="text-gray-600 mb-6">
-                ${language === 'es' 
-                  ? 'Esto generará nuevas tareas basadas en tu perfil actualizado. Si ya tienes 15 tareas activas, es posible que algunas no se puedan crear.' 
-                  : 'This will generate new tasks based on your updated profile. If you already have 15 active tasks, some may not be created.'}
-              </p>
+              <div class="text-left mb-6">
+                <p class="text-gray-800 font-medium mb-3">
+                  ${language === 'es' 
+                    ? 'Esto BORRARÁ TODAS tus tareas existentes y creará nuevas basadas en tu evaluación actualizada.' 
+                    : 'This will DELETE ALL your existing tasks and create new ones based on your updated assessment.'}
+                </p>
+                <p class="text-red-600 font-medium mb-3">
+                  ${language === 'es' 
+                    ? '⚠️ Esta acción no se puede deshacer' 
+                    : '⚠️ This action cannot be undone'}
+                </p>
+                <p class="text-gray-600 text-sm">
+                  ${language === 'es' 
+                    ? 'Si solo quieres añadir más tareas sin borrar las existentes, usa la herramienta "Más Tareas" en el dashboard.' 
+                    : 'If you only want to add more tasks without deleting existing ones, use the "More Tasks" tool in the dashboard.'}
+                </p>
+              </div>
               <div class="flex gap-3 justify-center">
                 <button id="cancel-tasks" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                   ${language === 'es' ? 'Cancelar' : 'Cancel'}
                 </button>
-                <button id="confirm-tasks" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                  ${language === 'es' ? 'Generar tareas' : 'Generate tasks'}
+                <button id="confirm-tasks" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                  ${language === 'es' ? 'Sí, reiniciar todo' : 'Yes, reset everything'}
                 </button>
               </div>
             </div>
@@ -116,7 +128,8 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
                   userId: user.id,
                   profileData: profileData,
                   maturityScores: scores,
-                  language: language
+                  language: language,
+                  replaceExisting: true
                 }
               }
             );
@@ -125,16 +138,16 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
               console.error('Error generating personalized tasks:', taskError);
               // Show user-friendly error message
               alert(language === 'es' 
-                ? 'Error al generar tareas personalizadas. Por favor, revisa que no tengas más de 15 tareas activas.'
-                : 'Error generating personalized tasks. Please check that you don\'t have more than 15 active tasks.');
+                ? 'Error al reiniciar las tareas. Es posible que tengas demasiadas tareas activas o haya un problema temporal.'
+                : 'Error resetting tasks. You may have too many active tasks or there may be a temporary issue.');
             } else {
-              console.log('Personalized tasks generated successfully:', taskResult);
+              console.log('Tasks reset and new personalized tasks generated successfully:', taskResult);
             }
           } catch (taskGenerationError) {
-            console.error('Failed to generate personalized tasks:', taskGenerationError);
+            console.error('Failed to reset and generate tasks:', taskGenerationError);
             alert(language === 'es' 
-              ? 'Error al generar tareas personalizadas. Por favor, inténtalo de nuevo más tarde.'
-              : 'Failed to generate personalized tasks. Please try again later.');
+              ? 'Error al reiniciar las tareas. Por favor, inténtalo de nuevo más tarde.'
+              : 'Failed to reset tasks. Please try again later.');
           } finally {
             setIsGeneratingTasks(false);
           }
