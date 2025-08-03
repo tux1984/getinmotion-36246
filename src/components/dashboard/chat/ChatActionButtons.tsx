@@ -52,9 +52,9 @@ const getActionVariant = (priority: string) => {
     case 'high':
       return 'default';
     case 'medium':
-      return 'secondary';
-    case 'low':
       return 'outline';
+    case 'low':
+      return 'ghost';
     default:
       return 'outline';
   }
