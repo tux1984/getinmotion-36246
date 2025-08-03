@@ -27,40 +27,138 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
     en: {
       masterAgent: 'Master Coordinator',
       subtitle: 'Your Personal Business Coach',
-      greeting: 'Hello! I\'m here to guide your creative business journey.',
+      greeting: getDynamicGreeting('en'),
       currentStatus: 'Current Status',
       tasksActive: 'active tasks',
       tasksCompleted: 'completed',
-      chatWithMe: 'Chat with me',
+      chatWithMe: 'Start Guided Session',
       viewProgress: 'View Progress',
-      nextSteps: 'Next Recommended Steps',
-      suggestions: [
-        'Complete your financial setup',
-        'Improve your marketing strategy',
-        'Validate your market fit'
-      ],
+      nextSteps: 'Your Next Steps',
+      suggestions: getDynamicSuggestions('en'),
       progressToNext: 'Progress to Next Level',
-      currentLevel: 'Current Level'
+      currentLevel: 'Current Level',
+      tasksSlots: 'task slots used',
+      motivationalMessage: getMotivationalMessage('en'),
+      coachingTip: getCoachingTip('en')
     },
     es: {
       masterAgent: 'Coordinador Maestro',
       subtitle: 'Tu Coach Personal de Negocios',
-      greeting: '¡Hola! Estoy aquí para guiar tu viaje empresarial creativo.',
+      greeting: getDynamicGreeting('es'),
       currentStatus: 'Estado Actual',
       tasksActive: 'tareas activas',
       tasksCompleted: 'completadas',
-      chatWithMe: 'Conversar conmigo',
+      chatWithMe: 'Iniciar Sesión Guiada',
       viewProgress: 'Ver Progreso',
-      nextSteps: 'Próximos Pasos Recomendados',
-      suggestions: [
-        'Completar configuración financiera',
-        'Mejorar estrategia de marketing',
-        'Validar encaje de mercado'
-      ],
+      nextSteps: 'Tus Próximos Pasos',
+      suggestions: getDynamicSuggestions('es'),
       progressToNext: 'Progreso al Siguiente Nivel',
-      currentLevel: 'Nivel Actual'
+      currentLevel: 'Nivel Actual',
+      tasksSlots: 'espacios de tareas usados',
+      motivationalMessage: getMotivationalMessage('es'),
+      coachingTip: getCoachingTip('es')
     }
   };
+
+  function getDynamicGreeting(lang: 'en' | 'es') {
+    const completionPercentage = maturityScores ? 
+      Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4 : 25;
+    
+    if (lang === 'es') {
+      if (completionPercentage < 40) {
+        return '¡Excelente! Estás comenzando tu transformación empresarial. Te voy a guiar paso a paso.';
+      } else if (completionPercentage < 70) {
+        return '¡Vas muy bien! Ya tienes una base sólida. Ahora enfoquémonos en llevar tu negocio al siguiente nivel.';
+      } else {
+        return '¡Impresionante progreso! Estás en camino a convertirte en un experto. Sigamos refinando tu estrategia.';
+      }
+    } else {
+      if (completionPercentage < 40) {
+        return 'Excellent! You\'re starting your business transformation. I\'ll guide you step by step.';
+      } else if (completionPercentage < 70) {
+        return 'Great progress! You have a solid foundation. Now let\'s focus on taking your business to the next level.';
+      } else {
+        return 'Impressive progress! You\'re on your way to becoming an expert. Let\'s keep refining your strategy.';
+      }
+    }
+  }
+
+  function getDynamicSuggestions(lang: 'en' | 'es') {
+    const completionPercentage = maturityScores ? 
+      Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4 : 25;
+    
+    if (lang === 'es') {
+      if (completionPercentage < 40) {
+        return [
+          'Define tu estructura legal básica',
+          'Configura tu primer sistema de pagos',
+          'Crea tu identidad de marca inicial'
+        ];
+      } else if (completionPercentage < 70) {
+        return [
+          'Optimiza tu estrategia de marketing',
+          'Implementa sistemas de automatización',
+          'Desarrolla partnerships estratégicos'
+        ];
+      } else {
+        return [
+          'Expande a nuevos mercados',
+          'Crea productos premium',
+          'Desarrolla un equipo de alto rendimiento'
+        ];
+      }
+    } else {
+      if (completionPercentage < 40) {
+        return [
+          'Set up your basic legal structure',
+          'Configure your first payment system',
+          'Create your initial brand identity'
+        ];
+      } else if (completionPercentage < 70) {
+        return [
+          'Optimize your marketing strategy',
+          'Implement automation systems',
+          'Develop strategic partnerships'
+        ];
+      } else {
+        return [
+          'Expand to new markets',
+          'Create premium products',
+          'Build a high-performance team'
+        ];
+      }
+    }
+  }
+
+  function getMotivationalMessage(lang: 'en' | 'es') {
+    if (completedTasksCount === 0) {
+      return lang === 'es' ? 
+        '🚀 ¡Tu aventura empresarial está comenzando!' :
+        '🚀 Your business adventure is just beginning!';
+    } else if (completedTasksCount < 5) {
+      return lang === 'es' ? 
+        '💪 ¡Excelente momentum! Cada tarea completada te acerca más a tu objetivo.' :
+        '💪 Excellent momentum! Every completed task brings you closer to your goal.';
+    } else {
+      return lang === 'es' ? 
+        '🏆 ¡Eres imparable! Tu dedicación está transformando tu negocio.' :
+        '🏆 You\'re unstoppable! Your dedication is transforming your business.';
+    }
+  }
+
+  function getCoachingTip(lang: 'en' | 'es') {
+    const tips = lang === 'es' ? [
+      'Tip: Enfócate en completar 1-2 tareas por semana para mantener el momentum',
+      'Tip: Las tareas de alto impacto te darán los mejores resultados',
+      'Tip: No tengas miedo de pausar tareas si cambias de prioridades'
+    ] : [
+      'Tip: Focus on completing 1-2 tasks per week to maintain momentum',
+      'Tip: High-impact tasks will give you the best results',
+      'Tip: Don\'t be afraid to pause tasks if your priorities change'
+    ];
+    
+    return tips[Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % tips.length];
+  }
 
   const t = translations[language];
 
@@ -119,15 +217,24 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
         {/* Greeting */}
         <p className="text-purple-100 mb-4">{t.greeting}</p>
 
+        {/* Motivational Message */}
+        <div className="bg-gradient-to-r from-white/10 to-white/5 rounded-lg p-3 mb-4">
+          <p className="text-white text-sm font-medium">{t.motivationalMessage}</p>
+        </div>
+
         {/* Status Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-white/10 rounded-lg p-3">
-            <div className="text-2xl font-bold text-white">{activeTasksCount}</div>
-            <div className="text-purple-200 text-sm">{t.tasksActive}</div>
+            <div className="text-xl font-bold text-white">{activeTasksCount}/15</div>
+            <div className="text-purple-200 text-xs">{t.tasksSlots}</div>
           </div>
           <div className="bg-white/10 rounded-lg p-3">
-            <div className="text-2xl font-bold text-green-300">{completedTasksCount}</div>
-            <div className="text-purple-200 text-sm">{t.tasksCompleted}</div>
+            <div className="text-xl font-bold text-green-300">{completedTasksCount}</div>
+            <div className="text-purple-200 text-xs">{t.tasksCompleted}</div>
+          </div>
+          <div className="bg-white/10 rounded-lg p-3">
+            <div className="text-xl font-bold text-yellow-300">{Math.round(maturityLevel.percentage)}%</div>
+            <div className="text-purple-200 text-xs">madurez</div>
           </div>
         </div>
 
@@ -156,14 +263,26 @@ export const MasterAgentInterface: React.FC<MasterAgentInterfaceProps> = ({
                 <Target className="w-4 h-4 mr-2" />
                 {t.nextSteps}
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {t.suggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-center text-sm text-purple-100">
-                    <ArrowRight className="w-3 h-3 mr-2 text-purple-300" />
-                    {suggestion}
+                  <li key={index} className="flex items-start text-sm">
+                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                      <span className="text-xs font-bold text-white">{index + 1}</span>
+                    </div>
+                    <div>
+                      <p className="text-purple-100 font-medium">{suggestion}</p>
+                      <p className="text-purple-300 text-xs mt-1">
+                        {language === 'es' ? 'Impacto: Alto' : 'Impact: High'}
+                      </p>
+                    </div>
                   </li>
                 ))}
               </ul>
+            </div>
+            
+            {/* Coaching Tip */}
+            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+              <p className="text-purple-100 text-xs italic">{t.coachingTip}</p>
             </div>
           </div>
         )}
