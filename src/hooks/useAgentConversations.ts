@@ -13,6 +13,18 @@ export interface AgentConversation {
   task_id: string | null;
 }
 
+export interface ChatAction {
+  id: string;
+  label: string;
+  type: 'task-action' | 'conversation' | 'resource';
+  priority: 'high' | 'medium' | 'low';
+  context?: {
+    taskId?: string;
+    action?: string;
+    data?: any;
+  };
+}
+
 export interface AgentMessage {
   id: string;
   conversation_id: string;
@@ -20,6 +32,7 @@ export interface AgentMessage {
   content: string;
   metadata: any;
   created_at: string;
+  suggested_actions?: ChatAction[];
 }
 
 export function useAgentConversations(agentId: string) {
@@ -235,7 +248,7 @@ export function useAgentConversations(agentId: string) {
   };
 
   // Add message to conversation
-  const addMessage = async (conversationId: string, content: string, messageType: 'user' | 'agent') => {
+  const addMessage = async (conversationId: string, content: string, messageType: 'user' | 'agent', suggestedActions?: ChatAction[]) => {
     try {
       const { data, error } = await supabase
         .from('agent_messages')
@@ -253,7 +266,8 @@ export function useAgentConversations(agentId: string) {
       
       const typedMessage: AgentMessage = {
         ...data,
-        message_type: data.message_type as 'user' | 'agent'
+        message_type: data.message_type as 'user' | 'agent',
+        suggested_actions: suggestedActions
       };
       
       setMessages(prev => [...prev, typedMessage]);

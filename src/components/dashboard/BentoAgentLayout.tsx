@@ -7,6 +7,7 @@ import { ModernFloatingAgentChat } from './ModernFloatingAgentChat';
 import { AgentQuickActions } from './AgentQuickActions';
 import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTaskChatActions } from './chat/TaskChatActions';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, BarChart3, Zap, Menu, Plus, PanelLeftClose, PanelRightClose, ListTodo, ArrowLeft } from 'lucide-react';
 import { AgentTasksPanel } from './AgentTasksPanel';
@@ -31,6 +32,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
   const [isCreatingTaskConversation, setIsCreatingTaskConversation] = useState(false);
 
   const conversationManager = useAgentConversations(selectedAgent);
+  const { handleTaskAction } = useTaskChatActions(selectedAgent);
 
   const t = {
     en: {
@@ -181,6 +183,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
                 setIsProcessing={conversationManager.setIsProcessing}
                 createConversation={conversationManager.createConversation}
                 addMessage={conversationManager.addMessage}
+                onTaskAction={handleTaskAction}
               />
             )}
             
@@ -393,6 +396,7 @@ export const BentoAgentLayout: React.FC<BentoAgentLayoutProps> = ({
           setIsProcessing={conversationManager.setIsProcessing}
           createConversation={conversationManager.createConversation}
           addMessage={conversationManager.addMessage}
+          onTaskAction={handleTaskAction}
         />
       </div>
 

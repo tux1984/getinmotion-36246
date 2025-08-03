@@ -3,13 +3,15 @@ import React from 'react';
 import { Bot, User, Calculator, Palette, Scale, Settings, FileText, Users, Target, TrendingUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AgentMessage } from '@/hooks/useAgentConversations';
+import { AgentMessage, ChatAction } from '@/hooks/useAgentConversations';
 import { RichTextRenderer } from './RichTextRenderer';
+import { ChatActionButtons } from './ChatActionButtons';
 
 interface MessageBubbleProps {
   message: AgentMessage;
   language: 'en' | 'es';
   agentId?: string;
+  onAction?: (action: ChatAction) => void;
 }
 
 const getAgentIcon = (agentId?: string) => {
@@ -43,7 +45,8 @@ const getAgentIcon = (agentId?: string) => {
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
   language,
-  agentId
+  agentId,
+  onAction
 }) => {
   const isUser = message.message_type === 'user';
   const IconComponent = getAgentIcon(agentId);
@@ -67,6 +70,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           <div className="whitespace-pre-wrap">
             <RichTextRenderer content={message.content} />
           </div>
+          
+          {/* Show CTAs for agent messages */}
+          {!isUser && message.suggested_actions && onAction && (
+            <ChatActionButtons
+              actions={message.suggested_actions}
+              onAction={onAction}
+            />
+          )}
+          
           <div className="text-xs opacity-70 mt-2">
             {formatDistanceToNow(new Date(message.created_at), { 
               addSuffix: true,

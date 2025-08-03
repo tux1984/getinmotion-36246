@@ -3,20 +3,22 @@ import React, { useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from './MessageBubble';
 import { ChatThinkingIndicator } from './ChatThinkingIndicator';
-import { AgentMessage } from '@/hooks/useAgentConversations';
+import { AgentMessage, ChatAction } from '@/hooks/useAgentConversations';
 
 interface ChatMessagesAreaProps {
   messages: AgentMessage[];
   isProcessing: boolean;
   language: 'en' | 'es';
   agentId?: string;
+  onAction?: (action: ChatAction) => void;
 }
 
 export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
   messages,
   isProcessing,
   language,
-  agentId
+  agentId,
+  onAction
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +39,7 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
             message={message}
             language={language}
             agentId={agentId}
+            onAction={onAction}
           />
         ))}
         

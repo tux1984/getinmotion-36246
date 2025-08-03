@@ -9,6 +9,9 @@ import { ChatMessagesArea } from './chat/ChatMessagesArea';
 import { ChatInputBar } from './chat/ChatInputBar';
 import { getAgentTranslation } from '@/data/agentTranslations';
 import { getAgentById } from '@/data/agentsDatabase';
+import { ChatAction } from '@/hooks/useAgentConversations';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 interface ModernFloatingAgentChatProps {
   agentId: string;
@@ -21,7 +24,8 @@ interface ModernFloatingAgentChatProps {
   messagesLoading: boolean;
   setIsProcessing: (isProcessing: boolean) => void;
   createConversation: (firstMessage: string) => Promise<string | null>;
-  addMessage: (conversationId: string, content: string, messageType: 'user' | 'agent') => Promise<any>;
+  addMessage: (conversationId: string, content: string, messageType: 'user' | 'agent', suggestedActions?: ChatAction[]) => Promise<any>;
+  onTaskAction?: (action: ChatAction) => void;
 }
 
 export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = ({
@@ -36,13 +40,68 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
   setIsProcessing,
   createConversation,
   addMessage,
+  onTaskAction,
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
+  const { user } = useAuth();
   const agentTranslation = getAgentTranslation(agentId, language);
   const agent = getAgentById(agentId);
   
   const { sendMessage: sendAIMessage } = useAIAgent(agentId);
+  
+  // Enhanced AI message function with task context
+  const sendAIMessageWithTaskContext = useCallback(async (messageContent: string, conversationId: string) => {
+    if (!user) return null;
+    
+    try {
+      // Check if this conversation is linked to a task
+      const { data: conversationData } = await supabase
+        .from('agent_conversations')
+        .select('task_id')
+        .eq('id', conversationId)
+        .single();
+      
+      const taskId = conversationData?.task_id;
+      
+      const requestBody: any = {
+        messages: [{ role: 'user', content: messageContent }],
+        language,
+        userId: user.id,
+        agentId: agentId
+      };
+      
+      // Add task context if available
+      if (taskId) {
+        requestBody.taskContext = {
+          taskId,
+          agentId,
+          taskTitle: 'Task Title', // This should be fetched from the task
+          taskDescription: 'Task Description'
+        };
+      }
+      
+      const { data: chatResponse, error: chatError } = await supabase.functions.invoke('chat-assistant', {
+        body: requestBody
+      });
+      
+      if (chatResponse && !chatError) {
+        return {
+          response: chatResponse.response,
+          suggestedActions: chatResponse.suggestedActions || []
+        };
+      }
+      
+      // Fallback to regular AI agent
+      const response = await sendAIMessage(messageContent);
+      return response ? { response, suggestedActions: [] } : null;
+    } catch (error) {
+      console.error('Error with task context AI message:', error);
+      // Fallback to regular AI agent
+      const response = await sendAIMessage(messageContent);
+      return response ? { response, suggestedActions: [] } : null;
+    }
+  }, [user, sendAIMessage, agentId, language]);
 
   // Fixed logic: we're in new chat state when there's no conversation AND no messages
   const isNewChat = !currentConversationId && messages.length === 0;
@@ -82,12 +141,13 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       console.log('Adding user message...');
       await addMessage(conversationId, messageContent, 'user');
       
-      console.log('Sending message to AI agent:', agentId);
-      const aiResponse = await sendAIMessage(messageContent);
+      console.log('Sending message to AI agent with task context:', agentId);
+      // Try to get response with task context if available
+      const aiResponseData = await sendAIMessageWithTaskContext(messageContent, conversationId);
       
-      if (aiResponse) {
-        console.log('Adding AI response...');
-        await addMessage(conversationId, aiResponse, 'agent');
+      if (aiResponseData) {
+        console.log('Adding AI response with suggested actions...');
+        await addMessage(conversationId, aiResponseData.response, 'agent', aiResponseData.suggestedActions);
       } else {
         console.error('No AI response received');
         toast({
@@ -161,6 +221,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
             isProcessing={isProcessing}
             language={language}
             agentId={agentId}
+            onAction={onTaskAction}
           />
 
           <ChatInputBar

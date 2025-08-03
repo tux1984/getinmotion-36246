@@ -12,6 +12,104 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function generateSuggestedActions(
+  taskContext: any, 
+  response: string, 
+  language: 'en' | 'es'
+): ChatAction[] {
+  const actions: ChatAction[] = [];
+  
+  if (!taskContext) return actions;
+  
+  const lowerResponse = response.toLowerCase();
+  
+  // Task completion suggestions
+  if (lowerResponse.includes('completar') || lowerResponse.includes('complete') || 
+      lowerResponse.includes('finalizar') || lowerResponse.includes('finish')) {
+    actions.push({
+      id: 'complete-task',
+      label: language === 'es' ? 'Marcar como completado' : 'Mark as completed',
+      type: 'task-action',
+      priority: 'high',
+      context: { taskId: taskContext.taskId, action: 'complete' }
+    });
+  }
+  
+  // Next step suggestions
+  if (lowerResponse.includes('siguiente') || lowerResponse.includes('next') ||
+      lowerResponse.includes('paso') || lowerResponse.includes('step')) {
+    actions.push({
+      id: 'next-step',
+      label: language === 'es' ? 'Ir al siguiente paso' : 'Go to next step',
+      type: 'task-action',
+      priority: 'medium',
+      context: { taskId: taskContext.taskId, action: 'next_step' }
+    });
+  }
+  
+  // Subtask suggestions
+  if (lowerResponse.includes('subtarea') || lowerResponse.includes('subtask') ||
+      lowerResponse.includes('dividir') || lowerResponse.includes('break down')) {
+    actions.push({
+      id: 'add-subtask',
+      label: language === 'es' ? 'Añadir subtarea' : 'Add subtask',
+      type: 'task-action',
+      priority: 'medium',
+      context: { taskId: taskContext.taskId, action: 'add_subtask' }
+    });
+  }
+  
+  // Questions suggestions
+  if (lowerResponse.includes('pregunta') || lowerResponse.includes('question') ||
+      lowerResponse.includes('duda') || lowerResponse.includes('doubt')) {
+    actions.push({
+      id: 'ask-questions',
+      label: language === 'es' ? 'Hacer preguntas específicas' : 'Ask specific questions',
+      type: 'conversation',
+      priority: 'low',
+      context: { taskId: taskContext.taskId, action: 'ask_questions' }
+    });
+  }
+  
+  // Resource suggestions
+  if (lowerResponse.includes('recurso') || lowerResponse.includes('resource') ||
+      lowerResponse.includes('herramienta') || lowerResponse.includes('tool')) {
+    actions.push({
+      id: 'add-resource',
+      label: language === 'es' ? 'Guardar como recurso' : 'Save as resource',
+      type: 'resource',
+      priority: 'low',
+      context: { taskId: taskContext.taskId, action: 'add_resource' }
+    });
+  }
+  
+  // Checklist suggestions
+  if (lowerResponse.includes('lista') || lowerResponse.includes('checklist') ||
+      lowerResponse.includes('pasos') || lowerResponse.includes('steps')) {
+    actions.push({
+      id: 'add-checklist',
+      label: language === 'es' ? 'Crear checklist' : 'Create checklist',
+      type: 'task-action',
+      priority: 'medium',
+      context: { taskId: taskContext.taskId, action: 'create_checklist' }
+    });
+  }
+  
+  return actions.slice(0, 3); // Limit to 3 actions max
+}
+
+interface ChatAction {
+  id: string;
+  label: string;
+  type: 'task-action' | 'conversation' | 'resource';
+  priority: 'high' | 'medium' | 'low';
+  context?: {
+    taskId?: string;
+    action?: string;
+    data?: any;
+  };
+}
+
 interface ChatRequest {
   messages: { role: 'user' | 'assistant'; content: string }[];
   language: 'en' | 'es';
@@ -262,8 +360,14 @@ Just ask. Be curious, not a consultant.`;
     }
     
     const assistantResponse = data.choices[0].message.content;
+    
+    // Generate suggested actions based on context and response
+    const suggestedActions = generateSuggestedActions(taskContext, assistantResponse, language);
 
-    return new Response(JSON.stringify({ response: assistantResponse }), {
+    return new Response(JSON.stringify({ 
+      response: assistantResponse,
+      suggestedActions 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
