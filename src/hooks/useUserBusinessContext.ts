@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { performCompleteMigration } from '@/utils/dataMigration';
 import { useToast } from '@/hooks/use-toast';
 
 export interface BusinessProfile {
@@ -70,7 +71,37 @@ export const useUserBusinessContext = () => {
         throw error;
       }
 
-      setContext(data || null);
+      if (!data) {
+        // No context found - perform automatic migration
+        console.log('No master context found for user - performing automatic migration');
+        try {
+          const migrationSuccess = await performCompleteMigration(user.id);
+          if (migrationSuccess) {
+            console.log('Migration completed successfully - refetching context');
+            // Refetch after migration
+            const { data: newData, error: refetchError } = await supabase
+              .from('user_master_context')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (refetchError) {
+              console.error('Error refetching context after migration:', refetchError);
+              setContext(null);
+            } else {
+              setContext(newData);
+            }
+          } else {
+            console.error('Migration failed');
+            setContext(null);
+          }
+        } catch (migrationError) {
+          console.error('Migration process failed:', migrationError);
+          setContext(null);
+        }
+      } else {
+        setContext(data);
+      }
     } catch (error) {
       console.error('Error fetching user business context:', error);
       toast({

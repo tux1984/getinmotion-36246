@@ -8,6 +8,7 @@ import { UserProfileData } from './types/wizardTypes';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
 import { useTranslations } from '@/hooks/useTranslations';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserBusinessContext } from '@/hooks/useUserBusinessContext';
 
 interface AIQuestion {
   question: string;
@@ -26,6 +27,7 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
   const { user } = useAuth();
   const { saveMaturityScores, saving: savingScores } = useMaturityScoresSaver();
   const { t } = useTranslations();
+  const { updateFromMaturityCalculator } = useUserBusinessContext();
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
 
   const handleWizardComplete = useCallback(async (
@@ -49,6 +51,12 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
         const scoresSaved = await saveMaturityScores(scores, profileData);
         if (scoresSaved) {
           console.log('Maturity scores saved to database successfully');
+        }
+        
+        // Update user context with comprehensive information
+        const contextUpdated = await updateFromMaturityCalculator(profileData, scores, language);
+        if (contextUpdated) {
+          console.log('User master context updated successfully');
         }
         
         // Create agents in database
