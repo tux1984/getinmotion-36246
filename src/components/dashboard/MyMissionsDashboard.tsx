@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, 
   Play, 
@@ -20,13 +20,20 @@ import {
   BarChart3,
   Calendar,
   Users,
-  Award
+  Award,
+  Sparkles,
+  Plus,
+  Lightbulb
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
+import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
+import { useUnifiedTaskRecommendations } from '@/hooks/useUnifiedTaskRecommendations';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
+import { OptimizedRecommendedTask } from '@/hooks/types/recommendedTasksTypes';
+import { toast } from 'sonner';
 
 interface MyMissionsDashboardProps {
   onTaskSelect: (task: AgentTask) => void;
@@ -36,13 +43,16 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { tasks, loading, startTaskDevelopment, completeTaskQuickly } = useAgentTasks();
+  const { tasks, loading, startTaskDevelopment, completeTaskQuickly, createTask } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, isAtLimit, remainingSlots, getProgressColor } = useTaskLimits(tasks);
+  const { maturityScores } = useOptimizedAgentManagement();
+  const recommendedTasks = useUnifiedTaskRecommendations({ maturityScores, language });
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | '1' | '2' | '3'>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
+  const [showRecommendations, setShowRecommendations] = useState(true);
 
   const t = {
     en: {
@@ -82,7 +92,14 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       lastUpdated: 'Updated',
       daysAgo: 'days ago',
       today: 'today',
-      yesterday: 'yesterday'
+      yesterday: 'yesterday',
+      recommendedTasks: 'Recommended Tasks',
+      recommendedSubtitle: 'Smart suggestions based on your business maturity',
+      convertToTask: 'Add to Missions',
+      recommendationsPriority: 'Recommended Priority',
+      estimatedTimeLabel: 'Estimated Time',
+      hideRecommendations: 'Hide Recommendations',
+      showRecommendations: 'Show Recommendations'
     },
     es: {
       title: 'Mis Misiones 🎯',
@@ -121,7 +138,14 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       lastUpdated: 'Actualizada',
       daysAgo: 'días atrás',
       today: 'hoy',
-      yesterday: 'ayer'
+      yesterday: 'ayer',
+      recommendedTasks: 'Tareas Recomendadas',
+      recommendedSubtitle: 'Sugerencias inteligentes basadas en tu madurez empresarial',
+      convertToTask: 'Agregar a Misiones',
+      recommendationsPriority: 'Prioridad Recomendada',
+      estimatedTimeLabel: 'Tiempo Estimado',
+      hideRecommendations: 'Ocultar Recomendaciones',
+      showRecommendations: 'Mostrar Recomendaciones'
     }
   };
 
@@ -183,6 +207,37 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       await startTaskDevelopment(task.id);
     }
     onTaskSelect(task);
+  };
+
+  const convertRecommendationToTask = async (recommendation: OptimizedRecommendedTask) => {
+    try {
+      if (isAtLimit) {
+        toast.error(language === 'es' ? 'Has alcanzado el límite de 15 tareas activas' : 'You have reached the limit of 15 active tasks');
+        return;
+      }
+
+      await createTask({
+        title: recommendation.title,
+        description: recommendation.description,
+        agent_id: recommendation.agentId,
+        priority: recommendation.priority === 'high' ? 1 : recommendation.priority === 'medium' ? 2 : 3,
+        relevance: recommendation.priority === 'high' ? 'high' : recommendation.priority === 'medium' ? 'medium' : 'low'
+      });
+
+      toast.success(language === 'es' ? '¡Tarea agregada a tus misiones!' : 'Task added to your missions!');
+    } catch (error) {
+      console.error('Error converting recommendation to task:', error);
+      toast.error(language === 'es' ? 'Error al agregar la tarea' : 'Error adding task');
+    }
+  };
+
+  const getPriorityColorForRecommendation = (priority: 'high' | 'medium' | 'low') => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50 border-red-200';
+      case 'medium': return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'low': return 'text-green-600 bg-green-50 border-green-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
   };
 
   const activeTasks = filteredTasks.filter(task => task.status === 'pending' || task.status === 'in_progress');
@@ -264,6 +319,118 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           </CardContent>
         </Card>
       </div>
+
+      {/* Recommended Tasks Section */}
+      {recommendedTasks.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Card className="border-gradient-to-r from-purple-200 to-pink-200 shadow-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {translations.recommendedTasks}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">{translations.recommendedSubtitle}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowRecommendations(!showRecommendations)}
+                  className="text-purple-600 hover:text-purple-700"
+                >
+                  {showRecommendations ? translations.hideRecommendations : translations.showRecommendations}
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <AnimatePresence>
+              {showRecommendations && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      {recommendedTasks.map((recommendation, index) => (
+                        <motion.div
+                          key={recommendation.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                          className="bg-gradient-to-r from-purple-50 via-white to-pink-50 rounded-lg p-4 border border-purple-100 hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 space-y-3">
+                              <div className="flex items-center gap-3">
+                                <Lightbulb className="w-5 h-5 text-purple-500" />
+                                <h4 className="font-semibold text-lg text-gray-800">
+                                  {recommendation.title}
+                                </h4>
+                                <Badge 
+                                  variant="outline" 
+                                  className={getPriorityColorForRecommendation(recommendation.priority)}
+                                >
+                                  {translations.recommendationsPriority}: {
+                                    recommendation.priority === 'high' ? translations.high :
+                                    recommendation.priority === 'medium' ? translations.medium :
+                                    translations.low
+                                  }
+                                </Badge>
+                              </div>
+                              
+                              <p className="text-muted-foreground text-sm leading-relaxed">
+                                {recommendation.description}
+                              </p>
+                              
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  <span>{recommendation.agentName}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{translations.estimatedTimeLabel}: {recommendation.estimatedTime}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Target className="h-3 w-3" />
+                                  <span>{recommendation.category}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-4">
+                              <Button
+                                onClick={() => convertRecommendationToTask(recommendation)}
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                                size="sm"
+                                disabled={isAtLimit}
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                {translations.convertToTask}
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Filters */}
       <Card>

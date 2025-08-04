@@ -502,7 +502,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
             </Card>
 
             <Card className="border-green-200 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-2xl transition-all duration-300">
-              <div className="p-8">
+                  <div className="p-8">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mr-4">
                     <Users className="w-6 h-6 text-white" />
@@ -510,7 +510,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                   <h3 className="text-2xl font-bold text-gray-800">{t.viewAllTasks}</h3>
                 </div>
                 <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                  Accede al control total de todas tus misiones: activas, pausadas y completadas. Tu centro de comando empresarial.
+                  Explora todas tus misiones y recomendaciones inteligentes en un solo lugar. Tu centro de comando empresarial unificado.
                 </p>
                 <Button 
                   onClick={() => navigate('/dashboard/tasks')}
@@ -518,7 +518,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                   className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-3 text-lg rounded-lg"
                   size="lg"
                 >
-                  Acceder al Centro de Control
+                  Ver Misiones y Recomendaciones
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </div>
