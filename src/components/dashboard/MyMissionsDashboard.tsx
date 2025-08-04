@@ -28,6 +28,7 @@ import {
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
 import { useUnifiedTaskRecommendations } from '@/hooks/useUnifiedTaskRecommendations';
@@ -42,6 +43,7 @@ interface MyMissionsDashboardProps {
 export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTaskSelect }) => {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const navigate = useNavigate();
   const { tasks, loading, startTaskDevelopment, completeTaskQuickly, createTask } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, isAtLimit, remainingSlots, getProgressColor } = useTaskLimits(tasks);
@@ -54,102 +56,6 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [showRecommendations, setShowRecommendations] = useState(true);
 
-  const t = {
-    en: {
-      title: 'My Missions 🎯',
-      subtitle: 'Central hub for all your creative tasks and goals',
-      searchPlaceholder: 'Search missions...',
-      allMissions: 'All Missions',
-      activeMissions: 'Active',
-      completedMissions: 'Completed',
-      filterByStatus: 'Filter by Status',
-      filterByPriority: 'Filter by Priority',
-      filterByAgent: 'Filter by Agent',
-      all: 'All',
-      pending: 'Not Started',
-      inProgress: 'In Progress',
-      completed: 'Completed',
-      high: 'High Priority',
-      medium: 'Medium Priority',
-      low: 'Low Priority',
-      continueTask: 'Continue',
-      startTask: 'Start',
-      reviewTask: 'Review',
-      completeTask: 'Mark Complete',
-      taskStats: 'Mission Statistics',
-      activeCount: 'Active Missions',
-      completedCount: 'Completed',
-      remainingSlots: 'Free Slots',
-      progressTitle: 'Your Progress',
-      noMissions: 'No missions found',
-      noMissionsDesc: 'Try adjusting your filters or create new tasks',
-      createFirst: 'Create My First Mission',
-      estimatedTime: 'Est. time',
-      minutes: 'min',
-      priority: 'Priority',
-      agent: 'Agent',
-      status: 'Status',
-      lastUpdated: 'Updated',
-      daysAgo: 'days ago',
-      today: 'today',
-      yesterday: 'yesterday',
-      recommendedTasks: 'Recommended Tasks',
-      recommendedSubtitle: 'Smart suggestions based on your business maturity',
-      convertToTask: 'Add to Missions',
-      recommendationsPriority: 'Recommended Priority',
-      estimatedTimeLabel: 'Estimated Time',
-      hideRecommendations: 'Hide Recommendations',
-      showRecommendations: 'Show Recommendations'
-    },
-    es: {
-      title: 'Mis Misiones 🎯',
-      subtitle: 'Centro de control para todas tus tareas y objetivos creativos',
-      searchPlaceholder: 'Buscar misiones...',
-      allMissions: 'Todas las Misiones',
-      activeMissions: 'Activas',
-      completedMissions: 'Completadas',
-      filterByStatus: 'Filtrar por Estado',
-      filterByPriority: 'Filtrar por Prioridad',
-      filterByAgent: 'Filtrar por Agente',
-      all: 'Todas',
-      pending: 'Sin Iniciar',
-      inProgress: 'En Progreso',
-      completed: 'Completadas',
-      high: 'Prioridad Alta',
-      medium: 'Prioridad Media',
-      low: 'Prioridad Baja',
-      continueTask: 'Continuar',
-      startTask: 'Iniciar',
-      reviewTask: 'Revisar',
-      completeTask: 'Marcar Completa',
-      taskStats: 'Estadísticas de Misiones',
-      activeCount: 'Misiones Activas',
-      completedCount: 'Completadas',
-      remainingSlots: 'Espacios Libres',
-      progressTitle: 'Tu Progreso',
-      noMissions: 'No se encontraron misiones',
-      noMissionsDesc: 'Intenta ajustar los filtros o crea nuevas tareas',
-      createFirst: 'Crear Mi Primera Misión',
-      estimatedTime: 'Tiempo est.',
-      minutes: 'min',
-      priority: 'Prioridad',
-      agent: 'Agente',
-      status: 'Estado',
-      lastUpdated: 'Actualizada',
-      daysAgo: 'días atrás',
-      today: 'hoy',
-      yesterday: 'ayer',
-      recommendedTasks: 'Tareas Recomendadas',
-      recommendedSubtitle: 'Sugerencias inteligentes basadas en tu madurez empresarial',
-      convertToTask: 'Agregar a Misiones',
-      recommendationsPriority: 'Prioridad Recomendada',
-      estimatedTimeLabel: 'Tiempo Estimado',
-      hideRecommendations: 'Ocultar Recomendaciones',
-      showRecommendations: 'Mostrar Recomendaciones'
-    }
-  };
-
-  const translations = t[language];
 
   // Filter and search tasks
   const filteredTasks = useMemo(() => {
@@ -197,9 +103,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) return translations.today;
-    if (diffDays === 2) return translations.yesterday;
-    return `${diffDays - 1} ${translations.daysAgo}`;
+    if (diffDays === 1) return t.missionsDashboard.today;
+    if (diffDays === 2) return t.missionsDashboard.yesterday;
+    return `${diffDays - 1} ${t.missionsDashboard.daysAgo}`;
   };
 
   const handleTaskAction = async (task: AgentTask) => {
@@ -212,7 +118,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const convertRecommendationToTask = async (recommendation: OptimizedRecommendedTask) => {
     try {
       if (isAtLimit) {
-        toast.error(language === 'es' ? 'Has alcanzado el límite de 15 tareas activas' : 'You have reached the limit of 15 active tasks');
+        toast.error(t.tasks.limitReached);
         return;
       }
 
@@ -224,10 +130,10 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
         relevance: recommendation.priority === 'high' ? 'high' : recommendation.priority === 'medium' ? 'medium' : 'low'
       });
 
-      toast.success(language === 'es' ? '¡Tarea agregada a tus misiones!' : 'Task added to your missions!');
+      toast.success(t.tasks.taskCreated);
     } catch (error) {
       console.error('Error converting recommendation to task:', error);
-      toast.error(language === 'es' ? 'Error al agregar la tarea' : 'Error adding task');
+      toast.error(t.messages.error);
     }
   };
 
@@ -248,7 +154,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando misiones...</p>
+          <p className="text-muted-foreground">{t.ui.loading}</p>
         </div>
       </div>
     );
@@ -259,9 +165,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          {translations.title}
+          {t.missionsDashboard.title}
         </h1>
-        <p className="text-muted-foreground">{translations.subtitle}</p>
+        <p className="text-muted-foreground">{t.missionsDashboard.subtitle}</p>
       </div>
 
       {/* Stats Cards */}
@@ -270,7 +176,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{translations.activeCount}</p>
+                <p className="text-sm text-muted-foreground">{t.missionsDashboard.activeCount}</p>
                 <p className="text-2xl font-bold text-blue-600">{activeTasksCount}</p>
               </div>
               <Target className="h-8 w-8 text-blue-500" />
@@ -282,7 +188,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{translations.completedCount}</p>
+                <p className="text-sm text-muted-foreground">{t.missionsDashboard.completedCount}</p>
                 <p className="text-2xl font-bold text-green-600">{completedTasksCount}</p>
               </div>
               <Award className="h-8 w-8 text-green-500" />
@@ -294,7 +200,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{translations.remainingSlots}</p>
+                <p className="text-sm text-muted-foreground">{t.missionsDashboard.remainingSlots}</p>
                 <p className="text-2xl font-bold text-orange-600">{remainingSlots}</p>
               </div>
               <Calendar className="h-8 w-8 text-orange-500" />
@@ -306,7 +212,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{translations.progressTitle}</p>
+                <p className="text-sm text-muted-foreground">{t.missionsDashboard.progressTitle}</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                   <div 
                     className={`h-2 rounded-full ${getProgressColor()}`}
@@ -336,9 +242,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                   </div>
                   <div>
                     <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      {translations.recommendedTasks}
+                      {t.missionsDashboard.recommendedTasks}
                     </CardTitle>
-                    <p className="text-sm text-muted-foreground">{translations.recommendedSubtitle}</p>
+                    <p className="text-sm text-muted-foreground">{t.missionsDashboard.recommendedSubtitle}</p>
                   </div>
                 </div>
                 <Button
@@ -347,7 +253,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                   onClick={() => setShowRecommendations(!showRecommendations)}
                   className="text-purple-600 hover:text-purple-700"
                 >
-                  {showRecommendations ? translations.hideRecommendations : translations.showRecommendations}
+                  {showRecommendations ? t.missionsDashboard.hideRecommendations : t.missionsDashboard.showRecommendations}
                 </Button>
               </div>
             </CardHeader>
@@ -381,10 +287,10 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                                   variant="outline" 
                                   className={getPriorityColorForRecommendation(recommendation.priority)}
                                 >
-                                  {translations.recommendationsPriority}: {
-                                    recommendation.priority === 'high' ? translations.high :
-                                    recommendation.priority === 'medium' ? translations.medium :
-                                    translations.low
+                                  {t.missionsDashboard.recommendationsPriority}: {
+                                    recommendation.priority === 'high' ? t.missionsDashboard.high :
+                                    recommendation.priority === 'medium' ? t.missionsDashboard.medium :
+                                    t.missionsDashboard.low
                                   }
                                 </Badge>
                               </div>
@@ -400,7 +306,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
-                                  <span>{translations.estimatedTimeLabel}: {recommendation.estimatedTime}</span>
+                                  <span>{t.missionsDashboard.estimatedTimeLabel}: {recommendation.estimatedTime}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Target className="h-3 w-3" />
@@ -417,7 +323,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                                 disabled={isAtLimit}
                               >
                                 <Plus className="h-4 w-4 mr-1" />
-                                {translations.convertToTask}
+                                {t.missionsDashboard.convertToTask}
                               </Button>
                             </div>
                           </div>
@@ -440,7 +346,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder={translations.searchPlaceholder}
+                  placeholder={t.missionsDashboard.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -450,34 +356,34 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
             
             <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={translations.filterByStatus} />
+                <SelectValue placeholder={t.missionsDashboard.filterByStatus} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{translations.all}</SelectItem>
-                <SelectItem value="pending">{translations.pending}</SelectItem>
-                <SelectItem value="in_progress">{translations.inProgress}</SelectItem>
-                <SelectItem value="completed">{translations.completed}</SelectItem>
+                <SelectItem value="all">{t.missionsDashboard.all}</SelectItem>
+                <SelectItem value="pending">{t.missionsDashboard.pending}</SelectItem>
+                <SelectItem value="in_progress">{t.missionsDashboard.inProgress}</SelectItem>
+                <SelectItem value="completed">{t.missionsDashboard.completed}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={priorityFilter} onValueChange={(value: any) => setPriorityFilter(value)}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={translations.filterByPriority} />
+                <SelectValue placeholder={t.missionsDashboard.filterByPriority} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{translations.all}</SelectItem>
-                <SelectItem value="1">{translations.high}</SelectItem>
-                <SelectItem value="2">{translations.medium}</SelectItem>
-                <SelectItem value="3">{translations.low}</SelectItem>
+                <SelectItem value="all">{t.missionsDashboard.all}</SelectItem>
+                <SelectItem value="1">{t.missionsDashboard.high}</SelectItem>
+                <SelectItem value="2">{t.missionsDashboard.medium}</SelectItem>
+                <SelectItem value="3">{t.missionsDashboard.low}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={agentFilter} onValueChange={setAgentFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={translations.filterByAgent} />
+                <SelectValue placeholder={t.missionsDashboard.filterByAgent} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{translations.all}</SelectItem>
+                <SelectItem value="all">{t.missionsDashboard.all}</SelectItem>
                 {availableAgents.map(agent => (
                   <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
                 ))}
@@ -490,9 +396,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       {/* Tasks Tabs */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">{translations.allMissions}</TabsTrigger>
-          <TabsTrigger value="active">{translations.activeMissions}</TabsTrigger>
-          <TabsTrigger value="completed">{translations.completedMissions}</TabsTrigger>
+          <TabsTrigger value="all">{t.missionsDashboard.allMissions}</TabsTrigger>
+          <TabsTrigger value="active">{t.missionsDashboard.activeMissions}</TabsTrigger>
+          <TabsTrigger value="completed">{t.missionsDashboard.completedMissions}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -500,10 +406,10 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
             <Card>
               <CardContent className="p-8 text-center">
                 <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{translations.noMissions}</h3>
-                <p className="text-muted-foreground mb-4">{translations.noMissionsDesc}</p>
+                <h3 className="text-lg font-semibold mb-2">{t.missionsDashboard.noMissions}</h3>
+                <p className="text-muted-foreground mb-4">{t.missionsDashboard.noMissionsDesc}</p>
                 <Button onClick={() => navigate('/maturity-calculator')}>
-                  {translations.createFirst}
+                  {t.missionsDashboard.createFirst}
                 </Button>
               </CardContent>
             </Card>
@@ -526,7 +432,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                               {task.title}
                             </h3>
                             <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                              {translations.priority} {task.priority}
+                              {t.missionsDashboard.priority} {task.priority}
                             </Badge>
                           </div>
                           
@@ -560,19 +466,19 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                             {task.status === 'pending' && (
                               <>
                                 <Play className="h-4 w-4 mr-1" />
-                                {translations.startTask}
+                                {t.missionsDashboard.startTask}
                               </>
                             )}
                             {task.status === 'in_progress' && (
                               <>
                                 <ArrowRight className="h-4 w-4 mr-1" />
-                                {translations.continueTask}
+                                {t.missionsDashboard.continueTask}
                               </>
                             )}
                             {task.status === 'completed' && (
                               <>
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                {translations.reviewTask}
+                                {t.missionsDashboard.reviewTask}
                               </>
                             )}
                           </Button>
@@ -609,7 +515,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                         </div>
                       </div>
                       <Button onClick={() => handleTaskAction(task)}>
-                        {task.status === 'pending' ? translations.startTask : translations.continueTask}
+                        {task.status === 'pending' ? t.missionsDashboard.startTask : t.missionsDashboard.continueTask}
                       </Button>
                     </div>
                   </CardContent>
@@ -645,7 +551,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                         </div>
                       </div>
                       <Button variant="outline" onClick={() => onTaskSelect(task)}>
-                        {translations.reviewTask}
+                        {t.missionsDashboard.reviewTask}
                       </Button>
                     </div>
                   </CardContent>

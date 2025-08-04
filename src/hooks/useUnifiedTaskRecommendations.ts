@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CategoryScore } from '@/types/dashboard';
 import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
+import { getTranslations } from '@/translations';
 import { v4 as uuidv4 } from 'uuid';
 
 interface UseUnifiedTaskRecommendationsProps {
@@ -10,152 +11,154 @@ interface UseUnifiedTaskRecommendationsProps {
 
 export const useUnifiedTaskRecommendations = ({ 
   maturityScores, 
-  language = 'es' 
+  language = 'en' 
 }: UseUnifiedTaskRecommendationsProps): OptimizedRecommendedTask[] => {
   
   return useMemo(() => {
     if (!maturityScores) return [];
 
+    const t = getTranslations(language);
+
     // Calculate maturity level
     const average = Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4;
     
-    let maturityLevel = 'Explorador';
-    if (average >= 80) maturityLevel = 'Visionario';
-    else if (average >= 60) maturityLevel = 'Estratega';
-    else if (average >= 40) maturityLevel = 'Constructor';
+    let maturityLevel: 'explorador' | 'constructor' | 'estratega' | 'visionario' = 'explorador';
+    if (average >= 80) maturityLevel = 'visionario';
+    else if (average >= 60) maturityLevel = 'estratega';
+    else if (average >= 40) maturityLevel = 'constructor';
 
     const tasksByLevel = {
-      'Explorador': [
+      'explorador': [
         { 
-          title: 'Validar tu idea de negocio con expertos', 
-          description: 'Obtén feedback profesional sobre tu concepto de negocio y valida su viabilidad en el mercado',
+          title: t.recommendedTasks.explorador.validateBusiness.title,
+          description: t.recommendedTasks.explorador.validateBusiness.description,
           agent: 'cultural-consultant',
-          agentName: 'Consultor Cultural',
+          agentName: t.recommendedTasks.agents.culturalConsultant,
           priority: 'high' as const,
-          category: 'Validación',
+          category: t.recommendedTasks.categories.validation,
           estimatedTime: '2-3 horas',
-          prompt: 'Necesito validar mi idea de negocio con expertos. Ayúdame a estructurar mi propuesta y encontrar el feedback necesario.'
+          prompt: t.recommendedTasks.explorador.validateBusiness.prompt
         },
         { 
-          title: 'Calcular costos reales de tu proyecto', 
-          description: 'Define presupuestos precisos y entiende todos los costos involucrados en tu proyecto',
+          title: t.recommendedTasks.explorador.calculateCosts.title,
+          description: t.recommendedTasks.explorador.calculateCosts.description,
           agent: 'cost-calculator',
-          agentName: 'Calculadora de Costos',
+          agentName: t.recommendedTasks.agents.costCalculator,
           priority: 'high' as const,
-          category: 'Finanzas',
+          category: t.recommendedTasks.categories.finances,
           estimatedTime: '1-2 horas',
-          prompt: 'Ayúdame a calcular todos los costos reales de mi proyecto para tener un presupuesto preciso.'
+          prompt: t.recommendedTasks.explorador.calculateCosts.prompt
         },
         { 
-          title: 'Establecer estructura legal básica', 
-          description: 'Protege tu negocio legalmente con la estructura jurídica adecuada',
+          title: t.recommendedTasks.explorador.legalStructure.title,
+          description: t.recommendedTasks.explorador.legalStructure.description,
           agent: 'collaboration-agreement',
-          agentName: 'Asesor Legal',
+          agentName: t.recommendedTasks.agents.legalAdvisor,
           priority: 'medium' as const,
-          category: 'Legal',
+          category: t.recommendedTasks.categories.legal,
           estimatedTime: '2-4 horas',
-          prompt: 'Necesito establecer la estructura legal básica para mi negocio. Guíame en el proceso.'
+          prompt: t.recommendedTasks.explorador.legalStructure.prompt
         }
       ],
-      'Constructor': [
+      'constructor': [
         { 
-          title: 'Desarrollar estrategia de marketing digital', 
-          description: 'Atrae a tus primeros clientes con una estrategia de marketing efectiva',
+          title: t.recommendedTasks.constructor.digitalMarketing.title,
+          description: t.recommendedTasks.constructor.digitalMarketing.description,
           agent: 'marketing-advisor',
-          agentName: 'Asesor de Marketing',
+          agentName: t.recommendedTasks.agents.marketingAdvisor,
           priority: 'high' as const,
-          category: 'Marketing',
+          category: t.recommendedTasks.categories.marketing,
           estimatedTime: '3-5 horas',
-          prompt: 'Ayúdame a desarrollar una estrategia de marketing digital para atraer mis primeros clientes.'
+          prompt: t.recommendedTasks.constructor.digitalMarketing.prompt
         },
         { 
-          title: 'Optimizar gestión de proyectos', 
-          description: 'Organiza tu flujo de trabajo para maximizar la productividad',
+          title: t.recommendedTasks.constructor.projectManagement.title,
+          description: t.recommendedTasks.constructor.projectManagement.description,
           agent: 'project-manager',
-          agentName: 'Gestor de Proyectos',
+          agentName: t.recommendedTasks.agents.projectManager,
           priority: 'medium' as const,
-          category: 'Operaciones',
+          category: t.recommendedTasks.categories.operations,
           estimatedTime: '2-3 horas',
-          prompt: 'Necesito optimizar la gestión de mis proyectos para ser más eficiente.'
+          prompt: t.recommendedTasks.constructor.projectManagement.prompt
         },
         { 
-          title: 'Crear sistema de precios competitivo', 
-          description: 'Maximiza tus ingresos con una estrategia de precios inteligente',
+          title: t.recommendedTasks.constructor.pricingSystem.title,
+          description: t.recommendedTasks.constructor.pricingSystem.description,
           agent: 'pricing-assistant',
-          agentName: 'Asistente de Precios',
+          agentName: t.recommendedTasks.agents.pricingAssistant,
           priority: 'medium' as const,
-          category: 'Estrategia',
+          category: t.recommendedTasks.categories.strategy,
           estimatedTime: '1-2 horas',
-          prompt: 'Ayúdame a crear un sistema de precios competitivo para mis productos/servicios.'
+          prompt: t.recommendedTasks.constructor.pricingSystem.prompt
         }
       ],
-      'Estratega': [
+      'estratega': [
         { 
-          title: 'Explorar mercados internacionales', 
-          description: 'Expande globalmente y encuentra nuevas oportunidades de mercado',
+          title: t.recommendedTasks.estratega.internationalMarkets.title,
+          description: t.recommendedTasks.estratega.internationalMarkets.description,
           agent: 'export-advisor',
-          agentName: 'Asesor de Exportación',
+          agentName: t.recommendedTasks.agents.exportAdvisor,
           priority: 'high' as const,
-          category: 'Expansión',
+          category: t.recommendedTasks.categories.expansion,
           estimatedTime: '4-6 horas',
-          prompt: 'Quiero explorar oportunidades en mercados internacionales. Ayúdame con la estrategia.'
+          prompt: t.recommendedTasks.estratega.internationalMarkets.prompt
         },
         { 
-          title: 'Desarrollar red de stakeholders', 
-          description: 'Conecta con socios clave para potenciar tu negocio',
+          title: t.recommendedTasks.estratega.stakeholderNetwork.title,
+          description: t.recommendedTasks.estratega.stakeholderNetwork.description,
           agent: 'stakeholder-matching',
-          agentName: 'Conector de Stakeholders',
+          agentName: t.recommendedTasks.agents.stakeholderConnector,
           priority: 'high' as const,
-          category: 'Networking',
+          category: t.recommendedTasks.categories.networking,
           estimatedTime: '3-4 horas',
-          prompt: 'Necesito desarrollar una red sólida de stakeholders para mi negocio.'
+          prompt: t.recommendedTasks.estratega.stakeholderNetwork.prompt
         },
         { 
-          title: 'Optimizar marca personal', 
-          description: 'Fortalece tu posicionamiento y presencia en el mercado',
+          title: t.recommendedTasks.estratega.personalBrand.title,
+          description: t.recommendedTasks.estratega.personalBrand.description,
           agent: 'branding-strategy',
-          agentName: 'Estratega de Marca',
+          agentName: t.recommendedTasks.agents.brandingStrategist,
           priority: 'medium' as const,
-          category: 'Branding',
+          category: t.recommendedTasks.categories.branding,
           estimatedTime: '2-3 horas',
-          prompt: 'Ayúdame a optimizar mi marca personal y posicionamiento en el mercado.'
+          prompt: t.recommendedTasks.estratega.personalBrand.prompt
         }
       ],
-      'Visionario': [
+      'visionario': [
         { 
-          title: 'Desarrollar estrategia de escalabilidad', 
-          description: 'Multiplica tu impacto con sistemas escalables',
+          title: t.recommendedTasks.visionario.scalabilityStrategy.title,
+          description: t.recommendedTasks.visionario.scalabilityStrategy.description,
           agent: 'business-scaling',
-          agentName: 'Especialista en Escalabilidad',
+          agentName: t.recommendedTasks.agents.scalingSpecialist,
           priority: 'high' as const,
-          category: 'Crecimiento',
+          category: t.recommendedTasks.categories.growth,
           estimatedTime: '5-8 horas',
-          prompt: 'Necesito desarrollar una estrategia para escalar mi negocio de manera sostenible.'
+          prompt: t.recommendedTasks.visionario.scalabilityStrategy.prompt
         },
         { 
-          title: 'Implementar innovación disruptiva', 
-          description: 'Lidera el cambio en tu industria con innovación',
+          title: t.recommendedTasks.visionario.disruptiveInnovation.title,
+          description: t.recommendedTasks.visionario.disruptiveInnovation.description,
           agent: 'innovation-consultant',
-          agentName: 'Consultor de Innovación',
+          agentName: t.recommendedTasks.agents.innovationConsultant,
           priority: 'high' as const,
-          category: 'Innovación',
+          category: t.recommendedTasks.categories.innovation,
           estimatedTime: '4-6 horas',
-          prompt: 'Quiero implementar innovación disruptiva en mi industria. Guíame en el proceso.'
+          prompt: t.recommendedTasks.visionario.disruptiveInnovation.prompt
         },
         { 
-          title: 'Crear ecosistema de negocios', 
-          description: 'Construye un imperio empresarial integrado',
+          title: t.recommendedTasks.visionario.businessEcosystem.title,
+          description: t.recommendedTasks.visionario.businessEcosystem.description,
           agent: 'ecosystem-builder',
-          agentName: 'Constructor de Ecosistemas',
+          agentName: t.recommendedTasks.agents.ecosystemBuilder,
           priority: 'medium' as const,
-          category: 'Estrategia',
+          category: t.recommendedTasks.categories.strategy,
           estimatedTime: '6-10 horas',
-          prompt: 'Ayúdame a crear un ecosistema de negocios integrado y rentable.'
+          prompt: t.recommendedTasks.visionario.businessEcosystem.prompt
         }
       ]
     };
 
-    const selectedTasks = tasksByLevel[maturityLevel] || tasksByLevel['Explorador'];
+    const selectedTasks = tasksByLevel[maturityLevel] || tasksByLevel['explorador'];
     
     return selectedTasks.map(task => ({
       id: `rec_${uuidv4()}`,

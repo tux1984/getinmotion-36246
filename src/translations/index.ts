@@ -237,6 +237,153 @@ export interface Translations {
     generatingTasks: string;
     generatingTasksDescription: string;
   };
+
+  // Missions Dashboard
+  missionsDashboard: {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    allMissions: string;
+    activeMissions: string;
+    completedMissions: string;
+    filterByStatus: string;
+    filterByPriority: string;
+    filterByAgent: string;
+    all: string;
+    pending: string;
+    inProgress: string;
+    completed: string;
+    high: string;
+    medium: string;
+    low: string;
+    continueTask: string;
+    startTask: string;
+    reviewTask: string;
+    completeTask: string;
+    taskStats: string;
+    activeCount: string;
+    completedCount: string;
+    remainingSlots: string;
+    progressTitle: string;
+    noMissions: string;
+    noMissionsDesc: string;
+    createFirst: string;
+    estimatedTime: string;
+    minutes: string;
+    priority: string;
+    agent: string;
+    status: string;
+    lastUpdated: string;
+    daysAgo: string;
+    today: string;
+    yesterday: string;
+    recommendedTasks: string;
+    recommendedSubtitle: string;
+    convertToTask: string;
+    recommendationsPriority: string;
+    estimatedTimeLabel: string;
+    hideRecommendations: string;
+    showRecommendations: string;
+  };
+
+  // Recommended Tasks
+  recommendedTasks: {
+    categories: {
+      validation: string;
+      finances: string;
+      legal: string;
+      marketing: string;
+      operations: string;
+      strategy: string;
+      expansion: string;
+      networking: string;
+      branding: string;
+      growth: string;
+      innovation: string;
+    };
+    agents: {
+      culturalConsultant: string;
+      costCalculator: string;
+      legalAdvisor: string;
+      marketingAdvisor: string;
+      projectManager: string;
+      pricingAssistant: string;
+      exportAdvisor: string;
+      stakeholderConnector: string;
+      brandingStrategist: string;
+      scalingSpecialist: string;
+      innovationConsultant: string;
+      ecosystemBuilder: string;
+    };
+    explorador: {
+      validateBusiness: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      calculateCosts: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      legalStructure: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+    };
+    constructor: {
+      digitalMarketing: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      projectManagement: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      pricingSystem: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+    };
+    estratega: {
+      internationalMarkets: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      stakeholderNetwork: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      personalBrand: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+    };
+    visionario: {
+      scalabilityStrategy: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      disruptiveInnovation: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+      businessEcosystem: {
+        title: string;
+        description: string;
+        prompt: string;
+      };
+    };
+  };
 }
 
 export const translations: Record<'en' | 'es', Translations> = {
@@ -457,6 +604,149 @@ export const translations: Record<'en' | 'es', Translations> = {
       generatingTasks: 'Creating Your Action Plan',
       generatingTasksDescription: 'AI is analyzing your responses to create personalized tasks...'
     },
+    missionsDashboard: {
+      title: 'My Missions 🎯',
+      subtitle: 'Central hub for all your creative tasks and goals',
+      searchPlaceholder: 'Search missions...',
+      allMissions: 'All Missions',
+      activeMissions: 'Active',
+      completedMissions: 'Completed',
+      filterByStatus: 'Filter by Status',
+      filterByPriority: 'Filter by Priority',
+      filterByAgent: 'Filter by Agent',
+      all: 'All',
+      pending: 'Not Started',
+      inProgress: 'In Progress',
+      completed: 'Completed',
+      high: 'High Priority',
+      medium: 'Medium Priority',
+      low: 'Low Priority',
+      continueTask: 'Continue',
+      startTask: 'Start',
+      reviewTask: 'Review',
+      completeTask: 'Mark Complete',
+      taskStats: 'Mission Statistics',
+      activeCount: 'Active Missions',
+      completedCount: 'Completed',
+      remainingSlots: 'Free Slots',
+      progressTitle: 'Your Progress',
+      noMissions: 'No missions found',
+      noMissionsDesc: 'Try adjusting your filters or create new tasks',
+      createFirst: 'Create My First Mission',
+      estimatedTime: 'Est. time',
+      minutes: 'min',
+      priority: 'Priority',
+      agent: 'Agent',
+      status: 'Status',
+      lastUpdated: 'Updated',
+      daysAgo: 'days ago',
+      today: 'today',
+      yesterday: 'yesterday',
+      recommendedTasks: 'Recommended Tasks',
+      recommendedSubtitle: 'Smart suggestions based on your business maturity',
+      convertToTask: 'Add to Missions',
+      recommendationsPriority: 'Recommended Priority',
+      estimatedTimeLabel: 'Estimated Time',
+      hideRecommendations: 'Hide Recommendations',
+      showRecommendations: 'Show Recommendations'
+    },
+    recommendedTasks: {
+      categories: {
+        validation: 'Validation',
+        finances: 'Finances',
+        legal: 'Legal',
+        marketing: 'Marketing',
+        operations: 'Operations',
+        strategy: 'Strategy',
+        expansion: 'Expansion',
+        networking: 'Networking',
+        branding: 'Branding',
+        growth: 'Growth',
+        innovation: 'Innovation'
+      },
+      agents: {
+        culturalConsultant: 'Cultural Consultant',
+        costCalculator: 'Cost Calculator',
+        legalAdvisor: 'Legal Advisor',
+        marketingAdvisor: 'Marketing Advisor',
+        projectManager: 'Project Manager',
+        pricingAssistant: 'Pricing Assistant',
+        exportAdvisor: 'Export Advisor',
+        stakeholderConnector: 'Stakeholder Connector',
+        brandingStrategist: 'Branding Strategist',
+        scalingSpecialist: 'Scaling Specialist',
+        innovationConsultant: 'Innovation Consultant',
+        ecosystemBuilder: 'Ecosystem Builder'
+      },
+      explorador: {
+        validateBusiness: {
+          title: 'Validate your business idea with experts',
+          description: 'Get professional feedback on your business concept and validate its market viability',
+          prompt: 'I need to validate my business idea with experts. Help me structure my proposal and find the necessary feedback.'
+        },
+        calculateCosts: {
+          title: 'Calculate real project costs',
+          description: 'Define precise budgets and understand all costs involved in your project',
+          prompt: 'Help me calculate all the real costs of my project to have an accurate budget.'
+        },
+        legalStructure: {
+          title: 'Establish basic legal structure',
+          description: 'Protect your business legally with the appropriate legal structure',
+          prompt: 'I need to establish the basic legal structure for my business. Guide me through the process.'
+        }
+      },
+      constructor: {
+        digitalMarketing: {
+          title: 'Develop digital marketing strategy',
+          description: 'Attract your first customers with an effective marketing strategy',
+          prompt: 'Help me develop a digital marketing strategy to attract my first customers.'
+        },
+        projectManagement: {
+          title: 'Optimize project management',
+          description: 'Organize your workflow to maximize productivity',
+          prompt: 'I need to optimize my project management to be more efficient.'
+        },
+        pricingSystem: {
+          title: 'Create competitive pricing system',
+          description: 'Maximize your revenue with an intelligent pricing strategy',
+          prompt: 'Help me create a competitive pricing system for my products/services.'
+        }
+      },
+      estratega: {
+        internationalMarkets: {
+          title: 'Explore international markets',
+          description: 'Expand globally and find new market opportunities',
+          prompt: 'I want to explore opportunities in international markets. Help me with the strategy.'
+        },
+        stakeholderNetwork: {
+          title: 'Develop stakeholder network',
+          description: 'Connect with key partners to boost your business',
+          prompt: 'I need to develop a solid stakeholder network for my business.'
+        },
+        personalBrand: {
+          title: 'Optimize personal brand',
+          description: 'Strengthen your positioning and market presence',
+          prompt: 'Help me optimize my personal brand and market positioning.'
+        }
+      },
+      visionario: {
+        scalabilityStrategy: {
+          title: 'Develop scalability strategy',
+          description: 'Multiply your impact with scalable systems',
+          prompt: 'I need to develop a strategy to scale my business sustainably.'
+        },
+        disruptiveInnovation: {
+          title: 'Implement disruptive innovation',
+          description: 'Lead change in your industry with innovation',
+          prompt: 'I want to implement disruptive innovation in my industry. Guide me through the process.'
+        },
+        businessEcosystem: {
+          title: 'Create business ecosystem',
+          description: 'Build an integrated business empire',
+          prompt: 'Help me create an integrated and profitable business ecosystem.'
+        }
+      }
+    },
   },
   es: {
     ui: {
@@ -674,6 +964,149 @@ export const translations: Record<'en' | 'es', Translations> = {
       description: 'Descubre las fortalezas de tu proyecto creativo y obtén recomendaciones personalizadas',
       generatingTasks: 'Creando tu Plan de Acción',
       generatingTasksDescription: 'La IA está analizando tus respuestas para crear tareas personalizadas...'
+    },
+    missionsDashboard: {
+      title: 'Mis Misiones 🎯',
+      subtitle: 'Centro de control para todas tus tareas y objetivos creativos',
+      searchPlaceholder: 'Buscar misiones...',
+      allMissions: 'Todas las Misiones',
+      activeMissions: 'Activas',
+      completedMissions: 'Completadas',
+      filterByStatus: 'Filtrar por Estado',
+      filterByPriority: 'Filtrar por Prioridad',
+      filterByAgent: 'Filtrar por Agente',
+      all: 'Todas',
+      pending: 'Sin Iniciar',
+      inProgress: 'En Progreso',
+      completed: 'Completadas',
+      high: 'Prioridad Alta',
+      medium: 'Prioridad Media',
+      low: 'Prioridad Baja',
+      continueTask: 'Continuar',
+      startTask: 'Iniciar',
+      reviewTask: 'Revisar',
+      completeTask: 'Marcar Completa',
+      taskStats: 'Estadísticas de Misiones',
+      activeCount: 'Misiones Activas',
+      completedCount: 'Completadas',
+      remainingSlots: 'Espacios Libres',
+      progressTitle: 'Tu Progreso',
+      noMissions: 'No se encontraron misiones',
+      noMissionsDesc: 'Intenta ajustar los filtros o crea nuevas tareas',
+      createFirst: 'Crear Mi Primera Misión',
+      estimatedTime: 'Tiempo est.',
+      minutes: 'min',
+      priority: 'Prioridad',
+      agent: 'Agente',
+      status: 'Estado',
+      lastUpdated: 'Actualizada',
+      daysAgo: 'días atrás',
+      today: 'hoy',
+      yesterday: 'ayer',
+      recommendedTasks: 'Tareas Recomendadas',
+      recommendedSubtitle: 'Sugerencias inteligentes basadas en tu madurez empresarial',
+      convertToTask: 'Agregar a Misiones',
+      recommendationsPriority: 'Prioridad Recomendada',
+      estimatedTimeLabel: 'Tiempo Estimado',
+      hideRecommendations: 'Ocultar Recomendaciones',
+      showRecommendations: 'Mostrar Recomendaciones'
+    },
+    recommendedTasks: {
+      categories: {
+        validation: 'Validación',
+        finances: 'Finanzas',
+        legal: 'Legal',
+        marketing: 'Marketing',
+        operations: 'Operaciones',
+        strategy: 'Estrategia',
+        expansion: 'Expansión',
+        networking: 'Networking',
+        branding: 'Branding',
+        growth: 'Crecimiento',
+        innovation: 'Innovación'
+      },
+      agents: {
+        culturalConsultant: 'Consultor Cultural',
+        costCalculator: 'Calculadora de Costos',
+        legalAdvisor: 'Asesor Legal',
+        marketingAdvisor: 'Asesor de Marketing',
+        projectManager: 'Gestor de Proyectos',
+        pricingAssistant: 'Asistente de Precios',
+        exportAdvisor: 'Asesor de Exportación',
+        stakeholderConnector: 'Conector de Stakeholders',
+        brandingStrategist: 'Estratega de Marca',
+        scalingSpecialist: 'Especialista en Escalabilidad',
+        innovationConsultant: 'Consultor de Innovación',
+        ecosystemBuilder: 'Constructor de Ecosistemas'
+      },
+      explorador: {
+        validateBusiness: {
+          title: 'Validar tu idea de negocio con expertos',
+          description: 'Obtén feedback profesional sobre tu concepto de negocio y valida su viabilidad en el mercado',
+          prompt: 'Necesito validar mi idea de negocio con expertos. Ayúdame a estructurar mi propuesta y encontrar el feedback necesario.'
+        },
+        calculateCosts: {
+          title: 'Calcular costos reales de tu proyecto',
+          description: 'Define presupuestos precisos y entiende todos los costos involucrados en tu proyecto',
+          prompt: 'Ayúdame a calcular todos los costos reales de mi proyecto para tener un presupuesto preciso.'
+        },
+        legalStructure: {
+          title: 'Establecer estructura legal básica',
+          description: 'Protege tu negocio legalmente con la estructura jurídica adecuada',
+          prompt: 'Necesito establecer la estructura legal básica para mi negocio. Guíame en el proceso.'
+        }
+      },
+      constructor: {
+        digitalMarketing: {
+          title: 'Desarrollar estrategia de marketing digital',
+          description: 'Atrae a tus primeros clientes con una estrategia de marketing efectiva',
+          prompt: 'Ayúdame a desarrollar una estrategia de marketing digital para atraer mis primeros clientes.'
+        },
+        projectManagement: {
+          title: 'Optimizar gestión de proyectos',
+          description: 'Organiza tu flujo de trabajo para maximizar la productividad',
+          prompt: 'Necesito optimizar la gestión de mis proyectos para ser más eficiente.'
+        },
+        pricingSystem: {
+          title: 'Crear sistema de precios competitivo',
+          description: 'Maximiza tus ingresos con una estrategia de precios inteligente',
+          prompt: 'Ayúdame a crear un sistema de precios competitivo para mis productos/servicios.'
+        }
+      },
+      estratega: {
+        internationalMarkets: {
+          title: 'Explorar mercados internacionales',
+          description: 'Expande globalmente y encuentra nuevas oportunidades de mercado',
+          prompt: 'Quiero explorar oportunidades en mercados internacionales. Ayúdame con la estrategia.'
+        },
+        stakeholderNetwork: {
+          title: 'Desarrollar red de stakeholders',
+          description: 'Conecta con socios clave para potenciar tu negocio',
+          prompt: 'Necesito desarrollar una red sólida de stakeholders para mi negocio.'
+        },
+        personalBrand: {
+          title: 'Optimizar marca personal',
+          description: 'Fortalece tu posicionamiento y presencia en el mercado',
+          prompt: 'Ayúdame a optimizar mi marca personal y posicionamiento en el mercado.'
+        }
+      },
+      visionario: {
+        scalabilityStrategy: {
+          title: 'Desarrollar estrategia de escalabilidad',
+          description: 'Multiplica tu impacto con sistemas escalables',
+          prompt: 'Necesito desarrollar una estrategia para escalar mi negocio de manera sostenible.'
+        },
+        disruptiveInnovation: {
+          title: 'Implementar innovación disruptiva',
+          description: 'Lidera el cambio en tu industria con innovación',
+          prompt: 'Quiero implementar innovación disruptiva en mi industria. Guíame en el proceso.'
+        },
+        businessEcosystem: {
+          title: 'Crear ecosistema de negocios',
+          description: 'Construye un imperio empresarial integrado',
+          prompt: 'Ayúdame a crear un ecosistema de negocios integrado y rentable.'
+        }
+      }
     },
   },
 };
