@@ -385,6 +385,33 @@ export type Database = {
           },
         ]
       }
+      task_generation_history: {
+        Row: {
+          created_at: string
+          generation_context: Json | null
+          generation_source: string
+          id: string
+          tasks_created: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          generation_context?: Json | null
+          generation_source: string
+          id?: string
+          tasks_created?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          generation_context?: Json | null
+          generation_source?: string
+          id?: string
+          tasks_created?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       task_steps: {
         Row: {
           ai_assistance_log: Json | null
@@ -510,37 +537,49 @@ export type Database = {
       user_master_context: {
         Row: {
           business_context: Json | null
+          business_profile: Json | null
           context_version: number | null
           conversation_insights: Json | null
           created_at: string | null
           goals_and_objectives: Json | null
           id: string
+          language_preference: string | null
+          last_assessment_date: string | null
           last_updated: string | null
           preferences: Json | null
+          task_generation_context: Json | null
           technical_details: Json | null
           user_id: string
         }
         Insert: {
           business_context?: Json | null
+          business_profile?: Json | null
           context_version?: number | null
           conversation_insights?: Json | null
           created_at?: string | null
           goals_and_objectives?: Json | null
           id?: string
+          language_preference?: string | null
+          last_assessment_date?: string | null
           last_updated?: string | null
           preferences?: Json | null
+          task_generation_context?: Json | null
           technical_details?: Json | null
           user_id: string
         }
         Update: {
           business_context?: Json | null
+          business_profile?: Json | null
           context_version?: number | null
           conversation_insights?: Json | null
           created_at?: string | null
           goals_and_objectives?: Json | null
           id?: string
+          language_preference?: string | null
+          last_assessment_date?: string | null
           last_updated?: string | null
           preferences?: Json | null
+          task_generation_context?: Json | null
           technical_details?: Json | null
           user_id?: string
         }

@@ -41,7 +41,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Build specialized context for the step
+    // Build specialized context for the step with HTML formatting
     const stepContext = `
 CONTEXTO DEL PASO ACTUAL:
 - Paso: ${step.title}
@@ -50,15 +50,32 @@ CONTEXTO DEL PASO ACTUAL:
 - Datos actuales del usuario: ${JSON.stringify(step.user_input_data)}
 ${step.ai_context_prompt ? `- Contexto específico: ${step.ai_context_prompt}` : ''}
 
-INSTRUCCIONES PARA LA IA:
+INSTRUCCIONES CRÍTICAS PARA LA IA:
 1. Eres un asistente especializado SOLO en este paso específico
 2. NO ofrezcas ayuda sobre otros pasos o temas generales
 3. Enfócate en ayudar al usuario a completar ESTE paso exitosamente
 4. Proporciona instrucciones claras y accionables
 5. Si el usuario hace preguntas fuera del contexto del paso, redirige amablemente
 6. Ayuda con ejemplos, aclaraciones o solución de bloqueos específicos de este paso
-7. Responde en ${language === 'es' ? 'español' : 'inglés'}
+7. Responde SIEMPRE en ${language === 'es' ? 'español' : 'inglés'}
 8. Mantén respuestas concisas y enfocadas en la acción
+
+FORMATO DE RESPUESTA OBLIGATORIO - USA HTML BIEN FORMATEADO:
+- **<p>** para párrafos (NUNCA uses \\n\\n)
+- **<strong>** para texto en negrilla (NUNCA uses **)
+- **<ul><li>** para listas con viñetas
+- **<ol><li>** para listas numeradas
+- **<br>** solo cuando necesites salto de línea específico
+- **<em>** para énfasis sutil
+- NUNCA uses markdown (*, **, etc.), SOLO HTML limpio
+
+EJEMPLO DE RESPUESTA CORRECTA:
+<p><strong>¡Perfecto!</strong> Para completar este paso te sugiero:</p>
+<ul>
+<li><strong>Primero:</strong> Define tu actividad específica</li>
+<li><strong>Segundo:</strong> Considera tu audiencia</li>
+</ul>
+<p>¿Te ayudo con algún aspecto específico?</p>
 `;
 
     // Build conversation messages for OpenAI
