@@ -26,6 +26,7 @@ export interface Translations {
     settings: string;
     help: string;
     home: string;
+    generatingRecommendations: string;
   };
 
   // Dashboard
@@ -93,6 +94,7 @@ export interface Translations {
     completeThisFirst: string;
     needToComplete: string;
     due: string;
+    tasksLabel: string;
     taskStatus: {
       completed: string;
       pending: string;
@@ -257,6 +259,10 @@ export interface Translations {
     description: string;
     generatingTasks: string;
     generatingTasksDescription: string;
+    ideaValidation: string;
+    userExperience: string;
+    marketFit: string;
+    monetization: string;
   };
 
   // Missions Dashboard
@@ -405,6 +411,48 @@ export interface Translations {
       };
     };
   };
+  
+  // Agent filtering and management
+  agentFilters: {
+    search: string;
+    category: string;
+    status: string;
+    priority: string;
+    sortBy: string;
+    clearFilters: string;
+    allCategories: string;
+    filtersLabel: string;
+  };
+  
+  // Task management
+  taskManagement: {
+    taskLimit: string;
+    currentTasks: string;
+    recommendation: string;
+    pauseTask: string;
+    resumeTask: string;
+    deleteTask: string;
+    reorderTasks: string;
+    limitReached: string;
+    limitWarning: string;
+    smartSuggestion: string;
+    manage: string;
+    paused: string;
+  };
+  
+  // Common sorting and filtering options
+  sortOptions: {
+    name: string;
+    usage: string;
+    impact: string;
+  };
+  
+  // Impact levels
+  impact: {
+    high: string;
+    medium: string;
+    low: string;
+  };
 }
 
 export const translations: Record<'en' | 'es', Translations> = {
@@ -434,6 +482,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       settings: 'Settings',
       help: 'Help',
       home: 'Home',
+      generatingRecommendations: 'Generating personalized recommendations...',
     },
     dashboard: {
       welcome: 'Welcome to GET IN MOTION MVP!',
@@ -472,6 +521,21 @@ export const translations: Record<'en' | 'es', Translations> = {
       getStarted: "Based on your answers, here's where I think you should start:",
       yourCreativeJourney: 'Your Creative Journey 🎨',
       continueTask: 'Continue',
+      
+      // TaskBasedDashboard specific
+      welcomeTitle: 'Welcome to Your Creative Workspace',
+      welcomeSubtitle: 'Ready to bring your creative project to life?',
+      priorityTasks: 'Priority Tasks Based on Your Assessment',
+      activeAgents: 'Active AI Assistants',
+      quickActions: 'Quick Actions',
+      projectProgress: 'Project Progress',
+      viewAgent: 'View Agent',
+      retakeAssessment: 'Retake Assessment',
+      startWithAgent: 'Start with',
+      recommendedAssistant: 'Recommended assistant',
+      noActiveAgents: 'No active agents yet',
+      scheduleSession: 'Schedule Session',
+      viewProgress: 'View Progress',
     },
     tasks: {
       completed: 'Completed! 🎉',
@@ -497,6 +561,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       completeThisFirst: 'Complete this task first',
       needToComplete: 'Complete some tasks to create new ones',
       due: 'Due',
+      tasksLabel: 'tasks',
       taskStatus: {
         completed: 'Completed',
         pending: 'Pending',
@@ -640,7 +705,11 @@ export const translations: Record<'en' | 'es', Translations> = {
       title: 'Cultural Maturity Assessment',
       description: 'Discover your creative project\'s strengths and get personalized recommendations',
       generatingTasks: 'Creating Your Action Plan',
-      generatingTasksDescription: 'AI is analyzing your responses to create personalized tasks...'
+      generatingTasksDescription: 'AI is analyzing your responses to create personalized tasks...',
+      ideaValidation: 'Idea Validation',
+      userExperience: 'User Experience',
+      marketFit: 'Market Fit',
+      monetization: 'Monetization'
     },
     missionsDashboard: {
       title: 'My Missions 🎯',
@@ -785,6 +854,40 @@ export const translations: Record<'en' | 'es', Translations> = {
         }
       }
     },
+    agentFilters: {
+      search: 'Search agents...',
+      category: 'Category',
+      status: 'Status',
+      priority: 'Priority',
+      sortBy: 'Sort by',
+      clearFilters: 'Clear filters',
+      allCategories: 'All categories',
+      filtersLabel: 'Filters:'
+    },
+    taskManagement: {
+      taskLimit: 'Task Management',
+      currentTasks: 'Active Tasks',
+      recommendation: 'Recommendation',
+      pauseTask: 'Pause',
+      resumeTask: 'Resume',
+      deleteTask: 'Delete',
+      reorderTasks: 'Reorder Tasks',
+      limitReached: 'You\'ve reached the task limit',
+      limitWarning: 'Close to task limit',
+      smartSuggestion: 'Consider pausing low-priority tasks to focus on high-impact ones',
+      manage: 'Manage',
+      paused: 'Paused'
+    },
+    sortOptions: {
+      name: 'Name',
+      usage: 'Usage',
+      impact: 'Impact'
+    },
+    impact: {
+      high: 'High Impact',
+      medium: 'Medium Impact',
+      low: 'Low Impact'
+    },
   },
   es: {
     ui: {
@@ -812,6 +915,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       settings: 'Configuración',
       help: 'Ayuda',
       home: 'Inicio',
+      generatingRecommendations: 'Generando recomendaciones personalizadas...',
     },
     dashboard: {
       welcome: '¡Bienvenido al MVP de GET IN MOTION!',
@@ -850,6 +954,21 @@ export const translations: Record<'en' | 'es', Translations> = {
       getStarted: 'Basándome en tus respuestas, creo que deberías empezar por acá:',
       yourCreativeJourney: 'Tu Viaje Creativo 🎨',
       continueTask: 'Continuar',
+      
+      // TaskBasedDashboard specific
+      welcomeTitle: 'Bienvenido a tu Espacio Creativo',
+      welcomeSubtitle: '¿Listo para dar vida a tu proyecto creativo?',
+      priorityTasks: 'Tareas Prioritarias Basadas en tu Evaluación',
+      activeAgents: 'Asistentes IA Activos',
+      quickActions: 'Acciones Rápidas',
+      projectProgress: 'Progreso del Proyecto',
+      viewAgent: 'Ver Agente',
+      retakeAssessment: 'Repetir Evaluación',
+      startWithAgent: 'Empezar con',
+      recommendedAssistant: 'Asistente recomendado',
+      noActiveAgents: 'Sin agentes activos aún',
+      scheduleSession: 'Programar Sesión',
+      viewProgress: 'Ver Progreso',
     },
     tasks: {
       completed: '¡Completada! 🎉',
@@ -875,6 +994,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       completeThisFirst: 'Completa esta tarea primero',
       needToComplete: 'Completa algunas tareas para crear nuevas',
       due: 'Vence',
+      tasksLabel: 'tareas',
       taskStatus: {
         completed: 'Completada',
         pending: 'Pendiente',
@@ -1018,7 +1138,11 @@ export const translations: Record<'en' | 'es', Translations> = {
       title: 'Evaluación de Madurez Cultural',
       description: 'Descubre las fortalezas de tu proyecto creativo y obtén recomendaciones personalizadas',
       generatingTasks: 'Creando tu Plan de Acción',
-      generatingTasksDescription: 'La IA está analizando tus respuestas para crear tareas personalizadas...'
+      generatingTasksDescription: 'La IA está analizando tus respuestas para crear tareas personalizadas...',
+      ideaValidation: 'Validación de Idea',
+      userExperience: 'Experiencia de Usuario',
+      marketFit: 'Ajuste al Mercado',
+      monetization: 'Monetización'
     },
     missionsDashboard: {
       title: 'Mis Misiones 🎯',
@@ -1162,6 +1286,40 @@ export const translations: Record<'en' | 'es', Translations> = {
           prompt: 'Ayúdame a crear un ecosistema de negocios integrado y rentable.'
         }
       }
+    },
+    agentFilters: {
+      search: 'Buscar agentes...',
+      category: 'Categoría',
+      status: 'Estado',
+      priority: 'Prioridad',
+      sortBy: 'Ordenar por',
+      clearFilters: 'Limpiar filtros',
+      allCategories: 'Todas las categorías',
+      filtersLabel: 'Filtros:'
+    },
+    taskManagement: {
+      taskLimit: 'Gestión de Tareas',
+      currentTasks: 'Tareas Activas',
+      recommendation: 'Recomendación',
+      pauseTask: 'Pausar',
+      resumeTask: 'Reanudar',
+      deleteTask: 'Eliminar',
+      reorderTasks: 'Reordenar Tareas',
+      limitReached: 'Has alcanzado el límite de tareas',
+      limitWarning: 'Cerca del límite de tareas',
+      smartSuggestion: 'Considera pausar tareas de baja prioridad para enfocarte en las de alto impacto',
+      manage: 'Gestionar',
+      paused: 'Pausada'
+    },
+    sortOptions: {
+      name: 'Nombre',
+      usage: 'Uso',
+      impact: 'Impacto'
+    },
+    impact: {
+      high: 'Alto Impacto',
+      medium: 'Impacto Medio',
+      low: 'Bajo Impacto'
     },
   },
 };

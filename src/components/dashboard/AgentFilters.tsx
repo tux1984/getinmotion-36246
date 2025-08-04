@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Filter, X, Zap, Circle, CheckCircle, AlertCircle } from 'lucide-react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface AgentFiltersProps {
   searchTerm: string;
@@ -37,48 +38,7 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
   language,
   categories
 }) => {
-  const translations = {
-    en: {
-      search: "Search agents...",
-      category: "Category",
-      status: "Status",
-      priority: "Priority",
-      sortBy: "Sort by",
-      clearFilters: "Clear filters",
-      all: "All",
-      active: "Active",
-      inactive: "Inactive",
-      recommended: "Recommended",
-      high: "High",
-      medium: "Medium",
-      low: "Low",
-      name: "Name",
-      usage: "Usage",
-      impact: "Impact",
-      allCategories: "All categories"
-    },
-    es: {
-      search: "Buscar agentes...",
-      category: "Categoría",
-      status: "Estado",
-      priority: "Prioridad",
-      sortBy: "Ordenar por",
-      clearFilters: "Limpiar filtros",
-      all: "Todos",
-      active: "Activos",
-      inactive: "Inactivos",
-      recommended: "Recomendados",
-      high: "Alta",
-      medium: "Media",
-      low: "Baja",
-      name: "Nombre",
-      usage: "Uso",
-      impact: "Impacto",
-      allCategories: "Todas las categorías"
-    }
-  };
-
-  const t = translations[language];
+  const { t } = useTranslations();
 
   const handleCategoryToggle = (category: string) => {
     if (selectedCategories.includes(category)) {
@@ -96,7 +56,7 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
-          placeholder={t.search}
+          placeholder={t.agentFilters.search}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-10 bg-white/70 backdrop-blur-sm border-purple-200 focus:border-purple-400"
@@ -107,7 +67,7 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
       <div className="flex flex-wrap gap-3 items-center">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-purple-600" />
-          <span className="text-sm font-medium text-gray-700">Filtros:</span>
+          <span className="text-sm font-medium text-gray-700">{t.agentFilters.filtersLabel}</span>
         </div>
 
         {/* Category Multi-Select */}
@@ -139,10 +99,10 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t.all}</SelectItem>
-            <SelectItem value="active">{t.active}</SelectItem>
-            <SelectItem value="inactive">{t.inactive}</SelectItem>
-            <SelectItem value="recommended">{t.recommended}</SelectItem>
+            <SelectItem value="all">{t.missionsDashboard.all}</SelectItem>
+            <SelectItem value="active">{t.status.active}</SelectItem>
+            <SelectItem value="inactive">{t.status.inactive}</SelectItem>
+            <SelectItem value="recommended">{t.missionsDashboard.all}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -151,14 +111,14 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
           <SelectTrigger className="w-32 bg-white/70 border-purple-200">
             <div className="flex items-center gap-2">
               {selectedPriority === 'Alta' && <AlertCircle className="w-3 h-3 text-red-500" />}
-              <SelectValue placeholder={t.priority} />
+              <SelectValue placeholder={t.agentFilters.priority} />
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t.all}</SelectItem>
-            <SelectItem value="Alta">{t.high}</SelectItem>
-            <SelectItem value="Media">{t.medium}</SelectItem>
-            <SelectItem value="Baja">{t.low}</SelectItem>
+            <SelectItem value="all">{t.missionsDashboard.all}</SelectItem>
+            <SelectItem value="Alta">{t.missionsDashboard.high}</SelectItem>
+            <SelectItem value="Media">{t.missionsDashboard.medium}</SelectItem>
+            <SelectItem value="Baja">{t.missionsDashboard.low}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -168,9 +128,9 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="name">{t.name}</SelectItem>
-            <SelectItem value="usage">{t.usage}</SelectItem>
-            <SelectItem value="impact">{t.impact}</SelectItem>
+            <SelectItem value="name">{t.sortOptions.name}</SelectItem>
+            <SelectItem value="usage">{t.sortOptions.usage}</SelectItem>
+            <SelectItem value="impact">{t.sortOptions.impact}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -183,7 +143,7 @@ export const AgentFilters: React.FC<AgentFiltersProps> = ({
             className="text-gray-600 hover:text-gray-800"
           >
             <X className="w-4 h-4 mr-1" />
-            {t.clearFilters}
+            {t.agentFilters.clearFilters}
           </Button>
         )}
       </div>

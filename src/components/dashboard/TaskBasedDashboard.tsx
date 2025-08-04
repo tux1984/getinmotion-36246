@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Agent, CategoryScore } from '@/types/dashboard';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
   onMaturityCalculatorClick,
   profileData
 }) => {
-  const { language } = useLanguage();
+  const { t, language } = useTranslations();
   const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
   const { tasks, loading, markTaskCompleted } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
   const isMobile = useIsMobile();
@@ -56,48 +56,6 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
     );
   }
 
-  const t = {
-    en: {
-      welcomeTitle: "Welcome to Your Creative Workspace",
-      welcomeSubtitle: "Ready to bring your creative project to life?",
-      priorityTasks: "Priority Tasks Based on Your Assessment",
-      activeAgents: "Active AI Assistants",
-      quickActions: "Quick Actions",
-      projectProgress: "Project Progress",
-      startTask: "Start Task",
-      viewAgent: "View Agent",
-      retakeAssessment: "Retake Assessment",
-      noTasks: "No tasks yet",
-      noTasksDesc: "Complete your maturity assessment to get personalized tasks",
-      high: "High",
-      medium: "Medium", 
-      low: "Low",
-      pending: "Pending",
-      inProgress: "In Progress",
-      completed: "Completed",
-      startWithAgent: "Start with"
-    },
-    es: {
-      welcomeTitle: "Bienvenido a tu Espacio Creativo",
-      welcomeSubtitle: "¿Listo para dar vida a tu proyecto creativo?",
-      priorityTasks: "Tareas Prioritarias Basadas en tu Evaluación",
-      activeAgents: "Asistentes IA Activos",
-      quickActions: "Acciones Rápidas",
-      projectProgress: "Progreso del Proyecto",
-      startTask: "Iniciar Tarea",
-      viewAgent: "Ver Agente",
-      retakeAssessment: "Repetir Evaluación",
-      noTasks: "Sin tareas aún",
-      noTasksDesc: "Completa tu evaluación de madurez para obtener tareas personalizadas",
-      high: "Alta",
-      medium: "Media",
-      low: "Baja",
-      pending: "Pendiente",
-      inProgress: "En Progreso",
-      completed: "Completada",
-      startWithAgent: "Empezar con"
-    }
-  };
 
   const activeAgents = agents.filter(agent => agent.status === 'active');
 
@@ -141,10 +99,10 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-4xl font-bold text-white mb-4">
-          {t[language].welcomeTitle}
+          {t.dashboard.welcomeTitle}
         </h1>
         <p className="text-xl text-white/80">
-          {t[language].welcomeSubtitle}
+          {t.dashboard.welcomeSubtitle}
         </p>
       </motion.div>
 
@@ -157,10 +115,10 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-white">
                 <Target className="w-6 h-6 text-purple-400" />
-                {t[language].priorityTasks}
+                {t.dashboard.priorityTasks}
                 {tasks.length > 0 && (
                   <Badge className="bg-purple-600 text-white">
-                    {tasks.length} tareas
+                    {tasks.length} {t.tasks.tasksLabel}
                   </Badge>
                 )}
               </CardTitle>
@@ -169,15 +127,15 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
               {loading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-white/60">Generando recomendaciones personalizadas...</p>
+                  <p className="text-white/60">{t.ui.generatingRecommendations}</p>
                 </div>
               ) : tasks.length === 0 ? (
                 <div className="text-center py-12">
                   <Clock className="w-16 h-16 text-white/40 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">{t[language].noTasks}</h3>
-                  <p className="text-white/60 mb-6">{t[language].noTasksDesc}</p>
+                  <h3 className="text-white font-semibold mb-2">{t.dashboard.noTasks}</h3>
+                  <p className="text-white/60 mb-6">{t.dashboard.noTasksDesc}</p>
                   <Button onClick={onMaturityCalculatorClick} className="bg-purple-600 hover:bg-purple-700">
-                    {t[language].retakeAssessment}
+                    {t.dashboard.retakeAssessment}
                   </Button>
                 </div>
               ) : (
@@ -196,7 +154,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                             <span className="text-lg">{getPriorityIcon(task.priority)}</span>
                             <h4 className="font-semibold text-white text-lg">{task.title}</h4>
                             <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                              {t[language][task.priority as keyof typeof t[typeof language]]}
+                              {t.missionsDashboard[task.priority as keyof typeof t.missionsDashboard]}
                             </Badge>
                             {task.category && (
                               <Badge variant="outline" className="text-white/70 border-white/30">
@@ -216,7 +174,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                       
                       <div className="flex items-center justify-between">
                         <div className="text-white/60 text-sm">
-                          Asistente recomendado: <span className="text-white font-medium">{task.agentName}</span>
+                          {t.dashboard.recommendedAssistant}: <span className="text-white font-medium">{task.agentName}</span>
                         </div>
                         <Button
                           onClick={() => handleStartTask(task)}
@@ -224,7 +182,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                           size="sm"
                         >
                           <Play className="w-4 h-4 mr-2" />
-                          {t[language].startWithAgent} {task.agentName}
+                          {t.dashboard.startWithAgent} {task.agentName}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </div>
@@ -245,7 +203,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-white">
                   <TrendingUp className="w-6 h-6 text-green-400" />
-                  {t[language].projectProgress}
+                  {t.dashboard.projectProgress}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -255,19 +213,19 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-white/70">
-                    <span>Validación de Idea</span>
+                    <span>{t.maturityCalculator.ideaValidation}</span>
                     <span>{maturityScores.ideaValidation}%</span>
                   </div>
                   <div className="flex justify-between text-white/70">
-                    <span>Experiencia Usuario</span>
+                    <span>{t.maturityCalculator.userExperience}</span>
                     <span>{maturityScores.userExperience}%</span>
                   </div>
                   <div className="flex justify-between text-white/70">
-                    <span>Ajuste al Mercado</span>
+                    <span>{t.maturityCalculator.marketFit}</span>
                     <span>{maturityScores.marketFit}%</span>
                   </div>
                   <div className="flex justify-between text-white/70">
-                    <span>Monetización</span>
+                    <span>{t.maturityCalculator.monetization}</span>
                     <span>{maturityScores.monetization}%</span>
                   </div>
                 </div>
@@ -280,12 +238,12 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-white">
                 <Users className="w-6 h-6 text-blue-400" />
-                {t[language].activeAgents}
+                {t.dashboard.activeAgents}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {activeAgents.length === 0 ? (
-                <p className="text-white/60 text-center py-4">No active agents yet</p>
+                <p className="text-white/60 text-center py-4">{t.dashboard.noActiveAgents}</p>
               ) : (
                 <div className="space-y-3">
                   {activeAgents.slice(0, 3).map((agent) => (
@@ -299,7 +257,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                         </div>
                         <div>
                           <div className="font-medium text-white text-sm">{agent.name}</div>
-                          <div className="text-white/50 text-xs">{agent.activeTasks} tareas activas</div>
+                          <div className="text-white/50 text-xs">{agent.activeTasks} {t.dashboard.activeTasks}</div>
                         </div>
                       </div>
                       <Button
@@ -308,7 +266,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                         onClick={() => onSelectAgent(agent.id)}
                         className="text-white/70 hover:text-white hover:bg-white/10"
                       >
-                        {t[language].viewAgent}
+                        {t.dashboard.viewAgent}
                       </Button>
                     </div>
                   ))}
@@ -322,7 +280,7 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-white">
                 <Zap className="w-6 h-6 text-yellow-400" />
-                {t[language].quickActions}
+                {t.dashboard.quickActions}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -333,21 +291,21 @@ export const TaskBasedDashboard: React.FC<TaskBasedDashboardProps> = ({
                   onClick={onMaturityCalculatorClick}
                 >
                   <TrendingUp className="w-4 h-4 mr-3" />
-                  {t[language].retakeAssessment}
+                  {t.dashboard.retakeAssessment}
                 </Button>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-white hover:bg-white/10"
                 >
                   <Calendar className="w-4 h-4 mr-3" />
-                  Programar Sesión
+                  {t.dashboard.scheduleSession}
                 </Button>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-white hover:bg-white/10"
                 >
                   <CheckCircle2 className="w-4 h-4 mr-3" />
-                  Ver Progreso
+                  {t.dashboard.viewProgress}
                 </Button>
               </div>
             </CardContent>

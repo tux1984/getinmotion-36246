@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface Task {
   id: string;
@@ -36,46 +37,7 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const translations = {
-    en: {
-      taskLimit: "Task Management",
-      currentTasks: "Active Tasks",
-      recommendation: "Recommendation",
-      pauseTask: "Pause",
-      resumeTask: "Resume", 
-      deleteTask: "Delete",
-      reorderTasks: "Reorder Tasks",
-      limitReached: "You've reached the task limit",
-      limitWarning: "Close to task limit",
-      smartSuggestion: "Consider pausing low-priority tasks to focus on high-impact ones",
-      priorityHigh: "High",
-      priorityMedium: "Medium", 
-      priorityLow: "Low",
-      impactHigh: "High Impact",
-      impactMedium: "Medium Impact",
-      impactLow: "Low Impact"
-    },
-    es: {
-      taskLimit: "Gestión de Tareas",
-      currentTasks: "Tareas Activas",
-      recommendation: "Recomendación",
-      pauseTask: "Pausar",
-      resumeTask: "Reanudar",
-      deleteTask: "Eliminar",
-      reorderTasks: "Reordenar Tareas",
-      limitReached: "Has alcanzado el límite de tareas",
-      limitWarning: "Cerca del límite de tareas",
-      smartSuggestion: "Considera pausar tareas de baja prioridad para enfocarte en las de alto impacto",
-      priorityHigh: "Alta",
-      priorityMedium: "Media",
-      priorityLow: "Baja",
-      impactHigh: "Alto Impacto",
-      impactMedium: "Impacto Medio",
-      impactLow: "Bajo Impacto"
-    }
-  };
-
-  const t = translations[language];
+  const { t } = useTranslations();
   const activeCount = activeTasks.filter(t => t.status !== 'paused').length;
   const progressPercentage = (activeCount / maxTasks) * 100;
 
@@ -104,8 +66,8 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
     if (activeCount >= 12) {
       return {
         type: 'warning',
-        message: activeCount >= maxTasks ? t.limitReached : t.limitWarning,
-        suggestion: t.smartSuggestion,
+        message: activeCount >= maxTasks ? t.taskManagement.limitReached : t.taskManagement.limitWarning,
+        suggestion: t.taskManagement.smartSuggestion,
         suggestedActions: lowPriorityTasks.slice(0, 3)
       };
     }
@@ -141,7 +103,7 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
                 className={activeCount >= maxTasks ? "border-red-500 text-red-500" : ""}
               >
                 <AlertTriangle className="h-4 w-4 mr-1" />
-                Gestionar
+                {t.taskManagement.manage}
               </Button>
             </DialogTrigger>
             
@@ -149,7 +111,7 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
-                  {t.taskLimit}
+                  {t.taskManagement.taskLimit}
                 </DialogTitle>
               </DialogHeader>
               
@@ -160,7 +122,7 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-amber-600" />
-                        {recommendations.type === 'warning' ? t.limitWarning : t.recommendation}
+                        {recommendations.type === 'warning' ? t.taskManagement.limitWarning : t.taskManagement.recommendation}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -173,7 +135,7 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
                 {/* Current Tasks */}
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    {t.currentTasks} ({activeCount})
+                    {t.taskManagement.currentTasks} ({activeCount})
                   </h3>
                   
                   <div className="space-y-3">
@@ -185,20 +147,20 @@ export const TaskLimitManager: React.FC<TaskLimitManagerProps> = ({
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-medium text-sm">{task.title}</h4>
                                 {task.status === 'paused' && (
-                                  <Badge variant="secondary" className="text-xs">Pausada</Badge>
+                                  <Badge variant="secondary" className="text-xs">{t.taskManagement.paused}</Badge>
                                 )}
                               </div>
                               
                               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)}`} />
-                                  {t[`priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}` as keyof typeof t]}
+                                  {t.missionsDashboard[task.priority as keyof typeof t.missionsDashboard]}
                                 </div>
                                 <Badge 
                                   variant="outline" 
                                   className={`text-xs ${getImpactColor(task.impact)}`}
                                 >
-                                  {t[`impact${task.impact.charAt(0).toUpperCase() + task.impact.slice(1)}` as keyof typeof t]}
+                                  {t.impact[task.impact as keyof typeof t.impact]}
                                 </Badge>
                                 {task.agent_name && (
                                   <span>{task.agent_name}</span>
