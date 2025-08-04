@@ -230,6 +230,27 @@ export interface Translations {
     seconds: string;
   };
 
+  // Task Status and Progress
+  taskStatus: {
+    completed: string;
+    completedPercentage: string; // "{percentage}% completed"
+    completedTime: string; // "Completed {timeAgo}"
+    progressPercentage: string; // "{percentage}% progress"
+  };
+
+  // Time Estimates
+  timeEstimates: {
+    hours_1_2: string; // "1-2 hours"
+    hours_2_3: string; // "2-3 hours"
+    hours_2_4: string; // "2-4 hours"
+    hours_3_4: string; // "3-4 hours"
+    hours_3_5: string; // "3-5 hours"
+    hours_4_5: string; // "4-5 hours"
+    hours_4_6: string; // "4-6 hours"
+    hours_5_8: string; // "5-8 hours"
+    hours_6_10: string; // "6-10 hours"
+  };
+
   // Maturity Calculator
   maturityCalculator: {
     title: string;
@@ -598,6 +619,23 @@ export const translations: Record<'en' | 'es', Translations> = {
       minutes: 'min',
       seconds: 'seconds',
     },
+    taskStatus: {
+      completed: 'Completed',
+      completedPercentage: '{percentage}% completed',
+      completedTime: 'Completed {timeAgo}',
+      progressPercentage: '{percentage}% progress',
+    },
+    timeEstimates: {
+      hours_1_2: '1-2 hours',
+      hours_2_3: '2-3 hours',
+      hours_2_4: '2-4 hours',
+      hours_3_4: '3-4 hours',
+      hours_3_5: '3-5 hours',
+      hours_4_5: '4-5 hours',
+      hours_4_6: '4-6 hours',
+      hours_5_8: '5-8 hours',
+      hours_6_10: '6-10 hours',
+    },
     maturityCalculator: {
       title: 'Cultural Maturity Assessment',
       description: 'Discover your creative project\'s strengths and get personalized recommendations',
@@ -958,6 +996,23 @@ export const translations: Record<'en' | 'es', Translations> = {
       hours: 'horas',
       minutes: 'min',
       seconds: 'segundos',
+    },
+    taskStatus: {
+      completed: 'Completada',
+      completedPercentage: '{percentage}% completado',
+      completedTime: 'Completada {timeAgo}',
+      progressPercentage: '{percentage}% progreso',
+    },
+    timeEstimates: {
+      hours_1_2: '1-2 horas',
+      hours_2_3: '2-3 horas',
+      hours_2_4: '2-4 horas',
+      hours_3_4: '3-4 horas',
+      hours_3_5: '3-5 horas',
+      hours_4_5: '4-5 horas',
+      hours_4_6: '4-6 horas',
+      hours_5_8: '5-8 horas',
+      hours_6_10: '6-10 horas',
     },
     maturityCalculator: {
       title: 'Evaluación de Madurez Cultural',

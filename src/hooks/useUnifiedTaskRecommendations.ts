@@ -36,7 +36,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.culturalConsultant,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.validation,
-          estimatedTime: '2-3 horas',
+          estimatedTime: t.timeEstimates.hours_2_3,
           prompt: t.recommendedTasks.explorador.validateBusiness.prompt
         },
         { 
@@ -46,7 +46,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.costCalculator,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.finances,
-          estimatedTime: '1-2 horas',
+          estimatedTime: t.timeEstimates.hours_1_2,
           prompt: t.recommendedTasks.explorador.calculateCosts.prompt
         },
         { 
@@ -56,7 +56,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.legalAdvisor,
           priority: 'medium' as const,
           category: t.recommendedTasks.categories.legal,
-          estimatedTime: '2-4 horas',
+          estimatedTime: t.timeEstimates.hours_2_4,
           prompt: t.recommendedTasks.explorador.legalStructure.prompt
         }
       ],
@@ -68,7 +68,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.marketingAdvisor,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.marketing,
-          estimatedTime: '3-5 horas',
+          estimatedTime: t.timeEstimates.hours_3_5,
           prompt: t.recommendedTasks.constructor.digitalMarketing.prompt
         },
         { 
@@ -78,7 +78,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.projectManager,
           priority: 'medium' as const,
           category: t.recommendedTasks.categories.operations,
-          estimatedTime: '2-3 horas',
+          estimatedTime: t.timeEstimates.hours_2_3,
           prompt: t.recommendedTasks.constructor.projectManagement.prompt
         },
         { 
@@ -88,7 +88,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.pricingAssistant,
           priority: 'medium' as const,
           category: t.recommendedTasks.categories.strategy,
-          estimatedTime: '1-2 horas',
+          estimatedTime: t.timeEstimates.hours_1_2,
           prompt: t.recommendedTasks.constructor.pricingSystem.prompt
         }
       ],
@@ -100,7 +100,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.exportAdvisor,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.expansion,
-          estimatedTime: '4-6 horas',
+          estimatedTime: t.timeEstimates.hours_4_6,
           prompt: t.recommendedTasks.estratega.internationalMarkets.prompt
         },
         { 
@@ -110,7 +110,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.stakeholderConnector,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.networking,
-          estimatedTime: '3-4 horas',
+          estimatedTime: t.timeEstimates.hours_3_4,
           prompt: t.recommendedTasks.estratega.stakeholderNetwork.prompt
         },
         { 
@@ -120,7 +120,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.brandingStrategist,
           priority: 'medium' as const,
           category: t.recommendedTasks.categories.branding,
-          estimatedTime: '2-3 horas',
+          estimatedTime: t.timeEstimates.hours_2_3,
           prompt: t.recommendedTasks.estratega.personalBrand.prompt
         }
       ],
@@ -132,7 +132,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.scalingSpecialist,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.growth,
-          estimatedTime: '5-8 horas',
+          estimatedTime: t.timeEstimates.hours_5_8,
           prompt: t.recommendedTasks.visionario.scalabilityStrategy.prompt
         },
         { 
@@ -142,7 +142,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.innovationConsultant,
           priority: 'high' as const,
           category: t.recommendedTasks.categories.innovation,
-          estimatedTime: '4-6 horas',
+          estimatedTime: t.timeEstimates.hours_4_6,
           prompt: t.recommendedTasks.visionario.disruptiveInnovation.prompt
         },
         { 
@@ -152,7 +152,7 @@ export const useUnifiedTaskRecommendations = ({
           agentName: t.recommendedTasks.agents.ecosystemBuilder,
           priority: 'medium' as const,
           category: t.recommendedTasks.categories.strategy,
-          estimatedTime: '6-10 horas',
+          estimatedTime: t.timeEstimates.hours_6_10,
           prompt: t.recommendedTasks.visionario.businessEcosystem.prompt
         }
       ]

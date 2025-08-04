@@ -511,7 +511,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                         )}
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span>{task.agent_id}</span>
-                          <span>{task.progress_percentage}% completado</span>
+                          <span>{t.taskStatus.completedPercentage.replace('{percentage}', task.progress_percentage.toString())}</span>
                         </div>
                       </div>
                       <Button onClick={() => handleTaskAction(task)}>
@@ -547,7 +547,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                         )}
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span>{task.agent_id}</span>
-                          <span>Completada {getTimeAgo(task.completed_at || task.updated_at)}</span>
+                          <span>{t.taskStatus.completedTime.replace('{timeAgo}', getTimeAgo(task.completed_at || task.updated_at))}</span>
                         </div>
                       </div>
                       <Button variant="outline" onClick={() => onTaskSelect(task)}>
