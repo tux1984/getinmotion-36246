@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { RobustPremiumDashboard } from '@/components/dashboard/RobustPremiumDashboard';
+import { UnifiedDashboard } from '@/components/dashboard/UnifiedDashboard';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,7 +12,7 @@ const NewDashboardHome = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  console.log('NewDashboardHome: Rendering with new RobustPremiumDashboard', {
+  console.log('NewDashboardHome: Rendering with unified Master Coordinator experience', {
     user: user?.email,
     isAuthorized
   });
@@ -43,7 +43,7 @@ const NewDashboardHome = () => {
         noIndex={true}
       />
       
-      <RobustPremiumDashboard />
+      <UnifiedDashboard />
     </>
   );
 };

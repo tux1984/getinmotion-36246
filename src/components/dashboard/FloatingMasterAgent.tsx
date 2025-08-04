@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, Brain, TrendingUp, AlertCircle } from 'lucide-react';
+import { MessageCircle, X, Brain, TrendingUp, AlertCircle, Crown, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,23 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [shouldShowProactive, setShouldShowProactive] = useState(false);
+  const [currentTip, setCurrentTip] = useState(0);
+
+  // Enhanced coaching tips
+  const coachingTips = [
+    "✨ Soy tu guía personal hacia el éxito",
+    "🎯 Cada paso cuenta en tu journey",
+    "💡 Tienes todo lo necesario para triunfar",
+    "🚀 Juntos construiremos algo increíble"
+  ];
+
+  // Rotate tips every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % coachingTips.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const translations = {
     en: {
@@ -70,15 +87,15 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
 
   const getContextualMessage = () => {
     if (userActivityDays >= 3) {
-      return t.inactiveMessage;
+      return "💭 Te he extrañado. ¿Retomamos tu camino al éxito?";
     }
     if (completedTasksCount > 0 && completedTasksCount % 5 === 0) {
-      return t.congratsMessage.replace('{count}', completedTasksCount.toString());
+      return `🎉 ¡Increíble! ${completedTasksCount} tareas completadas. Sigamos el momentum.`;
     }
     if (activeTasksCount >= 12) {
-      return "¡Casi llegas al límite! Considera completar algunas tareas antes de agregar más.";
+      return "⚡ Tienes mucha energía! Te ayudo a priorizar para maximizar resultados.";
     }
-    return t.todayMessage;
+    return coachingTips[currentTip];
   };
 
   const getStatusColor = () => {
@@ -140,9 +157,13 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* Contextual Message */}
-            <div className="bg-muted/50 rounded-lg p-3">
-              <p className="text-sm text-muted-foreground">
+            {/* Enhanced Contextual Message */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="w-4 h-4 text-purple-600" />
+                <span className="font-semibold text-purple-800 text-sm">Tu Coordinador Maestro</span>
+              </div>
+              <p className="text-sm text-purple-700 font-medium">
                 {getContextualMessage()}
               </p>
             </div>
@@ -159,17 +180,24 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-2">
-              <Button onClick={onStartChat} className="w-full" size="sm">
-                {t.startSession}
+            {/* Enhanced Action Buttons */}
+            <div className="space-y-3">
+              <Button 
+                onClick={onStartChat} 
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" 
+                size="sm"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Consulta Estratégica
               </Button>
               <div className="grid grid-cols-2 gap-2">
-                <Button onClick={onViewProgress} variant="outline" size="sm">
-                  {t.viewProgress}
+                <Button onClick={onViewProgress} variant="outline" size="sm" className="border-green-500 text-green-600 hover:bg-green-50">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  Progreso
                 </Button>
-                <Button onClick={onHelp} variant="outline" size="sm">
-                  {t.getHelp}
+                <Button onClick={onHelp} variant="outline" size="sm" className="border-amber-500 text-amber-600 hover:bg-amber-50">
+                  <Brain className="w-4 h-4 mr-1" />
+                  Ayuda
                 </Button>
               </div>
             </div>

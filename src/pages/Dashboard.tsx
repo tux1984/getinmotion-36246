@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { MasterCoordinatorDashboard } from '@/components/dashboard/MasterCoordinatorDashboard';
+import { UnifiedDashboard } from '@/components/dashboard/UnifiedDashboard';
 
-// Dashboard principal ahora es directamente el Coordinador Maestro
+// Dashboard principal - Experiencia completamente unificada a través del Coordinador Maestro
 const Dashboard = () => {
-  console.log('Dashboard: Rendering Master Coordinator as main entry point');
-  return <MasterCoordinatorDashboard />;
+  console.log('Dashboard: Rendering unified experience through Master Coordinator');
+  return <UnifiedDashboard />;
 };
 
 export default Dashboard;
