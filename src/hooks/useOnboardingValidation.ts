@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { getUserProgressStatus } from '@/utils/userProgress';
 
 export const useOnboardingValidation = () => {
   const { user } = useAuth();
@@ -13,46 +14,11 @@ export const useOnboardingValidation = () => {
       setIsValidating(true);
 
       try {
-        // Check multiple indicators of completed onboarding
-        const onboardingCompleted = localStorage.getItem('onboardingCompleted');
-        const maturityScores = localStorage.getItem('maturityScores');
-        const recommendedAgents = localStorage.getItem('recommendedAgents');
-        const userProfileData = localStorage.getItem('userProfileData');
+        // Use the centralized progress status function
+        const progressStatus = getUserProgressStatus();
+        console.log('Onboarding validation using centralized status:', progressStatus);
 
-        console.log('Onboarding validation data:', {
-          onboardingCompleted,
-          hasMaturityScores: !!maturityScores,
-          hasRecommendedAgents: !!recommendedAgents,
-          hasUserProfileData: !!userProfileData
-        });
-
-        // Primary check: explicit onboarding flag
-        if (onboardingCompleted === 'true') {
-          console.log('Onboarding marked as completed');
-          setHasCompletedOnboarding(true);
-          setIsValidating(false);
-          return;
-        }
-
-        // Secondary check: has maturity scores
-        if (maturityScores) {
-          try {
-            const scores = JSON.parse(maturityScores);
-            if (scores && typeof scores === 'object' && Object.keys(scores).length > 0) {
-              console.log('Found maturity scores, marking onboarding as complete');
-              localStorage.setItem('onboardingCompleted', 'true');
-              setHasCompletedOnboarding(true);
-              setIsValidating(false);
-              return;
-            }
-          } catch (e) {
-            console.warn('Error parsing maturity scores:', e);
-          }
-        }
-
-        // If no indicators found, onboarding is incomplete
-        console.log('No onboarding indicators found');
-        setHasCompletedOnboarding(false);
+        setHasCompletedOnboarding(progressStatus.shouldGoToDashboard);
         setIsValidating(false);
 
       } catch (error) {

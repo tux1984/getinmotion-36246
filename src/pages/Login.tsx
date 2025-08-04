@@ -11,6 +11,7 @@ import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
 import { useLanguage } from '@/context/LanguageContext';
+import { getUserProgressStatus } from '@/utils/userProgress';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -68,10 +69,18 @@ const Login = () => {
   
   const t = translations[language];
   
-  // Check if user has completed onboarding
-  const checkOnboardingStatus = () => {
-    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
-    return onboardingCompleted === 'true';
+  // Get comprehensive user progress status
+  const getUserRedirectPath = () => {
+    const progressStatus = getUserProgressStatus();
+    console.log('Login: User progress status:', progressStatus);
+    
+    // Users with any progress should go to dashboard
+    if (progressStatus.shouldGoToDashboard) {
+      return '/dashboard';
+    }
+    
+    // New users go to maturity calculator
+    return '/maturity-calculator';
   };
   
   // Redirect if already authenticated and authorized
@@ -82,20 +91,12 @@ const Login = () => {
       
       // Add a small delay to ensure auth state is stable
       const redirectTimer = setTimeout(() => {
-        // Check if user has completed onboarding
-        const hasCompletedOnboarding = checkOnboardingStatus();
+        // Get the appropriate redirect path based on user progress
+        let redirectTo = getUserRedirectPath();
         
-        // Default redirect for new users is always maturity calculator
-        let redirectTo = '/maturity-calculator';
-        
-        // Only go to dashboard if user has completed onboarding
-        if (hasCompletedOnboarding) {
-          redirectTo = '/dashboard';
-        }
-        
-        // Override with original intended destination if exists and user has completed onboarding
+        // Override with original intended destination if user has progress and was going somewhere specific
         const from = location.state?.from?.pathname;
-        if (from && from !== '/login' && hasCompletedOnboarding) {
+        if (from && from !== '/login' && redirectTo === '/dashboard') {
           redirectTo = from;
         }
         
