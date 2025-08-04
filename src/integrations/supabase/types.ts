@@ -341,6 +341,106 @@ export type Database = {
         }
         Relationships: []
       }
+      step_validations: {
+        Row: {
+          ai_feedback: string | null
+          created_at: string
+          id: string
+          step_id: string
+          user_confirmation: string | null
+          user_id: string
+          validation_data: Json | null
+          validation_result: string
+          validation_type: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          created_at?: string
+          id?: string
+          step_id: string
+          user_confirmation?: string | null
+          user_id: string
+          validation_data?: Json | null
+          validation_result: string
+          validation_type: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          created_at?: string
+          id?: string
+          step_id?: string
+          user_confirmation?: string | null
+          user_id?: string
+          validation_data?: Json | null
+          validation_result?: string
+          validation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_validations_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "task_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_steps: {
+        Row: {
+          ai_assistance_log: Json | null
+          ai_context_prompt: string | null
+          completion_status: string
+          created_at: string
+          description: string
+          id: string
+          input_type: string
+          step_number: number
+          task_id: string
+          title: string
+          updated_at: string
+          user_input_data: Json | null
+          validation_criteria: Json | null
+        }
+        Insert: {
+          ai_assistance_log?: Json | null
+          ai_context_prompt?: string | null
+          completion_status?: string
+          created_at?: string
+          description: string
+          id?: string
+          input_type?: string
+          step_number: number
+          task_id: string
+          title: string
+          updated_at?: string
+          user_input_data?: Json | null
+          validation_criteria?: Json | null
+        }
+        Update: {
+          ai_assistance_log?: Json | null
+          ai_context_prompt?: string | null
+          completion_status?: string
+          created_at?: string
+          description?: string
+          id?: string
+          input_type?: string
+          step_number?: number
+          task_id?: string
+          title?: string
+          updated_at?: string
+          user_input_data?: Json | null
+          validation_criteria?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_steps_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_agents: {
         Row: {
           agent_id: string
