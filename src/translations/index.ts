@@ -67,6 +67,21 @@ export interface Translations {
     getStarted: string;
     yourCreativeJourney: string;
     continueTask: string;
+    
+    // TaskBasedDashboard specific
+    welcomeTitle: string;
+    welcomeSubtitle: string;
+    priorityTasks: string;
+    activeAgents: string;
+    quickActions: string;
+    projectProgress: string;
+    viewAgent: string;
+    retakeAssessment: string;
+    startWithAgent: string;
+    recommendedAssistant: string;
+    noActiveAgents: string;
+    scheduleSession: string;
+    viewProgress: string;
   };
 
   // Tasks
