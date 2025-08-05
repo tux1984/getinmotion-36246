@@ -70,7 +70,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         {activeSection === 'agent-manager' && (
           <DashboardAgentManager 
             agents={agents} 
-            language={language} 
             onBack={onBackFromAgentManager} 
             onAgentToggle={onAgentToggle} 
           />

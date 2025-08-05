@@ -6,50 +6,20 @@ import { Badge } from '@/components/ui/badge';
 import { Agent, RecommendedAgents } from '@/types/dashboard';
 import { getAgentTranslation } from '@/data/agentTranslations';
 import { Bot, MessageCircle, Play, Pause, Settings } from 'lucide-react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface RecommendedAgentsSectionProps {
   agents: Agent[];
   recommendedAgents: RecommendedAgents;
   onSelectAgent: (id: string) => void;
-  language: 'en' | 'es';
 }
 
 export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> = ({
   agents,
   recommendedAgents,
-  onSelectAgent,
-  language
+  onSelectAgent
 }) => {
-  const translations = {
-    en: {
-      recommendedAgents: "Your AI Agents",
-      primaryAgents: "Primary Recommendations",
-      secondaryAgents: "Secondary Recommendations", 
-      chatWith: "Chat",
-      configure: "Configure",
-      active: "Active",
-      paused: "Paused",
-      inactive: "Inactive",
-      activeTasks: "active tasks",
-      lastUsed: "Last used",
-      never: "Never"
-    },
-    es: {
-      recommendedAgents: "Tus Agentes IA",
-      primaryAgents: "Recomendaciones Principales",
-      secondaryAgents: "Recomendaciones Secundarias",
-      chatWith: "Chatear", 
-      configure: "Configurar",
-      active: "Activo",
-      paused: "Pausado",
-      inactive: "Inactivo",
-      activeTasks: "tareas activas",
-      lastUsed: "Último uso",
-      never: "Nunca"
-    }
-  };
-
-  const t = translations[language];
+  const { t, language } = useTranslations();
 
   // Filter agents based on recommendations
   const getFilteredAgents = (agentList: string[] | undefined) => {
@@ -95,13 +65,13 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
             </div>
             <Badge className={`text-xs ${getStatusColor(agent.status)} flex items-center gap-1`}>
               {getStatusIcon(agent.status)}
-              {t[agent.status as keyof typeof t] || agent.status}
+              {t.recommendedAgents[agent.status as keyof typeof t.recommendedAgents] || agent.status}
             </Badge>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-            <span>{agent.activeTasks} {t.activeTasks}</span>
-            <span>{t.lastUsed}: {agent.lastUsed || t.never}</span>
+            <span>{agent.activeTasks} {t.recommendedAgents.activeTasks}</span>
+            <span>{t.recommendedAgents.lastUsed}: {agent.lastUsed || t.recommendedAgents.never}</span>
           </div>
 
           <div className="flex gap-2">
@@ -111,7 +81,7 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
               size="sm"
             >
               <MessageCircle className="w-4 h-4" />
-              {t.chatWith}
+              {t.recommendedAgents.chatWith}
             </Button>
             <Button variant="outline" size="sm" className="border-purple-200">
               <Settings className="w-4 h-4" />
@@ -126,12 +96,12 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <Bot className="w-6 h-6 text-purple-600" />
-        <h2 className="text-xl font-bold text-purple-900">{t.recommendedAgents}</h2>
+        <h2 className="text-xl font-bold text-purple-900">{t.recommendedAgents.recommendedAgents}</h2>
       </div>
 
       {primaryAgents.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">{t.primaryAgents}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">{t.recommendedAgents.primaryAgents}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {primaryAgents.map(agent => (
               <AgentCard key={agent.id} agent={agent} />
@@ -142,7 +112,7 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
 
       {secondaryAgents.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">{t.secondaryAgents}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">{t.recommendedAgents.secondaryAgents}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {secondaryAgents.map(agent => (
               <AgentCard key={agent.id} agent={agent} />

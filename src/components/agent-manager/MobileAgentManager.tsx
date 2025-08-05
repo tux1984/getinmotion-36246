@@ -13,58 +13,21 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Search, Filter, X, Users, Target, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isAgentRecommended } from '@/utils/agentUtils';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface MobileAgentManagerProps {
   currentAgents: Agent[];
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
-  language: 'en' | 'es';
 }
 
 export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
   currentAgents,
-  onAgentToggle,
-  language
+  onAgentToggle
 }) => {
   const { agents: userAgents, loading } = useUserData();
   const { togglingAgents, handleToggleAgent } = useAgentToggle(onAgentToggle);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  const translations = {
-    en: {
-      title: "AI Agent Manager",
-      subtitle: "Activate and manage your AI agents",
-      search: "Search agents...",
-      filters: "Filters",
-      clearFilters: "Clear filters",
-      totalAgents: "Total",
-      activeAgents: "Active",
-      recommendedAgents: "Recommended",
-      all: "All",
-      active: "Active Only",
-      inactive: "Inactive Only",
-      categories: "Categories",
-      noAgentsFound: "No agents found",
-      tryAdjusting: "Try adjusting your filters"
-    },
-    es: {
-      title: "Gestor de Agentes IA",
-      subtitle: "Activa y gestiona tus agentes IA",
-      search: "Buscar agentes...",
-      filters: "Filtros",
-      clearFilters: "Limpiar filtros",
-      totalAgents: "Total",
-      activeAgents: "Activos",
-      recommendedAgents: "Recomendados",
-      all: "Todos",
-      active: "Solo Activos",
-      inactive: "Solo Inactivos",
-      categories: "Categorías",
-      noAgentsFound: "No se encontraron agentes",
-      tryAdjusting: "Intenta ajustar tus filtros"
-    }
-  };
-
-  const t = translations[language];
+  const { t, language } = useTranslations();
 
   // Get unique categories
   const categories = [...new Set(culturalAgentsDatabase.map(agent => agent.category))];
@@ -94,9 +57,9 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
   } = useAgentFilters(culturalAgentsDatabase, getUserAgentData);
 
   const statusOptions = [
-    { value: 'all', label: t.all },
-    { value: 'active', label: t.active },
-    { value: 'inactive', label: t.inactive }
+    { value: 'all', label: t.agentManager.allAgents },
+    { value: 'active', label: t.agentManager.activate },
+    { value: 'inactive', label: t.agentManager.disabled }
   ];
 
   const categoryTranslations = {
@@ -197,8 +160,8 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-2xl font-bold text-white mb-2">{t.title}</h1>
-        <p className="text-white/80 text-sm">{t.subtitle}</p>
+        <h1 className="text-2xl font-bold text-white mb-2">{t.agentManager.title}</h1>
+        <p className="text-white/80 text-sm">{t.agentManager.subtitle}</p>
       </motion.div>
 
       {/* Stats Cards */}
@@ -306,8 +269,8 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
           <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-white/40" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">{t.noAgentsFound}</h3>
-          <p className="text-white/60 mb-4">{t.tryAdjusting}</p>
+          <h3 className="text-lg font-semibold text-white mb-2">{t.agentManager.noAgentsFound}</h3>
+          <p className="text-white/60 mb-4">{t.agentManager.tryAdjusting}</p>
           <Button
             onClick={clearFilters}
             variant="ghost"

@@ -86,7 +86,6 @@ const AgentManager = () => {
         <ModernAgentManager 
           currentAgents={agents}
           onAgentToggle={handleAgentToggle}
-          language={language}
         />
       </div>
     </DashboardBackground>

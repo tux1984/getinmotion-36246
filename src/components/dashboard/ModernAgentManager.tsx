@@ -12,42 +12,21 @@ import { MobileAgentManager } from '../agent-manager/MobileAgentManager';
 import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
-  language: 'en' | 'es';
 }
 
 export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
   currentAgents,
-  onAgentToggle,
-  language
+  onAgentToggle
 }) => {
   const { agents: userAgents, loading } = useUserData();
   const { togglingAgents, handleToggleAgent } = useAgentToggle(onAgentToggle);
   const isMobile = useIsMobile();
-
-  const translations = {
-    en: {
-      title: "AI Agent Manager",
-      subtitle: "Activate and manage your specialized AI agents",
-      loading: "Loading agent management...",
-      noAgentsFound: "No agents found",
-      tryAdjusting: "Try adjusting your filters",
-      clearAllFilters: "Clear all filters"
-    },
-    es: {
-      title: "Gestor de Agentes IA",
-      subtitle: "Activa y gestiona tus agentes IA especializados",
-      loading: "Cargando gestión de agentes...",
-      noAgentsFound: "No se encontraron agentes",
-      tryAdjusting: "Intenta ajustar tus filtros",
-      clearAllFilters: "Limpiar todos los filtros"
-    }
-  };
-
-  const t = translations[language];
+  const { t, language } = useTranslations();
 
   // Use mobile version on small screens
   if (isMobile) {
@@ -55,7 +34,6 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       <MobileAgentManager
         currentAgents={currentAgents}
         onAgentToggle={onAgentToggle}
-        language={language}
       />
     );
   }
@@ -106,7 +84,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
       <div className="space-y-6">
         <div className="text-center py-12">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-purple-600" />
-          <p className="text-gray-600">{t.loading}</p>
+          <p className="text-gray-600">{t.agentManager.loading}</p>
         </div>
       </div>
     );
@@ -116,8 +94,8 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
     <div className="space-y-6">
       {/* Compact Two-Column Header */}
       <CompactTwoColumnHeader
-        title={t.title}
-        subtitle={t.subtitle}
+        title={t.agentManager.title}
+        subtitle={t.agentManager.subtitle}
         totalAgents={stats.totalAgents}
         activeAgents={stats.activeAgents}
         recommendedAgents={stats.recommendedAgents}
@@ -165,13 +143,13 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <span className="text-xl">🔍</span>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">{t.noAgentsFound}</h3>
-          <p className="text-purple-200 mb-3">{t.tryAdjusting}</p>
+          <h3 className="text-lg font-semibold text-white mb-2">{t.agentManager.noAgentsFound}</h3>
+          <p className="text-purple-200 mb-3">{t.agentManager.tryAdjusting}</p>
           <button
             onClick={clearFilters}
             className="text-purple-300 hover:text-white font-medium text-sm"
           >
-            {t.clearAllFilters}
+            {t.agentManager.clearAllFilters}
           </button>
         </div>
       )}

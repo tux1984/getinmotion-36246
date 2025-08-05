@@ -4,75 +4,20 @@ import { culturalAgentsDatabase, CulturalAgent } from '@/data/agentsDatabase';
 import { useUserData } from '@/hooks/useUserData';
 import { AgentManagerHeader } from './AgentManagerHeader';
 import { AgentCategoryTabs } from './AgentCategoryTabs';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface AgentManagerProps {
   currentAgents: Agent[];
   onAgentToggle: (agentId: string, enabled: boolean) => Promise<void>;
-  language: 'en' | 'es';
 }
 
 export const AgentManager: React.FC<AgentManagerProps> = ({
   currentAgents,
-  onAgentToggle,
-  language
+  onAgentToggle
 }) => {
   const { agents: userAgents, loading } = useUserData();
   const [togglingAgents, setTogglingAgents] = useState<Set<string>>(new Set());
-
-  const translations = {
-    en: {
-      title: "Agent Manager",
-      subtitle: "Activate and manage your AI agents",
-      categories: {
-        Financiera: "Financial",
-        Legal: "Legal",
-        Diagnóstico: "Diagnostic",
-        Comercial: "Commercial",
-        Operativo: "Operations",
-        Comunidad: "Community"
-      },
-      priority: "Priority",
-      impact: "Impact",
-      enabled: "Enabled",
-      disabled: "Disabled",
-      activate: "Activate",
-      deactivate: "Deactivate",
-      allAgents: "All Agents",
-      recommended: "Recommended",
-      usageCount: "Usage count",
-      lastUsed: "Last used",
-      never: "Never",
-      activating: "Activating...",
-      deactivating: "Deactivating..."
-    },
-    es: {
-      title: "Gestor de Agentes",
-      subtitle: "Activa y gestiona tus agentes IA",
-      categories: {
-        Financiera: "Financiera",
-        Legal: "Legal",
-        Diagnóstico: "Diagnóstico",
-        Comercial: "Comercial",
-        Operativo: "Operativo",
-        Comunidad: "Comunidad"
-      },
-      priority: "Prioridad",
-      impact: "Impacto",
-      enabled: "Activado",
-      disabled: "Desactivado",
-      activate: "Activar",
-      deactivate: "Desactivar",
-      allAgents: "Todos los Agentes",
-      recommended: "Recomendado",
-      usageCount: "Contador de uso",
-      lastUsed: "Último uso",
-      never: "Nunca",
-      activating: "Activando...",
-      deactivating: "Desactivando..."
-    }
-  };
-
-  const t = translations[language];
+  const { t, language } = useTranslations();
 
   // Get user agent data for each agent
   const getUserAgentData = (agentId: string) => {
@@ -86,7 +31,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   };
 
   const formatLastUsed = (lastUsed: string | null) => {
-    if (!lastUsed) return t.never;
+    if (!lastUsed) return t.agentManager.never;
     
     const date = new Date(lastUsed);
     const now = new Date();
@@ -149,12 +94,12 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   if (loading) {
     return (
       <div className="space-y-6">
-        <AgentManagerHeader
-          title={t.title}
-          subtitle={t.subtitle}
-          totalAgents={0}
-          activeAgents={0}
-        />
+      <AgentManagerHeader
+        title={t.agentManager.title}
+        subtitle={t.agentManager.subtitle}
+        totalAgents={0}
+        activeAgents={0}
+      />
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="bg-gray-100 rounded-lg p-6 animate-pulse">
@@ -169,8 +114,8 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
   return (
     <div className="space-y-6">
       <AgentManagerHeader
-        title={t.title}
-        subtitle={t.subtitle}
+        title={t.agentManager.title}
+        subtitle={t.agentManager.subtitle}
         totalAgents={culturalAgentsDatabase.length}
         activeAgents={userAgents.filter(ua => ua.is_enabled).length}
       />
@@ -184,7 +129,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
         formatLastUsed={formatLastUsed}
         getPriorityColor={getPriorityColor}
         getImpactColor={getImpactColor}
-        translations={t}
+        translations={t.agentManager}
         language={language}
       />
     </div>

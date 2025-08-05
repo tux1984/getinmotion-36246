@@ -524,6 +524,91 @@ export interface Translations {
     medium: string;
     low: string;
   };
+  
+  // Agent Manager
+  agentManager: {
+    title: string;
+    subtitle: string;
+    categories: {
+      Financiera: string;
+      Legal: string;
+      Diagnóstico: string;
+      Comercial: string;
+      Operativo: string;
+      Comunidad: string;
+    };
+    priority: string;
+    impact: string;
+    enabled: string;
+    disabled: string;
+    activate: string;
+    deactivate: string;
+    allAgents: string;
+    recommended: string;
+    usageCount: string;
+    lastUsed: string;
+    never: string;
+    activating: string;
+    deactivating: string;
+    loading: string;
+    noAgentsFound: string;
+    tryAdjusting: string;
+    clearAllFilters: string;
+    search: string;
+    filters: string;
+    categories: string;
+    totalAgents: string;
+    activeAgents: string;
+  };
+  
+  // Recommended Agents
+  recommendedAgents: {
+    recommendedAgents: string;
+    primaryAgents: string;
+    secondaryAgents: string;
+    chatWith: string;
+    configure: string;
+    active: string;
+    paused: string;
+    inactive: string;
+    activeTasks: string;
+    lastUsed: string;
+    never: string;
+  };
+  
+  // Hero Section
+  heroSection: {
+    agentsSection: {
+      title: string;
+      subtitle: string;
+      features: {
+        instant: {
+          title: string;
+          description: string;
+        };
+        specialized: {
+          title: string;
+          description: string;
+        };
+        secure: {
+          title: string;
+          description: string;
+        };
+        collaborative: {
+          title: string;
+          description: string;
+        };
+      };
+      categories: {
+        financial: string;
+        legal: string;
+        operational: string;
+        marketing: string;
+      };
+      cta: string;
+      preview: string;
+    };
+  };
 }
 
 export const translations: Record<'en' | 'es', Translations> = {
@@ -1015,6 +1100,88 @@ export const translations: Record<'en' | 'es', Translations> = {
       strategist: 'Strategist',
       visionary: 'Visionary'
     },
+    
+    agentManager: {
+      title: "Agent Manager",
+      subtitle: "Activate and manage your AI agents",
+      categories: {
+        Financiera: "Financial",
+        Legal: "Legal",
+        Diagnóstico: "Diagnostic",
+        Comercial: "Commercial",
+        Operativo: "Operations",
+        Comunidad: "Community"
+      },
+      priority: "Priority",
+      impact: "Impact",
+      enabled: "Enabled",
+      disabled: "Disabled",
+      activate: "Activate",
+      deactivate: "Deactivate",
+      allAgents: "All Agents",
+      recommended: "Recommended",
+      usageCount: "Usage count",
+      lastUsed: "Last used",
+      never: "Never",
+      activating: "Activating...",
+      deactivating: "Deactivating...",
+      loading: "AI Agent Manager",
+      noAgentsFound: "No agents found",
+      tryAdjusting: "Try adjusting your filters",
+      clearAllFilters: "Clear all filters",
+      search: "Search agents...",
+      filters: "Filters", 
+      categories: "Categories",
+      totalAgents: "Total",
+      activeAgents: "Active"
+    },
+    
+    recommendedAgents: {
+      recommendedAgents: "Your AI Agents",
+      primaryAgents: "Primary Recommendations",
+      secondaryAgents: "Secondary Recommendations",
+      chatWith: "Chat",
+      configure: "Configure",
+      active: "Active",
+      paused: "Paused",
+      inactive: "Inactive",
+      activeTasks: "active tasks",
+      lastUsed: "Last used",
+      never: "Never"
+    },
+    
+    heroSection: {
+      agentsSection: {
+        title: "Meet Your AI Back Office Team",
+        subtitle: "20+ specialized AI agents designed to handle your business operations while you focus on creating",
+        features: {
+          instant: {
+            title: "Instant Activation",
+            description: "Deploy agents in seconds with zero configuration"
+          },
+          specialized: {
+            title: "Specialized Expertise",
+            description: "Each agent is trained for specific creative business needs"
+          },
+          secure: {
+            title: "Secure & Private",
+            description: "Your data stays protected with enterprise-grade security"
+          },
+          collaborative: {
+            title: "Works Together",
+            description: "Agents coordinate seamlessly for complex workflows"
+          }
+        },
+        categories: {
+          financial: "Financial Agents",
+          legal: "Legal Experts",
+          operational: "Operations Team",
+          marketing: "Marketing Suite"
+        },
+        cta: "Explore All Agents",
+        preview: "See Agents in Action"
+      }
+    },
   },
   es: {
     ui: {
@@ -1503,6 +1670,88 @@ export const translations: Record<'en' | 'es', Translations> = {
       builder: 'Constructor',
       strategist: 'Estratega',
       visionary: 'Visionario'
+    },
+    
+    agentManager: {
+      title: "Gestor de Agentes",
+      subtitle: "Activa y gestiona tus agentes IA",
+      categories: {
+        Financiera: "Financiera",
+        Legal: "Legal",
+        Diagnóstico: "Diagnóstico",
+        Comercial: "Comercial",
+        Operativo: "Operativo",
+        Comunidad: "Comunidad"
+      },
+      priority: "Prioridad",
+      impact: "Impacto",
+      enabled: "Activado",
+      disabled: "Desactivado",
+      activate: "Activar",
+      deactivate: "Desactivar",
+      allAgents: "Todos los Agentes",
+      recommended: "Recomendado",
+      usageCount: "Contador de uso",
+      lastUsed: "Último uso",
+      never: "Nunca",
+      activating: "Activando...",
+      deactivating: "Desactivando...",
+      loading: "Gestor de Agentes IA",
+      noAgentsFound: "No se encontraron agentes",
+      tryAdjusting: "Intenta ajustar tus filtros",
+      clearAllFilters: "Limpiar todos los filtros",
+      search: "Buscar agentes...",
+      filters: "Filtros",
+      categories: "Categorías", 
+      totalAgents: "Total",
+      activeAgents: "Activos"
+    },
+    
+    recommendedAgents: {
+      recommendedAgents: "Tus Agentes IA",
+      primaryAgents: "Recomendaciones Principales",
+      secondaryAgents: "Recomendaciones Secundarias",
+      chatWith: "Chatear",
+      configure: "Configurar",
+      active: "Activo",
+      paused: "Pausado",
+      inactive: "Inactivo",
+      activeTasks: "tareas activas",
+      lastUsed: "Último uso",
+      never: "Nunca"
+    },
+    
+    heroSection: {
+      agentsSection: {
+        title: "Conoce Tu Equipo de IA para Back Office",
+        subtitle: "Más de 20 agentes de IA especializados diseñados para manejar las operaciones de tu negocio mientras te enfocas en crear",
+        features: {
+          instant: {
+            title: "Activación Instantánea",
+            description: "Despliega agentes en segundos sin configuración"
+          },
+          specialized: {
+            title: "Experiencia Especializada",
+            description: "Cada agente está entrenado para necesidades específicas de negocios creativos"
+          },
+          secure: {
+            title: "Seguro y Privado",
+            description: "Tus datos se mantienen protegidos con seguridad empresarial"
+          },
+          collaborative: {
+            title: "Trabaja en Conjunto",
+            description: "Los agentes se coordinan perfectamente para flujos complejos"
+          }
+        },
+        categories: {
+          financial: "Agentes Financieros",
+          legal: "Expertos Legales",
+          operational: "Equipo Operativo",
+          marketing: "Suite de Marketing"
+        },
+        cta: "Explorar Todos los Agentes",
+        preview: "Ver Agentes en Acción"
+      }
     },
   },
 };
