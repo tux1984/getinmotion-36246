@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,20 +14,6 @@ interface AIAssistantIntegratedProps {
   initialMessage?: string;
 }
 
-const stepTitles = {
-  en: {
-    'profile': 'Creative Profile Assistant',
-    'business-info': 'Business Assistant', 
-    'management-style': 'Management Assistant',
-    'default': 'AI Assistant',
-  },
-  es: {
-    'profile': 'Asistente de Perfil Creativo',
-    'business-info': 'Asistente de Negocio',
-    'management-style': 'Asistente de Gestión', 
-    'default': 'Asistente IA',
-  },
-};
 
 export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({ 
   stepContext, 
@@ -36,7 +22,7 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
   isVisible = true,
   initialMessage
 }) => {
-  const { language } = useLanguage();
+  const { t, language } = useTranslations();
   const { messages, isLoading, sendMessage } = useAIAssistant(stepContext, questionId, questionTitle);
   const [input, setInput] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -83,10 +69,10 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
               </div>
               <div className="flex-1">
                 <p className="text-purple-800 font-medium text-sm">
-                  {initialMessage || (language === 'es' ? '¡Cuéntame más sobre esto!' : 'Tell me more about this!')}
+                  {initialMessage || t.aiAssistant.tellMeMore}
                 </p>
                 <p className="text-purple-600 text-xs mt-1">
-                  {language === 'es' ? 'Haz clic para responder' : 'Click to respond'}
+                  {t.aiAssistant.clickToRespond}
                 </p>
               </div>
             </div>
@@ -98,7 +84,10 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-purple-600" />
                 <h3 className="font-medium text-purple-800">
-                  {stepTitles[language][stepContext as keyof typeof stepTitles[typeof language]] || stepTitles[language].default}
+                  {stepContext === 'profile' ? t.aiAssistant.profileAssistant :
+                   stepContext === 'business-info' ? t.aiAssistant.businessAssistant :
+                   stepContext === 'management-style' ? t.aiAssistant.managementAssistant :
+                   t.aiAssistant.defaultAssistant}
                 </h3>
               </div>
             </div>
@@ -110,10 +99,7 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
                   <div className="flex flex-col items-center justify-center h-full text-slate-400">
                     <Bot size={32} className="mb-2" />
                     <p className="text-sm text-center">
-                      {language === 'es' 
-                        ? `Soy tu asistente. Pregúntame sobre "${questionTitle || 'esto'}".`
-                        : `I'm your assistant. Ask me about "${questionTitle || 'this'}".`
-                      }
+                      {`${t.aiAssistant.aboutQuestion} "${questionTitle || t.aiAssistant.thisContext}".`}
                     </p>
                   </div>
                 )}
@@ -172,7 +158,7 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={language === 'es' ? 'Escribe aquí para chatear con el asistente...' : 'Type here to chat with the assistant...'}
+                  placeholder={t.aiAssistant.expandedPlaceholder}
                   className="pr-28 bg-white"
                   rows={3}
                   onKeyDown={(e) => {
@@ -188,7 +174,7 @@ export const AIAssistantIntegrated: React.FC<AIAssistantIntegratedProps> = ({
                   className="absolute right-2 bottom-2"
                   size="sm"
                 >
-                  {language === 'es' ? 'Enviar' : 'Send'}
+                  {t.aiAssistant.send}
                   <Send size={16} className="ml-2" />
                 </Button>
               </form>

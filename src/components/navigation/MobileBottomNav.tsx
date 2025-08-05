@@ -3,57 +3,40 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Home, Users, Settings, BarChart3 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslations } from '@/hooks/useTranslations';
 
-interface MobileBottomNavProps {
-  language: 'en' | 'es';
-}
+interface MobileBottomNavProps {}
 
-export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ language }) => {
+export const MobileBottomNav: React.FC<MobileBottomNavProps> = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const translations = {
-    en: {
-      dashboard: 'Dashboard',
-      agents: 'Agents',
-      analytics: 'Analytics',
-      settings: 'Settings'
-    },
-    es: {
-      dashboard: 'Panel',
-      agents: 'Agentes',
-      analytics: 'Analíticas',
-      settings: 'Ajustes'
-    }
-  };
-
-  const t = translations[language];
+  const { t } = useTranslations();
 
   const navItems = [
     {
       id: 'dashboard',
-      label: t.dashboard,
+      label: t.mobileBottomNav.dashboard,
       icon: Home,
       path: '/dashboard',
       isActive: location.pathname === '/dashboard' || location.pathname === '/'
     },
     {
       id: 'agents',
-      label: t.agents,
+      label: t.mobileBottomNav.agents,
       icon: Users,
       path: '/agent-manager',
       isActive: location.pathname.includes('/agent')
     },
     {
       id: 'analytics',
-      label: t.analytics,
+      label: t.mobileBottomNav.analytics,
       icon: BarChart3,
       path: '/maturity-calculator',
       isActive: location.pathname.includes('/maturity')
     },
     {
       id: 'settings',
-      label: t.settings,
+      label: t.mobileBottomNav.settings,
       icon: Settings,
       path: '/dashboard',
       isActive: false

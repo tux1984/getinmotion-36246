@@ -1979,7 +1979,40 @@ export const translations: Record<'en' | 'es', Translations> = {
       confirmButton: "Confirmar Selección",
       selectedMessage: "¡Listo, esto nos ayuda a ayudarte mejor!",
     },
+
+    aiAssistant: {
+      title: "Asistente IA",
+      placeholder: "Escribe tu mensaje...",
+      send: "Enviar",
+      thinking: "Pensando...",
+      reset: "Reiniciar Chat",
+      emptyState: "¡Hola! ¿Cómo puedo ayudarte hoy?",
+      apiErrorTitle: "Problema de Conexión",
+      apiErrorDescription: "Puede haber un problema con el servicio de IA. Por favor, inténtalo más tarde.",
+      tellMeMore: "¡Cuéntame más sobre esto!",
+      clickToRespond: "Haz clic para responder",
+      expandedPlaceholder: "Escribe aquí para chatear con el asistente...",
+      profileAssistant: "Asistente de Perfil Creativo",
+      businessAssistant: "Asistente de Negocio",
+      managementAssistant: "Asistente de Gestión",
+      defaultAssistant: "Asistente IA",
+      aboutQuestion: "Soy tu asistente. Pregúntame sobre",
+      thisContext: "esto"
+    },
+
+    heroChatBoxes: {
+      viewAllAgents: "Ver Todos los Agentes",
+      exploreComplete: "Explorar Colección Completa"
+    },
+
+    mobileBottomNav: {
+      dashboard: "Panel",
+      agents: "Agentes",
+      analytics: "Analíticas",
+      settings: "Ajustes"
+    },
   },
+
 };
 
 // Hook para usar las traducciones
