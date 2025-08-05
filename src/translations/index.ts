@@ -84,6 +84,62 @@ export interface Translations {
     viewProgress: string;
   };
 
+  // Master Coordinator
+  masterCoordinator: {
+    title: string;
+    subtitle: string;
+    welcome: string;
+    currentStatus: string;
+    activeSlots: string;
+    completed: string;
+    maturityLevel: string;
+    nextRecommendations: string;
+    viewAllTasks: string;
+    startWithAgent: string;
+    choosePath: string;
+    getPersonalizedGuidance: string;
+    exploreSubAgents: string;
+    progressToNext: string;
+    personalCoordinator: string;
+    alwaysHereToGuide: string;
+    preparingCoordinator: string;
+    configuringExperience: string;
+    freeSlots: string;
+    excellentProgress: string;
+    successRate: string;
+    efficiency: string;
+    incredible: string;
+    completedTasks: string;
+  };
+
+  // Greetings and coaching
+  greetings: {
+    goodMorning: string;
+    goodAfternoon: string;
+    goodEvening: string;
+    firstTime: string;
+    excellentProgress: string;
+    manyActiveTasks: string;
+    perfectMoment: string;
+  };
+
+  // Coaching tips
+  coaching: {
+    tip1: string;
+    tip2: string;
+    tip3: string;
+    tip4: string;
+    tip5: string;
+  };
+
+  // Maturity levels
+  maturityLevels: {
+    explorer: string;
+    builder: string;
+    strategist: string;
+    visionary: string;
+  };
+
   // Tasks
   tasks: {
     completed: string;
@@ -903,6 +959,62 @@ export const translations: Record<'en' | 'es', Translations> = {
       medium: 'Medium Impact',
       low: 'Low Impact'
     },
+    
+    // Master Coordinator
+    masterCoordinator: {
+      title: 'Master Business Coordinator',
+      subtitle: 'Your AI Business Success Partner',
+      welcome: 'Welcome to your Business Command Center',
+      currentStatus: 'Current Progress Status',
+      activeSlots: 'Active Task Slots',
+      completed: 'Completed Tasks',
+      maturityLevel: 'Business Maturity',
+      nextRecommendations: 'Your Next Priority Missions',
+      viewAllTasks: 'Mission Control Center',
+      startWithAgent: 'Assign to',
+      choosePath: 'Choose Your Growth Path',
+      getPersonalizedGuidance: 'Strategic Consultation',
+      exploreSubAgents: 'Available Specialists',
+      progressToNext: 'Progress to Next Level',
+      personalCoordinator: 'Your Personal Coordinator',
+      alwaysHereToGuide: 'Always here to guide you',
+      preparingCoordinator: 'Preparing your Master Coordinator...',
+      configuringExperience: 'Setting up your personalized experience',
+      freeSlots: 'free slots',
+      excellentProgress: 'Excellent progress!',
+      successRate: 'Success Rate',
+      efficiency: 'Efficiency',
+      incredible: 'Incredible!',
+      completedTasks: 'You have completed {count} tasks'
+    },
+
+    // Greetings and coaching
+    greetings: {
+      goodMorning: '🌅 Good morning!',
+      goodAfternoon: '☀️ Good afternoon!',
+      goodEvening: '🌙 Good evening!',
+      firstTime: 'I am your Master Coordinator and I am excited to accompany you on this business adventure!',
+      excellentProgress: 'Incredible progress! You have proven to be a true {level}. Let\'s keep building your success!',
+      manyActiveTasks: 'I see you have many active missions. As your coordinator, I help you prioritize to maximize results.',
+      perfectMoment: 'Perfect time to advance toward your goals. I have some strategic missions for you.'
+    },
+
+    // Coaching tips
+    coaching: {
+      tip1: '💡 Every small step counts in your business journey',
+      tip2: '🚀 Consistency beats perfection',
+      tip3: '✨ Your next big idea is one task away',
+      tip4: '🎯 Focus on completing, not perfecting',
+      tip5: '🌟 Each completed task brings you closer to success'
+    },
+
+    // Maturity levels
+    maturityLevels: {
+      explorer: 'Explorer',
+      builder: 'Builder',
+      strategist: 'Strategist',
+      visionary: 'Visionary'
+    },
   },
   es: {
     ui: {
@@ -1335,6 +1447,62 @@ export const translations: Record<'en' | 'es', Translations> = {
       high: 'Alto Impacto',
       medium: 'Impacto Medio',
       low: 'Bajo Impacto'
+    },
+    
+    // Master Coordinator
+    masterCoordinator: {
+      title: 'Coordinador Maestro de Negocios',
+      subtitle: 'Tu Compañero IA para el Éxito Empresarial',
+      welcome: 'Bienvenido a tu Centro de Comando Empresarial',
+      currentStatus: 'Estado Actual de Progreso',
+      activeSlots: 'Espacios de Tareas Activas',
+      completed: 'Tareas Completadas',
+      maturityLevel: 'Madurez del Negocio',
+      nextRecommendations: 'Tus Próximas Misiones Prioritarias',
+      viewAllTasks: 'Centro de Control de Misiones',
+      startWithAgent: 'Asignar a',
+      choosePath: 'Elige tu Ruta de Crecimiento',
+      getPersonalizedGuidance: 'Consulta Estratégica',
+      exploreSubAgents: 'Especialistas Disponibles',
+      progressToNext: 'Progreso al Siguiente Nivel',
+      personalCoordinator: 'Tu Coordinador Personal',
+      alwaysHereToGuide: 'Siempre aquí para guiarte',
+      preparingCoordinator: 'Preparando tu Coordinador Maestro...',
+      configuringExperience: 'Configurando tu experiencia personalizada',
+      freeSlots: 'espacios libres',
+      excellentProgress: '¡Excelente progreso!',
+      successRate: 'Tasa de Éxito',
+      efficiency: 'Eficiencia',
+      incredible: '¡Increíble!',
+      completedTasks: 'Has completado {count} tareas'
+    },
+
+    // Greetings and coaching
+    greetings: {
+      goodMorning: '🌅 ¡Buenos días!',
+      goodAfternoon: '☀️ ¡Buenas tardes!',
+      goodEvening: '🌙 ¡Buenas noches!',
+      firstTime: '¡Soy tu Coordinador Maestro y estoy emocionado de acompañarte en esta aventura empresarial!',
+      excellentProgress: '¡Increíble progreso! Has demostrado ser un verdadero {level}. ¡Sigamos construyendo tu éxito!',
+      manyActiveTasks: 'Veo que tienes muchas misiones activas. Como tu coordinador, te ayudo a priorizar para maximizar resultados.',
+      perfectMoment: 'Perfecto momento para avanzar hacia tus objetivos. Tengo algunas misiones estratégicas para ti.'
+    },
+
+    // Coaching tips
+    coaching: {
+      tip1: '💡 Cada pequeño paso cuenta en tu viaje empresarial',
+      tip2: '🚀 La consistencia supera a la perfección',
+      tip3: '✨ Tu próxima gran idea está a una tarea de distancia',
+      tip4: '🎯 Enfócate en completar, no en perfeccionar',
+      tip5: '🌟 Cada tarea completada te acerca más al éxito'
+    },
+
+    // Maturity levels
+    maturityLevels: {
+      explorer: 'Explorador',
+      builder: 'Constructor',
+      strategist: 'Estratega',
+      visionary: 'Visionario'
     },
   },
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const MasterCoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const { t, language } = useTranslations();
   const { maturityScores, isLoading } = useOptimizedAgentManagement();
   const { tasks, createTask } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, remainingSlots, getProgressPercentage } = useTaskLimits(tasks);
@@ -31,11 +31,11 @@ export const MasterCoordinatorDashboard: React.FC = () => {
 
   // Dynamic tips and coaching messages
   const coachingTips = [
-    "💡 Cada pequeño paso cuenta en tu viaje empresarial",
-    "🚀 La consistencia supera a la perfección",
-    "✨ Tu próxima gran idea está a una tarea de distancia",
-    "🎯 Enfócate en completar, no en perfeccionar",
-    "🌟 Cada tarea completada te acerca más al éxito"
+    t.coaching.tip1,
+    t.coaching.tip2,
+    t.coaching.tip3,
+    t.coaching.tip4,
+    t.coaching.tip5
   ];
 
   useEffect(() => {
@@ -53,68 +53,32 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     }
   }, [completedTasksCount]);
 
-  const translations = {
-    en: {
-      title: "Master Business Coordinator",
-      subtitle: "Your AI Business Success Partner",
-      welcome: "Welcome to your Business Command Center",
-      currentStatus: "Current Progress Status",
-      activeSlots: "Active Task Slots",
-      completed: "Completed Tasks",
-      maturityLevel: "Business Maturity",
-      nextRecommendations: "Your Next Priority Missions",
-      viewAllTasks: "Mission Control Center",
-      startWithAgent: "Assign to",
-      choosePath: "Choose Your Growth Path",
-      getPersonalizedGuidance: "Strategic Consultation",
-      exploreSubAgents: "Available Specialists",
-      progressToNext: "Progress to Next Level"
-    },
-    es: {
-      title: "Coordinador Maestro de Negocios",
-      subtitle: "Tu Compañero IA para el Éxito Empresarial",
-      welcome: "Bienvenido a tu Centro de Comando Empresarial",
-      currentStatus: "Estado Actual de Progreso",
-      activeSlots: "Espacios de Tareas Activas",
-      completed: "Tareas Completadas",
-      maturityLevel: "Madurez del Negocio",
-      nextRecommendations: "Tus Próximas Misiones Prioritarias",
-      viewAllTasks: "Centro de Control de Misiones",
-      startWithAgent: "Asignar a",
-      choosePath: "Elige tu Ruta de Crecimiento",
-      getPersonalizedGuidance: "Consulta Estratégica",
-      exploreSubAgents: "Especialistas Disponibles",
-      progressToNext: "Progreso al Siguiente Nivel"
-    }
-  };
-
-  const t = translations[language];
 
   const getMaturityLevel = () => {
-    if (!maturityScores) return { level: 'Explorador', percentage: 25, color: 'from-purple-500 to-pink-500', emoji: '🌱' };
+    if (!maturityScores) return { level: t.maturityLevels.explorer, percentage: 25, color: 'from-purple-500 to-pink-500', emoji: '🌱' };
     
     const average = Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4;
     
     if (average >= 80) return { 
-      level: 'Visionario', 
+      level: t.maturityLevels.visionary, 
       percentage: average, 
       color: 'from-yellow-400 to-orange-500',
       emoji: '👑'
     };
     if (average >= 60) return { 
-      level: 'Estratega', 
+      level: t.maturityLevels.strategist, 
       percentage: average, 
       color: 'from-green-500 to-emerald-500',
       emoji: '🚀'
     };
     if (average >= 40) return { 
-      level: 'Constructor', 
+      level: t.maturityLevels.builder, 
       percentage: average, 
       color: 'from-blue-500 to-cyan-500',
       emoji: '🔧'
     };
     return { 
-      level: 'Explorador', 
+      level: t.maturityLevels.explorer, 
       percentage: average, 
       color: 'from-purple-500 to-pink-500',
       emoji: '🌱'
@@ -125,29 +89,29 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     const maturityLevel = getMaturityLevel();
     
     const tasksByLevel = {
-      'Explorador': [
+      [t.maturityLevels.explorer]: [
         { title: 'Validar tu idea de negocio con expertos', agent: 'cultural-consultant', priority: 'Alta', impact: 5, description: 'Obtén feedback profesional sobre tu concepto', icon: '🎯' },
         { title: 'Calcular costos reales de tu proyecto', agent: 'cost-calculator', priority: 'Alta', impact: 4, description: 'Define presupuestos precisos', icon: '💰' },
         { title: 'Establecer estructura legal básica', agent: 'collaboration-agreement', priority: 'Media', impact: 3, description: 'Protege tu negocio legalmente', icon: '⚖️' }
       ],
-      'Constructor': [
+      [t.maturityLevels.builder]: [
         { title: 'Desarrollar estrategia de marketing digital', agent: 'marketing-advisor', priority: 'Alta', impact: 5, description: 'Atrae a tus primeros clientes', icon: '📈' },
         { title: 'Optimizar gestión de proyectos', agent: 'project-manager', priority: 'Media', impact: 4, description: 'Organiza tu flujo de trabajo', icon: '📋' },
         { title: 'Crear sistema de precios competitivo', agent: 'pricing-assistant', priority: 'Media', impact: 3, description: 'Maximiza tus ingresos', icon: '💲' }
       ],
-      'Estratega': [
+      [t.maturityLevels.strategist]: [
         { title: 'Explorar mercados internacionales', agent: 'export-advisor', priority: 'Alta', impact: 5, description: 'Expande globalmente', icon: '🌍' },
         { title: 'Desarrollar red de stakeholders', agent: 'stakeholder-matching', priority: 'Alta', impact: 4, description: 'Conecta con socios clave', icon: '🤝' },
         { title: 'Optimizar marca personal', agent: 'branding-strategy', priority: 'Media', impact: 4, description: 'Fortalece tu posicionamiento', icon: '✨' }
       ],
-      'Visionario': [
+      [t.maturityLevels.visionary]: [
         { title: 'Desarrollar estrategia de escalabilidad', agent: 'business-scaling', priority: 'Alta', impact: 5, description: 'Multiplica tu impacto', icon: '🚀' },
         { title: 'Implementar innovación disruptiva', agent: 'innovation-consultant', priority: 'Alta', impact: 5, description: 'Lidera el cambio', icon: '💡' },
         { title: 'Crear ecosistema de negocios', agent: 'ecosystem-builder', priority: 'Media', impact: 4, description: 'Construye un imperio', icon: '🏰' }
       ]
     };
 
-    return tasksByLevel[maturityLevel.level] || tasksByLevel['Explorador'];
+    return tasksByLevel[maturityLevel.level] || tasksByLevel[t.maturityLevels.explorer];
   };
 
   const getPersonalizedGreeting = () => {
@@ -156,21 +120,21 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     let timeGreeting = '';
     
     if (currentHour < 12) {
-      timeGreeting = '🌅 ¡Buenos días!';
+      timeGreeting = t.greetings.goodMorning;
     } else if (currentHour < 18) {
-      timeGreeting = '☀️ ¡Buenas tardes!';
+      timeGreeting = t.greetings.goodAfternoon;
     } else {
-      timeGreeting = '🌙 ¡Buenas noches!';
+      timeGreeting = t.greetings.goodEvening;
     }
 
     if (completedTasksCount === 0) {
-      return `${timeGreeting} ¡Soy tu Coordinador Maestro y estoy emocionado de acompañarte en esta aventura empresarial! ${maturityLevel.emoji}`;
+      return `${timeGreeting} ${t.greetings.firstTime} ${maturityLevel.emoji}`;
     } else if (completedTasksCount >= 10) {
-      return `${timeGreeting} ¡Increíble progreso! Has demostrado ser un verdadero ${maturityLevel.level}. ¡Sigamos construyendo tu éxito! 🏆`;
+      return `${timeGreeting} ${t.greetings.excellentProgress.replace('{level}', maturityLevel.level)} 🏆`;
     } else if (activeTasksCount >= 12) {
-      return `${timeGreeting} Veo que tienes muchas misiones activas. Como tu coordinador, te ayudo a priorizar para maximizar resultados. 🎯`;
+      return `${timeGreeting} ${t.greetings.manyActiveTasks} 🎯`;
     } else {
-      return `${timeGreeting} Perfecto momento para avanzar hacia tus objetivos. Tengo algunas misiones estratégicas para ti. ⚡`;
+      return `${timeGreeting} ${t.greetings.perfectMoment} ⚡`;
     }
   };
 
@@ -220,8 +184,8 @@ export const MasterCoordinatorDashboard: React.FC = () => {
               >
                 <Crown className="w-10 h-10 text-white" />
               </motion.div>
-              <p className="text-white text-xl font-medium">Preparando tu Coordinador Maestro...</p>
-              <p className="text-purple-200 text-sm mt-2">Configurando tu experiencia personalizada</p>
+              <p className="text-white text-xl font-medium">{t.masterCoordinator.preparingCoordinator}</p>
+              <p className="text-purple-200 text-sm mt-2">{t.masterCoordinator.configuringExperience}</p>
             </motion.div>
           </div>
         </div>
@@ -264,8 +228,8 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                 transition={{ duration: 0.5, repeat: 3 }}
               >
                 <Trophy className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold">¡Increíble!</h3>
-                <p>Has completado {completedTasksCount} tareas</p>
+                <h3 className="text-2xl font-bold">{t.masterCoordinator.incredible}</h3>
+                <p>{t.masterCoordinator.completedTasks.replace('{count}', completedTasksCount.toString())}</p>
               </motion.div>
             </motion.div>
           )}
@@ -299,9 +263,9 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                 <Crown className="w-14 h-14 text-white" />
               </motion.div>
               <h1 className="text-5xl font-bold text-white mb-3 bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
-                {t.title}
+                {t.masterCoordinator.title}
               </h1>
-              <p className="text-purple-200 text-xl font-medium">{t.subtitle}</p>
+              <p className="text-purple-200 text-xl font-medium">{t.masterCoordinator.subtitle}</p>
               <motion.div 
                 className="mt-4 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2"
                 animate={{ opacity: [0.7, 1, 0.7] }}
@@ -324,8 +288,8 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-lg">Tu Coordinador Personal</h3>
-                  <p className="text-purple-200 text-sm">Siempre aquí para guiarte</p>
+                  <h3 className="text-white font-semibold text-lg">{t.masterCoordinator.personalCoordinator}</h3>
+                  <p className="text-purple-200 text-sm">{t.masterCoordinator.alwaysHereToGuide}</p>
                 </div>
               </div>
               <p className="text-white text-lg font-medium leading-relaxed">{getPersonalizedGreeting()}</p>
@@ -341,10 +305,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
               <Card className="bg-white/15 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300">
                 <div className="p-6 text-center">
                   <div className="text-4xl font-bold mb-2">{activeTasksCount}/15</div>
-                  <div className="text-purple-200 text-sm mb-3">{t.activeSlots}</div>
+                  <div className="text-purple-200 text-sm mb-3">{t.masterCoordinator.activeSlots}</div>
                   <Progress value={getProgressPercentage()} className="h-2" />
                   <div className="mt-2 text-xs text-purple-300">
-                    {remainingSlots} espacios libres
+                    {remainingSlots} {t.masterCoordinator.freeSlots}
                   </div>
                 </div>
               </Card>
@@ -352,10 +316,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
               <Card className="bg-white/15 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300">
                 <div className="p-6 text-center">
                   <div className="text-4xl font-bold mb-2 text-green-300">{completedTasksCount}</div>
-                  <div className="text-purple-200 text-sm mb-3">{t.completed}</div>
+                  <div className="text-purple-200 text-sm mb-3">{t.masterCoordinator.completed}</div>
                   <Star className="w-6 h-6 mx-auto text-yellow-400" />
                   <div className="mt-2 text-xs text-purple-300">
-                    ¡Excelente progreso!
+                    {t.masterCoordinator.excellentProgress}
                   </div>
                 </div>
               </Card>
@@ -372,10 +336,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
               <Card className="bg-white/15 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300">
                 <div className="p-6 text-center">
                   <div className="text-4xl font-bold mb-2 text-yellow-300">{Math.round((completedTasksCount / Math.max(completedTasksCount + activeTasksCount, 1)) * 100)}%</div>
-                  <div className="text-purple-200 text-sm mb-3">Tasa de Éxito</div>
+                  <div className="text-purple-200 text-sm mb-3">{t.masterCoordinator.successRate}</div>
                   <Zap className="w-6 h-6 mx-auto text-orange-400" />
                   <div className="mt-2 text-xs text-purple-300">
-                    Eficiencia del {Math.round((completedTasksCount / Math.max(completedTasksCount + activeTasksCount, 1)) * 100)}%
+                    {t.masterCoordinator.efficiency} {Math.round((completedTasksCount / Math.max(completedTasksCount + activeTasksCount, 1)) * 100)}%
                   </div>
                 </div>
               </Card>
@@ -402,7 +366,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
                       <Sparkles className="w-6 h-6 text-white" />
                     </div>
-                    {t.nextRecommendations}
+                    {t.masterCoordinator.nextRecommendations}
                   </h2>
                   <motion.div
                     animate={{ rotate: expandedSections.has('suggestions') ? 180 : 0 }}
@@ -459,7 +423,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg shadow-lg"
                               disabled={activeTasksCount >= 15}
                             >
-                              {t.startWithAgent} Especialista
+                              {t.masterCoordinator.startWithAgent} Especialista
                               <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                           </div>
@@ -485,7 +449,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mr-4">
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800">{t.getPersonalizedGuidance}</h3>
+                  <h3 className="text-2xl font-bold text-gray-800">{t.masterCoordinator.getPersonalizedGuidance}</h3>
                 </div>
                 <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                   Habla directamente conmigo para obtener orientación estratégica personalizada y resolver cualquier desafío empresarial.
@@ -507,7 +471,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mr-4">
                     <Users className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800">{t.viewAllTasks}</h3>
+                  <h3 className="text-2xl font-bold text-gray-800">{t.masterCoordinator.viewAllTasks}</h3>
                 </div>
                 <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                   Explora todas tus misiones y recomendaciones inteligentes en un solo lugar. Tu centro de comando empresarial unificado.
