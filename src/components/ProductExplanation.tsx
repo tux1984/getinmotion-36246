@@ -1,77 +1,32 @@
 import React from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 
 export const ProductExplanation = () => {
-  const { language } = useLanguage();
-
-  const translations = {
-    en: {
-      title: "How Get in Motion Works",
-      subtitle: "Simple steps to transform your creative business",
-      step1: {
-        title: "Start a Task, Your Way",
-        description: "Email, Slack, or directly in the app - whatever works for you"
-      },
-      step2: {
-        title: "Motion Gets to Work",
-        description: "We generate invoices, verify compliance, and handle the paperwork"
-      },
-      step3: {
-        title: "Collections Go Automatically",
-        description: "Smart follow-ups and payment reminders without you lifting a finger"
-      },
-      step4: {
-        title: "Review Reports and Optimize",
-        description: "Monitor everything during construction and optimize your processes"
-      }
-    },
-    es: {
-      title: "Cómo Funciona Get in Motion",
-      subtitle: "Pasos simples para transformar tu negocio creativo",
-      step1: {
-        title: "Inicia una Tarea, a Tu Manera",
-        description: "Email, Slack, o directo en la app - como prefieras"
-      },
-      step2: {
-        title: "Motion Se Pone a Trabajar",
-        description: "Generamos facturas, verificamos cumplimiento y manejamos el papeleo"
-      },
-      step3: {
-        title: "Las Cobranzas Salen Automáticamente",
-        description: "Seguimientos inteligentes y recordatorios de pago sin que muevas un dedo"
-      },
-      step4: {
-        title: "Revisa Reportes y Optimiza",
-        description: "Supervisión durante la construcción y optimización de tus procesos"
-      }
-    }
-  };
-
-  const t = translations[language];
+  const { t } = useTranslations();
 
   const steps = [
     {
       number: "01",
-      title: t.step1.title,
-      description: t.step1.description,
+      title: t.productExplanation.step1.title,
+      description: t.productExplanation.step1.description,
       color: "from-pink-500 to-purple-600"
     },
     {
       number: "02", 
-      title: t.step2.title,
-      description: t.step2.description,
+      title: t.productExplanation.step2.title,
+      description: t.productExplanation.step2.description,
       color: "from-purple-500 to-indigo-600"
     },
     {
       number: "03",
-      title: t.step3.title,
-      description: t.step3.description,
+      title: t.productExplanation.step3.title,
+      description: t.productExplanation.step3.description,
       color: "from-indigo-500 to-blue-600"
     },
     {
       number: "04",
-      title: t.step4.title,
-      description: t.step4.description,
+      title: t.productExplanation.step4.title,
+      description: t.productExplanation.step4.description,
       color: "from-blue-500 to-cyan-600"
     }
   ];
@@ -81,10 +36,10 @@ export const ProductExplanation = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">
-            {t.title}
+            {t.productExplanation.title}
           </h2>
           <p className="text-lg text-indigo-100 max-w-2xl mx-auto">
-            {t.subtitle}
+            {t.productExplanation.subtitle}
           </p>
         </div>
 

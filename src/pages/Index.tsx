@@ -74,9 +74,9 @@ const Index = () => {
         />
         <ProductExplanation />
         <FeaturesSection language={language} />
-        <ValueProposition language={language} />
+        <ValueProposition />
         <CollapsibleWaitlistForm language={language} />
-        <Footer language={language} />
+        <Footer />
       </div>
     </div>
   );

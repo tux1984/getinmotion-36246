@@ -75,7 +75,7 @@ export const TwoPagerLayout = ({
         {children}
       </main>
 
-      <Footer language={selectedLanguage as 'en' | 'es'} />
+      <Footer />
     </div>
   );
 };

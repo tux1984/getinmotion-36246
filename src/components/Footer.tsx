@@ -2,52 +2,10 @@
 import React from 'react';
 import { MotionLogo } from './MotionLogo';
 import { Link } from 'react-router-dom';
+import { useTranslations } from '@/hooks/useTranslations';
 
-interface FooterProps {
-  language: 'en' | 'es';
-}
-
-export const Footer = ({ language }: FooterProps) => {
-  const translations = {
-    en: {
-      tagline: "Empowering cultural creators with AI-powered tools for sustainable creative careers",
-      product: "Product",
-      platform: "Platform",
-      calculator: "Maturity Calculator", 
-      dashboard: "Dashboard",
-      agents: "AI Agents",
-      agentsGallery: "Agents Gallery",
-      resources: "Resources",
-      login: "Login",
-      admin: "Admin Access",
-      waitlist: "Join Waitlist",
-      legal: "Legal",
-      privacyPolicy: "Privacy Policy",
-      termsOfService: "Terms of Service",
-      copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`,
-      followUs: "Follow Us"
-    },
-    es: {
-      tagline: "Empoderando a creadores culturales con herramientas de IA para carreras creativas sostenibles",
-      product: "Producto",
-      platform: "Plataforma",
-      calculator: "Calculadora de Madurez",
-      dashboard: "Dashboard", 
-      agents: "Agentes de IA",
-      agentsGallery: "Galería de Agentes",
-      resources: "Recursos",
-      login: "Iniciar Sesión",
-      admin: "Acceso Admin",
-      waitlist: "Unirse a Lista",
-      legal: "Legal",
-      privacyPolicy: "Política de Privacidad",
-      termsOfService: "Términos de Servicio",
-      copyright: `© ${new Date().getFullYear()} Motion Project. Todos los derechos reservados.`,
-      followUs: "Síguenos"
-    }
-  };
-
-  const t = translations[language];
+export const Footer = () => {
+  const { t } = useTranslations();
 
   return (
     <footer className="relative w-full bg-gradient-to-br from-indigo-950 via-purple-950 to-indigo-900 overflow-hidden">
@@ -70,9 +28,9 @@ export const Footer = ({ language }: FooterProps) => {
             <div className="mb-6">
               <MotionLogo variant="light" size="lg" />
             </div>
-            <p className="text-indigo-200 text-sm leading-relaxed mb-6 max-w-sm">
-              {t.tagline}
-            </p>
+                <p className="text-indigo-200 text-sm leading-relaxed mb-6 max-w-sm">
+                  {t.footer.tagline}
+                </p>
             
             {/* Social media links */}
             <div className="flex space-x-4">
@@ -106,27 +64,27 @@ export const Footer = ({ language }: FooterProps) => {
           {/* Product section */}
           <div>
             <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-6">
-              {t.product}
+              {t.footer.product}
             </h3>
             <ul className="space-y-3">
               <li>
                 <a href="#product-explanation" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.platform}
+                  {t.footer.platform}
                 </a>
               </li>
               <li>
                 <Link to="/maturity-calculator" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.calculator}
+                  {t.footer.calculator}
                 </Link>
               </li>
               <li>
                 <Link to="/dashboard" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.dashboard}
+                  {t.footer.dashboard}
                 </Link>
               </li>
               <li>
                 <Link to="/agents" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.agentsGallery}
+                  {t.footer.agentsGallery}
                 </Link>
               </li>
             </ul>
@@ -135,22 +93,22 @@ export const Footer = ({ language }: FooterProps) => {
           {/* Resources & Access section */}
           <div>
             <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-blue-300 mb-6">
-              {t.resources}
+              {t.footer.resources}
             </h3>
             <ul className="space-y-3">
               <li>
                 <Link to="/login" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.login}
+                  {t.footer.login}
                 </Link>
               </li>
               <li>
                 <Link to="/admin" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.admin}
+                  {t.footer.admin}
                 </Link>
               </li>
               <li>
                 <a href="#access" className="text-indigo-200 hover:text-white transition-colors duration-200 text-sm">
-                  {t.waitlist}
+                  {t.footer.waitlist}
                 </a>
               </li>
             </ul>
@@ -163,16 +121,16 @@ export const Footer = ({ language }: FooterProps) => {
         {/* Bottom section */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-indigo-300 text-sm mb-4 md:mb-0">
-            {t.copyright}
+            {t.footer.copyright}
           </div>
           
           {/* Legal links */}
           <div className="flex space-x-6 text-sm">
             <a href="#" className="text-indigo-300 hover:text-white transition-colors duration-200">
-              {t.privacyPolicy}
+              {t.footer.privacyPolicy}
             </a>
             <a href="#" className="text-indigo-300 hover:text-white transition-colors duration-200">
-              {t.termsOfService}
+              {t.footer.termsOfService}
             </a>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { Lightbulb, User, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslations } from '@/hooks/useTranslations';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -19,37 +19,8 @@ interface ProfileSelectorProps {
 export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelected }) => {
   const [selectedProfile, setSelectedProfile] = useState<ProfileType>(null);
   const { toast } = useToast();
-  const { language } = useLanguage();
+  const { t } = useTranslations();
   const navigate = useNavigate();
-
-  const translations = {
-    en: {
-      title: "Where are you today with your project?",
-      subtitle: "We'll help you move forward from where you are. Choose the option that best represents you right now.",
-      ideaTitle: "I just have the idea",
-      ideaDescription: "I have an idea, but I don't know where to start and don't have anything set up yet.",
-      soloTitle: "I'm working on this, but alone",
-      soloDescription: "I've already started, but I do everything myself: sell, create, collect, publish.",
-      teamTitle: "I have a team",
-      teamDescription: "I work with more people and need to coordinate or delegate tasks.",
-      confirmButton: "Confirm Selection",
-      selectedMessage: "Ready! This helps us help you better!",
-    },
-    es: {
-      title: "¿Dónde estás hoy con tu proyecto?",
-      subtitle: "Te ayudamos a avanzar desde donde estés. Elige la opción que mejor te representa ahora.",
-      ideaTitle: "Apenas tengo la idea",
-      ideaDescription: "Tengo una idea, pero no sé por dónde empezar ni tengo nada montado todavía.",
-      soloTitle: "Estoy trabajando en esto, pero solo/a",
-      soloDescription: "Ya empecé, pero todo lo hago yo: vender, crear, cobrar, publicar.",
-      teamTitle: "Tengo un equipo",
-      teamDescription: "Trabajo con más personas y necesito coordinar o delegar tareas.",
-      confirmButton: "Confirmar Selección",
-      selectedMessage: "¡Listo, esto nos ayuda a ayudarte mejor!",
-    }
-  };
-
-  const t = translations[language];
 
   const handleSelect = (type: ProfileType) => {
     setSelectedProfile(type);
@@ -63,7 +34,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
       localStorage.setItem('userProfile', selectedProfile);
       
       toast({
-        title: t.selectedMessage,
+        title: t.profileSelector.selectedMessage,
         description: new Date().toLocaleTimeString(),
       });
       
@@ -76,8 +47,8 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
     <div className="py-16 bg-gradient-to-br from-indigo-900/70 to-purple-900/70 rounded-xl backdrop-blur-sm" id="profile-selector">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">{t.title}</h2>
-          <p className="text-lg text-indigo-100 max-w-3xl mx-auto">{t.subtitle}</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 font-serif">{t.profileSelector.title}</h2>
+          <p className="text-lg text-indigo-100 max-w-3xl mx-auto">{t.profileSelector.subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -95,7 +66,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mr-4">
                   <Lightbulb className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-pink-200">{t.ideaTitle}</h3>
+                <h3 className="text-xl font-bold text-pink-200">{t.profileSelector.ideaTitle}</h3>
               </div>
               
               <RadioGroup className="mb-3">
@@ -106,7 +77,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                     checked={selectedProfile === 'idea'}
                     className="border-pink-400 text-pink-500"
                   />
-                  <Label htmlFor="idea" className="text-indigo-100">{t.ideaDescription}</Label>
+                  <Label htmlFor="idea" className="text-indigo-100">{t.profileSelector.ideaDescription}</Label>
                 </div>
               </RadioGroup>
               
@@ -132,7 +103,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mr-4">
                   <User className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-purple-200">{t.soloTitle}</h3>
+                <h3 className="text-xl font-bold text-purple-200">{t.profileSelector.soloTitle}</h3>
               </div>
               
               <RadioGroup className="mb-3">
@@ -143,7 +114,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                     checked={selectedProfile === 'solo'}
                     className="border-purple-400 text-purple-500"
                   />
-                  <Label htmlFor="solo" className="text-indigo-100">{t.soloDescription}</Label>
+                  <Label htmlFor="solo" className="text-indigo-100">{t.profileSelector.soloDescription}</Label>
                 </div>
               </RadioGroup>
               
@@ -169,7 +140,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center mr-4">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-indigo-200">{t.teamTitle}</h3>
+                <h3 className="text-xl font-bold text-indigo-200">{t.profileSelector.teamTitle}</h3>
               </div>
               
               <RadioGroup className="mb-3">
@@ -180,7 +151,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                     checked={selectedProfile === 'team'}
                     className="border-indigo-400 text-indigo-500"
                   />
-                  <Label htmlFor="team" className="text-indigo-100">{t.teamDescription}</Label>
+                  <Label htmlFor="team" className="text-indigo-100">{t.profileSelector.teamDescription}</Label>
                 </div>
               </RadioGroup>
               
@@ -204,7 +175,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                 : 'bg-gray-600 cursor-not-allowed'
             }`}
           >
-            {t.confirmButton}
+            {t.profileSelector.confirmButton}
           </Button>
         </div>
       </div>

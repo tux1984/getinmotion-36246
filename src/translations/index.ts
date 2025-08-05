@@ -608,6 +608,72 @@ export interface Translations {
       cta: string;
       preview: string;
     };
+    title: string;
+    subtitle: string;
+    ctaButton: string;
+    scrollHint: string;
+  };
+
+  footer: {
+    tagline: string;
+    product: string;
+    platform: string;
+    calculator: string;
+    dashboard: string;
+    agents: string;
+    agentsGallery: string;
+    resources: string;
+    login: string;
+    admin: string;
+    waitlist: string;
+    legal: string;
+    privacyPolicy: string;
+    termsOfService: string;
+    copyright: string;
+    followUs: string;
+  };
+
+  productExplanation: {
+    title: string;
+    subtitle: string;
+    step1: {
+      title: string;
+      description: string;
+    };
+    step2: {
+      title: string;
+      description: string;
+    };
+    step3: {
+      title: string;
+      description: string;
+    };
+    step4: {
+      title: string;
+      description: string;
+    };
+  };
+
+  valueProposition: {
+    title: string;
+    subtitle: string;
+    reasons: Array<{
+      title: string;
+      description: string;
+    }>;
+  };
+
+  profileSelector: {
+    title: string;
+    subtitle: string;
+    ideaTitle: string;
+    ideaDescription: string;
+    soloTitle: string;
+    soloDescription: string;
+    teamTitle: string;
+    teamDescription: string;
+    confirmButton: string;
+    selectedMessage: string;
   };
 }
 
@@ -1151,6 +1217,10 @@ export const translations: Record<'en' | 'es', Translations> = {
     },
     
     heroSection: {
+      title: "Empower your creative business with AI",
+      subtitle: "Transform ideas into sustainable creative careers with intelligent agents that understand your industry",
+      ctaButton: "Start Your Journey",
+      scrollHint: "Scroll to explore",
       agentsSection: {
         title: "Meet Your AI Back Office Team",
         subtitle: "20+ specialized AI agents designed to handle your business operations while you focus on creating",
@@ -1181,6 +1251,82 @@ export const translations: Record<'en' | 'es', Translations> = {
         cta: "Explore All Agents",
         preview: "See Agents in Action"
       }
+    },
+
+    footer: {
+      tagline: "Empowering cultural creators with AI-powered tools for sustainable creative careers",
+      product: "Product",
+      platform: "Platform",
+      calculator: "Maturity Calculator", 
+      dashboard: "Dashboard",
+      agents: "AI Agents",
+      agentsGallery: "Agents Gallery",
+      resources: "Resources",
+      login: "Login",
+      admin: "Admin Access",
+      waitlist: "Join Waitlist",
+      legal: "Legal",
+      privacyPolicy: "Privacy Policy",
+      termsOfService: "Terms of Service",
+      copyright: `© ${new Date().getFullYear()} Motion Project. All rights reserved.`,
+      followUs: "Follow Us"
+    },
+
+    productExplanation: {
+      title: "How Get in Motion Works",
+      subtitle: "Simple steps to transform your creative business",
+      step1: {
+        title: "Start a Task, Your Way",
+        description: "Email, Slack, or directly in the app - whatever works for you"
+      },
+      step2: {
+        title: "Motion Gets to Work",
+        description: "We generate invoices, verify compliance, and handle the paperwork"
+      },
+      step3: {
+        title: "Collections Go Automatically",
+        description: "Smart follow-ups and payment reminders without you lifting a finger"
+      },
+      step4: {
+        title: "Review Reports and Optimize",
+        description: "Monitor everything during construction and optimize your processes"
+      }
+    },
+
+    valueProposition: {
+      title: "Why Choose Get in Motion?",
+      subtitle: "Designed to empower creators, organizations, and small businesses anywhere in the world",
+      reasons: [
+        {
+          title: "Save time and resources",
+          description: "Automate repetitive tasks and focus on what truly matters - your creative work and business growth."
+        },
+        {
+          title: "Operate like a large team",
+          description: "Access AI copilots 24/7 that work alongside you, providing expertise and support whenever you need it."
+        },
+        {
+          title: "Grow without technical knowledge",
+          description: "User-friendly tools that don't require coding or technical expertise to implement and use effectively."
+        },
+        {
+          title: "Custom solution",
+          description: "Tailored specifically for your industry, workflow, and unique business needs and challenges."
+        }
+      ]
+    },
+
+    profileSelector: {
+      title: "Where are you today with your project?",
+      subtitle: "We'll help you move forward from where you are. Choose the option that best represents you right now.",
+      ideaTitle: "I just have the idea",
+      ideaDescription: "I have an idea, but I don't know where to start and don't have anything set up yet.",
+      soloTitle: "I'm working on this, but alone",
+      soloDescription: "I've already started, but I do everything myself: sell, create, collect, publish.",
+      teamTitle: "I have a team",
+      teamDescription: "I work with more people and need to coordinate or delegate tasks.",
+      confirmButton: "Confirm Selection",
+      selectedMessage: "Ready! This helps us help you better!",
     },
   },
   es: {
@@ -1722,6 +1868,10 @@ export const translations: Record<'en' | 'es', Translations> = {
     },
     
     heroSection: {
+      title: "Empodera tu negocio creativo con IA",
+      subtitle: "Transforma ideas en carreras creativas sostenibles con agentes inteligentes que entienden tu industria",
+      ctaButton: "Comenzar Tu Viaje",
+      scrollHint: "Desliza para explorar",
       agentsSection: {
         title: "Conoce Tu Equipo de IA para Back Office",
         subtitle: "Más de 20 agentes de IA especializados diseñados para manejar las operaciones de tu negocio mientras te enfocas en crear",
@@ -1752,6 +1902,82 @@ export const translations: Record<'en' | 'es', Translations> = {
         cta: "Explorar Todos los Agentes",
         preview: "Ver Agentes en Acción"
       }
+    },
+
+    footer: {
+      tagline: "Empoderando a creadores culturales con herramientas de IA para carreras creativas sostenibles",
+      product: "Producto",
+      platform: "Plataforma",
+      calculator: "Calculadora de Madurez",
+      dashboard: "Dashboard", 
+      agents: "Agentes de IA",
+      agentsGallery: "Galería de Agentes",
+      resources: "Recursos",
+      login: "Iniciar Sesión",
+      admin: "Acceso Admin",
+      waitlist: "Unirse a Lista",
+      legal: "Legal",
+      privacyPolicy: "Política de Privacidad",
+      termsOfService: "Términos de Servicio",
+      copyright: `© ${new Date().getFullYear()} Motion Project. Todos los derechos reservados.`,
+      followUs: "Síguenos"
+    },
+
+    productExplanation: {
+      title: "Cómo Funciona Get in Motion",
+      subtitle: "Pasos simples para transformar tu negocio creativo",
+      step1: {
+        title: "Inicia una Tarea, a Tu Manera",
+        description: "Email, Slack, o directo en la app - como prefieras"
+      },
+      step2: {
+        title: "Motion Se Pone a Trabajar",
+        description: "Generamos facturas, verificamos cumplimiento y manejamos el papeleo"
+      },
+      step3: {
+        title: "Las Cobranzas Salen Automáticamente",
+        description: "Seguimientos inteligentes y recordatorios de pago sin que muevas un dedo"
+      },
+      step4: {
+        title: "Revisa Reportes y Optimiza",
+        description: "Supervisión durante la construcción y optimización de tus procesos"
+      }
+    },
+
+    valueProposition: {
+      title: "¿Por Qué Elegir Get in Motion?",
+      subtitle: "Diseñado para empoderar a creadores, organizaciones y pequeñas empresas en cualquier parte del mundo",
+      reasons: [
+        {
+          title: "Ahorra tiempo y recursos",
+          description: "Automatiza tareas repetitivas y enfócate en lo que realmente importa: tu trabajo creativo y crecimiento empresarial."
+        },
+        {
+          title: "Opera como un gran equipo",
+          description: "Accede a copilotos de IA 24/7 que trabajan junto a ti, brindando experiencia y apoyo cuando lo necesites."
+        },
+        {
+          title: "Crece sin conocimiento técnico",
+          description: "Herramientas fáciles de usar que no requieren programación o experiencia técnica para implementar y usar efectivamente."
+        },
+        {
+          title: "Solución personalizada",
+          description: "Adaptado específicamente para tu industria, flujo de trabajo y necesidades y desafíos únicos del negocio."
+        }
+      ]
+    },
+
+    profileSelector: {
+      title: "¿Dónde estás hoy con tu proyecto?",
+      subtitle: "Te ayudamos a avanzar desde donde estés. Elige la opción que mejor te representa ahora.",
+      ideaTitle: "Apenas tengo la idea",
+      ideaDescription: "Tengo una idea, pero no sé por dónde empezar ni tengo nada montado todavía.",
+      soloTitle: "Estoy trabajando en esto, pero solo/a",
+      soloDescription: "Ya empecé, pero todo lo hago yo: vender, crear, cobrar, publicar.",
+      teamTitle: "Tengo un equipo",
+      teamDescription: "Trabajo con más personas y necesito coordinar o delegar tareas.",
+      confirmButton: "Confirmar Selección",
+      selectedMessage: "¡Listo, esto nos ayuda a ayudarte mejor!",
     },
   },
 };

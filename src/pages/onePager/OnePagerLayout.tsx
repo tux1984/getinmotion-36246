@@ -71,7 +71,7 @@ export const OnePagerLayout = ({
         {children}
       </main>
 
-      <Footer language={selectedLanguage as 'en' | 'es'} />
+      <Footer />
     </div>
   );
 };
