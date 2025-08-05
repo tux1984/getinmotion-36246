@@ -103,7 +103,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
 
       {/* Category Filters */}
       <div>
-        <h4 className="font-medium text-white mb-3">{t.categories}</h4>
+        <h4 className="font-medium text-white mb-3">{t.agentManager.filterCategories}</h4>
         <div className="space-y-2">
           {categories.map(category => {
             const translatedCategory = categoryTranslations[language][category as keyof typeof categoryTranslations[typeof language]] || category;
@@ -137,7 +137,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
           className="w-full text-red-400 hover:text-red-300 hover:bg-red-950/20"
         >
           <X className="w-4 h-4 mr-2" />
-          {t.clearFilters}
+          {t.agentManager.clearAllFilters}
         </Button>
       )}
     </div>
@@ -171,21 +171,21 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
             <Users className="w-4 h-4 text-blue-400 mr-1" />
           </div>
           <div className="text-lg font-bold text-white">{stats.totalAgents}</div>
-          <div className="text-xs text-white/60">{t.totalAgents}</div>
+          <div className="text-xs text-white/60">{t.agentManager.totalAgents}</div>
         </div>
         <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center border border-white/20">
           <div className="flex items-center justify-center mb-1">
             <Target className="w-4 h-4 text-green-400 mr-1" />
           </div>
           <div className="text-lg font-bold text-white">{stats.activeAgents}</div>
-          <div className="text-xs text-white/60">{t.activeAgents}</div>
+          <div className="text-xs text-white/60">{t.agentManager.activeAgents}</div>
         </div>
         <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center border border-white/20">
           <div className="flex items-center justify-center mb-1">
             <Zap className="w-4 h-4 text-yellow-400 mr-1" />
           </div>
           <div className="text-lg font-bold text-white">{stats.recommendedAgents}</div>
-          <div className="text-xs text-white/60">{t.recommendedAgents}</div>
+          <div className="text-xs text-white/60">{t.recommendedAgents.recommendedAgents}</div>
         </div>
       </div>
 
@@ -196,7 +196,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
             <Input
-              placeholder={t.search}
+              placeholder={t.agentManager.search}
               value={filters.searchTerm}
               onChange={(e) => updateFilter('searchTerm', e.target.value)}
               className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-purple-400 h-10"
@@ -219,7 +219,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
             </SheetTrigger>
             <SheetContent side="right" className="bg-gradient-to-b from-purple-900 to-indigo-900 border-white/20">
               <SheetHeader>
-                <SheetTitle className="text-white">{t.filters}</SheetTitle>
+                <SheetTitle className="text-white">{t.agentManager.filters}</SheetTitle>
               </SheetHeader>
               <FilterContent />
             </SheetContent>
@@ -276,7 +276,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
             variant="ghost"
             className="text-purple-300 hover:text-white hover:bg-white/10"
           >
-            {t.clearFilters}
+            {t.agentManager.clearAllFilters}
           </Button>
         </div>
       )}

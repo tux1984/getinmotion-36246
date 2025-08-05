@@ -556,7 +556,7 @@ export interface Translations {
     clearAllFilters: string;
     search: string;
     filters: string;
-    categories: string;
+    filterCategories: string;
     totalAgents: string;
     activeAgents: string;
   };
@@ -1131,7 +1131,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       clearAllFilters: "Clear all filters",
       search: "Search agents...",
       filters: "Filters", 
-      categories: "Categories",
+      filterCategories: "Categories",
       totalAgents: "Total",
       activeAgents: "Active"
     },
@@ -1702,7 +1702,7 @@ export const translations: Record<'en' | 'es', Translations> = {
       clearAllFilters: "Limpiar todos los filtros",
       search: "Buscar agentes...",
       filters: "Filtros",
-      categories: "Categorías", 
+      filterCategories: "Categorías", 
       totalAgents: "Total",
       activeAgents: "Activos"
     },
