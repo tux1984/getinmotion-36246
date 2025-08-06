@@ -59,8 +59,8 @@ export const useMasterCoordinator = () => {
 
   // FASE 1: Análisis inteligente del perfil para generar tareas personalizadas
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
-    if (!user) {
-      console.warn('🚫 Master Coordinator: No user available for task generation');
+    if (!user || loading) {
+      console.warn('🚫 Master Coordinator: No user available or already generating tasks');
       return;
     }
 
@@ -179,14 +179,20 @@ export const useMasterCoordinator = () => {
     }
   }, [tasks]);
 
-  // FASE 1: Inicialización automática del coordinador cuando hay datos
+  // FASE 1: Inicialización automática del coordinador cuando hay datos - CON DEBOUNCE
   useEffect(() => {
-    if (user?.id && !isInitialized && tasks.length === 0) {
+    if (user?.id && !isInitialized && tasks.length === 0 && !loading) {
       console.log('🚀 Master Coordinator: Auto-initializing with complete profile data');
-      analyzeProfileAndGenerateTasks();
-      setIsInitialized(true);
+      
+      // Debounce para evitar múltiples llamadas
+      const timeoutId = setTimeout(() => {
+        analyzeProfileAndGenerateTasks();
+        setIsInitialized(true);
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [user?.id, tasks.length, isInitialized, analyzeProfileAndGenerateTasks]);
+  }, [user?.id, tasks.length, isInitialized, loading, analyzeProfileAndGenerateTasks]);
 
   // Actualizar tareas del coordinador cuando cambien las tareas normales
   useEffect(() => {

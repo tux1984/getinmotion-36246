@@ -200,7 +200,7 @@ async function getAITaskSuggestions(completedTasks: any[], maturityScores: any, 
       "reason": "Por qué esta tarea es el siguiente paso lógico",
       "impact": "high|medium|low",
       "agentId": "id del agente más apropiado",
-      "priority": número del 1-100
+      "priority": número del 1-5
     }]
   `;
 
@@ -412,7 +412,7 @@ Responde SOLO con un array JSON con esta estructura:
   "description": "Descripción detallada mencionando el tipo de negocio específico",
   "agent_id": "financial-management|marketing-specialist|legal-advisor|operations-specialist|cultural-consultant",
   "relevance": "high|medium|low",
-  "priority": 1-10,
+  "priority": 1-5,
   "estimated_time": "15 min|30 min|1 hora|2 horas",
   "category": "Categoría específica del tipo de negocio",
   "steps": [
@@ -454,7 +454,36 @@ Responde SOLO con un array JSON con esta estructura:
     
     const tasks = JSON.parse(aiResponse);
 
-    // Crear las tareas en la base de datos
+    // Verificar límite de tareas activas ANTES de crear nuevas
+    const { data: activeTasks } = await supabase
+      .from('agent_tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .in('status', ['pending', 'in_progress']);
+
+    const activeCount = activeTasks?.length || 0;
+    if (activeCount >= 15) {
+      // Pausar las tareas más antiguas y menos prioritarias
+      const { data: oldTasks } = await supabase
+        .from('agent_tasks')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .order('priority', { ascending: false })
+        .order('created_at', { ascending: true })
+        .limit(Math.min(tasks.length, activeCount - 10));
+
+      if (oldTasks && oldTasks.length > 0) {
+        await supabase
+          .from('agent_tasks')
+          .update({ status: 'cancelled' })
+          .in('id', oldTasks.map(t => t.id));
+        
+        console.log(`⚠️ Paused ${oldTasks.length} old tasks to make room for new ones`);
+      }
+    }
+
+    // Crear las tareas en la base de datos con prioridades válidas (1-5)
     const tasksToInsert = tasks.map((task: any) => ({
       user_id: userId,
       agent_id: task.agent_id,
@@ -462,7 +491,7 @@ Responde SOLO con un array JSON con esta estructura:
       description: task.description,
       relevance: task.relevance,
       status: 'pending',
-      priority: task.priority,
+      priority: Math.min(Math.max(task.priority || 3, 1), 5), // Asegurar rango 1-5
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }));

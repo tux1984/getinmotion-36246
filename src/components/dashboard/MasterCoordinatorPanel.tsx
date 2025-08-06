@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BusinessProfileCapture } from '@/components/business-profile/BusinessProfileCapture';
+import { LoadingIndicator } from './LoadingIndicator';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
@@ -143,6 +144,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   };
 
   const handleStartNow = async () => {
+    if (isGeneratingTasks) return; // Prevenir múltiples llamadas
+    
     console.log('🚀 Starting Master Coordinator flow');
     setIsGeneratingTasks(true);
     try {
@@ -155,6 +158,13 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
       });
     } catch (error) {
       console.error('❌ Error starting coordinator:', error);
+      toast({
+        title: language === 'es' ? "Error" : "Error",
+        description: language === 'es' 
+          ? "Hubo un problema al generar las tareas. Inténtalo de nuevo."
+          : "There was a problem generating tasks. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsGeneratingTasks(false);
     }
@@ -256,6 +266,15 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
   return (
     <>
+      {/* Loading Indicator */}
+      <LoadingIndicator 
+        isVisible={isGeneratingTasks} 
+        message={language === 'es' 
+          ? "Analizando tu perfil y generando tareas inteligentes..."
+          : "Analyzing your profile and generating intelligent tasks..."
+        } 
+      />
+
       {/* Master Coordinator Panel - Fixed Header */}
       <motion.div
         initial={{ y: -100, opacity: 0 }}
