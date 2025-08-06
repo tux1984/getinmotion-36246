@@ -5,7 +5,10 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { PersonalizedWelcomeSection } from './PersonalizedWelcomeSection';
+import { FixedMasterCoordinator } from '@/components/master-coordinator/FixedMasterCoordinator';
+import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
 import { generatePersonalizedRecommendations } from '@/utils/personalizedRecommendations';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,11 +52,23 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     deleteTask
   } = useAgentTasks();
 
+  // Master Coordinator orchestration
+  const {
+    coordinatorTasks,
+    deliverables,
+    coordinatorMessage,
+    nextUnlockedTask,
+    regenerateTasksFromProfile,
+    startTaskJourney,
+    loading: coordinatorLoading
+  } = useMasterCoordinator();
+
   // State management
   const [selectedSubAgent, setSelectedSubAgent] = useState<string | null>(null);
   const [isTaskAssignmentOpen, setIsTaskAssignmentOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['recommendations']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['recommendations', 'deliverables']));
   const [currentTip, setCurrentTip] = useState(0);
+  const [showDeliverables, setShowDeliverables] = useState(false);
 
   // Metrics
   const activeTasks = tasks.filter(task => task.status === 'pending' || task.status === 'in_progress');
@@ -72,7 +87,7 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   }, [businessProfile, language]);
 
   // Loading state with animation
-  if (scoresLoading || tasksLoading || profileLoading) {
+  if (scoresLoading || tasksLoading || profileLoading || coordinatorLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <motion.div 
@@ -100,9 +115,10 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     );
   }
 
-  const handleRecalculateMaturity = () => {
-    // Navigate to maturity calculator
+  const handleRecalculateMaturity = async () => {
+    // Navigate to maturity calculator and regenerate tasks
     navigate('/maturity-calculator');
+    await regenerateTasksFromProfile();
   };
 
   const handleEditProfile = () => {
@@ -110,10 +126,35 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     navigate('/profile');
   };
 
-  // Get recommended tasks intelligently based on maturity and progress
+  const handleTaskStart = async (taskId: string) => {
+    const success = await startTaskJourney(taskId);
+    if (success) {
+      navigate(`/dashboard/tasks/${taskId}`);
+    }
+  };
+
+  const handleDownloadDeliverable = (deliverableId: string) => {
+    const deliverable = deliverables.find(d => d.id === deliverableId);
+    if (deliverable?.downloadUrl) {
+      window.open(deliverable.downloadUrl, '_blank');
+    }
+  };
+
+  const handlePreviewDeliverable = (deliverableId: string) => {
+    navigate(`/dashboard/deliverables/${deliverableId}`);
+  };
+
+  // Get recommended tasks intelligently - now uses Coordinator tasks
   const getRecommendedTasks = () => {
+    if (coordinatorTasks.length > 0) {
+      // Use Master Coordinator's intelligent tasks
+      return coordinatorTasks
+        .filter(task => task.isUnlocked && !task.steps.every(step => step.isCompleted))
+        .slice(0, 4);
+    }
+
     if (personalizedRecommendations.length > 0) {
-      // Use personalized recommendations if available
+      // Fallback to personalized recommendations if available
       return personalizedRecommendations.slice(0, 4).map(rec => ({
         id: rec.id,
         title: rec.title,
@@ -123,7 +164,8 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
         estimatedTime: rec.estimatedTime,
         category: rec.category,
         agentId: rec.agentId,
-        impact: rec.impact
+        impact: rec.impact,
+        isUnlocked: true
       }));
     }
 
@@ -131,7 +173,7 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       return [];
     }
 
-    // Fallback to existing tasks
+    // Final fallback to existing tasks
     const pendingTasks = tasks
       .filter(task => task.status === 'pending')
       .sort((a, b) => {
@@ -144,7 +186,7 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       })
       .slice(0, 4);
 
-    return pendingTasks;
+    return pendingTasks.map(task => ({ ...task, isUnlocked: true }));
   };
 
   const getMaturityLevel = () => maturityLevel;
@@ -215,6 +257,11 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       potentialImpact: 'Potential impact',
       chatWithMaster: 'Chat with Master Agent',
       masterAgentHelper: 'Need help? I\'m here to guide you through every step of your business journey.',
+      myProgress: 'My Progress',
+      deliverables: 'Deliverables',
+      showProgress: 'Show My Progress',
+      orchestratedExperience: 'Orchestrated Experience',
+      intelligentTasks: 'Intelligent Tasks Generated'
     },
     es: {
       title: 'Centro de Desarrollo Empresarial',
@@ -234,6 +281,11 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       potentialImpact: 'Impacto potencial',
       chatWithMaster: 'Chat con Agente Maestro',
       masterAgentHelper: '¿Necesitas ayuda? Estoy aquí para guiarte en cada paso de tu viaje empresarial.',
+      myProgress: 'Mis Avances',
+      deliverables: 'Entregables',
+      showProgress: 'Ver Mis Avances',
+      orchestratedExperience: 'Experiencia Orquestada',
+      intelligentTasks: 'Tareas Inteligentes Generadas'
     }
   };
 
@@ -241,7 +293,10 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Fixed Master Coordinator */}
+      <FixedMasterCoordinator onTaskStart={handleTaskStart} />
+      
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
           
           {/* Personalized Welcome Section */}
@@ -402,24 +457,28 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
                                     )}
                                   </div>
                                   
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      size="sm"
-                                      onClick={() => handleStartTaskWithAgent(task.id, task.agentId)}
-                                      className="bg-primary hover:bg-primary/90"
-                                    >
-                                      <Play className="w-3 h-3 mr-1" />
-                                      {t.startWithAgent}
-                                    </Button>
-                                    <Button 
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleCompleteTask(task.id)}
-                                      className="border-green-200 text-green-700 hover:bg-green-50"
-                                    >
-                                      <CheckCircle2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
+                                   <div className="flex space-x-2">
+                                     <Button 
+                                       size="sm"
+                                       onClick={() => handleTaskStart(task.id)}
+                                       disabled={!(task as any).isUnlocked}
+                                       className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                                     >
+                                       <Play className="w-3 h-3 mr-1" />
+                                       {t.startWithAgent} {(task as any).agentName || 'Especialista'}
+                                     </Button>
+                                     {(task as any).isUnlocked && (
+                                       <Button 
+                                         size="sm"
+                                         variant="outline"
+                                         onClick={() => handleCompleteTask(task.id)}
+                                         className="border-green-200 text-green-700 hover:bg-green-50"
+                                       >
+                                         <CheckCircle2 className="w-3 h-3 mr-1" />
+                                         Quick Complete
+                                       </Button>
+                                     )}
+                                   </div>
                                 </div>
                               </motion.div>
                             ))
@@ -496,6 +555,25 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
 
             </div>
           </div>
+
+          {/* Deliverables Section - Conditionally Rendered */}
+          <AnimatePresence>
+            {showDeliverables && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="overflow-hidden"
+              >
+                <DeliverablesSection
+                  deliverables={deliverables}
+                  onDownload={handleDownloadDeliverable}
+                  onPreview={handlePreviewDeliverable}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </>
