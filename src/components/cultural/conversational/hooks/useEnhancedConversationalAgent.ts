@@ -114,12 +114,23 @@ export const useEnhancedConversationalAgent = (
                 
                 if (dynamicQuestions.length > 0) {
                   console.log(`✨ Agregando ${dynamicQuestions.length} preguntas personalizadas a ${blockId}`);
-                  enhanced[blockIndex] = {
-                    ...enhanced[blockIndex],
-                    questions: [...enhanced[blockIndex].questions, ...dynamicQuestions.slice(0, 2)], // Limit to 2 per block
-                    agentMessage: getEnhancedAgentMessage(enhanced[blockIndex], profileData, businessType, language)
-                  };
-                  hasChanges = true;
+                  // Filter out any questions that might be insights instead of actual questions
+                  const validQuestions = dynamicQuestions.filter(q => 
+                    q.question && 
+                    q.question.length > 10 && 
+                    q.question.includes('?') &&
+                    !q.question.toLowerCase().includes('veo que tienes') &&
+                    !q.question.toLowerCase().includes('i can see')
+                  );
+                  
+                  if (validQuestions.length > 0) {
+                    enhanced[blockIndex] = {
+                      ...enhanced[blockIndex],
+                      questions: [...enhanced[blockIndex].questions, ...validQuestions.slice(0, 2)], // Limit to 2 per block
+                      agentMessage: getEnhancedAgentMessage(enhanced[blockIndex], profileData, businessType, language)
+                    };
+                    hasChanges = true;
+                  }
                 }
               } catch (error) {
                 console.warn('Failed to generate dynamic questions for block:', blockId, error);
@@ -395,18 +406,27 @@ const generateContextualInsight = (
   businessType: string,
   language: 'en' | 'es'
 ): string | null => {
+  // Only generate insights for key fields, not all answers
+  const insightFields = ['businessDescription', 'hasSold', 'pricingMethod', 'mainObstacles', 'targetAudience'];
+  
+  if (!insightFields.includes(fieldName)) {
+    return null;
+  }
+
   const insights = {
     en: {
       businessDescription: `I can see you're passionate about your ${businessType} work. This level of detail will help me create very specific recommendations.`,
       hasSold: answer ? 'Great! Having sales validates your business model.' : 'No worries! We\'ll focus on validation strategies first.',
       pricingMethod: 'Your pricing approach tells me a lot about your business maturity and scalability potential.',
-      mainObstacles: 'Understanding your challenges helps me prioritize the most impactful solutions.'
+      mainObstacles: 'Understanding your challenges helps me prioritize the most impactful solutions.',
+      targetAudience: 'Knowing your audience helps me suggest more targeted growth strategies.'
     },
     es: {
       businessDescription: `Veo que tienes pasión por tu trabajo ${businessType === 'creative' ? 'creativo' : 'emprendedor'}. Este nivel de detalle me ayudará a crear recomendaciones muy específicas.`,
       hasSold: answer ? '¡Genial! Tener ventas valida tu modelo de negocio.' : '¡No te preocupes! Nos enfocaremos primero en estrategias de validación.',
       pricingMethod: 'Tu enfoque de precios me dice mucho sobre la madurez y potencial de escalabilidad de tu negocio.',
-      mainObstacles: 'Entender tus desafíos me ayuda a priorizar las soluciones más impactantes.'
+      mainObstacles: 'Entender tus desafíos me ayuda a priorizar las soluciones más impactantes.',
+      targetAudience: 'Conocer tu audiencia me ayuda a sugerir estrategias de crecimiento más dirigidas.'
     }
   };
   

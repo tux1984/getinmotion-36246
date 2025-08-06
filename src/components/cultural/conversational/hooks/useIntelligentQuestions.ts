@@ -54,17 +54,34 @@ export const useIntelligentQuestions = () => {
       const questions = data?.questions || [];
       
       // Transform AI questions into ConversationQuestion format
-      const transformedQuestions: ConversationQuestion[] = questions.map((q: any, index: number) => ({
-        id: `dynamic_${currentBlock.id}_${index}`,
-        question: q.question,
-        type: 'text-input' as const,
-        fieldName: `dynamic_${currentBlock.id}_${index}`,
-        explanation: q.context,
-        required: false,
-        placeholder: language === 'es' 
-          ? 'Comparte tus pensamientos...' 
-          : 'Share your thoughts...'
-      }));
+      const transformedQuestions: ConversationQuestion[] = questions
+        .filter((q: any) => 
+          q.question && 
+          q.question.trim().length > 10 && 
+          q.question.includes('?') &&
+          !q.question.toLowerCase().includes('veo que tienes') &&
+          !q.question.toLowerCase().includes('i can see') &&
+          !q.question.toLowerCase().includes('insight') &&
+          !q.question.toLowerCase().includes('este nivel de detalle')
+        )
+        .map((q: any, index: number) => ({
+          id: `dynamic_${currentBlock.id}_${index}`,
+          question: q.question,
+          type: q.type || 'text-input' as const,
+          fieldName: `dynamic_${currentBlock.id}_${index}`,
+          explanation: q.context,
+          required: false,
+          placeholder: language === 'es' 
+            ? 'Comparte tus pensamientos...' 
+            : 'Share your thoughts...',
+          // Handle options if provided by AI
+          options: q.options ? q.options.map((opt: any, optIndex: number) => ({
+            id: `opt_${index}_${optIndex}`,
+            label: opt.label || opt,
+            value: opt.value || opt,
+            description: opt.description
+          })) : undefined
+        }));
 
       setDynamicQuestions(transformedQuestions);
       return transformedQuestions;

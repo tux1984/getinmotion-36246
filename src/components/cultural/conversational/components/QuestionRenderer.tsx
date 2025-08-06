@@ -38,9 +38,22 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
 
   const t = translations[language];
 
-  const renderSingleChoice = () => (
-    <div className="space-y-3">
-      {question.options?.map((option) => (
+  const renderSingleChoice = () => {
+    // Validate that we have proper options
+    if (!question.options || question.options.length === 0) {
+      return (
+        <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
+          {language === 'es' 
+            ? 'No hay opciones disponibles para esta pregunta'
+            : 'No options available for this question'
+          }
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {question.options?.map((option) => (
         <motion.div
           key={option.id}
           whileHover={{ scale: 1.02 }}
@@ -64,9 +77,28 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       ))}
     </div>
   );
+  };
 
   const renderMultipleChoice = () => {
     const selectedCount = Array.isArray(value) ? value.length : 0;
+    
+    // Validate that we have proper options
+    if (!question.options || question.options.length === 0) {
+      return (
+        <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
+          {language === 'es' 
+            ? 'No hay opciones disponibles para esta pregunta'
+            : 'No options available for this question'
+          }
+        </div>
+      );
+    }
+
+    // Check if any option has the same label repeated (insight contamination)
+    const uniqueLabels = new Set(question.options.map(opt => opt.label));
+    if (uniqueLabels.size !== question.options.length) {
+      console.warn('Detected duplicate options in multiple choice question:', question.options);
+    }
     
     return (
       <div className="space-y-3">
