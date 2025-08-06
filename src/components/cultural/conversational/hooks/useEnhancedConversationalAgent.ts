@@ -323,8 +323,8 @@ export const useEnhancedConversationalAgent = (
           setBusinessType(detectedType);
         }
         
-        // Smart progress saving with debounce
-        debouncedSaveProgress();
+        // REMOVED: Smart progress saving with debounce - let the main component handle it
+        // debouncedSaveProgress();
         
         return updated;
       });

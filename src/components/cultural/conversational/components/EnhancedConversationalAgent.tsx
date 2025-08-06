@@ -53,12 +53,8 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
     loadProgress();
   }, [loadProgress]);
 
-  // Auto-save progress
-  useEffect(() => {
-    if (profileData && Object.keys(profileData).length > 0) {
-      saveProgress();
-    }
-  }, [profileData, saveProgress]);
+  // Auto-save progress - REMOVED to prevent double saves
+  // The hook now handles all saving internally
 
   // Show results when completed
   useEffect(() => {
