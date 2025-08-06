@@ -4,11 +4,21 @@ import { getConversationBlocks } from '../data/conversationBlocks';
 import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
+import { useAuth } from '@/context/AuthContext';
+import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
+import { useUserBusinessContext } from '@/hooks/useUserBusinessContext';
+import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
+import { generateMaturityBasedRecommendations } from '@/utils/maturityRecommendations';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const useConversationalAgent = (
   language: 'en' | 'es',
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData) => void
 ) => {
+  const { user } = useAuth();
+  const { saveMaturityScores } = useMaturityScoresSaver();
+  const { updateFromMaturityCalculator } = useUserBusinessContext();
   const blocks = getConversationBlocks(language);
   
   // Add debugging and validation
@@ -90,22 +100,76 @@ export const useConversationalAgent = (
     return ((currentBlockIndex + 1) / blocks.length) * 100;
   }, [currentBlockIndex, blocks.length]);
 
-  const completeAssessment = useCallback(() => {
-    const mockScores: CategoryScore = {
-      ideaValidation: 75,
-      userExperience: 60,
-      marketFit: 50,
-      monetization: 40
-    };
+  const completeAssessment = useCallback(async () => {
+    if (!user) {
+      console.error('No authenticated user found');
+      toast.error(language === 'en' ? 'Authentication required' : 'Se requiere autenticación');
+      return;
+    }
 
-    const mockRecommendedAgents: RecommendedAgents = {
-      primary: ['market-research', 'branding'],
-      secondary: ['finance', 'content']
-    };
+    try {
+      console.log('Starting assessment completion process...');
+      
+      // Generate real scores based on profileData
+      const scores: CategoryScore = {
+        ideaValidation: calculateIdeaValidationScore(profileData),
+        userExperience: calculateUserExperienceScore(profileData),
+        marketFit: calculateMarketFitScore(profileData),
+        monetization: calculateMonetizationScore(profileData)
+      };
 
-    localStorage.removeItem('conversational-agent-progress');
-    onComplete(mockScores, mockRecommendedAgents, profileData);
-  }, [profileData, onComplete]);
+      console.log('Generated scores:', scores);
+
+      // Generate agent recommendations based on scores
+      const recommendedAgents = generateMaturityBasedRecommendations(scores);
+      console.log('Generated recommendations:', recommendedAgents);
+
+      // Save maturity scores to database
+      const scoreSaved = await saveMaturityScores(scores, profileData);
+      if (!scoreSaved) {
+        throw new Error('Failed to save maturity scores');
+      }
+
+      // Create user agents
+      const agentsCreated = await createUserAgentsFromRecommendations(user.id, recommendedAgents);
+      if (!agentsCreated) {
+        throw new Error('Failed to create user agents');
+      }
+
+      // Update user business context
+      await updateFromMaturityCalculator(profileData, scores, language);
+
+      // Generate personalized tasks
+      try {
+        await supabase.functions.invoke('generate-artisan-tasks', {
+          body: { 
+            profileData,
+            maturityScores: scores,
+            language 
+          }
+        });
+        console.log('Tasks generation initiated');
+      } catch (taskError) {
+        console.warn('Tasks generation failed but continuing:', taskError);
+      }
+
+      // Mark onboarding as complete
+      markOnboardingComplete(scores, recommendedAgents);
+
+      // Clean up saved progress
+      localStorage.removeItem('conversational-agent-progress');
+
+      console.log('Assessment completion successful!');
+      toast.success(language === 'en' ? 'Assessment completed successfully!' : '¡Evaluación completada exitosamente!');
+
+      // Call completion callback
+      onComplete(scores, recommendedAgents, profileData);
+
+    } catch (error) {
+      console.error('Error completing assessment:', error);
+      toast.error(language === 'en' ? 'Error completing assessment' : 'Error al completar la evaluación');
+    }
+  }, [profileData, onComplete, user, saveMaturityScores, updateFromMaturityCalculator, language]);
 
   const maturityLevel: MaturityLevel = {
     id: 'growing',
@@ -127,6 +191,52 @@ export const useConversationalAgent = (
       category: 'Market Research'
     }
   ];
+
+  // Helper functions to calculate scores based on profile data
+  const calculateIdeaValidationScore = (data: UserProfileData): number => {
+    let score = 50; // Base score
+    
+    if (data.businessDescription && data.businessDescription.length > 20) score += 10;
+    if (data.targetAudience && data.targetAudience.length > 10) score += 10;
+    if (data.customerClarity && data.customerClarity >= 7) score += 15;
+    if (data.hasSold) score += 15;
+    
+    return Math.min(100, score);
+  };
+
+  const calculateUserExperienceScore = (data: UserProfileData): number => {
+    let score = 40; // Base score
+    
+    if (data.salesConsistency === 'consistent') score += 20;
+    if (data.salesConsistency === 'occasional') score += 10;
+    if (data.promotionChannels && data.promotionChannels.length >= 2) score += 15;
+    if (data.marketingConfidence && data.marketingConfidence >= 6) score += 15;
+    if (data.delegationComfort && data.delegationComfort >= 6) score += 10;
+    
+    return Math.min(100, score);
+  };
+
+  const calculateMarketFitScore = (data: UserProfileData): number => {
+    let score = 35; // Base score
+    
+    if (data.profitClarity && data.profitClarity >= 7) score += 20;
+    if (data.salesConsistency === 'consistent') score += 20;
+    if (data.targetAudience && data.targetAudience.length > 15) score += 15;
+    if (data.promotionChannels && data.promotionChannels.length >= 3) score += 10;
+    
+    return Math.min(100, score);
+  };
+
+  const calculateMonetizationScore = (data: UserProfileData): number => {
+    let score = 30; // Base score
+    
+    if (data.hasSold) score += 25;
+    if (data.profitClarity && data.profitClarity >= 8) score += 20;
+    if (data.salesConsistency === 'consistent') score += 20;
+    if (data.businessGoals && data.businessGoals.includes('profit')) score += 5;
+    
+    return Math.min(100, score);
+  };
 
   return {
     currentBlock,

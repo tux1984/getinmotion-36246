@@ -24,9 +24,11 @@ const MaturityCalculator = () => {
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    console.log('MaturityCalculator: Assessment completed');
-    // DO NOT auto-redirect - let completion screen handle navigation
-    // The new flow will show completion screen first
+    console.log('MaturityCalculator: Assessment completed', { scores, recommendedAgents });
+    // Navigate to dashboard after short delay to allow user to see completion
+    setTimeout(() => {
+      navigate('/dashboard/home');
+    }, 2000);
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator[language];

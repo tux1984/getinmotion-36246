@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Star, ArrowRight } from 'lucide-react';
+import { Trophy, Star, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../../types/wizardTypes';
 import { MaturityLevel, PersonalizedTask } from '../types/conversationalTypes';
@@ -20,18 +20,38 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   language,
   onComplete
 }) => {
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const translations = {
     en: {
       title: "Your Business Growth Profile",
       level: "Your Level",
       tasks: "Your Personalized Action Plan",
-      complete: "Start Your Journey"
+      complete: "Start Your Journey",
+      completing: "Setting up your dashboard...",
+      completed: "Welcome to your dashboard!"
     },
     es: {
       title: "Tu Perfil de Crecimiento Empresarial",
       level: "Tu Nivel",
       tasks: "Tu Plan de Acción Personalizado", 
-      complete: "Iniciar Tu Viaje"
+      complete: "Iniciar Tu Viaje",
+      completing: "Configurando tu panel...",
+      completed: "¡Bienvenido a tu panel!"
+    }
+  };
+
+  const handleComplete = async () => {
+    setIsCompleting(true);
+    try {
+      await onComplete();
+      setIsCompleted(true);
+      setTimeout(() => {
+        // Navigation will be handled by parent component
+      }, 1500);
+    } catch (error) {
+      console.error('Error completing:', error);
+      setIsCompleting(false);
     }
   };
 
@@ -67,9 +87,27 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         </div>
       </div>
 
-      <Button onClick={onComplete} className="w-full">
-        {t.complete}
-        <ArrowRight className="w-4 h-4 ml-2" />
+      <Button 
+        onClick={handleComplete} 
+        className="w-full" 
+        disabled={isCompleting || isCompleted}
+      >
+        {isCompleted ? (
+          <>
+            <CheckCircle className="w-4 h-4 mr-2" />
+            {t.completed}
+          </>
+        ) : isCompleting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            {t.completing}
+          </>
+        ) : (
+          <>
+            {t.complete}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </>
+        )}
       </Button>
     </motion.div>
   );
