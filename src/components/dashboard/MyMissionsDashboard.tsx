@@ -23,7 +23,8 @@ import {
   Award,
   Sparkles,
   Plus,
-  Lightbulb
+  Lightbulb,
+  Trash2
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
@@ -34,6 +35,7 @@ import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement
 import { useUnifiedTaskRecommendations } from '@/hooks/useUnifiedTaskRecommendations';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
 import { OptimizedRecommendedTask } from '@/hooks/types/recommendedTasksTypes';
+import { ClearAllTasksDialog } from './ClearAllTasksDialog';
 import { toast } from 'sonner';
 
 interface MyMissionsDashboardProps {
@@ -45,7 +47,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const { language } = useLanguage();
   const { t } = useTranslations();
   const navigate = useNavigate();
-  const { tasks, loading, startTaskDevelopment, completeTaskQuickly, createTask } = useAgentTasks();
+  const { tasks, loading, startTaskDevelopment, completeTaskQuickly, createTask, deleteAllTasks } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, isAtLimit, remainingSlots, getProgressColor } = useTaskLimits(tasks);
   const { maturityScores } = useOptimizedAgentManagement();
   const recommendedTasks = useUnifiedTaskRecommendations({ maturityScores, language });
@@ -55,6 +57,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const [priorityFilter, setPriorityFilter] = useState<'all' | '1' | '2' | '3'>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [showRecommendations, setShowRecommendations] = useState(true);
+  const [showClearAllDialog, setShowClearAllDialog] = useState(false);
 
 
   // Filter and search tasks
@@ -338,21 +341,22 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
         </motion.div>
       )}
 
-      {/* Filters */}
+      {/* Filters and Actions */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder={t.missionsDashboard.searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder={t.missionsDashboard.searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
-            </div>
             
             <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
               <SelectTrigger className="w-[180px]">
@@ -389,6 +393,22 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                 ))}
               </SelectContent>
             </Select>
+            </div>
+
+            {/* Delete All Tasks Button */}
+            {tasks.length > 0 && (
+              <div className="flex justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowClearAllDialog(true)}
+                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {language === 'es' ? 'Eliminar Todas las Tareas' : 'Delete All Tasks'}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -561,6 +581,17 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Clear All Tasks Dialog */}
+      <ClearAllTasksDialog
+        isOpen={showClearAllDialog}
+        onClose={() => setShowClearAllDialog(false)}
+        onConfirm={async () => {
+          await deleteAllTasks();
+        }}
+        taskCount={tasks.length}
+        language={language}
+      />
     </div>
   );
 };

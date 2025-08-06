@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslations } from '@/hooks/useTranslations';
 import { TaskDetailView } from './TaskDetailView';
 import { TaskStepInterface } from './TaskStepInterface';
+import { DeleteTaskDialog } from './DeleteTaskDialog';
 import { 
   CheckCircle2, 
   Clock, 
@@ -47,6 +48,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   const { t } = useTranslations();
   const [showTaskDetail, setShowTaskDetail] = useState(false);
   const [showStepInterface, setShowStepInterface] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const getStatusBadge = (status: AgentTask['status']) => {
     const statusConfig = {
@@ -270,7 +272,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
             {/* Delete */}
             <Button 
-              onClick={() => onDelete(task.id)}
+              onClick={() => setShowDeleteDialog(true)}
               size="sm" 
               variant="ghost"
               className="h-8 px-2 text-red-500 hover:text-red-700"
@@ -307,6 +309,18 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             }}
           />
         )}
+
+        {/* Delete Task Confirmation Dialog */}
+        <DeleteTaskDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={async () => {
+            await onDelete(task.id);
+            setShowDeleteDialog(false);
+          }}
+          task={task}
+          language={language}
+        />
       </CardContent>
     </Card>
   );
