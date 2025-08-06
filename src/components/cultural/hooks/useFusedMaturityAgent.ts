@@ -178,14 +178,69 @@ export const useFusedMaturityAgent = (
       const recommendedAgents = generateMaturityBasedRecommendations(scores);
       
       if (user) {
+        // Save complete profile to user_profiles table including new fields
+        const userProfileUpdate = {
+          business_description: profileData.businessDescription,
+          brand_name: profileData.brandName,
+          business_type: businessType,
+          target_market: profileData.targetAudience,
+          current_stage: profileData.salesConsistency,
+          business_goals: profileData.businessGoals || [],
+          monthly_revenue_goal: profileData.monthlyRevenueGoal || null,
+          business_location: profileData.businessLocation,
+          years_in_business: profileData.yearsInBusiness || null,
+          team_size: profileData.teamSize,
+          current_challenges: profileData.currentChallenges || [],
+          sales_channels: profileData.salesChannels || [],
+          primary_skills: profileData.primarySkills || [],
+          updated_at: new Date().toISOString()
+        };
+
+        // Update user profile with complete data
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .update(userProfileUpdate)
+          .eq('user_id', user.id);
+
+        if (profileError) {
+          console.error('Error updating user profile:', profileError);
+        } else {
+          console.log('User profile updated successfully with complete data');
+        }
+
+        // Save maturity scores
         await saveMaturityScores(scores, profileData);
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
         markOnboardingComplete(scores, recommendedAgents);
+
+        // Activate Master Coordinator automatically
+        try {
+          console.log('FusedMaturityAgent: Activating Master Coordinator...');
+          const { data: coordinatorData, error: coordinatorError } = await supabase.functions.invoke('master-agent-coordinator', {
+            body: {
+              action: 'analyze_and_generate_tasks',
+              profileData: {
+                ...profileData,
+                businessType,
+                maturityLevel: getMaturityLevel(profileData, businessType, language).name,
+                completedAssessment: true
+              }
+            }
+          });
+
+          if (coordinatorError) {
+            console.error('Error activating Master Coordinator:', coordinatorError);
+          } else {
+            console.log('Master Coordinator activated successfully:', coordinatorData);
+          }
+        } catch (coordinatorError) {
+          console.error('Failed to activate Master Coordinator:', coordinatorError);
+        }
         
         toast.success(
           language === 'es' 
-            ? `¡Perfil completo! Detectamos que eres un emprendedor ${getBusinessTypeLabel(businessType, language)} en crecimiento.`
-            : `Profile complete! We detected you're a growing ${getBusinessTypeLabel(businessType, language)} entrepreneur.`
+            ? `¡Perfil completo! Detectamos que eres un emprendedor ${getBusinessTypeLabel(businessType, language)} en crecimiento. Tu Master Coordinator está activo.`
+            : `Profile complete! We detected you're a growing ${getBusinessTypeLabel(businessType, language)} entrepreneur. Your Master Coordinator is active.`
         );
       }
       
