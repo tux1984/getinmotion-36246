@@ -495,6 +495,55 @@ export interface Translations {
     filtersLabel: string;
   };
   
+  // AI Assistant
+  aiAssistant: {
+    chatNow: string;
+    sendMessage: string;
+    placeholder: string;
+    thinking: string;
+    clearChat: string;
+    noMessages: string;
+    getStarted: string;
+    helpYou: string;
+    typeMessage: string;
+    startChat: string;
+    askQuestion: string;
+    reset: string;
+    openChat: string;
+    expandChat: string;
+    assistant: string;
+    available: string;
+    status: string;
+    title: string;
+    send: string;
+    emptyState: string;
+    tellMeMore: string;
+    clickToRespond: string;
+    profileAssistant: string;
+    businessAssistant: string;
+    managementAssistant: string;
+    defaultAssistant: string;
+    aboutQuestion: string;
+    thisContext: string;
+    expandedPlaceholder: string;
+  };
+
+  // Hero Chat Boxes
+  heroChatBoxes: {
+    viewAllAgents: string;
+    exploreComplete: string;
+  };
+
+  // Mobile Bottom Navigation
+  mobileBottomNav: {
+    home: string;
+    agents: string;
+    dashboard: string;
+    profile: string;
+    analytics: string;
+    settings: string;
+  };
+
   // Task management
   taskManagement: {
     taskLimit: string;
@@ -1328,6 +1377,52 @@ export const translations: Record<'en' | 'es', Translations> = {
       confirmButton: "Confirm Selection",
       selectedMessage: "Ready! This helps us help you better!",
     },
+
+    aiAssistant: {
+      chatNow: "Chat Now",
+      sendMessage: "Send Message",
+      placeholder: "Type your message...",
+      thinking: "Thinking...",
+      clearChat: "Clear Chat",
+      noMessages: "No messages yet",
+      getStarted: "Get Started",
+      helpYou: "How can I help you?",
+      typeMessage: "Type a message",
+      startChat: "Start Chat",
+      askQuestion: "Ask a question",
+      reset: "Reset Chat",
+      openChat: "Open Chat",
+      expandChat: "Expand Chat",
+      assistant: "Assistant",
+      available: "Available",
+      status: "Status",
+      title: "AI Assistant",
+      send: "Send",
+      emptyState: "Hello! How can I help you today?",
+      tellMeMore: "Tell me more about this!",
+      clickToRespond: "Click to respond",
+      profileAssistant: "Creative Profile Assistant",
+      businessAssistant: "Business Assistant",
+      managementAssistant: "Management Assistant",
+      defaultAssistant: "AI Assistant",
+      aboutQuestion: "I'm your assistant. Ask me about",
+      thisContext: "this",
+      expandedPlaceholder: "Type here to chat with the assistant..."
+    },
+
+    heroChatBoxes: {
+      viewAllAgents: "View All Agents",
+      exploreComplete: "Explore our complete gallery of specialized agents"
+    },
+
+    mobileBottomNav: {
+      home: "Home",
+      agents: "Agents",
+      dashboard: "Dashboard",
+      profile: "Profile",
+      analytics: "Analytics",
+      settings: "Settings"
+    },
   },
   es: {
     ui: {
@@ -1981,35 +2076,49 @@ export const translations: Record<'en' | 'es', Translations> = {
     },
 
     aiAssistant: {
-      title: "Asistente IA",
+      chatNow: "Chatear Ahora",
+      sendMessage: "Enviar Mensaje",
       placeholder: "Escribe tu mensaje...",
-      send: "Enviar",
       thinking: "Pensando...",
+      clearChat: "Limpiar Chat",
+      noMessages: "Sin mensajes aún",
+      getStarted: "Comenzar",
+      helpYou: "¿Cómo puedo ayudarte?",
+      typeMessage: "Escribe un mensaje",
+      startChat: "Iniciar Chat",
+      askQuestion: "Haz una pregunta",
       reset: "Reiniciar Chat",
+      openChat: "Abrir Chat",
+      expandChat: "Expandir Chat",
+      assistant: "Asistente",
+      available: "Disponible",
+      status: "Estado",
+      title: "Asistente IA",
+      send: "Enviar",
       emptyState: "¡Hola! ¿Cómo puedo ayudarte hoy?",
-      apiErrorTitle: "Problema de Conexión",
-      apiErrorDescription: "Puede haber un problema con el servicio de IA. Por favor, inténtalo más tarde.",
       tellMeMore: "¡Cuéntame más sobre esto!",
       clickToRespond: "Haz clic para responder",
-      expandedPlaceholder: "Escribe aquí para chatear con el asistente...",
       profileAssistant: "Asistente de Perfil Creativo",
       businessAssistant: "Asistente de Negocio",
       managementAssistant: "Asistente de Gestión",
       defaultAssistant: "Asistente IA",
       aboutQuestion: "Soy tu asistente. Pregúntame sobre",
-      thisContext: "esto"
+      thisContext: "esto",
+      expandedPlaceholder: "Escribe aquí para chatear con el asistente..."
     },
 
     heroChatBoxes: {
       viewAllAgents: "Ver Todos los Agentes",
-      exploreComplete: "Explorar Colección Completa"
+      exploreComplete: "Explora nuestra galería completa de agentes especializados"
     },
 
     mobileBottomNav: {
-      dashboard: "Panel",
+      home: "Inicio",
       agents: "Agentes",
-      analytics: "Analíticas",
-      settings: "Ajustes"
+      dashboard: "Panel",
+      profile: "Perfil",
+      analytics: "Estadísticas",
+      settings: "Configuración"
     },
   },
 

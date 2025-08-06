@@ -78,7 +78,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
 
       {/* Mobile Bottom Navigation */}
       {isMobile && activeSection === 'dashboard' && (
-        <MobileBottomNav language={language} />
+        <MobileBottomNav />
       )}
     </div>
   );
