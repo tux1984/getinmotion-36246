@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, HelpCircle, ArrowRight, ArrowLeft, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,16 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // Reset question index when block changes
+  useEffect(() => {
+    console.log('ConversationFlow: Block changed, resetting question index', { 
+      blockId: block.id, 
+      questionsLength: block.questions?.length 
+    });
+    setCurrentQuestionIndex(0);
+    setShowExplanation(false);
+  }, [block.id]);
 
   const translations = {
     en: {
@@ -78,27 +88,58 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
   }
 
   const handleQuestionAnswer = (answer: any) => {
+    console.log('ConversationFlow: handleQuestionAnswer', { 
+      currentQuestionIndex, 
+      totalQuestions: block.questions.length,
+      isLastQuestion,
+      blockId: block.id 
+    });
+    
     onAnswer(currentQuestion.id, answer);
     
-    if (!isLastQuestion) {
+    // Strict validation before setTimeout to prevent index overflow
+    if (!isLastQuestion && currentQuestionIndex + 1 < block.questions.length) {
       setTimeout(() => {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setCurrentQuestionIndex(prev => {
+          const newIndex = prev + 1;
+          console.log('ConversationFlow: Setting new question index via setTimeout', { prev, newIndex, maxIndex: block.questions.length - 1 });
+          // Additional safety check in case state changed during timeout
+          if (newIndex < block.questions.length) {
+            return newIndex;
+          }
+          return prev; // Don't change if it would exceed bounds
+        });
       }, 800);
     }
   };
 
   const handleNext = () => {
+    console.log('ConversationFlow: handleNext', { 
+      currentQuestionIndex, 
+      isLastQuestion, 
+      totalQuestions: block.questions.length 
+    });
+    
     if (isLastQuestion) {
+      // Reset question index when moving to next block
+      setCurrentQuestionIndex(0);
       onNext();
-    } else {
+    } else if (currentQuestionIndex + 1 < block.questions.length) {
       setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
+    console.log('ConversationFlow: handlePrevious', { 
+      currentQuestionIndex, 
+      isFirstQuestion 
+    });
+    
     if (isFirstQuestion) {
+      // Reset question index when moving to previous block
+      setCurrentQuestionIndex(0);
       onPrevious();
-    } else {
+    } else if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
     }
   };

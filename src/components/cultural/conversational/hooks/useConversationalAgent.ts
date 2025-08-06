@@ -39,16 +39,32 @@ export const useConversationalAgent = (
   }, [currentBlock, updateProfileData]);
 
   const goToNextBlock = useCallback(() => {
+    console.log('useConversationalAgent: goToNextBlock', { 
+      currentBlockIndex, 
+      totalBlocks: blocks.length 
+    });
+    
     if (currentBlockIndex < blocks.length - 1) {
-      setCurrentBlockIndex(prev => prev + 1);
+      setCurrentBlockIndex(prev => {
+        const newIndex = prev + 1;
+        console.log('useConversationalAgent: Moving to next block', { prev, newIndex });
+        return newIndex;
+      });
     } else {
+      console.log('useConversationalAgent: Assessment completed');
       setIsCompleted(true);
     }
   }, [currentBlockIndex, blocks.length]);
 
   const goToPreviousBlock = useCallback(() => {
+    console.log('useConversationalAgent: goToPreviousBlock', { currentBlockIndex });
+    
     if (currentBlockIndex > 0) {
-      setCurrentBlockIndex(prev => prev - 1);
+      setCurrentBlockIndex(prev => {
+        const newIndex = prev - 1;
+        console.log('useConversationalAgent: Moving to previous block', { prev, newIndex });
+        return newIndex;
+      });
     }
   }, [currentBlockIndex]);
 
