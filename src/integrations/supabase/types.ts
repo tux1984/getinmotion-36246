@@ -621,27 +621,75 @@ export type Database = {
       user_profiles: {
         Row: {
           avatar_url: string | null
+          brand_name: string | null
+          business_description: string | null
+          business_goals: string[] | null
+          business_location: string | null
+          business_type: string | null
           created_at: string
+          current_challenges: string[] | null
+          current_stage: string | null
           full_name: string | null
           id: string
+          initial_investment_range: string | null
+          monthly_revenue_goal: number | null
+          primary_skills: string[] | null
+          sales_channels: string[] | null
+          social_media_presence: Json | null
+          target_market: string | null
+          team_size: string | null
+          time_availability: string | null
           updated_at: string
           user_id: string
+          years_in_business: number | null
         }
         Insert: {
           avatar_url?: string | null
+          brand_name?: string | null
+          business_description?: string | null
+          business_goals?: string[] | null
+          business_location?: string | null
+          business_type?: string | null
           created_at?: string
+          current_challenges?: string[] | null
+          current_stage?: string | null
           full_name?: string | null
           id?: string
+          initial_investment_range?: string | null
+          monthly_revenue_goal?: number | null
+          primary_skills?: string[] | null
+          sales_channels?: string[] | null
+          social_media_presence?: Json | null
+          target_market?: string | null
+          team_size?: string | null
+          time_availability?: string | null
           updated_at?: string
           user_id: string
+          years_in_business?: number | null
         }
         Update: {
           avatar_url?: string | null
+          brand_name?: string | null
+          business_description?: string | null
+          business_goals?: string[] | null
+          business_location?: string | null
+          business_type?: string | null
           created_at?: string
+          current_challenges?: string[] | null
+          current_stage?: string | null
           full_name?: string | null
           id?: string
+          initial_investment_range?: string | null
+          monthly_revenue_goal?: number | null
+          primary_skills?: string[] | null
+          sales_channels?: string[] | null
+          social_media_presence?: Json | null
+          target_market?: string | null
+          team_size?: string | null
+          time_availability?: string | null
           updated_at?: string
           user_id?: string
+          years_in_business?: number | null
         }
         Relationships: []
       }

@@ -413,6 +413,7 @@ export const useMasterCoordinator = () => {
     coordinatorMessage: getCoordinatorMessage(),
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
+    analyzeProfileAndGenerateTasks,
     startTaskJourney,
     completeTaskStep,
     generateTaskDeliverable,

@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BusinessProfileCapture } from '@/components/business-profile/BusinessProfileCapture';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Crown, 
   MessageCircle, 
@@ -16,7 +21,10 @@ import {
   PlayCircle,
   CheckCircle2,
   Clock,
-  ArrowRight
+  ArrowRight,
+  User,
+  Zap,
+  Brain
 } from 'lucide-react';
 
 interface FixedMasterCoordinatorProps {
@@ -25,16 +33,52 @@ interface FixedMasterCoordinatorProps {
 
 export const FixedMasterCoordinator: React.FC<FixedMasterCoordinatorProps> = ({ onTaskStart }) => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
   const [showFullMessage, setShowFullMessage] = useState(false);
+  const [showProfileCapture, setShowProfileCapture] = useState(false);
+  const [conversationData, setConversationData] = useState<any>(null);
+  const [businessProfile, setBusinessProfile] = useState<any>(null);
+  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   
   const { 
     coordinatorMessage, 
     nextUnlockedTask, 
     coordinatorTasks,
-    startTaskJourney 
+    startTaskJourney,
+    analyzeProfileAndGenerateTasks
   } = useMasterCoordinator();
+
+  // Verificar si necesita capturar perfil de negocio
+  useEffect(() => {
+    const checkBusinessProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('business_description, brand_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        setBusinessProfile(profile);
+        
+        // Si no tiene información del negocio, mostrar captura
+        if (!profile?.business_description && !profile?.brand_name) {
+          setShowProfileCapture(true);
+        } else {
+          // Si tiene perfil, iniciar conversación inteligente
+          await startIntelligentConversation();
+        }
+      } catch (error) {
+        console.error('Error checking business profile:', error);
+      }
+    };
+    
+    checkBusinessProfile();
+  }, [user]);
 
   const completedTasks = coordinatorTasks.filter(task => task.steps.every(step => step.isCompleted));
   const progressPercentage = coordinatorTasks.length > 0 
@@ -46,6 +90,78 @@ export const FixedMasterCoordinator: React.FC<FixedMasterCoordinatorProps> = ({ 
     if (success) {
       onTaskStart?.(taskId);
       navigate(`/dashboard/tasks/${taskId}`);
+    }
+  };
+
+  const startIntelligentConversation = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'start_conversation',
+          userId: user.id,
+          userProfile: businessProfile,
+          conversationContext: 'dashboard_initialization'
+        }
+      });
+
+      if (error) throw error;
+      setConversationData(data);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
+
+  const generatePersonalizedTasks = async () => {
+    if (!user || !businessProfile?.business_description) return;
+    
+    setIsGeneratingTasks(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'analyze_and_generate_tasks',
+          userId: user.id,
+          userProfile: businessProfile,
+          businessDescription: businessProfile.business_description
+        }
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "🎯 Tareas personalizadas generadas",
+        description: data.message || "He creado tareas específicas para tu negocio"
+      });
+
+      // Refrescar las tareas del coordinador
+      await analyzeProfileAndGenerateTasks();
+      
+    } catch (error) {
+      console.error('Error generating tasks:', error);
+      toast({
+        title: "❌ Error",
+        description: "No se pudieron generar las tareas personalizadas",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingTasks(false);
+    }
+  };
+
+  const handleActionButton = async (action: string) => {
+    switch (action) {
+      case 'start_tasks':
+        await generatePersonalizedTasks();
+        break;
+      case 'business_details':
+        setShowProfileCapture(true);
+        break;
+      case 'explain_more':
+        await startIntelligentConversation();
+        break;
+      default:
+        break;
     }
   };
 
@@ -160,43 +276,120 @@ export const FixedMasterCoordinator: React.FC<FixedMasterCoordinatorProps> = ({ 
                 >
                   <div className="mt-4 space-y-4">
                     
-                    {/* Coordinator Message */}
+                    {/* Intelligent Coordinator Message */}
                     <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
                       <div className="flex items-start space-x-3">
-                        <MessageCircle className="w-5 h-5 text-white/80 mt-1" />
+                        <Brain className="w-5 h-5 text-yellow-300 mt-1" />
                         <div className="flex-1">
-                          <p className="text-white leading-relaxed">
-                            {showFullMessage 
-                              ? coordinatorMessage.message 
-                              : getMessagePreview(coordinatorMessage.message)
-                            }
-                          </p>
-                          {coordinatorMessage.message.length > 120 && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowFullMessage(!showFullMessage)}
-                              className="text-white/80 hover:text-white p-0 h-auto mt-1"
-                            >
-                              {showFullMessage ? t.showLess : t.showMore}
-                            </Button>
+                          {conversationData ? (
+                            <div className="space-y-3">
+                              <p className="text-white leading-relaxed">
+                                {conversationData.message}
+                              </p>
+                              
+                              {conversationData.questions && conversationData.questions.length > 0 && (
+                                <div className="space-y-2">
+                                  {conversationData.questions.map((question: string, index: number) => (
+                                    <p key={index} className="text-white/80 text-sm italic">
+                                      {question}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <p className="text-white leading-relaxed">
+                                {businessProfile?.business_description 
+                                  ? `¡Hola! Veo que te dedicas a: ${businessProfile.business_description}. ¡Vamos a hacer crecer tu negocio juntos!`
+                                  : "¡Hola! Para poder ayudarte de la mejor manera, necesito conocer más sobre tu negocio. ¿Me cuentas qué haces?"
+                                }
+                              </p>
+                              
+                              {businessProfile?.brand_name && (
+                                <p className="text-white/80 text-sm">
+                                  📍 Marca: <span className="font-semibold">{businessProfile.brand_name}</span>
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Intelligent Action Buttons */}
                     <div className="flex flex-wrap gap-3">
                       
-                      {/* Next Task Action */}
-                      {nextUnlockedTask && coordinatorMessage.taskId && (
-                        <Button
-                          onClick={() => handleStartTask(coordinatorMessage.taskId!)}
-                          className="bg-white text-purple-600 hover:bg-white/90 font-semibold"
-                        >
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                          {t.startMission}: {nextUnlockedTask.title}
-                        </Button>
+                      {/* Personalized Action Buttons */}
+                      {conversationData?.actionButtons ? (
+                        conversationData.actionButtons.map((button: any, index: number) => (
+                          <Button
+                            key={index}
+                            onClick={() => handleActionButton(button.action)}
+                            disabled={isGeneratingTasks && button.action === 'start_tasks'}
+                            className={`${
+                              button.action === 'start_tasks' 
+                                ? 'bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold' 
+                                : 'bg-white text-purple-600 hover:bg-white/90'
+                            }`}
+                          >
+                            {button.action === 'start_tasks' && isGeneratingTasks ? (
+                              <>
+                                <Zap className="w-4 h-4 mr-2 animate-pulse" />
+                                Generando tareas...
+                              </>
+                            ) : (
+                              <>
+                                {button.action === 'start_tasks' && <Zap className="w-4 h-4 mr-2" />}
+                                {button.action === 'business_details' && <User className="w-4 h-4 mr-2" />}
+                                {button.action === 'explain_more' && <Brain className="w-4 h-4 mr-2" />}
+                                {button.text}
+                              </>
+                            )}
+                          </Button>
+                        ))
+                      ) : (
+                        <>
+                          {/* Default Action Buttons */}
+                          {businessProfile?.business_description ? (
+                            <Button
+                              onClick={() => generatePersonalizedTasks()}
+                              disabled={isGeneratingTasks}
+                              className="bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold"
+                            >
+                              {isGeneratingTasks ? (
+                                <>
+                                  <Zap className="w-4 h-4 mr-2 animate-pulse" />
+                                  Generando tareas específicas...
+                                </>
+                              ) : (
+                                <>
+                                  <Zap className="w-4 h-4 mr-2" />
+                                  Crear tareas para mi negocio
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => setShowProfileCapture(true)}
+                              className="bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold"
+                            >
+                              <User className="w-4 h-4 mr-2" />
+                              Cuéntame sobre tu negocio
+                            </Button>
+                          )}
+
+                          {/* Next Task Action */}
+                          {nextUnlockedTask && coordinatorMessage.taskId && (
+                            <Button
+                              onClick={() => handleStartTask(coordinatorMessage.taskId!)}
+                              className="bg-white text-purple-600 hover:bg-white/90 font-semibold"
+                            >
+                              <PlayCircle className="w-4 h-4 mr-2" />
+                              {t.startMission}: {nextUnlockedTask.title}
+                            </Button>
+                          )}
+                        </>
                       )}
 
                       {/* Chat Button */}
@@ -252,6 +445,28 @@ export const FixedMasterCoordinator: React.FC<FixedMasterCoordinatorProps> = ({ 
           </CardContent>
         </Card>
       </div>
+
+      {/* Business Profile Capture Modal */}
+      <Dialog open={showProfileCapture} onOpenChange={setShowProfileCapture}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Brain className="w-6 h-6 text-primary" />
+              <span>Configuración de Perfil Inteligente</span>
+            </DialogTitle>
+          </DialogHeader>
+          <BusinessProfileCapture
+            onComplete={() => {
+              setShowProfileCapture(false);
+              // Refrescar datos después de completar
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            }}
+            onSkip={() => setShowProfileCapture(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

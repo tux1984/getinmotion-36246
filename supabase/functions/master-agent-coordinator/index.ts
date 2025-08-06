@@ -14,12 +14,14 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface TaskEvolutionRequest {
-  action: 'evolve_tasks' | 'get_coaching_message' | 'analyze_progress';
+  action: 'evolve_tasks' | 'get_coaching_message' | 'analyze_progress' | 'analyze_and_generate_tasks' | 'start_conversation';
   completedTasks?: any[];
   maturityScores?: any;
   userProfile?: any;
   userId: string;
   currentTasks?: any[];
+  businessDescription?: string;
+  conversationContext?: string;
 }
 
 serve(async (req) => {
@@ -28,7 +30,7 @@ serve(async (req) => {
   }
 
   try {
-    const { action, completedTasks, maturityScores, userProfile, userId, currentTasks }: TaskEvolutionRequest = await req.json();
+    const { action, completedTasks, maturityScores, userProfile, userId, currentTasks, businessDescription, conversationContext }: TaskEvolutionRequest = await req.json();
 
     console.log(`Master Agent Coordinator - Action: ${action}, User: ${userId}`);
 
@@ -41,6 +43,12 @@ serve(async (req) => {
       
       case 'analyze_progress':
         return await analyzeUserProgress(userId, maturityScores);
+      
+      case 'analyze_and_generate_tasks':
+        return await analyzeAndGenerateTasks(userId, userProfile, maturityScores, businessDescription);
+      
+      case 'start_conversation':
+        return await startIntelligentConversation(userId, userProfile, conversationContext);
       
       default:
         throw new Error(`Unknown action: ${action}`);
@@ -271,5 +279,238 @@ async function analyzeUserProgress(userId: string, maturityScores: any) {
   } catch (error) {
     console.error('Error analyzing progress:', error);
     throw error;
+  }
+}
+
+async function analyzeAndGenerateTasks(userId: string, userProfile: any, maturityScores: any, businessDescription?: string) {
+  if (!openAIApiKey) {
+    return new Response(
+      JSON.stringify({ error: 'OpenAI API key not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  try {
+    // Obtener información completa del usuario desde Supabase
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    const { data: maturityData } = await supabase
+      .from('user_maturity_scores')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const businessInfo = businessDescription || profile?.business_description || 'No hay descripción del negocio disponible';
+    const brandName = profile?.brand_name || 'Negocio sin nombre definido';
+    
+    const prompt = `
+Eres un Master Coordinator AI experto en emprendimiento. Analiza el perfil completo del usuario y genera tareas ALTAMENTE PERSONALIZADAS y ESPECÍFICAS para su negocio.
+
+INFORMACIÓN DEL NEGOCIO:
+Descripción: ${businessInfo}
+Nombre de marca: ${brandName}
+Tipo de negocio: ${profile?.business_type || 'No definido'}
+Mercado objetivo: ${profile?.target_market || 'No definido'}
+Etapa actual: ${profile?.current_stage || 'No definido'}
+Ubicación: ${profile?.business_location || 'No definido'}
+Canales de venta: ${profile?.sales_channels || []}
+Equipo: ${profile?.team_size || 'No definido'}
+Disponibilidad de tiempo: ${profile?.time_availability || 'No definido'}
+
+PUNTUACIONES DE MADUREZ:
+${maturityData ? `
+- Validación de idea: ${maturityData.idea_validation}/100
+- Experiencia de usuario: ${maturityData.user_experience}/100  
+- Ajuste al mercado: ${maturityData.market_fit}/100
+- Monetización: ${maturityData.monetization}/100
+` : 'No hay datos de madurez disponibles'}
+
+CONTEXTO:
+Si el usuario dice "pinto chaquetas de cuero personalizadas", entonces debes generar tareas ESPECÍFICAS como:
+- "Define tus costos por cada tipo de diseño personalizado"
+- "Identifica tu buyer persona: ¿quién compra chaquetas personalizadas?"
+- "Crea una estrategia de precios para productos únicos"
+
+INSTRUCCIONES:
+1. Genera EXACTAMENTE 5 tareas específicas para este negocio
+2. NO uses tareas genéricas - todo debe ser contextual al negocio descrito
+3. Prioriza según las puntuaciones de madurez más bajas
+4. Incluye pasos específicos y entregables claros
+5. Usa el nombre de la marca/negocio en las tareas cuando sea relevante
+
+Responde SOLO con un array JSON con esta estructura:
+[{
+  "title": "Título específico para el negocio",
+  "description": "Descripción detallada y contextual",
+  "agent_id": "financial-management|marketing-specialist|legal-advisor|operations-specialist|cultural-consultant",
+  "relevance": "high|medium|low",
+  "priority": 1-10,
+  "estimated_time": "15 min|30 min|1 hora|2 horas",
+  "category": "Categoría específica del negocio",
+  "steps": [
+    {
+      "title": "Paso específico 1",
+      "description": "Descripción detallada del paso",
+      "deliverable": "Entregable concreto"
+    }
+  ]
+}]
+`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 2000
+      }),
+    });
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+    const tasks = JSON.parse(aiResponse);
+
+    // Crear las tareas en la base de datos
+    const tasksToInsert = tasks.map((task: any) => ({
+      user_id: userId,
+      agent_id: task.agent_id,
+      title: task.title,
+      description: task.description,
+      relevance: task.relevance,
+      status: 'pending',
+      priority: task.priority,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+    const { data: insertedTasks, error } = await supabase
+      .from('agent_tasks')
+      .insert(tasksToInsert)
+      .select();
+
+    if (error) throw error;
+
+    console.log(`✅ Generated ${insertedTasks?.length} personalized tasks for user ${userId}`);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        tasks: insertedTasks,
+        message: `He generado ${insertedTasks?.length} tareas específicas para tu negocio: ${businessInfo}`
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error generating personalized tasks:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+async function startIntelligentConversation(userId: string, userProfile: any, conversationContext?: string) {
+  if (!openAIApiKey) {
+    return new Response(
+      JSON.stringify({ error: 'OpenAI API key not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  try {
+    // Obtener información del perfil del usuario
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    const { data: tasks } = await supabase
+      .from('agent_tasks')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    const businessInfo = profile?.business_description || 'No definido';
+    const completedTasks = tasks?.filter(t => t.status === 'completed') || [];
+    const pendingTasks = tasks?.filter(t => t.status === 'pending') || [];
+
+    const prompt = `
+Eres el Master Coordinator, un guía empresarial empático y conversacional. Tu trabajo es hablar con ${profile?.full_name || 'el usuario'} sobre su negocio de forma natural y personalizada.
+
+INFORMACIÓN DEL NEGOCIO:
+Descripción: ${businessInfo}
+Nombre de marca: ${profile?.brand_name || 'Sin definir'}
+Tareas completadas: ${completedTasks.length}
+Tareas pendientes: ${pendingTasks.length}
+
+CONTEXTO DE CONVERSACIÓN: ${conversationContext || 'Inicio de conversación'}
+
+INSTRUCCIONES:
+1. Habla de forma conversacional y empática como un coach personal
+2. SIEMPRE menciona específicamente su negocio si está definido
+3. Usa frases como: "Veo que te dedicas a ____", "¿Ya tienes ____?", "Vamos a ayudarte con ____"
+4. Haz preguntas específicas sobre su negocio para obtener más información
+5. Proporciona opciones de acción claras con botones
+6. Si no tienes suficiente información del negocio, pregunta por detalles específicos
+
+Ejemplos de respuestas:
+- "¡Hola! Veo que pintas chaquetas de cuero personalizadas. ¿Ya tienes una marca definida o vamos a crearla desde cero?"
+- "Perfecto, tu negocio de [negocio] tiene mucho potencial. ¿Qué te gustaría mejorar primero: precios, visibilidad o procesos?"
+
+Responde en JSON con este formato:
+{
+  "message": "Mensaje conversacional específico para su negocio",
+  "questions": ["¿Pregunta específica 1?", "¿Pregunta específica 2?"],
+  "actionButtons": [
+    {"text": "Empezar ahora", "action": "start_tasks"},
+    {"text": "Explícame más", "action": "explain_more"},
+    {"text": "Hablar de mi negocio", "action": "business_details"}
+  ],
+  "nextSteps": ["Paso específico 1", "Paso específico 2"]
+}
+`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 1000
+      }),
+    });
+
+    const data = await response.json();
+    const conversationData = JSON.parse(data.choices[0].message.content);
+
+    return new Response(
+      JSON.stringify(conversationData),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error starting intelligent conversation:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 }
