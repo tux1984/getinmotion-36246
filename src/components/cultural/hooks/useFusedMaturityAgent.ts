@@ -170,7 +170,7 @@ export const useFusedMaturityAgent = (
   }, []);
 
   const completeAssessment = useCallback(async () => {
-    console.log('Fused Agent: Completing assessment', { profileData });
+    console.log('Fused Agent: Completing assessment with full integration', { profileData });
     
     try {
       // Calculate maturity scores based on profile data
@@ -178,34 +178,48 @@ export const useFusedMaturityAgent = (
       const recommendedAgents = generateMaturityBasedRecommendations(scores);
       
       if (user) {
-        // Save complete profile to user_profiles table including new fields
+        // Create comprehensive profile update with ALL new fields
         const userProfileUpdate = {
           business_description: profileData.businessDescription,
-          brand_name: profileData.brandName,
+          brand_name: profileData.brandName || profileData.businessGoals,
           business_type: businessType,
           target_market: profileData.targetAudience,
-          current_stage: profileData.salesConsistency,
-          business_goals: profileData.businessGoals || [],
-          monthly_revenue_goal: profileData.monthlyRevenueGoal || null,
+          current_stage: profileData.salesConsistency || profileData.experience,
+          business_goals: Array.isArray(profileData.businessGoals) ? profileData.businessGoals : [profileData.businessGoals].filter(Boolean),
+          monthly_revenue_goal: profileData.monthlyRevenueGoal || (profileData.urgencyLevel ? profileData.urgencyLevel * 1000 : null),
           business_location: profileData.businessLocation,
-          years_in_business: profileData.yearsInBusiness || null,
-          team_size: profileData.teamSize,
-          current_challenges: profileData.currentChallenges || [],
-          sales_channels: profileData.salesChannels || [],
-          primary_skills: profileData.primarySkills || [],
+          years_in_business: profileData.yearsInBusiness || (profileData.experience === 'experienced' ? 3 : 1),
+          team_size: profileData.teamSize || profileData.teamStructure || 'solo',
+          current_challenges: Array.isArray(profileData.mainObstacles) ? profileData.mainObstacles : [profileData.mainObstacles].filter(Boolean),
+          sales_channels: Array.isArray(profileData.promotionChannels) ? profileData.promotionChannels : [profileData.promotionChannels].filter(Boolean),
+          primary_skills: Array.isArray(profileData.activities) ? profileData.activities : [profileData.activities].filter(Boolean),
+          time_availability: profileData.supportPreference || profileData.timeAvailability,
+          social_media_presence: {
+            platforms: profileData.promotionChannels || [],
+            confidence: profileData.marketingConfidence || 3
+          },
           updated_at: new Date().toISOString()
         };
 
-        // Update user profile with complete data
+        // Filter out undefined values
+        const cleanUpdate = Object.fromEntries(
+          Object.entries(userProfileUpdate).filter(([_, value]) => value !== undefined && value !== null)
+        );
+
+        // Upsert complete profile data
         const { error: profileError } = await supabase
           .from('user_profiles')
-          .update(userProfileUpdate)
-          .eq('user_id', user.id);
+          .upsert({
+            user_id: user.id,
+            ...cleanUpdate
+          }, {
+            onConflict: 'user_id'
+          });
 
         if (profileError) {
           console.error('Error updating user profile:', profileError);
         } else {
-          console.log('User profile updated successfully with complete data');
+          console.log('User profile updated successfully with complete data:', cleanUpdate);
         }
 
         // Save maturity scores
@@ -213,40 +227,57 @@ export const useFusedMaturityAgent = (
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
         markOnboardingComplete(scores, recommendedAgents);
 
-        // Activate Master Coordinator automatically
+        // ACTIVATE MASTER COORDINATOR with complete profile data
         try {
-          console.log('FusedMaturityAgent: Activating Master Coordinator...');
+          console.log('🚀 FusedMaturityAgent: Activating Master Coordinator with full profile...');
           const { data: coordinatorData, error: coordinatorError } = await supabase.functions.invoke('master-agent-coordinator', {
             body: {
               action: 'analyze_and_generate_tasks',
-              profileData: {
+              userId: user.id,
+              userProfile: {
                 ...profileData,
                 businessType,
                 maturityLevel: getMaturityLevel(profileData, businessType, language).name,
-                completedAssessment: true
-              }
+                completedAssessment: true,
+                // Include calculated scores for better task generation
+                maturityScores: scores
+              },
+              maturityScores: scores,
+              businessDescription: profileData.businessDescription
             }
           });
 
           if (coordinatorError) {
-            console.error('Error activating Master Coordinator:', coordinatorError);
+            console.error('❌ Error activating Master Coordinator:', coordinatorError);
+            // Continue anyway - don't block the flow
           } else {
-            console.log('Master Coordinator activated successfully:', coordinatorData);
+            console.log('✅ Master Coordinator activated successfully:', coordinatorData);
+            toast.success(
+              language === 'es' 
+                ? '¡Master Coordinator activado! Tus tareas personalizadas están listas.'
+                : 'Master Coordinator activated! Your personalized tasks are ready.'
+            );
           }
         } catch (coordinatorError) {
-          console.error('Failed to activate Master Coordinator:', coordinatorError);
+          console.error('❌ Failed to activate Master Coordinator:', coordinatorError);
+          // Continue anyway - the user can still use the dashboard
         }
         
         toast.success(
           language === 'es' 
-            ? `¡Perfil completo! Detectamos que eres un emprendedor ${getBusinessTypeLabel(businessType, language)} en crecimiento. Tu Master Coordinator está activo.`
-            : `Profile complete! We detected you're a growing ${getBusinessTypeLabel(businessType, language)} entrepreneur. Your Master Coordinator is active.`
+            ? `¡Perfil completo! Detectamos que eres un emprendedor ${getBusinessTypeLabel(businessType, language)}. Redirigiendo al dashboard...`
+            : `Profile complete! We detected you're a ${getBusinessTypeLabel(businessType, language)} entrepreneur. Redirecting to dashboard...`
         );
       }
       
       setIsCompleted(true);
       localStorage.removeItem('fused_maturity_calculator_progress');
-      onComplete(scores, recommendedAgents, profileData);
+      
+      // Wait a moment for the coordinator activation, then call completion
+      setTimeout(() => {
+        onComplete(scores, recommendedAgents, profileData);
+      }, 2000);
+      
     } catch (error) {
       console.error('Failed to complete assessment:', error);
       toast.error(

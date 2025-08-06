@@ -9,13 +9,14 @@ export const useUserBusinessProfile = () => {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserBusinessProfile | null>(null);
 
-  // Derive business profile from various sources
+  // Derive business profile from various sources with enhanced field mapping
   const businessProfile = useMemo((): UserBusinessProfile | null => {
-    if (!user || !profile) return null;
+    if (!user) return null;
 
     // Get from localStorage - prioritize maturity calculator data
     const maturityScoresData = localStorage.getItem('maturityScores');
     const calculatorProfileData = localStorage.getItem('profileData');
+    const fusedMaturityData = localStorage.getItem('fused_maturity_calculator_progress');
     const conversationalData = localStorage.getItem('enhanced_conversational_agent_progress');
     const oldConversationalData = localStorage.getItem('conversational-agent-progress');
     const onboardingData = localStorage.getItem('onboarding-answers');
@@ -28,10 +29,14 @@ export const useUserBusinessProfile = () => {
     let parsedMaturity = {};
     
     try {
-      // Priority: maturity calculator > enhanced conversational > old conversational > onboarding
-      if (calculatorProfileData) {
+      // Priority: fused maturity > calculator > enhanced conversational > old conversational > onboarding
+      if (fusedMaturityData) {
+        const fusedData = JSON.parse(fusedMaturityData);
+        parsedCalculatorProfile = fusedData.profileData || {};
+        console.log('🎯 Using fused maturity calculator profile data:', parsedCalculatorProfile);
+      } else if (calculatorProfileData) {
         parsedCalculatorProfile = JSON.parse(calculatorProfileData);
-        console.log('🎯 Using maturity calculator profile data:', parsedCalculatorProfile);
+        console.log('🎯 Using legacy maturity calculator profile data:', parsedCalculatorProfile);
       }
       
       if (maturityScoresData) {
@@ -91,7 +96,14 @@ export const useUserBusinessProfile = () => {
       currentChallenges: extractChallenges(mergedData),
       maturityLevel: calculateMaturityLevel(parsedMaturity, parsedMaturityScores),
       lastAssessmentDate: new Date().toISOString(),
-      language: (mergedData as any).language || 'es'
+      language: (mergedData as any).language || 'es',
+      // Enhanced fields from database profile
+      businessDescription: (profile as any)?.business_description || (mergedData as any).businessDescription || '',
+      brandName: (profile as any)?.brand_name || (mergedData as any).brandName || '',
+      businessLocation: (profile as any)?.business_location || (mergedData as any).businessLocation || '',
+      yearsInBusiness: (profile as any)?.years_in_business || (mergedData as any).yearsInBusiness || null,
+      socialMediaPresence: (profile as any)?.social_media_presence || {},
+      initialInvestmentRange: (profile as any)?.initial_investment_range || (mergedData as any).initialInvestmentRange || ''
     };
   }, [user, profile]);
 

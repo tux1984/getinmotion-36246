@@ -23,12 +23,17 @@ const MaturityCalculator = () => {
     navigate('/dashboard/home');
   };
 
-  const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents) => {
-    console.log('MaturityCalculator: Assessment completed', { scores, recommendedAgents });
-    // Navigate to dashboard after short delay to allow user to see completion
+  const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData?: any) => {
+    console.log('MaturityCalculator: Assessment completed with full integration', { scores, recommendedAgents, profileData });
+    
+    // Store completion flag for dashboard integration
+    localStorage.setItem('maturity_assessment_completed', 'true');
+    localStorage.setItem('assessment_completion_time', new Date().toISOString());
+    
+    // Navigate to dashboard after coordinator activation
     setTimeout(() => {
       navigate('/dashboard/home');
-    }, 2000);
+    }, 3000); // Slightly longer to allow coordinator to fully activate
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator[language];

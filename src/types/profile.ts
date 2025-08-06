@@ -30,6 +30,14 @@ export interface UserBusinessProfile {
   
   // Language preference
   language: 'en' | 'es';
+  
+  // Enhanced fields from fused maturity calculator
+  businessDescription?: string;
+  brandName?: string;
+  businessLocation?: string;
+  yearsInBusiness?: number | null;
+  socialMediaPresence?: Record<string, any>;
+  initialInvestmentRange?: string;
 }
 
 export type BusinessModel = 

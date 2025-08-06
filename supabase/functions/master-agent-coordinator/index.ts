@@ -378,7 +378,13 @@ Responde SOLO con un array JSON con esta estructura:
     });
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    let aiResponse = data.choices[0].message.content;
+    
+    // Clean up the response to ensure it's valid JSON
+    aiResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    console.log('Raw AI response:', aiResponse);
+    
     const tasks = JSON.parse(aiResponse);
 
     // Crear las tareas en la base de datos

@@ -53,6 +53,7 @@ export interface UserProfileData {
   monthlyRevenueGoal?: number;
   yearsInBusiness?: number;
   teamSize?: string;
+  timeAvailability?: string;
   currentChallenges?: string[];
   salesChannels?: string[];
   primarySkills?: string[];

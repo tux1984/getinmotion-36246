@@ -95,14 +95,43 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     
     onAnswer(currentQuestion.id, answer);
     
+    // Check for conditional logic before auto-advancing
+    const shouldAutoAdvance = evaluateConditionalLogic(currentQuestion, answer, profileData);
+    
     // Auto-advance for single-choice questions
-    if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'yes-no') {
+    if ((currentQuestion.type === 'single-choice' || currentQuestion.type === 'yes-no') && shouldAutoAdvance) {
       setTimeout(() => {
         if (!isLastQuestion) {
           setCurrentQuestionIndex(prev => prev + 1);
         }
       }, 500);
     }
+  };
+
+  const evaluateConditionalLogic = (question: any, answer: any, profileData: UserProfileData): boolean => {
+    // Implement conditional logic based on question dependencies
+    if (question.showIf) {
+      const condition = question.showIf;
+      const fieldValue = profileData[condition.field];
+      
+      // Evaluate condition
+      switch (condition.operator) {
+        case 'equals':
+          return fieldValue === condition.value;
+        case 'not_equals':
+          return fieldValue !== condition.value;
+        case 'includes':
+          return Array.isArray(fieldValue) && fieldValue.includes(condition.value);
+        case 'greater_than':
+          return Number(fieldValue) > Number(condition.value);
+        case 'less_than':
+          return Number(fieldValue) < Number(condition.value);
+        default:
+          return true;
+      }
+    }
+    
+    return true; // No conditional logic, proceed normally
   };
 
   const handleNext = () => {
