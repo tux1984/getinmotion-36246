@@ -19,101 +19,14 @@ export const useIntelligentQuestions = () => {
     language,
     currentBlock
   }: IntelligentQuestionParams) => {
-    // Clear any existing timeout
-    if (generationTimeoutRef.current) {
-      clearTimeout(generationTimeoutRef.current);
-    }
+    // TEMPORARILY DISABLED: Edge functions are returning insights as options
+    console.log('🚫 Dynamic question generation DISABLED - returning static questions only');
+    setIsGenerating(false);
     
-    setIsGenerating(true);
-    
-    // Set a safety timeout to prevent stuck states
-    generationTimeoutRef.current = setTimeout(() => {
-      console.warn('Question generation timeout reached');
-      setIsGenerating(false);
-    }, 10000); // 10 second timeout
-    
-    try {
-      console.log('Generating contextual questions for:', currentBlock.id);
-      
-      // Call the edge function to generate dynamic questions
-      const { data, error } = await supabase.functions.invoke('generate-dynamic-questions', {
-        body: {
-          profileData,
-          language,
-          blockContext: currentBlock.strategicContext,
-          businessDescription: profileData.businessDescription,
-          industry: profileData.industry
-        }
-      });
-
-      if (error) {
-        console.error('Error generating questions:', error);
-        return [];
-      }
-
-      const questions = data?.questions || [];
-      
-      // Transform AI questions into ConversationQuestion format with strict filtering
-      const transformedQuestions: ConversationQuestion[] = questions
-        .filter((q: any) => {
-          // Basic validation
-          if (!q.question || q.question.trim().length < 10 || !q.question.includes('?')) {
-            return false;
-          }
-          
-          // Filter out AI insights and commentary
-          const questionText = q.question.toLowerCase();
-          const insightPatterns = [
-            'veo que tienes',
-            'i can see', 
-            'insight',
-            'este nivel de detalle',
-            'me parece que',
-            'it seems that',
-            'observo que',
-            'i notice that',
-            'es interesante que',
-            'it\'s interesting that',
-            'dado que mencionaste',
-            'since you mentioned',
-            'basándome en',
-            'based on',
-            'considerando que',
-            'considering that'
-          ];
-          
-          return !insightPatterns.some(pattern => questionText.includes(pattern));
-        })
-        .map((q: any, index: number) => {
-          // FORCE all AI-generated questions to be text-input only
-          // The AI is generating insights as options, not real multiple choice options
-          return {
-            id: `dynamic_${currentBlock.id}_${index}`,
-            question: q.question.trim(),
-            type: 'text-input' as const, // ALWAYS text-input for AI questions
-            fieldName: `dynamic_${currentBlock.id}_${index}`,
-            explanation: q.context?.trim() || '',
-            required: false,
-            placeholder: language === 'es' 
-              ? 'Comparte tus pensamientos detalladamente...' 
-              : 'Share your detailed thoughts...'
-            // NO OPTIONS for AI questions - they're generating insights as fake options
-          };
-        });
-
-      setDynamicQuestions(transformedQuestions);
-      return transformedQuestions;
-      
-    } catch (error) {
-      console.error('Failed to generate contextual questions:', error);
-      return [];
-    } finally {
-      // Clear timeout and reset state
-      if (generationTimeoutRef.current) {
-        clearTimeout(generationTimeoutRef.current);
-      }
-      setIsGenerating(false);
-    }
+    // Return high-quality static questions instead
+    const staticQuestions = getHighQualityStaticQuestions(profileData, language, currentBlock);
+    setDynamicQuestions(staticQuestions);
+    return staticQuestions;
   }, []);
 
   const getIndustrySpecificQuestions = useCallback((
@@ -238,10 +151,58 @@ export const useIntelligentQuestions = () => {
     return conditionalQuestions;
   }, []);
 
+  const getHighQualityStaticQuestions = useCallback((
+    profileData: UserProfileData,
+    language: 'en' | 'es',
+    currentBlock: ConversationBlock
+  ): ConversationQuestion[] => {
+    // Return curated, high-quality text-input questions based on context
+    const questions: ConversationQuestion[] = [];
+    
+    if (currentBlock.id === 'whoYouServe') {
+      questions.push({
+        id: 'target_audience_detail',
+        question: language === 'es' 
+          ? '¿Qué problema específico resuelves para tus clientes ideales?'
+          : 'What specific problem do you solve for your ideal clients?',
+        type: 'text-input',
+        fieldName: 'problemSolved',
+        explanation: language === 'es' 
+          ? 'Entender el problema que resuelves nos ayuda a crear mejores estrategias'
+          : 'Understanding the problem you solve helps us create better strategies',
+        required: false,
+        placeholder: language === 'es' 
+          ? 'Describe el problema principal que resuelves...' 
+          : 'Describe the main problem you solve...'
+      });
+    }
+    
+    if (currentBlock.id === 'howYouCharge') {
+      questions.push({
+        id: 'pricing_challenges',
+        question: language === 'es' 
+          ? '¿Cuál es tu mayor desafío al establecer precios?'
+          : 'What is your biggest challenge when setting prices?',
+        type: 'text-input',
+        fieldName: 'pricingChallenges',
+        explanation: language === 'es' 
+          ? 'Los desafíos de precios nos ayudan a sugerir mejores estrategias'
+          : 'Pricing challenges help us suggest better strategies',
+        required: false,
+        placeholder: language === 'es' 
+          ? 'Comparte tus desafíos con los precios...' 
+          : 'Share your pricing challenges...'
+      });
+    }
+    
+    return questions;
+  }, []);
+
   return {
     generateContextualQuestions,
     getIndustrySpecificQuestions,
     getConditionalQuestions,
+    getHighQualityStaticQuestions,
     isGenerating,
     dynamicQuestions
   };

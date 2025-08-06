@@ -91,72 +91,8 @@ export const useEnhancedConversationalAgent = (
         }
       }
 
-      // Auto-generate questions when we have meaningful info (increased threshold to 30 chars)
-      if (profileData.businessDescription && 
-          profileData.businessDescription.length > 30 &&
-          currentGenerationsRef.current < maxGenerationsPerSession.current) {
-        const businessKey = `${profileData.businessDescription}_${profileData.industry || 'unknown'}`;
-        const now = Date.now();
-        
-        // Implement 5-second cooldown between generations
-        if (!generatedQuestionsRef.current.has(businessKey) && 
-            !isGeneratingRef.current &&
-            now - questionGenerationCooldownRef.current > 5000) {
-          
-          console.log('🧠 Generando preguntas específicas para tu negocio...');
-          setPersonalizationCount(prev => prev + 1);
-          setCurrentPersonalizationContext(
-            language === 'es' 
-              ? `Analizando tu ${businessType === 'creative' ? 'trabajo creativo' : 'negocio'}...`
-              : `Analyzing your ${businessType === 'creative' ? 'creative work' : 'business'}...`
-          );
-          isGeneratingRef.current = true;
-          questionGenerationCooldownRef.current = now;
-          currentGenerationsRef.current += 1;
-          
-          // More strategic question insertion
-          const targetBlocks = ['whoYouServe', 'howYouCharge', 'marketingChannels', 'growthBlocks'];
-          
-          for (const blockId of targetBlocks) {
-            const blockIndex = enhanced.findIndex(block => block.id === blockId);
-            if (blockIndex !== -1) {
-              try {
-                const dynamicQuestions = await generateContextualQuestions({
-                  profileData,
-                  language,
-                  currentBlock: enhanced[blockIndex]
-                });
-                
-                if (dynamicQuestions.length > 0) {
-                  console.log(`✨ Agregando ${dynamicQuestions.length} preguntas personalizadas a ${blockId}`);
-                  // Filter out any questions that might be insights instead of actual questions
-                  const validQuestions = dynamicQuestions.filter(q => 
-                    q.question && 
-                    q.question.length > 10 && 
-                    q.question.includes('?') &&
-                    !q.question.toLowerCase().includes('veo que tienes') &&
-                    !q.question.toLowerCase().includes('i can see')
-                  );
-                  
-                  if (validQuestions.length > 0) {
-                    enhanced[blockIndex] = {
-                      ...enhanced[blockIndex],
-                      questions: [...enhanced[blockIndex].questions, ...validQuestions.slice(0, 2)], // Limit to 2 per block
-                      agentMessage: getEnhancedAgentMessage(enhanced[blockIndex], profileData, businessType, language)
-                    };
-                    hasChanges = true;
-                  }
-                }
-              } catch (error) {
-                console.warn('Failed to generate dynamic questions for block:', blockId, error);
-              }
-            }
-          }
-          
-          generatedQuestionsRef.current.add(businessKey);
-          isGeneratingRef.current = false;
-        }
-      }
+      // DISABLED: Dynamic question generation causing issues
+      console.log('🚫 Dynamic question generation DISABLED for stability');
 
       // Add industry-specific and conditional questions
       if (profileData.industry) {
@@ -187,78 +123,10 @@ export const useEnhancedConversationalAgent = (
     initializeEnhancedBlocks();
   }, [profileData.businessDescription, profileData.industry, blocks, businessType]);
 
-  // Optimized real-time question generation with stricter controls
+  // DISABLED: Intelligent follow-up generation causing issues
   const triggerIntelligentFollowUp = useCallback(async (fieldName: string, answer: any) => {
-    const triggerFields = ['targetAudience', 'pricingMethod', 'hasSold', 'mainObstacles'];
-    const now = Date.now();
-    
-    // Enhanced triggering logic with quality checks
-    const isTextAnswer = typeof answer === 'string';
-    const isHighQualityText = isTextAnswer && 
-                             answer.length > 30 && 
-                             answer.split(' ').length > 5 &&
-                             !answer.toLowerCase().includes('test') &&
-                             !answer.toLowerCase().includes('prueba');
-    
-    const shouldTrigger = triggerFields.includes(fieldName) && 
-                         !isGeneratingRef.current &&
-                         currentGenerationsRef.current < maxGenerationsPerSession.current &&
-                         now - questionGenerationCooldownRef.current > 5000 &&
-                         (!isTextAnswer || isHighQualityText);
-    
-    if (shouldTrigger) {
-      console.log(`🧠 Generando pregunta de seguimiento inteligente para: ${fieldName}`);
-      setPersonalizationCount(prev => prev + 1);
-      setCurrentPersonalizationContext(
-        language === 'es' 
-          ? `Adaptando preguntas basado en: ${fieldName}`
-          : `Adapting questions based on: ${fieldName}`
-      );
-      
-      try {
-        isGeneratingRef.current = true;
-        questionGenerationCooldownRef.current = now;
-        currentGenerationsRef.current += 1;
-        
-        const dynamicQuestions = await generateContextualQuestions({
-          profileData: { ...profileData, [fieldName]: answer },
-          language,
-          currentBlock: currentBlock || enhancedBlocks[currentBlockIndex]
-        });
-        
-        if (dynamicQuestions.length > 0) {
-          // More strategic placement
-          const enhanced = [...enhancedBlocks];
-          const targetBlockIndex = Math.min(currentBlockIndex + 1, enhanced.length - 1);
-          
-          if (targetBlockIndex < enhanced.length) {
-            const validQuestions = dynamicQuestions.filter(q => 
-              q.question && 
-              q.question.length > 15 && 
-              q.question.includes('?') &&
-              !q.question.toLowerCase().includes('insight')
-            );
-            
-            if (validQuestions.length > 0) {
-              enhanced[targetBlockIndex] = {
-                ...enhanced[targetBlockIndex],
-                questions: [
-                  ...enhanced[targetBlockIndex].questions,
-                  validQuestions[0] // Only add one high-quality question
-                ]
-              };
-              setEnhancedBlocks(enhanced);
-              console.log(`✨ Agregada pregunta inteligente de seguimiento`);
-            }
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to generate follow-up question:', error);
-      } finally {
-        isGeneratingRef.current = false;
-      }
-    }
-  }, [profileData, currentBlock, currentBlockIndex, enhancedBlocks, businessType, language]);
+    console.log('🚫 Intelligent follow-up DISABLED for stability');
+  }, []);
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
     const now = Date.now();
@@ -529,31 +397,9 @@ const generateContextualInsight = (
   businessType: string,
   language: 'en' | 'es'
 ): string | null => {
-  // Only generate insights for key fields, not all answers
-  const insightFields = ['businessDescription', 'hasSold', 'pricingMethod', 'mainObstacles', 'targetAudience'];
-  
-  if (!insightFields.includes(fieldName)) {
-    return null;
-  }
-
-  const insights = {
-    en: {
-      businessDescription: `I can see you're passionate about your ${businessType} work. This level of detail will help me create very specific recommendations.`,
-      hasSold: answer ? 'Great! Having sales validates your business model.' : 'No worries! We\'ll focus on validation strategies first.',
-      pricingMethod: 'Your pricing approach tells me a lot about your business maturity and scalability potential.',
-      mainObstacles: 'Understanding your challenges helps me prioritize the most impactful solutions.',
-      targetAudience: 'Knowing your audience helps me suggest more targeted growth strategies.'
-    },
-    es: {
-      businessDescription: `Veo que tienes pasión por tu trabajo ${businessType === 'creative' ? 'creativo' : 'emprendedor'}. Este nivel de detalle me ayudará a crear recomendaciones muy específicas.`,
-      hasSold: answer ? '¡Genial! Tener ventas valida tu modelo de negocio.' : '¡No te preocupes! Nos enfocaremos primero en estrategias de validación.',
-      pricingMethod: 'Tu enfoque de precios me dice mucho sobre la madurez y potencial de escalabilidad de tu negocio.',
-      mainObstacles: 'Entender tus desafíos me ayuda a priorizar las soluciones más impactantes.',
-      targetAudience: 'Conocer tu audiencia me ayuda a sugerir estrategias de crecimiento más dirigidas.'
-    }
-  };
-  
-  return insights[language][fieldName] || null;
+  // DISABLED: These insights were contaminating options
+  console.log('🚫 Contextual insights DISABLED to prevent contamination');
+  return null;
 };
 
 const calculateEnhancedMaturityScores = (profileData: UserProfileData, businessType: string): CategoryScore => {
