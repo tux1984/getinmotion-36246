@@ -53,35 +53,53 @@ export const useIntelligentQuestions = () => {
 
       const questions = data?.questions || [];
       
-      // Transform AI questions into ConversationQuestion format
+      // Transform AI questions into ConversationQuestion format with strict filtering
       const transformedQuestions: ConversationQuestion[] = questions
-        .filter((q: any) => 
-          q.question && 
-          q.question.trim().length > 10 && 
-          q.question.includes('?') &&
-          !q.question.toLowerCase().includes('veo que tienes') &&
-          !q.question.toLowerCase().includes('i can see') &&
-          !q.question.toLowerCase().includes('insight') &&
-          !q.question.toLowerCase().includes('este nivel de detalle')
-        )
-        .map((q: any, index: number) => ({
-          id: `dynamic_${currentBlock.id}_${index}`,
-          question: q.question,
-          type: q.type || 'text-input' as const,
-          fieldName: `dynamic_${currentBlock.id}_${index}`,
-          explanation: q.context,
-          required: false,
-          placeholder: language === 'es' 
-            ? 'Comparte tus pensamientos...' 
-            : 'Share your thoughts...',
-          // Handle options if provided by AI
-          options: q.options ? q.options.map((opt: any, optIndex: number) => ({
-            id: `opt_${index}_${optIndex}`,
-            label: opt.label || opt,
-            value: opt.value || opt,
-            description: opt.description
-          })) : undefined
-        }));
+        .filter((q: any) => {
+          // Basic validation
+          if (!q.question || q.question.trim().length < 10 || !q.question.includes('?')) {
+            return false;
+          }
+          
+          // Filter out AI insights and commentary
+          const questionText = q.question.toLowerCase();
+          const insightPatterns = [
+            'veo que tienes',
+            'i can see', 
+            'insight',
+            'este nivel de detalle',
+            'me parece que',
+            'it seems that',
+            'observo que',
+            'i notice that',
+            'es interesante que',
+            'it\'s interesting that',
+            'dado que mencionaste',
+            'since you mentioned',
+            'basándome en',
+            'based on',
+            'considerando que',
+            'considering that'
+          ];
+          
+          return !insightPatterns.some(pattern => questionText.includes(pattern));
+        })
+        .map((q: any, index: number) => {
+          // FORCE all AI-generated questions to be text-input only
+          // The AI is generating insights as options, not real multiple choice options
+          return {
+            id: `dynamic_${currentBlock.id}_${index}`,
+            question: q.question.trim(),
+            type: 'text-input' as const, // ALWAYS text-input for AI questions
+            fieldName: `dynamic_${currentBlock.id}_${index}`,
+            explanation: q.context?.trim() || '',
+            required: false,
+            placeholder: language === 'es' 
+              ? 'Comparte tus pensamientos detalladamente...' 
+              : 'Share your detailed thoughts...'
+            // NO OPTIONS for AI questions - they're generating insights as fake options
+          };
+        });
 
       setDynamicQuestions(transformedQuestions);
       return transformedQuestions;

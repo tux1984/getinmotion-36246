@@ -46,14 +46,30 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   const renderSingleChoice = () => {
     // Validate that we have proper options
     if (!question.options || question.options.length === 0) {
-      return (
-        <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
-          {language === 'es' 
-            ? 'No hay opciones disponibles para esta pregunta'
-            : 'No options available for this question'
-          }
-        </div>
-      );
+      console.warn('Single choice question without options, converting to text input:', question.id);
+      return renderTextInput();
+    }
+
+    // Additional validation: check if options look like AI insights (duplicated text)
+    const optionLabels = question.options.map(opt => opt.label);
+    const uniqueLabels = new Set(optionLabels);
+    const hasDuplicates = uniqueLabels.size !== optionLabels.length;
+    
+    // Check if any option contains insight-like text
+    const hasInsightText = optionLabels.some(label => 
+      typeof label === 'string' && (
+        label.toLowerCase().includes('veo que') ||
+        label.toLowerCase().includes('i can see') ||
+        label.toLowerCase().includes('este nivel') ||
+        label.toLowerCase().includes('me parece') ||
+        label.toLowerCase().includes('observo que') ||
+        label.toLowerCase().includes('basándome en')
+      )
+    );
+    
+    if (hasDuplicates || hasInsightText) {
+      console.warn('Detected AI insights as options, converting to text input:', question.id, optionLabels);
+      return renderTextInput();
     }
 
     return (
@@ -89,20 +105,30 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     
     // Validate that we have proper options
     if (!question.options || question.options.length === 0) {
-      return (
-        <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
-          {language === 'es' 
-            ? 'No hay opciones disponibles para esta pregunta'
-            : 'No options available for this question'
-          }
-        </div>
-      );
+      console.warn('Multiple choice question without options, converting to text input:', question.id);
+      return renderTextInput();
     }
 
-    // Check if any option has the same label repeated (insight contamination)
-    const uniqueLabels = new Set(question.options.map(opt => opt.label));
-    if (uniqueLabels.size !== question.options.length) {
-      console.warn('Detected duplicate options in multiple choice question:', question.options);
+    // Additional validation for AI insights contamination
+    const optionLabels = question.options.map(opt => opt.label);
+    const uniqueLabels = new Set(optionLabels);
+    const hasDuplicates = uniqueLabels.size !== optionLabels.length;
+    
+    // Check if any option contains insight-like text
+    const hasInsightText = optionLabels.some(label => 
+      typeof label === 'string' && (
+        label.toLowerCase().includes('veo que') ||
+        label.toLowerCase().includes('i can see') ||
+        label.toLowerCase().includes('este nivel') ||
+        label.toLowerCase().includes('me parece') ||
+        label.toLowerCase().includes('observo que') ||
+        label.toLowerCase().includes('basándome en')
+      )
+    );
+    
+    if (hasDuplicates || hasInsightText) {
+      console.warn('Detected AI insights as options, converting to text input:', question.id, optionLabels);
+      return renderTextInput();
     }
     
     return (
