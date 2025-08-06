@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ConversationBlock, MaturityLevel, PersonalizedTask } from '../types/conversationalTypes';
 import { getConversationBlocks } from '../data/conversationBlocks';
 import { UserProfileData } from '../../types/wizardTypes';
@@ -11,6 +11,7 @@ import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/u
 import { generateMaturityBasedRecommendations } from '@/utils/maturityRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useIntelligentQuestions } from './useIntelligentQuestions';
 
 export const useConversationalAgent = (
   language: 'en' | 'es',
@@ -28,10 +29,70 @@ export const useConversationalAgent = (
   const [profileData, setProfileData] = useState<UserProfileData>({} as UserProfileData);
   const [insights, setInsights] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [enhancedBlocks, setEnhancedBlocks] = useState<ConversationBlock[]>([]);
 
-  const currentBlock = blocks && blocks.length > 0 ? blocks[currentBlockIndex] : null;
+  const {
+    generateContextualQuestions,
+    getIndustrySpecificQuestions,
+    getConditionalQuestions,
+    isGenerating
+  } = useIntelligentQuestions();
+
+  const currentBlock = enhancedBlocks.length > 0 
+    ? enhancedBlocks[currentBlockIndex] 
+    : (blocks && blocks.length > 0 ? blocks[currentBlockIndex] : null);
   
   console.log('useConversationalAgent: Current block', { currentBlockIndex, currentBlock: currentBlock?.id, questionsLength: currentBlock?.questions?.length });
+
+  // Initialize enhanced blocks with intelligent questions
+  useEffect(() => {
+    const initializeEnhancedBlocks = async () => {
+      const enhanced = [...blocks];
+      
+      // Add industry-specific questions to relevant blocks
+      if (profileData.industry && profileData.businessDescription) {
+        const industryQuestions = getIndustrySpecificQuestions(
+          profileData.industry,
+          profileData.businessDescription,
+          language
+        );
+        
+        // Add to appropriate blocks (whoYouServe block)
+        if (industryQuestions.length > 0) {
+          const targetBlockIndex = enhanced.findIndex(block => block.id === 'whoYouServe');
+          if (targetBlockIndex !== -1) {
+            enhanced[targetBlockIndex] = {
+              ...enhanced[targetBlockIndex],
+              questions: [...enhanced[targetBlockIndex].questions, ...industryQuestions]
+            };
+          }
+        }
+      }
+
+      // Add conditional questions based on profile data
+      const conditionalQuestions = getConditionalQuestions(profileData, language);
+      if (conditionalQuestions.length > 0) {
+        const growthBlockIndex = enhanced.findIndex(block => block.id === 'growthBlocks');
+        if (growthBlockIndex !== -1) {
+          enhanced[growthBlockIndex] = {
+            ...enhanced[growthBlockIndex],
+            questions: [...enhanced[growthBlockIndex].questions, ...conditionalQuestions]
+          };
+        }
+      }
+
+      setEnhancedBlocks(enhanced);
+    };
+
+    if (blocks.length > 0) {
+      initializeEnhancedBlocks();
+    }
+  }, [blocks, profileData.industry, profileData.businessDescription, language, getIndustrySpecificQuestions, getConditionalQuestions]);
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    loadProgress();
+  }, []);
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
     setProfileData(prev => ({ ...prev, ...data }));
@@ -49,12 +110,13 @@ export const useConversationalAgent = (
   }, [currentBlock, updateProfileData]);
 
   const goToNextBlock = useCallback(() => {
+    const totalBlocks = enhancedBlocks.length > 0 ? enhancedBlocks.length : blocks.length;
     console.log('useConversationalAgent: goToNextBlock', { 
       currentBlockIndex, 
-      totalBlocks: blocks.length 
+      totalBlocks
     });
     
-    if (currentBlockIndex < blocks.length - 1) {
+    if (currentBlockIndex < totalBlocks - 1) {
       setCurrentBlockIndex(prev => {
         const newIndex = prev + 1;
         console.log('useConversationalAgent: Moving to next block', { prev, newIndex });
@@ -64,7 +126,7 @@ export const useConversationalAgent = (
       console.log('useConversationalAgent: Assessment completed');
       setIsCompleted(true);
     }
-  }, [currentBlockIndex, blocks.length]);
+  }, [currentBlockIndex, blocks.length, enhancedBlocks.length]);
 
   const goToPreviousBlock = useCallback(() => {
     console.log('useConversationalAgent: goToPreviousBlock', { currentBlockIndex });
@@ -97,8 +159,9 @@ export const useConversationalAgent = (
   }, []);
 
   const getBlockProgress = useCallback(() => {
-    return ((currentBlockIndex + 1) / blocks.length) * 100;
-  }, [currentBlockIndex, blocks.length]);
+    const totalBlocks = enhancedBlocks.length > 0 ? enhancedBlocks.length : blocks.length;
+    return ((currentBlockIndex + 1) / totalBlocks) * 100;
+  }, [currentBlockIndex, blocks.length, enhancedBlocks.length]);
 
   const completeAssessment = useCallback(async () => {
     if (!user) {
@@ -252,6 +315,8 @@ export const useConversationalAgent = (
     saveProgress,
     loadProgress,
     completeAssessment,
-    getBlockProgress
+    getBlockProgress,
+    isGenerating,
+    generateContextualQuestions
   };
 };

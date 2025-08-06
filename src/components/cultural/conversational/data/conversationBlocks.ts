@@ -68,6 +68,22 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
             step: 1,
             explanation: 'Understanding your customer deeply is crucial for effective marketing and product development.',
             required: true
+          },
+          {
+            id: 'target_demographics',
+            question: 'Which demographics best describe your customers?',
+            type: 'multiple-choice' as const,
+            fieldName: 'targetDemographics',
+            explanation: 'Demographic information helps tailor marketing messages and channels.',
+            required: false,
+            options: [
+              { id: 'young_adults', label: 'Young Adults (18-30)', value: 'young_adults' },
+              { id: 'professionals', label: 'Working Professionals (30-50)', value: 'professionals' },
+              { id: 'seniors', label: 'Seniors (50+)', value: 'seniors' },
+              { id: 'parents', label: 'Parents with Children', value: 'parents' },
+              { id: 'students', label: 'Students', value: 'students' },
+              { id: 'entrepreneurs', label: 'Other Entrepreneurs', value: 'entrepreneurs' }
+            ]
           }
         ]
       },
@@ -104,6 +120,22 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
             step: 1,
             explanation: 'Understanding your true profitability is essential for making smart business decisions and planning growth.',
             required: true
+          },
+          {
+            id: 'revenue_streams',
+            question: 'What are your current revenue sources?',
+            type: 'multiple-choice' as const,
+            fieldName: 'revenueStreams',
+            explanation: 'Diversifying revenue streams can increase stability and growth potential.',
+            required: false,
+            options: [
+              { id: 'primary_service', label: 'Main Service/Product', value: 'primary_service' },
+              { id: 'add_ons', label: 'Add-on Services', value: 'add_ons' },
+              { id: 'digital_products', label: 'Digital Products', value: 'digital_products' },
+              { id: 'courses', label: 'Courses/Training', value: 'courses' },
+              { id: 'affiliates', label: 'Affiliate Marketing', value: 'affiliates' },
+              { id: 'licensing', label: 'Licensing/Royalties', value: 'licensing' }
+            ]
           }
         ]
       },

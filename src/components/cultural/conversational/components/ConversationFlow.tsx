@@ -16,6 +16,8 @@ interface ConversationFlowProps {
   onNext: () => void;
   onPrevious: () => void;
   updateProfileData: (data: Partial<UserProfileData>) => void;
+  isGenerating?: boolean;
+  generateContextualQuestions?: (params: any) => Promise<any[]>;
 }
 
 export const ConversationFlow: React.FC<ConversationFlowProps> = ({
@@ -26,7 +28,9 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
   onAnswer,
   onNext,
   onPrevious,
-  updateProfileData
+  updateProfileData,
+  isGenerating = false,
+  generateContextualQuestions
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);

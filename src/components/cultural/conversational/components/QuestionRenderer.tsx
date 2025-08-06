@@ -61,45 +61,58 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     </div>
   );
 
-  const renderMultipleChoice = () => (
-    <div className="space-y-3">
-      {question.options?.map((option) => {
-        const isSelected = Array.isArray(value) && value.includes(option.value);
-        return (
-          <motion.div
-            key={option.id}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              variant={isSelected ? "default" : "outline"}
-              className={`w-full justify-start text-left p-4 h-auto ${
-                isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
-              }`}
-              onClick={() => {
-                const currentValues = Array.isArray(value) ? value : [];
-                const newValues = isSelected
-                  ? currentValues.filter(v => v !== option.value)
-                  : [...currentValues, option.value];
-                onChange(newValues);
-              }}
+  const renderMultipleChoice = () => {
+    const selectedCount = Array.isArray(value) ? value.length : 0;
+    
+    return (
+      <div className="space-y-3">
+        <div className="text-sm text-muted-foreground mb-3">
+          {language === 'es' 
+            ? `Puedes seleccionar múltiples opciones (${selectedCount} seleccionadas)`
+            : `You can select multiple options (${selectedCount} selected)`
+          }
+        </div>
+        {question.options?.map((option) => {
+          const isSelected = Array.isArray(value) && value.includes(option.value);
+          return (
+            <motion.div
+              key={option.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <div className="flex items-center gap-3 flex-1">
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                  isSelected ? 'bg-primary border-primary' : 'border-border'
-                }`}>
-                  {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+              <Button
+                variant={isSelected ? "default" : "outline"}
+                className={`w-full justify-start text-left p-4 h-auto ${
+                  isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
+                onClick={() => {
+                  const currentValues = Array.isArray(value) ? value : [];
+                  const newValues = isSelected
+                    ? currentValues.filter(v => v !== option.value)
+                    : [...currentValues, option.value];
+                  onChange(newValues);
+                }}
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                    isSelected ? 'bg-primary border-primary' : 'border-border'
+                  }`}>
+                    {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{option.label}</div>
+                    {option.description && (
+                      <div className="text-sm text-muted-foreground mt-1">{option.description}</div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="font-medium">{option.label}</div>
-                </div>
-              </div>
-            </Button>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
+              </Button>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderTextInput = () => (
     <Input
@@ -111,27 +124,46 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     />
   );
 
-  const renderSlider = () => (
-    <div className="space-y-4">
-      <div className="px-2">
-        <Slider
-          value={[value || question.min || 1]}
-          onValueChange={(newValue) => onChange(newValue[0])}
-          min={question.min || 1}
-          max={question.max || 5}
-          step={question.step || 1}
-          className="w-full"
-        />
+  const renderSlider = () => {
+    const minValue = question.min || 1;
+    const maxValue = question.max || 5;
+    const defaultValue = Math.ceil((minValue + maxValue) / 2);
+    const currentValue = value !== undefined && value !== null ? value : defaultValue;
+    
+    // Set default value if not already set
+    React.useEffect(() => {
+      if (value === undefined || value === null) {
+        onChange(defaultValue);
+      }
+    }, [value, defaultValue, onChange]);
+
+    return (
+      <div className="space-y-4">
+        <div className="px-2">
+          <Slider
+            value={[currentValue]}
+            onValueChange={(newValue) => onChange(newValue[0])}
+            min={minValue}
+            max={maxValue}
+            step={question.step || 1}
+            className="w-full"
+          />
+        </div>
+        <div className="flex justify-between text-sm text-muted-foreground px-2">
+          <span>{minValue}</span>
+          <span className="font-medium text-foreground">
+            {currentValue} / {maxValue}
+          </span>
+          <span>{maxValue}</span>
+        </div>
+        <div className="text-center text-xs text-muted-foreground">
+          {currentValue === minValue && (language === 'es' ? 'Muy bajo' : 'Very low')}
+          {currentValue === defaultValue && (language === 'es' ? 'Moderado' : 'Moderate')}
+          {currentValue === maxValue && (language === 'es' ? 'Muy alto' : 'Very high')}
+        </div>
       </div>
-      <div className="flex justify-between text-sm text-muted-foreground px-2">
-        <span>{question.min || 1}</span>
-        <span className="font-medium text-foreground">
-          {value || question.min || 1} / {question.max || 5}
-        </span>
-        <span>{question.max || 5}</span>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderYesNo = () => (
     <div className="flex gap-4">
