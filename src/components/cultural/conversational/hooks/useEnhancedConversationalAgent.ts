@@ -489,7 +489,7 @@ const calculateUserExperienceScore = (profileData: UserProfileData): number => {
   
   if (profileData.promotionChannels && profileData.promotionChannels.length > 0) score += 20;
   if (profileData.marketingConfidence && profileData.marketingConfidence >= 3) score += 25;
-  if (profileData.businessGoals && profileData.businessGoals !== 'not_sure') score += 20;
+  if (profileData.businessGoals && (Array.isArray(profileData.businessGoals) ? profileData.businessGoals.length > 0 : profileData.businessGoals !== 'not_sure')) score += 20;
   if (profileData.supportPreference) score += 20;
   
   return Math.min(100, score);

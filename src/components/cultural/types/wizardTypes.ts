@@ -44,8 +44,18 @@ export interface UserProfileData {
   marketingConfidence?: number;
   mainObstacles?: string[];
   urgencyLevel?: number;
-  businessGoals?: string;
+  businessGoals?: string[];
   supportPreference?: string;
+  
+  // Additional BusinessProfileCapture fields
+  brandName?: string;
+  businessLocation?: string;
+  monthlyRevenueGoal?: number;
+  yearsInBusiness?: number;
+  teamSize?: string;
+  currentChallenges?: string[];
+  salesChannels?: string[];
+  primarySkills?: string[];
 }
 
 export interface WizardStepProps {

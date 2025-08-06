@@ -101,7 +101,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   };
 
   const renderMultipleChoice = () => {
-    const selectedCount = Array.isArray(value) ? value.length : 0;
+    const currentValue = Array.isArray(value) ? value : [];
+    const selectedCount = currentValue.length;
     
     // Validate that we have proper options
     if (!question.options || question.options.length === 0) {
@@ -140,7 +141,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
           }
         </div>
         {question.options?.map((option) => {
-          const isSelected = Array.isArray(value) && value.includes(option.value);
+          const isSelected = currentValue.includes(option.value);
           return (
             <motion.div
               key={option.id}
@@ -153,10 +154,15 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
                   isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
                 }`}
                 onClick={() => {
-                  const currentValues = Array.isArray(value) ? value : [];
                   const newValues = isSelected
-                    ? currentValues.filter(v => v !== option.value)
-                    : [...currentValues, option.value];
+                    ? currentValue.filter(v => v !== option.value)
+                    : [...currentValue, option.value];
+                  console.log('QuestionRenderer: Multiple choice updated', { 
+                    questionId: question.id, 
+                    option: option.value, 
+                    isSelected, 
+                    newValues 
+                  });
                   handleAnswer(newValues);
                 }}
               >
@@ -275,21 +281,29 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     const minValue = question.min || 1;
     const maxValue = question.max || 5;
     const defaultValue = Math.ceil((minValue + maxValue) / 2);
-    const currentValue = value !== undefined && value !== null ? value : defaultValue;
+    const currentValue = value !== undefined && value !== null ? Number(value) : defaultValue;
     
     // Set default value if not already set
     React.useEffect(() => {
       if (value === undefined || value === null) {
+        console.log('QuestionRenderer: Setting default slider value', { defaultValue, questionId: question.id });
         handleAnswer(defaultValue);
       }
-    }, [value, defaultValue, handleAnswer]);
+    }, [value, defaultValue, handleAnswer, question.id]);
 
     return (
       <div className="space-y-4">
         <div className="px-2">
           <Slider
             value={[currentValue]}
-            onValueChange={(newValue) => handleAnswer(newValue[0])}
+            onValueChange={(newValue) => {
+              console.log('QuestionRenderer: Slider changed', { 
+                questionId: question.id, 
+                oldValue: currentValue, 
+                newValue: newValue[0] 
+              });
+              handleAnswer(newValue[0]);
+            }}
             min={minValue}
             max={maxValue}
             step={question.step || 1}

@@ -20,6 +20,15 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             required: true
           },
           {
+            id: 'brand_name',
+            question: 'What\'s your brand or business name?',
+            type: 'text-input' as const,
+            fieldName: 'brandName',
+            placeholder: 'E.g., LeatherArt Custom, My Consulting...',
+            explanation: 'Your brand name helps personalize recommendations.',
+            required: false
+          },
+          {
             id: 'industry_category',
             question: 'Which category best describes your work?',
             type: 'single-choice' as const,
@@ -222,6 +231,113 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         ]
       },
       {
+        id: 'business_profile_details',
+        title: 'Business Details',
+        subtitle: 'Additional information to personalize your experience',
+        agentMessage: "Let's gather some additional details about your business to make my recommendations even more personalized.",
+        strategicContext: "These details help create a complete business profile for optimal task and agent recommendations.",
+        questions: [
+          {
+            id: 'business_location',
+            question: 'Where is your business located?',
+            type: 'text-input' as const,
+            fieldName: 'businessLocation',
+            placeholder: 'City, Country',
+            explanation: 'Location affects market opportunities and strategies.',
+            required: false
+          },
+          {
+            id: 'years_in_business',
+            question: 'How many years have you been in business?',
+            type: 'slider' as const,
+            fieldName: 'yearsInBusiness',
+            min: 0,
+            max: 20,
+            step: 1,
+            explanation: 'Experience level affects the type of advice you need.',
+            required: false
+          },
+          {
+            id: 'monthly_revenue_goal',
+            question: 'What\'s your monthly revenue goal? (in USD)',
+            type: 'slider' as const,
+            fieldName: 'monthlyRevenueGoal',
+            min: 500,
+            max: 50000,
+            step: 500,
+            explanation: 'Revenue goals help determine the right growth strategies.',
+            required: false
+          },
+          {
+            id: 'team_size',
+            question: 'What\'s your team size?',
+            type: 'single-choice' as const,
+            fieldName: 'teamSize',
+            explanation: 'Team size affects delegation and scaling strategies.',
+            required: false,
+            options: [
+              { id: 'solo', label: 'Just me', value: 'solo' },
+              { id: 'small', label: '2-5 people', value: 'small' },
+              { id: 'medium', label: '6-20 people', value: 'medium' },
+              { id: 'large', label: 'More than 20 people', value: 'large' }
+            ]
+          },
+          {
+            id: 'current_challenges',
+            question: 'What are your current business challenges?',
+            type: 'multiple-choice' as const,
+            fieldName: 'currentChallenges',
+            explanation: 'Understanding challenges helps prioritize solutions.',
+            required: false,
+            options: [
+              { id: 'pricing', label: 'Pricing strategy', value: 'pricing' },
+              { id: 'marketing', label: 'Marketing', value: 'marketing' },
+              { id: 'time_management', label: 'Time management', value: 'time_management' },
+              { id: 'competition', label: 'Competition', value: 'competition' },
+              { id: 'customer_acquisition', label: 'Customer acquisition', value: 'customer_acquisition' },
+              { id: 'financial_management', label: 'Financial management', value: 'financial_management' },
+              { id: 'technology', label: 'Technology', value: 'technology' },
+              { id: 'legal_issues', label: 'Legal aspects', value: 'legal_issues' }
+            ]
+          },
+          {
+            id: 'sales_channels',
+            question: 'Where do you currently sell?',
+            type: 'multiple-choice' as const,
+            fieldName: 'salesChannels',
+            explanation: 'Current sales channels help identify expansion opportunities.',
+            required: false,
+            options: [
+              { id: 'instagram', label: 'Instagram', value: 'instagram' },
+              { id: 'facebook', label: 'Facebook', value: 'facebook' },
+              { id: 'whatsapp', label: 'WhatsApp', value: 'whatsapp' },
+              { id: 'website', label: 'Website', value: 'website' },
+              { id: 'marketplace', label: 'Marketplace', value: 'marketplace' },
+              { id: 'physical_store', label: 'Physical store', value: 'physical_store' },
+              { id: 'word_of_mouth', label: 'Word of mouth', value: 'word_of_mouth' }
+            ]
+          },
+          {
+            id: 'primary_skills',
+            question: 'What are your primary skills?',
+            type: 'multiple-choice' as const,
+            fieldName: 'primarySkills',
+            explanation: 'Skills help identify what you can leverage vs. what you need help with.',
+            required: false,
+            options: [
+              { id: 'design', label: 'Design', value: 'design' },
+              { id: 'programming', label: 'Programming', value: 'programming' },
+              { id: 'marketing', label: 'Marketing', value: 'marketing' },
+              { id: 'sales', label: 'Sales', value: 'sales' },
+              { id: 'finance', label: 'Finance', value: 'finance' },
+              { id: 'leadership', label: 'Leadership', value: 'leadership' },
+              { id: 'communication', label: 'Communication', value: 'communication' },
+              { id: 'project_management', label: 'Project Management', value: 'project_management' }
+            ]
+          }
+        ]
+      },
+      {
         id: 'challenges_goals',
         title: 'Challenges & Vision',
         subtitle: 'What\'s holding you back and where you want to go',
@@ -259,17 +375,19 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
           },
           {
             id: 'business_goals',
-            question: 'What\'s your main goal for your business?',
-            type: 'single-choice' as const,
+            question: 'What are your main business goals?',
+            type: 'multiple-choice' as const,
             fieldName: 'businessGoals',
             explanation: 'Your goals determine the type and intensity of support you\'ll need.',
             required: true,
             options: [
-              { id: 'side_income', label: 'Extra income on the side', value: 'side_income', description: 'Supplement my main income' },
-              { id: 'replace_job', label: 'Replace my day job', value: 'replace_job', description: 'Become my main source of income' },
-              { id: 'grow_business', label: 'Build a real business', value: 'grow_business', description: 'Create something that can grow beyond me' },
-              { id: 'scale_enterprise', label: 'Scale to a big company', value: 'scale_enterprise', description: 'Build a large organization' },
-              { id: 'not_sure', label: 'Not sure yet', value: 'not_sure', description: 'Still exploring possibilities' }
+              { id: 'increase_revenue', label: 'Increase revenue', value: 'increase_revenue' },
+              { id: 'scale_operations', label: 'Scale operations', value: 'scale_operations' },
+              { id: 'automate_processes', label: 'Automate processes', value: 'automate_processes' },
+              { id: 'expand_market', label: 'Expand market', value: 'expand_market' },
+              { id: 'improve_efficiency', label: 'Improve efficiency', value: 'improve_efficiency' },
+              { id: 'build_brand', label: 'Build brand', value: 'build_brand' },
+              { id: 'reduce_costs', label: 'Reduce costs', value: 'reduce_costs' }
             ]
           },
           {
@@ -307,6 +425,15 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             required: true
           },
           {
+            id: 'brand_name',
+            question: '¿Cuál es el nombre de tu marca o negocio?',
+            type: 'text-input' as const,
+            fieldName: 'brandName',
+            placeholder: 'Ej: LeatherArt Custom, Mi Consultoría...',
+            explanation: 'El nombre de tu marca ayuda a personalizar las recomendaciones.',
+            required: false
+          },
+          {
             id: 'industry_category',
             question: '¿Qué categoría describe mejor tu trabajo?',
             type: 'single-choice' as const,
@@ -333,7 +460,7 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
               { id: 'just_starting', label: 'Recién empezando', value: 'just_starting', description: 'Nuevo en el emprendimiento' },
               { id: 'some_experience', label: 'Algo de experiencia', value: 'some_experience', description: 'He intentado algunas cosas' },
               { id: 'experienced', label: 'Experimentado', value: 'experienced', description: 'Llevo tiempo haciendo esto' },
-              { id: 'expert', label: 'Experto', value: 'expert', description: 'Emprendedor muy experimentado' }
+              { id: 'expert', label: 'Experto', value: 'expert', description: 'Muy experimentado en emprendimiento' }
             ]
           }
         ]
@@ -342,8 +469,8 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         id: 'target_market',
         title: 'Tus Clientes',
         subtitle: 'Entendiendo a quién sirves',
-        agentMessage: "¡Perfecto! Ahora déjame entender mejor tu mercado. Conocer a tus clientes es crucial para hacer crecer tu negocio efectivamente.",
-        strategicContext: "La claridad sobre clientes impacta directamente tu efectividad de marketing y estrategia de precios.",
+        agentMessage: "¡Excelente! Ahora déjame entender mejor tu mercado. Conocer a tus clientes es crucial para hacer crecer tu negocio efectivamente.",
+        strategicContext: "La claridad sobre tus clientes impacta directamente la efectividad de tu marketing y estrategia de precios.",
         questions: [
           {
             id: 'target_audience',
@@ -353,10 +480,10 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             explanation: 'Diferentes audiencias requieren diferentes enfoques. B2C necesita estrategias diferentes a B2B.',
             required: true,
             options: [
-              { id: 'individuals', label: 'Consumidores Individuales (B2C)', value: 'individuals', description: 'Personas comprando para sí mismas' },
+              { id: 'individuals', label: 'Consumidores Individuales (B2C)', value: 'individuals', description: 'Personas regulares comprando para sí mismas' },
               { id: 'businesses', label: 'Otros Negocios (B2B)', value: 'businesses', description: 'Empresas u organizaciones' },
               { id: 'both', label: 'Ambos', value: 'both', description: 'Sirvo tanto a individuos como empresas' },
-              { id: 'unclear', label: 'No estoy seguro aún', value: 'unclear', description: 'Aún estoy descubriendo esto' }
+              { id: 'unclear', label: 'No estoy seguro aún', value: 'unclear', description: 'Todavía estoy descubriendo esto' }
             ]
           },
           {
@@ -392,12 +519,12 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         id: 'business_maturity',
         title: 'Realidad del Negocio',
         subtitle: 'Tu situación actual',
-        agentMessage: "Hablemos de dónde te encuentras ahora. Necesito entender tu madurez empresarial actual para darte los siguientes pasos correctos.",
-        strategicContext: "Tu historial de ventas y estructura empresarial determina si necesitas estrategias de validación o escalamiento.",
+        agentMessage: "Hablemos de dónde estás ahora mismo. Necesito entender la madurez actual de tu negocio para darte los próximos pasos correctos.",
+        strategicContext: "Tu historial de ventas y estructura de negocio determinan si necesitas estrategias de validación o de escalamiento.",
         questions: [
           {
             id: 'has_sold',
-            question: '¿Ya has realizado ventas?',
+            question: '¿Ya has hecho ventas?',
             type: 'yes-no' as const,
             fieldName: 'hasSold',
             explanation: 'Hacer tu primera venta es un hito importante que cambia toda tu estrategia de crecimiento.',
@@ -405,10 +532,10 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
           },
           {
             id: 'sales_consistency',
-            question: '¿Qué tan seguido realizas ventas?',
+            question: '¿Con qué frecuencia haces ventas?',
             type: 'single-choice' as const,
             fieldName: 'salesConsistency',
-            explanation: 'Las ventas consistentes indican validación del mercado y madurez empresarial.',
+            explanation: 'Las ventas consistentes indican validación del mercado y madurez del negocio.',
             required: true,
             options: [
               { id: 'never', label: 'Nunca he vendido nada aún', value: 'never' },
@@ -428,9 +555,9 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             options: [
               { id: 'hourly', label: 'Por hora', value: 'hourly', description: 'Cobro por hora trabajada' },
               { id: 'project', label: 'Precios fijos por proyecto', value: 'project', description: 'Un precio por proyecto completo' },
-              { id: 'product', label: 'Por producto/artículo', value: 'product', description: 'Cada artículo tiene su precio' },
+              { id: 'product', label: 'Por producto/artículo', value: 'product', description: 'Cada artículo tiene su propio precio' },
               { id: 'subscription', label: 'Mensual/recurrente', value: 'subscription', description: 'Los clientes pagan regularmente' },
-              { id: 'no_system', label: 'No tengo un sistema claro aún', value: 'no_system', description: 'Aún estoy descubriendo esto' }
+              { id: 'no_system', label: 'No tengo un sistema claro aún', value: 'no_system', description: 'Todavía estoy descubriendo esto' }
             ]
           },
           {
@@ -441,7 +568,7 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             min: 1,
             max: 5,
             step: 1,
-            explanation: 'Entender la rentabilidad es esencial para decisiones empresariales inteligentes.',
+            explanation: 'Entender la rentabilidad es esencial para decisiones inteligentes de negocio.',
             required: true
           }
         ]
@@ -450,15 +577,15 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         id: 'team_operations',
         title: 'Tu Equipo y Operaciones',
         subtitle: 'Cómo trabajas',
-        agentMessage: "Entender tu estructura de equipo y operaciones me ayuda a recomendar el nivel correcto de apoyo y estrategias de delegación.",
-        strategicContext: "Tu estructura de equipo afecta la priorización de tareas, estrategias de crecimiento y oportunidades de delegación.",
+        agentMessage: "Entender la estructura de tu equipo y operaciones me ayuda a recomendar el nivel correcto de apoyo y estrategias de delegación.",
+        strategicContext: "La estructura de tu equipo afecta la priorización de tareas, estrategias de crecimiento y oportunidades de delegación.",
         questions: [
           {
             id: 'team_structure',
             question: '¿Trabajas solo o con otros?',
             type: 'single-choice' as const,
             fieldName: 'teamStructure',
-            explanation: 'Tu estructura de equipo determina qué puedes delegar y qué tan rápido puedes escalar.',
+            explanation: 'La estructura de tu equipo determina qué puedes delegar y qué tan rápido puedes escalar.',
             required: true,
             options: [
               { id: 'solo', label: 'Solo yo', value: 'solo', description: 'Manejo todo yo mismo' },
@@ -492,7 +619,7 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
               { id: 'referrals', label: 'Referencias', value: 'referrals' },
               { id: 'advertising', label: 'Publicidad Pagada', value: 'advertising' },
               { id: 'networking', label: 'Eventos de Networking', value: 'networking' },
-              { id: 'nowhere', label: 'En ningún lugar realmente', value: 'nowhere' }
+              { id: 'nowhere', label: 'En ningún lado realmente', value: 'nowhere' }
             ]
           },
           {
@@ -509,6 +636,113 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         ]
       },
       {
+        id: 'business_profile_details',
+        title: 'Detalles del Negocio',
+        subtitle: 'Información adicional para personalizar tu experiencia',
+        agentMessage: "Recopilemos algunos detalles adicionales sobre tu negocio para hacer mis recomendaciones aún más personalizadas.",
+        strategicContext: "Estos detalles ayudan a crear un perfil completo de negocio para recomendaciones óptimas de tareas y agentes.",
+        questions: [
+          {
+            id: 'business_location',
+            question: '¿Dónde está ubicado tu negocio?',
+            type: 'text-input' as const,
+            fieldName: 'businessLocation',
+            placeholder: 'Ciudad, País',
+            explanation: 'La ubicación afecta las oportunidades de mercado y estrategias.',
+            required: false
+          },
+          {
+            id: 'years_in_business',
+            question: '¿Cuántos años llevas en el negocio?',
+            type: 'slider' as const,
+            fieldName: 'yearsInBusiness',
+            min: 0,
+            max: 20,
+            step: 1,
+            explanation: 'El nivel de experiencia afecta el tipo de consejo que necesitas.',
+            required: false
+          },
+          {
+            id: 'monthly_revenue_goal',
+            question: '¿Cuál es tu meta de ingresos mensuales? (en USD)',
+            type: 'slider' as const,
+            fieldName: 'monthlyRevenueGoal',
+            min: 500,
+            max: 50000,
+            step: 500,
+            explanation: 'Las metas de ingresos ayudan a determinar las estrategias de crecimiento correctas.',
+            required: false
+          },
+          {
+            id: 'team_size',
+            question: '¿Cuál es el tamaño de tu equipo?',
+            type: 'single-choice' as const,
+            fieldName: 'teamSize',
+            explanation: 'El tamaño del equipo afecta las estrategias de delegación y escalamiento.',
+            required: false,
+            options: [
+              { id: 'solo', label: 'Solo yo', value: 'solo' },
+              { id: 'small', label: '2-5 personas', value: 'small' },
+              { id: 'medium', label: '6-20 personas', value: 'medium' },
+              { id: 'large', label: 'Más de 20 personas', value: 'large' }
+            ]
+          },
+          {
+            id: 'current_challenges',
+            question: '¿Cuáles son tus desafíos actuales de negocio?',
+            type: 'multiple-choice' as const,
+            fieldName: 'currentChallenges',
+            explanation: 'Entender los desafíos ayuda a priorizar soluciones.',
+            required: false,
+            options: [
+              { id: 'pricing', label: 'Estrategia de precios', value: 'pricing' },
+              { id: 'marketing', label: 'Marketing', value: 'marketing' },
+              { id: 'time_management', label: 'Gestión del tiempo', value: 'time_management' },
+              { id: 'competition', label: 'Competencia', value: 'competition' },
+              { id: 'customer_acquisition', label: 'Adquisición de clientes', value: 'customer_acquisition' },
+              { id: 'financial_management', label: 'Gestión financiera', value: 'financial_management' },
+              { id: 'technology', label: 'Tecnología', value: 'technology' },
+              { id: 'legal_issues', label: 'Aspectos legales', value: 'legal_issues' }
+            ]
+          },
+          {
+            id: 'sales_channels',
+            question: '¿Dónde vendes actualmente?',
+            type: 'multiple-choice' as const,
+            fieldName: 'salesChannels',
+            explanation: 'Los canales de venta actuales ayudan a identificar oportunidades de expansión.',
+            required: false,
+            options: [
+              { id: 'instagram', label: 'Instagram', value: 'instagram' },
+              { id: 'facebook', label: 'Facebook', value: 'facebook' },
+              { id: 'whatsapp', label: 'WhatsApp', value: 'whatsapp' },
+              { id: 'website', label: 'Sitio Web', value: 'website' },
+              { id: 'marketplace', label: 'Marketplace', value: 'marketplace' },
+              { id: 'physical_store', label: 'Tienda física', value: 'physical_store' },
+              { id: 'word_of_mouth', label: 'Boca a boca', value: 'word_of_mouth' }
+            ]
+          },
+          {
+            id: 'primary_skills',
+            question: '¿Cuáles son tus habilidades principales?',
+            type: 'multiple-choice' as const,
+            fieldName: 'primarySkills',
+            explanation: 'Las habilidades ayudan a identificar qué puedes aprovechar vs. en qué necesitas ayuda.',
+            required: false,
+            options: [
+              { id: 'design', label: 'Diseño', value: 'design' },
+              { id: 'programming', label: 'Programación', value: 'programming' },
+              { id: 'marketing', label: 'Marketing', value: 'marketing' },
+              { id: 'sales', label: 'Ventas', value: 'sales' },
+              { id: 'finance', label: 'Finanzas', value: 'finance' },
+              { id: 'leadership', label: 'Liderazgo', value: 'leadership' },
+              { id: 'communication', label: 'Comunicación', value: 'communication' },
+              { id: 'project_management', label: 'Gestión de Proyectos', value: 'project_management' }
+            ]
+          }
+        ]
+      },
+      {
         id: 'challenges_goals',
         title: 'Desafíos y Visión',
         subtitle: 'Qué te detiene y hacia dónde quieres ir',
@@ -517,7 +751,7 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
         questions: [
           {
             id: 'main_obstacles',
-            question: '¿Cuáles son tus mayores obstáculos ahora?',
+            question: '¿Cuáles son tus mayores obstáculos ahora mismo?',
             type: 'multiple-choice' as const,
             fieldName: 'mainObstacles',
             explanation: 'Identificar desafíos específicos me ayuda a crear soluciones dirigidas.',
@@ -546,17 +780,19 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
           },
           {
             id: 'business_goals',
-            question: '¿Cuál es tu meta principal para tu negocio?',
-            type: 'single-choice' as const,
+            question: '¿Cuáles son tus principales metas de negocio?',
+            type: 'multiple-choice' as const,
             fieldName: 'businessGoals',
             explanation: 'Tus metas determinan el tipo e intensidad de apoyo que necesitarás.',
             required: true,
             options: [
-              { id: 'side_income', label: 'Ingresos extra a un lado', value: 'side_income', description: 'Complementar mi ingreso principal' },
-              { id: 'replace_job', label: 'Reemplazar mi trabajo', value: 'replace_job', description: 'Convertirse en mi fuente principal de ingresos' },
-              { id: 'grow_business', label: 'Construir un negocio real', value: 'grow_business', description: 'Crear algo que pueda crecer más allá de mí' },
-              { id: 'scale_enterprise', label: 'Escalar a una gran empresa', value: 'scale_enterprise', description: 'Construir una organización grande' },
-              { id: 'not_sure', label: 'No estoy seguro aún', value: 'not_sure', description: 'Aún explorando posibilidades' }
+              { id: 'increase_revenue', label: 'Aumentar ingresos', value: 'increase_revenue' },
+              { id: 'scale_operations', label: 'Escalar operaciones', value: 'scale_operations' },
+              { id: 'automate_processes', label: 'Automatizar procesos', value: 'automate_processes' },
+              { id: 'expand_market', label: 'Expandir mercado', value: 'expand_market' },
+              { id: 'improve_efficiency', label: 'Mejorar eficiencia', value: 'improve_efficiency' },
+              { id: 'build_brand', label: 'Construir marca', value: 'build_brand' },
+              { id: 'reduce_costs', label: 'Reducir costos', value: 'reduce_costs' }
             ]
           },
           {
@@ -570,7 +806,7 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
               { id: 'hands_on', label: 'Orientación práctica', value: 'hands_on', description: 'Quiero ayuda detallada con todo' },
               { id: 'strategic', label: 'Dirección estratégica', value: 'strategic', description: 'Dame el plan, yo lo ejecuto' },
               { id: 'tools', label: 'Herramientas y recursos', value: 'tools', description: 'Necesito mejores sistemas y herramientas' },
-              { id: 'minimal', label: 'Intervención mínima', value: 'minimal', description: 'Solo señálame la dirección correcta' }
+              { id: 'minimal', label: 'Intervención mínima', value: 'minimal', description: 'Solo apúntame en la dirección correcta' }
             ]
           }
         ]
@@ -578,5 +814,5 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
     ]
   };
 
-  return blocks[language];
+  return blocks[language] || blocks.en;
 };
