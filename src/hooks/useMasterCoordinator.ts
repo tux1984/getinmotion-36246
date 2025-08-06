@@ -110,7 +110,7 @@ export const useMasterCoordinator = () => {
 
   // FASE 2: Generar preguntas inteligentes contextuales
   const generateIntelligentQuestions = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) return [];
 
     console.log('🤔 Master Coordinator: Generating intelligent contextual questions');
     
@@ -131,10 +131,12 @@ export const useMasterCoordinator = () => {
         console.log(`✅ Generated ${data.questions.length} intelligent questions`);
         return data.questions;
       }
+      return [];
     } catch (error) {
       console.error('❌ Error generating intelligent questions:', error);
+      return [];
     }
-  }, [user, profileData, currentScores, businessProfile]);
+  }, [user?.id, profileData, currentScores, businessProfile]);
 
   // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
   const transformToCoordinatorTasks = useMemo(() => {
@@ -144,37 +146,33 @@ export const useMasterCoordinator = () => {
     }
 
     try {
-      const sortedTasks = [...tasks].sort((a, b) => {
-        if (a.relevance !== b.relevance) {
-          const relevanceOrder = { high: 3, medium: 2, low: 1 };
-          return relevanceOrder[b.relevance as keyof typeof relevanceOrder] - 
-                 relevanceOrder[a.relevance as keyof typeof relevanceOrder];
+      const validTasks = tasks.filter(task => task && task.id);
+      
+      const sortedTasks = validTasks.sort((a, b) => {
+        const relevanceOrder = { high: 3, medium: 2, low: 1 };
+        const aRelevance = relevanceOrder[a.relevance as keyof typeof relevanceOrder] || 2;
+        const bRelevance = relevanceOrder[b.relevance as keyof typeof relevanceOrder] || 2;
+        
+        if (aRelevance !== bRelevance) {
+          return bRelevance - aRelevance;
         }
-        return a.priority - b.priority;
+        return (a.priority || 1) - (b.priority || 1);
       });
 
-      return sortedTasks.slice(0, 15).map((task, index) => {
-        // Validaciones adicionales para cada tarea
-        if (!task || !task.id) {
-          console.warn('⚠️ Invalid task found:', task);
-          return null;
-        }
-
-        return {
-          id: task.id,
-          title: task.title || 'Tarea sin título',
-          description: task.description || '',
-          agentId: task.agent_id || 'general',
-          agentName: getAgentName(task.agent_id || 'general'),
-          priority: task.priority || 1,
-          relevance: task.relevance || 'medium',
-          estimatedTime: getEstimatedTime(task.title || ''),
-          category: getTaskCategory(task.agent_id || 'general'),
-          isUnlocked: index === 0 || tasks.filter((t, i) => i < index).some(t => t.status === 'completed'),
-          prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
-          steps: generateStepsForTask(task)
-        };
-      }).filter(Boolean) as CoordinatorTask[]; // Filtrar elementos null
+      return sortedTasks.slice(0, 15).map((task, index) => ({
+        id: task.id,
+        title: task.title || 'Tarea sin título',
+        description: task.description || '',
+        agentId: task.agent_id || 'general',
+        agentName: getAgentName(task.agent_id || 'general'),
+        priority: task.priority || 1,
+        relevance: task.relevance || 'medium',
+        estimatedTime: getEstimatedTime(task.title || ''),
+        category: getTaskCategory(task.agent_id || 'general'),
+        isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
+        prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
+        steps: generateStepsForTask(task)
+      }));
     } catch (error) {
       console.error('❌ Error transforming tasks:', error);
       return [];
@@ -183,12 +181,12 @@ export const useMasterCoordinator = () => {
 
   // FASE 1: Inicialización automática del coordinador cuando hay datos
   useEffect(() => {
-    if (user && !isInitialized && tasks.length === 0) {
+    if (user?.id && !isInitialized && tasks.length === 0) {
       console.log('🚀 Master Coordinator: Auto-initializing with complete profile data');
       analyzeProfileAndGenerateTasks();
       setIsInitialized(true);
     }
-  }, [user, tasks.length, isInitialized, analyzeProfileAndGenerateTasks]);
+  }, [user?.id, tasks.length, isInitialized, analyzeProfileAndGenerateTasks]);
 
   // Actualizar tareas del coordinador cuando cambien las tareas normales
   useEffect(() => {
