@@ -28,8 +28,24 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
     industry: profileData.industry || '',
     experience: profileData.experience || '',
     projectDescription: profileData.projectDescription || '',
-    mainGoal: profileData.mainGoal || ''
+    mainGoal: profileData.mainGoal || '',
+    productType: profileData.productType || '',
+    hasSold: profileData.hasSold || '',
+    timeInvested: profileData.timeInvested || '',
+    knowsCosts: profileData.knowsCosts || '',
+    dreamGoal: profileData.dreamGoal || ''
   });
+
+  // Detect if this is an artisan based on project description keywords
+  const isArtisan = formData.projectDescription.toLowerCase().includes('hago') || 
+                   formData.projectDescription.toLowerCase().includes('tejo') ||
+                   formData.projectDescription.toLowerCase().includes('creo') ||
+                   formData.projectDescription.toLowerCase().includes('artesanía') ||
+                   formData.projectDescription.toLowerCase().includes('make') ||
+                   formData.projectDescription.toLowerCase().includes('knit') ||
+                   formData.projectDescription.toLowerCase().includes('craft') ||
+                   formData.projectDescription.toLowerCase().includes('handmade') ||
+                   formData.industry === 'crafts';
 
   const t = {
     en: {
@@ -42,10 +58,18 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
       experience: 'Experience Level',
       selectExperience: 'Select your experience',
       projectDescription: 'Project Description',
-      projectPlaceholder: 'Briefly describe your creative project or business idea',
+      projectPlaceholder: 'Briefly describe your creative project or business idea (e.g. "I make hand-knitted dolls", "I paint custom jackets")',
       mainGoal: 'Main Goal',
       goalPlaceholder: 'What do you want to achieve in the next 6 months?',
       continue: 'Continue',
+      artisanQuestions: {
+        productType: 'What products do you make?',
+        productTypePlaceholder: 'E.g: knitted dolls, artisan candles, jewelry, etc.',
+        hasSold: 'Have you sold before?',
+        timeInvested: 'How much time do you dedicate to this?',
+        knowsCosts: 'Do you know how much it costs to make?',
+        dreamGoal: 'What do you dream to achieve with this?'
+      },
       industries: {
         'visual-arts': 'Visual Arts',
         'performing-arts': 'Performing Arts',
@@ -79,10 +103,18 @@ export const ProfileSetupStep: React.FC<ProfileSetupStepProps> = ({
       experience: 'Nivel de Experiencia',
       selectExperience: 'Selecciona tu experiencia',
       projectDescription: 'Descripción del Proyecto',
-      projectPlaceholder: 'Describe brevemente tu proyecto creativo o idea de negocio',
+      projectPlaceholder: 'Describe brevemente tu proyecto creativo o idea de negocio (ej: "Hago muñecos tejidos a mano", "Pinto chaquetas personalizadas")',
       mainGoal: 'Objetivo Principal',
       goalPlaceholder: '¿Qué quieres lograr en los próximos 6 meses?',
       continue: 'Continuar',
+      artisanQuestions: {
+        productType: '¿Qué productos haces?',
+        productTypePlaceholder: 'Ej: muñecos tejidos, velas artesanales, joyas, etc.',
+        hasSold: '¿Has vendido antes?',
+        timeInvested: '¿Cuánto tiempo dedicas a esto?',
+        knowsCosts: '¿Sabes cuánto te cuesta hacerlo?',
+        dreamGoal: '¿Qué sueñas lograr con esto?'
+      },
       industries: {
         'visual-arts': 'Artes Visuales',
         'performing-arts': 'Artes Escénicas',

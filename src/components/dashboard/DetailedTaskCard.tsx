@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from '@/hooks/useTranslations';
 import { TaskDetailView } from './TaskDetailView';
+import { TaskStepInterface } from './TaskStepInterface';
 import { 
   CheckCircle2, 
   Clock, 
@@ -45,6 +46,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   const taskLimits = useTaskLimits(allTasks);
   const { t } = useTranslations();
   const [showTaskDetail, setShowTaskDetail] = useState(false);
+  const [showStepInterface, setShowStepInterface] = useState(false);
 
   const getStatusBadge = (status: AgentTask['status']) => {
     const statusConfig = {
@@ -84,13 +86,13 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     }
     
     if (task.status === 'in_progress') {
-      return {
-        label: t.dashboard.continueTask,
-        icon: MessageSquare,
-        onClick: handleStartDevelopment,
-        variant: 'default' as const,
-        className: 'bg-blue-600 hover:bg-blue-700 text-white'
-      };
+    return {
+      label: t.dashboard.continueTask,
+      icon: MessageSquare,
+      onClick: () => setShowStepInterface(true),
+      variant: 'default' as const,
+      className: 'bg-blue-600 hover:bg-blue-700 text-white'
+    };
     }
     
     // For pending tasks, check if we can start development
@@ -290,6 +292,19 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             onUpdateTimeSpent={() => Promise.resolve()}
             onClose={() => setShowTaskDetail(false)}
             onChatWithAgent={() => onChatWithAgent?.(task)}
+          />
+        )}
+
+        {/* Task Step Interface Modal */}
+        {showStepInterface && (
+          <TaskStepInterface
+            task={task}
+            language={language}
+            onClose={() => setShowStepInterface(false)}
+            onComplete={() => {
+              setShowStepInterface(false);
+              onCompleteTask?.(task);
+            }}
           />
         )}
       </CardContent>
