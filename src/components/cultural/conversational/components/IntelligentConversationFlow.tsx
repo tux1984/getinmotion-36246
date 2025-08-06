@@ -1,0 +1,362 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Sparkles, ArrowRight, ArrowLeft, Brain, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ConversationBlock } from '../types/conversationalTypes';
+import { UserProfileData } from '../../types/wizardTypes';
+import { QuestionRenderer } from './QuestionRenderer';
+import { InsightDisplay } from './InsightDisplay';
+import { QuestionGeneratingIndicator } from './QuestionGeneratingIndicator';
+
+interface IntelligentConversationFlowProps {
+  block: ConversationBlock;
+  profileData: UserProfileData;
+  insights: string[];
+  language: 'en' | 'es';
+  onAnswer: (questionId: string, answer: any) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  updateProfileData: (data: Partial<UserProfileData>) => void;
+  isGenerating?: boolean;
+  generateContextualQuestions?: (params: any) => Promise<any[]>;
+  personalizationCount?: number;
+  currentPersonalizationContext?: string;
+  businessType?: string;
+  agentPersonality?: string;
+}
+
+export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowProps> = ({
+  block,
+  profileData,
+  insights,
+  language,
+  onAnswer,
+  onNext,
+  onPrevious,
+  updateProfileData,
+  isGenerating = false,
+  generateContextualQuestions,
+  personalizationCount = 0,
+  currentPersonalizationContext = '',
+  businessType = 'creative',
+  agentPersonality = 'empathetic'
+}) => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [showAgentThinking, setShowAgentThinking] = useState(false);
+
+  // Reset question index when block changes
+  useEffect(() => {
+    console.log('IntelligentConversationFlow: Block changed', { 
+      blockId: block.id, 
+      questionsLength: block.questions?.length 
+    });
+    setCurrentQuestionIndex(0);
+    setShowExplanation(false);
+  }, [block.id]);
+
+  // Show agent thinking when generating
+  useEffect(() => {
+    if (isGenerating) {
+      setShowAgentThinking(true);
+      const timer = setTimeout(() => setShowAgentThinking(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isGenerating]);
+
+  const translations = {
+    en: {
+      next: "Continue",
+      previous: "Previous",
+      whatIsThis: "What is this?",
+      insight: "Agent Insight",
+      lastQuestion: "Complete this section",
+      agentThinking: "Agent is analyzing your response...",
+      personalized: "Personalized Question",
+      adaptive: "Adapting to your business"
+    },
+    es: {
+      next: "Continuar",
+      previous: "Anterior",
+      whatIsThis: "¿Qué es esto?",
+      insight: "Insight del Agente",
+      lastQuestion: "Completar esta sección",
+      agentThinking: "El agente está analizando tu respuesta...",
+      personalized: "Pregunta Personalizada",
+      adaptive: "Adaptándose a tu negocio"
+    }
+  };
+
+  const t = translations[language];
+  
+  // Defensive checks
+  if (!block || !block.questions || block.questions.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <div className="animate-pulse">
+          <Brain className="w-8 h-8 mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">
+            {language === 'es' ? 'Preparando preguntas inteligentes...' : 'Preparing intelligent questions...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+  const currentQuestion = block.questions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === block.questions.length - 1;
+  const isFirstQuestion = currentQuestionIndex === 0;
+  
+  if (!currentQuestion) {
+    console.error('IntelligentConversationFlow: currentQuestion is undefined');
+    return (
+      <div className="p-8 text-center">
+        <p className="text-destructive">
+          {language === 'es' ? 'Error cargando pregunta. Por favor recarga la página.' : 'Error loading question. Please refresh the page.'}
+        </p>
+      </div>
+    );
+  }
+
+  const handleQuestionAnswer = (answer: any) => {
+    console.log('IntelligentConversationFlow: handleQuestionAnswer', { 
+      questionId: currentQuestion.id, 
+      answer 
+    });
+    
+    onAnswer(currentQuestion.id, answer);
+    
+    // Auto-advance for single-choice questions
+    if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'yes-no') {
+      setTimeout(() => {
+        if (!isLastQuestion) {
+          setCurrentQuestionIndex(prev => prev + 1);
+        }
+      }, 500);
+    }
+  };
+
+  const handleNext = () => {
+    if (isLastQuestion) {
+      onNext();
+    } else {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (isFirstQuestion) {
+      onPrevious();
+    } else {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  const isQuestionAnswered = (question: any) => {
+    const fieldValue = profileData[question.fieldName];
+    return fieldValue !== undefined && fieldValue !== null && 
+           (typeof fieldValue !== 'string' || fieldValue.trim() !== '');
+  };
+
+  // Determine if this is a personalized question (added after initial block)
+  const isPersonalizedQuestion = currentQuestionIndex >= 3; // Assuming first 3 are base questions
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.5 }}
+      className="overflow-hidden"
+    >
+      {/* Enhanced Agent Message with Personality */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 border-b border-border/50">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              {showAgentThinking ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <Brain className="w-6 h-6 text-white" />
+                </motion.div>
+              ) : (
+                <MessageSquare className="w-6 h-6 text-white" />
+              )}
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-semibold text-foreground">
+                {language === 'es' ? 'Tu Agente de Crecimiento Creativo' : 'Your Creative Growth Agent'}
+              </h3>
+              {isPersonalizedQuestion && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-accent/20 rounded-full text-xs">
+                  <Sparkles className="w-3 h-3" />
+                  <span className="text-accent-foreground">{t.personalized}</span>
+                </div>
+              )}
+            </div>
+            <motion.p 
+              key={block.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-muted-foreground leading-relaxed"
+            >
+              {block.agentMessage}
+            </motion.p>
+            
+            {/* Personalization Context */}
+            {personalizationCount > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-3 flex items-center gap-2 text-sm text-primary"
+              >
+                <Star className="w-4 h-4" />
+                <span>
+                  {language === 'es' 
+                    ? `Pregunta personalizada #${personalizationCount} para tu negocio` 
+                    : `Personalized question #${personalizationCount} for your business`}
+                </span>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Strategic Context */}
+      {block.strategicContext && (
+        <div className="px-6 py-4 bg-muted/30">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">
+                {language === 'es' ? 'Por qué pregunto esto:' : 'Why I\'m asking this:'}
+              </strong>{' '}
+              {block.strategicContext}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Question Content */}
+      <div className="p-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestionIndex}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* Question Header */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {language === 'es' ? 'Pregunta' : 'Question'} {currentQuestionIndex + 1} {language === 'es' ? 'de' : 'of'} {block.questions.length}
+                </span>
+                {currentQuestion.explanation && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowExplanation(!showExplanation)}
+                    className="text-xs"
+                  >
+                    {t.whatIsThis}
+                  </Button>
+                )}
+              </div>
+              
+              <h4 className="text-lg font-semibold text-foreground mb-3">
+                {currentQuestion.question}
+              </h4>
+              
+              {/* Question Explanation */}
+              <AnimatePresence>
+                {showExplanation && currentQuestion.explanation && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 p-4 bg-accent/10 rounded-lg border border-accent/20"
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      {currentQuestion.explanation}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Question Renderer */}
+            <QuestionRenderer
+              question={currentQuestion}
+              onAnswer={handleQuestionAnswer}
+              language={language}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Question Generation Indicator */}
+      <QuestionGeneratingIndicator
+        language={language}
+        isVisible={isGenerating}
+        personalizationCount={personalizationCount}
+        context={currentPersonalizationContext}
+      />
+
+      {/* Insights Display */}
+      {insights.length > 0 && (
+        <div className="px-6 pb-4">
+          <InsightDisplay
+            insights={insights}
+            language={language}
+          />
+        </div>
+      )}
+
+      {/* Enhanced Navigation */}
+      <div className="px-6 py-4 bg-muted/20 border-t border-border/50">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={isFirstQuestion && currentQuestionIndex === 0}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t.previous}
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {currentQuestionIndex + 1} / {block.questions.length}
+            </span>
+            <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary to-accent"
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: `${((currentQuestionIndex + 1) / block.questions.length) * 100}%` 
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+
+          <Button
+            onClick={handleNext}
+            disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion)}
+            className="flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+          >
+            {isLastQuestion ? t.lastQuestion : t.next}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
