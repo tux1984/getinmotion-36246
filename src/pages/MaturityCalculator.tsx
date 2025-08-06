@@ -5,7 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
-import { EnhancedConversationalAgent } from '@/components/cultural/conversational/components/EnhancedConversationalAgent';
+import { FusedMaturityCalculator } from '@/components/cultural/FusedMaturityCalculator';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
@@ -49,7 +49,7 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <EnhancedConversationalAgent
+      <FusedMaturityCalculator
         language={language}
         onComplete={handleComplete}
       />
