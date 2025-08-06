@@ -5,7 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
-import { MaturityCalculatorSimplified } from '@/components/cultural/MaturityCalculatorSimplified';
+import { ConversationalMaturityAgent } from '@/components/cultural/conversational/ConversationalMaturityAgent';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
@@ -47,7 +47,7 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <MaturityCalculatorSimplified
+      <ConversationalMaturityAgent
         language={language}
         onComplete={handleComplete}
       />
