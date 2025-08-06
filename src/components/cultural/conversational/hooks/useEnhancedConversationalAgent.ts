@@ -12,6 +12,7 @@ import { generateMaturityBasedRecommendations } from '@/utils/maturityRecommenda
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIntelligentQuestions } from './useIntelligentQuestions';
+import { generateAdaptiveAgentMessage } from '../data/adaptiveConversationBlocks';
 
 export const useEnhancedConversationalAgent = (
   language: 'en' | 'es',
@@ -30,8 +31,10 @@ export const useEnhancedConversationalAgent = (
 
   const {
     generateContextualQuestions,
+    generateAdaptiveQuestions,
     getIndustrySpecificQuestions,
     getConditionalQuestions,
+    analyzeUserContext,
     isGenerating
   } = useIntelligentQuestions();
 
@@ -87,8 +90,42 @@ export const useEnhancedConversationalAgent = (
         }
       }
 
-      // DISABLED: Dynamic question generation causing issues
-      console.log('🚫 Dynamic question generation DISABLED for stability');
+      // ENABLED: Intelligent agent message adaptation
+      enhanced.forEach((block, index) => {
+        const adaptiveMessage = generateAdaptiveAgentMessage(block.id, profileData, language);
+        if (adaptiveMessage !== block.agentMessage) {
+          enhanced[index] = {
+            ...block,
+            agentMessage: adaptiveMessage
+          };
+          hasChanges = true;
+        }
+      });
+
+      // Add intelligent adaptive questions based on context
+      if (profileData.businessDescription && profileData.businessDescription.length > 20) {
+        const userContext = analyzeUserContext(profileData);
+        const adaptiveQuestions = generateAdaptiveQuestions(userContext, profileData, language, currentBlock || enhanced[0]);
+        
+        if (adaptiveQuestions.length > 0) {
+          // Find the most appropriate block to add questions to
+          const targetBlockIndex = enhanced.findIndex(block => 
+            block.id === 'currentSituation' || block.id === 'salesReality' || block.id === 'currentChallenges'
+          );
+          
+          if (targetBlockIndex !== -1 && !generatedQuestionsRef.current.has(profileData.businessDescription)) {
+            enhanced[targetBlockIndex] = {
+              ...enhanced[targetBlockIndex],
+              questions: [
+                ...enhanced[targetBlockIndex].questions,
+                ...adaptiveQuestions.slice(0, 2) // Limit to prevent overwhelming
+              ]
+            };
+            generatedQuestionsRef.current.add(profileData.businessDescription);
+            hasChanges = true;
+          }
+        }
+      }
 
       // Add industry-specific and conditional questions
       if (profileData.industry) {
@@ -96,13 +133,13 @@ export const useEnhancedConversationalAgent = (
         const conditionalQuestions = getConditionalQuestions(profileData, language);
         
         if (industryQuestions.length > 0 || conditionalQuestions.length > 0) {
-          const targetBlockIndex = enhanced.findIndex(block => block.id === 'visionGoals');
+          const targetBlockIndex = enhanced.findIndex(block => block.id === 'vision');
           if (targetBlockIndex !== -1) {
             enhanced[targetBlockIndex] = {
               ...enhanced[targetBlockIndex],
               questions: [
                 ...enhanced[targetBlockIndex].questions,
-                ...industryQuestions.slice(0, 2), // Limit to prevent overwhelming
+                ...industryQuestions.slice(0, 1), // Limit to prevent overwhelming
                 ...conditionalQuestions.slice(0, 1)
               ]
             };
@@ -117,12 +154,41 @@ export const useEnhancedConversationalAgent = (
     };
 
     initializeEnhancedBlocks();
-  }, [profileData.businessDescription, profileData.industry, blocks, businessType]);
+  }, [profileData.businessDescription, profileData.industry, blocks, businessType, language, analyzeUserContext, generateAdaptiveQuestions, currentBlock]);
 
-  // DISABLED: Intelligent follow-up generation causing issues
+  // ENABLED: Intelligent follow-up generation
   const triggerIntelligentFollowUp = useCallback(async (fieldName: string, answer: any) => {
-    console.log('🚫 Intelligent follow-up DISABLED for stability');
-  }, []);
+    console.log('🤖 Triggering intelligent follow-up for:', fieldName, answer);
+    
+    // Generate follow-up questions based on specific answers
+    if (fieldName === 'businessDescription' && answer && answer.length > 20) {
+      const userContext = analyzeUserContext({ ...profileData, [fieldName]: answer });
+      
+      // Log what we detected about the user
+      console.log('🔍 Detected user context:', userContext);
+      
+      // Update agent message for next interactions
+      const enhanced = [...enhancedBlocks];
+      enhanced.forEach((block, index) => {
+        if (block.id === 'businessType' || block.id === 'currentSituation') {
+          const adaptiveMessage = generateAdaptiveAgentMessage(block.id, { ...profileData, [fieldName]: answer }, language);
+          enhanced[index] = {
+            ...block,
+            agentMessage: adaptiveMessage
+          };
+        }
+      });
+      setEnhancedBlocks(enhanced);
+    }
+    
+    if (fieldName === 'mainObstacles' && Array.isArray(answer) && answer.includes('pricing')) {
+      console.log('🎯 User has pricing challenges - preparing targeted questions');
+    }
+    
+    if (fieldName === 'targetAudience' && answer === 'businesses') {
+      console.log('🏢 User targets businesses - preparing B2B questions');
+    }
+  }, [analyzeUserContext, profileData, enhancedBlocks, language]);
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
     const now = Date.now();
@@ -202,8 +268,11 @@ export const useEnhancedConversationalAgent = (
     if (question) {
       const fieldName = question.fieldName;
       updateProfileData({ [fieldName]: answer });
+      
+      // Trigger intelligent follow-up
+      triggerIntelligentFollowUp(fieldName, answer);
     }
-  }, [currentBlock, updateProfileData]);
+  }, [currentBlock, updateProfileData, triggerIntelligentFollowUp]);
 
   const goToNextBlock = useCallback(() => {
     if (currentBlockIndex < enhancedBlocks.length - 1) {
