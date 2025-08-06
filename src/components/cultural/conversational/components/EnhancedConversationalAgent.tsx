@@ -26,7 +26,6 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
   const {
     currentBlock,
     profileData,
-    insights,
     isCompleted,
     maturityLevel,
     personalizedTasks,
@@ -38,12 +37,7 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
     loadProgress,
     completeAssessment,
     getBlockProgress,
-    isGenerating,
-    generateContextualQuestions,
-    personalizationCount,
-    currentPersonalizationContext,
-    businessType,
-    agentPersonality
+    businessType
   } = useEnhancedConversationalAgent(language, onComplete);
 
   const [showResults, setShowResults] = useState(false);
@@ -105,22 +99,12 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
       transition={{ duration: 0.6 }}
       className="max-w-4xl mx-auto min-h-screen"
     >
-      {/* Enhanced Agent Header with personality */}
+      {/* Clean Agent Header */}
       <AgentHeader
         language={language}
         currentBlock={currentBlock}
         progress={getBlockProgress().percentage}
         businessType={businessType}
-        agentPersonality={agentPersonality}
-        personalizationCount={personalizationCount}
-      />
-
-      {/* Smart Progress Indicator */}
-      <SmartProgressIndicator 
-        language={language}
-        isGenerating={isGenerating}
-        isSaving={false}
-        hasUnsavedChanges={false}
       />
 
       {/* Main Intelligent Conversation Flow */}
@@ -130,18 +114,12 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
             key={currentBlock.id}
             block={currentBlock}
             profileData={profileData}
-            insights={insights}
             language={language}
             onAnswer={answerQuestion}
             onNext={goToNextBlock}
             onPrevious={goToPreviousBlock}
             updateProfileData={updateProfileData}
-            isGenerating={isGenerating}
-            generateContextualQuestions={generateContextualQuestions}
-            personalizationCount={personalizationCount}
-            currentPersonalizationContext={currentPersonalizationContext}
             businessType={businessType}
-            agentPersonality={agentPersonality}
           />
         </AnimatePresence>
       </div>

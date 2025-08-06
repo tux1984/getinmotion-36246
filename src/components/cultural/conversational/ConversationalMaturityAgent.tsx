@@ -117,16 +117,12 @@ export const ConversationalMaturityAgent: React.FC<ConversationalMaturityAgentPr
             key={currentBlock.id}
             block={currentBlock}
             profileData={profileData}
-            insights={insights}
+            
             language={language}
             onAnswer={answerQuestion}
             onNext={goToNextBlock}
             onPrevious={goToPreviousBlock}
             updateProfileData={updateProfileData}
-            isGenerating={isGenerating}
-            generateContextualQuestions={generateContextualQuestions}
-            personalizationCount={personalizationCount}
-            currentPersonalizationContext={currentPersonalizationContext}
           />
         </AnimatePresence>
       </div>

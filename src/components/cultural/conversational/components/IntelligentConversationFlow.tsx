@@ -5,45 +5,30 @@ import { Button } from '@/components/ui/button';
 import { ConversationBlock } from '../types/conversationalTypes';
 import { UserProfileData } from '../../types/wizardTypes';
 import { QuestionRenderer } from './QuestionRenderer';
-import { InsightDisplay } from './InsightDisplay';
-import { QuestionGeneratingIndicator } from './QuestionGeneratingIndicator';
 
 interface IntelligentConversationFlowProps {
   block: ConversationBlock;
   profileData: UserProfileData;
-  insights: string[];
   language: 'en' | 'es';
   onAnswer: (questionId: string, answer: any) => void;
   onNext: () => void;
   onPrevious: () => void;
   updateProfileData: (data: Partial<UserProfileData>) => void;
-  isGenerating?: boolean;
-  generateContextualQuestions?: (params: any) => Promise<any[]>;
-  personalizationCount?: number;
-  currentPersonalizationContext?: string;
   businessType?: string;
-  agentPersonality?: string;
 }
 
 export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowProps> = ({
   block,
   profileData,
-  insights,
   language,
   onAnswer,
   onNext,
   onPrevious,
   updateProfileData,
-  isGenerating = false,
-  generateContextualQuestions,
-  personalizationCount = 0,
-  currentPersonalizationContext = '',
-  businessType = 'creative',
-  agentPersonality = 'empathetic'
+  businessType = 'creative'
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [showAgentThinking, setShowAgentThinking] = useState(false);
 
   // Reset question index when block changes
   useEffect(() => {
@@ -55,35 +40,19 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     setShowExplanation(false);
   }, [block.id]);
 
-  // Show agent thinking when generating
-  useEffect(() => {
-    if (isGenerating) {
-      setShowAgentThinking(true);
-      const timer = setTimeout(() => setShowAgentThinking(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isGenerating]);
 
   const translations = {
     en: {
       next: "Continue",
       previous: "Previous",
       whatIsThis: "What is this?",
-      insight: "Agent Insight",
-      lastQuestion: "Complete this section",
-      agentThinking: "Agent is analyzing your response...",
-      personalized: "Personalized Question",
-      adaptive: "Adapting to your business"
+      lastQuestion: "Complete this section"
     },
     es: {
       next: "Continuar",
       previous: "Anterior",
       whatIsThis: "¿Qué es esto?",
-      insight: "Insight del Agente",
-      lastQuestion: "Completar esta sección",
-      agentThinking: "El agente está analizando tu respuesta...",
-      personalized: "Pregunta Personalizada",
-      adaptive: "Adaptándose a tu negocio"
+      lastQuestion: "Completar esta sección"
     }
   };
 
@@ -158,8 +127,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
            (typeof fieldValue !== 'string' || fieldValue.trim() !== '');
   };
 
-  // Determine if this is a personalized question (added after initial block)
-  const isPersonalizedQuestion = currentQuestionIndex >= 3; // Assuming first 3 are base questions
 
   return (
     <motion.div
@@ -169,35 +136,18 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
       transition={{ duration: 0.5 }}
       className="overflow-hidden"
     >
-      {/* Enhanced Agent Message with Personality */}
+      {/* Clean Agent Message */}
       <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 border-b border-border/50">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              {showAgentThinking ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Brain className="w-6 h-6 text-white" />
-                </motion.div>
-              ) : (
-                <MessageSquare className="w-6 h-6 text-white" />
-              )}
+              <MessageSquare className="w-6 h-6 text-white" />
             </div>
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold text-foreground">
-                {language === 'es' ? 'Tu Agente de Crecimiento Creativo' : 'Your Creative Growth Agent'}
-              </h3>
-              {isPersonalizedQuestion && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-accent/20 rounded-full text-xs">
-                  <Sparkles className="w-3 h-3" />
-                  <span className="text-accent-foreground">{t.personalized}</span>
-                </div>
-              )}
-            </div>
+            <h3 className="font-semibold text-foreground mb-2">
+              {language === 'es' ? 'Tu Agente de Crecimiento Creativo' : 'Your Creative Growth Agent'}
+            </h3>
             <motion.p 
               key={block.id}
               initial={{ opacity: 0, y: 10 }}
@@ -206,22 +156,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
             >
               {block.agentMessage}
             </motion.p>
-            
-            {/* Personalization Context */}
-            {personalizationCount > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-3 flex items-center gap-2 text-sm text-primary"
-              >
-                <Star className="w-4 h-4" />
-                <span>
-                  {language === 'es' 
-                    ? `Pregunta personalizada #${personalizationCount} para tu negocio` 
-                    : `Personalized question #${personalizationCount} for your business`}
-                </span>
-              </motion.div>
-            )}
           </div>
         </div>
       </div>
@@ -300,23 +234,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
         </AnimatePresence>
       </div>
 
-      {/* Question Generation Indicator */}
-      <QuestionGeneratingIndicator
-        language={language}
-        isVisible={isGenerating}
-        personalizationCount={personalizationCount}
-        context={currentPersonalizationContext}
-      />
-
-      {/* Insights Display */}
-      {insights.length > 0 && (
-        <div className="px-6 pb-4">
-          <InsightDisplay
-            insights={insights}
-            language={language}
-          />
-        </div>
-      )}
 
       {/* Enhanced Navigation */}
       <div className="px-6 py-4 bg-muted/20 border-t border-border/50">

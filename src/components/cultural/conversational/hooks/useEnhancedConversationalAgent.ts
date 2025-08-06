@@ -24,13 +24,9 @@ export const useEnhancedConversationalAgent = (
   
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [profileData, setProfileData] = useState<UserProfileData>({} as UserProfileData);
-  const [insights, setInsights] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [enhancedBlocks, setEnhancedBlocks] = useState<ConversationBlock[]>([]);
-  const [personalizationCount, setPersonalizationCount] = useState(0);
-  const [currentPersonalizationContext, setCurrentPersonalizationContext] = useState('');
   const [businessType, setBusinessType] = useState<'creative' | 'service' | 'product' | 'tech' | 'other'>('creative');
-  const [agentPersonality, setAgentPersonality] = useState('empathetic');
 
   const {
     generateContextualQuestions,
@@ -206,17 +202,8 @@ export const useEnhancedConversationalAgent = (
     if (question) {
       const fieldName = question.fieldName;
       updateProfileData({ [fieldName]: answer });
-      
-      // Generate contextual insight
-      const insight = generateContextualInsight(fieldName, answer, profileData, businessType, language);
-      if (insight) {
-        setInsights(prev => [...prev, insight]);
-      }
-      
-      // Trigger intelligent follow-up
-      triggerIntelligentFollowUp(fieldName, answer);
     }
-  }, [currentBlock, updateProfileData, profileData, businessType, triggerIntelligentFollowUp, language]);
+  }, [currentBlock, updateProfileData]);
 
   const goToNextBlock = useCallback(() => {
     if (currentBlockIndex < enhancedBlocks.length - 1) {
@@ -243,9 +230,7 @@ export const useEnhancedConversationalAgent = (
         const progressData = {
           currentBlockIndex,
           profileData,
-          insights,
           enhancedBlocks,
-          personalizationCount,
           businessType,
           lastUpdated: new Date().toISOString()
         };
@@ -255,7 +240,7 @@ export const useEnhancedConversationalAgent = (
         console.error('Failed to save progress:', error);
       }
     }, 2000); // 2 second debounce
-  }, [currentBlockIndex, profileData, insights, enhancedBlocks, personalizationCount, businessType]);
+  }, [currentBlockIndex, profileData, enhancedBlocks, businessType]);
 
   const saveProgress = useCallback(() => {
     // Immediate save for manual triggers
@@ -263,9 +248,7 @@ export const useEnhancedConversationalAgent = (
       const progressData = {
         currentBlockIndex,
         profileData,
-        insights,
         enhancedBlocks,
-        personalizationCount,
         businessType,
         lastUpdated: new Date().toISOString()
       };
@@ -274,7 +257,7 @@ export const useEnhancedConversationalAgent = (
     } catch (error) {
       console.error('Failed to save progress:', error);
     }
-  }, [currentBlockIndex, profileData, insights, enhancedBlocks, personalizationCount, businessType]);
+  }, [currentBlockIndex, profileData, enhancedBlocks, businessType]);
 
   const loadProgress = useCallback(() => {
     try {
@@ -283,8 +266,6 @@ export const useEnhancedConversationalAgent = (
         const progressData = JSON.parse(saved);
         setCurrentBlockIndex(progressData.currentBlockIndex || 0);
         setProfileData(progressData.profileData || {});
-        setInsights(progressData.insights || []);
-        setPersonalizationCount(progressData.personalizationCount || 0);
         setBusinessType(progressData.businessType || 'creative');
         if (progressData.enhancedBlocks) {
           setEnhancedBlocks(progressData.enhancedBlocks);
@@ -297,7 +278,7 @@ export const useEnhancedConversationalAgent = (
   }, []);
 
   const completeAssessment = useCallback(async () => {
-    console.log('Enhanced Agent: Completing assessment', { profileData, insights });
+    console.log('Enhanced Agent: Completing assessment', { profileData });
     
     try {
       // Calculate enhanced maturity scores
@@ -341,7 +322,6 @@ export const useEnhancedConversationalAgent = (
   return {
     currentBlock,
     profileData,
-    insights,
     isCompleted,
     maturityLevel: getMaturityLevel(profileData, businessType, language),
     personalizedTasks: generatePersonalizedTasks(profileData, businessType, language),
@@ -353,12 +333,7 @@ export const useEnhancedConversationalAgent = (
     loadProgress,
     completeAssessment,
     getBlockProgress,
-    isGenerating,
-    generateContextualQuestions,
-    personalizationCount,
-    currentPersonalizationContext,
-    businessType,
-    agentPersonality
+    businessType
   };
 };
 

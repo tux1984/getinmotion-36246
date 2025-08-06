@@ -5,37 +5,26 @@ import { Button } from '@/components/ui/button';
 import { ConversationBlock, QuestionType } from '../types/conversationalTypes';
 import { UserProfileData } from '../../types/wizardTypes';
 import { QuestionRenderer } from './QuestionRenderer';
-import { InsightDisplay } from './InsightDisplay';
 import { QuestionGeneratingIndicator } from './QuestionGeneratingIndicator';
 
 interface ConversationFlowProps {
   block: ConversationBlock;
   profileData: UserProfileData;
-  insights: string[];
   language: 'en' | 'es';
   onAnswer: (questionId: string, answer: any) => void;
   onNext: () => void;
   onPrevious: () => void;
   updateProfileData: (data: Partial<UserProfileData>) => void;
-  isGenerating?: boolean;
-  generateContextualQuestions?: (params: any) => Promise<any[]>;
-  personalizationCount?: number;
-  currentPersonalizationContext?: string;
 }
 
 export const ConversationFlow: React.FC<ConversationFlowProps> = ({
   block,
   profileData,
-  insights,
   language,
   onAnswer,
   onNext,
   onPrevious,
-  updateProfileData,
-  isGenerating = false,
-  generateContextualQuestions,
-  personalizationCount = 0,
-  currentPersonalizationContext = ''
+  updateProfileData
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -168,13 +157,6 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
           </div>
         </div>
 
-        {/* Question Generation Indicator */}
-        <QuestionGeneratingIndicator 
-          language={language} 
-          isVisible={isGenerating}
-          personalizationCount={personalizationCount}
-          context={currentPersonalizationContext}
-        />
 
         <Button
           variant="ghost"
@@ -217,20 +199,6 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
         />
       </motion.div>
 
-      {insights.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-medium text-muted-foreground">{t.insight}</span>
-          </div>
-          <InsightDisplay insights={insights} language={language} />
-        </motion.div>
-      )}
 
       <div className="flex justify-between items-center pt-6 border-t border-border">
         <Button
