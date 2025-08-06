@@ -150,15 +150,51 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     );
   };
 
-  const renderTextInput = () => (
-    <Input
-      type="text"
-      placeholder={question.placeholder}
-      value={value || ''}
-      onChange={(e) => handleAnswer(e.target.value)}
-      className="w-full p-4 text-base"
-    />
-  );
+  const renderTextInput = () => {
+    const [localValue, setLocalValue] = React.useState(value || '');
+    const [debounceTimeout, setDebounceTimeout] = React.useState<NodeJS.Timeout | null>(null);
+
+    // Update local value when external value changes
+    React.useEffect(() => {
+      setLocalValue(value || '');
+    }, [value]);
+
+    const handleInputChange = (inputValue: string) => {
+      setLocalValue(inputValue);
+      
+      // Clear existing timeout
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+      
+      // Set new timeout for debounced update
+      const timeout = setTimeout(() => {
+        console.log('QuestionRenderer: Debounced text input update', inputValue);
+        handleAnswer(inputValue);
+      }, 800); // Wait 800ms after user stops typing
+      
+      setDebounceTimeout(timeout);
+    };
+
+    // Cleanup timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (debounceTimeout) {
+          clearTimeout(debounceTimeout);
+        }
+      };
+    }, [debounceTimeout]);
+
+    return (
+      <Input
+        type="text"
+        placeholder={question.placeholder}
+        value={localValue}
+        onChange={(e) => handleInputChange(e.target.value)}
+        className="w-full p-4 text-base"
+      />
+    );
+  };
 
   const renderSlider = () => {
     const minValue = question.min || 1;

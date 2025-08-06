@@ -85,11 +85,11 @@ export const useEnhancedConversationalAgent = (
         }
       }
 
-      // Auto-generate questions when we have minimal info (reduced threshold to 3 characters)
-      if (profileData.businessDescription && profileData.businessDescription.length > 3) {
+      // Auto-generate questions when we have meaningful info (increased threshold)
+      if (profileData.businessDescription && profileData.businessDescription.length > 15) {
         const businessKey = `${profileData.businessDescription}_${profileData.industry || 'unknown'}`;
         
-        if (!generatedQuestionsRef.current.has(businessKey)) {
+        if (!generatedQuestionsRef.current.has(businessKey) && !isGeneratingRef.current) {
           console.log('🧠 Generando preguntas específicas para tu negocio...');
           setPersonalizationCount(prev => prev + 1);
           setCurrentPersonalizationContext(
@@ -174,9 +174,15 @@ export const useEnhancedConversationalAgent = (
 
   // Real-time question generation after important answers
   const triggerIntelligentFollowUp = useCallback(async (fieldName: string, answer: any) => {
-    const triggerFields = ['businessDescription', 'targetAudience', 'pricingMethod', 'hasSold', 'mainObstacles'];
+    const triggerFields = ['targetAudience', 'pricingMethod', 'hasSold', 'mainObstacles'];
     
-    if (triggerFields.includes(fieldName) && !isGeneratingRef.current) {
+    // Only trigger for non-text fields or completed text (>20 chars)
+    const isTextAnswer = typeof answer === 'string';
+    const shouldTrigger = !triggerFields.includes(fieldName) || 
+                         !isTextAnswer || 
+                         (isTextAnswer && answer.length > 20);
+    
+    if (triggerFields.includes(fieldName) && !isGeneratingRef.current && shouldTrigger) {
       console.log(`🧠 Generando pregunta de seguimiento para: ${fieldName}`);
       setPersonalizationCount(prev => prev + 1);
       setCurrentPersonalizationContext(
@@ -218,6 +224,26 @@ export const useEnhancedConversationalAgent = (
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
     console.log('Enhanced Agent: Updating profile data', data);
+    
+    // Prevent rapid-fire updates for text fields
+    const textFields = ['businessDescription', 'targetAudience', 'mainObstacles'];
+    const isTextFieldUpdate = Object.keys(data).some(key => textFields.includes(key));
+    
+    if (isTextFieldUpdate) {
+      // For text fields, only update if the value is substantially different
+      const shouldUpdate = Object.entries(data).every(([key, value]) => {
+        const currentValue = String(profileData[key] || '');
+        const newValue = String(value || '');
+        // Only update if significant change (>3 chars difference or complete)
+        return Math.abs(newValue.length - currentValue.length) > 3 || newValue.length < 3;
+      });
+      
+      if (!shouldUpdate) {
+        console.log('Enhanced Agent: Skipping minor text update to prevent loops');
+        return;
+      }
+    }
+    
     setProfileData(prev => {
       const updated = { ...prev, ...data };
       
@@ -232,7 +258,7 @@ export const useEnhancedConversationalAgent = (
       
       return updated;
     });
-  }, [detectBusinessType]);
+  }, [detectBusinessType, profileData]);
 
   const answerQuestion = useCallback((questionId: string, answer: any) => {
     console.log('Enhanced Agent: Question answered', { questionId, answer });
