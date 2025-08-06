@@ -30,6 +30,8 @@ export const useConversationalAgent = (
   const [insights, setInsights] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [enhancedBlocks, setEnhancedBlocks] = useState<ConversationBlock[]>([]);
+  const [personalizationCount, setPersonalizationCount] = useState(0);
+  const [currentPersonalizationContext, setCurrentPersonalizationContext] = useState('');
 
   const {
     generateContextualQuestions,
@@ -61,12 +63,14 @@ export const useConversationalAgent = (
       const enhanced = [...blocks];
       let hasChanges = false;
       
-      // Auto-generate dynamic questions after business description is provided
-      if (profileData.businessDescription && profileData.businessDescription.length > 20) {
+      // Auto-generate dynamic questions with lower threshold (5+ characters)
+      if (profileData.businessDescription && profileData.businessDescription.length > 5) {
         const businessKey = `${profileData.businessDescription}_${profileData.industry || 'unknown'}`;
         
         if (!generatedQuestionsRef.current.has(businessKey)) {
-          console.log('Business description detected, generating contextual questions...');
+          console.log('🧠 Analyzing your business to create personalized questions...');
+          setPersonalizationCount(prev => prev + 1);
+          setCurrentPersonalizationContext(`Analizando: ${profileData.businessDescription?.slice(0, 40)}...`);
           isGeneratingRef.current = true;
           
           // Find the most relevant block to add dynamic questions to
@@ -83,7 +87,7 @@ export const useConversationalAgent = (
                 });
                 
                 if (dynamicQuestions.length > 0) {
-                  console.log(`Adding ${dynamicQuestions.length} dynamic questions to ${blockId} block`);
+                  console.log(`✨ Adding ${dynamicQuestions.length} personalized questions to ${blockId} block`);
                   enhanced[blockIndex] = {
                     ...enhanced[blockIndex],
                     questions: [...enhanced[blockIndex].questions, ...dynamicQuestions]
@@ -160,16 +164,16 @@ export const useConversationalAgent = (
       const updatedData = { [question.fieldName]: answer };
       updateProfileData(updatedData);
       
-      // Generate follow-up questions for key fields
-      const keyFields = ['businessDescription', 'industry', 'targetAudience', 'hasSold'];
-      if (keyFields.includes(question.fieldName)) {
-        console.log(`Key field ${question.fieldName} answered, potentially generating follow-up questions...`);
+      // Generate follow-up questions for any meaningful answer
+      if (answer && typeof answer === 'string' && answer.length > 3) {
+        console.log('🎯 Generating next personalized question based on your answer...');
+        setPersonalizationCount(prev => prev + 1);
+        setCurrentPersonalizationContext(`Procesando: "${answer.slice(0, 30)}..."`);
         
         // Trigger intelligent question generation for subsequent blocks
         const newProfileData = { ...profileData, ...updatedData };
-        if (newProfileData.businessDescription && newProfileData.industry) {
-          // This will be handled by the useEffect above
-          console.log('Profile data enriched, dynamic question generation will be triggered');
+        if (newProfileData.businessDescription) {
+          console.log('✨ Your answer will influence the next questions');
         }
       }
     }
@@ -383,6 +387,8 @@ export const useConversationalAgent = (
     completeAssessment,
     getBlockProgress,
     isGenerating,
-    generateContextualQuestions
+    generateContextualQuestions,
+    personalizationCount,
+    currentPersonalizationContext
   };
 };

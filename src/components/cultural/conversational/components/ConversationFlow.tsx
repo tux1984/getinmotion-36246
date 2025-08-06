@@ -19,6 +19,8 @@ interface ConversationFlowProps {
   updateProfileData: (data: Partial<UserProfileData>) => void;
   isGenerating?: boolean;
   generateContextualQuestions?: (params: any) => Promise<any[]>;
+  personalizationCount?: number;
+  currentPersonalizationContext?: string;
 }
 
 export const ConversationFlow: React.FC<ConversationFlowProps> = ({
@@ -31,7 +33,9 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
   onPrevious,
   updateProfileData,
   isGenerating = false,
-  generateContextualQuestions
+  generateContextualQuestions,
+  personalizationCount = 0,
+  currentPersonalizationContext = ''
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -168,6 +172,8 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
         <QuestionGeneratingIndicator 
           language={language} 
           isVisible={isGenerating}
+          personalizationCount={personalizationCount}
+          context={currentPersonalizationContext}
         />
 
         <Button

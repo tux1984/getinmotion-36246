@@ -39,7 +39,9 @@ export const ConversationalMaturityAgent: React.FC<ConversationalMaturityAgentPr
     completeAssessment,
     getBlockProgress,
     isGenerating,
-    generateContextualQuestions
+    generateContextualQuestions,
+    personalizationCount,
+    currentPersonalizationContext
   } = useConversationalAgent(language, onComplete);
 
   const [showResults, setShowResults] = useState(false);
@@ -123,6 +125,8 @@ export const ConversationalMaturityAgent: React.FC<ConversationalMaturityAgentPr
             updateProfileData={updateProfileData}
             isGenerating={isGenerating}
             generateContextualQuestions={generateContextualQuestions}
+            personalizationCount={personalizationCount}
+            currentPersonalizationContext={currentPersonalizationContext}
           />
         </AnimatePresence>
       </div>
