@@ -11,18 +11,27 @@ export const useConversationalAgent = (
 ) => {
   const blocks = getConversationBlocks(language);
   
+  // Add debugging and validation
+  console.log('useConversationalAgent: Blocks loaded', { language, blocksLength: blocks?.length, blocks: blocks?.slice(0, 2) });
+  
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [profileData, setProfileData] = useState<UserProfileData>({} as UserProfileData);
   const [insights, setInsights] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  const currentBlock = blocks[currentBlockIndex];
+  const currentBlock = blocks && blocks.length > 0 ? blocks[currentBlockIndex] : null;
+  
+  console.log('useConversationalAgent: Current block', { currentBlockIndex, currentBlock: currentBlock?.id, questionsLength: currentBlock?.questions?.length });
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
     setProfileData(prev => ({ ...prev, ...data }));
   }, []);
 
   const answerQuestion = useCallback((questionId: string, answer: any) => {
+    if (!currentBlock || !currentBlock.questions) {
+      console.error('answerQuestion: No current block or questions available');
+      return;
+    }
     const question = currentBlock.questions.find(q => q.id === questionId);
     if (question) {
       updateProfileData({ [question.fieldName]: answer });

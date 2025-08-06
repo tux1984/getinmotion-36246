@@ -49,9 +49,33 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
   };
 
   const t = translations[language];
+  
+  // Add defensive checks to prevent undefined errors
+  if (!block || !block.questions || block.questions.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">Loading questions...</p>
+      </div>
+    );
+  }
+  
   const currentQuestion = block.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === block.questions.length - 1;
   const isFirstQuestion = currentQuestionIndex === 0;
+  
+  // Additional check for currentQuestion
+  if (!currentQuestion) {
+    console.error('ConversationFlow: currentQuestion is undefined', {
+      currentQuestionIndex,
+      totalQuestions: block.questions.length,
+      blockId: block.id
+    });
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">Error loading question. Please refresh the page.</p>
+      </div>
+    );
+  }
 
   const handleQuestionAnswer = (answer: any) => {
     onAnswer(currentQuestion.id, answer);

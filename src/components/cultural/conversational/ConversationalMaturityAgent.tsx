@@ -61,6 +61,22 @@ export const ConversationalMaturityAgent: React.FC<ConversationalMaturityAgentPr
     }
   }, [isCompleted]);
 
+  // Show loading if currentBlock is not available
+  if (!currentBlock) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-4xl mx-auto min-h-screen p-8"
+      >
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading conversation blocks...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
   if (showResults) {
     return (
       <ResultsDisplay
