@@ -105,29 +105,47 @@ export const useMasterCoordinator = () => {
 
   // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
   const transformToCoordinatorTasks = useMemo(() => {
-    const sortedTasks = [...tasks].sort((a, b) => {
-      if (a.relevance !== b.relevance) {
-        const relevanceOrder = { high: 3, medium: 2, low: 1 };
-        return relevanceOrder[b.relevance as keyof typeof relevanceOrder] - 
-               relevanceOrder[a.relevance as keyof typeof relevanceOrder];
-      }
-      return a.priority - b.priority;
-    });
+    // Validaciones para evitar errores de variables no inicializadas
+    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+      return [];
+    }
 
-    return sortedTasks.slice(0, 15).map((task, index) => ({
-      id: task.id,
-      title: task.title,
-      description: task.description || '',
-      agentId: task.agent_id,
-      agentName: getAgentName(task.agent_id),
-      priority: task.priority,
-      relevance: task.relevance,
-      estimatedTime: getEstimatedTime(task.title),
-      category: getTaskCategory(task.agent_id),
-      isUnlocked: index === 0 || tasks.filter((t, i) => i < index).some(t => t.status === 'completed'),
-      prerequisiteTasks: index > 0 ? [sortedTasks[index - 1].id] : [],
-      steps: generateStepsForTask(task)
-    }));
+    try {
+      const sortedTasks = [...tasks].sort((a, b) => {
+        if (a.relevance !== b.relevance) {
+          const relevanceOrder = { high: 3, medium: 2, low: 1 };
+          return relevanceOrder[b.relevance as keyof typeof relevanceOrder] - 
+                 relevanceOrder[a.relevance as keyof typeof relevanceOrder];
+        }
+        return a.priority - b.priority;
+      });
+
+      return sortedTasks.slice(0, 15).map((task, index) => {
+        // Validaciones adicionales para cada tarea
+        if (!task || !task.id) {
+          console.warn('⚠️ Invalid task found:', task);
+          return null;
+        }
+
+        return {
+          id: task.id,
+          title: task.title || 'Tarea sin título',
+          description: task.description || '',
+          agentId: task.agent_id || 'general',
+          agentName: getAgentName(task.agent_id || 'general'),
+          priority: task.priority || 1,
+          relevance: task.relevance || 'medium',
+          estimatedTime: getEstimatedTime(task.title || ''),
+          category: getTaskCategory(task.agent_id || 'general'),
+          isUnlocked: index === 0 || tasks.filter((t, i) => i < index).some(t => t.status === 'completed'),
+          prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
+          steps: generateStepsForTask(task)
+        };
+      }).filter(Boolean) as CoordinatorTask[]; // Filtrar elementos null
+    } catch (error) {
+      console.error('❌ Error transforming tasks:', error);
+      return [];
+    }
   }, [tasks]);
 
   // Inicialización automática del coordinador cuando hay datos
