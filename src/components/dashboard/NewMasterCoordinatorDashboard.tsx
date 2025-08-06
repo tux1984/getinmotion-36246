@@ -9,8 +9,6 @@ import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { PersonalizedWelcomeSection } from './PersonalizedWelcomeSection';
 import { FixedMasterCoordinator } from '@/components/master-coordinator/FixedMasterCoordinator';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
-import { IntelligentStartButton } from './IntelligentStartButton';
-import { generatePersonalizedRecommendations } from '@/utils/personalizedRecommendations';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,10 +35,11 @@ import {
   User,
   Crown,
   FileText,
-  Star
+  Star,
+  Heart
 } from 'lucide-react';
 
-export const NewMasterCoordinatorDashboard: React.FC = () => {
+export const MasterCoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -76,6 +75,24 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['recommendations', 'deliverables']));
   const [currentTip, setCurrentTip] = useState(0);
   const [showDeliverables, setShowDeliverables] = useState(false);
+  const [hoveredAction, setHoveredAction] = useState<string | null>(null);
+  const [celebrationVisible, setCelebrationVisible] = useState(false);
+
+  // Dynamic coaching tips
+  const coachingTips = [
+    language === 'es' ? 'Cada gran negocio comenzó con una idea audaz' : 'Every great business started with a bold idea',
+    language === 'es' ? 'La consistencia es la clave del crecimiento sostenible' : 'Consistency is the key to sustainable growth',
+    language === 'es' ? 'Conoce a tu cliente mejor que nadie' : 'Know your customer better than anyone',
+    language === 'es' ? 'La innovación nace de escuchar al mercado' : 'Innovation comes from listening to the market',
+    language === 'es' ? 'Tu red de contactos es tu mayor activo' : 'Your network is your greatest asset'
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % coachingTips.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Metrics
   const activeTasks = tasks.filter(task => task.status === 'pending' || task.status === 'in_progress');
@@ -87,11 +104,33 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   const maturityLevel = currentScores ? 
     Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : 1;
 
-  // Personalized recommendations
+  // Show celebration when tasks are completed
+  useEffect(() => {
+    if (completedTasksCount > 0 && completedTasksCount % 3 === 0) {
+      setCelebrationVisible(true);
+      setTimeout(() => setCelebrationVisible(false), 3000);
+    }
+  }, [completedTasksCount]);
+
+  // Enhanced personalized recommendations using coordinator tasks
   const personalizedRecommendations = useMemo(() => {
-    if (!businessProfile) return [];
-    return generatePersonalizedRecommendations(businessProfile, language);
-  }, [businessProfile, language]);
+    if (coordinatorTasks.length > 0) {
+      return coordinatorTasks
+        .filter(task => task.isUnlocked)
+        .slice(0, 6)
+        .map(task => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          priority: task.priority === 1 ? 'critical' : task.priority === 2 ? 'high' : 'medium',
+          estimatedTime: task.estimatedTime || '30 min',
+          category: task.category || 'General',
+          agentId: task.agentId,
+          impact: 5 - (task.priority || 3)
+        }));
+    }
+    return [];
+  }, [coordinatorTasks]);
 
   // Loading state with animation
   if (scoresLoading || tasksLoading || profileLoading || coordinatorLoading) {
@@ -341,19 +380,114 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
           
-          {/* Intelligent Start Button - FASE 3 */}
+          {/* Integrated Start Actions - Replacing IntelligentStartButton */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <IntelligentStartButton
-              onStartNow={handleStartNow}
-              onTalkAboutBusiness={handleTalkAboutBusiness}
-              onRecalculateMaturity={handleRecalculateMaturity}
-              coordinatorMessage={coordinatorMessage}
-              loading={coordinatorLoading}
-              language={language}
-            />
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Brain className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">
+                      {language === 'es' ? 'Coordinador Maestro' : 'Master Coordinator'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{coordinatorMessage?.message}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground mb-3">
+                    {language === 'es' ? 'Elige tu siguiente acción' : 'Choose your next action'}
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Button
+                      variant="default"
+                      className="h-auto p-4 bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={handleStartNow}
+                      disabled={coordinatorLoading}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="w-8 h-8 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
+                          <Play className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">
+                            {language === 'es' ? 'Empezar Ahora' : 'Start Now'}
+                          </div>
+                          <div className="text-xs text-primary-foreground/80">
+                            {language === 'es' 
+                              ? 'Activa el coordinador y genera tareas personalizadas' 
+                              : 'Activate coordinator and generate personalized tasks'}
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4"
+                      onClick={handleTalkAboutBusiness}
+                      disabled={coordinatorLoading}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <MessageCircle className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">
+                            {language === 'es' ? 'Hablar de mi negocio' : 'Tell me about your business'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {language === 'es' 
+                              ? 'Profundiza en tu perfil con preguntas inteligentes' 
+                              : 'Deepen your profile with intelligent questions'}
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4"
+                      onClick={handleRecalculateMaturity}
+                      disabled={coordinatorLoading}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Calculator className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">
+                            {language === 'es' ? 'Recalcular Madurez' : 'Recalculate Maturity'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {language === 'es' 
+                              ? 'Actualiza tu nivel de madurez empresarial' 
+                              : 'Update your business maturity level'}
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                </div>
+
+                {coordinatorLoading && (
+                  <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+                    <Sparkles className="w-4 h-4 animate-spin" />
+                    <span>
+                      {language === 'es' 
+                        ? 'Generando recomendaciones inteligentes...' 
+                        : 'Generating intelligent recommendations...'}
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Personalized Welcome Section */}
