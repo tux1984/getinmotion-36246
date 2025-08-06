@@ -7,12 +7,18 @@ interface AgentHeaderProps {
   language: 'en' | 'es';
   currentBlock: ConversationBlock;
   progress: number;
+  businessType?: string;
+  agentPersonality?: string;
+  personalizationCount?: number;
 }
 
 export const AgentHeader: React.FC<AgentHeaderProps> = ({
   language,
   currentBlock,
-  progress
+  progress,
+  businessType,
+  agentPersonality,
+  personalizationCount
 }) => {
   const translations = {
     en: {

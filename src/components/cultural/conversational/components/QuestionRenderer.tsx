@@ -8,8 +8,9 @@ import { ConversationQuestion } from '../types/conversationalTypes';
 
 interface QuestionRendererProps {
   question: ConversationQuestion;
-  value: any;
-  onChange: (value: any) => void;
+  value?: any;
+  onChange?: (value: any) => void;
+  onAnswer?: (answer: any) => void;
   language: 'en' | 'es';
 }
 
@@ -17,8 +18,11 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   question,
   value,
   onChange,
+  onAnswer,
   language
 }) => {
+  // Use onAnswer if provided, otherwise fall back to onChange
+  const handleAnswer = onAnswer || onChange || (() => {});
   const translations = {
     en: {
       yes: "Yes",
@@ -47,7 +51,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             className={`w-full justify-start text-left p-4 h-auto ${
               value === option.value ? 'ring-2 ring-primary ring-offset-2' : ''
             }`}
-            onClick={() => onChange(option.value)}
+            onClick={() => handleAnswer(option.value)}
           >
             <div className="flex-1">
               <div className="font-medium mb-1">{option.label}</div>
@@ -90,7 +94,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
                   const newValues = isSelected
                     ? currentValues.filter(v => v !== option.value)
                     : [...currentValues, option.value];
-                  onChange(newValues);
+                  handleAnswer(newValues);
                 }}
               >
                 <div className="flex items-center gap-3 flex-1">
@@ -119,7 +123,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       type="text"
       placeholder={question.placeholder}
       value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => handleAnswer(e.target.value)}
       className="w-full p-4 text-base"
     />
   );
@@ -133,16 +137,16 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     // Set default value if not already set
     React.useEffect(() => {
       if (value === undefined || value === null) {
-        onChange(defaultValue);
+        handleAnswer(defaultValue);
       }
-    }, [value, defaultValue, onChange]);
+    }, [value, defaultValue, handleAnswer]);
 
     return (
       <div className="space-y-4">
         <div className="px-2">
           <Slider
             value={[currentValue]}
-            onValueChange={(newValue) => onChange(newValue[0])}
+            onValueChange={(newValue) => handleAnswer(newValue[0])}
             min={minValue}
             max={maxValue}
             step={question.step || 1}
@@ -173,7 +177,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           className={`w-full h-16 text-lg ${
             value === true ? 'ring-2 ring-primary ring-offset-2' : ''
           }`}
-          onClick={() => onChange(true)}
+          onClick={() => handleAnswer(true)}
         >
           <Check className="w-6 h-6 mr-2" />
           {t.yes}
@@ -185,7 +189,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           className={`w-full h-16 text-lg ${
             value === false ? 'ring-2 ring-primary ring-offset-2' : ''
           }`}
-          onClick={() => onChange(false)}
+          onClick={() => handleAnswer(false)}
         >
           <X className="w-6 h-6 mr-2" />
           {t.no}
@@ -207,7 +211,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             className={`w-full p-4 h-auto text-center ${
               value === option.value ? 'ring-2 ring-primary ring-offset-2' : ''
             }`}
-            onClick={() => onChange(option.value)}
+            onClick={() => handleAnswer(option.value)}
           >
             {option.label}
           </Button>

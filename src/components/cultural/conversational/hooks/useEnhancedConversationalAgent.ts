@@ -134,7 +134,7 @@ export const useEnhancedConversationalAgent = (
 
       // Add industry-specific and conditional questions
       if (profileData.industry) {
-        const industryQuestions = getIndustrySpecificQuestions(profileData.industry, language);
+        const industryQuestions = getIndustrySpecificQuestions(profileData.industry, profileData.businessDescription || '', language);
         const conditionalQuestions = getConditionalQuestions(profileData, language);
         
         if (industryQuestions.length > 0 || conditionalQuestions.length > 0) {
@@ -300,13 +300,13 @@ export const useEnhancedConversationalAgent = (
     try {
       // Calculate enhanced maturity scores
       const scores = calculateEnhancedMaturityScores(profileData, businessType);
-      const recommendedAgents = generateMaturityBasedRecommendations(scores, profileData);
+      const recommendedAgents = generateMaturityBasedRecommendations(scores);
       
       if (user) {
         await saveMaturityScores(scores);
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
-        updateFromMaturityCalculator(profileData);
-        markOnboardingComplete();
+        await updateFromMaturityCalculator(profileData, scores, language);
+        markOnboardingComplete(scores, recommendedAgents);
         
         toast.success(
           language === 'es' 
