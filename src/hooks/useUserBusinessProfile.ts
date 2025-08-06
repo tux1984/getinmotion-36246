@@ -31,28 +31,35 @@ export const useUserBusinessProfile = () => {
       // Priority: maturity calculator > enhanced conversational > old conversational > onboarding
       if (calculatorProfileData) {
         parsedCalculatorProfile = JSON.parse(calculatorProfileData);
-        console.log('Using maturity calculator profile data:', parsedCalculatorProfile);
+        console.log('🎯 Using maturity calculator profile data:', parsedCalculatorProfile);
       }
       
       if (maturityScoresData) {
         parsedMaturityScores = JSON.parse(maturityScoresData);
-        console.log('Using maturity calculator scores:', parsedMaturityScores);
+        console.log('📊 Using maturity calculator scores:', parsedMaturityScores);
       }
       
       if (conversationalData) {
         const data = JSON.parse(conversationalData);
         parsedConversational = data.profileData || {};
-        console.log('Using enhanced conversational data:', parsedConversational);
+        console.log('💬 Using enhanced conversational data:', parsedConversational);
       } else if (oldConversationalData) {
         const data = JSON.parse(oldConversationalData);
         parsedConversational = data.profileData || {};
-        console.log('Using old conversational data:', parsedConversational);
+        console.log('💬 Using old conversational data:', parsedConversational);
       }
       
       if (onboardingData) parsedOnboarding = JSON.parse(onboardingData);
       if (maturityData) parsedMaturity = JSON.parse(maturityData);
+      
+      console.log('🔍 Profile data debug:', {
+        calculatorProfile: parsedCalculatorProfile,
+        maturityScores: parsedMaturityScores,
+        conversational: parsedConversational,
+        onboarding: parsedOnboarding
+      });
     } catch (e) {
-      console.warn('Failed to parse stored data:', e);
+      console.warn('❌ Failed to parse stored data:', e);
     }
 
     // Merge data with maturity calculator taking highest priority
@@ -134,9 +141,11 @@ export const useUserBusinessProfile = () => {
 
 // Helper functions to extract data from onboarding and conversational agent
 function detectBusinessModel(answers: any): BusinessModel {
+  console.log('🔍 Detecting business model from:', answers);
+  
   // Check maturity calculator format first (UserProfileData)
   if (answers.profileType) {
-    // Map ProfileType to BusinessModel
+    console.log('📝 Profile type found:', answers.profileType);
     switch (answers.profileType) {
       case 'idea': return 'other';
       case 'solo': return 'services';
@@ -144,8 +153,31 @@ function detectBusinessModel(answers: any): BusinessModel {
     }
   }
 
+  // Check business type from calculator
+  if (answers.businessType) {
+    console.log('🏢 Business type found:', answers.businessType);
+    const businessType = answers.businessType.toLowerCase();
+    if (businessType.includes('artisan') || businessType.includes('craft') ||
+        businessType.includes('handmade') || businessType.includes('artesanal')) {
+      return 'artisan';
+    }
+    if (businessType.includes('service') || businessType.includes('freelance')) {
+      return 'services';
+    }
+    if (businessType.includes('product') || businessType.includes('ecommerce')) {
+      return 'ecommerce';
+    }
+    if (businessType.includes('content') || businessType.includes('creator')) {
+      return 'content';
+    }
+    if (businessType.includes('consulting') || businessType.includes('coach')) {
+      return 'consulting';
+    }
+  }
+
   // Check industry from calculator
   if (answers.industry) {
+    console.log('🏭 Industry found:', answers.industry);
     const industry = answers.industry.toLowerCase();
     if (industry.includes('ceramic') || industry.includes('craft') || 
         industry.includes('artisan') || industry.includes('artesanal') ||

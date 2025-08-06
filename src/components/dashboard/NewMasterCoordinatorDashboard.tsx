@@ -43,7 +43,10 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   // Task management
   const { 
     tasks, 
-    loading: tasksLoading
+    loading: tasksLoading,
+    startTaskDevelopment,
+    completeTaskQuickly,
+    deleteTask
   } = useAgentTasks();
 
   // State management
@@ -158,9 +161,33 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     });
   };
 
-  const handleStartTaskWithAgent = (taskId: string, agentId: string) => {
-    setSelectedSubAgent(agentId);
-    setIsTaskAssignmentOpen(true);
+  const handleStartTaskWithAgent = async (taskId: string, agentId: string) => {
+    try {
+      console.log('🚀 Starting task development:', { taskId, agentId });
+      await startTaskDevelopment(taskId);
+      // Navigate to agent chat after starting task
+      navigate(`/dashboard/agent/${agentId}?taskId=${taskId}`);
+    } catch (error) {
+      console.error('❌ Error starting task:', error);
+    }
+  };
+
+  const handleCompleteTask = async (taskId: string) => {
+    try {
+      console.log('✅ Completing task:', taskId);
+      await completeTaskQuickly(taskId);
+    } catch (error) {
+      console.error('❌ Error completing task:', error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      console.log('🗑️ Deleting task:', taskId);
+      await deleteTask(taskId);
+    } catch (error) {
+      console.error('❌ Error deleting task:', error);
+    }
   };
 
   const handleMasterAgentChat = () => {
@@ -375,14 +402,24 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
                                     )}
                                   </div>
                                   
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => handleStartTaskWithAgent(task.id, task.agentId)}
-                                    className="bg-primary hover:bg-primary/90"
-                                  >
-                                    <Play className="w-3 h-3 mr-1" />
-                                    {t.startWithAgent} {task.category}
-                                  </Button>
+                                  <div className="flex space-x-2">
+                                    <Button 
+                                      size="sm"
+                                      onClick={() => handleStartTaskWithAgent(task.id, task.agentId)}
+                                      className="bg-primary hover:bg-primary/90"
+                                    >
+                                      <Play className="w-3 h-3 mr-1" />
+                                      {t.startWithAgent}
+                                    </Button>
+                                    <Button 
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleCompleteTask(task.id)}
+                                      className="border-green-200 text-green-700 hover:bg-green-50"
+                                    >
+                                      <CheckCircle2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 </div>
                               </motion.div>
                             ))
