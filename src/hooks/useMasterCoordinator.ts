@@ -57,51 +57,82 @@ export const useMasterCoordinator = () => {
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Análisis inteligente del perfil para generar tareas personalizadas
+  // FASE 1: Análisis inteligente del perfil para generar tareas personalizadas
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
-    if (!currentScores || !profileData || !user) return;
+    if (!user) {
+      console.warn('🚫 Master Coordinator: No user available for task generation');
+      return;
+    }
 
-    console.log('🧠 Master Coordinator: Analyzing profile and generating intelligent tasks');
+    console.log('🧠 Master Coordinator: Analyzing COMPLETE profile and generating INTELLIGENT tasks');
+    
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'analyze_and_generate_tasks',
+          userId: user.id,
+          userProfile: profileData,
+          maturityScores: currentScores,
+          businessProfile
+        }
+      });
+
+      if (error) {
+        console.error('❌ Master Coordinator: Error from edge function:', error);
+        throw error;
+      }
+
+      if (data?.tasks) {
+        console.log(`✅ Master Coordinator: Generated ${data.tasks.length} ultra-personalized tasks`);
+        
+        toast({
+          title: "¡Tareas Inteligentes Generadas!",
+          description: `He creado ${data.tasks.length} tareas específicas basadas en tu perfil completo.`,
+        });
+        
+        return data.tasks;
+      } else {
+        console.warn('⚠️ Master Coordinator: No tasks returned from edge function');
+      }
+    } catch (error) {
+      console.error('❌ Master Coordinator: Error generating tasks:', error);
+      toast({
+        title: "Error al Generar Tareas",
+        description: "Hubo un problema generando tus tareas personalizadas. Intenta de nuevo.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user, profileData, currentScores, businessProfile, toast]);
+
+  // FASE 2: Generar preguntas inteligentes contextuales
+  const generateIntelligentQuestions = useCallback(async () => {
+    if (!user) return;
+
+    console.log('🤔 Master Coordinator: Generating intelligent contextual questions');
     
     try {
       const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
         body: {
-          action: 'analyze_and_generate_tasks',
-          maturityScores: currentScores,
-          profileData,
-          businessProfile,
-          userId: user.id
+          action: 'generate_intelligent_questions',
+          userId: user.id,
+          userProfile: profileData
         }
       });
 
       if (error) throw error;
 
-      if (data?.tasks) {
-        // Reemplazar tareas existentes con las nuevas generadas
-        await deleteAllTasks();
-        
-        const newTasks = [];
-        for (const taskData of data.tasks) {
-          const newTask = await createTask({
-            title: taskData.title,
-            description: taskData.description,
-            agent_id: taskData.agentId,
-            relevance: taskData.relevance,
-            priority: taskData.priority
-          });
-          if (newTask) newTasks.push(newTask);
-        }
-        
-        console.log('✅ Master Coordinator: Generated and created', newTasks.length, 'intelligent tasks');
-        toast({
-          title: "Tareas Personalizadas Generadas",
-          description: `He creado ${newTasks.length} tareas específicas para tu perfil empresarial.`,
-        });
+      if (data?.questions) {
+        console.log(`✅ Generated ${data.questions.length} intelligent questions`);
+        return data.questions;
       }
     } catch (error) {
-      console.error('❌ Master Coordinator: Error generating tasks:', error);
+      console.error('❌ Error generating intelligent questions:', error);
     }
-  }, [currentScores, profileData, businessProfile, user, createTask, deleteAllTasks]);
+  }, [user, profileData]);
 
   // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
   const transformToCoordinatorTasks = useMemo(() => {
@@ -148,14 +179,14 @@ export const useMasterCoordinator = () => {
     }
   }, [tasks]);
 
-  // Inicialización automática del coordinador cuando hay datos
+  // FASE 1: Inicialización automática del coordinador cuando hay datos
   useEffect(() => {
-    if (currentScores && profileData && !isInitialized && tasks.length === 0) {
-      console.log('🚀 Master Coordinator: Auto-initializing with profile data');
+    if (user && !isInitialized && tasks.length === 0) {
+      console.log('🚀 Master Coordinator: Auto-initializing with complete profile data');
       analyzeProfileAndGenerateTasks();
       setIsInitialized(true);
     }
-  }, [currentScores, profileData, tasks.length, isInitialized, analyzeProfileAndGenerateTasks]);
+  }, [user, tasks.length, isInitialized, analyzeProfileAndGenerateTasks]);
 
   // Actualizar tareas del coordinador cuando cambien las tareas normales
   useEffect(() => {
@@ -316,28 +347,30 @@ export const useMasterCoordinator = () => {
       tasks.find(t => t.id === task.id)?.status === 'pending');
   };
 
+  // FASE 4: Mensaje inteligente del coordinador
   const getCoordinatorMessage = () => {
     const nextTask = getNextUnlockedTask();
     const completedCount = tasks.filter(t => t.status === 'completed').length;
+    const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
     
     if (!nextTask && completedCount === 0) {
       return {
         type: 'welcome',
-        message: "¡Hola! Veo que acabas de completar tu análisis de madurez. Estos son los pasos específicos que debes seguir para hacer crecer tu emprendimiento. Vamos paso a paso, yo te acompaño."
+        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${businessName}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`
       };
     }
     
     if (nextTask) {
       return {
         type: 'guidance',
-        message: `Perfecto, tu siguiente misión es: "${nextTask.title}". Haz clic aquí para activarla y te guiaré paso a paso.`,
+        message: `Perfecto, tu siguiente misión para ${businessName} es: "${nextTask.title}". Haz clic en "Empezar ahora" y te guiaré paso a paso con detalles específicos.`,
         taskId: nextTask.id
       };
     }
     
     return {
       type: 'progress',
-      message: `¡Increíble! Has completado ${completedCount} tareas. Estás construyendo algo genial. ¿Quieres que evalúe tu progreso y te recomiende los siguientes pasos?`
+      message: `¡Increíble! Has completado ${completedCount} tareas para ${businessName}. Estás construyendo algo realmente sólido. ¿Quieres que analice tu progreso y genere las siguientes recomendaciones?`
     };
   };
 
@@ -414,6 +447,7 @@ export const useMasterCoordinator = () => {
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
     analyzeProfileAndGenerateTasks,
+    generateIntelligentQuestions,
     startTaskJourney,
     completeTaskStep,
     generateTaskDeliverable,

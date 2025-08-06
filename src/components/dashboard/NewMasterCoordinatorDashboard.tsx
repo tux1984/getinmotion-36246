@@ -9,7 +9,9 @@ import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { PersonalizedWelcomeSection } from './PersonalizedWelcomeSection';
 import { FixedMasterCoordinator } from '@/components/master-coordinator/FixedMasterCoordinator';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
+import { IntelligentStartButton } from './IntelligentStartButton';
 import { generatePersonalizedRecommendations } from '@/utils/personalizedRecommendations';
+import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,6 +44,7 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { toast } = useToast();
   const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
   
@@ -61,6 +64,8 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     coordinatorMessage,
     nextUnlockedTask,
     regenerateTasksFromProfile,
+    analyzeProfileAndGenerateTasks,
+    generateIntelligentQuestions,
     startTaskJourney,
     loading: coordinatorLoading
   } = useMasterCoordinator();
@@ -117,10 +122,45 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
     );
   }
 
+  // FASE 3: Manejo del botón "Empezar ahora" funcional
+  const handleStartNow = async () => {
+    console.log('🚀 Starting Master Coordinator flow');
+    try {
+      // Activar análisis completo y generar tareas
+      await analyzeProfileAndGenerateTasks();
+      
+      // Mostrar mensaje de éxito
+      toast({
+        title: "¡Coordinador Activado!",
+        description: "He analizado tu perfil y generado tareas específicas para tu negocio.",
+      });
+    } catch (error) {
+      console.error('❌ Error starting coordinator:', error);
+    }
+  };
+
   const handleRecalculateMaturity = async () => {
     // Navigate to maturity calculator and regenerate tasks
     navigate('/maturity-calculator');
     await regenerateTasksFromProfile();
+  };
+
+  const handleTalkAboutBusiness = async () => {
+    console.log('💬 Generating intelligent questions about business');
+    try {
+      const questions = await generateIntelligentQuestions();
+      if (questions && questions.length > 0) {
+        // Navigate to intelligent conversation with context
+        navigate('/dashboard/agent/master-coordinator', { 
+          state: { 
+            context: 'business_deep_dive',
+            questions 
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error generating questions:', error);
+    }
   };
 
   const handleEditProfile = () => {
@@ -301,6 +341,21 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
           
+          {/* Intelligent Start Button - FASE 3 */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <IntelligentStartButton
+              onStartNow={handleStartNow}
+              onTalkAboutBusiness={handleTalkAboutBusiness}
+              onRecalculateMaturity={handleRecalculateMaturity}
+              coordinatorMessage={coordinatorMessage}
+              loading={coordinatorLoading}
+              language={language}
+            />
+          </motion.div>
+
           {/* Personalized Welcome Section */}
           {businessProfile && (
             <motion.div 
