@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
 import { useUserBusinessProfile } from './useUserBusinessProfile';
+import { useToast } from '@/hooks/use-toast';
 import { useAgentTasks } from './useAgentTasks';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 
 export interface CoordinatorTask {
   id: string;
@@ -162,7 +162,21 @@ export const useMasterCoordinator = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDeliverables(data || []);
+      
+      // Transform database fields to match TaskDeliverable interface
+      const transformedDeliverables: TaskDeliverable[] = (data || []).map(item => ({
+        id: item.id,
+        taskId: item.task_id,
+        title: item.title,
+        description: item.description || '',
+        fileType: item.file_type as 'pdf' | 'doc' | 'txt' | 'table',
+        content: item.content,
+        downloadUrl: item.file_url,
+        createdAt: item.created_at,
+        agentId: item.agent_id
+      }));
+      
+      setDeliverables(transformedDeliverables);
     } catch (error) {
       console.error('Error loading deliverables:', error);
     }

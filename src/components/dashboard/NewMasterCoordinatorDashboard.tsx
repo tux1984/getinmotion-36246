@@ -33,7 +33,9 @@ import {
   Bot,
   Calculator,
   User,
-  Crown
+  Crown,
+  FileText,
+  Star
 } from 'lucide-react';
 
 export const NewMasterCoordinatorDashboard: React.FC = () => {
