@@ -127,6 +127,18 @@ export const MasterCoordinatorDashboard: React.FC = () => {
       timeGreeting = t.greetings.goodEvening;
     }
 
+    // Check if user is artisan based on tasks
+    const hasArtisanTasks = tasks.some(task => 
+      task.title.toLowerCase().includes('costo') || 
+      task.title.toLowerCase().includes('artesanal') ||
+      task.title.toLowerCase().includes('cost') ||
+      task.title.toLowerCase().includes('craft')
+    );
+
+    if (hasArtisanTasks) {
+      return `${timeGreeting} ${language === 'es' ? 'Vamos a convertir tu arte en un negocio próspero' : 'Let\'s turn your art into a thriving business'} 🎨`;
+    }
+
     if (completedTasksCount === 0) {
       return `${timeGreeting} ${t.greetings.firstTime} ${maturityLevel.emoji}`;
     } else if (completedTasksCount >= 10) {

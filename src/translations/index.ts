@@ -152,6 +152,9 @@ export interface Translations {
     completeTask: string;
     markCompleted: string;
     quickComplete: string;
+    stepByStep: string;
+    continueSteps: string;
+    startTask: string;
     delete: string;
     subtasks: string;
     progress: string;
@@ -819,6 +822,9 @@ export const translations: Record<'en' | 'es', Translations> = {
       completeTask: 'Complete Task',
       markCompleted: 'Mark as Done',
       quickComplete: 'Quick complete',
+      stepByStep: 'Step by Step',
+      continueSteps: 'Continue Steps',
+      startTask: 'Start Task',
       delete: 'Delete',
       subtasks: 'subtasks',
       progress: 'Progress',
@@ -1516,6 +1522,9 @@ export const translations: Record<'en' | 'es', Translations> = {
       completeTask: 'Completar Tarea',
       markCompleted: 'Marcar Terminada',
       quickComplete: 'Completar rápido',
+      stepByStep: 'Paso a Paso',
+      continueSteps: 'Continuar Pasos',
+      startTask: 'Iniciar Tarea',
       delete: 'Eliminar',
       subtasks: 'subtareas',
       progress: 'Progreso',
