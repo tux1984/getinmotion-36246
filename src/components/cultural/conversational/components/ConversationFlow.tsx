@@ -99,22 +99,8 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
       blockId: block.id 
     });
     
+    // Solo guardar la respuesta, el usuario debe hacer clic en "Siguiente" para avanzar
     onAnswer(currentQuestion.id, answer);
-    
-    // Strict validation before setTimeout to prevent index overflow
-    if (!isLastQuestion && currentQuestionIndex + 1 < block.questions.length) {
-      setTimeout(() => {
-        setCurrentQuestionIndex(prev => {
-          const newIndex = prev + 1;
-          console.log('ConversationFlow: Setting new question index via setTimeout', { prev, newIndex, maxIndex: block.questions.length - 1 });
-          // Additional safety check in case state changed during timeout
-          if (newIndex < block.questions.length) {
-            return newIndex;
-          }
-          return prev; // Don't change if it would exceed bounds
-        });
-      }, 800);
-    }
   };
 
   const handleNext = () => {
