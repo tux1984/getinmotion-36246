@@ -313,14 +313,48 @@ const calculateMonetization = (profileData: UserProfileData): number => {
   return Math.min(score, 5);
 };
 
-const getMaturityLevel = (profileData: UserProfileData, businessType: string, language: 'en' | 'es'): string => {
+const getMaturityLevel = (profileData: UserProfileData, businessType: string, language: 'en' | 'es'): MaturityLevel => {
   const scores = calculateMaturityScores(profileData, businessType);
   const average = Object.values(scores).reduce((a, b) => a + b, 0) / Object.values(scores).length;
   
-  if (average <= 2) return language === 'es' ? 'Iniciando' : 'Starting';
-  if (average <= 3) return language === 'es' ? 'Desarrollando' : 'Developing'; 
-  if (average <= 4) return language === 'es' ? 'Creciendo' : 'Growing';
-  return language === 'es' ? 'Avanzado' : 'Advanced';
+  if (average <= 2) {
+    return {
+      id: 'starting',
+      level: 1,
+      name: language === 'es' ? 'Iniciando' : 'Starting',
+      description: language === 'es' ? 'Estás comenzando tu viaje emprendedor' : 'You are starting your entrepreneurial journey',
+      characteristics: [],
+      nextSteps: []
+    };
+  }
+  if (average <= 3) {
+    return {
+      id: 'developing',
+      level: 2,
+      name: language === 'es' ? 'Desarrollando' : 'Developing',
+      description: language === 'es' ? 'Tu negocio está tomando forma' : 'Your business is taking shape',
+      characteristics: [],
+      nextSteps: []
+    };
+  }
+  if (average <= 4) {
+    return {
+      id: 'growing',
+      level: 3,
+      name: language === 'es' ? 'Creciendo' : 'Growing',
+      description: language === 'es' ? 'Tu negocio está en crecimiento' : 'Your business is growing',
+      characteristics: [],
+      nextSteps: []
+    };
+  }
+  return {
+    id: 'advanced',
+    level: 4,
+    name: language === 'es' ? 'Avanzado' : 'Advanced',
+    description: language === 'es' ? 'Tienes un negocio maduro y establecido' : 'You have a mature and established business',
+    characteristics: [],
+    nextSteps: []
+  };
 };
 
 const generatePersonalizedTasks = (profileData: UserProfileData, businessType: string, language: 'en' | 'es'): PersonalizedTask[] => {
