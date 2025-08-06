@@ -12,11 +12,11 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         questions: [
           {
             id: 'business_description',
-            question: 'What do you do or sell exactly?',
+            question: 'Describe your business in detail - what you do, who you help, and what makes you unique?',
             type: 'text-input' as const,
             fieldName: 'businessDescription',
-            placeholder: 'E.g., I make handmade jewelry, I teach piano, I develop mobile apps...',
-            explanation: 'This helps me understand your core product or service and identify the best growth strategies for your specific industry.',
+            placeholder: 'E.g., I create custom handmade jewelry for young professionals who want unique pieces that reflect their personality. I specialize in silver work with natural stones...',
+            explanation: 'The more specific you are, the better I can understand your business and generate personalized recommendations. Think about your unique value proposition.',
             required: true
           },
           {
@@ -41,7 +41,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'whoYouServe',
         title: 'Your Audience',
         subtitle: 'Identifying your ideal customers',
-        agentMessage: "Great! Now I need to understand who you're helping. Your audience is key to everything we'll build together.",
+        agentMessage: "Perfect! Based on what you've told me about your business, I'm now generating some specific questions tailored just for you. Let's dive deeper into your audience.",
         strategicContext: "Knowing your target market helps me recommend the right marketing strategies, pricing approaches, and growth tactics.",
         questions: [
           {
@@ -91,7 +91,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'howYouCharge',
         title: 'Your Pricing',
         subtitle: 'Understanding your revenue model',
-        agentMessage: "Money talk time! Don't worry, this isn't about judgment - it's about understanding your current revenue model so I can help you optimize it.",
+        agentMessage: "Now that I understand your business and audience better, let's talk money! I'm generating some pricing questions specific to your industry and business model.",
         strategicContext: "Your pricing strategy reveals a lot about your business maturity and helps me identify opportunities for improvement.",
         questions: [
           {
@@ -143,7 +143,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'salesValidation',
         title: 'Sales History',
         subtitle: 'Your track record so far',
-        agentMessage: "Let's talk about your sales experience. This isn't about bragging - it's about understanding where you are in your journey.",
+        agentMessage: "Based on your pricing model, let me ask some targeted questions about your sales experience. This helps me understand your validation level.",
         strategicContext: "Your sales history helps me determine whether you need validation strategies or scaling strategies.",
         questions: [
           {
@@ -209,7 +209,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'marketingChannels',
         title: 'Promotion & Visibility',
         subtitle: 'How you attract customers',
-        agentMessage: "Let's explore how people find out about you. Marketing doesn't have to be scary - let's see what's working and what needs attention.",
+        agentMessage: "Perfect! Now I'll customize some marketing questions specifically for your industry and target audience. Let's see what's working and what we can improve.",
         strategicContext: "Your current marketing efforts reveal opportunities for improvement and help me recommend the best growth channels for your business type.",
         questions: [
           {
@@ -247,7 +247,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'growthBlocks',
         title: 'Growth Obstacles',
         subtitle: 'What\'s holding you back',
-        agentMessage: "Now for the real talk - what's actually stopping you from growing? No judgment here, we all have obstacles. Identifying them is the first step to overcoming them.",
+        agentMessage: "Now for the tailored analysis - based on everything you've shared, I can predict some specific obstacles. Let's see if I'm right and identify what's really holding you back.",
         strategicContext: "Understanding your specific challenges helps me prioritize the most impactful tasks and recommend the right agents to help you.",
         questions: [
           {
@@ -287,7 +287,7 @@ export const getConversationBlocks = (language: 'en' | 'es'): ConversationBlock[
         id: 'visionGoals',
         title: 'Your Vision',
         subtitle: 'Where you want to go',
-        agentMessage: "Finally, let's dream a little! Where do you see yourself in the future? Your vision helps me understand what kind of support you'll need.",
+        agentMessage: "Finally, based on your unique business profile, let me ask some vision questions that will help me create the perfect growth strategy for you specifically.",
         strategicContext: "Your goals determine the type and intensity of support you'll need. Big dreams require different strategies than lifestyle businesses.",
         questions: [
           {

@@ -6,6 +6,7 @@ import { ConversationBlock, QuestionType } from '../types/conversationalTypes';
 import { UserProfileData } from '../../types/wizardTypes';
 import { QuestionRenderer } from './QuestionRenderer';
 import { InsightDisplay } from './InsightDisplay';
+import { QuestionGeneratingIndicator } from './QuestionGeneratingIndicator';
 
 interface ConversationFlowProps {
   block: ConversationBlock;
@@ -162,6 +163,12 @@ export const ConversationFlow: React.FC<ConversationFlowProps> = ({
             <p className="text-muted-foreground text-sm">{block.strategicContext}</p>
           </div>
         </div>
+
+        {/* Question Generation Indicator */}
+        <QuestionGeneratingIndicator 
+          language={language} 
+          isVisible={isGenerating}
+        />
 
         <Button
           variant="ghost"

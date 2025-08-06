@@ -44,10 +44,42 @@ export const useConversationalAgent = (
   
   console.log('useConversationalAgent: Current block', { currentBlockIndex, currentBlock: currentBlock?.id, questionsLength: currentBlock?.questions?.length });
 
-  // Initialize enhanced blocks with intelligent questions
+  // Initialize enhanced blocks with intelligent questions and dynamic generation
   useEffect(() => {
     const initializeEnhancedBlocks = async () => {
+      console.log('Initializing enhanced blocks with intelligent questions...');
       const enhanced = [...blocks];
+      
+      // Auto-generate dynamic questions after business description is provided
+      if (profileData.businessDescription && profileData.businessDescription.length > 20) {
+        console.log('Business description detected, generating contextual questions...');
+        
+        // Find the most relevant block to add dynamic questions to
+        const targetBlocks = ['whoYouServe', 'howYouCharge', 'marketingChannels'];
+        
+        for (const blockId of targetBlocks) {
+          const blockIndex = enhanced.findIndex(block => block.id === blockId);
+          if (blockIndex !== -1) {
+            try {
+              const dynamicQuestions = await generateContextualQuestions({
+                profileData,
+                language,
+                currentBlock: enhanced[blockIndex]
+              });
+              
+              if (dynamicQuestions.length > 0) {
+                console.log(`Adding ${dynamicQuestions.length} dynamic questions to ${blockId} block`);
+                enhanced[blockIndex] = {
+                  ...enhanced[blockIndex],
+                  questions: [...enhanced[blockIndex].questions, ...dynamicQuestions]
+                };
+              }
+            } catch (error) {
+              console.warn('Failed to generate dynamic questions for block:', blockId, error);
+            }
+          }
+        }
+      }
       
       // Add industry-specific questions to relevant blocks
       if (profileData.industry && profileData.businessDescription) {
@@ -87,7 +119,7 @@ export const useConversationalAgent = (
     if (blocks.length > 0) {
       initializeEnhancedBlocks();
     }
-  }, [blocks, profileData.industry, profileData.businessDescription, language, getIndustrySpecificQuestions, getConditionalQuestions]);
+  }, [blocks, profileData.industry, profileData.businessDescription, profileData.targetAudience, language, getIndustrySpecificQuestions, getConditionalQuestions, generateContextualQuestions]);
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -98,16 +130,30 @@ export const useConversationalAgent = (
     setProfileData(prev => ({ ...prev, ...data }));
   }, []);
 
-  const answerQuestion = useCallback((questionId: string, answer: any) => {
+  const answerQuestion = useCallback(async (questionId: string, answer: any) => {
     if (!currentBlock || !currentBlock.questions) {
       console.error('answerQuestion: No current block or questions available');
       return;
     }
     const question = currentBlock.questions.find(q => q.id === questionId);
     if (question) {
-      updateProfileData({ [question.fieldName]: answer });
+      const updatedData = { [question.fieldName]: answer };
+      updateProfileData(updatedData);
+      
+      // Generate follow-up questions for key fields
+      const keyFields = ['businessDescription', 'industry', 'targetAudience', 'hasSold'];
+      if (keyFields.includes(question.fieldName)) {
+        console.log(`Key field ${question.fieldName} answered, potentially generating follow-up questions...`);
+        
+        // Trigger intelligent question generation for subsequent blocks
+        const newProfileData = { ...profileData, ...updatedData };
+        if (newProfileData.businessDescription && newProfileData.industry) {
+          // This will be handled by the useEffect above
+          console.log('Profile data enriched, dynamic question generation will be triggered');
+        }
+      }
     }
-  }, [currentBlock, updateProfileData]);
+  }, [currentBlock, updateProfileData, profileData]);
 
   const goToNextBlock = useCallback(() => {
     const totalBlocks = enhancedBlocks.length > 0 ? enhancedBlocks.length : blocks.length;
