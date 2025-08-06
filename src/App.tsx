@@ -22,6 +22,7 @@ import OnePager from './pages/OnePager';
 import TwoPager from './pages/TwoPager';
 import ThreePager from './pages/ThreePager';
 import AgentsGallery from './pages/AgentsGallery';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -88,6 +89,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MaturityCalculator />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 } 
               />
