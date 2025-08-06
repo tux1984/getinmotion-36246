@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ConversationBlock, MaturityLevel, PersonalizedTask } from '../types/conversationalTypes';
 import { getConversationBlocks } from '../data/conversationBlocks';
 import { UserProfileData } from '../../types/wizardTypes';
@@ -44,40 +44,60 @@ export const useConversationalAgent = (
   
   console.log('useConversationalAgent: Current block', { currentBlockIndex, currentBlock: currentBlock?.id, questionsLength: currentBlock?.questions?.length });
 
+  // Track generated questions to prevent loops
+  const generatedQuestionsRef = useRef<Set<string>>(new Set());
+  const isGeneratingRef = useRef(false);
+  
   // Initialize enhanced blocks with intelligent questions and dynamic generation
   useEffect(() => {
     const initializeEnhancedBlocks = async () => {
+      // Prevent multiple simultaneous generations
+      if (isGeneratingRef.current) {
+        console.log('Already generating questions, skipping...');
+        return;
+      }
+      
       console.log('Initializing enhanced blocks with intelligent questions...');
       const enhanced = [...blocks];
+      let hasChanges = false;
       
       // Auto-generate dynamic questions after business description is provided
       if (profileData.businessDescription && profileData.businessDescription.length > 20) {
-        console.log('Business description detected, generating contextual questions...');
+        const businessKey = `${profileData.businessDescription}_${profileData.industry || 'unknown'}`;
         
-        // Find the most relevant block to add dynamic questions to
-        const targetBlocks = ['whoYouServe', 'howYouCharge', 'marketingChannels'];
-        
-        for (const blockId of targetBlocks) {
-          const blockIndex = enhanced.findIndex(block => block.id === blockId);
-          if (blockIndex !== -1) {
-            try {
-              const dynamicQuestions = await generateContextualQuestions({
-                profileData,
-                language,
-                currentBlock: enhanced[blockIndex]
-              });
-              
-              if (dynamicQuestions.length > 0) {
-                console.log(`Adding ${dynamicQuestions.length} dynamic questions to ${blockId} block`);
-                enhanced[blockIndex] = {
-                  ...enhanced[blockIndex],
-                  questions: [...enhanced[blockIndex].questions, ...dynamicQuestions]
-                };
+        if (!generatedQuestionsRef.current.has(businessKey)) {
+          console.log('Business description detected, generating contextual questions...');
+          isGeneratingRef.current = true;
+          
+          // Find the most relevant block to add dynamic questions to
+          const targetBlocks = ['whoYouServe', 'howYouCharge', 'marketingChannels'];
+          
+          for (const blockId of targetBlocks) {
+            const blockIndex = enhanced.findIndex(block => block.id === blockId);
+            if (blockIndex !== -1) {
+              try {
+                const dynamicQuestions = await generateContextualQuestions({
+                  profileData,
+                  language,
+                  currentBlock: enhanced[blockIndex]
+                });
+                
+                if (dynamicQuestions.length > 0) {
+                  console.log(`Adding ${dynamicQuestions.length} dynamic questions to ${blockId} block`);
+                  enhanced[blockIndex] = {
+                    ...enhanced[blockIndex],
+                    questions: [...enhanced[blockIndex].questions, ...dynamicQuestions]
+                  };
+                  hasChanges = true;
+                }
+              } catch (error) {
+                console.warn('Failed to generate dynamic questions for block:', blockId, error);
               }
-            } catch (error) {
-              console.warn('Failed to generate dynamic questions for block:', blockId, error);
             }
           }
+          
+          generatedQuestionsRef.current.add(businessKey);
+          isGeneratingRef.current = false;
         }
       }
       

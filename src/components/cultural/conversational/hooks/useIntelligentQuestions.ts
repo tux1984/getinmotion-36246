@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ConversationBlock, ConversationQuestion } from '../types/conversationalTypes';
 import { UserProfileData } from '../../types/wizardTypes';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,13 +12,25 @@ interface IntelligentQuestionParams {
 export const useIntelligentQuestions = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [dynamicQuestions, setDynamicQuestions] = useState<ConversationQuestion[]>([]);
+  const generationTimeoutRef = useRef<NodeJS.Timeout>();
 
   const generateContextualQuestions = useCallback(async ({
     profileData,
     language,
     currentBlock
   }: IntelligentQuestionParams) => {
+    // Clear any existing timeout
+    if (generationTimeoutRef.current) {
+      clearTimeout(generationTimeoutRef.current);
+    }
+    
     setIsGenerating(true);
+    
+    // Set a safety timeout to prevent stuck states
+    generationTimeoutRef.current = setTimeout(() => {
+      console.warn('Question generation timeout reached');
+      setIsGenerating(false);
+    }, 10000); // 10 second timeout
     
     try {
       console.log('Generating contextual questions for:', currentBlock.id);
@@ -61,6 +73,10 @@ export const useIntelligentQuestions = () => {
       console.error('Failed to generate contextual questions:', error);
       return [];
     } finally {
+      // Clear timeout and reset state
+      if (generationTimeoutRef.current) {
+        clearTimeout(generationTimeoutRef.current);
+      }
       setIsGenerating(false);
     }
   }, []);
