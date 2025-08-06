@@ -43,9 +43,7 @@ export const NewMasterCoordinatorDashboard: React.FC = () => {
   // Task management
   const { 
     tasks, 
-    loading: tasksLoading,
-    completeTask,
-    deleteTask 
+    loading: tasksLoading
   } = useAgentTasks();
 
   // State management
