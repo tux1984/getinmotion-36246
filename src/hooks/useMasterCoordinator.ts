@@ -73,9 +73,9 @@ export const useMasterCoordinator = () => {
         body: {
           action: 'analyze_and_generate_tasks',
           userId: user.id,
-          userProfile: profileData,
-          maturityScores: currentScores,
-          businessProfile
+          userProfile: profileData || null,
+          maturityScores: currentScores || null,
+          businessProfile: businessProfile || null
         }
       });
 
@@ -119,7 +119,9 @@ export const useMasterCoordinator = () => {
         body: {
           action: 'generate_intelligent_questions',
           userId: user.id,
-          userProfile: profileData
+          userProfile: profileData || null,
+          maturityScores: currentScores || null,
+          businessProfile: businessProfile || null
         }
       });
 
@@ -132,7 +134,7 @@ export const useMasterCoordinator = () => {
     } catch (error) {
       console.error('❌ Error generating intelligent questions:', error);
     }
-  }, [user, profileData]);
+  }, [user, profileData, currentScores, businessProfile]);
 
   // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
   const transformToCoordinatorTasks = useMemo(() => {
@@ -252,7 +254,10 @@ export const useMasterCoordinator = () => {
           action: 'create_task_steps',
           taskId,
           taskData: task,
-          profileContext: { profileData, businessProfile }
+          profileContext: { 
+            profileData: profileData || null, 
+            businessProfile: businessProfile || null 
+          }
         }
       });
 
