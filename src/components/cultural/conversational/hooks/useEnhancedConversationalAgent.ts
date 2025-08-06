@@ -43,9 +43,15 @@ export const useEnhancedConversationalAgent = (
     ? enhancedBlocks[currentBlockIndex] 
     : (blocks && blocks.length > 0 ? blocks[currentBlockIndex] : null);
 
-  // Track generated questions to prevent loops
+  // Enhanced tracking to prevent loops and excessive updates
   const generatedQuestionsRef = useRef<Set<string>>(new Set());
   const isGeneratingRef = useRef(false);
+  const lastUpdateTimeRef = useRef<number>(0);
+  const saveProgressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const updateProfileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const questionGenerationCooldownRef = useRef<number>(0);
+  const maxGenerationsPerSession = useRef<number>(3);
+  const currentGenerationsRef = useRef<number>(0);
   
   // Enhanced business type detection
   const detectBusinessType = useCallback((description: string, industry: string) => {
@@ -85,11 +91,18 @@ export const useEnhancedConversationalAgent = (
         }
       }
 
-      // Auto-generate questions when we have meaningful info (increased threshold)
-      if (profileData.businessDescription && profileData.businessDescription.length > 15) {
+      // Auto-generate questions when we have meaningful info (increased threshold to 30 chars)
+      if (profileData.businessDescription && 
+          profileData.businessDescription.length > 30 &&
+          currentGenerationsRef.current < maxGenerationsPerSession.current) {
         const businessKey = `${profileData.businessDescription}_${profileData.industry || 'unknown'}`;
+        const now = Date.now();
         
-        if (!generatedQuestionsRef.current.has(businessKey) && !isGeneratingRef.current) {
+        // Implement 5-second cooldown between generations
+        if (!generatedQuestionsRef.current.has(businessKey) && 
+            !isGeneratingRef.current &&
+            now - questionGenerationCooldownRef.current > 5000) {
+          
           console.log('🧠 Generando preguntas específicas para tu negocio...');
           setPersonalizationCount(prev => prev + 1);
           setCurrentPersonalizationContext(
@@ -98,6 +111,8 @@ export const useEnhancedConversationalAgent = (
               : `Analyzing your ${businessType === 'creative' ? 'creative work' : 'business'}...`
           );
           isGeneratingRef.current = true;
+          questionGenerationCooldownRef.current = now;
+          currentGenerationsRef.current += 1;
           
           // More strategic question insertion
           const targetBlocks = ['whoYouServe', 'howYouCharge', 'marketingChannels', 'growthBlocks'];
@@ -172,18 +187,27 @@ export const useEnhancedConversationalAgent = (
     initializeEnhancedBlocks();
   }, [profileData.businessDescription, profileData.industry, blocks, businessType]);
 
-  // Real-time question generation after important answers
+  // Optimized real-time question generation with stricter controls
   const triggerIntelligentFollowUp = useCallback(async (fieldName: string, answer: any) => {
     const triggerFields = ['targetAudience', 'pricingMethod', 'hasSold', 'mainObstacles'];
+    const now = Date.now();
     
-    // Only trigger for non-text fields or completed text (>20 chars)
+    // Enhanced triggering logic with quality checks
     const isTextAnswer = typeof answer === 'string';
-    const shouldTrigger = !triggerFields.includes(fieldName) || 
-                         !isTextAnswer || 
-                         (isTextAnswer && answer.length > 20);
+    const isHighQualityText = isTextAnswer && 
+                             answer.length > 30 && 
+                             answer.split(' ').length > 5 &&
+                             !answer.toLowerCase().includes('test') &&
+                             !answer.toLowerCase().includes('prueba');
     
-    if (triggerFields.includes(fieldName) && !isGeneratingRef.current && shouldTrigger) {
-      console.log(`🧠 Generando pregunta de seguimiento para: ${fieldName}`);
+    const shouldTrigger = triggerFields.includes(fieldName) && 
+                         !isGeneratingRef.current &&
+                         currentGenerationsRef.current < maxGenerationsPerSession.current &&
+                         now - questionGenerationCooldownRef.current > 5000 &&
+                         (!isTextAnswer || isHighQualityText);
+    
+    if (shouldTrigger) {
+      console.log(`🧠 Generando pregunta de seguimiento inteligente para: ${fieldName}`);
       setPersonalizationCount(prev => prev + 1);
       setCurrentPersonalizationContext(
         language === 'es' 
@@ -193,6 +217,9 @@ export const useEnhancedConversationalAgent = (
       
       try {
         isGeneratingRef.current = true;
+        questionGenerationCooldownRef.current = now;
+        currentGenerationsRef.current += 1;
+        
         const dynamicQuestions = await generateContextualQuestions({
           profileData: { ...profileData, [fieldName]: answer },
           language,
@@ -200,18 +227,29 @@ export const useEnhancedConversationalAgent = (
         });
         
         if (dynamicQuestions.length > 0) {
+          // More strategic placement
           const enhanced = [...enhancedBlocks];
-          const nextBlockIndex = Math.min(currentBlockIndex + 1, enhanced.length - 1);
+          const targetBlockIndex = Math.min(currentBlockIndex + 1, enhanced.length - 1);
           
-          if (nextBlockIndex < enhanced.length) {
-            enhanced[nextBlockIndex] = {
-              ...enhanced[nextBlockIndex],
-              questions: [
-                ...enhanced[nextBlockIndex].questions,
-                ...dynamicQuestions.slice(0, 1) // Just one follow-up per trigger
-              ]
-            };
-            setEnhancedBlocks(enhanced);
+          if (targetBlockIndex < enhanced.length) {
+            const validQuestions = dynamicQuestions.filter(q => 
+              q.question && 
+              q.question.length > 15 && 
+              q.question.includes('?') &&
+              !q.question.toLowerCase().includes('insight')
+            );
+            
+            if (validQuestions.length > 0) {
+              enhanced[targetBlockIndex] = {
+                ...enhanced[targetBlockIndex],
+                questions: [
+                  ...enhanced[targetBlockIndex].questions,
+                  validQuestions[0] // Only add one high-quality question
+                ]
+              };
+              setEnhancedBlocks(enhanced);
+              console.log(`✨ Agregada pregunta inteligente de seguimiento`);
+            }
           }
         }
       } catch (error) {
@@ -223,41 +261,74 @@ export const useEnhancedConversationalAgent = (
   }, [profileData, currentBlock, currentBlockIndex, enhancedBlocks, businessType, language]);
 
   const updateProfileData = useCallback((data: Partial<UserProfileData>) => {
-    console.log('Enhanced Agent: Updating profile data', data);
+    const now = Date.now();
     
-    // Prevent rapid-fire updates for text fields
+    // Prevent excessive updates - minimum 100ms between updates
+    if (now - lastUpdateTimeRef.current < 100) {
+      console.log('Enhanced Agent: Throttling rapid updates');
+      return;
+    }
+    
+    console.log('Enhanced Agent: Smart profile data update', { data, now });
+    
+    // Enhanced change detection for text fields
     const textFields = ['businessDescription', 'targetAudience', 'mainObstacles'];
     const isTextFieldUpdate = Object.keys(data).some(key => textFields.includes(key));
     
     if (isTextFieldUpdate) {
-      // For text fields, only update if the value is substantially different
+      // Clear existing timeout for debounced updates
+      if (updateProfileTimeoutRef.current) {
+        clearTimeout(updateProfileTimeoutRef.current);
+      }
+      
+      // For text fields, use more sophisticated change detection
       const shouldUpdate = Object.entries(data).every(([key, value]) => {
         const currentValue = String(profileData[key] || '');
         const newValue = String(value || '');
-        // Only update if significant change (>3 chars difference or complete)
-        return Math.abs(newValue.length - currentValue.length) > 3 || newValue.length < 3;
+        
+        // Advanced change detection
+        const significantChange = Math.abs(newValue.length - currentValue.length) > 5;
+        const isComplete = newValue.length > 20 && newValue.split(' ').length > 3;
+        const isEmpty = newValue.length === 0;
+        
+        return significantChange || isComplete || isEmpty;
       });
       
       if (!shouldUpdate) {
-        console.log('Enhanced Agent: Skipping minor text update to prevent loops');
+        console.log('Enhanced Agent: Deferring minor text update');
         return;
       }
+      
+      // Debounce profile updates for text fields
+      updateProfileTimeoutRef.current = setTimeout(() => {
+        performUpdate();
+      }, 300);
+    } else {
+      // Immediate update for non-text fields
+      performUpdate();
     }
     
-    setProfileData(prev => {
-      const updated = { ...prev, ...data };
+    function performUpdate() {
+      lastUpdateTimeRef.current = now;
       
-      // Detect business type on industry change
-      if (data.industry || data.businessDescription) {
-        const detectedType = detectBusinessType(
-          updated.businessDescription || '', 
-          updated.industry || ''
-        );
-        setBusinessType(detectedType);
-      }
-      
-      return updated;
-    });
+      setProfileData(prev => {
+        const updated = { ...prev, ...data };
+        
+        // Detect business type on industry change
+        if (data.industry || data.businessDescription) {
+          const detectedType = detectBusinessType(
+            updated.businessDescription || '', 
+            updated.industry || ''
+          );
+          setBusinessType(detectedType);
+        }
+        
+        // Smart progress saving with debounce
+        debouncedSaveProgress();
+        
+        return updated;
+      });
+    }
   }, [detectBusinessType, profileData]);
 
   const answerQuestion = useCallback((questionId: string, answer: any) => {
@@ -293,7 +364,33 @@ export const useEnhancedConversationalAgent = (
     }
   }, [currentBlockIndex]);
 
+  // Optimized progress saving with debouncing
+  const debouncedSaveProgress = useCallback(() => {
+    if (saveProgressTimeoutRef.current) {
+      clearTimeout(saveProgressTimeoutRef.current);
+    }
+    
+    saveProgressTimeoutRef.current = setTimeout(() => {
+      try {
+        const progressData = {
+          currentBlockIndex,
+          profileData,
+          insights,
+          enhancedBlocks,
+          personalizationCount,
+          businessType,
+          lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem('enhanced_conversational_agent_progress', JSON.stringify(progressData));
+        console.log('Enhanced Agent: Smart progress saved');
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+      }
+    }, 2000); // 2 second debounce
+  }, [currentBlockIndex, profileData, insights, enhancedBlocks, personalizationCount, businessType]);
+
   const saveProgress = useCallback(() => {
+    // Immediate save for manual triggers
     try {
       const progressData = {
         currentBlockIndex,
@@ -305,7 +402,7 @@ export const useEnhancedConversationalAgent = (
         lastUpdated: new Date().toISOString()
       };
       localStorage.setItem('enhanced_conversational_agent_progress', JSON.stringify(progressData));
-      console.log('Enhanced Agent: Progress saved');
+      console.log('Enhanced Agent: Manual progress saved');
     } catch (error) {
       console.error('Failed to save progress:', error);
     }

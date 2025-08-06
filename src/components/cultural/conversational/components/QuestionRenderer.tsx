@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Check, X } from 'lucide-react';
+import { Check, X, Edit3 } from 'lucide-react';
 import { ConversationQuestion } from '../types/conversationalTypes';
 
 interface QuestionRendererProps {
@@ -14,7 +14,7 @@ interface QuestionRendererProps {
   language: 'en' | 'es';
 }
 
-export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
+const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   question,
   value,
   onChange,
@@ -22,17 +22,22 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   language
 }) => {
   // Use onAnswer if provided, otherwise fall back to onChange
-  const handleAnswer = onAnswer || onChange || (() => {});
+  const handleAnswer = useCallback(onAnswer || onChange || (() => {}), [onAnswer, onChange]);
+  
   const translations = {
     en: {
       yes: "Yes",
       no: "No",
-      selectOption: "Select an option"
+      selectOption: "Select an option",
+      typing: "Typing...",
+      willSaveAfter: "Will save after you finish typing"
     },
     es: {
       yes: "Sí",
       no: "No",
-      selectOption: "Selecciona una opción"
+      selectOption: "Selecciona una opción",
+      typing: "Escribiendo...",
+      willSaveAfter: "Se guardará cuando termines de escribir"
     }
   };
 
@@ -150,51 +155,95 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     );
   };
 
-  const renderTextInput = () => {
-    const [localValue, setLocalValue] = React.useState(value || '');
-    const [debounceTimeout, setDebounceTimeout] = React.useState<NodeJS.Timeout | null>(null);
+  const renderTextInput = useCallback(() => {
+    const [localValue, setLocalValue] = useState(value || '');
+    const [isTyping, setIsTyping] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
+    const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastSavedValueRef = useRef(value || '');
 
-    // Update local value when external value changes
-    React.useEffect(() => {
-      setLocalValue(value || '');
-    }, [value]);
+    // Only update local value on external changes if we haven't started typing
+    useEffect(() => {
+      if (!isTyping && !hasInitialized) {
+        setLocalValue(value || '');
+        lastSavedValueRef.current = value || '';
+        setHasInitialized(true);
+      }
+    }, [value, isTyping, hasInitialized]);
 
-    const handleInputChange = (inputValue: string) => {
+    const handleInputChange = useCallback((inputValue: string) => {
       setLocalValue(inputValue);
+      setIsTyping(true);
       
       // Clear existing timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
       
-      // Set new timeout for debounced update
-      const timeout = setTimeout(() => {
-        console.log('QuestionRenderer: Debounced text input update', inputValue);
-        handleAnswer(inputValue);
-      }, 800); // Wait 800ms after user stops typing
+      // Only update if there's a significant change (>5 chars or input is complete)
+      const shouldUpdate = (inputValue.trim().length > 10 && 
+                           Math.abs(inputValue.length - lastSavedValueRef.current.length) > 5) ||
+                          inputValue.trim().length === 0;
       
-      setDebounceTimeout(timeout);
-    };
+      if (shouldUpdate) {
+        // Set new timeout for debounced update - increased to 1200ms
+        debounceTimeoutRef.current = setTimeout(() => {
+          console.log('QuestionRenderer: Smart debounced update', { 
+            inputValue, 
+            previous: lastSavedValueRef.current,
+            length: inputValue.length 
+          });
+          
+          lastSavedValueRef.current = inputValue;
+          handleAnswer(inputValue);
+          setIsTyping(false);
+        }, 1200);
+      } else {
+        // Short timeout just to update typing status
+        debounceTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 500);
+      }
+    }, [handleAnswer]);
 
     // Cleanup timeout on unmount
-    React.useEffect(() => {
+    useEffect(() => {
       return () => {
-        if (debounceTimeout) {
-          clearTimeout(debounceTimeout);
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
         }
       };
-    }, [debounceTimeout]);
+    }, []);
 
     return (
-      <Input
-        type="text"
-        placeholder={question.placeholder}
-        value={localValue}
-        onChange={(e) => handleInputChange(e.target.value)}
-        className="w-full p-4 text-base"
-      />
+      <div className="space-y-2">
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder={question.placeholder}
+            value={localValue}
+            onChange={(e) => handleInputChange(e.target.value)}
+            className="w-full p-4 text-base pr-12"
+          />
+          {isTyping && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-primary animate-pulse" />
+            </div>
+          )}
+        </div>
+        {isTyping && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs text-muted-foreground flex items-center gap-2"
+          >
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+            {t.typing} - {t.willSaveAfter}
+          </motion.div>
+        )}
+      </div>
     );
-  };
+  }, [value, question.placeholder, handleAnswer, t]);
 
   const renderSlider = () => {
     const minValue = question.min || 1;
@@ -304,4 +353,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     default:
       return <div>Unsupported question type</div>;
   }
-};
+});
+
+QuestionRenderer.displayName = 'QuestionRenderer';
+
+export { QuestionRenderer };

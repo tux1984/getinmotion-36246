@@ -5,7 +5,7 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { UserProfileData } from '../../types/wizardTypes';
 import { AgentHeader } from './AgentHeader';
 import { IntelligentConversationFlow } from './IntelligentConversationFlow';
-import { ProgressSaving } from './ProgressSaving';
+import { SmartProgressIndicator } from './SmartProgressIndicator';
 import { CreativeResultsDisplay } from './CreativeResultsDisplay';
 import { useEnhancedConversationalAgent } from '../hooks/useEnhancedConversationalAgent';
 
@@ -119,8 +119,13 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
         personalizationCount={personalizationCount}
       />
 
-      {/* Progress Saving Indicator */}
-      <ProgressSaving language={language} />
+      {/* Smart Progress Indicator */}
+      <SmartProgressIndicator 
+        language={language}
+        isGenerating={isGenerating}
+        isSaving={false}
+        hasUnsavedChanges={false}
+      />
 
       {/* Main Intelligent Conversation Flow */}
       <div className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-border/50">
