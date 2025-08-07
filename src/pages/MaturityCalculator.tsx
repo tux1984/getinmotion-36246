@@ -8,6 +8,7 @@ import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
 import { FusedMaturityCalculator } from '@/components/cultural/FusedMaturityCalculator';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const MaturityCalculator = () => {
   
@@ -36,7 +37,11 @@ const MaturityCalculator = () => {
     }, 3000); // Slightly longer to allow coordinator to fully activate
   };
 
-  const seoData = SEO_CONFIG.pages.maturityCalculator.en;
+  const seoData = SEO_CONFIG.pages.maturityCalculator?.en || {
+    title: 'Business Maturity Calculator - Motion',
+    description: 'Assess your business maturity level',
+    keywords: 'maturity calculator, business assessment'
+  };
 
   return (
     <>
@@ -54,9 +59,11 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <FusedMaturityCalculator
-        onComplete={handleComplete}
-      />
+      <ErrorBoundary>
+        <FusedMaturityCalculator
+          onComplete={handleComplete}
+        />
+      </ErrorBoundary>
     </>
   );
 };
