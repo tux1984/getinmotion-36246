@@ -5,7 +5,7 @@ import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { MyMissionsDashboard } from '@/components/dashboard/MyMissionsDashboard';
-import { GuidedTaskExecution } from '@/components/tasks/GuidedTaskExecution';
+import { IntelligentTaskInterface } from '@/components/tasks/IntelligentTaskInterface';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ListTodo } from 'lucide-react';
@@ -68,7 +68,14 @@ const TasksDashboard = () => {
 
             {/* Task Execution Content */}
             <div className="max-w-6xl mx-auto px-6 py-8">
-              <GuidedTaskExecution task={selectedTask} />
+              <IntelligentTaskInterface 
+                task={selectedTask} 
+                onTaskComplete={() => {
+                  // Refresh tasks and go back to dashboard
+                  setSelectedTask(null);
+                }}
+                onBack={() => setSelectedTask(null)}
+              />
             </div>
           </div>
         </DashboardBackground>
