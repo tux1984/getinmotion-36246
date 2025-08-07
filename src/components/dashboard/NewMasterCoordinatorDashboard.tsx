@@ -10,6 +10,7 @@ import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
 import { CompactPriorityRecommendations } from './CompactPriorityRecommendations';
+import { QuickActionsPanel } from './QuickActionsPanel';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -506,61 +507,20 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
               </motion.div>
             </div>
 
-            {/* Right Column: Quick Actions */}
+            {/* Right Column: Quick Actions Panel */}
             <div className="space-y-6">
               
-              {/* Master Agent Chat */}
+              {/* Unified Quick Actions Panel */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="border-secondary/20 bg-gradient-to-br from-secondary/5 to-accent/5">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Crown className="w-5 h-5 text-secondary" />
-                      <span>{t.getGuidance}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      {t.masterAgentHelper}
-                    </p>
-                    <Button 
-                      onClick={handleMasterAgentChat}
-                      className="w-full bg-secondary hover:bg-secondary/90"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      {t.chatWithMaster}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Quick Actions */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Target className="w-5 h-5" />
-                      <span>{t.viewAllTasks}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      onClick={() => navigate('/dashboard/tasks')}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      {t.viewAllTasks}
-                    </Button>
-                  </CardContent>
-                </Card>
+                <QuickActionsPanel
+                  language={language}
+                  onMasterAgentChat={handleMasterAgentChat}
+                  activeTasks={activeTasksCount}
+                />
               </motion.div>
 
             </div>
