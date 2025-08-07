@@ -65,7 +65,7 @@ serve(async (req) => {
         return await completeStep(taskId!, stepId!, stepData, userId);
       
       case 'generate_deliverable':
-        return await generateDeliverable(taskId!, userId);
+        return await generateDeliverable(taskId!, userId, userProfile?.collectedAnswers);
       
       default:
         throw new Error(`Unknown action: ${action}`);
@@ -563,6 +563,11 @@ async function generateIntelligentQuestions(userId: string, userProfile: any) {
       maturityScores: maturityData
     };
 
+    // If this is for task-specific questions, use different logic
+    if (userProfile?.taskId) {
+      return await generateTaskSpecificQuestions(userProfile);
+    }
+
     const prompt = `
 Eres un Master Coordinator especializado en hacer preguntas inteligentes para profundizar en el perfil empresarial.
 
@@ -855,7 +860,7 @@ export async function completeStep(taskId: string, stepId: string, stepData: any
 }
 
 // Generar entregable para tarea completada
-export async function generateDeliverable(taskId: string, userId: string) {
+export async function generateDeliverable(taskId: string, userId: string, collectedAnswers?: Array<{question: string, answer: string}>) {
   if (!openAIApiKey) {
     return new Response(
       JSON.stringify({ error: 'OpenAI API key not configured' }),
@@ -877,20 +882,31 @@ export async function generateDeliverable(taskId: string, userId: string) {
       .eq('task_id', taskId)
       .order('step_number');
 
-    const stepData = steps?.map(step => ({
-      title: step.title,
-      userInput: step.user_input_data
-    }));
+    let inputData;
+    if (collectedAnswers && collectedAnswers.length > 0) {
+      // Use the intelligent collection data
+      inputData = collectedAnswers.map(qa => ({
+        question: qa.question,
+        answer: qa.answer
+      }));
+    } else {
+      // Use traditional step data
+      inputData = steps?.map(step => ({
+        title: step.title,
+        userInput: step.user_input_data
+      }));
+    }
 
     const prompt = `
-Eres un experto en crear entregables empresariales profesionales.
+Eres un experto en crear entregables empresariales profesionales y valiosos.
 
 TAREA COMPLETADA:
 Título: "${task.title}"
 Descripción: "${task.description}"
+Agente: "${task.agent_id}"
 
-PASOS REALIZADOS Y DATOS:
-${JSON.stringify(stepData, null, 2)}
+INFORMACIÓN RECOPILADA:
+${JSON.stringify(inputData, null, 2)}
 
 INSTRUCCIONES:
 1. Crea un entregable profesional y útil
@@ -1051,6 +1067,128 @@ Responde en JSON con este formato:
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// Task-specific question generation for the intelligent interface
+async function generateTaskSpecificQuestions(userProfile: any) {
+  if (!openAIApiKey) {
+    return new Response(
+      JSON.stringify({ error: 'OpenAI API key not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  try {
+    const previousAnswers = userProfile?.previousAnswers || [];
+    const hasContext = previousAnswers.length > 0;
+
+    let prompt = '';
+
+    if (hasContext) {
+      // Generate contextual follow-up questions based on previous answers
+      prompt = `
+Eres un especialista en conversaciones empresariales inteligentes. Analiza las respuestas previas del usuario y genera LA SIGUIENTE pregunta más relevante para profundizar en su negocio.
+
+CONTEXTO DEL NEGOCIO:
+Tarea: ${userProfile?.taskTitle || 'No especificada'}
+Agente: ${userProfile?.agentId || 'general'}
+
+RESPUESTAS PREVIAS:
+${previousAnswers.map((qa: any, index: number) => `${index + 1}. P: ${qa.question}\n   R: ${qa.answer}`).join('\n\n')}
+
+INSTRUCCIONES:
+1. Analiza las respuestas previas para identificar qué información falta
+2. Genera UNA sola pregunta que profundice en aspectos importantes no cubiertos
+3. La pregunta debe ser específica y basada en las respuestas anteriores
+4. Evita repetir información ya obtenida
+5. Enfócate en completar la información necesaria para el agente específico
+
+Responde SOLO con un array JSON con UNA pregunta:
+[{
+  "question": "Pregunta específica basada en respuestas anteriores",
+  "context": "Por qué esta pregunta es el siguiente paso lógico",
+  "category": "followup",
+  "type": "text"
+}]
+`;
+    } else {
+      // Generate initial questions for the specific task/agent
+      prompt = `
+Eres un especialista en recolección de información empresarial. Genera 3-4 preguntas específicas para ayudar al usuario con su tarea empresarial.
+
+CONTEXTO:
+Tarea: ${userProfile?.taskTitle || 'No especificada'}
+Descripción: ${userProfile?.taskDescription || 'No disponible'}
+Agente: ${userProfile?.agentId || 'general'}
+
+INSTRUCCIONES ESPECÍFICAS POR AGENTE:
+- financial-management: Preguntas sobre costos, precios, ingresos, gastos
+- marketing-specialist: Preguntas sobre audiencia, canales, mensaje, competencia
+- legal-advisor: Preguntas sobre estructura legal, contratos, cumplimiento
+- operations-specialist: Preguntas sobre procesos, flujos de trabajo, eficiencia
+- cultural-consultant: Preguntas sobre marca, identidad, posicionamiento
+
+REGLAS:
+1. Las preguntas deben ser específicas al agente y tarea
+2. Evita preguntas genéricas
+3. Cada pregunta debe recopilar información valiosa
+4. Usa el contexto del negocio para personalizar
+
+Responde SOLO con un array JSON:
+[{
+  "question": "Pregunta específica para la tarea",
+  "context": "Por qué esta pregunta es importante",
+  "category": "initial",
+  "type": "text"
+}]
+`;
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: hasContext ? 500 : 1000
+      }),
+    });
+
+    const data = await response.json();
+    let aiResponse = data.choices[0].message.content;
+    
+    // Clean up the response
+    aiResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    const questions = JSON.parse(aiResponse);
+
+    return new Response(
+      JSON.stringify({ questions }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error generating task-specific questions:', error);
+    
+    // Fallback questions based on agent
+    const fallbackQuestions = [{
+      question: userProfile?.agentId === 'financial-management' 
+        ? '¿Cuáles son tus principales fuentes de ingresos actuales?' 
+        : '¿Cuál es tu principal desafío en este momento?',
+      context: 'Información básica para continuar',
+      category: 'fallback',
+      type: 'text'
+    }];
+    
+    return new Response(
+      JSON.stringify({ questions: fallbackQuestions }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 }
