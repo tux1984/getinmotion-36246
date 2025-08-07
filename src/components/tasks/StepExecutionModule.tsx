@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Circle, Bot, Send, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Circle, Bot, Send, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { useStepAI } from '@/hooks/useStepAI';
+import { StepGuideCard } from './StepGuideCard';
 import { cn } from '@/lib/utils';
 
 interface StepExecutionModuleProps {
@@ -37,7 +38,6 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(step.user_input_data?.text || '');
   const [showAI, setShowAI] = useState(false);
-  const [confirmationText, setConfirmationText] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   
   const { messages, isLoading, sendMessage } = useStepAI(step);
@@ -55,14 +55,30 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
   };
 
   const handleValidateStep = async () => {
-    if (!confirmationText.trim()) return;
+    if (!inputValue.trim()) return;
     
     setIsValidating(true);
-    const success = await onValidateStep(step.id, 'manual', confirmationText);
+    const success = await onValidateStep(step.id, 'manual', 'Paso completado por el usuario');
     if (success && canAdvance) {
       setTimeout(() => onMoveNext(), 1000);
     }
     setIsValidating(false);
+  };
+
+  const getPlaceholderText = () => {
+    const title = step.title.toLowerCase();
+    
+    if (title.includes('características') || title.includes('features')) {
+      return "Ejemplo: Productos hechos a mano con materiales naturales, diseños únicos personalizables, técnica artesanal tradicional...";
+    }
+    if (title.includes('beneficios') || title.includes('benefits')) {
+      return "Ejemplo: Mis clientes obtienen productos únicos que expresan su personalidad, materiales duraderos que dan valor por años...";
+    }
+    if (title.includes('precio') || title.includes('pricing')) {
+      return "Ejemplo: Precios desde $50 para productos básicos hasta $200 para piezas personalizadas, competitivos con productos artesanales similares...";
+    }
+    
+    return "Describe tu respuesta de manera específica y detallada...";
   };
 
   const renderStepInput = () => {
@@ -72,8 +88,8 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
           <Textarea
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="Escribe tu respuesta aquí..."
-            className="min-h-[100px]"
+            placeholder={getPlaceholderText()}
+            className="min-h-[120px]"
             disabled={isCompleted}
           />
         );
@@ -92,8 +108,8 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
           <Textarea
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="Completa este paso..."
-            className="min-h-[100px]"
+            placeholder={getPlaceholderText()}
+            className="min-h-[120px]"
             disabled={isCompleted}
           />
         );
@@ -143,13 +159,32 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
         </CardHeader>
 
         {(isCurrentStep || isInProgress || isCompleted) && (
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            {/* Guide Section - Only show for current step */}
+            {isCurrentStep && (
+              <StepGuideCard step={step} />
+            )}
+
             {/* Input Section */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Tu respuesta:
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">
+                  Tu respuesta:
+                </label>
+                {inputValue.trim() && (
+                  <Badge variant="secondary" className="text-xs">
+                    {inputValue.length} caracteres
+                  </Badge>
+                )}
+              </div>
               {renderStepInput()}
+              
+              {/* Character count and validation hint */}
+              {isCurrentStep && inputValue.length < 50 && (
+                <p className="text-xs text-muted-foreground">
+                  💡 Sé específico: Respuestas más detalladas (al menos 50 caracteres) generan mejores resultados
+                </p>
+              )}
             </div>
 
             {/* AI Assistant Section */}
@@ -161,8 +196,8 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
                   onClick={() => setShowAI(!showAI)}
                   className="w-full"
                 >
-                  <Bot className="h-4 w-4 mr-2" />
-                  {showAI ? 'Ocultar asistente' : '🤖 ¿Necesitas ayuda con este paso?'}
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {showAI ? 'Ocultar asistente IA' : '✨ Obtener ayuda personalizada'}
                 </Button>
 
                 {showAI && (
@@ -196,30 +231,63 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
                       )}
                     </div>
                     
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        placeholder="Pregunta sobre este paso..."
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                            handleAIMessage(e.currentTarget.value);
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                        disabled={isLoading}
-                      />
-                      <Button
-                        size="sm"
-                        onClick={(e) => {
-                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                          if (input.value.trim()) {
-                            handleAIMessage(input.value);
-                            input.value = '';
-                          }
-                        }}
-                        disabled={isLoading}
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
+                    <div className="space-y-2 mt-3">
+                      {/* Quick suggestion buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAIMessage("Dame 3 ejemplos específicos para mi tipo de negocio")}
+                          disabled={isLoading}
+                          className="text-xs"
+                        >
+                          Ver ejemplos
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAIMessage("¿Cómo puedo hacer mi respuesta más específica y efectiva?")}
+                          disabled={isLoading}
+                          className="text-xs"
+                        >
+                          Mejorar respuesta
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAIMessage("¿Qué información debería incluir que tal vez no estoy considerando?")}
+                          disabled={isLoading}
+                          className="text-xs"
+                        >
+                          Qué agregar
+                        </Button>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Haz una pregunta específica..."
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              handleAIMessage(e.currentTarget.value);
+                              e.currentTarget.value = '';
+                            }
+                          }}
+                          disabled={isLoading}
+                         />
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                            if (input.value.trim()) {
+                              handleAIMessage(input.value);
+                              input.value = '';
+                            }
+                          }}
+                          disabled={isLoading}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -233,23 +301,32 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-3 border-t pt-4"
               >
-                <label className="text-sm font-medium">
-                  ¿Has completado este paso? Describe brevemente qué hiciste:
-                </label>
-                <Textarea
-                  value={confirmationText}
-                  onChange={(e) => setConfirmationText(e.target.value)}
-                  placeholder="Ejemplo: 'Definí mis canales principales como redes sociales, email marketing y eventos locales'"
-                  className="min-h-[60px]"
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">
+                    ¿Completaste tu respuesta?
+                  </label>
+                  {inputValue.length >= 50 && (
+                    <Badge variant="secondary" className="text-xs text-green-700 bg-green-50">
+                      ✓ Respuesta completa
+                    </Badge>
+                  )}
+                </div>
+                
                 <Button
                   onClick={handleValidateStep}
-                  disabled={!confirmationText.trim() || isValidating}
+                  disabled={inputValue.length < 20 || isValidating}
                   className="w-full"
+                  size="lg"
                 >
-                  {isValidating ? 'Validando...' : 'Marcar como completado'}
+                  {isValidating ? 'Completando paso...' : 'Completar este paso'}
                   <CheckCircle className="h-4 w-4 ml-2" />
                 </Button>
+                
+                {inputValue.length < 20 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Necesitas al menos 20 caracteres para completar el paso
+                  </p>
+                )}
               </motion.div>
             )}
 

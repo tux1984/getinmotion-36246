@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
 import { useTaskSteps } from '@/hooks/useTaskSteps';
 import { StepExecutionModule } from './StepExecutionModule';
+import { TaskContextCard } from './TaskContextCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,13 @@ export const GuidedTaskExecution: React.FC<GuidedTaskExecutionProps> = ({ task }
 
   return (
     <div className="space-y-6">
+      {/* Task Context - What will you achieve */}
+      <TaskContextCard 
+        task={task} 
+        currentStepIndex={currentStepIndex} 
+        totalSteps={steps.length} 
+      />
+
       {/* Task Header with Progress */}
       <Card>
         <CardHeader>
