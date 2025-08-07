@@ -3,21 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
+import { useTranslations } from '@/hooks/useTranslations';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { MyMissionsDashboard } from '@/components/dashboard/MyMissionsDashboard';
 import { IntelligentTaskInterface } from '@/components/tasks/IntelligentTaskInterface';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ListTodo } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Target } from 'lucide-react';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
 const TasksDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslations();
   const language = 'en'; // Fixed to English only
   const { tasks } = useAgentTasks();
-  const { activeTasksCount, completedTasksCount } = useTaskLimits(tasks);
+  const { activeTasksCount, completedTasksCount, remainingSlots } = useTaskLimits(tasks);
   const [selectedTask, setSelectedTask] = useState<AgentTask | null>(null);
 
   const seoData = SEO_CONFIG.pages.dashboard[language];
@@ -28,7 +30,7 @@ const TasksDashboard = () => {
       <>
         <SEOHead
           title={`${seoData.title} - ${selectedTask.title}`}
-          description="Ejecuta tu tarea paso a paso con IA"
+          description={t.taskManagement.stepByStepExecution}
           keywords={seoData.keywords}
           url={`${SEO_CONFIG.siteUrl}/dashboard/tasks/${selectedTask.id}`}
           type="website"
@@ -36,28 +38,28 @@ const TasksDashboard = () => {
         />
         
         <DashboardBackground showGlobalComponents={false}>
-          <div className="min-h-screen">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-900 to-blue-800 border-b border-blue-700">
-              <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="min-h-screen bg-background">
+            {/* Compact Header */}
+            <div className="border-b bg-card">
+              <div className="max-w-7xl mx-auto px-6 py-4">
                 <div className="flex items-center gap-4">
                   <Button
                     onClick={() => setSelectedTask(null)}
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/10"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Volver a Mis Misiones
+                    {t.taskManagement.backToTasks}
                   </Button>
-                  <div className="h-6 w-px bg-blue-600" />
+                  <div className="h-4 w-px bg-border" />
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                      <ListTodo className="w-6 h-6 text-white" />
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Target className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <h1 className="text-2xl font-bold text-white">{selectedTask.title}</h1>
-                      <p className="text-blue-200">Ejecución guiada paso a paso</p>
+                      <h1 className="text-lg font-semibold">{selectedTask.title}</h1>
+                      <p className="text-sm text-muted-foreground">{t.taskManagement.stepByStepExecution}</p>
                     </div>
                   </div>
                 </div>
@@ -65,11 +67,10 @@ const TasksDashboard = () => {
             </div>
 
             {/* Task Execution Content */}
-            <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-6 py-6">
               <IntelligentTaskInterface 
                 task={selectedTask} 
                 onTaskComplete={() => {
-                  // Refresh tasks and go back to dashboard
                   setSelectedTask(null);
                 }}
                 onBack={() => setSelectedTask(null)}
@@ -84,8 +85,8 @@ const TasksDashboard = () => {
   return (
     <>
       <SEOHead
-        title={`${seoData.title} - Gestión de Tareas`}
-        description="Gestiona todas tus tareas empresariales en un solo lugar"
+        title={`${seoData.title} - ${t.taskManagement.title}`}
+        description={t.taskManagement.subtitle}
         keywords={seoData.keywords}
         url={`${SEO_CONFIG.siteUrl}/dashboard/tasks`}
         type="website"
@@ -93,64 +94,69 @@ const TasksDashboard = () => {
       />
       
       <DashboardBackground showGlobalComponents={false}>
-        <div className="min-h-screen">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-900 to-blue-800 border-b border-blue-700">
-            <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="min-h-screen bg-background">
+          {/* Compact Modern Header */}
+          <div className="border-b bg-card">
+            <div className="max-w-7xl mx-auto px-6 py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Button
                     onClick={() => navigate('/dashboard')}
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/10"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Volver al Coordinador Maestro
+                    {t.taskManagement.backToCoordinator}
                   </Button>
-                  <div className="h-6 w-px bg-blue-600" />
+                  <div className="h-4 w-px bg-border" />
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                      <ListTodo className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Target className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h1 className="text-2xl font-bold text-white">Gestión de Tareas</h1>
-                      <p className="text-blue-200">Organiza y ejecuta tu plan empresarial</p>
+                      <h1 className="text-xl font-bold text-foreground">{t.taskManagement.title}</h1>
+                      <p className="text-sm text-muted-foreground">{t.taskManagement.subtitle}</p>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-white">{activeTasksCount + completedTasksCount}</div>
-                  <div className="text-blue-200 text-sm">Total de tareas</div>
+                
+                {/* Compact Stats */}
+                <div className="hidden md:flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <Clock className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-blue-600">{activeTasksCount}</div>
+                      <div className="text-xs text-muted-foreground">{t.taskManagement.activeTasks}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-green-600">{completedTasksCount}</div>
+                      <div className="text-xs text-muted-foreground">{t.taskManagement.completedTasks}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                      <Target className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-orange-600">{remainingSlots}</div>
+                      <div className="text-xs text-muted-foreground">{t.taskManagement.freeSlots}</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                  <div className="p-4 text-center">
-                    <div className="text-2xl font-bold mb-1">{activeTasksCount}</div>
-                    <div className="text-blue-200 text-sm">Tareas Activas</div>
-                  </div>
-                </Card>
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                  <div className="p-4 text-center">
-                    <div className="text-2xl font-bold mb-1 text-green-300">{completedTasksCount}</div>
-                    <div className="text-blue-200 text-sm">Completadas</div>
-                  </div>
-                </Card>
-                <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-                  <div className="p-4 text-center">
-                    <div className="text-2xl font-bold mb-1 text-yellow-300">{15 - activeTasksCount}</div>
-                    <div className="text-blue-200 text-sm">Espacios Libres</div>
-                  </div>
-                </Card>
               </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="max-w-7xl mx-auto px-6 py-6">
             <MyMissionsDashboard onTaskSelect={setSelectedTask} />
           </div>
         </div>

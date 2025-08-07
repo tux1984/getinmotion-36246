@@ -402,7 +402,52 @@ export const translations = {
     ]
   },
 
-  // Missions Dashboard
+  // Task Management
+  taskManagement: {
+    title: "Task Manager",
+    subtitle: "Organize and execute your business plan efficiently",
+    backToCoordinator: "Back to Master Coordinator",
+    backToTasks: "Back to Tasks",
+    stepByStepExecution: "Step-by-step guided execution",
+    totalTasks: "Total Tasks",
+    activeTasks: "Active Tasks",
+    completedTasks: "Completed",
+    freeSlots: "Free Slots",
+    searchPlaceholder: "Search tasks...",
+    allTasks: "All Tasks",
+    activeTab: "Active",
+    completedTab: "Completed",
+    filterByStatus: "Status",
+    filterByPriority: "Priority",
+    filterByAgent: "Agent",
+    all: "All",
+    pending: "Pending",
+    inProgress: "In Progress",
+    completed: "Completed",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    startTask: "Start Task",
+    continueTask: "Continue Task",
+    reviewTask: "Review Task",
+    deleteAllTasks: "Delete All Tasks",
+    noTasksTitle: "No tasks available",
+    noTasksDesc: "Start by creating your first task to organize your business growth",
+    createFirstTask: "Create First Task",
+    priority: "Priority",
+    agent: "Agent",
+    status: "Status",
+    progress: "Progress",
+    lastUpdated: "Last Updated",
+    daysAgo: "days ago",
+    today: "Today",
+    yesterday: "Yesterday",
+    timeSpent: "Time spent",
+    subtasks: "Subtasks",
+    overallProgress: "Overall Progress"
+  },
+
+  // Missions Dashboard  
   missionsDashboard: {
     title: "My Missions",
     subtitle: "Track and manage your active business missions",
