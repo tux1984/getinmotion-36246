@@ -447,7 +447,17 @@ export const translations = {
     recommendationsPriority: "Priority",
     estimatedTimeLabel: "Estimated Time",
     hideRecommendations: "Hide Recommendations",
-    showRecommendations: "Show Recommendations"
+    showRecommendations: "Show Recommendations",
+    generatingRecommendations: "Generating personalized recommendations...",
+    needMoreInfo: "We need more information about your business to create better recommendations",
+    tryAgain: "Try Again",
+    noRecommendations: "No recommendations available",
+    refreshRecommendations: "Refresh Recommendations",
+    converting: "Converting...",
+    convertedSuccessfully: "Task created successfully",
+    errorConverting: "Error creating task",
+    errorGenerating: "Error generating recommendations",
+    newRecommendation: "New recommendation generated"
   },
 
   // Status

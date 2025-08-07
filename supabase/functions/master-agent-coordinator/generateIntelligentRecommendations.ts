@@ -12,7 +12,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Generate intelligent task recommendations using AI
-export async function generateIntelligentRecommendations(userId: string, maturityScores: any, language: string = 'es') {
+export async function generateIntelligentRecommendations(userId: string, maturityScores: any, language: string = 'en') {
   try {
     // Get user profile and completed tasks from Supabase
     const { data: userProfile } = await supabase
@@ -46,9 +46,7 @@ export async function generateIntelligentRecommendations(userId: string, maturit
       return new Response(
         JSON.stringify({ 
           needsMoreInfo: true,
-          message: language === 'en' 
-            ? 'We need more information about your business to create personalized recommendations.'
-            : 'Necesitamos más información sobre tu negocio para crear recomendaciones personalizadas.'
+          message: 'We need more information about your business to create personalized recommendations.'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -64,46 +62,46 @@ export async function generateIntelligentRecommendations(userId: string, maturit
     else if (maturityAverage >= 40) maturityLevel = 'constructor';
 
     const prompt = `
-Eres un consultor de negocios experto. Genera 3 recomendaciones de tareas altamente personalizadas para este emprendedor.
+You are an expert business consultant. Generate 3 highly personalized task recommendations for this entrepreneur.
 
-INFORMACIÓN DEL USUARIO:
-Nivel de Madurez: ${maturityLevel} (promedio: ${maturityAverage})
-Puntuaciones detalladas: ${JSON.stringify(maturityScores)}
-Perfil de negocio: ${JSON.stringify(businessContext)}
+USER INFORMATION:
+Maturity Level: ${maturityLevel} (average: ${maturityAverage})
+Detailed scores: ${JSON.stringify(maturityScores)}
+Business profile: ${JSON.stringify(businessContext)}
 
-TAREAS COMPLETADAS (${completedTasks?.length || 0}):
-${completedTasks?.map((task: any) => `- ${task.title} (${task.agent_id})`).join('\n') || 'Ninguna'}
+COMPLETED TASKS (${completedTasks?.length || 0}):
+${completedTasks?.map((task: any) => `- ${task.title} (${task.agent_id})`).join('\n') || 'None'}
 
-TAREAS ACTIVAS (${activeTasks?.length || 0}):
-${activeTasks?.map((task: any) => `- ${task.title} (${task.agent_id})`).join('\n') || 'Ninguna'}
+ACTIVE TASKS (${activeTasks?.length || 0}):
+${activeTasks?.map((task: any) => `- ${task.title} (${task.agent_id})`).join('\n') || 'None'}
 
-INSTRUCCIONES:
-1. Analiza el contexto completo del usuario y evita recomendar tareas similares a las ya completadas o activas
-2. Genera recomendaciones que sean el siguiente paso lógico en su journey empresarial
-3. Considera su nivel de madurez para determinar la complejidad apropiada
-4. Cada tarea debe tener un agente específico disponible
-5. Las tareas deben ser accionables y específicas para su contexto de negocio
+INSTRUCTIONS:
+1. Analyze the complete user context and avoid recommending tasks similar to already completed or active ones
+2. Generate recommendations that are the logical next step in their business journey
+3. Consider their maturity level to determine appropriate complexity
+4. Each task must have a specific available agent
+5. Tasks should be actionable and specific to their business context
 
-AGENTES DISPONIBLES:
-- cultural-consultant: Identidad de marca, posicionamiento, valores
-- cost-calculator: Análisis financiero, presupuestos, proyecciones
-- marketing-advisor: Estrategias de marketing, audiencias, canales
-- legal-advisor: Aspectos legales, contratos, cumplimiento
-- export-advisor: Expansión internacional, mercados globales
-- business-scaling: Escalabilidad, crecimiento, optimización
-- operations-specialist: Procesos, eficiencia operativa
-- content-creator: Creación de contenido, storytelling
+AVAILABLE AGENTS:
+- cultural-consultant: Brand identity, positioning, values
+- cost-calculator: Financial analysis, budgets, projections
+- marketing-advisor: Marketing strategies, audiences, channels
+- legal-advisor: Legal aspects, contracts, compliance
+- export-advisor: International expansion, global markets
+- business-scaling: Scalability, growth, optimization
+- operations-specialist: Processes, operational efficiency
+- content-creator: Content creation, storytelling
 
-Responde SOLO con un array JSON con exactamente 3 recomendaciones:
+Respond ONLY with a JSON array with exactly 3 recommendations:
 [{
-  "title": "Título específico y accionable",
-  "description": "Descripción detallada de por qué es importante ahora",
-  "agentId": "id-del-agente",
-  "agentName": "Nombre del Agente",
+  "title": "Specific and actionable title",
+  "description": "Detailed description of why it's important now",
+  "agentId": "agent-id",
+  "agentName": "Agent Name",
   "priority": "high|medium|low",
-  "category": "Categoría relevante",
-  "estimatedTime": "Tiempo estimado",
-  "prompt": "Prompt específico para el agente"
+  "category": "Relevant category",
+  "estimatedTime": "Estimated time",
+  "prompt": "Specific prompt for the agent"
 }]
 `;
 
@@ -155,16 +153,14 @@ Responde SOLO con un array JSON con exactamente 3 recomendaciones:
     // Fallback to basic recommendations
     const fallbackRecs = [{
       id: `fallback_${Date.now()}`,
-      title: language === 'en' ? 'Validate Your Business Concept' : 'Valida tu Concepto de Negocio',
-      description: language === 'en' 
-        ? 'Get expert validation on your business idea and market potential'
-        : 'Obtén validación experta sobre tu idea de negocio y potencial de mercado',
+      title: 'Validate Your Business Concept',
+      description: 'Get expert validation on your business idea and market potential',
       agentId: 'cultural-consultant',
       agentName: 'Cultural Consultant',
       priority: 'high',
       category: 'Validation',
       estimatedTime: '2-3 hours',
-      prompt: language === 'en' ? 'Help me validate my business concept' : 'Ayúdame a validar mi concepto de negocio',
+      prompt: 'Help me validate my business concept',
       completed: false,
       isRealAgent: true
     }];

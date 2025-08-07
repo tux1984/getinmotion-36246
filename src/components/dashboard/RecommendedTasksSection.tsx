@@ -6,6 +6,7 @@ import { Target, Lightbulb, User, Clock, Tag, EyeOff } from 'lucide-react';
 import { useUnifiedTaskRecommendations } from '@/hooks/useUnifiedTaskRecommendations';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslations } from '@/hooks/useTranslations';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface RecommendedTasksSectionProps {
@@ -33,46 +34,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
     language
   });
 
-  const translations = {
-    en: {
-      recommendedTasks: "Recommended Tasks",
-      subtitle: "Suggested based on your business goals",
-      hideRecommendations: "Hide Recommendations",
-      showRecommendations: "Show Recommendations",
-      convertToTask: "Convert to Task",
-      converted: "Converted",
-      agent: "Agent",
-      timeEstimated: "Time",
-      category: "Category",
-      priority: {
-        high: "High",
-        medium: "Medium", 
-        low: "Low"
-      },
-      taskCreated: "Task created successfully",
-      error: "Error creating task"
-    },
-    es: {
-      recommendedTasks: "Tareas Recomendadas",
-      subtitle: "Sugeridas basadas en tus objetivos de negocio",
-      hideRecommendations: "Ocultar Recomendaciones",
-      showRecommendations: "Mostrar Recomendaciones", 
-      convertToTask: "Convertir en Tarea",
-      converted: "Convertido",
-      agent: "Agente",
-      timeEstimated: "Tiempo",
-      category: "Categoría",
-      priority: {
-        high: "Alta",
-        medium: "Media",
-        low: "Baja"
-      },
-      taskCreated: "Tarea creada exitosamente",
-      error: "Error al crear la tarea"
-    }
-  };
-
-  const t = translations[language];
+  const { t } = useTranslations();
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -110,7 +72,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
       });
 
       toast({
-        title: t.taskCreated,
+        title: t.missionsDashboard.convertedSuccessfully,
         description: recommendation.title,
       });
 
@@ -119,7 +81,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
     } catch (error) {
       console.error('Error creating task:', error);
       toast({
-        title: t.error,
+        title: t.missionsDashboard.errorConverting,
         description: recommendation.title,
         variant: "destructive"
       });
@@ -145,7 +107,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
             className="w-full text-muted-foreground hover:text-foreground"
           >
             <Target className="w-4 h-4 mr-2" />
-            {t.showRecommendations}
+            {t.missionsDashboard.showRecommendations}
           </Button>
         </CardContent>
       </Card>
@@ -159,10 +121,10 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="w-5 h-5 text-purple-600" />
-              {t.recommendedTasks}
+              {t.missionsDashboard.recommendedTasks}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {t.subtitle}
+              {t.missionsDashboard.recommendedSubtitle}
             </p>
           </div>
           <Button
@@ -172,7 +134,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
             className="text-muted-foreground hover:text-foreground"
           >
             <EyeOff className="w-4 h-4 mr-1" />
-            {t.hideRecommendations}
+            {t.missionsDashboard.hideRecommendations}
           </Button>
         </div>
       </CardHeader>
@@ -204,7 +166,7 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
                           variant="outline"
                           className={`shrink-0 text-xs ${getPriorityColor(recommendation.priority)}`}
                         >
-                          {t.priority[recommendation.priority.toLowerCase() as keyof typeof t.priority] || recommendation.priority}
+                          {recommendation.priority}
                         </Badge>
                       </div>
                       
@@ -237,10 +199,10 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
                           {convertingTasks.has(recommendation.id) ? (
                             <div className="flex items-center gap-2">
                               <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
-                              {t.converted}
+                              {t.missionsDashboard.converting}
                             </div>
                           ) : (
-                            t.convertToTask
+                            t.missionsDashboard.convertToTask
                           )}
                         </Button>
                       </div>
@@ -255,20 +217,20 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
         {loading && (
           <div className="text-center py-8 text-muted-foreground">
             <div className="w-8 h-8 border border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4" />
-            <p>Generating personalized recommendations...</p>
+            <p>{t.missionsDashboard.generatingRecommendations}</p>
           </div>
         )}
         
         {!loading && needsMoreInfo && (
           <div className="text-center py-8 text-muted-foreground">
             <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p className="mb-4">We need more information about your business to create better recommendations</p>
+            <p className="mb-4">{t.missionsDashboard.needMoreInfo}</p>
             <Button 
               variant="outline" 
               onClick={refreshRecommendations}
               className="text-purple-600 border-purple-200 hover:bg-purple-50"
             >
-              Try Again
+              {t.missionsDashboard.tryAgain}
             </Button>
           </div>
         )}
@@ -276,13 +238,13 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
         {!loading && !needsMoreInfo && activeRecommendations.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p className="mb-4">No recommendations available</p>
+            <p className="mb-4">{t.missionsDashboard.noRecommendations}</p>
             <Button 
               variant="outline" 
               onClick={refreshRecommendations}
               className="text-purple-600 border-purple-200 hover:bg-purple-50"
             >
-              Refresh Recommendations
+              {t.missionsDashboard.refreshRecommendations}
             </Button>
           </div>
         )}
