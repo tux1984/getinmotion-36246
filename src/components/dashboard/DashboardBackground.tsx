@@ -4,7 +4,7 @@ import { FloatingMasterAgent } from './FloatingMasterAgent';
 import { TaskLimitManager } from './TaskLimitManager';
 import { useUserData } from '@/hooks/useUserData';
 import { useMaturityScores } from '@/hooks/useMaturityScores';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { useNavigate } from 'react-router-dom';
 
 interface DashboardBackgroundProps {
@@ -16,7 +16,7 @@ export const DashboardBackground: React.FC<DashboardBackgroundProps> = ({
   children, 
   showGlobalComponents = true 
 }) => {
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const navigate = useNavigate();
   const { profile } = useUserData();
   const { currentScores } = useMaturityScores();
