@@ -4,6 +4,7 @@ import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
 import { useUserBusinessProfile } from './useUserBusinessProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentTasks } from './useAgentTasks';
+import { useTaskGenerationControl } from './useTaskGenerationControl';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CoordinatorTask {
@@ -50,6 +51,7 @@ export const useMasterCoordinator = () => {
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();
   const { tasks, createTask, updateTask, deleteTask, deleteAllTasks } = useAgentTasks();
+  const { allowAutoGeneration } = useTaskGenerationControl();
   
   const [coordinatorTasks, setCoordinatorTasks] = useState<CoordinatorTask[]>([]);
   const [currentPath, setCurrentPath] = useState<CoordinatorTask[]>([]);
@@ -179,20 +181,37 @@ export const useMasterCoordinator = () => {
     }
   }, [tasks]);
 
-  // FASE 1: Inicialización automática del coordinador cuando hay datos - CON DEBOUNCE
-  useEffect(() => {
-    if (user?.id && !isInitialized && tasks.length === 0 && !loading) {
-      console.log('🚀 Master Coordinator: Auto-initializing with complete profile data');
-      
-      // Debounce para evitar múltiples llamadas
-      const timeoutId = setTimeout(() => {
-        analyzeProfileAndGenerateTasks();
-        setIsInitialized(true);
-      }, 1000);
+  // Generate initial tasks only when auto-generation is allowed (after maturity test)
+  const generateInitialTasks = useCallback(async () => {
+    if (!allowAutoGeneration || !user?.id || isInitialized || loading || tasks.length > 0) {
+      console.log('🚫 Skipping auto task generation:', { 
+        allowAutoGeneration, 
+        userId: user?.id, 
+        isInitialized, 
+        loading, 
+        tasksCount: tasks.length 
+      });
+      return;
+    }
 
+    console.log('🚀 Master Coordinator: Auto-generating initial tasks after maturity test completion');
+    
+    try {
+      await analyzeProfileAndGenerateTasks();
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('❌ Error in initial task generation:', error);
+    }
+  }, [allowAutoGeneration, user?.id, isInitialized, loading, tasks.length, analyzeProfileAndGenerateTasks]);
+
+  // Auto-initialize only when conditions are met
+  useEffect(() => {
+    if (allowAutoGeneration && user?.id && !isInitialized && tasks.length === 0 && !loading) {
+      // Debounce para evitar múltiples llamadas
+      const timeoutId = setTimeout(generateInitialTasks, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, [user?.id, tasks.length, isInitialized, loading, analyzeProfileAndGenerateTasks]);
+  }, [allowAutoGeneration, generateInitialTasks]);
 
   // Actualizar tareas del coordinador cuando cambien las tareas normales
   useEffect(() => {
@@ -532,6 +551,7 @@ export const useMasterCoordinator = () => {
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
     analyzeProfileAndGenerateTasks,
+    generateInitialTasks,
     generateIntelligentQuestions,
     startTaskJourney,
     completeTaskStep,

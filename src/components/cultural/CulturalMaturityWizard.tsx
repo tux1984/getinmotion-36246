@@ -6,6 +6,7 @@ import { RecommendedAgents } from '@/types/dashboard';
 import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
 import { UserProfileData } from './types/wizardTypes';
+import { useTaskGenerationControl } from '@/hooks/useTaskGenerationControl';
 
 interface AIQuestion {
   question: string;
@@ -16,7 +17,17 @@ export const CulturalMaturityWizard: React.FC<{
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => void;
 }> = ({ onComplete }) => {
   const { language } = useLanguage();
+  const { enableAutoGeneration } = useTaskGenerationControl();
   
+  const handleMaturityComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => {
+    // Enable automatic task generation after maturity test completion
+    console.log('🎯 Maturity test completed - enabling automatic task generation');
+    enableAutoGeneration();
+    
+    // Call the original onComplete handler
+    onComplete(scores, recommendedAgents, profileData, aiQuestions);
+  };
+
   const {
     currentStepId,
     profileData,
@@ -31,7 +42,7 @@ export const CulturalMaturityWizard: React.FC<{
     isCurrentStepValid,
     analysisType,
     handleAnalysisChoice
-  } = useMaturityWizard(onComplete, language);
+  } = useMaturityWizard(handleMaturityComplete, language);
 
   return (
     <WizardContent

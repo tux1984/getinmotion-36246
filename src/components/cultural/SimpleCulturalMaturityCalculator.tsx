@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { UserProfileData } from './types/wizardTypes';
+import { useTaskGenerationControl } from '@/hooks/useTaskGenerationControl';
 
 interface AIQuestion {
   question: string;
@@ -23,6 +24,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
 }) => {
   const { user } = useAuth();
   const { saveMaturityScores, saving: savingScores } = useMaturityScoresSaver();
+  const { enableAutoGeneration } = useTaskGenerationControl();
 
   const handleWizardComplete = useCallback(async (
     scores: CategoryScore, 
@@ -58,7 +60,11 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
         }
       }
       
-      // 3. Llamar callback original
+      // 3. Enable automatic task generation after maturity test completion
+      console.log('🎯 Maturity test completed - enabling automatic task generation');
+      enableAutoGeneration();
+      
+      // 4. Llamar callback original
       onComplete(scores, recommendedAgents, profileData, aiQuestions);
     } catch (err) {
       console.error('Error completing onboarding:', err);
