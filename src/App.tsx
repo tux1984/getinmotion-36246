@@ -5,6 +5,7 @@ import './App.css';
 import { Toaster } from '@/components/ui/toaster';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
@@ -27,8 +28,9 @@ import Profile from './pages/Profile';
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen">
+      <LanguageProvider>
+        <AuthProvider>
+          <div className="min-h-screen">
           <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -125,7 +127,8 @@ function App() {
           </div>
           <Toaster />
         </AuthProvider>
-      </BrowserRouter>
+      </LanguageProvider>
+    </BrowserRouter>
   );
 }
 
