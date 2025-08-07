@@ -6,9 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Circle, Bot, Send, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { CheckCircle, Circle, Send, ArrowRight, ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
 import { useStepAI } from '@/hooks/useStepAI';
-import { StepGuideCard } from './StepGuideCard';
+import { AIMessageFormatter } from './AIMessageFormatter';
 import { cn } from '@/lib/utils';
 
 interface StepExecutionModuleProps {
@@ -159,196 +159,188 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
         </CardHeader>
 
         {(isCurrentStep || isInProgress || isCompleted) && (
-          <CardContent className="space-y-6">
-            {/* Guide Section - Only show for current step */}
-            {isCurrentStep && (
-              <StepGuideCard step={step} />
-            )}
-
+          <CardContent className="space-y-4">
             {/* Input Section */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">
                   Tu respuesta:
                 </label>
-                {inputValue.trim() && (
-                  <Badge variant="secondary" className="text-xs">
-                    {inputValue.length} caracteres
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {inputValue.trim() && (
+                    <Badge variant="secondary" className="text-xs">
+                      {inputValue.length} caracteres
+                    </Badge>
+                  )}
+                  {isCurrentStep && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAI(!showAI)}
+                      className="text-xs h-6"
+                    >
+                      <HelpCircle className="h-3 w-3 mr-1" />
+                      {showAI ? 'Ocultar ayuda' : 'Ayuda IA'}
+                    </Button>
+                  )}
+                </div>
               </div>
               {renderStepInput()}
               
-              {/* Character count and validation hint */}
-              {isCurrentStep && inputValue.length < 50 && (
+              {/* Simplified validation hint */}
+              {isCurrentStep && inputValue.length < 20 && (
                 <p className="text-xs text-muted-foreground">
-                  💡 Sé específico: Respuestas más detalladas (al menos 50 caracteres) generan mejores resultados
+                  💡 Describe tu respuesta con más detalle (mínimo 20 caracteres)
                 </p>
               )}
             </div>
 
-            {/* AI Assistant Section */}
-            {isCurrentStep && (
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAI(!showAI)}
-                  className="w-full"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {showAI ? 'Ocultar asistente IA' : '✨ Obtener ayuda personalizada'}
-                </Button>
-
-                {showAI && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="border rounded-lg p-3 bg-background/50"
-                  >
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {messages.map((message, index) => (
-                        <div
-                          key={index}
-                          className={cn(
-                            "p-2 rounded text-sm",
-                            message.role === 'user' 
-                              ? "bg-primary text-primary-foreground ml-4" 
-                              : "bg-muted mr-4"
-                          )}
-                        >
-                          {message.content}
-                        </div>
-                      ))}
-                      {isLoading && (
-                        <div className="bg-muted mr-4 p-2 rounded text-sm">
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                            <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                            <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                          </div>
-                        </div>
+            {/* Compact AI Assistant Section */}
+            {isCurrentStep && showAI && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="border rounded-lg p-3 bg-muted/20"
+              >
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {messages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "p-2 rounded-lg text-sm",
+                        message.role === 'user' 
+                          ? "bg-primary text-primary-foreground ml-8" 
+                          : "bg-card border mr-4"
+                      )}
+                    >
+                      {message.role === 'assistant' ? (
+                        <AIMessageFormatter content={message.content} />
+                      ) : (
+                        message.content
                       )}
                     </div>
-                    
-                    <div className="space-y-2 mt-3">
-                      {/* Quick suggestion buttons */}
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAIMessage("Dame 3 ejemplos específicos para mi tipo de negocio")}
-                          disabled={isLoading}
-                          className="text-xs"
-                        >
-                          Ver ejemplos
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAIMessage("¿Cómo puedo hacer mi respuesta más específica y efectiva?")}
-                          disabled={isLoading}
-                          className="text-xs"
-                        >
-                          Mejorar respuesta
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAIMessage("¿Qué información debería incluir que tal vez no estoy considerando?")}
-                          disabled={isLoading}
-                          className="text-xs"
-                        >
-                          Qué agregar
-                        </Button>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Haz una pregunta específica..."
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                              handleAIMessage(e.currentTarget.value);
-                              e.currentTarget.value = '';
-                            }
-                          }}
-                          disabled={isLoading}
-                         />
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                            if (input.value.trim()) {
-                              handleAIMessage(input.value);
-                              input.value = '';
-                            }
-                          }}
-                          disabled={isLoading}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
+                  ))}
+                  {isLoading && (
+                    <div className="bg-card border mr-4 p-3 rounded-lg">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                        <span className="text-xs ml-2">El asistente está pensando...</span>
                       </div>
                     </div>
-                  </motion.div>
-                )}
-              </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2 mt-3">
+                  {/* Compact quick suggestions */}
+                  <div className="flex flex-wrap gap-1">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAIMessage("Dame ejemplos específicos")}
+                      disabled={isLoading}
+                      className="text-xs h-6"
+                    >
+                      Ejemplos
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAIMessage("¿Cómo mejorar mi respuesta?")}
+                      disabled={isLoading}
+                      className="text-xs h-6"
+                    >
+                      Mejorar
+                    </Button>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Pregunta algo específico..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                          handleAIMessage(e.currentTarget.value);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                      disabled={isLoading}
+                      className="text-sm h-8"
+                     />
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (input.value.trim()) {
+                          handleAIMessage(input.value);
+                          input.value = '';
+                        }
+                      }}
+                      disabled={isLoading}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Send className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
             )}
 
-            {/* Validation Section */}
+            {/* Simplified Validation Section */}
             {isCurrentStep && inputValue.trim() && !isCompleted && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-3 border-t pt-4"
+                className="space-y-3 pt-2"
               >
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">
-                    ¿Completaste tu respuesta?
-                  </label>
-                  {inputValue.length >= 50 && (
-                    <Badge variant="secondary" className="text-xs text-green-700 bg-green-50">
-                      ✓ Respuesta completa
-                    </Badge>
-                  )}
-                </div>
-                
                 <Button
                   onClick={handleValidateStep}
                   disabled={inputValue.length < 20 || isValidating}
                   className="w-full"
-                  size="lg"
+                  size="default"
                 >
-                  {isValidating ? 'Completando paso...' : 'Completar este paso'}
-                  <CheckCircle className="h-4 w-4 ml-2" />
+                  {isValidating ? (
+                    <>Completando paso...</>
+                  ) : (
+                    <>
+                      Completar paso {stepIndex + 1}
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                    </>
+                  )}
                 </Button>
                 
-                {inputValue.length < 20 && (
+                {inputValue.length >= 20 && inputValue.length < 50 && (
                   <p className="text-xs text-muted-foreground text-center">
-                    Necesitas al menos 20 caracteres para completar el paso
+                    ✓ Puedes completar este paso. Más detalles = mejores resultados
                   </p>
                 )}
               </motion.div>
             )}
 
-            {/* Navigation */}
-            {isCurrentStep && (
-              <div className="flex justify-between pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={onMovePrevious}
-                  disabled={stepIndex === 0}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Anterior
-                </Button>
+            {/* Compact Navigation */}
+            {isCurrentStep && (stepIndex > 0 || (isCompleted && stepIndex < totalSteps - 1)) && (
+              <div className="flex justify-between pt-3 border-t">
+                {stepIndex > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onMovePrevious}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </Button>
+                )}
                 
-                <Button
-                  onClick={onMoveNext}
-                  disabled={!isCompleted || stepIndex === totalSteps - 1}
-                >
-                  Siguiente
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
+                {isCompleted && stepIndex < totalSteps - 1 && (
+                  <Button
+                    size="sm"
+                    onClick={onMoveNext}
+                    className="ml-auto"
+                  >
+                    Siguiente
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>
