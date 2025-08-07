@@ -106,21 +106,18 @@ Responde en este formato:
     switch (status) {
       case 'reviewing':
         return {
-          icon: <RefreshCw className="h-4 w-4 animate-spin" />,
           badge: { variant: 'secondary', text: 'Revisando...' },
           bgColor: 'bg-blue-50 dark:bg-blue-950/20',
           borderColor: 'border-blue-200 dark:border-blue-800'
         };
       case 'needs_improvement':
         return {
-          icon: <AlertCircle className="h-4 w-4 text-amber-500" />,
           badge: { variant: 'secondary', text: 'Necesita mejoras' },
           bgColor: 'bg-amber-50 dark:bg-amber-950/20',
           borderColor: 'border-amber-200 dark:border-amber-800'
         };
       case 'approved':
         return {
-          icon: <CheckCircle className="h-4 w-4 text-emerald-500" />,
           badge: { variant: 'secondary', text: 'Aprobado' },
           bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
           borderColor: 'border-emerald-200 dark:border-emerald-800'
