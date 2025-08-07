@@ -17,7 +17,7 @@ const UserProgress = () => {
   return (
     <>
       <SEOHead
-        title={language === 'es' ? 'Dashboard de Progreso - ' + seoData.title : 'Progress Dashboard - ' + seoData.title}
+        title={'Progress Dashboard - ' + seoData.title}
         description={seoData.description}
         keywords={seoData.keywords}
         url={`${SEO_CONFIG.siteUrl}/dashboard/progress`}

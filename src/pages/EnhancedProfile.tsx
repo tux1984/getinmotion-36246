@@ -53,10 +53,10 @@ const EnhancedProfile: React.FC = () => {
           </motion.div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">
-              {language === 'es' ? 'Cargando tu perfil...' : 'Loading your profile...'}
+              Loading your profile...
             </h2>
             <p className="text-muted-foreground">
-              {language === 'es' ? 'Preparando información personalizada' : 'Preparing personalized information'}
+              Preparing personalized information
             </p>
           </div>
         </motion.div>
@@ -71,15 +71,13 @@ const EnhancedProfile: React.FC = () => {
           <CardContent className="text-center p-8">
             <User className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">
-              {language === 'es' ? 'Perfil no encontrado' : 'Profile not found'}
+              Profile not found
             </h2>
             <p className="text-muted-foreground mb-4">
-              {language === 'es' 
-                ? 'Complete el calculador de madurez para crear su perfil.' 
-                : 'Complete the maturity calculator to create your profile.'}
+              Complete the maturity calculator to create your profile.
             </p>
             <Button onClick={() => navigate('/maturity-calculator')}>
-              {language === 'es' ? 'Crear perfil' : 'Create profile'}
+              Create profile
             </Button>
           </CardContent>
         </Card>
@@ -476,11 +474,9 @@ const EnhancedProfile: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <ArrowRight className="w-5 h-5 text-primary" />
                         <div>
-                          <h4 className="font-semibold">{language === 'es' ? 'Completar evaluación de madurez' : 'Complete maturity assessment'}</h4>
+                          <h4 className="font-semibold">Complete maturity assessment</h4>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {language === 'es' 
-                              ? 'Obtén recomendaciones más precisas completando todos los pasos de evaluación.'
-                              : 'Get more precise recommendations by completing all assessment steps.'}
+                            Get more precise recommendations by completing all assessment steps.
                           </p>
                         </div>
                       </div>
@@ -490,11 +486,9 @@ const EnhancedProfile: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <ArrowRight className="w-5 h-5 text-secondary" />
                         <div>
-                          <h4 className="font-semibold">{language === 'es' ? 'Expandir canales de venta' : 'Expand sales channels'}</h4>
+                          <h4 className="font-semibold">Expand sales channels</h4>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {language === 'es' 
-                              ? 'Considera agregar nuevos canales digitales para aumentar tu alcance.'
-                              : 'Consider adding new digital channels to increase your reach.'}
+                            Consider adding new digital channels to increase your reach.
                           </p>
                         </div>
                       </div>

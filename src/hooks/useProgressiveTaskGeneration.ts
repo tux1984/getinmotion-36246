@@ -13,10 +13,8 @@ export const useProgressiveTaskGeneration = () => {
   const generateProgressiveTasks = async () => {
     if (!user) {
       toast({
-        title: language === 'es' ? 'Error' : 'Error',
-        description: language === 'es' 
-          ? 'Debes estar autenticado para generar tareas'
-          : 'You must be authenticated to generate tasks',
+        title: 'Error',
+        description: 'You must be authenticated to generate tasks',
         variant: 'destructive',
       });
       return false;
@@ -30,17 +28,15 @@ export const useProgressiveTaskGeneration = () => {
       const { data, error } = await supabase.functions.invoke('generate-progressive-tasks', {
         body: {
           userId: user.id,
-          language: language
+          language: 'en'
         }
       });
 
       if (error) {
         console.error('Error generating progressive tasks:', error);
         toast({
-          title: language === 'es' ? 'Error' : 'Error',
-          description: language === 'es' 
-            ? 'Error al generar tareas progresivas'
-            : 'Error generating progressive tasks',
+          title: 'Error',
+          description: 'Error generating progressive tasks',
           variant: 'destructive',
         });
         return false;
@@ -49,10 +45,8 @@ export const useProgressiveTaskGeneration = () => {
       const tasksCreated = data?.tasksCreated || 0;
       
       toast({
-        title: language === 'es' ? '¡Tareas generadas!' : 'Tasks generated!',
-        description: language === 'es' 
-          ? `Se generaron ${tasksCreated} nuevas tareas basadas en tu progreso actual`
-          : `Generated ${tasksCreated} new tasks based on your current progress`,
+        title: 'Tasks generated!',
+        description: `Generated ${tasksCreated} new tasks based on your current progress`,
         variant: 'default',
       });
 
@@ -65,10 +59,8 @@ export const useProgressiveTaskGeneration = () => {
     } catch (error) {
       console.error('Failed to generate progressive tasks:', error);
       toast({
-        title: language === 'es' ? 'Error' : 'Error',
-        description: language === 'es' 
-          ? 'Error inesperado al generar tareas'
-          : 'Unexpected error generating tasks',
+        title: 'Error',
+        description: 'Unexpected error generating tasks',
         variant: 'destructive',
       });
       return false;

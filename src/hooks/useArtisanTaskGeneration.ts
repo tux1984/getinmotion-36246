@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { ArtisanProfile } from '@/utils/artisanTaskGenerator';
+// import { ArtisanProfile } from '@/types/artisan';
 
 export const useArtisanTaskGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -11,13 +11,11 @@ export const useArtisanTaskGeneration = () => {
   const { language } = useLanguage();
   const { toast } = useToast();
 
-  const generateArtisanTasks = async (profileData: ArtisanProfile) => {
+  const generateArtisanTasks = async (profileData: any) => {
     if (!user) {
       toast({
-        title: language === 'es' ? 'Error' : 'Error',
-        description: language === 'es' 
-          ? 'Debes estar autenticado para generar tareas'
-          : 'You must be authenticated to generate tasks',
+        title: 'Error',
+        description: 'You must be authenticated to generate tasks',
         variant: 'destructive',
       });
       return false;
@@ -26,23 +24,20 @@ export const useArtisanTaskGeneration = () => {
     setIsGenerating(true);
     
     try {
-      console.log('Generating artisan tasks for profile:', profileData);
-      
-      const { data, error } = await supabase.functions.invoke('generate-artisan-tasks', {
+      const { data, error } = await supabase.functions.invoke('intelligent-functions', {
         body: {
+          action: 'generate_artisan_tasks',
           userId: user.id,
           profileData,
-          language
+          language: 'en'
         }
       });
 
       if (error) {
         console.error('Error generating artisan tasks:', error);
         toast({
-          title: language === 'es' ? 'Error' : 'Error',
-          description: language === 'es' 
-            ? 'Error al generar tareas para artesanos'
-            : 'Error generating artisan tasks',
+          title: 'Error',
+          description: 'Error generating artisan tasks',
           variant: 'destructive',
         });
         return false;
@@ -51,10 +46,8 @@ export const useArtisanTaskGeneration = () => {
       const tasksCreated = data?.tasksCreated || 0;
       
       toast({
-        title: language === 'es' ? '¡Tareas artesanales creadas!' : 'Artisan tasks created!',
-        description: language === 'es' 
-          ? `Se crearon ${tasksCreated} tareas personalizadas para tu arte de ${profileData.productType}`
-          : `Created ${tasksCreated} personalized tasks for your ${profileData.productType} craft`,
+        title: 'Artisan tasks created!',
+        description: `Created ${tasksCreated} personalized tasks for your ${profileData.productType} craft`,
         variant: 'default',
       });
 
@@ -67,10 +60,8 @@ export const useArtisanTaskGeneration = () => {
     } catch (error) {
       console.error('Failed to generate artisan tasks:', error);
       toast({
-        title: language === 'es' ? 'Error' : 'Error',
-        description: language === 'es' 
-          ? 'Error inesperado al generar tareas artesanales'
-          : 'Unexpected error generating artisan tasks',
+        title: 'Error',
+        description: 'Unexpected error generating artisan tasks',
         variant: 'destructive',
       });
       return false;
