@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.5';
+import { generateIntelligentRecommendations } from './generateIntelligentRecommendations.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +15,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface TaskEvolutionRequest {
-  action: 'evolve_tasks' | 'get_coaching_message' | 'analyze_progress' | 'analyze_and_generate_tasks' | 'start_conversation' | 'generate_intelligent_questions' | 'create_task_steps' | 'complete_step' | 'generate_deliverable';
+  action: 'evolve_tasks' | 'get_coaching_message' | 'analyze_progress' | 'analyze_and_generate_tasks' | 'start_conversation' | 'generate_intelligent_questions' | 'create_task_steps' | 'complete_step' | 'generate_deliverable' | 'generate_intelligent_recommendations';
   completedTasks?: any[];
   maturityScores?: any;
   userProfile?: any;
@@ -27,6 +28,7 @@ interface TaskEvolutionRequest {
   profileContext?: any;
   stepId?: string;
   stepData?: any;
+  language?: 'en' | 'es';
 }
 
 serve(async (req) => {
@@ -35,7 +37,7 @@ serve(async (req) => {
   }
 
   try {
-    const { action, completedTasks, maturityScores, userProfile, userId, currentTasks, businessDescription, conversationContext, taskId, taskData, profileContext, stepId, stepData }: TaskEvolutionRequest = await req.json();
+    const { action, completedTasks, maturityScores, userProfile, userId, currentTasks, businessDescription, conversationContext, taskId, taskData, profileContext, stepId, stepData, language }: TaskEvolutionRequest = await req.json();
 
     console.log(`Master Agent Coordinator - Action: ${action}, User: ${userId}`);
 
@@ -66,6 +68,9 @@ serve(async (req) => {
       
       case 'generate_deliverable':
         return await generateDeliverable(taskId!, userId, userProfile?.collectedAnswers);
+
+      case 'generate_intelligent_recommendations':
+        return await generateIntelligentRecommendations(userId, maturityScores, language || 'es');
       
       default:
         throw new Error(`Unknown action: ${action}`);

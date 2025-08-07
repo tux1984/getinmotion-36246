@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CategoryScore } from '@/types/dashboard';
 import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseUnifiedTaskRecommendationsProps {
   maturityScores: CategoryScore | null;
@@ -11,14 +11,52 @@ interface UseUnifiedTaskRecommendationsProps {
 export const useUnifiedTaskRecommendations = ({ 
   maturityScores, 
   language = 'en' 
-}: UseUnifiedTaskRecommendationsProps): OptimizedRecommendedTask[] => {
-  
-  return useMemo(() => {
-    if (!maturityScores) return [];
+}: UseUnifiedTaskRecommendationsProps) => {
+  const [user, setUser] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<OptimizedRecommendedTask[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [convertedIds, setConvertedIds] = useState<Set<string>>(new Set());
+  const [needsMoreInfo, setNeedsMoreInfo] = useState(false);
 
-    // Calculate maturity level
+  const generateIntelligentRecommendations = useCallback(async () => {
+    if (!user || !maturityScores) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'generate_intelligent_recommendations',
+          userId: user.id,
+          maturityScores,
+          language
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.needsMoreInfo) {
+        setNeedsMoreInfo(true);
+        return;
+      }
+
+      if (data?.recommendations) {
+        setRecommendations(data.recommendations);
+        setNeedsMoreInfo(false);
+      }
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      // Fallback to static recommendations
+      generateFallbackRecommendations();
+
+    } finally {
+      setLoading(false);
+    }
+  }, [user, maturityScores, language]);
+
+  const generateFallbackRecommendations = useCallback(() => {
+    if (!maturityScores) return;
+
     const average = Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4;
-    
     let maturityLevel: 'explorador' | 'constructor' | 'estratega' | 'visionario' = 'explorador';
     if (average >= 80) maturityLevel = 'visionario';
     else if (average >= 60) maturityLevel = 'estratega';
@@ -87,8 +125,8 @@ export const useUnifiedTaskRecommendations = ({
 
     const selectedTasks = tasksByLevel[maturityLevel] || tasksByLevel['explorador'];
     
-    return selectedTasks.map(task => ({
-      id: `rec_${uuidv4()}`,
+    const fallbackTasks = selectedTasks.map(task => ({
+      id: `rec_${Date.now()}_${Math.random()}`,
       title: task.title,
       description: task.description,
       agentId: task.agent,
@@ -100,5 +138,42 @@ export const useUnifiedTaskRecommendations = ({
       completed: false,
       isRealAgent: true
     }));
-  }, [maturityScores, language]);
+
+    setRecommendations(fallbackTasks);
+  }, [maturityScores]);
+
+  const markAsConverted = useCallback((taskId: string) => {
+    setConvertedIds(prev => new Set(prev).add(taskId));
+    // Generate new recommendation to replace the converted one
+    generateIntelligentRecommendations();
+  }, [generateIntelligentRecommendations]);
+
+  const refreshRecommendations = useCallback(() => {
+    generateIntelligentRecommendations();
+  }, [generateIntelligentRecommendations]);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    if (maturityScores && user) {
+      generateIntelligentRecommendations();
+    }
+  }, [maturityScores, user, generateIntelligentRecommendations]);
+
+  // Filter out converted tasks
+  const activeRecommendations = recommendations.filter(task => !convertedIds.has(task.id));
+
+  return {
+    recommendations: activeRecommendations,
+    loading,
+    needsMoreInfo,
+    markAsConverted,
+    refreshRecommendations
+  };
 };

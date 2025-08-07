@@ -22,7 +22,13 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
   const { toast } = useToast();
   const { createTask } = useAgentTasks();
 
-  const recommendedTasks = useUnifiedTaskRecommendations({
+  const { 
+    recommendations: recommendedTasks, 
+    loading, 
+    needsMoreInfo, 
+    markAsConverted, 
+    refreshRecommendations 
+  } = useUnifiedTaskRecommendations({
     maturityScores,
     language
   });
@@ -108,8 +114,8 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
         description: recommendation.title,
       });
 
-      // Mark as completed to hide from recommendations
-      recommendation.completed = true;
+      // Mark as converted and generate new recommendation
+      markAsConverted(recommendation.id);
     } catch (error) {
       console.error('Error creating task:', error);
       toast({
@@ -126,10 +132,8 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
     }
   };
 
-  // Filter out completed tasks and limit to 3 for dashboard
-  const activeRecommendations = recommendedTasks
-    .filter(task => !task.completed)
-    .slice(0, 3);
+  // Limit to 3 for dashboard
+  const activeRecommendations = recommendedTasks.slice(0, 3);
 
   if (isHidden) {
     return (
@@ -248,10 +252,38 @@ const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
           ))}
         </AnimatePresence>
         
-        {activeRecommendations.length === 0 && (
+        {loading && (
+          <div className="text-center py-8 text-muted-foreground">
+            <div className="w-8 h-8 border border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4" />
+            <p>Generating personalized recommendations...</p>
+          </div>
+        )}
+        
+        {!loading && needsMoreInfo && (
           <div className="text-center py-8 text-muted-foreground">
             <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p>No recommendations available</p>
+            <p className="mb-4">We need more information about your business to create better recommendations</p>
+            <Button 
+              variant="outline" 
+              onClick={refreshRecommendations}
+              className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              Try Again
+            </Button>
+          </div>
+        )}
+        
+        {!loading && !needsMoreInfo && activeRecommendations.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <p className="mb-4">No recommendations available</p>
+            <Button 
+              variant="outline" 
+              onClick={refreshRecommendations}
+              className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              Refresh Recommendations
+            </Button>
           </div>
         )}
       </CardContent>

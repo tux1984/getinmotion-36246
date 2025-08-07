@@ -230,7 +230,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       </div>
 
       {/* Recommended Tasks Section */}
-      {recommendedTasks.length > 0 && (
+      {recommendedTasks.recommendations.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -271,7 +271,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                 >
                   <CardContent className="pt-0">
                     <div className="space-y-4">
-                      {recommendedTasks.map((recommendation, index) => (
+                      {recommendedTasks.recommendations.map((recommendation, index) => (
                         <motion.div
                           key={recommendation.id}
                           initial={{ opacity: 0, x: -20 }}
