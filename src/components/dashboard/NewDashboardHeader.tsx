@@ -3,10 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calculator, Settings, LogOut, Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
 import { useLocation } from 'react-router-dom';
 import { MotionLogo } from '@/components/MotionLogo';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface NewDashboardHeaderProps {
   onMaturityCalculatorClick: () => void;
@@ -18,27 +16,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
   onAgentManagerClick
 }) => {
   const { signOut } = useAuth();
-  const { language } = useLanguage();
   const location = useLocation();
-
-  const translations = {
-    en: {
-      maturityCalculator: "Maturity Calculator",
-      agentManager: "Agent Manager",
-      backToDashboard: "Back to Dashboard",
-      settings: "Settings",
-      signOut: "Sign Out"
-    },
-    es: {
-      maturityCalculator: "Calculadora de Madurez",
-      agentManager: "Gestor de Agentes",
-      backToDashboard: "Volver al Dashboard",
-      settings: "Configuración",
-      signOut: "Cerrar Sesión"
-    }
-  };
-
-  const t = translations[language];
 
   const isOnAgentManager = location.pathname.includes('/dashboard/agents');
 
@@ -66,7 +44,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             className="group flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
           >
             <Calculator className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
-            <span className="hidden sm:inline font-medium">{t.maturityCalculator}</span>
+            <span className="hidden sm:inline font-medium">Maturity Calculator</span>
           </Button>
           
           <Button
@@ -78,19 +56,16 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             {isOnAgentManager ? (
               <>
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
-                <span className="hidden sm:inline font-medium">{t.backToDashboard}</span>
+                <span className="hidden sm:inline font-medium">Back to Dashboard</span>
               </>
             ) : (
               <>
                 <Users className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                <span className="hidden sm:inline font-medium">{t.agentManager}</span>
+                <span className="hidden sm:inline font-medium">Agent Manager</span>
               </>
             )}
           </Button>
           
-          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200">
-            <LanguageSwitcher />
-          </div>
           
           <Button
             variant="ghost"
@@ -99,7 +74,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 hover:scale-105 rounded-xl"
           >
             <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
-            <span className="hidden sm:inline font-medium">{t.signOut}</span>
+            <span className="hidden sm:inline font-medium">Sign Out</span>
           </Button>
         </div>
       </div>

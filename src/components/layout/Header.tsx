@@ -1,21 +1,16 @@
 
 import React from 'react';
 import { MotionLogo } from '@/components/MotionLogo';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+
 import { Button } from '@/components/ui/button';
 import { Menu, X, UserPlus, LogIn, Settings } from 'lucide-react';
 import { useState } from 'react';
 
 interface HeaderProps {
-  translations: {
-    navAgents: string;
-    navAccess: string;
-    navLogin: string;
-  };
   onAccessClick: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -33,12 +28,9 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             className="group flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200 hover:shadow-lg hover:scale-105 transform"
           >
             <span className="group-hover:scale-110 transition-transform duration-200">🤖</span>
-            {translations.navAgents}
+            Agents
           </a>
           
-          <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2 hover:from-gray-100 hover:to-slate-100 transition-all duration-200 hover:shadow-md hover:scale-105 transform">
-            <LanguageSwitcher />
-          </div>
 
           <Button
             onClick={() => window.location.href = '/login'}
@@ -46,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             className="group flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-300 hover:scale-105 hover:shadow-md rounded-xl px-6 py-2 font-medium"
           >
             <LogIn className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-            {translations.navLogin}
+            Login
           </Button>
           
           <Button
@@ -54,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             className="group flex items-center gap-2 bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 hover:from-purple-700 hover:via-purple-800 hover:to-pink-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-110 hover:shadow-xl transform hover:shadow-purple-500/25 active:scale-95"
           >
             <UserPlus className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
-            {translations.navAccess}
+            Get Access
           </Button>
 
           {/* Discrete Admin Link */}
@@ -85,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             onClick={() => setIsMenuOpen(false)}
           >
             <span>🤖</span>
-            {translations.navAgents}
+            Agents
           </a>
 
           <a 
@@ -94,14 +86,9 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             onClick={() => setIsMenuOpen(false)}
           >
             <LogIn className="w-4 h-4" />
-            {translations.navLogin}
+            Login
           </a>
           
-          <div className="flex justify-center py-2">
-            <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl p-2">
-              <LanguageSwitcher />
-            </div>
-          </div>
           
           <Button
             onClick={() => {
@@ -111,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ translations, onAccessClick }) =
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             <UserPlus className="w-4 h-4" />
-            {translations.navAccess}
+            Get Access
           </Button>
 
           {/* Admin link in mobile menu */}

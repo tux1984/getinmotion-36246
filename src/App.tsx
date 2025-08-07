@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
-import { LanguageProvider } from '@/context/LanguageContext';
+
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Index from './pages/Index';
@@ -26,11 +26,10 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
-    <LanguageProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <div className="min-h-screen">
-            <Routes>
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="min-h-screen">
+          <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               {/* Main dashboard route - Master Coordinator as entry point */}
@@ -127,7 +126,6 @@ function App() {
           <Toaster />
         </AuthProvider>
       </BrowserRouter>
-    </LanguageProvider>
   );
 }
 

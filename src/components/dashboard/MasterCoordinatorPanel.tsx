@@ -10,7 +10,7 @@ import { LoadingIndicator } from './LoadingIndicator';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +42,7 @@ interface MasterCoordinatorPanelProps {
 }
 
 export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ onTaskStart }) => {
-  const { language } = useLanguage();
+  // English-only version
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -89,30 +89,24 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
   const getTimeOfDayGreeting = () => {
     const hour = new Date().getHours();
-    if (language === 'es') {
-      if (hour < 12) return '¡Buenos días!';
-      if (hour < 18) return '¡Buenas tardes!';
-      return '¡Buenas noches!';
-    } else {
-      if (hour < 12) return 'Good morning!';
-      if (hour < 18) return 'Good afternoon!';
-      return 'Good evening!';
-    }
+    if (hour < 12) return 'Good morning!';
+    if (hour < 18) return 'Good afternoon!';
+    return 'Good evening!';
   };
 
   const getBusinessModelLabel = () => {
     if (!businessProfile?.businessModel) return '';
-    const models: { [key: string]: { en: string; es: string } } = {
-      'b2b': { en: 'B2B', es: 'B2B' },
-      'b2c': { en: 'B2C', es: 'B2C' },
-      'marketplace': { en: 'Marketplace', es: 'Marketplace' },
-      'saas': { en: 'SaaS', es: 'SaaS' },
-      'ecommerce': { en: 'E-commerce', es: 'E-commerce' },
-      'consulting': { en: 'Consulting', es: 'Consultoría' },
-      'freelance': { en: 'Freelance', es: 'Freelance' },
-      'other': { en: 'Other', es: 'Otro' }
+    const models: { [key: string]: string } = {
+      'b2b': 'B2B',
+      'b2c': 'B2C',
+      'marketplace': 'Marketplace',
+      'saas': 'SaaS',
+      'ecommerce': 'E-commerce',
+      'consulting': 'Consulting',
+      'freelance': 'Freelance',
+      'other': 'Other'
     };
-    return models[businessProfile.businessModel]?.[language] || businessProfile.businessModel;
+    return models[businessProfile.businessModel] || businessProfile.businessModel;
   };
 
   const handleStartTask = async (taskId: string) => {
@@ -151,18 +145,14 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     try {
       await analyzeProfileAndGenerateTasks();
       toast({
-        title: language === 'es' ? "¡Coordinador Activado!" : "Coordinator Activated!",
-        description: language === 'es' 
-          ? "He analizado tu perfil y generado tareas específicas para tu negocio."
-          : "I've analyzed your profile and generated specific tasks for your business.",
+        title: "Coordinator Activated!",
+        description: "I've analyzed your profile and generated specific tasks for your business.",
       });
     } catch (error) {
       console.error('❌ Error starting coordinator:', error);
       toast({
-        title: language === 'es' ? "Error" : "Error",
-        description: language === 'es' 
-          ? "Hubo un problema al generar las tareas. Inténtalo de nuevo."
-          : "There was a problem generating tasks. Please try again.",
+        title: "Error",
+        description: "There was a problem generating tasks. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -211,54 +201,28 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     navigate('/dashboard/agent/master-coordinator');
   };
 
-  const translations = {
-    en: {
-      masterCoordinator: 'Master Coordinator',
-      personalGuide: 'Your Personal Business Guide',
-      currentMission: 'Current Mission',
-      startMission: 'Start Mission',
-      chatWithMe: 'Chat with me',
-      progress: 'Progress',
-      completedTasks: 'completed tasks',
-      activeTasks: 'active tasks',
-      showMore: 'Show more',
-      showLess: 'Show less',
-      nextSteps: 'Next Steps',
-      getStarted: 'Get Started',
-      maturityLevel: 'Maturity Level',
-      businessModel: 'Business Model',
-      startNow: 'Start Now',
-      activateCoordinator: 'Activate coordinator and generate personalized tasks',
-      talkAboutBusiness: 'Tell me about your business',
-      deepenProfile: 'Deepen your profile with intelligent questions',
-      recalculateMaturity: 'Recalculate Maturity',
-      updateMaturityScores: 'Update your maturity scores and regenerate tasks'
-    },
-    es: {
-      masterCoordinator: 'Coordinador Maestro',
-      personalGuide: 'Tu Guía Personal de Negocios',
-      currentMission: 'Misión Actual',
-      startMission: 'Iniciar Misión',
-      chatWithMe: 'Habla conmigo',
-      progress: 'Progreso',
-      completedTasks: 'tareas completadas',
-      activeTasks: 'tareas activas',
-      showMore: 'Ver más',
-      showLess: 'Ver menos',
-      nextSteps: 'Próximos Pasos',
-      getStarted: 'Empezar',
-      maturityLevel: 'Nivel de Madurez',
-      businessModel: 'Modelo de Negocio',
-      startNow: 'Empezar Ahora',
-      activateCoordinator: 'Activa el coordinador y genera tareas personalizadas',
-      talkAboutBusiness: 'Hablar de mi negocio',
-      deepenProfile: 'Profundiza en tu perfil con preguntas inteligentes',
-      recalculateMaturity: 'Recalcular Madurez',
-      updateMaturityScores: 'Actualiza tus puntuaciones de madurez y regenera tareas'
-    }
+  const labels = {
+    masterCoordinator: 'Master Coordinator',
+    personalGuide: 'Your Personal Business Guide',
+    currentMission: 'Current Mission',
+    startMission: 'Start Mission',
+    chatWithMe: 'Chat with me',
+    progress: 'Progress',
+    completedTasks: 'completed tasks',
+    activeTasks: 'active tasks',
+    showMore: 'Show more',
+    showLess: 'Show less',
+    nextSteps: 'Next Steps',
+    getStarted: 'Get Started',
+    maturityLevel: 'Maturity Level',
+    businessModel: 'Business Model',
+    startNow: 'Start Now',
+    activateCoordinator: 'Activate coordinator and generate personalized tasks',
+    talkAboutBusiness: 'Tell me about your business',
+    deepenProfile: 'Deepen your profile with intelligent questions',
+    recalculateMaturity: 'Recalculate Maturity',
+    updateMaturityScores: 'Update your maturity scores and regenerate tasks'
   };
-
-  const t = translations[language];
 
   const getMessagePreview = (message: string, limit: number = 120) => {
     return message.length > limit ? message.substring(0, limit) + '...' : message;
@@ -269,10 +233,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
       {/* Loading Indicator */}
       <LoadingIndicator 
         isVisible={isGeneratingTasks} 
-        message={language === 'es' 
-          ? "Analizando tu perfil y generando tareas inteligentes..."
-          : "Analyzing your profile and generating intelligent tasks..."
-        } 
+        message="Analyzing your profile and generating intelligent tasks..."
       />
 
       {/* Master Coordinator Panel - Fixed Header */}
@@ -306,8 +267,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                   </motion.div>
                   
                   <div>
-                    <h2 className="text-lg font-bold">{t.masterCoordinator}</h2>
-                    <p className="text-white/80 text-sm">{t.personalGuide}</p>
+                    <h2 className="text-lg font-bold">{labels.masterCoordinator}</h2>
+                    <p className="text-white/80 text-sm">{labels.personalGuide}</p>
                   </div>
                 </div>
 
@@ -315,11 +276,11 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                 <div className="hidden md:flex items-center space-x-4">
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                     <Target className="w-3 h-3 mr-1" />
-                    {progressPercentage}% {t.progress}
+                    {progressPercentage}% {labels.progress}
                   </Badge>
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                     <CheckCircle2 className="w-3 h-3 mr-1" />
-                    {completedTasks.length} {t.completedTasks}
+                    {completedTasks.length} {labels.completedTasks}
                   </Badge>
                 </div>
 
@@ -353,14 +314,10 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                             <div className="space-y-3">
                               <p className="text-white leading-relaxed">
                                 {getTimeOfDayGreeting()} {businessProfile?.brandName && `¡${businessProfile.brandName}!`}
-                                {businessProfile?.businessDescription 
-                                  ? ` ${coordinatorMessage?.message || (language === 'es' 
-                                    ? 'He analizado tu perfil y tengo tareas específicas para hacer crecer tu negocio.' 
-                                    : 'I\'ve analyzed your profile and have specific tasks to grow your business.')}`
-                                  : (language === 'es' 
-                                    ? "Para ayudarte de la mejor manera, necesito conocer más sobre tu negocio. ¿Me cuentas qué haces?" 
-                                    : "To help you in the best way, I need to know more about your business. Can you tell me what you do?")
-                                }
+                                 {businessProfile?.businessDescription 
+                                   ? ` ${coordinatorMessage?.message || 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
+                                   : "To help you in the best way, I need to know more about your business. Can you tell me what you do?"
+                                 }
                               </p>
                               
                               {/* Business Profile Quick View */}
@@ -381,7 +338,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                     )}
                                     <Badge className="bg-green-400/20 text-green-100 border-green-400/30">
                                       <TrendingUp className="w-3 h-3 mr-1" />
-                                      {t.maturityLevel}: {maturityLevel}/10
+                                      {labels.maturityLevel}: {maturityLevel}/10
                                     </Badge>
                                   </div>
                                   <p className="text-white/80 text-sm">
@@ -397,7 +354,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                       {/* Action Buttons */}
                       <div className="space-y-3">
                         <p className="text-sm font-medium text-white/90 mb-3">
-                          {language === 'es' ? 'Elige tu siguiente acción:' : 'Choose your next action:'}
+                          Choose your next action:
                         </p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -416,15 +373,12 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                 )}
                               </div>
                               <div className="flex-1 text-left">
-                                <div className="font-medium">
-                                  {isGeneratingTasks 
-                                    ? (language === 'es' ? 'Generando...' : 'Generating...')
-                                    : t.startNow
-                                  }
-                                </div>
-                                <div className="text-xs text-purple-700">
-                                  {t.activateCoordinator}
-                                </div>
+                                 <div className="font-medium">
+                                   {isGeneratingTasks ? 'Generating...' : labels.startNow}
+                                 </div>
+                                 <div className="text-xs text-purple-700">
+                                   {labels.activateCoordinator}
+                                 </div>
                               </div>
                             </div>
                           </Button>
@@ -440,12 +394,12 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                 <MessageCircle className="w-4 h-4 text-purple-600" />
                               </div>
                               <div className="flex-1 text-left">
-                                <div className="font-medium">
-                                  {t.talkAboutBusiness}
-                                </div>
-                                <div className="text-xs text-purple-500">
-                                  {t.deepenProfile}
-                                </div>
+                                 <div className="font-medium">
+                                   {labels.talkAboutBusiness}
+                                 </div>
+                                 <div className="text-xs text-purple-500">
+                                   {labels.deepenProfile}
+                                 </div>
                               </div>
                             </div>
                           </Button>
@@ -461,12 +415,12 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                 <Calculator className="w-4 h-4 text-purple-600" />
                               </div>
                               <div className="flex-1 text-left">
-                                <div className="font-medium">
-                                  {t.recalculateMaturity}
-                                </div>
-                                <div className="text-xs text-purple-500">
-                                  {t.updateMaturityScores}
-                                </div>
+                                 <div className="font-medium">
+                                   {labels.recalculateMaturity}
+                                 </div>
+                                 <div className="text-xs text-purple-500">
+                                   {labels.updateMaturityScores}
+                                 </div>
                               </div>
                             </div>
                           </Button>
@@ -479,7 +433,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                           className="w-full border-white/30 text-white hover:bg-white/20"
                         >
                           <MessageCircle className="w-4 h-4 mr-2" />
-                          {t.chatWithMe}
+                          {labels.chatWithMe}
                         </Button>
 
                         {/* Quick Stats on Mobile */}
@@ -491,7 +445,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                             {completedTasks.length} ✓
                           </Badge>
                           <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                            {activeTasks.length} {t.activeTasks}
+                            {activeTasks.length} {labels.activeTasks}
                           </Badge>
                         </div>
                       </div>
@@ -501,7 +455,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                         <div className="bg-white/5 rounded-lg p-3">
                           <h4 className="text-sm font-semibold text-white/90 mb-2 flex items-center">
                             <ArrowRight className="w-3 h-3 mr-1" />
-                            {t.nextSteps}
+                            {labels.nextSteps}
                           </h4>
                           <div className="space-y-1">
                             {coordinatorTasks.slice(0, 3).map((task, index) => (
@@ -543,9 +497,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {language === 'es' 
-                ? 'Cuéntame sobre tu negocio' 
-                : 'Tell me about your business'}
+              Tell me about your business
             </DialogTitle>
           </DialogHeader>
           <BusinessProfileCapture

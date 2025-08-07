@@ -1,7 +1,6 @@
+import React, { createContext, useContext, ReactNode } from 'react';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-type Language = 'en' | 'es';
+type Language = 'en';
 
 interface LanguageContextType {
   language: Language;
@@ -10,39 +9,9 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Helper to get browser language preference
-const getBrowserLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'en';
-  
-  const browserLang = navigator.language || navigator.languages?.[0] || 'en';
-  return browserLang.startsWith('es') ? 'es' : 'en';
-};
-
-// Helper to get stored language preference
-const getStoredLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'en';
-  
-  const stored = localStorage.getItem('user-language');
-  if (stored === 'en' || stored === 'es') return stored;
-  
-  return getBrowserLanguage();
-};
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(getStoredLanguage);
-
-  const setLanguage = (newLanguage: Language) => {
-    setLanguageState(newLanguage);
-    localStorage.setItem('user-language', newLanguage);
-  };
-
-  // Initialize language on mount
-  useEffect(() => {
-    const initialLanguage = getStoredLanguage();
-    if (initialLanguage !== language) {
-      setLanguageState(initialLanguage);
-    }
-  }, []);
+  const language = 'en';
+  const setLanguage = () => {}; // No-op since we only support English
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>
