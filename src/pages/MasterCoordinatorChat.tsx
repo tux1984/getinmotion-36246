@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { AgentSpecificHeader } from '@/components/dashboard/AgentSpecificHeader';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { BentoAgentLayout } from '@/components/dashboard/BentoAgentLayout';
@@ -10,7 +10,7 @@ import { SEO_CONFIG } from '@/config/seo';
 
 const MasterCoordinatorChat = () => {
   const { user, isAuthorized } = useAuth();
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const navigate = useNavigate();
 
   console.log('MasterCoordinatorChat: Rendering chat interface');
