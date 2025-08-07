@@ -11,7 +11,7 @@ interface QuickActionsPanelProps {
   activeTasks?: number;
 }
 
-export const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
+const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
   language,
   onMasterAgentChat,
   activeTasks = 0
@@ -117,3 +117,5 @@ export const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
     </Card>
   );
 };
+
+export default QuickActionsPanel;

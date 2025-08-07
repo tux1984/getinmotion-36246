@@ -10,7 +10,7 @@ import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
 import { CompactPriorityRecommendations } from './CompactPriorityRecommendations';
-import { QuickActionsPanel } from './QuickActionsPanel';
+import QuickActionsPanel from './QuickActionsPanel';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
