@@ -16,7 +16,7 @@ export type RecommendedAgents = {
 interface Agent {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  iconType: string;
   color: string;
   soon: boolean;
   greeting: string;
@@ -78,11 +78,30 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
     return Boolean(agentSystemPrompts[id]);
   };
   
+  // Helper function to render icons based on iconType
+  const renderIcon = (iconType: string) => {
+    const iconProps = { className: "w-5 h-5" };
+    switch(iconType) {
+      case 'FileText':
+        return <FileText {...iconProps} />;
+      case 'Calculator':
+        return <Calculator {...iconProps} />;
+      case 'FileSpreadsheet':
+        return <FileSpreadsheet {...iconProps} />;
+      case 'Briefcase':
+        return <Briefcase {...iconProps} />;
+      case 'Palette':
+        return <Palette {...iconProps} />;
+      default:
+        return <FileText {...iconProps} />;
+    }
+  };
+  
   const agents: Agent[] = [
     { 
       id: "admin", 
       name: t.adminAssistant, 
-      icon: <FileText className="w-5 h-5" />, 
+      iconType: "FileText", 
       color: "bg-violet-100 text-violet-700", 
       soon: false,
       category: t.backOfficeCategory,
@@ -94,7 +113,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
     { 
       id: "accounting", 
       name: t.accountingAgent, 
-      icon: <Calculator className="w-5 h-5" />, 
+      iconType: "Calculator", 
       color: "bg-indigo-100 text-indigo-700", 
       soon: false,
       category: t.financialCategory,
@@ -106,7 +125,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
     { 
       id: "legal", 
       name: t.legalAdvisor, 
-      icon: <FileSpreadsheet className="w-5 h-5" />, 
+      iconType: "FileSpreadsheet", 
       color: "bg-blue-100 text-blue-700", 
       soon: false,
       category: t.legalCategory,
@@ -118,7 +137,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
     { 
       id: "operations", 
       name: t.operationsManager, 
-      icon: <Briefcase className="w-5 h-5" />, 
+      iconType: "Briefcase", 
       color: "bg-emerald-100 text-emerald-700", 
       soon: false,
       category: t.backOfficeCategory,
@@ -130,7 +149,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
     { 
       id: "cultural", 
       name: t.culturalCreatorAgent, 
-      icon: <Palette className="w-5 h-5" />, 
+      iconType: "Palette", 
       color: "bg-pink-100 text-pink-700", 
       soon: false,
       category: t.culturalCategory,
@@ -187,7 +206,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
                   onClick={() => handleSelectCopilot(agent.id)}
                 >
                   <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
-                    {agent.icon}
+                    {renderIcon(agent.iconType)}
                   </div>
                   <h3 className="font-medium mb-1">{agent.name}</h3>
                   <div className="flex flex-wrap gap-2">
@@ -221,7 +240,7 @@ export const CopilotSelector = ({ onSelectCopilot, recommendedAgents, showCatego
               onClick={() => handleSelectCopilot(agent.id)}
             >
               <div className={`w-10 h-10 rounded-full ${agent.color} flex items-center justify-center mb-3`}>
-                {agent.icon}
+                {renderIcon(agent.iconType)}
               </div>
               <h3 className="font-medium mb-1">{agent.name}</h3>
               <div className="flex flex-wrap gap-2">

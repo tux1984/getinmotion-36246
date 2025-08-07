@@ -17,7 +17,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   const [inputMessage, setInputMessage] = useState('');
   const [copilotName, setCopilotName] = useState('');
   const [copilotColor, setCopilotColor] = useState('');
-  const [copilotIcon, setCopilotIcon] = useState<React.ReactNode>(null);
+  const [copilotIconType, setCopilotIconType] = useState<string>('FileText');
   const [greetingInitialized, setGreetingInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,53 +49,72 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
   
   const t = translations[language];
 
+  // Helper function to render icons based on iconType
+  const renderIcon = (iconType: string) => {
+    const iconProps = { className: "w-5 h-5" };
+    switch(iconType) {
+      case 'FileText':
+        return <FileText {...iconProps} />;
+      case 'Calculator':
+        return <Calculator {...iconProps} />;
+      case 'FileSpreadsheet':
+        return <FileSpreadsheet {...iconProps} />;
+      case 'Briefcase':
+        return <Briefcase {...iconProps} />;
+      case 'Palette':
+        return <Palette {...iconProps} />;
+      default:
+        return <FileText {...iconProps} />;
+    }
+  };
+
   // Set initial chat configurations based on agent type
   useEffect(() => {
     switch(agentId) {
       case 'contract-generator':
         setCopilotName(language === 'en' ? 'Contract Generator' : 'Generador de Contratos');
         setCopilotColor('bg-blue-100 text-blue-700');
-        setCopilotIcon(<FileSpreadsheet className="w-5 h-5" />);
+        setCopilotIconType('FileSpreadsheet');
         break;
       case 'cost-calculator':
         setCopilotName(language === 'en' ? 'Cost Calculator' : 'Calculador de Costos');
         setCopilotColor('bg-emerald-100 text-emerald-700');
-        setCopilotIcon(<Calculator className="w-5 h-5" />);
+        setCopilotIconType('Calculator');
         break;
       case 'maturity-evaluator':
         setCopilotName(language === 'en' ? 'Maturity Evaluator' : 'Evaluador de Madurez');
         setCopilotColor('bg-violet-100 text-violet-700');
-        setCopilotIcon(<FileText className="w-5 h-5" />);
+        setCopilotIconType('FileText');
         break;
       case 'admin':
         setCopilotName(language === 'en' ? 'Administrative Assistant' : 'Asistente Administrativo');
         setCopilotColor('bg-violet-100 text-violet-700');
-        setCopilotIcon(<FileText className="w-5 h-5" />);
+        setCopilotIconType('FileText');
         break;
       case 'accounting':
         setCopilotName(language === 'en' ? 'Accounting Agent' : 'Agente Contable');
         setCopilotColor('bg-indigo-100 text-indigo-700');
-        setCopilotIcon(<Calculator className="w-5 h-5" />);
+        setCopilotIconType('Calculator');
         break;
       case 'legal':
         setCopilotName(language === 'en' ? 'Legal Advisor' : 'Asesor Legal');
         setCopilotColor('bg-blue-100 text-blue-700');
-        setCopilotIcon(<FileSpreadsheet className="w-5 h-5" />);
+        setCopilotIconType('FileSpreadsheet');
         break;
       case 'operations':
         setCopilotName(language === 'en' ? 'Operations Manager' : 'Gerente de Operaciones');
         setCopilotColor('bg-emerald-100 text-emerald-700');
-        setCopilotIcon(<Briefcase className="w-5 h-5" />);
+        setCopilotIconType('Briefcase');
         break;
       case 'cultural':
         setCopilotName(language === 'en' ? 'Cultural Creator Agent' : 'Agente para Creadores Culturales');
         setCopilotColor('bg-pink-100 text-pink-700');
-        setCopilotIcon(<Palette className="w-5 h-5" />);
+        setCopilotIconType('Palette');
         break;
       default:
         setCopilotName(language === 'en' ? 'Assistant' : 'Asistente');
         setCopilotColor('bg-slate-100 text-slate-700');
-        setCopilotIcon(<FileText className="w-5 h-5" />);
+        setCopilotIconType('FileText');
     }
   }, [agentId, language]);
 
@@ -148,7 +167,7 @@ export const CopilotChat = ({ agentId, onBack }: CopilotChatProps) => {
       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center">
           <div className={`w-8 h-8 rounded-full ${copilotColor} flex items-center justify-center mr-3`}>
-            {copilotIcon}
+            {renderIcon(copilotIconType)}
           </div>
           <h2 className="font-medium">{copilotName}</h2>
         </div>
