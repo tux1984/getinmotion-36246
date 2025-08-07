@@ -2,14 +2,14 @@
 import React from 'react';
 import { ChatBox } from './hero/ChatBox';
 import { ChatBoxesHeader } from './hero/ChatBoxesHeader';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { motion } from 'framer-motion';
 import { getAgents } from './hero/agentsData';
 import { ChatBoxCarousel } from './hero/ChatBoxCarousel';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const HeroChatBoxes = () => {
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const isMobile = useIsMobile();
   const agents = getAgents();
   
