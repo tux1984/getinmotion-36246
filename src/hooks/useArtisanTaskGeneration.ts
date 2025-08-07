@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { useToast } from '@/hooks/use-toast';
 // import { ArtisanProfile } from '@/types/artisan';
 
 export const useArtisanTaskGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const { toast } = useToast();
 
   const generateArtisanTasks = async (profileData: any) => {

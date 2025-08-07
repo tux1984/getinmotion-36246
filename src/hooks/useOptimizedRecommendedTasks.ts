@@ -4,14 +4,14 @@ import { CategoryScore } from '@/types/dashboard';
 import { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 import { generateRobustTasksFromScores } from './utils/taskGenerationUtils';
 import { supabase } from '@/integrations/supabase/client';
-import { useLanguage } from '@/context/LanguageContext';
+
 
 export type { OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 
 export const useOptimizedRecommendedTasks = (maturityScores: CategoryScore | null, profileData: any | null, agentPool: string[] = []) => {
   const [tasks, setTasks] = useState<OptimizedRecommendedTask[]>([]);
   const [loading, setLoading] = useState(false); // Changed to false by default
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
 
   useEffect(() => {
     // Only generate suggestions if we have the necessary data
