@@ -69,7 +69,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     updateMeta('og:url', siteUrl, true);
     updateMeta('og:type', type, true);
     updateMeta('og:site_name', SEO_CONFIG.siteName, true);
-    updateMeta('og:locale', language === 'es' ? 'es_ES' : 'en_US', true);
+    updateMeta('og:locale', 'en_US', true);
     
     // Twitter Card tags
     updateMeta('twitter:card', 'summary_large_image');

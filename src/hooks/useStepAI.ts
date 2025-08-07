@@ -78,9 +78,7 @@ export const useStepAI = (step: TaskStep) => {
     } catch (error) {
       console.error("Error calling step-ai-assistant function:", error);
       
-      const errorMessage = language === 'es' ? 
-        'Lo siento, no puedo ayudarte en este momento con este paso.' : 
-        "I'm sorry, I can't help you with this step right now.";
+      const errorMessage = "I'm sorry, I can't help you with this step right now.";
       
       const errorResponse: StepAIMessage = {
         role: 'assistant',

@@ -106,11 +106,8 @@ export const VisualMaturityCalculator: React.FC<VisualMaturityCalculatorProps> =
         onPrevious={handlePrevious}
         isFirstStep={currentStep === 0}
         isLastStep={currentStep >= questions.length - 1}
-        language={language}
         isValid={!!answers[currentQuestion.id]}
-        nextLabel={currentStep < questions.length - 1 
-          ? (language === 'en' ? 'Next' : 'Siguiente')
-          : (language === 'en' ? 'Complete' : 'Completar')}
+        nextLabel={currentStep < questions.length - 1 ? 'Next' : 'Complete'}
       />
     );
 

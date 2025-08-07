@@ -70,7 +70,7 @@ export const useAIAssistant = (stepContext: string, questionId: string, question
       console.error("Error calling chat-assistant function:", error);
       
       // Try to extract a meaningful error message
-      let errorMessage = language === 'es' ? 'Lo siento, no puedo responder en este momento.' : "I'm sorry, I can't respond right now.";
+      let errorMessage = "I'm sorry, I can't respond right now.";
       
       if (error && typeof error === 'object') {
         const errorObj = error as any;

@@ -62,7 +62,7 @@ export const UserProgressDashboard: React.FC = () => {
   
   // Get last assessment date
   const lastAssessmentDate = scoreHistory.length > 0 
-    ? new Date(scoreHistory[0].created_at).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')
+    ? new Date(scoreHistory[0].created_at).toLocaleDateString('en-US')
     : null;
 
   // Calculate progress metrics

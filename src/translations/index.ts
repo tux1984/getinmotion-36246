@@ -348,7 +348,13 @@ export const translations = {
     title: "Recommended Agents",
     subtitle: "Based on your business profile and goals", 
     startWorking: "Start Working",
-    recommendedAgents: "Recommended for you"
+    recommendedAgents: "Recommended for you",
+    activeTasks: "active tasks",
+    lastUsed: "Last used",
+    never: "Never",
+    chatWith: "Chat with",
+    primaryAgents: "Primary Agents",
+    secondaryAgents: "Secondary Agents"
   },
 
   // AI Assistant Extended
@@ -504,7 +510,15 @@ export const translations = {
     remaining: "remaining",
     manageSlots: "Manage Task Slots",
     reachedLimit: "You've reached your task limit",
-    completeOthers: "Complete some tasks to create new ones"
+    completeOthers: "Complete some tasks to create new ones",
+    limitReached: "Task limit reached",
+    limitWarning: "You're approaching your task limit",
+    smartSuggestion: "Smart suggestion: Complete some tasks to free up space",
+    manage: "Manage",
+    taskLimit: "Task Limit",
+    recommendation: "Recommendation",
+    currentTasks: "Current Tasks",
+    paused: "Paused"
   },
 
   // Impact
@@ -517,7 +531,37 @@ export const translations = {
   // Hero Section
   heroSection: {
     title: "Transform Your Creative Business",
-    subtitle: "Get AI-powered guidance tailored to your industry"
+    subtitle: "Get AI-powered guidance tailored to your industry",
+    agentsSection: {
+      title: "Meet Your AI Agents",
+      subtitle: "Specialized AI assistants designed to help you succeed",
+      preview: "Agent Categories",
+      cta: "Explore All Agents",
+      features: {
+        instant: {
+          title: "Instant Responses",
+          description: "Get immediate answers to your business questions"
+        },
+        specialized: {
+          title: "Specialized Knowledge",
+          description: "Each agent is trained for specific business areas"
+        },
+        secure: {
+          title: "Secure & Private",
+          description: "Your business data is protected and confidential"
+        },
+        collaborative: {
+          title: "Collaborative",
+          description: "Work with multiple agents for comprehensive solutions"
+        }
+      },
+      categories: {
+        financial: "Financial",
+        legal: "Legal",
+        operational: "Operational",
+        marketing: "Marketing"
+      }
+    }
   },
 
   // Extended Recommended Agents
@@ -528,6 +572,71 @@ export const translations = {
     chatWith: "Chat with",
     primaryAgents: "Primary Agents",
     secondaryAgents: "Secondary Agents"
+  },
+
+  // Hero Chat Boxes
+  heroChatBoxes: {
+    typing: "Typing...",
+    viewAllAgents: "View All Agents",
+    exploreComplete: "Explore Complete Platform",
+    examples: [
+      "How can I improve my business?",
+      "What should I focus on next?",
+      "Help me create a business plan"
+    ]
+  },
+
+  // Mobile Bottom Navigation
+  mobileBottomNav: {
+    dashboard: "Dashboard",
+    agents: "Agents",
+    tasks: "Tasks",
+    profile: "Profile",
+    analytics: "Analytics",
+    settings: "Settings"
+  },
+
+  // Extended Task Management
+  taskManagementExtended: {
+    limitReached: "Task limit reached",
+    limitWarning: "You're approaching your task limit",
+    smartSuggestion: "Smart suggestion: Complete some tasks to free up space",
+    manage: "Manage",
+    taskLimit: "Task Limit",
+    recommendation: "Recommendation",
+    currentTasks: "Current Tasks",
+    paused: "Paused"
+  },
+
+  // Recommended Tasks for unified system
+  recommendedTasks: {
+    title: "Recommended Tasks",
+    subtitle: "Based on your business goals",
+    generateNew: "Generate New Recommendations",
+    noTasks: "No recommendations available",
+    explorador: {
+      title: "Business Explorer",
+      subtitle: "Explore business opportunities",
+      agents: "Explore Agents",
+      categories: "Categories"
+    },
+    agents: "Agents",
+    categories: "Categories",
+    digitalMarketing: {
+      title: "Digital Marketing",
+      subtitle: "Marketing strategies"
+    },
+    projectManagement: {
+      title: "Project Management", 
+      subtitle: "Project coordination"
+    }
+  },
+
+  // Time Estimates
+  timeEstimates: {
+    short: "15-30 min",
+    medium: "30-60 min",
+    long: "1-2 hours"
   }
 };
 

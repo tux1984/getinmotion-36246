@@ -79,11 +79,11 @@ export const MasterCoordinatorDashboard: React.FC = () => {
 
   // Dynamic coaching tips
   const coachingTips = [
-    language === 'es' ? 'Cada gran negocio comenzó con una idea audaz' : 'Every great business started with a bold idea',
-    language === 'es' ? 'La consistencia es la clave del crecimiento sostenible' : 'Consistency is the key to sustainable growth',
-    language === 'es' ? 'Conoce a tu cliente mejor que nadie' : 'Know your customer better than anyone',
-    language === 'es' ? 'La innovación nace de escuchar al mercado' : 'Innovation comes from listening to the market',
-    language === 'es' ? 'Tu red de contactos es tu mayor activo' : 'Your network is your greatest asset'
+    'Every great business started with a bold idea',
+    'Consistency is the key to sustainable growth',
+    'Know your customer better than anyone',
+    'Innovation comes from listening to the market',
+    'Your network is your greatest asset'
   ];
 
   useEffect(() => {
@@ -149,10 +149,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
           </motion.div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">
-              {language === 'es' ? 'Coordinando tu experiencia...' : 'Coordinating your experience...'}
+              Coordinating your experience...
             </h2>
             <p className="text-muted-foreground">
-              {language === 'es' ? 'Preparando tu panel personalizado' : 'Preparing your personalized dashboard'}
+              Preparing your personalized dashboard
             </p>
           </div>
         </motion.div>
@@ -549,7 +549,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                           ) : (
                             <div className="text-center py-8 text-muted-foreground">
                               <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary/50" />
-                              <p>{language === 'es' ? 'Generando recomendaciones personalizadas...' : 'Generating personalized recommendations...'}</p>
+                              <p>Generating personalized recommendations...</p>
                             </div>
                           )}
                         </CardContent>

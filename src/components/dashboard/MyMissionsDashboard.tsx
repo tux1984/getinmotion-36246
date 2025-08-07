@@ -405,7 +405,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                   className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  {language === 'es' ? 'Eliminar Todas las Tareas' : 'Delete All Tasks'}
+                  Delete All Tasks
                 </Button>
               </div>
             )}

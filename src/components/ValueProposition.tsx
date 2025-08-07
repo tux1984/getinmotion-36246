@@ -32,10 +32,10 @@ export const ValueProposition: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {reason.title}
+                  {reason}
                 </h3>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  {reason.description}
+                  Get the support you need to grow your business
                 </p>
               </div>
             </div>
