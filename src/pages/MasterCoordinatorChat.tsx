@@ -2,9 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
-import { AgentSpecificHeader } from '@/components/dashboard/AgentSpecificHeader';
-import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
-import { BentoAgentLayout } from '@/components/dashboard/BentoAgentLayout';
+import { MasterCoordinatorCommandCenter } from '@/components/master-coordinator/MasterCoordinatorCommandCenter';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
@@ -45,23 +43,10 @@ const MasterCoordinatorChat = () => {
         noIndex={true}
       />
       
-      <DashboardBackground showGlobalComponents={true}>
-        <AgentSpecificHeader 
-          agentId="master-coordinator"
-          language={language}
-          onBack={handleBack}
-        />
-        
-        <div className="h-screen flex flex-col">
-          <div className="flex-1 min-h-0 container mx-auto px-4 sm:px-6 lg:px-8">
-            <BentoAgentLayout 
-              selectedAgent="master-coordinator"
-              language={language}
-              onBack={handleBack}
-            />
-          </div>
-        </div>
-      </DashboardBackground>
+      <MasterCoordinatorCommandCenter 
+        language={language}
+        onBack={handleBack}
+      />
     </>
   );
 };
