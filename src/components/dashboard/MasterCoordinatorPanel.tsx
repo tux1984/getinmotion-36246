@@ -463,9 +463,9 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
                         {/* Chat Button */}
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           onClick={handleChatWithCoordinator}
-                          className="w-full border-white/30 text-white hover:bg-white/20"
+                          className="w-full bg-white/10 border border-white/20 text-white hover:bg-white/30 transition-colors"
                         >
                           <MessageCircle className="w-4 h-4 mr-2" />
                           {labels.chatWithMe}

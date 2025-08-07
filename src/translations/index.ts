@@ -402,50 +402,6 @@ export const translations = {
     ]
   },
 
-  // Task Management
-  taskManagement: {
-    title: "Task Manager",
-    subtitle: "Organize and execute your business plan efficiently",
-    backToCoordinator: "Back to Master Coordinator",
-    backToTasks: "Back to Tasks",
-    stepByStepExecution: "Step-by-step guided execution",
-    totalTasks: "Total Tasks",
-    activeTasks: "Active Tasks",
-    completedTasks: "Completed",
-    freeSlots: "Free Slots",
-    searchPlaceholder: "Search tasks...",
-    allTasks: "All Tasks",
-    activeTab: "Active",
-    completedTab: "Completed",
-    filterByStatus: "Status",
-    filterByPriority: "Priority",
-    filterByAgent: "Agent",
-    all: "All",
-    pending: "Pending",
-    inProgress: "In Progress",
-    completed: "Completed",
-    high: "High",
-    medium: "Medium",
-    low: "Low",
-    startTask: "Start Task",
-    continueTask: "Continue Task",
-    reviewTask: "Review Task",
-    deleteAllTasks: "Delete All Tasks",
-    noTasksTitle: "No tasks available",
-    noTasksDesc: "Start by creating your first task to organize your business growth",
-    createFirstTask: "Create First Task",
-    priority: "Priority",
-    agent: "Agent",
-    status: "Status",
-    progress: "Progress",
-    lastUpdated: "Last Updated",
-    daysAgo: "days ago",
-    today: "Today",
-    yesterday: "Yesterday",
-    timeSpent: "Time spent",
-    subtasks: "Subtasks",
-    overallProgress: "Overall Progress"
-  },
 
   // Missions Dashboard  
   missionsDashboard: {
@@ -558,8 +514,17 @@ export const translations = {
     completedTime: "Completed"
   },
 
-  // Task Management
+  // Task Management - Extended with all required properties
   taskManagement: {
+    title: "Task Manager",
+    subtitle: "Organize and execute your business plan efficiently",
+    backToCoordinator: "Back to Master Coordinator",
+    backToTasks: "Back to Tasks",
+    stepByStepExecution: "Step-by-step guided execution",
+    totalTasks: "Total Tasks",
+    activeTasks: "Active Tasks",
+    completedTasks: "Completed",
+    freeSlots: "Free Slots",
     limit: "Task Limit",
     unlimited: "Unlimited",
     remaining: "remaining",
@@ -573,7 +538,10 @@ export const translations = {
     taskLimit: "Task Limit",
     recommendation: "Recommendation",
     currentTasks: "Current Tasks",
-    paused: "Paused"
+    paused: "Paused",
+    inProgress: "In Progress",
+    completed: "Completed",
+    pending: "Pending"
   },
 
   // Impact
@@ -651,17 +619,6 @@ export const translations = {
     settings: "Settings"
   },
 
-  // Extended Task Management
-  taskManagementExtended: {
-    limitReached: "Task limit reached",
-    limitWarning: "You're approaching your task limit",
-    smartSuggestion: "Smart suggestion: Complete some tasks to free up space",
-    manage: "Manage",
-    taskLimit: "Task Limit",
-    recommendation: "Recommendation",
-    currentTasks: "Current Tasks",
-    paused: "Paused"
-  },
 
   // Recommended Tasks for unified system
   recommendedTasks: {
