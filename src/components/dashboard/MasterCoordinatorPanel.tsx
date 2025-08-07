@@ -405,13 +405,13 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                   <Play className="w-4 h-4 text-purple-900" />
                                 )}
                               </div>
-                              <div className="flex-1 text-left">
-                                 <div className="font-medium">
+                              <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                 <div className="font-medium truncate">
                                    {isGeneratingTasks 
                                      ? (language === 'es' ? 'Generando...' : 'Generating...')
                                      : labels.startNow}
                                  </div>
-                                 <div className="text-xs text-purple-700">
+                                 <div className="text-xs text-purple-700 truncate">
                                    {labels.activateCoordinator}
                                  </div>
                               </div>
@@ -428,11 +428,11 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                               <div className="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center">
                                 <MessageCircle className="w-4 h-4 text-purple-600" />
                               </div>
-                              <div className="flex-1 text-left">
-                                 <div className="font-medium">
+                              <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                 <div className="font-medium truncate">
                                    {labels.talkAboutBusiness}
                                  </div>
-                                 <div className="text-xs text-purple-500">
+                                 <div className="text-xs text-purple-500 truncate">
                                    {labels.deepenProfile}
                                  </div>
                               </div>
@@ -449,11 +449,11 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                               <div className="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center">
                                 <Calculator className="w-4 h-4 text-purple-600" />
                               </div>
-                              <div className="flex-1 text-left">
-                                 <div className="font-medium">
+                              <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                 <div className="font-medium truncate">
                                    {labels.recalculateMaturity}
                                  </div>
-                                 <div className="text-xs text-purple-500">
+                                 <div className="text-xs text-purple-500 truncate">
                                    {labels.updateMaturityScores}
                                  </div>
                               </div>
