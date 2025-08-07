@@ -15,12 +15,10 @@ interface AIQuestion {
 
 interface FusedMaturityCalculatorProps {
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData, aiQuestions?: AIQuestion[]) => void;
-  language: 'en' | 'es';
 }
 
 export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = ({
-  onComplete,
-  language
+  onComplete
 }) => {
   const {
     currentBlock,
@@ -37,7 +35,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
     completeAssessment,
     getBlockProgress,
     businessType
-  } = useFusedMaturityAgent(language, onComplete);
+  } = useFusedMaturityAgent('en', onComplete);
 
   const [showResults, setShowResults] = useState(false);
 
@@ -68,7 +66,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
             <div className="h-3 bg-muted rounded w-1/2 mx-auto"></div>
           </div>
           <p className="text-muted-foreground mt-4">
-            {language === 'es' ? 'Preparando tu experiencia personalizada...' : 'Preparing your personalized experience...'}
+            Preparing your personalized experience...
           </p>
         </div>
       </motion.div>
@@ -81,7 +79,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
         profileData={profileData}
         maturityLevel={maturityLevel}
         personalizedTasks={personalizedTasks}
-        language={language}
+        language="en"
         businessType={businessType}
         onComplete={completeAssessment}
       />
@@ -97,7 +95,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
     >
       {/* Clean Agent Header */}
       <AgentHeader
-        language={language}
+        language="en"
         currentBlock={currentBlock}
         progress={getBlockProgress().percentage}
         businessType={businessType}
@@ -110,7 +108,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
             key={currentBlock.id}
             block={currentBlock}
             profileData={profileData}
-            language={language}
+            language="en"
             onAnswer={answerQuestion}
             onNext={goToNextBlock}
             onPrevious={goToPreviousBlock}

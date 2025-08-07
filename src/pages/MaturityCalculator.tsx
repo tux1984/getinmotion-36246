@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { NewDashboardHeader } from '@/components/dashboard/NewDashboardHeader';
@@ -10,7 +10,7 @@ import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
 const MaturityCalculator = () => {
-  const { language } = useLanguage();
+  
   const navigate = useNavigate();
 
   // Scroll to top when component mounts
@@ -36,7 +36,7 @@ const MaturityCalculator = () => {
     }, 3000); // Slightly longer to allow coordinator to fully activate
   };
 
-  const seoData = SEO_CONFIG.pages.maturityCalculator[language];
+  const seoData = SEO_CONFIG.pages.maturityCalculator.en;
 
   return (
     <>
@@ -55,7 +55,6 @@ const MaturityCalculator = () => {
       />
 
       <FusedMaturityCalculator
-        language={language}
         onComplete={handleComplete}
       />
     </>
