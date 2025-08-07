@@ -22,7 +22,7 @@ const Login = () => {
   const location = useLocation();
   
   
-  console.log('Login: Component rendering, user:', user?.email, 'authorized:', isAuthorized, 'loading:', loading);
+  
   
   const t = {
     title: "Access GET IN MOTION",

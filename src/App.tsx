@@ -8,7 +8,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Index from './pages/Index';
-import Dashboard from './pages/Dashboard';
+
 import DashboardHome from './pages/DashboardHome';
 import AgentManager from './pages/AgentManager';
 import AgentDetails from './pages/AgentDetails';

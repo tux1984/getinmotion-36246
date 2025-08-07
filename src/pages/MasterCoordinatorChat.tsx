@@ -11,7 +11,7 @@ const MasterCoordinatorChat = () => {
   const language = 'en'; // Fixed to English only
   const navigate = useNavigate();
 
-  console.log('MasterCoordinatorChat: Rendering chat interface');
+  
 
   // Scroll to top on load
   useEffect(() => {

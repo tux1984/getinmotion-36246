@@ -13,7 +13,7 @@ const AgentDetails = () => {
   const { user, isAuthorized } = useAuth();
   const navigate = useNavigate();
 
-  console.log('AgentDetails: Rendering for agent', agentId);
+  
 
   // Scroll to top on load
   useEffect(() => {

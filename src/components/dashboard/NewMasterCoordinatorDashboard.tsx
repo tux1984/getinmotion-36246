@@ -167,7 +167,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   // FASE 3: Manejo del botón "Empezar ahora" funcional
   const handleStartNow = async () => {
-    console.log('🚀 Starting Master Coordinator flow');
     try {
       // Activar análisis completo y generar tareas
       await analyzeProfileAndGenerateTasks();
@@ -189,7 +188,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   };
 
   const handleTalkAboutBusiness = async () => {
-    console.log('💬 Generating intelligent questions about business');
     try {
       const questions = await generateIntelligentQuestions();
       if (questions && questions.length > 0) {
@@ -215,7 +213,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   const handleTaskStart = async (taskId: string) => {
     try {
       setStartingTask(taskId);
-      console.log('🚀 Starting task:', taskId);
       
       const success = await startTaskJourney(taskId);
       if (success) {
@@ -256,19 +253,12 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   // Simplified recommended tasks logic
   const getRecommendedTasks = () => {
-    console.log('📊 Getting recommended tasks:', {
-      coordinatorTasks: coordinatorTasks.length,
-      personalizedRecommendations: personalizedRecommendations.length,
-      tasks: tasks.length
-    });
-
     // Priority 1: Use Master Coordinator's intelligent tasks
     if (coordinatorTasks.length > 0) {
       const availableTasks = coordinatorTasks
         .filter(task => task.isUnlocked && !task.steps?.every(step => step.isCompleted))
         .slice(0, 4);
       
-      console.log('✅ Using coordinator tasks:', availableTasks.length);
       return availableTasks;
     }
 
@@ -287,7 +277,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
         isUnlocked: true
       }));
       
-      console.log('✅ Using personalized recommendations:', formattedRecs.length);
       return formattedRecs;
     }
 
@@ -308,12 +297,10 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
         .slice(0, 4)
         .map(task => ({ ...task, isUnlocked: true }));
       
-      console.log('✅ Using existing tasks:', pendingTasks.length);
       return pendingTasks;
     }
 
     // Fallback: Generate default tasks if nothing is available
-    console.log('⚠️ No tasks available, creating default recommendations');
     return generateDefaultTasks(language, businessProfile);
   };
 
@@ -334,7 +321,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   const handleStartTaskWithAgent = async (taskId: string, agentId: string) => {
     try {
-      console.log('🚀 Starting task development:', { taskId, agentId });
       await startTaskDevelopment(taskId);
       // Navigate to agent chat after starting task
       navigate(`/dashboard/agent/${agentId}?taskId=${taskId}`);
@@ -345,7 +331,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   const handleCompleteTask = async (taskId: string) => {
     try {
-      console.log('✅ Completing task:', taskId);
       await completeTaskQuickly(taskId);
     } catch (error) {
       console.error('❌ Error completing task:', error);
@@ -354,7 +339,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      console.log('🗑️ Deleting task:', taskId);
       await deleteTask(taskId);
     } catch (error) {
       console.error('❌ Error deleting task:', error);

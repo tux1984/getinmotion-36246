@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useAgentTasks } from '@/hooks/useAgentTasks';
+import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { MyMissionsDashboard } from '@/components/dashboard/MyMissionsDashboard';
@@ -11,8 +11,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ListTodo } from 'lucide-react';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
-import { AgentTask } from '@/hooks/useAgentTasks';
-import { useState } from 'react';
 
 const TasksDashboard = () => {
   const navigate = useNavigate();
