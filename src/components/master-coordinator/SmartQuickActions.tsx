@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,10 @@ import {
   Lightbulb,
   Calendar,
   Users,
-  FileText
+  FileText,
+  Building2
 } from 'lucide-react';
+import { BusinessProfileDialog } from './BusinessProfileDialog';
 
 interface CoordinatorTask {
   id: string;
@@ -46,6 +48,7 @@ export const SmartQuickActions: React.FC<SmartQuickActionsProps> = ({
   onTaskStart,
   onOpenChat
 }) => {
+  const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
   const translations = {
     en: {
       title: 'Smart Quick Actions',
@@ -55,7 +58,7 @@ export const SmartQuickActions: React.FC<SmartQuickActionsProps> = ({
       reviewProgress: 'Review Progress',
       getInsights: 'Get AI Insights',
       planWeek: 'Plan My Week',
-      connectExperts: 'Connect with Experts',
+      tellBusiness: 'Tell me about your business',
       nextTaskTitle: 'Next Priority Task',
       highPriority: 'High Priority',
       estimatedTime: 'Est. time',
@@ -69,7 +72,7 @@ export const SmartQuickActions: React.FC<SmartQuickActionsProps> = ({
       reviewProgress: 'Revisar Progreso',
       getInsights: 'Obtener Insights de IA',
       planWeek: 'Planificar Mi Semana',
-      connectExperts: 'Conectar con Expertos',
+      tellBusiness: 'Cuéntame sobre tu negocio',
       nextTaskTitle: 'Próxima Tarea Prioritaria',
       highPriority: 'Alta Prioridad',
       estimatedTime: 'Tiempo est.',
@@ -83,33 +86,33 @@ export const SmartQuickActions: React.FC<SmartQuickActionsProps> = ({
     {
       id: 'discuss',
       title: t.discussStrategy,
-      description: 'Get personalized guidance from your Master Coordinator',
+      description: language === 'en' ? 'Get personalized guidance from your Master Coordinator' : 'Obtén orientación personalizada de tu Coordinador Maestro',
       icon: MessageCircle,
-      color: 'bg-blue-500/10 text-blue-700 border-blue-200 dark:text-blue-300 dark:border-blue-800',
+      color: 'bg-primary/10 text-primary border-primary/20',
       action: onOpenChat
     },
     {
-      id: 'progress',
-      title: t.reviewProgress,
-      description: 'Analyze your journey and identify improvement areas',
-      icon: BarChart3,
-      color: 'bg-green-500/10 text-green-700 border-green-200 dark:text-green-300 dark:border-green-800',
-      action: () => {} // Navigate to progress view
+      id: 'business',
+      title: t.tellBusiness,
+      description: language === 'en' ? 'Share details about your business for personalized recommendations' : 'Comparte detalles sobre tu negocio para recomendaciones personalizadas',
+      icon: Building2,
+      color: 'bg-secondary/10 text-secondary-foreground border-secondary/20',
+      action: () => setIsBusinessDialogOpen(true)
     },
     {
       id: 'insights',
       title: t.getInsights,
-      description: 'Discover AI-powered business insights and opportunities',
+      description: language === 'en' ? 'Discover AI-powered business insights and opportunities' : 'Descubre insights empresariales impulsados por IA y oportunidades',
       icon: Brain,
-      color: 'bg-purple-500/10 text-purple-700 border-purple-200 dark:text-purple-300 dark:border-purple-800',
+      color: 'bg-accent/10 text-accent-foreground border-accent/20',
       action: onOpenChat
     },
     {
       id: 'plan',
       title: t.planWeek,
-      description: 'Create a strategic weekly plan with task prioritization',
+      description: language === 'en' ? 'Create a strategic weekly plan with task prioritization' : 'Crea un plan semanal estratégico con priorización de tareas',
       icon: Calendar,
-      color: 'bg-orange-500/10 text-orange-700 border-orange-200 dark:text-orange-300 dark:border-orange-800',
+      color: 'bg-muted/50 text-muted-foreground border-muted',
       action: onOpenChat
     }
   ];
@@ -216,6 +219,12 @@ export const SmartQuickActions: React.FC<SmartQuickActionsProps> = ({
         </motion.div>
 
       </CardContent>
+
+      <BusinessProfileDialog 
+        open={isBusinessDialogOpen}
+        onOpenChange={setIsBusinessDialogOpen}
+        language={language}
+      />
     </Card>
   );
 };
