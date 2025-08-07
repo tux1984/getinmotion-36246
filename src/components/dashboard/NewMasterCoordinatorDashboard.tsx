@@ -9,6 +9,7 @@ import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
+import { CompactPriorityRecommendations } from './CompactPriorityRecommendations';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -251,32 +252,37 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     navigate(`/dashboard/deliverables/${deliverableId}`);
   };
 
-  // Simplified recommended tasks logic
+  // Simplified recommended tasks logic with proper type conversion
   const getRecommendedTasks = () => {
+    const mapToCompactFormat = (task: any) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      priority: typeof task.priority === 'number' ? task.priority : 
+                task.priority === 'critical' ? 1 : 
+                task.priority === 'high' ? 2 : 3,
+      relevance: (task.relevance === 'high' || task.relevance === 'medium' || task.relevance === 'low') 
+        ? task.relevance as 'high' | 'medium' | 'low'
+        : task.priority === 1 ? 'high' as const :
+          task.priority === 2 ? 'medium' as const : 'low' as const,
+      estimatedTime: task.estimatedTime || '30 min',
+      category: task.category || 'General',
+      isUnlocked: task.isUnlocked ?? true
+    });
+
     // Priority 1: Use Master Coordinator's intelligent tasks
     if (coordinatorTasks.length > 0) {
       const availableTasks = coordinatorTasks
         .filter(task => task.isUnlocked && !task.steps?.every(step => step.isCompleted))
-        .slice(0, 4);
+        .slice(0, 4)
+        .map(mapToCompactFormat);
       
       return availableTasks;
     }
 
     // Priority 2: Use personalized recommendations
     if (personalizedRecommendations.length > 0) {
-      const formattedRecs = personalizedRecommendations.slice(0, 4).map(rec => ({
-        id: rec.id,
-        title: rec.title,
-        description: rec.description,
-        priority: rec.priority === 'critical' ? 1 : rec.priority === 'high' ? 2 : 3,
-        relevance: rec.priority === 'critical' ? 'high' : rec.priority === 'high' ? 'medium' : 'low',
-        estimatedTime: rec.estimatedTime,
-        category: rec.category,
-        agentId: rec.agentId,
-        impact: rec.impact,
-        isUnlocked: true
-      }));
-      
+      const formattedRecs = personalizedRecommendations.slice(0, 4).map(mapToCompactFormat);
       return formattedRecs;
     }
 
@@ -295,13 +301,14 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           return a.priority - b.priority;
         })
         .slice(0, 4)
-        .map(task => ({ ...task, isUnlocked: true }));
+        .map(mapToCompactFormat);
       
       return pendingTasks;
     }
 
     // Fallback: Generate default tasks if nothing is available
-    return generateDefaultTasks(language, businessProfile);
+    const defaultTasks = generateDefaultTasks(language, businessProfile);
+    return defaultTasks.map(mapToCompactFormat);
   };
 
 
@@ -482,153 +489,20 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
             {/* Left Column: Recommendations */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Next Recommendations */}
+              {/* Compact Priority Recommendations */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Lightbulb className="w-5 h-5 text-primary" />
-                        <span>{t.nextRecommendations}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleSection('recommendations')}
-                      >
-                        {expandedSections.has('recommendations') ? 
-                          <ChevronRight className="w-4 h-4" /> : 
-                          <ChevronRight className="w-4 h-4 rotate-90" />
-                        }
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  
-                  <AnimatePresence>
-                    {expandedSections.has('recommendations') && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <CardContent className="pt-0 space-y-4">
-                          {recommendedTasks.length > 0 ? (
-                            recommendedTasks.map((task, index) => (
-                              <motion.div
-                                key={task.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="p-4 rounded-lg bg-background/60 backdrop-blur-sm border border-primary/10 hover:border-primary/20 transition-all duration-200"
-                              >
-                                <div className="flex justify-between items-start mb-3">
-                                  <div className="space-y-1">
-                                    <h4 className="font-semibold text-foreground">{task.title}</h4>
-                                    <p className="text-sm text-muted-foreground">{task.description}</p>
-                                  </div>
-                                  <Badge 
-                                    variant={task.relevance === 'high' ? 'default' : 'secondary'}
-                                    className="ml-2"
-                                  >
-                                    {task.relevance === 'high' ? t.highPriority : 
-                                     task.relevance === 'medium' ? t.mediumPriority : t.lowPriority}
-                                  </Badge>
-                                </div>
-                                
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                                    <div className="flex items-center space-x-1">
-                                      <Clock className="w-3 h-3" />
-                                      <span>{t.estimatedTime}: {task.estimatedTime}</span>
-                                    </div>
-                                    {(task as any).impact && (
-                                      <div className="flex items-center space-x-1">
-                                        <TrendingUp className="w-3 h-3" />
-                                        <span>{t.potentialImpact}: {(task as any).impact}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                   <div className="flex space-x-2">
-                                     <Button 
-                                       size="sm"
-                                       onClick={() => handleTaskStart(task.id)}
-                                       disabled={startingTask === task.id || !(task as any).isUnlocked}
-                                       className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-                                     >
-                                        {startingTask === task.id ? (
-                                          <div className="flex items-center space-x-1">
-                                            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                                            <span>{language === 'es' ? 'Iniciando...' : 'Starting...'}</span>
-                                          </div>
-                                        ) : (
-                                          <>
-                                            <Play className="w-3 h-3 mr-1" />
-                                            {language === 'es' ? 'Empezar ahora' : 'Start now'}
-                                          </>
-                                        )}
-                                     </Button>
-                                     {(task as any).isUnlocked && startingTask !== task.id && (
-                                       <Button 
-                                         size="sm"
-                                         variant="outline"
-                                         onClick={() => handleCompleteTask(task.id)}
-                                         className="border-green-200 text-green-700 hover:bg-green-50"
-                                       >
-                                         <CheckCircle2 className="w-3 h-3 mr-1" />
-                                         Quick Complete
-                                       </Button>
-                                     )}
-                                   </div>
-                                </div>
-                              </motion.div>
-                            ))
-                          ) : (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              className="text-center py-8"
-                            >
-                              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                                <Target className="w-8 h-8 text-primary" />
-                              </div>
-                              <h3 className="text-lg font-semibold text-foreground mb-2">
-                                {language === 'es' 
-                                  ? 'Generando Recomendaciones Personalizadas'
-                                  : 'Generating Personalized Recommendations'}
-                              </h3>
-                              <p className="text-muted-foreground mb-4">
-                                {language === 'es' 
-                                  ? 'Estoy analizando tu perfil para crear tareas específicas para tu negocio...'
-                                  : 'I\'m analyzing your profile to create specific tasks for your business...'}
-                              </p>
-                              <Button 
-                                onClick={analyzeProfileAndGenerateTasks}
-                                disabled={coordinatorLoading}
-                                variant="outline"
-                                className="mx-auto"
-                              >
-                                {coordinatorLoading ? (
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                    <span>{language === 'es' ? 'Analizando...' : 'Analyzing...'}</span>
-                                  </div>
-                                ) : (
-                                  language === 'es' ? 'Generar Recomendaciones' : 'Generate Recommendations'
-                                )}
-                              </Button>
-                            </motion.div>
-                          )}
-                        </CardContent>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Card>
+                <CompactPriorityRecommendations
+                  recommendations={recommendedTasks}
+                  onTaskStart={handleTaskStart}
+                  onGenerateMore={analyzeProfileAndGenerateTasks}
+                  language={language}
+                  loading={coordinatorLoading}
+                  startingTask={startingTask}
+                />
               </motion.div>
             </div>
 
