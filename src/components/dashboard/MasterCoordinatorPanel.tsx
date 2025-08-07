@@ -40,10 +40,10 @@ import {
 
 interface MasterCoordinatorPanelProps {
   onTaskStart?: (taskId: string) => void;
+  language: 'en' | 'es';
 }
 
-export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ onTaskStart }) => {
-  // English-only version
+export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ onTaskStart, language }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -91,9 +91,15 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
   const getTimeOfDayGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning!';
-    if (hour < 18) return 'Good afternoon!';
-    return 'Good evening!';
+    if (language === 'es') {
+      if (hour < 12) return '¡Buenos días!';
+      if (hour < 18) return '¡Buenas tardes!';
+      return '¡Buenas noches!';
+    } else {
+      if (hour < 12) return 'Good morning!';
+      if (hour < 18) return 'Good afternoon!';
+      return 'Good evening!';
+    }
   };
 
   const getBusinessModelLabel = () => {
@@ -147,14 +153,18 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     try {
       await analyzeProfileAndGenerateTasks();
       toast({
-        title: "Coordinator Activated!",
-        description: "I've analyzed your profile and generated specific tasks for your business.",
+        title: language === 'es' ? "¡Coordinador Activado!" : "Coordinator Activated!",
+        description: language === 'es' 
+          ? "He analizado tu perfil y generado tareas específicas para tu negocio."
+          : "I've analyzed your profile and generated specific tasks for your business.",
       });
     } catch (error) {
       console.error('❌ Error starting coordinator:', error);
       toast({
-        title: "Error",
-        description: "There was a problem generating tasks. Please try again.",
+        title: language === 'es' ? "Error" : "Error",
+        description: language === 'es' 
+          ? "Hubo un problema generando las tareas. Por favor, inténtalo de nuevo."
+          : "There was a problem generating tasks. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -191,7 +201,28 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     navigate('/dashboard/agent/master-coordinator');
   };
 
-  const labels = {
+  const labels = language === 'es' ? {
+    masterCoordinator: 'Coordinador Maestro',
+    personalGuide: 'Tu Guía Personal de Negocio',
+    currentMission: 'Misión Actual',
+    startMission: 'Iniciar Misión',
+    chatWithMe: 'Chatea conmigo',
+    progress: 'Progreso',
+    completedTasks: 'tareas completadas',
+    activeTasks: 'tareas activas',
+    showMore: 'Mostrar más',
+    showLess: 'Mostrar menos',
+    nextSteps: 'Próximos Pasos',
+    getStarted: 'Comenzar',
+    maturityLevel: 'Nivel de Madurez',
+    businessModel: 'Modelo de Negocio',
+    startNow: 'Comenzar Ahora',
+    activateCoordinator: 'Activar coordinador y generar tareas personalizadas',
+    talkAboutBusiness: 'Háblame de tu negocio',
+    deepenProfile: 'Profundiza tu perfil con preguntas inteligentes',
+    recalculateMaturity: 'Recalcular Madurez',
+    updateMaturityScores: 'Actualiza tus puntuaciones de madurez y regenera tareas'
+  } : {
     masterCoordinator: 'Master Coordinator',
     personalGuide: 'Your Personal Business Guide',
     currentMission: 'Current Mission',
@@ -223,7 +254,9 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
       {/* Loading Indicator */}
       <LoadingIndicator 
         isVisible={isGeneratingTasks} 
-        message="Analyzing your profile and generating intelligent tasks..."
+        message={language === 'es' 
+          ? "Analizando tu perfil y generando tareas inteligentes..."
+          : "Analyzing your profile and generating intelligent tasks..."}
       />
 
       {/* Master Coordinator Panel - Collapsible */}
@@ -314,7 +347,9 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                       : typeof coordinatorMessage === 'string' 
                                       ? coordinatorMessage 
                                       : 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
-                                   : "To help you in the best way, I need to know more about your business. Can you tell me what you do?"
+                                     : (language === 'es' 
+                                       ? "Para ayudarte de la mejor manera, necesito saber más sobre tu negocio. ¿Puedes contarme a qué te dedicas?"
+                                       : "To help you in the best way, I need to know more about your business. Can you tell me what you do?")
                                  }
                               </p>
                               
@@ -351,9 +386,9 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
                       {/* Action Buttons */}
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-white/90 mb-3">
-                          Choose your next action:
-                        </p>
+                         <p className="text-sm font-medium text-white/90 mb-3">
+                           {language === 'es' ? 'Elige tu próxima acción:' : 'Choose your next action:'}
+                         </p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <Button
@@ -372,7 +407,9 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                               </div>
                               <div className="flex-1 text-left">
                                  <div className="font-medium">
-                                   {isGeneratingTasks ? 'Generating...' : labels.startNow}
+                                   {isGeneratingTasks 
+                                     ? (language === 'es' ? 'Generando...' : 'Generating...')
+                                     : labels.startNow}
                                  </div>
                                  <div className="text-xs text-purple-700">
                                    {labels.activateCoordinator}
@@ -509,10 +546,10 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
       </Dialog>
 
       {/* Business Profile Dialog */}
-      <BusinessProfileDialog 
+        <BusinessProfileDialog 
         open={showBusinessDialog}
         onOpenChange={setShowBusinessDialog}
-        language="en"
+        language={language}
       />
     </>
   );

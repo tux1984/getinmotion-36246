@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { generateDefaultTasks } from '@/utils/generateDefaultTasks';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
@@ -38,10 +39,13 @@ import {
   Heart
 } from 'lucide-react';
 
-export const MasterCoordinatorDashboard: React.FC = () => {
+interface MasterCoordinatorDashboardProps {
+  language: 'en' | 'es';
+}
+
+export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProps> = ({ language }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const language = 'en'; // Fixed to English only
   const { toast } = useToast();
   const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
@@ -215,10 +219,12 @@ export const MasterCoordinatorDashboard: React.FC = () => {
       
       const success = await startTaskJourney(taskId);
       if (success) {
-        toast({
-          title: "¡Tarea Iniciada!",
-          description: "Te redirigimos a la ejecución paso a paso.",
-        });
+      toast({
+        title: language === 'es' ? "¡Tarea Iniciada!" : "Task Started!",
+        description: language === 'es' 
+          ? "Te redirigimos a la ejecución paso a paso."
+          : "Redirecting you to step-by-step execution.",
+      });
         navigate(`/dashboard/tasks/${taskId}`);
       } else {
         throw new Error('Failed to start task journey');
@@ -226,8 +232,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     } catch (error) {
       console.error('❌ Error starting task:', error);
       toast({
-        title: "Error al Iniciar Tarea",
-        description: "No se pudo iniciar la tarea. Inténtalo de nuevo.",
+        title: language === 'es' ? "Error al Iniciar Tarea" : "Error Starting Task",
+        description: language === 'es' 
+          ? "No se pudo iniciar la tarea. Inténtalo de nuevo."
+          : "Could not start the task. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -306,39 +314,9 @@ export const MasterCoordinatorDashboard: React.FC = () => {
 
     // Fallback: Generate default tasks if nothing is available
     console.log('⚠️ No tasks available, creating default recommendations');
-    return generateDefaultTasks();
+    return generateDefaultTasks(language, businessProfile);
   };
 
-  const generateDefaultTasks = () => {
-    const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
-    
-    return [
-      {
-        id: 'default-1',
-        title: `Definir propuesta de valor para ${businessName}`,
-        description: 'Identifica qué hace único tu producto o servicio y por qué los clientes deberían elegirte.',
-        priority: 1,
-        relevance: 'high' as const,
-        estimatedTime: '45-60 min',
-        category: 'Estrategia',
-        agentId: 'business-advisor',
-        impact: 'alto',
-        isUnlocked: true
-      },
-      {
-        id: 'default-2',
-        title: 'Análisis de precios competitivos',
-        description: 'Estudia el mercado y define una estrategia de precios rentable y atractiva.',
-        priority: 2,
-        relevance: 'high' as const,
-        estimatedTime: '30-45 min',
-        category: 'Monetización',
-        agentId: 'pricing-analyst',
-        impact: 'alto',
-        isUnlocked: true
-      }
-    ];
-  };
 
   const getMaturityLevel = () => maturityLevel;
 
@@ -445,7 +423,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
   return (
     <>
       {/* Master Coordinator Panel - Único y central */}
-      <MasterCoordinatorPanel onTaskStart={handleTaskStart} />
+      <MasterCoordinatorPanel onTaskStart={handleTaskStart} language={language} />
       
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
@@ -599,17 +577,17 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                                        disabled={startingTask === task.id || !(task as any).isUnlocked}
                                        className="bg-primary hover:bg-primary/90 disabled:opacity-50"
                                      >
-                                       {startingTask === task.id ? (
-                                         <div className="flex items-center space-x-1">
-                                           <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                                           <span>Iniciando...</span>
-                                         </div>
-                                       ) : (
-                                         <>
-                                           <Play className="w-3 h-3 mr-1" />
-                                           Empezar ahora
-                                         </>
-                                       )}
+                                        {startingTask === task.id ? (
+                                          <div className="flex items-center space-x-1">
+                                            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>{language === 'es' ? 'Iniciando...' : 'Starting...'}</span>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <Play className="w-3 h-3 mr-1" />
+                                            {language === 'es' ? 'Empezar ahora' : 'Start now'}
+                                          </>
+                                        )}
                                      </Button>
                                      {(task as any).isUnlocked && startingTask !== task.id && (
                                        <Button 
@@ -636,10 +614,14 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                                 <Target className="w-8 h-8 text-primary" />
                               </div>
                               <h3 className="text-lg font-semibold text-foreground mb-2">
-                                Generando Recomendaciones Personalizadas
+                                {language === 'es' 
+                                  ? 'Generando Recomendaciones Personalizadas'
+                                  : 'Generating Personalized Recommendations'}
                               </h3>
                               <p className="text-muted-foreground mb-4">
-                                Estoy analizando tu perfil para crear tareas específicas para tu negocio...
+                                {language === 'es' 
+                                  ? 'Estoy analizando tu perfil para crear tareas específicas para tu negocio...'
+                                  : 'I\'m analyzing your profile to create specific tasks for your business...'}
                               </p>
                               <Button 
                                 onClick={analyzeProfileAndGenerateTasks}
@@ -650,10 +632,10 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                                 {coordinatorLoading ? (
                                   <div className="flex items-center space-x-2">
                                     <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                    <span>Analizando...</span>
+                                    <span>{language === 'es' ? 'Analizando...' : 'Analyzing...'}</span>
                                   </div>
                                 ) : (
-                                  'Generar Recomendaciones'
+                                  language === 'es' ? 'Generar Recomendaciones' : 'Generate Recommendations'
                                 )}
                               </Button>
                             </motion.div>
