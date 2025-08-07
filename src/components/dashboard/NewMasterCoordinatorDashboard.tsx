@@ -76,6 +76,7 @@ export const MasterCoordinatorDashboard: React.FC = () => {
   const [showDeliverables, setShowDeliverables] = useState(false);
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
+  const [startingTask, setStartingTask] = useState<string | null>(null);
 
   // Dynamic coaching tips
   const coachingTips = [
@@ -206,7 +207,6 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     navigate('/profile');
   };
 
-  const [startingTask, setStartingTask] = useState<string | null>(null);
 
   const handleTaskStart = async (taskId: string) => {
     try {
