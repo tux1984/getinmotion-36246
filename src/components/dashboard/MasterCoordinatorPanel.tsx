@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BusinessProfileCapture } from '@/components/business-profile/BusinessProfileCapture';
+import { BusinessProfileDialog } from '@/components/master-coordinator/BusinessProfileDialog';
 import { LoadingIndicator } from './LoadingIndicator';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
@@ -48,6 +49,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
   const [showProfileCapture, setShowProfileCapture] = useState(false);
+  const [showBusinessDialog, setShowBusinessDialog] = useState(false);
   const [conversationData, setConversationData] = useState<any>(null);
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   
@@ -165,20 +167,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   };
 
   const handleTalkAboutBusiness = async () => {
-    console.log('💬 Generating intelligent questions about business');
-    try {
-      const questions = await generateIntelligentQuestions();
-      if (questions && questions.length > 0) {
-        navigate('/dashboard/agent/master-coordinator', { 
-          state: { 
-            context: 'business_deep_dive',
-            questions 
-          }
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error generating questions:', error);
-    }
+    console.log('💬 Opening business profile dialog');
+    setShowBusinessDialog(true);
   };
 
   const handleActionButton = async (action: string) => {
@@ -319,7 +309,11 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                               <p className="text-white leading-relaxed">
                                 {getTimeOfDayGreeting()} {businessProfile?.brandName && `¡${businessProfile.brandName}!`}
                                  {businessProfile?.businessDescription 
-                                   ? ` ${coordinatorMessage?.message || 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
+                                   ? ` ${typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
+                                      ? coordinatorMessage.message 
+                                      : typeof coordinatorMessage === 'string' 
+                                      ? coordinatorMessage 
+                                      : 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
                                    : "To help you in the best way, I need to know more about your business. Can you tell me what you do?"
                                  }
                               </p>
@@ -513,6 +507,13 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
           />
         </DialogContent>
       </Dialog>
+
+      {/* Business Profile Dialog */}
+      <BusinessProfileDialog 
+        open={showBusinessDialog}
+        onOpenChange={setShowBusinessDialog}
+        language="en"
+      />
     </>
   );
 };
