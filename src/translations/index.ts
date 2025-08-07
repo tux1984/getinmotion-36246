@@ -193,6 +193,341 @@ export const translations = {
     workingWith: "Working with",
     startWorking: "Start Working",
     comingSoon: "Coming Soon"
+  },
+
+  // AI Assistant
+  aiAssistant: {
+    title: "AI Business Assistant",
+    welcome: "Welcome to your AI Business Assistant",
+    howCanIHelp: "How can I help you today?",
+    askAnything: "Ask me anything about your business",
+    thinking: "Thinking...",
+    type: "Type your message...",
+    send: "Send",
+    clear: "Clear chat",
+    reset: "Reset Chat",
+    error: "Something went wrong. Please try again.",
+    emptyState: "Start a conversation with your AI assistant",
+    placeholder: "Ask me anything about your business...",
+    tellMeMore: "Tell me more",
+    clickToRespond: "Click to respond",
+    suggestions: "Suggestions",
+    profileAssistant: "Profile Assistant",
+    businessAssistant: "Business Assistant", 
+    managementAssistant: "Management Assistant",
+    defaultAssistant: "General Assistant",
+    aboutQuestion: "What would you like to know about",
+    thisContext: "this context?",
+    expandedPlaceholder: "Ask me anything about your business, goals, or how I can help you grow..."
+  },
+
+  // Footer
+  footer: {
+    tagline: "Empowering creators to build better businesses",
+    company: "Company",
+    about: "About Us",
+    careers: "Careers", 
+    contact: "Contact",
+    blog: "Blog",
+    product: "Product",
+    platform: "Platform",
+    calculator: "Maturity Calculator",
+    dashboard: "Dashboard",
+    agentsGallery: "Agents Gallery",
+    resources: "Resources",
+    support: "Support",
+    documentation: "Documentation",
+    community: "Community",
+    login: "Login",
+    admin: "Admin",
+    waitlist: "Waitlist",
+    legal: "Legal",
+    privacy: "Privacy Policy",
+    terms: "Terms of Service",
+    cookies: "Cookie Policy",
+    copyright: "© 2024 CreatorCopilot",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    allRightsReserved: "All rights reserved",
+    builtWith: "Built with ❤️ for creators"
+  },
+
+  // Product Explanation
+  productExplanation: {
+    title: "Transform Your Creative Business",
+    subtitle: "Get personalized guidance from AI agents specialized in your industry",
+    howItWorks: "How it works",
+    step1: {
+      title: "Take our maturity assessment",
+      description: "Answer questions about your business to get your current maturity level"
+    },
+    step2: {
+      title: "Get matched with AI agents", 
+      description: "Our system recommends the best agents for your specific needs and goals"
+    },
+    step3: {
+      title: "Start growing your business",
+      description: "Work with specialized agents to tackle your biggest challenges and opportunities"
+    },
+    step4: {
+      title: "Track your progress",
+      description: "Monitor your growth and achievements as you implement our recommendations"
+    }
+  },
+
+  // Profile Selector
+  profileSelector: {
+    title: "Choose Your Profile",
+    subtitle: "Select the profile that best describes your creative business",
+    selectedMessage: "You selected:",
+    individual: "Individual Creator",
+    individualDesc: "I'm a solo creator working on my own projects",
+    team: "Creative Team", 
+    teamDesc: "We're a team of creators working together",
+    agency: "Creative Agency",
+    agencyDesc: "We're an established agency serving clients",
+    ideaTitle: "I have an idea",
+    ideaDescription: "I'm just starting with a business concept that needs validation",
+    soloTitle: "I work solo",
+    soloDescription: "I'm an individual creator with an active business or project",
+    teamTitle: "We work as a team",
+    teamDescription: "We're a team of creators collaborating on projects",
+    continue: "Continue",
+    back: "Back",
+    confirmButton: "Start Assessment"
+  },
+
+  // Value Proposition
+  valueProposition: {
+    title: "Why Choose Our Platform",
+    subtitle: "Everything you need to grow your creative business",
+    feature1: "Personalized AI Guidance",
+    feature1Desc: "Get recommendations tailored to your specific business and industry",
+    feature2: "Expert Knowledge", 
+    feature2Desc: "Access specialized knowledge from industry experts and best practices",
+    feature3: "Action-Oriented Tasks",
+    feature3Desc: "Receive specific, actionable tasks that move your business forward",
+    reasons: [
+      "Personalized AI guidance tailored to your industry",
+      "Expert knowledge from successful creators", 
+      "Action-oriented tasks that drive real results",
+      "24/7 availability to support your growth"
+    ]
+  },
+
+  // Agent Manager
+  agentManager: {
+    title: "Agent Manager",
+    subtitle: "Choose your specialized AI assistants",
+    recommended: "Recommended for you",
+    allAgents: "All Agents",
+    categories: "Categories",
+    search: "Search agents...",
+    noResults: "No agents found",
+    startWorking: "Start Working",
+    learnMore: "Learn More",
+    comingSoon: "Coming Soon",
+    selectCategory: "Select a category",
+    allCategories: "All Categories",
+    activeAgents: "Active Agents",
+    availableAgents: "Available Agents",
+    activate: "Activate",
+    disabled: "Disabled",
+    filterCategories: "Filter by categories",
+    clearAllFilters: "Clear all filters",
+    totalAgents: "Total agents",
+    filters: "Filters",
+    noAgentsFound: "No agents found",
+    tryAdjusting: "Try adjusting your filters",
+    never: "Never",
+    loading: "Loading agents..."
+  },
+
+  // Recommended Agents
+  recommendedAgents: {
+    title: "Recommended Agents",
+    subtitle: "Based on your business profile and goals", 
+    startWorking: "Start Working",
+    recommendedAgents: "Recommended for you"
+  },
+
+  // AI Assistant Extended
+  aiAssistantExtended: {
+    profileAssistant: "Profile Assistant",
+    businessAssistant: "Business Assistant", 
+    managementAssistant: "Management Assistant",
+    defaultAssistant: "General Assistant",
+    aboutQuestion: "What would you like to know about",
+    thisContext: "this context?",
+    expandedPlaceholder: "Ask me anything about your business, goals, or how I can help you grow..."
+  },
+
+  // Maturity Calculator
+  maturityCalculator: {
+    title: "Maturity Calculator",
+    description: "Assess your business maturity level",
+    generatingTasks: "Generating Tasks",
+    generatingTasksDescription: "Creating personalized tasks based on your assessment",
+    ideaValidation: "Idea Validation",
+    userExperience: "User Experience",
+    marketFit: "Market Fit",
+    monetization: "Monetization"
+  },
+
+  // Agent Filters
+  agentFilters: {
+    search: "Search agents...",
+    category: "Category",
+    status: "Status",
+    priority: "Priority",
+    sortBy: "Sort by",
+    clearFilters: "Clear filters",
+    allCategories: "All Categories",
+    filtersLabel: "Filters"
+  },
+
+  // Value Proposition Extended
+  valuePropositionExtended: {
+    reasons: [
+      "Personalized AI guidance tailored to your industry",
+      "Expert knowledge from successful creators", 
+      "Action-oriented tasks that drive real results",
+      "24/7 availability to support your growth"
+    ]
+  },
+
+  // Missions Dashboard
+  missionsDashboard: {
+    title: "My Missions",
+    subtitle: "Track and manage your active business missions",
+    searchPlaceholder: "Search missions...",
+    allMissions: "All Missions",
+    activeMissions: "Active Missions", 
+    completedMissions: "Completed Missions",
+    filterByStatus: "Filter by Status",
+    filterByPriority: "Filter by Priority",
+    filterByAgent: "Filter by Agent",
+    all: "All",
+    pending: "Pending", 
+    inProgress: "In Progress",
+    completed: "Completed",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    continueTask: "Continue Task",
+    startTask: "Start Task",
+    reviewTask: "Review Task",
+    completeTask: "Complete Task",
+    taskStats: "Task Stats",
+    activeCount: "Active",
+    completedCount: "Completed",
+    remainingSlots: "Remaining Slots",
+    progressTitle: "Progress Overview",
+    noMissions: "No missions found",
+    noMissionsDesc: "Create your first mission to get started",
+    createFirst: "Create First Mission",
+    estimatedTime: "Estimated Time",
+    minutes: "minutes",
+    priority: "Priority",
+    agent: "Agent",
+    status: "Status",
+    lastUpdated: "Last Updated",
+    daysAgo: "days ago",
+    today: "Today",
+    yesterday: "Yesterday",
+    recommendedTasks: "Recommended Tasks",
+    recommendedSubtitle: "Suggested based on your business goals",
+    convertToTask: "Convert to Task",
+    recommendationsPriority: "Priority",
+    estimatedTimeLabel: "Estimated Time",
+    hideRecommendations: "Hide Recommendations",
+    showRecommendations: "Show Recommendations"
+  },
+
+  // Status
+  status: {
+    active: "Active",
+    inactive: "Inactive",
+    online: "Online",
+    offline: "Offline",
+    available: "Available",
+    busy: "Busy",
+    away: "Away",
+    ready: "Ready",
+    processing: "Processing",
+    complete: "Complete",
+    failed: "Failed"
+  },
+
+  // Time
+  time: {
+    now: "Now",
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    thisWeek: "This week",
+    lastWeek: "Last week",
+    thisMonth: "This month",
+    lastMonth: "Last month",
+    thisYear: "This year",
+    ago: "ago",
+    in: "in",
+    days: "days",
+    hours: "hours",
+    minutes: "minutes",
+    seconds: "seconds"
+  },
+
+  // Sort Options
+  sortOptions: {
+    name: "Name",
+    date: "Date", 
+    priority: "Priority",
+    usage: "Usage",
+    impact: "Impact"
+  },
+
+  // Task Status
+  taskStatus: {
+    completed: "Completed",
+    pending: "Pending",
+    inProgress: "In Progress",
+    cancelled: "Cancelled",
+    completedPercentage: "% completed",
+    completedTime: "Completed"
+  },
+
+  // Task Management
+  taskManagement: {
+    limit: "Task Limit",
+    unlimited: "Unlimited",
+    remaining: "remaining",
+    manageSlots: "Manage Task Slots",
+    reachedLimit: "You've reached your task limit",
+    completeOthers: "Complete some tasks to create new ones"
+  },
+
+  // Impact
+  impact: {
+    high: "High Impact", 
+    medium: "Medium Impact",
+    low: "Low Impact"
+  },
+
+  // Hero Section
+  heroSection: {
+    title: "Transform Your Creative Business",
+    subtitle: "Get AI-powered guidance tailored to your industry"
+  },
+
+  // Extended Recommended Agents
+  recommendedAgentsExtended: {
+    activeTasks: "active tasks",
+    lastUsed: "Last used",
+    never: "Never",
+    chatWith: "Chat with",
+    primaryAgents: "Primary Agents",
+    secondaryAgents: "Secondary Agents"
   }
 };
 

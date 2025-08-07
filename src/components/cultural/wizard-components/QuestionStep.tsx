@@ -146,7 +146,6 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         onPrevious={onPrevious}
         isFirstStep={isFirstStep || false}
         isLastStep={false}
-        language={language}
         isValid={isStepValid}
       />
     ) : null;
