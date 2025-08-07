@@ -252,20 +252,50 @@ export const useMasterCoordinator = () => {
     try {
       console.log('🎯 Master Coordinator: Starting task journey for', task.title);
       
-      // Crear pasos detallados para la tarea
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
-        body: {
-          action: 'create_task_steps',
-          taskId,
-          taskData: task,
-          profileContext: { 
-            profileData: profileData || null, 
-            businessProfile: businessProfile || null 
+      // Primero verificar si ya existen pasos para esta tarea
+      const { data: existingSteps, error: stepsError } = await supabase
+        .from('task_steps')
+        .select('id')
+        .eq('task_id', taskId);
+      
+      if (stepsError) throw stepsError;
+      
+      // Si no existen pasos, crearlos
+      if (!existingSteps || existingSteps.length === 0) {
+        console.log('📝 Creating steps for task:', task.title);
+        
+        const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+          body: {
+            action: 'create_task_steps',
+            taskId,
+            taskData: task,
+            profileContext: { 
+              profileData: profileData || null, 
+              businessProfile: businessProfile || null 
+            }
           }
-        }
-      });
+        });
 
-      if (error) throw error;
+        if (error) {
+          console.error('Error creating steps:', error);
+          throw error;
+        }
+        
+        console.log('✅ Steps created successfully:', data);
+      } else {
+        console.log('✅ Steps already exist for this task');
+      }
+
+      // Marcar la tarea como en progreso
+      const { error: updateError } = await supabase
+        .from('agent_tasks')
+        .update({ 
+          status: 'in_progress',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', taskId);
+      
+      if (updateError) throw updateError;
 
       toast({
         title: "¡Misión Activada!",
@@ -275,6 +305,11 @@ export const useMasterCoordinator = () => {
       return true;
     } catch (error) {
       console.error('Error starting task journey:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo iniciar la tarea. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
       return false;
     }
   };
