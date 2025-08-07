@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
@@ -41,7 +41,7 @@ import {
 export const MasterCoordinatorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const { toast } = useToast();
   const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
