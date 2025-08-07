@@ -4,11 +4,10 @@ import { TaskStep } from '@/hooks/types/taskStepTypes';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Circle, Send, ArrowRight, ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
-import { useStepAI } from '@/hooks/useStepAI';
-import { AIMessageFormatter } from './AIMessageFormatter';
+import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
+import { StepExamplesSection } from './StepExamplesSection';
+import { AIReviewer } from './AIReviewer';
+import { ModernStepCard } from './ModernStepCard';
 import { cn } from '@/lib/utils';
 
 interface StepExecutionModuleProps {
@@ -37,10 +36,8 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
   onSelectStep
 }) => {
   const [inputValue, setInputValue] = useState(step.user_input_data?.text || '');
-  const [showAI, setShowAI] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  
-  const { messages, isLoading, sendMessage } = useStepAI(step);
+  const [aiApproval, setAiApproval] = useState<{ isValid: boolean; feedback?: string } | null>(null);
   
   const isCompleted = step.completion_status === 'completed';
   const isInProgress = step.completion_status === 'in_progress';
@@ -50,15 +47,15 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
     onUpdateData(step.id, { text: value });
   };
 
-  const handleAIMessage = async (message: string) => {
-    await sendMessage(message);
+  const handleAIReview = (isValid: boolean, feedback?: string) => {
+    setAiApproval({ isValid, feedback });
   };
 
   const handleValidateStep = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !aiApproval?.isValid) return;
     
     setIsValidating(true);
-    const success = await onValidateStep(step.id, 'manual', 'Paso completado por el usuario');
+    const success = await onValidateStep(step.id, 'manual', aiApproval.feedback || 'Paso completado por el usuario');
     if (success && canAdvance) {
       setTimeout(() => onMoveNext(), 1000);
     }
@@ -116,236 +113,127 @@ export const StepExecutionModule: React.FC<StepExecutionModuleProps> = ({
     }
   };
 
+  const canCompleteStep = () => {
+    return inputValue.length >= 20 && aiApproval?.isValid;
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full"
+    <ModernStepCard
+      stepIndex={stepIndex}
+      totalSteps={totalSteps}
+      title={step.title}
+      description={step.description}
+      isCurrentStep={isCurrentStep}
+      isCompleted={isCompleted}
+      isInProgress={isInProgress}
+      onClick={() => onSelectStep(stepIndex)}
     >
-      <Card className={cn(
-        "transition-all duration-300",
-        isCurrentStep && "ring-2 ring-primary",
-        isCompleted && "bg-muted/30 border-success"
-      )}>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onSelectStep(stepIndex)}
-                className="flex items-center gap-2 text-left hover:opacity-80 transition-opacity"
-              >
-                {isCompleted ? (
-                  <CheckCircle className="h-6 w-6 text-success" />
-                ) : (
-                  <Circle className={cn(
-                    "h-6 w-6",
-                    isCurrentStep ? "text-primary" : "text-muted-foreground"
-                  )} />
-                )}
-                <div>
-                  <Badge variant={isCurrentStep ? "default" : "secondary"}>
-                    Paso {stepIndex + 1} de {totalSteps}
-                  </Badge>
-                </div>
-              </button>
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-lg">{step.title}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {step.description}
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-
-        {(isCurrentStep || isInProgress || isCompleted) && (
-          <CardContent className="space-y-4">
-            {/* Input Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">
-                  Tu respuesta:
-                </label>
-                <div className="flex items-center gap-2">
-                  {inputValue.trim() && (
-                    <Badge variant="secondary" className="text-xs">
-                      {inputValue.length} caracteres
-                    </Badge>
-                  )}
-                  {isCurrentStep && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowAI(!showAI)}
-                      className="text-xs h-6"
-                    >
-                      <HelpCircle className="h-3 w-3 mr-1" />
-                      {showAI ? 'Ocultar ayuda' : 'Ayuda IA'}
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {renderStepInput()}
-              
-              {/* Simplified validation hint */}
-              {isCurrentStep && inputValue.length < 20 && (
-                <p className="text-xs text-muted-foreground">
-                  💡 Describe tu respuesta con más detalle (mínimo 20 caracteres)
-                </p>
-              )}
-            </div>
-
-            {/* Compact AI Assistant Section */}
-            {isCurrentStep && showAI && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="border rounded-lg p-3 bg-muted/20"
-              >
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "p-2 rounded-lg text-sm",
-                        message.role === 'user' 
-                          ? "bg-primary text-primary-foreground ml-8" 
-                          : "bg-card border mr-4"
-                      )}
-                    >
-                      {message.role === 'assistant' ? (
-                        <AIMessageFormatter content={message.content} />
-                      ) : (
-                        message.content
-                      )}
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="bg-card border mr-4 p-3 rounded-lg">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" />
-                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                        <div className="w-1.5 h-1.5 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                        <span className="text-xs ml-2">El asistente está pensando...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2 mt-3">
-                  {/* Compact quick suggestions */}
-                  <div className="flex flex-wrap gap-1">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleAIMessage("Dame ejemplos específicos")}
-                      disabled={isLoading}
-                      className="text-xs h-6"
-                    >
-                      Ejemplos
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleAIMessage("¿Cómo mejorar mi respuesta?")}
-                      disabled={isLoading}
-                      className="text-xs h-6"
-                    >
-                      Mejorar
-                    </Button>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Pregunta algo específico..."
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                          handleAIMessage(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }}
-                      disabled={isLoading}
-                      className="text-sm h-8"
-                     />
-                    <Button
-                      size="sm"
-                      onClick={(e) => {
-                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                        if (input.value.trim()) {
-                          handleAIMessage(input.value);
-                          input.value = '';
-                        }
-                      }}
-                      disabled={isLoading}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Send className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Simplified Validation Section */}
-            {isCurrentStep && inputValue.trim() && !isCompleted && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-3 pt-2"
-              >
-                <Button
-                  onClick={handleValidateStep}
-                  disabled={inputValue.length < 20 || isValidating}
-                  className="w-full"
-                  size="default"
-                >
-                  {isValidating ? (
-                    <>Completando paso...</>
-                  ) : (
-                    <>
-                      Completar paso {stepIndex + 1}
-                      <CheckCircle className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-                
-                {inputValue.length >= 20 && inputValue.length < 50 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    ✓ Puedes completar este paso. Más detalles = mejores resultados
-                  </p>
-                )}
-              </motion.div>
-            )}
-
-            {/* Compact Navigation */}
-            {isCurrentStep && (stepIndex > 0 || (isCompleted && stepIndex < totalSteps - 1)) && (
-              <div className="flex justify-between pt-3 border-t">
-                {stepIndex > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onMovePrevious}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Anterior
-                  </Button>
-                )}
-                
-                {isCompleted && stepIndex < totalSteps - 1 && (
-                  <Button
-                    size="sm"
-                    onClick={onMoveNext}
-                    className="ml-auto"
-                  >
-                    Siguiente
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
+      <div className="space-y-6">
+        {/* Examples Section - Always visible when step is active */}
+        {isCurrentStep && (
+          <StepExamplesSection 
+            stepTitle={step.title}
+            stepDescription={step.description}
+          />
         )}
-      </Card>
-    </motion.div>
+
+        {/* Input Section */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-foreground">
+              Tu respuesta:
+            </label>
+            {renderStepInput()}
+          </div>
+
+          {/* AI Reviewer - Auto-reviews content */}
+          {isCurrentStep && inputValue.length >= 10 && (
+            <AIReviewer
+              content={inputValue}
+              stepTitle={step.title}
+              onReviewComplete={handleAIReview}
+              disabled={isCompleted}
+            />
+          )}
+        </div>
+
+        {/* Validation Section */}
+        {isCurrentStep && inputValue.trim() && !isCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            <Button
+              onClick={handleValidateStep}
+              disabled={!canCompleteStep() || isValidating}
+              className="w-full"
+              size="lg"
+            >
+              {isValidating ? (
+                <>Completando paso...</>
+              ) : (
+                <>
+                  Completar paso {stepIndex + 1}
+                  <CheckCircle className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+            
+            {/* Status messages */}
+            {inputValue.length < 20 && (
+              <p className="text-xs text-muted-foreground text-center">
+                Necesitas al menos 20 caracteres para que la IA pueda revisar tu respuesta
+              </p>
+            )}
+            
+            {inputValue.length >= 20 && !aiApproval && (
+              <p className="text-xs text-muted-foreground text-center">
+                La IA está revisando tu respuesta...
+              </p>
+            )}
+            
+            {aiApproval && !aiApproval.isValid && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+                Mejora tu respuesta según las sugerencias de la IA para continuar
+              </p>
+            )}
+            
+            {aiApproval?.isValid && (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center">
+                ✓ Tu respuesta está lista. Puedes completar este paso.
+              </p>
+            )}
+          </motion.div>
+        )}
+
+        {/* Navigation */}
+        {isCurrentStep && (stepIndex > 0 || (isCompleted && stepIndex < totalSteps - 1)) && (
+          <div className="flex justify-between pt-4 border-t border-border/30">
+            {stepIndex > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onMovePrevious}
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+            )}
+            
+            {isCompleted && stepIndex < totalSteps - 1 && (
+              <Button
+                size="sm"
+                onClick={onMoveNext}
+                className="ml-auto"
+              >
+                Siguiente
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </ModernStepCard>
   );
 };
