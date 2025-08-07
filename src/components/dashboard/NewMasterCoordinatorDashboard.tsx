@@ -9,7 +9,7 @@ import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
-import { CompactPriorityRecommendations } from './CompactPriorityRecommendations';
+import RecommendedTasksSection from './RecommendedTasksSection';
 import QuickActionsPanel from './QuickActionsPanel';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -496,13 +496,9 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <CompactPriorityRecommendations
-                  recommendations={recommendedTasks}
-                  onTaskStart={handleTaskStart}
-                  onGenerateMore={analyzeProfileAndGenerateTasks}
+                <RecommendedTasksSection
                   language={language}
-                  loading={coordinatorLoading}
-                  startingTask={startingTask}
+                  maturityScores={currentScores || {}}
                 />
               </motion.div>
             </div>
