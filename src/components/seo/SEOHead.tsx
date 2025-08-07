@@ -1,6 +1,5 @@
 
 import { useEffect } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
 import { SEO_CONFIG, generateJsonLd } from '@/config/seo';
 
 interface SEOHeadProps {
@@ -24,7 +23,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   noIndex = false,
   canonicalUrl
 }) => {
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   
   const siteTitle = title || SEO_CONFIG.defaultTitle;
   const siteDescription = description || SEO_CONFIG.defaultDescription;
