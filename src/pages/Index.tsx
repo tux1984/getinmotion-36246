@@ -63,7 +63,6 @@ const Index = () => {
       />
       
       <Header 
-        translations={t}
         onAccessClick={handleAccessClick}
       />
       {/* Add padding top to account for floating header */}
