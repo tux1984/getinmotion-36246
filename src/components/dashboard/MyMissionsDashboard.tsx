@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+
 import { useTranslations } from '@/hooks/useTranslations';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { useOptimizedAgentManagement } from '@/hooks/useOptimizedAgentManagement';
@@ -44,7 +44,7 @@ interface MyMissionsDashboardProps {
 
 export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTaskSelect }) => {
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const { t } = useTranslations();
   const navigate = useNavigate();
   const { tasks, loading, startTaskDevelopment, completeTaskQuickly, createTask, deleteAllTasks } = useAgentTasks();
