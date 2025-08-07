@@ -8,9 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
-import { useLanguage } from '@/context/LanguageContext';
 import { getUserProgressStatus } from '@/utils/userProgress';
 
 const Login = () => {
@@ -22,52 +20,29 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { language } = useLanguage();
+  
   
   console.log('Login: Component rendering, user:', user?.email, 'authorized:', isAuthorized, 'loading:', loading);
   
-  const translations = {
-    en: {
-      title: "Access GET IN MOTION",
-      subtitle: "Enter your credentials to access the platform",
-      email: "Email",
-      password: "Password",
-      signIn: "Sign In",
-      signingIn: "Signing in...",
-      emailPlaceholder: "Enter your email",
-      passwordPlaceholder: "Enter your password",
-      unauthorized: "Unauthorized user",
-      unauthorizedMessage: "Your account is not authorized to access this system",
-      invalidCredentials: "Invalid credentials",
-      invalidCredentialsMessage: "Please check your email and password",
-      errorOccurred: "An error occurred",
-      welcomeBack: "Welcome back!",
-      loginSuccessful: "Login successful",
-      showDebug: "Show Debug Info",
-      hideDebug: "Hide Debug Info"
-    },
-    es: {
-      title: "Acceder a GET IN MOTION",
-      subtitle: "Ingresa tus credenciales para acceder a la plataforma",
-      email: "Email",
-      password: "Contraseña",
-      signIn: "Iniciar Sesión",
-      signingIn: "Iniciando sesión...",
-      emailPlaceholder: "Ingresa tu email",
-      passwordPlaceholder: "Ingresa tu contraseña",
-      unauthorized: "Usuario no autorizado",
-      unauthorizedMessage: "Tu cuenta no está autorizada para acceder a este sistema",
-      invalidCredentials: "Credenciales inválidas",
-      invalidCredentialsMessage: "Por favor verifica tu email y contraseña",
-      errorOccurred: "Ocurrió un error",
-      welcomeBack: "¡Bienvenido de vuelta!",
-      loginSuccessful: "Inicio de sesión exitoso",
-      showDebug: "Mostrar Info Debug",
-      hideDebug: "Ocultar Info Debug"
-    }
+  const t = {
+    title: "Access GET IN MOTION",
+    subtitle: "Enter your credentials to access the platform",
+    email: "Email",
+    password: "Password",
+    signIn: "Sign In",
+    signingIn: "Signing in...",
+    emailPlaceholder: "Enter your email",
+    passwordPlaceholder: "Enter your password",
+    unauthorized: "Unauthorized user",
+    unauthorizedMessage: "Your account is not authorized to access this system",
+    invalidCredentials: "Invalid credentials",
+    invalidCredentialsMessage: "Please check your email and password",
+    errorOccurred: "An error occurred",
+    welcomeBack: "Welcome back!",
+    loginSuccessful: "Login successful",
+    showDebug: "Show Debug Info",
+    hideDebug: "Hide Debug Info"
   };
-  
-  const t = translations[language];
   
   // Get comprehensive user progress status
   const getUserRedirectPath = () => {
@@ -168,7 +143,7 @@ const Login = () => {
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex items-center justify-center">
         <div className="text-white flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <div>Verificando sesión...</div>
+          <div>Checking session...</div>
         </div>
       </div>
     );
@@ -178,7 +153,6 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex flex-col">
       <header className="p-4 flex justify-between items-center">
         <MotionLogo variant="light" />
-        <LanguageSwitcher />
       </header>
       
       <div className="flex-1 flex items-center justify-center px-4">
