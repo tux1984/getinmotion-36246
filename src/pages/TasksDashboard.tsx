@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
@@ -18,7 +17,7 @@ import { useState } from 'react';
 const TasksDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const language = 'en'; // Fixed to English only
   const { tasks } = useAgentTasks();
   const { activeTasksCount, completedTasksCount } = useTaskLimits(tasks);
   const [selectedTask, setSelectedTask] = useState<AgentTask | null>(null);
