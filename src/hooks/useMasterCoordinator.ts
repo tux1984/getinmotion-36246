@@ -246,13 +246,61 @@ export const useMasterCoordinator = () => {
   };
 
   const startTaskJourney = async (taskId: string) => {
-    const task = coordinatorTasks.find(t => t.id === taskId);
-    if (!task || !task.isUnlocked) return false;
+    console.log('🎯 Master Coordinator: Starting task journey for', taskId);
+    
+    // First check if this is a default task or coordinator task
+    const coordinatorTask = coordinatorTasks.find(t => t.id === taskId);
+    const regularTask = tasks.find(t => t.id === taskId);
+    
+    // For default tasks, create them first
+    if (taskId.startsWith('default-') && !regularTask) {
+      console.log('📝 Creating new task from default recommendation');
+      
+      try {
+        const defaultTask = coordinatorTask;
+        if (!defaultTask) {
+          throw new Error('Default task not found');
+        }
+
+        const { data: newTask, error: createError } = await supabase
+          .from('agent_tasks')
+          .insert({
+            user_id: user?.id,
+            agent_id: defaultTask.agentId,
+            title: defaultTask.title,
+            description: defaultTask.description,
+            relevance: defaultTask.relevance,
+            priority: defaultTask.priority,
+            status: 'in_progress'
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        
+        // Update the taskId to the newly created task
+        taskId = newTask.id;
+        console.log('✅ New task created:', newTask.id);
+        
+      } catch (error) {
+        console.error('❌ Error creating task:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo crear la tarea. Inténtalo de nuevo.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
+
+    const task = coordinatorTask || regularTask;
+    if (!task) {
+      console.error('❌ Task not found:', taskId);
+      return false;
+    }
 
     try {
-      console.log('🎯 Master Coordinator: Starting task journey for', task.title);
-      
-      // Primero verificar si ya existen pasos para esta tarea
+      // Check if steps already exist for this task
       const { data: existingSteps, error: stepsError } = await supabase
         .from('task_steps')
         .select('id')
@@ -260,7 +308,7 @@ export const useMasterCoordinator = () => {
       
       if (stepsError) throw stepsError;
       
-      // Si no existen pasos, crearlos
+      // Create steps if they don't exist
       if (!existingSteps || existingSteps.length === 0) {
         console.log('📝 Creating steps for task:', task.title);
         
@@ -277,7 +325,7 @@ export const useMasterCoordinator = () => {
         });
 
         if (error) {
-          console.error('Error creating steps:', error);
+          console.error('❌ Error creating steps:', error);
           throw error;
         }
         
@@ -286,7 +334,7 @@ export const useMasterCoordinator = () => {
         console.log('✅ Steps already exist for this task');
       }
 
-      // Marcar la tarea como en progreso
+      // Update task status to in progress
       const { error: updateError } = await supabase
         .from('agent_tasks')
         .update({ 
@@ -295,21 +343,14 @@ export const useMasterCoordinator = () => {
         })
         .eq('id', taskId);
       
-      if (updateError) throw updateError;
-
-      toast({
-        title: "¡Misión Activada!",
-        description: `Vamos paso a paso con: ${task.title}`,
-      });
+      if (updateError) {
+        console.warn('⚠️ Could not update task status:', updateError);
+        // Don't fail the entire operation for this
+      }
 
       return true;
     } catch (error) {
-      console.error('Error starting task journey:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo iniciar la tarea. Inténtalo de nuevo.",
-        variant: "destructive"
-      });
+      console.error('❌ Error starting task journey:', error);
       return false;
     }
   };

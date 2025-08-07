@@ -206,10 +206,32 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     navigate('/profile');
   };
 
+  const [startingTask, setStartingTask] = useState<string | null>(null);
+
   const handleTaskStart = async (taskId: string) => {
-    const success = await startTaskJourney(taskId);
-    if (success) {
-      navigate(`/dashboard/tasks/${taskId}`);
+    try {
+      setStartingTask(taskId);
+      console.log('🚀 Starting task:', taskId);
+      
+      const success = await startTaskJourney(taskId);
+      if (success) {
+        toast({
+          title: "¡Tarea Iniciada!",
+          description: "Te redirigimos a la ejecución paso a paso.",
+        });
+        navigate(`/dashboard/tasks/${taskId}`);
+      } else {
+        throw new Error('Failed to start task journey');
+      }
+    } catch (error) {
+      console.error('❌ Error starting task:', error);
+      toast({
+        title: "Error al Iniciar Tarea",
+        description: "No se pudo iniciar la tarea. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    } finally {
+      setStartingTask(null);
     }
   };
 
@@ -224,18 +246,27 @@ export const MasterCoordinatorDashboard: React.FC = () => {
     navigate(`/dashboard/deliverables/${deliverableId}`);
   };
 
-  // Get recommended tasks intelligently - now uses Coordinator tasks
+  // Simplified recommended tasks logic
   const getRecommendedTasks = () => {
+    console.log('📊 Getting recommended tasks:', {
+      coordinatorTasks: coordinatorTasks.length,
+      personalizedRecommendations: personalizedRecommendations.length,
+      tasks: tasks.length
+    });
+
+    // Priority 1: Use Master Coordinator's intelligent tasks
     if (coordinatorTasks.length > 0) {
-      // Use Master Coordinator's intelligent tasks
-      return coordinatorTasks
-        .filter(task => task.isUnlocked && !task.steps.every(step => step.isCompleted))
+      const availableTasks = coordinatorTasks
+        .filter(task => task.isUnlocked && !task.steps?.every(step => step.isCompleted))
         .slice(0, 4);
+      
+      console.log('✅ Using coordinator tasks:', availableTasks.length);
+      return availableTasks;
     }
 
+    // Priority 2: Use personalized recommendations
     if (personalizedRecommendations.length > 0) {
-      // Fallback to personalized recommendations if available
-      return personalizedRecommendations.slice(0, 4).map(rec => ({
+      const formattedRecs = personalizedRecommendations.slice(0, 4).map(rec => ({
         id: rec.id,
         title: rec.title,
         description: rec.description,
@@ -247,26 +278,66 @@ export const MasterCoordinatorDashboard: React.FC = () => {
         impact: rec.impact,
         isUnlocked: true
       }));
+      
+      console.log('✅ Using personalized recommendations:', formattedRecs.length);
+      return formattedRecs;
     }
 
-    if (tasks.length === 0) {
-      return [];
-    }
-
-    // Final fallback to existing tasks
-    const pendingTasks = tasks
-      .filter(task => task.status === 'pending')
-      .sort((a, b) => {
-        if (a.relevance !== b.relevance) {
+    // Priority 3: Use existing pending tasks
+    if (tasks.length > 0) {
+      const pendingTasks = tasks
+        .filter(task => task.status === 'pending')
+        .sort((a, b) => {
           const relevanceOrder = { high: 3, medium: 2, low: 1 };
-          return relevanceOrder[b.relevance as keyof typeof relevanceOrder] - 
-                 relevanceOrder[a.relevance as keyof typeof relevanceOrder];
-        }
-        return a.priority - b.priority;
-      })
-      .slice(0, 4);
+          const aRelevance = relevanceOrder[a.relevance as keyof typeof relevanceOrder] || 2;
+          const bRelevance = relevanceOrder[b.relevance as keyof typeof relevanceOrder] || 2;
+          
+          if (aRelevance !== bRelevance) {
+            return bRelevance - aRelevance;
+          }
+          return a.priority - b.priority;
+        })
+        .slice(0, 4)
+        .map(task => ({ ...task, isUnlocked: true }));
+      
+      console.log('✅ Using existing tasks:', pendingTasks.length);
+      return pendingTasks;
+    }
 
-    return pendingTasks.map(task => ({ ...task, isUnlocked: true }));
+    // Fallback: Generate default tasks if nothing is available
+    console.log('⚠️ No tasks available, creating default recommendations');
+    return generateDefaultTasks();
+  };
+
+  const generateDefaultTasks = () => {
+    const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
+    
+    return [
+      {
+        id: 'default-1',
+        title: `Definir propuesta de valor para ${businessName}`,
+        description: 'Identifica qué hace único tu producto o servicio y por qué los clientes deberían elegirte.',
+        priority: 1,
+        relevance: 'high' as const,
+        estimatedTime: '45-60 min',
+        category: 'Estrategia',
+        agentId: 'business-advisor',
+        impact: 'alto',
+        isUnlocked: true
+      },
+      {
+        id: 'default-2',
+        title: 'Análisis de precios competitivos',
+        description: 'Estudia el mercado y define una estrategia de precios rentable y atractiva.',
+        priority: 2,
+        relevance: 'high' as const,
+        estimatedTime: '30-45 min',
+        category: 'Monetización',
+        agentId: 'pricing-analyst',
+        impact: 'alto',
+        isUnlocked: true
+      }
+    ];
   };
 
   const getMaturityLevel = () => maturityLevel;
@@ -525,13 +596,22 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                                      <Button 
                                        size="sm"
                                        onClick={() => handleTaskStart(task.id)}
-                                       disabled={!(task as any).isUnlocked}
+                                       disabled={startingTask === task.id || !(task as any).isUnlocked}
                                        className="bg-primary hover:bg-primary/90 disabled:opacity-50"
                                      >
-                                       <Play className="w-3 h-3 mr-1" />
-                                       {t.startWithAgent} {(task as any).agentName || 'Especialista'}
+                                       {startingTask === task.id ? (
+                                         <div className="flex items-center space-x-1">
+                                           <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                                           <span>Iniciando...</span>
+                                         </div>
+                                       ) : (
+                                         <>
+                                           <Play className="w-3 h-3 mr-1" />
+                                           Empezar ahora
+                                         </>
+                                       )}
                                      </Button>
-                                     {(task as any).isUnlocked && (
+                                     {(task as any).isUnlocked && startingTask !== task.id && (
                                        <Button 
                                          size="sm"
                                          variant="outline"
@@ -547,10 +627,36 @@ export const MasterCoordinatorDashboard: React.FC = () => {
                               </motion.div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                              <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary/50" />
-                              <p>Generating personalized recommendations...</p>
-                            </div>
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-center py-8"
+                            >
+                              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                                <Target className="w-8 h-8 text-primary" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-foreground mb-2">
+                                Generando Recomendaciones Personalizadas
+                              </h3>
+                              <p className="text-muted-foreground mb-4">
+                                Estoy analizando tu perfil para crear tareas específicas para tu negocio...
+                              </p>
+                              <Button 
+                                onClick={analyzeProfileAndGenerateTasks}
+                                disabled={coordinatorLoading}
+                                variant="outline"
+                                className="mx-auto"
+                              >
+                                {coordinatorLoading ? (
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                    <span>Analizando...</span>
+                                  </div>
+                                ) : (
+                                  'Generar Recomendaciones'
+                                )}
+                              </Button>
+                            </motion.div>
                           )}
                         </CardContent>
                       </motion.div>
