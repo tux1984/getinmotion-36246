@@ -32,7 +32,12 @@ export const GuidedTaskExecution: React.FC<GuidedTaskExecutionProps> = ({ task }
       <div className="flex items-center justify-center h-64">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground">Cargando pasos de la tarea...</p>
+          <p className="text-muted-foreground">
+            {!steps.length && task.status === 'in_progress' 
+              ? 'Generando pasos de la tarea...' 
+              : 'Cargando pasos de la tarea...'
+            }
+          </p>
         </div>
       </div>
     );
@@ -43,9 +48,14 @@ export const GuidedTaskExecution: React.FC<GuidedTaskExecutionProps> = ({ task }
       <Card>
         <CardContent className="p-8 text-center">
           <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Pasos no configurados</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            {task.status === 'pending' ? 'Tarea pendiente' : 'Generando pasos...'}
+          </h3>
           <p className="text-muted-foreground">
-            Esta tarea aún no tiene pasos definidos. Los pasos se generarán automáticamente.
+            {task.status === 'pending' 
+              ? 'Esta tarea está pendiente. Inicia la tarea para generar los pasos automáticamente.'
+              : 'Los pasos se están generando automáticamente. Esto puede tomar unos momentos...'
+            }
           </p>
         </CardContent>
       </Card>

@@ -23,6 +23,44 @@ export function useTaskSteps(taskId: string) {
 
       if (error) throw error;
       
+      // If no steps found, check if task is in_progress and attempt to create steps
+      if (!data || data.length === 0) {
+        console.log('🔍 No steps found for task:', taskId);
+        
+        // Check if task exists and is in progress
+        const { data: task, error: taskError } = await supabase
+          .from('agent_tasks')
+          .select('status, title, description, agent_id')
+          .eq('id', taskId)
+          .single();
+          
+        if (!taskError && task && task.status === 'in_progress') {
+          console.log('🚀 Task is in progress but has no steps, attempting to create them');
+          setLoading(true);
+          
+          try {
+            const { data: createStepsResult, error: createError } = await supabase.functions.invoke('master-agent-coordinator', {
+              body: {
+                action: 'create_task_steps',
+                taskId,
+                taskData: task
+              }
+            });
+            
+            if (createError) {
+              console.error('Error creating steps:', createError);
+            } else {
+              console.log('✅ Steps created successfully, refetching...');
+              // Wait a moment and refetch
+              setTimeout(() => fetchSteps(), 1000);
+              return;
+            }
+          } catch (createStepsError) {
+            console.error('Error in step creation call:', createStepsError);
+          }
+        }
+      }
+      
       setSteps(data || []);
       
       // Find first incomplete step

@@ -639,7 +639,10 @@ Responde SOLO con un array JSON:
 
 // FASE 5: Crear pasos específicos para tareas
 export async function createTaskSteps(taskId: string, taskData: any, profileContext: any) {
+  console.log(`🔧 Creating steps for task: ${taskId} - ${taskData.title}`);
+  
   if (!openAIApiKey) {
+    console.error('❌ OpenAI API key not configured');
     return new Response(
       JSON.stringify({ error: 'OpenAI API key not configured' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -647,6 +650,28 @@ export async function createTaskSteps(taskId: string, taskData: any, profileCont
   }
 
   try {
+    // Check if steps already exist
+    const { data: existingSteps, error: checkError } = await supabase
+      .from('task_steps')
+      .select('id')
+      .eq('task_id', taskId);
+    
+    if (checkError) {
+      console.error('❌ Error checking existing steps:', checkError);
+      throw checkError;
+    }
+    
+    if (existingSteps && existingSteps.length > 0) {
+      console.log(`✅ Steps already exist for task ${taskId}, returning existing steps`);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          steps: existingSteps,
+          message: 'Los pasos ya existen para esta tarea.'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     const prompt = `
 Eres un Master Coordinator experto en crear pasos específicos y útiles para tareas empresariales.
 
@@ -684,6 +709,7 @@ Responde SOLO con un array JSON:
 }]
 `;
 
+    console.log('🤖 Calling OpenAI to generate steps...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -698,21 +724,47 @@ Responde SOLO con un array JSON:
       }),
     });
 
+    if (!response.ok) {
+      console.error('❌ OpenAI API error:', response.status, response.statusText);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
     const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('❌ Invalid OpenAI response format:', data);
+      throw new Error('Invalid OpenAI response format');
+    }
+    
     let aiResponse = data.choices[0].message.content;
+    console.log('🎯 Raw AI response for steps:', aiResponse);
     
     aiResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const steps = JSON.parse(aiResponse);
+    
+    let steps;
+    try {
+      steps = JSON.parse(aiResponse);
+    } catch (parseError) {
+      console.error('❌ Error parsing AI response:', parseError, 'Raw response:', aiResponse);
+      throw new Error('Failed to parse AI response as JSON');
+    }
+
+    if (!Array.isArray(steps)) {
+      console.error('❌ AI response is not an array:', steps);
+      throw new Error('AI response must be an array of steps');
+    }
+
+    console.log(`📝 Inserting ${steps.length} steps into database...`);
 
     // Insertar pasos en la base de datos
-    const stepsToInsert = steps.map((step: any) => ({
+    const stepsToInsert = steps.map((step: any, index: number) => ({
       task_id: taskId,
-      step_number: step.step_number,
-      title: step.title,
-      description: step.description,
+      step_number: step.step_number || (index + 1),
+      title: step.title || `Paso ${index + 1}`,
+      description: step.description || '',
       input_type: step.input_type || 'text',
       validation_criteria: step.validation_criteria || {},
-      ai_context_prompt: step.ai_context_prompt,
+      ai_context_prompt: step.ai_context_prompt || '',
       completion_status: 'pending'
     }));
 
@@ -721,7 +773,12 @@ Responde SOLO con un array JSON:
       .insert(stepsToInsert)
       .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Error inserting steps into database:', error);
+      throw error;
+    }
+
+    console.log(`✅ Successfully created ${insertedSteps.length} steps for task ${taskId}`);
 
     return new Response(
       JSON.stringify({ 
@@ -733,9 +790,13 @@ Responde SOLO con un array JSON:
     );
 
   } catch (error) {
-    console.error('Error creating task steps:', error);
+    console.error('❌ Error in createTaskSteps:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        taskId: taskId,
+        details: 'Failed to create task steps' 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
