@@ -236,11 +236,15 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
         message="Analyzing your profile and generating intelligent tasks..."
       />
 
-      {/* Master Coordinator Panel - Fixed Header */}
+      {/* Master Coordinator Panel - Collapsible */}
       <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-primary/20 shadow-lg"
+        initial={{ opacity: 0, height: 'auto' }}
+        animate={{ 
+          opacity: 1,
+          height: isExpanded ? 'auto' : '80px'
+        }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className="w-full bg-background/95 backdrop-blur-lg border-b border-primary/20 shadow-lg overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="border-none shadow-none bg-gradient-to-r from-purple-600/90 via-indigo-600/90 to-blue-600/90 text-white">
@@ -301,7 +305,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
                     <div className="mt-4 space-y-4">
