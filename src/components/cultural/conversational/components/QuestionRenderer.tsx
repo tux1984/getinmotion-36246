@@ -82,8 +82,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
         >
           <Button
             variant={value === option.value ? "default" : "outline"}
-            className={`w-full justify-start text-left p-4 h-auto ${
-              value === option.value ? 'ring-2 ring-primary ring-offset-2' : ''
+            className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+              value === option.value ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
             }`}
             onClick={() => handleAnswer(option.value)}
           >
@@ -150,8 +150,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
             >
               <Button
                 variant={isSelected ? "default" : "outline"}
-                className={`w-full justify-start text-left p-4 h-auto ${
-                  isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
+                className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                  isSelected ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
                 }`}
                 onClick={() => {
                   const newValues = isSelected
@@ -331,8 +331,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1">
         <Button
           variant={value === true ? "default" : "outline"}
-          className={`w-full h-16 text-lg ${
-            value === true ? 'ring-2 ring-primary ring-offset-2' : ''
+          className={`w-full h-16 text-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+            value === true ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
           }`}
           onClick={() => handleAnswer(true)}
         >
@@ -343,8 +343,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1">
         <Button
           variant={value === false ? "default" : "outline"}
-          className={`w-full h-16 text-lg ${
-            value === false ? 'ring-2 ring-primary ring-offset-2' : ''
+          className={`w-full h-16 text-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+            value === false ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
           }`}
           onClick={() => handleAnswer(false)}
         >
@@ -365,8 +365,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
         >
           <Button
             variant={value === option.value ? "default" : "outline"}
-            className={`w-full p-4 h-auto text-center ${
-              value === option.value ? 'ring-2 ring-primary ring-offset-2' : ''
+            className={`w-full p-4 h-auto text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+              value === option.value ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
             }`}
             onClick={() => handleAnswer(option.value)}
           >

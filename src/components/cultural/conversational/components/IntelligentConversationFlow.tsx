@@ -104,7 +104,7 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
         if (!isLastQuestion) {
           setCurrentQuestionIndex(prev => prev + 1);
         }
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -296,7 +296,7 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
           <Button
             onClick={handleNext}
             disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion)}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
           >
             {isLastQuestion ? t.lastQuestion : t.next}
             <ArrowRight className="w-4 h-4" />

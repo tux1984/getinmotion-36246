@@ -40,7 +40,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-r from-purple-50 to-violet-50 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-200/50 shadow-lg"
+      className="bg-gradient-to-r from-purple-100 to-violet-100 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-200/50 shadow-lg"
     >
       {/* Agent Avatar and Identity */}
       <div className="flex items-center gap-4 mb-4">
