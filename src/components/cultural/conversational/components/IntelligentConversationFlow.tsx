@@ -189,29 +189,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
       transition={{ duration: 0.5 }}
       className="overflow-hidden"
     >
-      {/* Clean Agent Message */}
-      <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 border-b border-border/50">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground mb-2">
-              {language === 'es' ? 'Tu Agente de Crecimiento Creativo' : 'Your Creative Growth Agent'}
-            </h3>
-            <motion.p 
-              key={block.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-muted-foreground leading-relaxed"
-            >
-              {block.agentMessage}
-            </motion.p>
-          </div>
-        </div>
-      </div>
 
       {/* Strategic Context */}
       {block.strategicContext && (

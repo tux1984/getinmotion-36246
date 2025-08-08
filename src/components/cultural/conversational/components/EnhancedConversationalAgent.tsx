@@ -105,6 +105,7 @@ export const EnhancedConversationalAgent: React.FC<EnhancedConversationalAgentPr
         currentBlock={currentBlock}
         progress={getBlockProgress().percentage}
         businessType={businessType}
+        agentMessage={currentBlock.agentMessage}
       />
 
       {/* Main Intelligent Conversation Flow */}

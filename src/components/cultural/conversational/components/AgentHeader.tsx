@@ -10,6 +10,7 @@ interface AgentHeaderProps {
   businessType?: string;
   agentPersonality?: string;
   personalizationCount?: number;
+  agentMessage?: string;
 }
 
 export const AgentHeader: React.FC<AgentHeaderProps> = ({
@@ -18,7 +19,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   progress,
   businessType,
   agentPersonality,
-  personalizationCount
+  personalizationCount,
+  agentMessage
 }) => {
   const translations = {
     en: {
@@ -187,6 +189,27 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           <CheckCircle className="w-4 h-4 text-emerald-500" />
         </motion.div>
       </div>
+
+      {/* Agent Message */}
+      {agentMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="mt-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 relative z-10"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <p className="text-white/90 text-sm leading-relaxed flex-1">
+              {agentMessage}
+            </p>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
