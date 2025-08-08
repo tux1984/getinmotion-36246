@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { generateDefaultTasks } from '@/utils/generateDefaultTasks';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-
+import { AgentTask } from '@/hooks/types/agentTaskTypes';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
@@ -213,19 +213,19 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   };
 
 
-  const handleTaskStart = async (taskId: string) => {
+  const handleTaskStart = async (task: AgentTask) => {
     try {
-      setStartingTask(taskId);
+      setStartingTask(task.id);
       
-      const success = await startTaskJourney(taskId);
+      const success = await startTaskJourney(task.id);
       if (success) {
-      toast({
-        title: language === 'es' ? "¡Tarea Iniciada!" : "Task Started!",
-        description: language === 'es' 
-          ? "Te redirigimos a la ejecución paso a paso."
-          : "Redirecting you to step-by-step execution.",
-      });
-        navigate(`/dashboard/tasks/${taskId}`);
+        toast({
+          title: language === 'es' ? "¡Tarea Iniciada!" : "Task Started!",
+          description: language === 'es' 
+            ? "Te redirigimos a la ejecución paso a paso."
+            : "Redirecting you to step-by-step execution.",
+        });
+        navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
       } else {
         throw new Error('Failed to start task journey');
       }
@@ -338,11 +338,24 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     }
   };
 
-  const handleCompleteTask = async (taskId: string) => {
+  const handleCompleteTask = async (task: AgentTask) => {
     try {
-      await completeTaskQuickly(taskId);
+      await completeTaskQuickly(task.id);
+      toast({
+        title: language === 'es' ? "¡Tarea Completada!" : "Task Completed!",
+        description: language === 'es' 
+          ? "La tarea se ha marcado como completada exitosamente."
+          : "Task has been marked as completed successfully.",
+      });
     } catch (error) {
       console.error('❌ Error completing task:', error);
+      toast({
+        title: language === 'es' ? "Error al Completar Tarea" : "Error Completing Task",
+        description: language === 'es' 
+          ? "No se pudo completar la tarea. Inténtalo de nuevo."
+          : "Could not complete the task. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -356,6 +369,13 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   const handleMasterAgentChat = () => {
     navigate('/dashboard/agent/master-coordinator');
+  };
+
+  const handleTaskStartFromPanel = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      await handleTaskStart(task);
+    }
   };
 
   const recommendedTasks = getRecommendedTasks();
@@ -416,7 +436,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   return (
     <>
       {/* Master Coordinator Panel - Único y central */}
-      <MasterCoordinatorPanel onTaskStart={handleTaskStart} language={language} />
+      <MasterCoordinatorPanel onTaskStart={handleTaskStartFromPanel} language={language} />
       
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
@@ -497,7 +517,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 language={language}
                 onStartDevelopment={async (task) => {
                   console.log('🚀 Starting task through master coordinator:', task.id);
-                  await handleTaskStart(task.id);
+                  await handleTaskStart(task);
                 }}
                 onChatWithAgent={(task) => {
                   console.log('💬 Opening chat with agent through coordinator:', task.agent_id);
@@ -505,7 +525,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 }}
                 onCompleteTask={async (task) => {
                   console.log('✅ Completing task through master coordinator:', task.id);
-                  await handleCompleteTask(task.id);
+                  await handleCompleteTask(task);
                 }}
                 startingTask={startingTask}
               />
