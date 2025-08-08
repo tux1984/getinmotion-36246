@@ -292,8 +292,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     }, [value, defaultValue, handleAnswer, question.id]);
 
     return (
-      <div className="space-y-4">
-        <div className="px-2">
+      <div className="space-y-4 relative z-10">
+        <div className="px-4 py-6 touch-none">
           <Slider
             value={[currentValue]}
             onValueChange={(newValue) => {
@@ -307,7 +307,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
             min={minValue}
             max={maxValue}
             step={question.step || 1}
-            className="w-full"
+            className="w-full relative z-20"
           />
         </div>
         <div className="flex justify-between text-sm text-muted-foreground px-2">

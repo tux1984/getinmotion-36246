@@ -59,7 +59,7 @@ const MaturityCalculator = () => {
         onAgentManagerClick={handleBackToDashboard}
       />
 
-      <div className="pt-28">
+      <div className="pt-36">
         <ErrorBoundary>
           <FusedMaturityCalculator
             onComplete={handleComplete}
