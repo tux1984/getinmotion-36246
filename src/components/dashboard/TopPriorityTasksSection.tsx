@@ -66,6 +66,11 @@ export const TopPriorityTasksSection: React.FC<TopPriorityTasksSectionProps> = (
 
   const t = translations[language];
 
+  // Debug: Log tasks received
+  console.log('🔍 TopPriorityTasksSection - Tasks received:', tasks);
+  console.log('🔍 TopPriorityTasksSection - Tasks length:', tasks.length);
+  console.log('🔍 TopPriorityTasksSection - Tasks statuses:', tasks.map(t => ({ id: t.id, status: t.status, title: t.title })));
+
   // Get top 3 priority tasks - filter by status and sort by relevance + priority
   const priorityTasks = tasks
     .filter(task => task.status === 'pending' || task.status === 'in_progress')
@@ -80,6 +85,10 @@ export const TopPriorityTasksSection: React.FC<TopPriorityTasksSectionProps> = (
       return a.priority - b.priority;
     })
     .slice(0, 3);
+
+  // Debug: Log filtered tasks
+  console.log('🔍 TopPriorityTasksSection - Priority tasks after filter:', priorityTasks);
+  console.log('🔍 TopPriorityTasksSection - Priority tasks length:', priorityTasks.length);
 
   const getPriorityColor = (relevance: string) => {
     switch (relevance) {

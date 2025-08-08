@@ -513,6 +513,13 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
             <div className="lg:col-span-2 space-y-6">
               
               {/* Top Priority Tasks Section */}
+              {/* Debug logs */}
+              {(() => {
+                console.log('🔍 MasterCoordinatorDashboard - Tasks:', tasks);
+                console.log('🔍 MasterCoordinatorDashboard - Tasks length:', tasks.length);
+                console.log('🔍 MasterCoordinatorDashboard - Loading:', tasksLoading);
+                return null;
+              })()}
               <TopPriorityTasksSection
                 tasks={tasks}
                 language={language}
