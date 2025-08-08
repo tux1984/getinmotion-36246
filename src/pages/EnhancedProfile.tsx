@@ -38,6 +38,10 @@ const EnhancedProfile: React.FC = () => {
   const { businessProfile, loading } = useUserBusinessProfile();
   const { currentScores } = useOptimizedMaturityScores();
   const { coordinatorMessage, deliverables } = useMasterCoordinator();
+
+  // Debug logging to understand data types
+  console.log('🔍 EnhancedProfile: coordinatorMessage type:', typeof coordinatorMessage, coordinatorMessage);
+  console.log('🔍 EnhancedProfile: deliverables type:', typeof deliverables, deliverables);
   const [selectedTab, setSelectedTab] = useState('overview');
 
   if (loading) {
@@ -264,7 +268,9 @@ const EnhancedProfile: React.FC = () => {
         </motion.div>
 
         {/* Master Coordinator Integration */}
-        {(coordinatorMessage || (deliverables && deliverables.length > 0)) && (
+        {((coordinatorMessage && typeof coordinatorMessage === 'object' && coordinatorMessage.message) || 
+          (typeof coordinatorMessage === 'string' && coordinatorMessage) || 
+          (deliverables && deliverables.length > 0)) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,7 +278,8 @@ const EnhancedProfile: React.FC = () => {
             className="mb-8"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {coordinatorMessage && (
+              {((coordinatorMessage && typeof coordinatorMessage === 'object' && coordinatorMessage.message) || 
+                (typeof coordinatorMessage === 'string' && coordinatorMessage)) && (
                 <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
@@ -284,7 +291,10 @@ const EnhancedProfile: React.FC = () => {
                           {language === ('es' as string) ? 'Análisis del Coordinador Maestro' : 'Master Coordinator Analysis'}
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                          {typeof coordinatorMessage === 'string' ? coordinatorMessage : 'Analyzing your business profile...'}
+                          {typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
+                            ? coordinatorMessage.message 
+                            : (typeof coordinatorMessage === 'string' ? coordinatorMessage : 'Analyzing your business profile...')
+                          }
                         </p>
                       </div>
                     </div>

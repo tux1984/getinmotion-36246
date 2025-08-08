@@ -144,11 +144,17 @@ export const useMasterCoordinator = () => {
   const transformToCoordinatorTasks = useMemo(() => {
     // Validaciones para evitar errores de variables no inicializadas
     if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+      console.log('🔍 useMasterCoordinator: No tasks available for transformation');
       return [];
     }
 
     try {
       const validTasks = tasks.filter(task => task && task.id);
+      
+      if (validTasks.length === 0) {
+        console.log('🔍 useMasterCoordinator: No valid tasks found');
+        return [];
+      }
       
       const sortedTasks = validTasks.sort((a, b) => {
         const relevanceOrder = { high: 3, medium: 2, low: 1 };
@@ -161,20 +167,29 @@ export const useMasterCoordinator = () => {
         return (a.priority || 1) - (b.priority || 1);
       });
 
-      return sortedTasks.slice(0, 15).map((task, index) => ({
-        id: task.id,
-        title: task.title || 'Tarea sin título',
-        description: task.description || '',
-        agentId: task.agent_id || 'general',
-        agentName: getAgentName(task.agent_id || 'general'),
-        priority: task.priority || 1,
-        relevance: task.relevance || 'medium',
-        estimatedTime: getEstimatedTime(task.title || ''),
-        category: getTaskCategory(task.agent_id || 'general'),
-        isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
-        prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
-        steps: generateStepsForTask(task)
-      }));
+      console.log('🔍 useMasterCoordinator: Transforming', sortedTasks.length, 'tasks');
+
+      return sortedTasks.slice(0, 15).map((task, index) => {
+        if (!task || !task.id) {
+          console.warn('🚫 useMasterCoordinator: Invalid task encountered:', task);
+          return null;
+        }
+
+        return {
+          id: task.id,
+          title: task.title || 'Tarea sin título',
+          description: task.description || '',
+          agentId: task.agent_id || 'general',
+          agentName: getAgentName(task.agent_id || 'general'),
+          priority: task.priority || 1,
+          relevance: task.relevance || 'medium',
+          estimatedTime: getEstimatedTime(task.title || ''),
+          category: getTaskCategory(task.agent_id || 'general'),
+          isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
+          prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
+          steps: generateStepsForTask(task)
+        };
+      }).filter(Boolean); // Remove any null entries
     } catch (error) {
       console.error('❌ Error transforming tasks:', error);
       return [];
@@ -453,29 +468,36 @@ export const useMasterCoordinator = () => {
 
   // FASE 4: Mensaje inteligente del coordinador
   const getCoordinatorMessage = () => {
-    const nextTask = getNextUnlockedTask();
-    const completedCount = tasks.filter(t => t.status === 'completed').length;
-    const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
-    
-    if (!nextTask && completedCount === 0) {
-      return {
-        type: 'welcome',
-        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${businessName}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`
-      };
+    try {
+      const nextTask = getNextUnlockedTask();
+      const completedCount = tasks.filter(t => t.status === 'completed').length;
+      const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
+      
+      let result;
+      if (!nextTask && completedCount === 0) {
+        result = {
+          type: 'welcome',
+          message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${businessName}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`
+        };
+      } else if (nextTask) {
+        result = {
+          type: 'guidance',
+          message: `Perfecto, tu siguiente misión para ${businessName} es: "${nextTask.title}". Haz clic en "Empezar ahora" y te guiaré paso a paso con detalles específicos.`,
+          taskId: nextTask.id
+        };
+      } else {
+        result = {
+          type: 'progress',
+          message: `¡Increíble! Has completado ${completedCount} tareas para ${businessName}. Estás construyendo algo realmente sólido. ¿Quieres que analice tu progreso y genere las siguientes recomendaciones?`
+        };
+      }
+      
+      console.log('🔍 useMasterCoordinator: getCoordinatorMessage result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error in getCoordinatorMessage:', error);
+      return { type: 'error', message: 'Analyzing your business profile...' };
     }
-    
-    if (nextTask) {
-      return {
-        type: 'guidance',
-        message: `Perfecto, tu siguiente misión para ${businessName} es: "${nextTask.title}". Haz clic en "Empezar ahora" y te guiaré paso a paso con detalles específicos.`,
-        taskId: nextTask.id
-      };
-    }
-    
-    return {
-      type: 'progress',
-      message: `¡Increíble! Has completado ${completedCount} tareas para ${businessName}. Estás construyendo algo realmente sólido. ¿Quieres que analice tu progreso y genere las siguientes recomendaciones?`
-    };
   };
 
   // Helper functions
