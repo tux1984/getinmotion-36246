@@ -43,16 +43,16 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
 
   const translations = {
     en: {
-      next: "Continue",
-      previous: "Previous",
+      next: "Next",
+      previous: "Previous", 
       whatIsThis: "What is this?",
-      lastQuestion: "Complete this section"
+      lastQuestion: "Continue to next section"
     },
     es: {
-      next: "Continuar",
+      next: "Siguiente",
       previous: "Anterior",
       whatIsThis: "¿Qué es esto?",
-      lastQuestion: "Completar esta sección"
+      lastQuestion: "Continuar a la siguiente sección"
     }
   };
 
@@ -95,17 +95,8 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     
     onAnswer(currentQuestion.id, answer);
     
-    // Check for conditional logic before auto-advancing
-    const shouldAutoAdvance = evaluateConditionalLogic(currentQuestion, answer, profileData);
-    
-    // Auto-advance for single-choice questions
-    if ((currentQuestion.type === 'single-choice' || currentQuestion.type === 'yes-no') && shouldAutoAdvance) {
-      setTimeout(() => {
-        if (!isLastQuestion) {
-          setCurrentQuestionIndex(prev => prev + 1);
-        }
-      }, 1000);
-    }
+    // No auto-advance - let user control navigation with buttons
+    // This improves UX by removing confusion between auto-advance and manual buttons
   };
 
   const evaluateConditionalLogic = (question: any, answer: any, profileData: UserProfileData): boolean => {

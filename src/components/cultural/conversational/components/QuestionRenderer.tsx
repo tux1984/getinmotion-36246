@@ -101,7 +101,17 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   };
 
   const renderMultipleChoice = () => {
+    // Ensure we always have an array, initializing with empty array if needed
     const currentValue = Array.isArray(value) ? value : [];
+    
+    // Initialize empty array if value is undefined/null
+    React.useEffect(() => {
+      if (!value || !Array.isArray(value)) {
+        console.log('QuestionRenderer: Initializing empty array for multiple choice', { questionId: question.id });
+        handleAnswer([]);
+      }
+    }, [value, handleAnswer, question.id]);
+    
     const selectedCount = currentValue.length;
     
     // Validate that we have proper options
@@ -292,8 +302,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     }, [value, defaultValue, handleAnswer, question.id]);
 
     return (
-      <div className="space-y-4 relative z-10">
-        <div className="px-4 py-6 touch-none">
+      <div className="space-y-4 relative z-50">
+        <div className="px-6 py-8 touch-manipulation pointer-events-auto bg-background/95 rounded-lg border">
           <Slider
             value={[currentValue]}
             onValueChange={(newValue) => {
@@ -307,7 +317,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
             min={minValue}
             max={maxValue}
             step={question.step || 1}
-            className="w-full relative z-20"
+            className="w-full relative z-50 pointer-events-auto cursor-pointer"
           />
         </div>
         <div className="flex justify-between text-sm text-muted-foreground px-2">
