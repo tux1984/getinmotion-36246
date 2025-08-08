@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Sparkles, CheckCircle } from 'lucide-react';
+import { Bot, Sparkles, CheckCircle, Star, Zap, Target } from 'lucide-react';
 import { ConversationBlock } from '../types/conversationalTypes';
 
 interface AgentHeaderProps {
@@ -40,26 +40,43 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-r from-purple-100 to-violet-100 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-200/50 shadow-lg"
+      className="bg-gradient-to-r from-purple-100 via-violet-100 to-purple-100 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-300/60 shadow-xl relative overflow-hidden"
     >
+      {/* Animated background accent */}
+      <motion.div
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200/30 to-transparent"
+      />
+      
       {/* Agent Avatar and Identity */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4 mb-4 relative z-10">
         <div className="relative">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-full flex items-center justify-center shadow-lg">
-            <Bot className="w-6 h-6 text-white" />
+          <div className="w-14 h-14 bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700 rounded-full flex items-center justify-center shadow-lg border-2 border-purple-300">
+            <Bot className="w-7 h-7 text-white" />
           </div>
           <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
+            animate={{ scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+            className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-md"
           >
-            <Sparkles className="w-2 h-2 text-white" />
+            <Sparkles className="w-2.5 h-2.5 text-white" />
+          </motion.div>
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+            className="absolute -bottom-1 -left-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"
+          >
+            <Star className="w-2 h-2 text-white" />
           </motion.div>
         </div>
         
-        <div>
-          <h1 className="text-xl font-bold text-foreground">{t.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-800 to-violet-800 bg-clip-text text-transparent">{t.title}</h1>
+            <Zap className="w-5 h-5 text-purple-600" />
+          </div>
+          <p className="text-sm text-purple-700 font-medium">{t.subtitle}</p>
         </div>
       </div>
 
@@ -86,9 +103,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       </div>
 
       {/* Current Block Indicator */}
-      <div className="flex items-center gap-2 text-sm">
-        <CheckCircle className="w-4 h-4 text-green-500" />
-        <span className="text-muted-foreground">{currentBlock.subtitle}</span>
+      <div className="flex items-center gap-2 text-sm relative z-10">
+        <Target className="w-4 h-4 text-purple-600" />
+        <span className="text-purple-700 font-medium">{currentBlock.subtitle}</span>
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 1, repeat: Infinity }}
+          className="ml-auto"
+        >
+          <CheckCircle className="w-4 h-4 text-emerald-500" />
+        </motion.div>
       </div>
     </motion.div>
   );

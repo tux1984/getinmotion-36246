@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Check, X, Edit3 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Check, X, Edit3, CheckCircle2, Circle, Star, Heart, Zap, Target, Lightbulb, Rocket } from 'lucide-react';
 import { ConversationQuestion } from '../types/conversationalTypes';
 
 interface QuestionRendererProps {
@@ -43,6 +44,12 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
 
   const t = translations[language];
 
+  const getOptionIcon = (index: number) => {
+    const icons = [Circle, CheckCircle2, Star, Heart, Zap, Target, Lightbulb, Rocket];
+    const IconComponent = icons[index % icons.length];
+    return <IconComponent className="w-5 h-5" />;
+  };
+
   const renderSingleChoice = () => {
     // Validate that we have proper options
     if (!question.options || question.options.length === 0) {
@@ -73,31 +80,68 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     }
 
     return (
-      <div className="space-y-3">
-        {question.options?.map((option) => (
-        <motion.div
-          key={option.id}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-            <Button
-              variant={String(value) === String(option.value) ? "default" : "outline"}
-              className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                String(value) === String(option.value) ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
-              }`}
-            onClick={() => handleAnswer(option.value)}
-          >
-            <div className="flex-1">
-              <div className="font-medium mb-1">{option.label}</div>
-              {option.description && (
-                <div className="text-sm text-muted-foreground">{option.description}</div>
-              )}
-            </div>
-          </Button>
-        </motion.div>
-      ))}
-    </div>
-  );
+      <RadioGroup value={String(value)} onValueChange={(val) => {
+        const option = question.options?.find(opt => String(opt.value) === val);
+        if (option) handleAnswer(option.value);
+      }}>
+        <div className="space-y-3">
+          {question.options?.map((option, index) => {
+            const isSelected = String(value) === String(option.value);
+            return (
+              <motion.div
+                key={option.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08, duration: 0.3 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className={`
+                  flex items-center p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 min-h-[64px] relative
+                  ${isSelected
+                    ? 'border-purple-400 bg-purple-50 shadow-md scale-[1.02]' 
+                    : 'border-purple-200 hover:border-purple-300 hover:bg-purple-25 hover:shadow-sm bg-white'
+                  }
+                `} onClick={() => handleAnswer(option.value)}>
+                  
+                  <RadioGroupItem
+                    value={String(option.value)}
+                    className="w-5 h-5 mr-4 flex-shrink-0 border-2 border-purple-300 data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600"
+                  />
+                  
+                  <div className={`mr-3 flex-shrink-0 transition-colors ${
+                    isSelected ? 'text-purple-600' : 'text-purple-400'
+                  }`}>
+                    {getOptionIcon(index)}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className={`font-medium leading-relaxed ${
+                      isSelected ? 'text-purple-800' : 'text-gray-800'
+                    }`}>
+                      {option.label}
+                    </div>
+                    {option.description && (
+                      <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                    )}
+                  </div>
+                  
+                  {isSelected && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="ml-2"
+                    >
+                      <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </RadioGroup>
+    );
   };
 
   const renderMultipleChoice = () => {
@@ -146,52 +190,65 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     
     return (
       <div className="space-y-3">
-        <div className="text-sm text-muted-foreground mb-3">
+        <div className="text-sm text-purple-600 mb-3 font-medium">
           {language === 'es' 
             ? `Puedes seleccionar múltiples opciones (${selectedCount} seleccionadas)`
             : `You can select multiple options (${selectedCount} selected)`
           }
         </div>
-        {question.options?.map((option) => {
+        {question.options?.map((option, index) => {
           const isSelected = currentValue && Array.isArray(currentValue) && currentValue.includes(option.value);
           return (
             <motion.div
               key={option.id}
-              whileHover={{ scale: 1.02 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08, duration: 0.3 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Button
-                variant={isSelected ? "default" : "outline"}
-                className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                  isSelected ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
-                }`}
-                onClick={() => {
-                  const newValues = isSelected
-                    ? currentValue.filter(v => v !== option.value)
-                    : [...currentValue, option.value];
-                  console.log('QuestionRenderer: Multiple choice updated', { 
-                    questionId: question.id, 
-                    option: option.value, 
-                    isSelected, 
-                    newValues 
-                  });
-                  handleAnswer(newValues);
-                }}
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                    isSelected ? 'bg-primary border-primary' : 'border-border'
-                  }`}>
-                    {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{option.label}</div>
-                    {option.description && (
-                      <div className="text-sm text-muted-foreground mt-1">{option.description}</div>
-                    )}
-                  </div>
+              <div className={`
+                flex items-center p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 min-h-[64px] relative
+                ${isSelected
+                  ? 'border-purple-400 bg-purple-50 shadow-md scale-[1.02]' 
+                  : 'border-purple-200 hover:border-purple-300 hover:bg-purple-25 hover:shadow-sm bg-white'
+                }
+              `} onClick={() => {
+                const newValues = isSelected
+                  ? currentValue.filter(v => v !== option.value)
+                  : [...currentValue, option.value];
+                console.log('QuestionRenderer: Multiple choice updated', { 
+                  questionId: question.id, 
+                  option: option.value, 
+                  isSelected, 
+                  newValues 
+                });
+                handleAnswer(newValues);
+              }}>
+                
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-4 flex-shrink-0 transition-colors ${
+                  isSelected ? 'bg-purple-600 border-purple-600' : 'border-purple-300 hover:border-purple-400'
+                }`}>
+                  {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
-              </Button>
+                
+                <div className={`mr-3 flex-shrink-0 transition-colors ${
+                  isSelected ? 'text-purple-600' : 'text-purple-400'
+                }`}>
+                  {getOptionIcon(index)}
+                </div>
+                
+                <div className="flex-1">
+                  <div className={`font-medium leading-relaxed ${
+                    isSelected ? 'text-purple-800' : 'text-gray-800'
+                  }`}>
+                    {option.label}
+                  </div>
+                  {option.description && (
+                    <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                  )}
+                </div>
+              </div>
             </motion.div>
           );
         })}
