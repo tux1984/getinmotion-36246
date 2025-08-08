@@ -40,13 +40,13 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-border/50"
+      className="bg-gradient-to-r from-purple-50 to-violet-50 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-200/50 shadow-lg"
     >
       {/* Agent Avatar and Identity */}
       <div className="flex items-center gap-4 mb-4">
         <div className="relative">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-primary-foreground" />
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-full flex items-center justify-center shadow-lg">
+            <Bot className="w-6 h-6 text-white" />
           </div>
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
@@ -69,12 +69,12 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           <span>{t.currentStep}: {currentBlock.title}</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="w-full bg-secondary/20 rounded-full h-2">
+        <div className="w-full bg-purple-100 rounded-full h-2">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full relative overflow-hidden"
+            className="bg-gradient-to-r from-purple-600 to-violet-600 h-2 rounded-full relative overflow-hidden shadow-sm"
           >
             <motion.div
               animate={{ x: ['-100%', '100%'] }}

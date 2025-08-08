@@ -91,7 +91,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="max-w-4xl mx-auto min-h-screen"
+      className="max-w-4xl mx-auto min-h-screen px-4 sm:px-6"
     >
       {/* Clean Agent Header */}
       <AgentHeader

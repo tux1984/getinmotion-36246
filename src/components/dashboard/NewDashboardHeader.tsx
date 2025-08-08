@@ -41,7 +41,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={onMaturityCalculatorClick}
-            className="group flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
+            className="group flex items-center gap-2 bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-violet-100 hover:border-purple-300 hover:text-purple-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
           >
             <Calculator className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
             <span className="hidden sm:inline font-medium">Maturity Calculator</span>
@@ -51,7 +51,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={handleAgentManagerClick}
-            className="group flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-pink-100 hover:border-purple-300 hover:text-purple-800 transition-all duration-200 hover:scale-105 hover:shadow-md rounded-xl"
+            className="group flex items-center gap-2 bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200 text-violet-700 hover:from-violet-100 hover:to-purple-100 hover:border-violet-300 hover:text-violet-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
           >
             {isOnAgentManager ? (
               <>
@@ -71,7 +71,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 hover:scale-105 rounded-xl"
+            className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-300 hover:scale-110 rounded-xl transform"
           >
             <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
             <span className="hidden sm:inline font-medium">Sign Out</span>
