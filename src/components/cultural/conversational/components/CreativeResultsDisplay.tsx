@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Sparkles, CheckCircle, ArrowRight, Star, Palette, Target, TrendingUp } from 'lucide-react';
+import { Trophy, Sparkles, CheckCircle, ArrowRight, Star, Palette, Target, TrendingUp, Zap, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserProfileData } from '../../types/wizardTypes';
 import { MaturityLevel, PersonalizedTask } from '../types/conversationalTypes';
@@ -68,17 +68,13 @@ export const CreativeResultsDisplay: React.FC<CreativeResultsDisplayProps> = ({
 
   const t = translations[language];
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     setIsCompleting(true);
-    
-    // Provide immediate feedback then navigate
+    // Immediate feedback and completion
     setTimeout(() => {
       setIsCompleted(true);
-      // Navigate immediately after visual feedback
-      setTimeout(() => {
-        onComplete();
-      }, 300);
-    }, 100);
+      onComplete();
+    }, 800);
   };
 
   const getBusinessIcon = () => {
@@ -106,55 +102,107 @@ export const CreativeResultsDisplay: React.FC<CreativeResultsDisplayProps> = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="max-w-4xl mx-auto p-6"
-    >
-      {/* Header with Achievement */}
-      <div className="text-center mb-8">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mb-6"
-        >
-          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary via-accent to-secondary rounded-full flex items-center justify-center shadow-lg">
-            <Trophy className="w-10 h-10 text-white" />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 relative overflow-hidden">
+      {/* Celebration Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: 20 }).map((_, i) => (
           <motion.div
+            key={i}
+            initial={{ y: -100, x: Math.random() * window.innerWidth, rotate: 0 }}
+            animate={{ 
+              y: window.innerHeight + 100, 
+              rotate: 360,
+              scale: [1, 1.2, 0.8, 1]
+            }}
+            transition={{ 
+              duration: 3 + Math.random() * 2, 
+              repeat: Infinity,
+              delay: Math.random() * 2
+            }}
+            className={`absolute w-4 h-4 ${
+              i % 3 === 0 ? 'bg-yellow-400' : 
+              i % 3 === 1 ? 'bg-orange-400' : 'bg-red-400'
+            } rounded-full shadow-lg`}
+          />
+        ))}
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10 max-w-4xl mx-auto p-6"
+      >
+        {/* Celebration Header */}
+        <div className="text-center mb-12">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+            className="mb-8"
+          >
+            {/* Achievement Badge */}
+            <div className="relative inline-block">
+              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
+                <Crown className="w-16 h-16 text-white" />
+              </div>
+              {/* Sparkle effects around badge */}
+              {Array.from({ length: 8 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1, 0] }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity,
+                    delay: i * 0.2
+                  }}
+                  className={`absolute w-3 h-3 bg-yellow-400 rounded-full`}
+                  style={{
+                    top: `${20 + 30 * Math.cos((i / 8) * 2 * Math.PI)}%`,
+                    left: `${50 + 30 * Math.sin((i / 8) * 2 * Math.PI)}%`,
+                  }}
+                />
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-6"
+            >
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-100 to-orange-100 px-6 py-3 rounded-full border-2 border-yellow-300 shadow-lg">
+                <Star className="w-6 h-6 text-yellow-600" />
+                <span className="text-xl font-bold text-yellow-800">
+                  {language === 'es' ? '¡Análisis Completado!' : 'Analysis Complete!'}
+                </span>
+                <Star className="w-6 h-6 text-yellow-600" />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 bg-clip-text text-transparent mb-4"
+          >
+            {language === 'es' ? '¡Felicitaciones!' : 'Congratulations!'}
+          </motion.h1>
+          
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center justify-center gap-2 mb-2"
+            transition={{ delay: 1 }}
+            className="text-xl text-gray-700 font-medium"
           >
-            <Star className="w-5 h-5 text-accent" />
-            <span className="text-accent font-medium">
-              {t.detectedAs}: {t.businessTypes[businessType]}
-            </span>
-            <Star className="w-5 h-5 text-accent" />
-          </motion.div>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-2"
-        >
-          {t.title}
-        </motion.h1>
-        
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-muted-foreground text-lg"
-        >
-          {t.subtitle}
-        </motion.p>
-      </div>
+            {language === 'es' 
+              ? 'Tu perfil creativo está listo para el crecimiento' 
+              : 'Your creative profile is ready for growth'
+            }
+          </motion.p>
+        </div>
 
       {/* Profile Summary */}
       <motion.div
@@ -303,43 +351,57 @@ export const CreativeResultsDisplay: React.FC<CreativeResultsDisplayProps> = ({
         </motion.div>
       )}
 
-      {/* Action Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-        className="text-center"
-      >
-        <Button
-          onClick={handleComplete}
-          disabled={isCompleting || isCompleted}
-          size="lg"
-          className="bg-gradient-to-r from-primary via-accent to-secondary hover:from-primary/90 hover:via-accent/90 hover:to-secondary/90 text-white px-8 py-6 text-lg font-medium shadow-lg"
+        {/* Celebration Action Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2 }}
+          className="text-center"
         >
-          {isCompleted ? (
-            <>
-              <CheckCircle className="w-5 h-5 mr-2" />
-              {t.completed}
-            </>
-          ) : isCompleting ? (
-            <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="mr-2"
-              >
-                <Sparkles className="w-5 h-5" />
-              </motion.div>
-              {t.completing}
-            </>
-          ) : (
-            <>
-              {t.startJourney}
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </>
-          )}
-        </Button>
+          <Button
+            onClick={handleComplete}
+            disabled={isCompleting || isCompleted}
+            size="lg"
+            className="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 text-white px-12 py-6 text-xl font-bold shadow-2xl border-4 border-white transform hover:scale-105 transition-all duration-300"
+          >
+            {isCompleted ? (
+              <>
+                <CheckCircle className="w-6 h-6 mr-3" />
+                {language === 'es' ? '¡Listo!' : 'Ready!'}
+              </>
+            ) : isCompleting ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="mr-3"
+                >
+                  <Zap className="w-6 h-6" />
+                </motion.div>
+                {language === 'es' ? 'Configurando...' : 'Setting up...'}
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-6 h-6 mr-3" />
+                {language === 'es' ? 'Comenzar Mi Aventura Creativa' : 'Start My Creative Adventure'}
+                <ArrowRight className="w-6 h-6 ml-3" />
+              </>
+            )}
+          </Button>
+          
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4 }}
+            className="mt-4 text-gray-600"
+          >
+            {language === 'es' 
+              ? 'Tu dashboard personalizado te espera' 
+              : 'Your personalized dashboard awaits'
+            }
+          </motion.p>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };

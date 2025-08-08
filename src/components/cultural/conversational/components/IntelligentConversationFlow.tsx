@@ -143,8 +143,23 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
 
   const isQuestionAnswered = (question: any) => {
     const fieldValue = profileData[question.fieldName];
-    return fieldValue !== undefined && fieldValue !== null && 
-           (typeof fieldValue !== 'string' || fieldValue.trim() !== '');
+    
+    // Handle different question types
+    if (question.type === 'multiple-choice' && Array.isArray(fieldValue)) {
+      return fieldValue.length > 0;
+    }
+    
+    if (question.type === 'slider' || question.type === 'rating') {
+      return fieldValue !== undefined && fieldValue !== null && fieldValue !== 0;
+    }
+    
+    if (question.type === 'text' || question.type === 'textarea') {
+      return fieldValue !== undefined && fieldValue !== null && 
+             typeof fieldValue === 'string' && fieldValue.trim() !== '';
+    }
+    
+    // For single-choice questions
+    return fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
   };
 
 
@@ -285,14 +300,21 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
             </div>
           </div>
 
-          <Button
-            onClick={handleNext}
-            disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion)}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-          >
-            {isLastQuestion ? t.lastQuestion : t.next}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            {currentQuestion.required && !isQuestionAnswered(currentQuestion) && (
+              <span className="text-xs text-destructive font-medium">
+                {language === 'es' ? 'Respuesta requerida' : 'Answer required'}
+              </span>
+            )}
+            <Button
+              onClick={handleNext}
+              disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion)}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLastQuestion ? t.lastQuestion : t.next}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
