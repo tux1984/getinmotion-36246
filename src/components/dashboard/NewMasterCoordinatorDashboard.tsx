@@ -217,18 +217,19 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     try {
       setStartingTask(task.id);
       
-      const success = await startTaskJourney(task.id);
-      if (success) {
-        toast({
-          title: language === 'es' ? "¡Tarea Iniciada!" : "Task Started!",
-          description: language === 'es' 
-            ? "Te redirigimos a la ejecución paso a paso."
-            : "Redirecting you to step-by-step execution.",
-        });
-        navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
-      } else {
-        throw new Error('Failed to start task journey');
-      }
+      // Use the same flow as TaskManager: startTaskDevelopment + navigation
+      await startTaskDevelopment(task.id);
+      
+      toast({
+        title: language === 'es' ? "¡Tarea Iniciada!" : "Task Started!",
+        description: language === 'es' 
+          ? "Te redirigimos al agente para continuar."
+          : "Redirecting you to the agent to continue.",
+      });
+      
+      // Navigate to agent chat with taskId
+      navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
+      
     } catch (error) {
       console.error('❌ Error starting task:', error);
       toast({
