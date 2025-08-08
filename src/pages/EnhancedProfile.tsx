@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
+import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +36,8 @@ const EnhancedProfile: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { businessProfile, loading } = useUserBusinessProfile();
+  const { currentScores } = useOptimizedMaturityScores();
+  const { coordinatorMessage, deliverables } = useMasterCoordinator();
   const [selectedTab, setSelectedTab] = useState('overview');
 
   if (loading) {
@@ -232,8 +236,8 @@ const EnhancedProfile: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-sm text-muted-foreground">{t.maturityLevel}</div>
-                  <div className={`text-3xl font-bold ${getMaturityColor(businessProfile.maturityLevel)}`}>
-                    {businessProfile.maturityLevel}/5
+                  <div className={`text-3xl font-bold ${getMaturityColor(currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel)}`}>
+                    {currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel}/5
                   </div>
                 </div>
               </div>
@@ -258,6 +262,61 @@ const EnhancedProfile: React.FC = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Master Coordinator Integration */}
+        {(coordinatorMessage || (deliverables && deliverables.length > 0)) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {coordinatorMessage && (
+                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Brain className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-2">
+                          {language === ('es' as string) ? 'Análisis del Coordinador Maestro' : 'Master Coordinator Analysis'}
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {typeof coordinatorMessage === 'string' ? coordinatorMessage : 'Analyzing your business profile...'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {deliverables && deliverables.length > 0 && (
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-green-800 mb-2">
+                          {language === ('es' as string) ? 'Entregables Activos' : 'Active Deliverables'}
+                        </h3>
+                        <p className="text-sm text-green-600">
+                          {language === ('es' as string)
+                            ? `${deliverables.length} entregables en progreso para tu negocio`
+                            : `${deliverables.length} deliverables in progress for your business`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Tabs Navigation */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
@@ -445,9 +504,11 @@ const EnhancedProfile: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">{t.maturityLevel}</span>
-                      <span className="text-sm text-muted-foreground">{businessProfile.maturityLevel}/5</span>
+                      <span className="text-sm text-muted-foreground">
+                        {currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel}/5
+                      </span>
                     </div>
-                    <Progress value={(businessProfile.maturityLevel / 5) * 100} className="h-2" />
+                    <Progress value={((currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel) / 5) * 100} className="h-2" />
                   </div>
                 </CardContent>
               </Card>

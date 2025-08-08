@@ -207,10 +207,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     }
   };
 
-  const handleEditProfile = () => {
-    // Navigate to profile editing
-    navigate('/profile');
-  };
 
 
   const handleTaskStart = async (task: AgentTask) => {
@@ -227,8 +223,8 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           : "Redirecting you to the agent to continue.",
       });
       
-      // Navigate to agent chat with taskId
-      navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
+      // Navigate to task execution interface instead of agent directly
+      navigate(`/dashboard/tasks`, { state: { selectedTaskId: task.id } });
       
     } catch (error) {
       console.error('❌ Error starting task:', error);
@@ -333,7 +329,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     try {
       await startTaskDevelopment(taskId);
       // Navigate to agent chat after starting task
-      navigate(`/dashboard/agent/${agentId}?taskId=${taskId}`);
+      navigate(`/dashboard/tasks`, { state: { selectedTaskId: taskId } });
     } catch (error) {
       console.error('❌ Error starting task:', error);
     }
@@ -377,6 +373,10 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     if (task) {
       await handleTaskStart(task);
     }
+  };
+
+  const handleEditProfile = () => {
+    navigate('/profile');
   };
 
   const recommendedTasks = getRecommendedTasks();
@@ -522,7 +522,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 }}
                 onChatWithAgent={(task) => {
                   console.log('💬 Opening chat with agent through coordinator:', task.agent_id);
-                  navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
+                  navigate(`/dashboard/tasks`, { state: { selectedTaskId: task.id } });
                 }}
                 onCompleteTask={async (task) => {
                   console.log('✅ Completing task through master coordinator:', task.id);
@@ -558,6 +558,49 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                   onMasterAgentChat={handleMasterAgentChat}
                   activeTasks={activeTasksCount}
                 />
+              </motion.div>
+
+              {/* Profile & Settings Panel */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Card className="bg-gradient-to-br from-card to-card/80 border-primary/20">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <User className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {language === 'es' ? 'Mi Perfil' : 'My Profile'}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {language === 'es' ? 'Gestiona tu información' : 'Manage your information'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button
+                      onClick={handleEditProfile}
+                      className="w-full bg-primary/10 hover:bg-primary/20 text-primary border-primary/30"
+                      variant="outline"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      {language === 'es' ? 'Ver Mi Perfil' : 'View My Profile'}
+                    </Button>
+                    <Button
+                      onClick={handleRecalculateMaturity}
+                      className="w-full bg-purple-50 hover:bg-purple-100 text-purple-600 border-purple-200"
+                      variant="outline"
+                    >
+                      <Calculator className="w-4 h-4 mr-2" />
+                      {language === 'es' ? 'Calculadora de Madurez' : 'Maturity Calculator'}
+                    </Button>
+                  </CardContent>
+                </Card>
               </motion.div>
 
             </div>

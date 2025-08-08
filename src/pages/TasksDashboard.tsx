@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -15,12 +15,23 @@ import { SEO_CONFIG } from '@/config/seo';
 
 const TasksDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { t } = useTranslations();
   const language = 'en'; // Fixed to English only
   const { tasks } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, remainingSlots } = useTaskLimits(tasks);
   const [selectedTask, setSelectedTask] = useState<AgentTask | null>(null);
+
+  // Handle navigation state for pre-selected task
+  useEffect(() => {
+    if (location.state?.selectedTaskId && tasks.length > 0) {
+      const taskFromState = tasks.find(t => t.id === location.state.selectedTaskId);
+      if (taskFromState) {
+        setSelectedTask(taskFromState);
+      }
+    }
+  }, [location.state, tasks]);
 
   const seoData = SEO_CONFIG.pages.dashboard[language];
 
