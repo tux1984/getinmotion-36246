@@ -83,7 +83,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
           <Button
             variant={value === option.value ? "default" : "outline"}
             className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-              value === option.value ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
+              value === option.value ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
             }`}
             onClick={() => handleAnswer(option.value)}
           >
@@ -101,16 +101,16 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   };
 
   const renderMultipleChoice = () => {
-    // Ensure we always have an array, initializing with empty array if needed
+    // Initialize value as empty array if needed (without useEffect to avoid loops)
     const currentValue = Array.isArray(value) ? value : [];
     
-    // Initialize empty array if value is undefined/null
-    React.useEffect(() => {
-      if (!value || !Array.isArray(value)) {
+    // Direct initialization without useEffect to prevent infinite loops
+    React.useMemo(() => {
+      if (!Array.isArray(value) && value === undefined) {
         console.log('QuestionRenderer: Initializing empty array for multiple choice', { questionId: question.id });
         handleAnswer([]);
       }
-    }, [value, handleAnswer, question.id]);
+    }, [question.id]); // Only depend on question.id, not value
     
     const selectedCount = currentValue.length;
     
@@ -161,7 +161,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
               <Button
                 variant={isSelected ? "default" : "outline"}
                 className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                  isSelected ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
+                  isSelected ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
                 }`}
                 onClick={() => {
                   const newValues = isSelected
@@ -302,23 +302,34 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
     }, [value, defaultValue, handleAnswer, question.id]);
 
     return (
-      <div className="space-y-4 relative z-50">
-        <div className="px-6 py-8 touch-manipulation pointer-events-auto bg-background/95 rounded-lg border">
-          <Slider
-            value={[currentValue]}
-            onValueChange={(newValue) => {
-              console.log('QuestionRenderer: Slider changed', { 
-                questionId: question.id, 
-                oldValue: currentValue, 
-                newValue: newValue[0] 
-              });
-              handleAnswer(newValue[0]);
+      <div className="space-y-6 relative transform-gpu">
+        <div className="p-8 rounded-xl bg-gradient-to-br from-background/95 to-accent/5 border-2 border-accent/20 shadow-lg transform-gpu">
+          <div 
+            className="w-full" 
+            style={{ 
+              touchAction: 'manipulation',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none'
             }}
-            min={minValue}
-            max={maxValue}
-            step={question.step || 1}
-            className="w-full relative z-50 pointer-events-auto cursor-pointer"
-          />
+          >
+            <Slider
+              value={[currentValue]}
+              onValueChange={(newValue) => {
+                console.log('QuestionRenderer: Slider changed', { 
+                  questionId: question.id, 
+                  oldValue: currentValue, 
+                  newValue: newValue[0] 
+                });
+                handleAnswer(newValue[0]);
+              }}
+              min={minValue}
+              max={maxValue}
+              step={question.step || 1}
+              className="w-full cursor-pointer [&>*]:pointer-events-auto [&>*]:touch-manipulation [&_*]:touch-manipulation [&_*]:!touch-manipulation"
+              style={{ touchAction: 'manipulation !important' }}
+            />
+          </div>
         </div>
         <div className="flex justify-between text-sm text-muted-foreground px-2">
           <span>{minValue}</span>
@@ -342,7 +353,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
         <Button
           variant={value === true ? "default" : "outline"}
           className={`w-full h-16 text-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-            value === true ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
+            value === true ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
           }`}
           onClick={() => handleAnswer(true)}
         >
@@ -354,7 +365,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
         <Button
           variant={value === false ? "default" : "outline"}
           className={`w-full h-16 text-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-            value === false ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
+            value === false ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
           }`}
           onClick={() => handleAnswer(false)}
         >
@@ -376,7 +387,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
           <Button
             variant={value === option.value ? "default" : "outline"}
             className={`w-full p-4 h-auto text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-              value === option.value ? 'ring-3 ring-purple-500 bg-purple-500 text-white shadow-lg' : 'hover:bg-purple-50'
+              value === option.value ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
             }`}
             onClick={() => handleAnswer(option.value)}
           >
