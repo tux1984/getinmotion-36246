@@ -11,6 +11,7 @@ import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
 import RecommendedTasksSection from './RecommendedTasksSection';
 import QuickActionsPanel from './QuickActionsPanel';
+import { TopPriorityTasksSection } from './TopPriorityTasksSection';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -490,6 +491,30 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
             {/* Left Column: Recommendations */}
             <div className="lg:col-span-2 space-y-6">
               
+              {/* Top Priority Tasks Section */}
+              <TopPriorityTasksSection
+                tasks={tasks}
+                language={language}
+                onStartDevelopment={async (task) => {
+                  setStartingTask(task.id);
+                  try {
+                    await startTaskDevelopment(task.id);
+                    navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
+                  } catch (error) {
+                    console.error('Error starting task:', error);
+                  } finally {
+                    setStartingTask(null);
+                  }
+                }}
+                onChatWithAgent={(task) => {
+                  navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
+                }}
+                onCompleteTask={async (task) => {
+                  await completeTaskQuickly(task.id);
+                }}
+                startingTask={startingTask}
+              />
+
               {/* Compact Priority Recommendations */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
