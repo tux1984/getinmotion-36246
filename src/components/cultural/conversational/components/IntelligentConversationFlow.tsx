@@ -247,6 +247,7 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
             {/* Question Renderer */}
             <QuestionRenderer
               question={currentQuestion}
+              value={profileData[currentQuestion.fieldName]}
               onAnswer={handleQuestionAnswer}
               language={language}
             />

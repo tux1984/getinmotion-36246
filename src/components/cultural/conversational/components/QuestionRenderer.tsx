@@ -80,11 +80,11 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button
-            variant={value === option.value ? "default" : "outline"}
-            className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-              value === option.value ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
-            }`}
+            <Button
+              variant={String(value) === String(option.value) ? "default" : "outline"}
+              className={`w-full justify-start text-left p-4 h-auto transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                String(value) === String(option.value) ? 'ring-2 ring-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]' : 'hover:bg-accent/50 border-2 border-transparent hover:border-accent/30'
+              }`}
             onClick={() => handleAnswer(option.value)}
           >
             <div className="flex-1">
@@ -101,16 +101,18 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
   };
 
   const renderMultipleChoice = () => {
-    // Initialize value as empty array if needed (without useEffect to avoid loops)
+    // Initialize value as empty array if needed
     const currentValue = Array.isArray(value) ? value : [];
+    const [isInitialized, setIsInitialized] = useState(false);
     
-    // Direct initialization without useEffect to prevent infinite loops
-    React.useMemo(() => {
-      if (!Array.isArray(value) && value === undefined) {
+    // Initialize empty array on first render if needed
+    useEffect(() => {
+      if (!isInitialized && (!value || !Array.isArray(value))) {
         console.log('QuestionRenderer: Initializing empty array for multiple choice', { questionId: question.id });
         handleAnswer([]);
+        setIsInitialized(true);
       }
-    }, [question.id]); // Only depend on question.id, not value
+    }, [isInitialized, value, handleAnswer, question.id]);
     
     const selectedCount = currentValue.length;
     
@@ -151,7 +153,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
           }
         </div>
         {question.options?.map((option) => {
-          const isSelected = currentValue.includes(option.value);
+          const isSelected = currentValue && Array.isArray(currentValue) && currentValue.includes(option.value);
           return (
             <motion.div
               key={option.id}
@@ -305,12 +307,13 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
       <div className="space-y-6 relative transform-gpu">
         <div className="p-8 rounded-xl bg-gradient-to-br from-background/95 to-accent/5 border-2 border-accent/20 shadow-lg transform-gpu">
           <div 
-            className="w-full" 
+            className="w-full relative isolate"
             style={{ 
               touchAction: 'manipulation',
               WebkitTouchCallout: 'none',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              transform: 'translateZ(0)'
             }}
           >
             <Slider
@@ -326,8 +329,11 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = memo(({
               min={minValue}
               max={maxValue}
               step={question.step || 1}
-              className="w-full cursor-pointer [&>*]:pointer-events-auto [&>*]:touch-manipulation [&_*]:touch-manipulation [&_*]:!touch-manipulation"
-              style={{ touchAction: 'manipulation !important' }}
+              className="w-full !touch-manipulation !cursor-pointer [&>*]:!touch-manipulation [&>*]:!pointer-events-auto [&_*]:!touch-manipulation [&_*]:!cursor-pointer override-touch-none"
+              style={{ 
+                touchAction: 'manipulation !important',
+                cursor: 'pointer !important'
+              }}
             />
           </div>
         </div>
