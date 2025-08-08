@@ -71,13 +71,14 @@ export const CreativeResultsDisplay: React.FC<CreativeResultsDisplayProps> = ({
   const handleComplete = async () => {
     setIsCompleting(true);
     
-    // Simulate setting up dashboard
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsCompleted(true);
+    // Provide immediate feedback then navigate
     setTimeout(() => {
-      onComplete();
-    }, 1000);
+      setIsCompleted(true);
+      // Navigate immediately after visual feedback
+      setTimeout(() => {
+        onComplete();
+      }, 300);
+    }, 100);
   };
 
   const getBusinessIcon = () => {
