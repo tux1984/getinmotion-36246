@@ -108,38 +108,49 @@ export const getEnhancedConversationBlocks = (language: 'en' | 'es'): Conversati
         strategicContext: "Sales history and pricing understanding are crucial indicators of business maturity and help me prioritize the most important next steps.",
         questions: [
           {
-            id: 'has_sold',
-            question: 'Have you ever sold your creative work?',
-            type: 'yes-no' as const,
-            fieldName: 'hasSold',
-            explanation: 'This is a huge milestone that changes everything about your growth strategy.',
-            required: true
+            id: 'sales_experience',
+            question: 'What best describes your sales experience?',
+            type: 'single-choice' as const,
+            fieldName: 'salesExperience',
+            explanation: 'Understanding your sales history helps me recommend the right growth strategy.',
+            required: true,
+            options: [
+              { id: 'never_sold', label: 'I\'ve never sold my creative work', value: 'never_sold' },
+              { id: 'few_sales', label: 'I\'ve made a few sales but it\'s inconsistent', value: 'few_sales' },
+              { id: 'regular_sales', label: 'I make regular sales but want to grow', value: 'regular_sales' },
+              { id: 'established_sales', label: 'I have consistent sales and revenue', value: 'established_sales' }
+            ]
+          },
+          {
+            id: 'income_goal',
+            question: 'What\'s your monthly income goal from your creative work?',
+            type: 'single-choice' as const,
+            fieldName: 'incomeGoal',
+            explanation: 'Your income goal helps me understand the scale of business strategy you need.',
+            required: true,
+            options: [
+              { id: 'hobby', label: 'Just cover materials ($0-200/month)', value: 'hobby' },
+              { id: 'side', label: 'Meaningful side income ($200-1000/month)', value: 'side' },
+              { id: 'partial', label: 'Partial living income ($1000-3000/month)', value: 'partial' },
+              { id: 'full', label: 'Full living income ($3000+/month)', value: 'full' },
+              { id: 'scale', label: 'Scale to hire others and grow big', value: 'scale' }
+            ]
           },
           {
             id: 'pricing_confidence',
-            question: 'How confident do you feel about pricing your work?',
+            question: 'How confident do you feel about pricing your work appropriately?',
             type: 'slider' as const,
             fieldName: 'pricingConfidence',
             min: 1,
             max: 5,
             step: 1,
             explanation: 'Pricing confidence affects your ability to earn what your work is worth.',
-            required: true
-          },
-          {
-            id: 'income_goal',
-            question: 'What\'s your income goal from your creative work?',
-            type: 'single-choice' as const,
-            fieldName: 'incomeGoal',
-            explanation: 'Your income goal helps me understand the scale of business strategy you need.',
             required: true,
-            options: [
-              { id: 'hobby', label: 'Just cover materials (hobby income)', value: 'hobby' },
-              { id: 'side', label: 'Meaningful side income ($500-2000/month)', value: 'side' },
-              { id: 'partial', label: 'Partial living income ($2000-5000/month)', value: 'partial' },
-              { id: 'full', label: 'Full living income ($5000+/month)', value: 'full' },
-              { id: 'scale', label: 'Scale to hire others and grow big', value: 'scale' }
-            ]
+            showIf: {
+              field: 'salesExperience',
+              operator: 'not_equals',
+              value: 'never_sold'
+            }
           }
         ]
       },
@@ -326,38 +337,49 @@ export const getEnhancedConversationBlocks = (language: 'en' | 'es'): Conversati
         strategicContext: "El historial de ventas y entendimiento de precios son indicadores cruciales de madurez empresarial y me ayudan a priorizar los siguientes pasos más importantes.",
         questions: [
           {
-            id: 'has_sold',
-            question: '¿Alguna vez has vendido tu trabajo creativo?',
-            type: 'yes-no' as const,
-            fieldName: 'hasSold',
-            explanation: 'Este es un hito enorme que cambia todo sobre tu estrategia de crecimiento.',
-            required: true
+            id: 'sales_experience',
+            question: '¿Qué describe mejor tu experiencia en ventas?',
+            type: 'single-choice' as const,
+            fieldName: 'salesExperience',
+            explanation: 'Entender tu historial de ventas me ayuda a recomendar la estrategia de crecimiento correcta.',
+            required: true,
+            options: [
+              { id: 'never_sold', label: 'Nunca he vendido mi trabajo creativo', value: 'never_sold' },
+              { id: 'few_sales', label: 'He hecho algunas ventas pero es inconsistente', value: 'few_sales' },
+              { id: 'regular_sales', label: 'Hago ventas regulares pero quiero crecer', value: 'regular_sales' },
+              { id: 'established_sales', label: 'Tengo ventas e ingresos consistentes', value: 'established_sales' }
+            ]
+          },
+          {
+            id: 'income_goal',
+            question: '¿Cuál es tu meta de ingresos mensuales de tu trabajo creativo?',
+            type: 'single-choice' as const,
+            fieldName: 'incomeGoal',
+            explanation: 'Tu meta de ingresos me ayuda a entender la escala de estrategia de negocio que necesitas.',
+            required: true,
+            options: [
+              { id: 'hobby', label: 'Solo cubrir materiales ($0-200/mes)', value: 'hobby' },
+              { id: 'side', label: 'Ingreso secundario significativo ($200-1000/mes)', value: 'side' },
+              { id: 'partial', label: 'Ingreso parcial para vivir ($1000-3000/mes)', value: 'partial' },
+              { id: 'full', label: 'Ingreso completo para vivir ($3000+/mes)', value: 'full' },
+              { id: 'scale', label: 'Escalar para contratar otros y crecer grande', value: 'scale' }
+            ]
           },
           {
             id: 'pricing_confidence',
-            question: '¿Qué tan seguro te sientes sobre poner precios a tu trabajo?',
+            question: '¿Qué tan seguro te sientes al poner precios apropiados a tu trabajo?',
             type: 'slider' as const,
             fieldName: 'pricingConfidence',
             min: 1,
             max: 5,
             step: 1,
             explanation: 'La confianza en precios afecta tu capacidad de ganar lo que vale tu trabajo.',
-            required: true
-          },
-          {
-            id: 'income_goal',
-            question: '¿Cuál es tu meta de ingresos de tu trabajo creativo?',
-            type: 'single-choice' as const,
-            fieldName: 'incomeGoal',
-            explanation: 'Tu meta de ingresos me ayuda a entender la escala de estrategia empresarial que necesitas.',
             required: true,
-            options: [
-              { id: 'hobby', label: 'Solo cubrir materiales (ingresos de hobby)', value: 'hobby' },
-              { id: 'side', label: 'Ingresos adicionales significativos ($500-2000/mes)', value: 'side' },
-              { id: 'partial', label: 'Ingresos parciales para vivir ($2000-5000/mes)', value: 'partial' },
-              { id: 'full', label: 'Ingresos completos para vivir ($5000+/mes)', value: 'full' },
-              { id: 'scale', label: 'Escalar para contratar otros y crecer grande', value: 'scale' }
-            ]
+            showIf: {
+              field: 'salesExperience',
+              operator: 'not_equals',
+              value: 'never_sold'
+            }
           }
         ]
       },

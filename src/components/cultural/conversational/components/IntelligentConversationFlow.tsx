@@ -129,7 +129,21 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     if (isLastQuestion) {
       onNext();
     } else {
-      setCurrentQuestionIndex(prev => prev + 1);
+      // Check if next question should be shown based on conditional logic
+      let nextIndex = currentQuestionIndex + 1;
+      while (nextIndex < block.questions.length) {
+        const nextQuestion = block.questions[nextIndex];
+        if (evaluateConditionalLogic(nextQuestion, null, profileData)) {
+          break;
+        }
+        nextIndex++;
+      }
+      
+      if (nextIndex >= block.questions.length) {
+        onNext(); // No more valid questions, go to next section
+      } else {
+        setCurrentQuestionIndex(nextIndex);
+      }
     }
   };
 
@@ -150,12 +164,16 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     }
     
     if (question.type === 'slider' || question.type === 'rating') {
-      return fieldValue !== undefined && fieldValue !== null && fieldValue !== 0;
+      return fieldValue !== undefined && fieldValue !== null && fieldValue > 0;
     }
     
-    if (question.type === 'text' || question.type === 'textarea') {
+    if (question.type === 'text-input' || question.type === 'text' || question.type === 'textarea') {
       return fieldValue !== undefined && fieldValue !== null && 
              typeof fieldValue === 'string' && fieldValue.trim() !== '';
+    }
+    
+    if (question.type === 'yes-no') {
+      return fieldValue !== undefined && fieldValue !== null;
     }
     
     // For single-choice questions
