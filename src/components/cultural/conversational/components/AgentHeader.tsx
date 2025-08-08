@@ -37,71 +37,74 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
 
   const t = translations[language];
 
-  // Dynamic styling based on conversation block
+  // Debug current block
+  console.log('Current block ID:', currentBlock.id);
+
+  // Dynamic styling based on conversation block - SIMPLIFIED GRADIENTS
   const getSectionStyling = (blockId: string) => {
     switch (blockId) {
       case 'welcome':
         return {
-          gradient: 'from-pink-100 via-rose-100 to-pink-100',
-          border: 'border-pink-300/60',
+          gradient: 'bg-gradient-to-r from-pink-400 to-rose-400',
+          border: 'border-pink-300',
           icon: Heart,
-          iconColor: 'text-pink-600',
-          textColor: 'from-pink-800 to-rose-800',
-          accentGradient: 'from-pink-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-pink-500/20'
         };
       case 'businessType':
         return {
-          gradient: 'from-blue-100 via-indigo-100 to-blue-100',
-          border: 'border-blue-300/60',
+          gradient: 'bg-gradient-to-r from-blue-400 to-indigo-400',
+          border: 'border-blue-300',
           icon: Building,
-          iconColor: 'text-blue-600',
-          textColor: 'from-blue-800 to-indigo-800',
-          accentGradient: 'from-blue-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-blue-500/20'
         };
       case 'currentSituation':
         return {
-          gradient: 'from-green-100 via-emerald-100 to-green-100',
-          border: 'border-green-300/60',
+          gradient: 'bg-gradient-to-r from-green-400 to-emerald-400',
+          border: 'border-green-300',
           icon: TrendingUp,
-          iconColor: 'text-green-600',
-          textColor: 'from-green-800 to-emerald-800',
-          accentGradient: 'from-green-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-green-500/20'
         };
       case 'salesReality':
         return {
-          gradient: 'from-orange-100 via-amber-100 to-orange-100',
-          border: 'border-orange-300/60',
+          gradient: 'bg-gradient-to-r from-orange-400 to-amber-400',
+          border: 'border-orange-300',
           icon: DollarSign,
-          iconColor: 'text-orange-600',
-          textColor: 'from-orange-800 to-amber-800',
-          accentGradient: 'from-orange-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-orange-500/20'
         };
       case 'currentChallenges':
         return {
-          gradient: 'from-red-100 via-rose-100 to-red-100',
-          border: 'border-red-300/60',
+          gradient: 'bg-gradient-to-r from-red-400 to-rose-400',
+          border: 'border-red-300',
           icon: AlertTriangle,
-          iconColor: 'text-red-600',
-          textColor: 'from-red-800 to-rose-800',
-          accentGradient: 'from-red-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-red-500/20'
         };
       case 'vision':
         return {
-          gradient: 'from-purple-100 via-violet-100 to-purple-100',
-          border: 'border-purple-300/60',
+          gradient: 'bg-gradient-to-r from-purple-400 to-violet-400',
+          border: 'border-purple-300',
           icon: Target,
-          iconColor: 'text-purple-600',
-          textColor: 'from-purple-800 to-violet-800',
-          accentGradient: 'from-purple-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-purple-500/20'
         };
       default:
         return {
-          gradient: 'from-gray-100 via-slate-100 to-gray-100',
-          border: 'border-gray-300/60',
+          gradient: 'bg-gradient-to-r from-gray-400 to-slate-400',
+          border: 'border-gray-300',
           icon: Lightbulb,
-          iconColor: 'text-gray-600',
-          textColor: 'from-gray-800 to-slate-800',
-          accentGradient: 'from-gray-200/30'
+          iconColor: 'text-white',
+          textColor: 'text-white',
+          accentGradient: 'bg-gray-500/20'
         };
     }
   };
