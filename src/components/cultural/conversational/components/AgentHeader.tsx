@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Sparkles, CheckCircle, Star, Zap, Target, Palette, Users, TrendingUp, Heart, Lightbulb, Building } from 'lucide-react';
+import { Bot, Sparkles, CheckCircle, Star, Zap, Target, Palette, Users, TrendingUp, Heart, Lightbulb, Building, DollarSign, AlertTriangle } from 'lucide-react';
 import { ConversationBlock } from '../types/conversationalTypes';
 
 interface AgentHeaderProps {
@@ -38,7 +38,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   // Dynamic styling based on conversation block
   const getSectionStyling = (blockId: string) => {
     switch (blockId) {
-      case 'creative_motivation':
+      case 'welcome':
         return {
           gradient: 'from-pink-100 via-rose-100 to-pink-100',
           border: 'border-pink-300/60',
@@ -47,7 +47,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           textColor: 'from-pink-800 to-rose-800',
           accentGradient: 'from-pink-200/30'
         };
-      case 'business_foundations':
+      case 'businessType':
         return {
           gradient: 'from-blue-100 via-indigo-100 to-blue-100',
           border: 'border-blue-300/60',
@@ -56,7 +56,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           textColor: 'from-blue-800 to-indigo-800',
           accentGradient: 'from-blue-200/30'
         };
-      case 'growth_strategy':
+      case 'currentSituation':
         return {
           gradient: 'from-green-100 via-emerald-100 to-green-100',
           border: 'border-green-300/60',
@@ -65,32 +65,41 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           textColor: 'from-green-800 to-emerald-800',
           accentGradient: 'from-green-200/30'
         };
-      case 'creative_process':
+      case 'salesReality':
         return {
           gradient: 'from-orange-100 via-amber-100 to-orange-100',
           border: 'border-orange-300/60',
-          icon: Palette,
+          icon: DollarSign,
           iconColor: 'text-orange-600',
           textColor: 'from-orange-800 to-amber-800',
           accentGradient: 'from-orange-200/30'
         };
-      case 'market_connection':
+      case 'currentChallenges':
         return {
-          gradient: 'from-cyan-100 via-teal-100 to-cyan-100',
-          border: 'border-cyan-300/60',
-          icon: Users,
-          iconColor: 'text-cyan-600',
-          textColor: 'from-cyan-800 to-teal-800',
-          accentGradient: 'from-cyan-200/30'
+          gradient: 'from-red-100 via-rose-100 to-red-100',
+          border: 'border-red-300/60',
+          icon: AlertTriangle,
+          iconColor: 'text-red-600',
+          textColor: 'from-red-800 to-rose-800',
+          accentGradient: 'from-red-200/30'
         };
-      default:
+      case 'vision':
         return {
           gradient: 'from-purple-100 via-violet-100 to-purple-100',
           border: 'border-purple-300/60',
-          icon: Lightbulb,
+          icon: Target,
           iconColor: 'text-purple-600',
           textColor: 'from-purple-800 to-violet-800',
           accentGradient: 'from-purple-200/30'
+        };
+      default:
+        return {
+          gradient: 'from-gray-100 via-slate-100 to-gray-100',
+          border: 'border-gray-300/60',
+          icon: Lightbulb,
+          iconColor: 'text-gray-600',
+          textColor: 'from-gray-800 to-slate-800',
+          accentGradient: 'from-gray-200/30'
         };
     }
   };
