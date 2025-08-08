@@ -171,7 +171,7 @@ export const TopPriorityTasksSection: React.FC<TopPriorityTasksSectionProps> = (
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {priorityTasks.map((task, index) => {
           const mainAction = getMainAction(task);
           const isStarting = startingTask === task.id;

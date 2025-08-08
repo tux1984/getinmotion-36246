@@ -496,21 +496,16 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 tasks={tasks}
                 language={language}
                 onStartDevelopment={async (task) => {
-                  setStartingTask(task.id);
-                  try {
-                    await startTaskDevelopment(task.id);
-                    navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
-                  } catch (error) {
-                    console.error('Error starting task:', error);
-                  } finally {
-                    setStartingTask(null);
-                  }
+                  console.log('🚀 Starting task through master coordinator:', task.id);
+                  await handleTaskStart(task.id);
                 }}
                 onChatWithAgent={(task) => {
+                  console.log('💬 Opening chat with agent through coordinator:', task.agent_id);
                   navigate(`/dashboard/agent/${task.agent_id}?taskId=${task.id}`);
                 }}
                 onCompleteTask={async (task) => {
-                  await completeTaskQuickly(task.id);
+                  console.log('✅ Completing task through master coordinator:', task.id);
+                  await handleCompleteTask(task.id);
                 }}
                 startingTask={startingTask}
               />
