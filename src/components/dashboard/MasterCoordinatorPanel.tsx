@@ -126,6 +126,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
           build_brand: 'Construir marca',
           expand_market: 'Expandir mercado',
           reduce_costs: 'Reducir costos',
+          improve_efficiency: 'Mejorar eficiencia',
           improve_ux: 'Mejorar experiencia',
           launch_mvp: 'Lanzar MVP'
         }
@@ -136,6 +137,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
           build_brand: 'Build brand',
           expand_market: 'Expand market',
           reduce_costs: 'Reduce costs',
+          improve_efficiency: 'Improve efficiency',
           improve_ux: 'Improve UX',
           launch_mvp: 'Launch MVP'
         };
@@ -365,7 +367,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                           <div className="flex-1">
                             <div className="space-y-3">
                               <p className="text-white leading-relaxed">
-                                {getTimeOfDayGreeting()} {businessProfile?.brandName && `¡${businessProfile.brandName}!`}
+                                {getTimeOfDayGreeting()} {(() => { const raw = (businessProfile as any)?.brandName ?? (businessProfile as any)?.businessDescription; return (typeof raw === 'string' && raw.trim().length > 0 && !raw.trim().startsWith('[')) ? `¡${raw}!` : '' })()}
                                  {businessProfile?.businessDescription 
                                    ? ` ${typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
                                       ? coordinatorMessage.message 

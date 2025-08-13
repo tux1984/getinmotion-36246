@@ -98,8 +98,8 @@ export const useUserBusinessProfile = () => {
       lastAssessmentDate: new Date().toISOString(),
       language: (mergedData as any).language || 'es',
       // Enhanced fields from database profile
-      businessDescription: (profile as any)?.business_description || (mergedData as any).businessDescription || '',
-      brandName: (profile as any)?.brand_name || (mergedData as any).brandName || '',
+      businessDescription: sanitizeText((profile as any)?.business_description) || sanitizeText((mergedData as any).businessDescription) || '',
+      brandName: sanitizeText((profile as any)?.brand_name) || sanitizeText((mergedData as any).brandName) || '',
       businessLocation: (profile as any)?.business_location || (mergedData as any).businessLocation || '',
       yearsInBusiness: (profile as any)?.years_in_business || (mergedData as any).yearsInBusiness || null,
       socialMediaPresence: (profile as any)?.social_media_presence || {},
@@ -150,6 +150,16 @@ export const useUserBusinessProfile = () => {
     }
   };
 };
+
+// Utilities
+function sanitizeText(val: any): string {
+  if (typeof val !== 'string') return '';
+  const trimmed = val.trim();
+  if (!trimmed) return '';
+  // Ignore JSON-like arrays accidentally stored as text
+  if ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('{') && trimmed.endsWith('}'))) return '';
+  return trimmed.replace(/^"+|"+$/g, '');
+}
 
 // Helper functions to extract data from onboarding and conversational agent
 function detectBusinessModel(answers: any): BusinessModel {

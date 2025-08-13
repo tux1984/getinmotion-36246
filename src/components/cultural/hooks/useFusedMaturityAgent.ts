@@ -79,7 +79,7 @@ export const useFusedMaturityAgent = (
       // Map wizard data to user profile structure
       const profileUpdate = {
         business_description: data.businessDescription,
-        brand_name: data.businessGoals, // Map appropriately 
+        brand_name: typeof data.brandName === 'string' ? data.brandName : undefined,
         business_type: data.industry,
         target_market: data.targetAudience,
         current_stage: data.experience,
@@ -181,7 +181,7 @@ export const useFusedMaturityAgent = (
         // Create comprehensive profile update with ALL new fields
         const userProfileUpdate = {
           business_description: profileData.businessDescription,
-          brand_name: profileData.brandName || profileData.businessGoals,
+          brand_name: typeof profileData.brandName === 'string' ? profileData.brandName : undefined,
           business_type: businessType,
           target_market: profileData.targetAudience,
           current_stage: profileData.salesConsistency || profileData.experience,
