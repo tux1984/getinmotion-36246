@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations } from '@/hooks/useTranslations';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { TaskDetailView } from './TaskDetailView';
 import { TaskStepInterface } from './TaskStepInterface';
 import { DeleteTaskDialog } from './DeleteTaskDialog';
@@ -36,6 +39,9 @@ interface DetailedTaskCardProps {
   onUnarchive?: (taskId: string) => void;
   isUpdating: boolean;
   allTasks?: AgentTask[];
+  isSelected?: boolean;
+  onSelect?: (taskId: string, selected: boolean) => void;
+  showSelection?: boolean;
 }
 
 export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
@@ -48,13 +54,20 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   onArchive,
   onUnarchive,
   isUpdating,
-  allTasks = []
+  allTasks = [],
+  isSelected = false,
+  onSelect,
+  showSelection = false
 }) => {
   const taskLimits = useTaskLimits(allTasks);
   const { t } = useTranslations();
+  const { businessProfile } = useUserBusinessProfile();
   const [showTaskDetail, setShowTaskDetail] = useState(false);
   const [showStepInterface, setShowStepInterface] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Format title with brand name
+  const displayTitle = formatTaskTitleForDisplay(task.title, businessProfile?.brandName);
 
   const getStatusBadge = (status: AgentTask['status']) => {
     const statusConfig = {
@@ -142,12 +155,24 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   const totalSubtasks = task.subtasks?.length || 0;
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-purple-400">
+    <Card className={`group hover:shadow-md transition-all duration-200 border-l-4 ${
+      isSelected ? 'border-l-blue-500 bg-blue-50/50' : 'border-l-purple-400'
+    }`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <h4 className="font-semibold text-sm truncate">{task.title}</h4>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Selection checkbox */}
+            {showSelection && (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => onSelect?.(task.id, checked as boolean)}
+                className="mt-1"
+              />
+            )}
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="font-semibold text-sm line-clamp-2 max-w-[300px]">{displayTitle}</h4>
               <Badge variant={statusBadge.variant} className={`text-xs ${statusBadge.color}`}>
                 <StatusIcon className="w-3 h-3 mr-1" />
                 {task.status}
@@ -231,6 +256,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
                 </div>
               </div>
             )}
+            </div>
           </div>
 
           <div className="flex items-center gap-1 ml-3">

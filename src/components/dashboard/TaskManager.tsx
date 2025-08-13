@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Plus, ArrowRight, MessageSquare, Target } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
 import { DetailedTaskCard } from './DetailedTaskCard';
@@ -21,6 +22,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   const { language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { businessProfile } = useUserBusinessProfile();
   const { 
     tasks, 
     loading, 
@@ -62,7 +64,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       const updatedTask = await startTaskDevelopment(task.id);
       
       if (updatedTask && onChatWithAgent) {
-        onChatWithAgent(task.id, task.title);
+        onChatWithAgent(task.id, formatTaskTitleForDisplay(task.title, businessProfile?.brandName));
       }
     } catch (error) {
       console.error('Error starting task development:', error);
@@ -92,13 +94,13 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     
     toast({
       title: t.taskComplete,
-      description: task.title,
+      description: formatTaskTitleForDisplay(task.title, businessProfile?.brandName),
     });
   };
 
   const handleChatWithAgent = (task: any) => {
     if (onChatWithAgent) {
-      onChatWithAgent(task.id, task.title);
+      onChatWithAgent(task.id, formatTaskTitleForDisplay(task.title, businessProfile?.brandName));
     }
   };
 

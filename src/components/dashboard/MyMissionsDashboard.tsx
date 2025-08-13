@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, 
   Play, 
@@ -25,10 +26,13 @@ import {
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
+import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { ClearAllTasksDialog } from './ClearAllTasksDialog';
+import { DetailedTaskCard } from './DetailedTaskCard';
 import { toast } from 'sonner';
 
 interface MyMissionsDashboardProps {
@@ -38,6 +42,7 @@ interface MyMissionsDashboardProps {
 export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTaskSelect }) => {
   const { user } = useAuth();
   const { t } = useTranslations();
+  const { businessProfile } = useUserBusinessProfile();
   const navigate = useNavigate();
   const { tasks, loading, startTaskDevelopment, deleteAllTasks, archiveTask, unarchiveTask, deleteTask } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, remainingSlots, getProgressColor } = useTaskLimits(tasks);
@@ -47,6 +52,8 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const [priorityFilter, setPriorityFilter] = useState<'all' | '1' | '2' | '3'>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [showClearAllDialog, setShowClearAllDialog] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+  const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
 
 
   // Filter and search tasks
@@ -114,6 +121,75 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
       await startTaskDevelopment(task.id);
     }
     onTaskSelect(task);
+  };
+
+  // Multi-selection handlers
+  const handleSelectTask = (taskId: string, selected: boolean) => {
+    const newSelected = new Set(selectedTasks);
+    if (selected) {
+      newSelected.add(taskId);
+    } else {
+      newSelected.delete(taskId);
+    }
+    setSelectedTasks(newSelected);
+  };
+
+  const handleSelectAll = (tasks: AgentTask[], selected: boolean) => {
+    const newSelected = new Set(selectedTasks);
+    if (selected) {
+      tasks.forEach(task => newSelected.add(task.id));
+    } else {
+      tasks.forEach(task => newSelected.delete(task.id));
+    }
+    setSelectedTasks(newSelected);
+  };
+
+  const clearSelection = () => setSelectedTasks(new Set());
+
+  // Batch operations
+  const handleBatchDelete = async () => {
+    const taskIds = Array.from(selectedTasks);
+    setUpdatingTasks(new Set(taskIds));
+    
+    try {
+      await Promise.all(taskIds.map(id => deleteTask(id)));
+      toast.success(`${taskIds.length} tareas eliminadas`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Error al eliminar tareas');
+    } finally {
+      setUpdatingTasks(new Set());
+    }
+  };
+
+  const handleBatchArchive = async () => {
+    const taskIds = Array.from(selectedTasks);
+    setUpdatingTasks(new Set(taskIds));
+    
+    try {
+      await Promise.all(taskIds.map(id => archiveTask(id)));
+      toast.success(`${taskIds.length} tareas archivadas`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Error al archivar tareas');
+    } finally {
+      setUpdatingTasks(new Set());
+    }
+  };
+
+  const handleBatchUnarchive = async () => {
+    const taskIds = Array.from(selectedTasks);
+    setUpdatingTasks(new Set(taskIds));
+    
+    try {
+      await Promise.all(taskIds.map(id => unarchiveTask(id)));
+      toast.success(`${taskIds.length} tareas desarchivadas`);
+      clearSelection();
+    } catch (error) {
+      toast.error('Error al desarchivar tareas');
+    } finally {
+      setUpdatingTasks(new Set());
+    }
   };
 
 
@@ -294,6 +370,69 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           </TabsTrigger>
         </TabsList>
 
+        {/* Batch Actions Bar */}
+        <AnimatePresence>
+          {selectedTasks.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+            >
+              <Card className="shadow-lg border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium">
+                      {selectedTasks.size} tarea{selectedTasks.size !== 1 ? 's' : ''} seleccionada{selectedTasks.size !== 1 ? 's' : ''}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBatchDelete}
+                        disabled={Array.from(selectedTasks).some(id => updatingTasks.has(id))}
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Eliminar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBatchArchive}
+                        disabled={Array.from(selectedTasks).some(id => updatingTasks.has(id))}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        <Archive className="w-4 h-4 mr-1" />
+                        Archivar
+                      </Button>
+                      {statusFilter === 'archived' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleBatchUnarchive}
+                          disabled={Array.from(selectedTasks).some(id => updatingTasks.has(id))}
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                        >
+                          <ArchiveRestore className="w-4 h-4 mr-1" />
+                          Desarchivar
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearSelection}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <TabsContent value="all" className="space-y-4 mt-6">
           {filteredTasks.length === 0 ? (
             <Card>
@@ -309,99 +448,43 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {filteredTasks.map((task, index) => {
-                const statusBadge = getStatusBadge(task.status);
-                const priorityBadge = getPriorityBadge(task.priority);
-                const StatusIcon = statusBadge.icon;
-                
-                return (
-                  <motion.div
+            <div className="space-y-4">
+              {/* Select All checkbox */}
+              <div className="flex items-center gap-2 px-2">
+                <Checkbox
+                  checked={filteredTasks.length > 0 && filteredTasks.every(task => selectedTasks.has(task.id))}
+                  onCheckedChange={(checked) => handleSelectAll(filteredTasks, checked as boolean)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar todo ({filteredTasks.length})
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {filteredTasks.map((task, index) => (
+                  <DetailedTaskCard
                     key={task.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-primary/20 hover:border-l-primary">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-center gap-3">
-                              <StatusIcon className="w-5 h-5 text-muted-foreground" />
-                              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                                {task.title}
-                              </h3>
-                              <Badge variant="outline" className={priorityBadge.className}>
-                                {priorityBadge.text}
-                              </Badge>
-                              <Badge variant={statusBadge.variant} className={statusBadge.className}>
-                                {task.status.replace('_', ' ')}
-                              </Badge>
-                            </div>
-                            
-                            {task.description && (
-                              <p className="text-muted-foreground line-clamp-2 text-sm">{task.description}</p>
-                            )}
-                            
-                            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4" />
-                                <span className="font-medium">{task.agent_id}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Timer className="h-4 w-4" />
-                                <span>{getTimeAgo(task.updated_at)}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <BarChart3 className="h-4 w-4" />
-                                <span>{task.progress_percentage}% Progress</span>
-                              </div>
-                              {task.subtasks && task.subtasks.length > 0 && (
-                                <div className="flex items-center gap-2">
-                                  <CheckCircle className="h-4 w-4" />
-                                  <span>{task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} Subtasks</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-3 ml-6">
-                            <Button
-                              variant="outline"
-                              onClick={() => handleTaskAction(task)}
-                              className="group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200"
-                            >
-                              {task.status === 'pending' && (
-                                <>
-                                  <Play className="h-4 w-4 mr-2" />
-                                  Start Task
-                                </>
-                              )}
-                              {task.status === 'in_progress' && (
-                                <>
-                                  <ArrowRight className="h-4 w-4 mr-2" />
-                                  Continue Task
-                                </>
-                              )}
-                              {task.status === 'completed' && (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Review Task
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
+                    task={task}
+                    language="es"
+                    onStartDevelopment={() => startTaskDevelopment(task.id)}
+                    onCompleteTask={() => {}}
+                    onChatWithAgent={() => onTaskSelect(task)}
+                    onDelete={deleteTask}
+                    onArchive={archiveTask}
+                    onUnarchive={unarchiveTask}
+                    isUpdating={updatingTasks.has(task.id)}
+                    allTasks={tasks}
+                    isSelected={selectedTasks.has(task.id)}
+                    onSelect={handleSelectTask}
+                    showSelection={true}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="active" className="space-y-3 mt-6">
+        <TabsContent value="active" className="space-y-4 mt-6">
           {activeTasks.length === 0 ? (
             <Card>
               <CardContent className="py-12 px-8 text-center">
@@ -413,58 +496,43 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
               </CardContent>
             </Card>
           ) : (
-            activeTasks.map((task, index) => {
-              const priorityBadge = getPriorityBadge(task.priority);
+            <div className="space-y-4">
+              {/* Select All checkbox */}
+              <div className="flex items-center gap-2 px-2">
+                <Checkbox
+                  checked={activeTasks.length > 0 && activeTasks.every(task => selectedTasks.has(task.id))}
+                  onCheckedChange={(checked) => handleSelectAll(activeTasks, checked as boolean)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar todo ({activeTasks.length})
+                </span>
+              </div>
               
-              return (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-blue-500">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <Clock className="w-5 h-5 text-blue-600" />
-                            <h3 className="font-semibold text-lg">{task.title}</h3>
-                            <Badge variant="outline" className={priorityBadge.className}>
-                              {priorityBadge.text}
-                            </Badge>
-                          </div>
-                          {task.description && (
-                            <p className="text-muted-foreground text-sm line-clamp-2">{task.description}</p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="font-medium">{task.agent_id}</span>
-                            <span>{task.progress_percentage}% complete</span>
-                          </div>
-                        </div>
-                        <Button onClick={() => handleTaskAction(task)} className="bg-blue-600 hover:bg-blue-700">
-                          {task.status === 'pending' ? (
-                            <>
-                              <Play className="h-4 w-4 mr-2" />
-                              Start Task
-                            </>
-                          ) : (
-                            <>
-                              <ArrowRight className="h-4 w-4 mr-2" />
-                              Continue Task
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })
+              <div className="space-y-3">
+                {activeTasks.map((task, index) => (
+                  <DetailedTaskCard
+                    key={task.id}
+                    task={task}
+                    language="es"
+                    onStartDevelopment={() => startTaskDevelopment(task.id)}
+                    onCompleteTask={() => {}}
+                    onChatWithAgent={() => onTaskSelect(task)}
+                    onDelete={deleteTask}
+                    onArchive={archiveTask}
+                    onUnarchive={unarchiveTask}
+                    isUpdating={updatingTasks.has(task.id)}
+                    allTasks={tasks}
+                    isSelected={selectedTasks.has(task.id)}
+                    onSelect={handleSelectTask}
+                    showSelection={true}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="completed" className="space-y-3 mt-6">
+        <TabsContent value="completed" className="space-y-4 mt-6">
           {completedTasks.length === 0 ? (
             <Card>
               <CardContent className="py-12 px-8 text-center">
@@ -476,49 +544,43 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
               </CardContent>
             </Card>
           ) : (
-            completedTasks.map((task, index) => {
-              const priorityBadge = getPriorityBadge(task.priority);
+            <div className="space-y-4">
+              {/* Select All checkbox */}
+              <div className="flex items-center gap-2 px-2">
+                <Checkbox
+                  checked={completedTasks.length > 0 && completedTasks.every(task => selectedTasks.has(task.id))}
+                  onCheckedChange={(checked) => handleSelectAll(completedTasks, checked as boolean)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar todo ({completedTasks.length})
+                </span>
+              </div>
               
-               return (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-green-500">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <h3 className="font-semibold text-lg">{task.title}</h3>
-                            <Badge variant="outline" className={priorityBadge.className}>
-                              {priorityBadge.text}
-                            </Badge>
-                          </div>
-                          {task.description && (
-                            <p className="text-muted-foreground text-sm line-clamp-2">{task.description}</p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="font-medium">{task.agent_id}</span>
-                            <span>Completed {getTimeAgo(task.completed_at || task.updated_at)}</span>
-                          </div>
-                        </div>
-                        <Button variant="outline" onClick={() => handleTaskAction(task)} className="text-green-600 border-green-200 hover:bg-green-50">
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Review Task
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })
+              <div className="space-y-3">
+                {completedTasks.map((task, index) => (
+                  <DetailedTaskCard
+                    key={task.id}
+                    task={task}
+                    language="es"
+                    onStartDevelopment={() => startTaskDevelopment(task.id)}
+                    onCompleteTask={() => {}}
+                    onChatWithAgent={() => onTaskSelect(task)}
+                    onDelete={deleteTask}
+                    onArchive={archiveTask}
+                    onUnarchive={unarchiveTask}
+                    isUpdating={updatingTasks.has(task.id)}
+                    allTasks={tasks}
+                    isSelected={selectedTasks.has(task.id)}
+                    onSelect={handleSelectTask}
+                    showSelection={true}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="archived" className="space-y-3 mt-6">
+        <TabsContent value="archived" className="space-y-4 mt-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Archived Tasks</h3>
             {archivedTasks.length > 0 && (
@@ -549,66 +611,39 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
               </CardContent>
             </Card>
           ) : (
-            archivedTasks.map((task, index) => {
-              const priorityBadge = getPriorityBadge(task.priority);
+            <div className="space-y-4">
+              {/* Select All checkbox */}
+              <div className="flex items-center gap-2 px-2">
+                <Checkbox
+                  checked={archivedTasks.length > 0 && archivedTasks.every(task => selectedTasks.has(task.id))}
+                  onCheckedChange={(checked) => handleSelectAll(archivedTasks, checked as boolean)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Seleccionar todo ({archivedTasks.length})
+                </span>
+              </div>
               
-              return (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-gray-400 opacity-70">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <Archive className="w-5 h-5 text-gray-500" />
-                            <h3 className="font-semibold text-lg text-gray-600">{task.title}</h3>
-                            <Badge variant="outline" className={priorityBadge.className}>
-                              {priorityBadge.text}
-                            </Badge>
-                            <Badge variant="outline" className="text-gray-500">
-                              Archived
-                            </Badge>
-                          </div>
-                          {task.description && (
-                            <p className="text-muted-foreground text-sm line-clamp-2">{task.description}</p>
-                          )}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="font-medium">{task.agent_id}</span>
-                            <span>Archived {getTimeAgo(task.updated_at)}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => unarchiveTask(task.id)}
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                          >
-                            <ArchiveRestore className="h-4 w-4 mr-2" />
-                            Unarchive
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              deleteTask(task.id);
-                              toast.success('Task deleted');
-                            }}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })
+              <div className="space-y-3">
+                {archivedTasks.map((task, index) => (
+                  <DetailedTaskCard
+                    key={task.id}
+                    task={task}
+                    language="es"
+                    onStartDevelopment={() => startTaskDevelopment(task.id)}
+                    onCompleteTask={() => {}}
+                    onChatWithAgent={() => onTaskSelect(task)}
+                    onDelete={deleteTask}
+                    onArchive={archiveTask}
+                    onUnarchive={unarchiveTask}
+                    isUpdating={updatingTasks.has(task.id)}
+                    allTasks={tasks}
+                    isSelected={selectedTasks.has(task.id)}
+                    onSelect={handleSelectTask}
+                    showSelection={true}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </TabsContent>
       </Tabs>

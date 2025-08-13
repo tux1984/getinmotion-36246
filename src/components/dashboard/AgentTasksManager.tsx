@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +29,7 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
     archiveTask,
     unarchiveTask
   } = useAgentTasks(agentId);
+  const { businessProfile } = useUserBusinessProfile();
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
 
   const t = {
