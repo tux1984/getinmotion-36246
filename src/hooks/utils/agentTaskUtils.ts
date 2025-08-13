@@ -36,11 +36,12 @@ export const replaceGoalArrayInText = (text: any): string => {
   if (text === null || text === undefined) return '';
   const str = String(text);
   
-  // Updated regex to match the actual JSON array format from database
-  const pattern = /\['[a-z_]+'(?:,'[a-z_]+')*\]|\["[a-z_]+"(?:,"[a-z_]+")*\]/g;
+  // Enhanced regex to match ANY array format - JSON arrays, goal arrays, etc.
+  const pattern = /\[[^\]]+\]/g;
   
   return str.replace(pattern, (match) => {
     try {
+      // Try to parse as JSON first
       const arr = JSON.parse(match) as string[];
       if (Array.isArray(arr)) {
         return arr
@@ -49,14 +50,16 @@ export const replaceGoalArrayInText = (text: any): string => {
       }
       return match;
     } catch {
-      // If JSON.parse fails, try to extract the values manually
+      // If JSON.parse fails, manually extract values
       const values = match.match(/[a-z_]+/g);
       if (values) {
         return values
           .map(key => GOAL_LABELS[key] || toTitleCase(key.replace(/_/g, ' ')))
           .join(', ');
       }
-      return match;
+      
+      // Last resort: remove the brackets entirely
+      return match.replace(/[\[\]'",]/g, '').replace(/_/g, ' ');
     }
   });
 };
@@ -66,10 +69,17 @@ export const formatTaskTitleForDisplay = (title: string, brandName?: string): st
   // First, clean the title from any remaining JSON arrays or goal lists
   let cleanTitle = replaceGoalArrayInText(title);
   
-  if (!brandName) return cleanTitle;
+  // If no brand name, try to generate an intelligent one or use fallback
+  if (!brandName) {
+    // Look for common patterns and create smart fallbacks
+    if (cleanTitle.toLowerCase().includes('validación') || cleanTitle.toLowerCase().includes('validation')) {
+      return cleanTitle.replace(/\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi, 'tu proyecto');
+    }
+    return cleanTitle.replace(/\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi, 'tu emprendimiento');
+  }
   
   // Replace goal lists with brand name
-  const goalPattern = /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/g;
+  const goalPattern = /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi;
   
   return cleanTitle.replace(goalPattern, brandName);
 };

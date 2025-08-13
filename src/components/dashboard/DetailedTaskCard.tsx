@@ -155,9 +155,9 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   const totalSubtasks = task.subtasks?.length || 0;
 
   return (
-    <Card className={`group hover:shadow-md transition-all duration-200 border-l-4 ${
-      isSelected ? 'border-l-blue-500 bg-blue-50/50' : 'border-l-purple-400'
-    }`}>
+    <Card className={`group hover:shadow-card hover:scale-[1.02] transition-all duration-300 border-l-4 bg-gradient-to-r from-background to-primary-subtle/30 ${
+      isSelected ? 'border-l-primary bg-primary-subtle/50 shadow-glow' : 'border-l-primary/60'
+    } ${task.status === 'completed' ? 'bg-gradient-to-r from-secondary/10 to-secondary/5 border-l-secondary' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -172,8 +172,12 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h4 className="font-semibold text-sm line-clamp-2 max-w-[300px]">{displayTitle}</h4>
-              <Badge variant={statusBadge.variant} className={`text-xs ${statusBadge.color}`}>
+                <h4 className="font-semibold text-sm line-clamp-2 max-w-[300px] bg-gradient-to-r from-foreground to-primary/80 bg-clip-text text-transparent">{displayTitle}</h4>
+              <Badge variant={statusBadge.variant} className={`text-xs animate-fade-in ${statusBadge.color} ${
+                task.status === 'completed' ? 'bg-gradient-to-r from-secondary to-secondary-glow text-white' : 
+                task.status === 'in_progress' ? 'bg-gradient-to-r from-primary to-primary-glow text-white animate-glow-pulse' :
+                'bg-muted'
+              }`}>
                 <StatusIcon className="w-3 h-3 mr-1" />
                 {task.status}
               </Badge>
@@ -194,13 +198,13 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
             <div className="flex items-center gap-4 text-xs text-gray-500">
               {/* Progress */}
               <div className="flex items-center gap-1">
-                <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                <div className="w-16 bg-muted rounded-full h-1.5 overflow-hidden">
                   <div 
-                    className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                    className="h-1.5 rounded-full transition-all duration-500 bg-gradient-to-r from-primary to-primary-glow animate-fade-in"
                     style={{ width: `${task.progress_percentage}%` }}
                   />
                 </div>
-                <span>{task.progress_percentage}%</span>
+                <span className="text-xs font-medium">{task.progress_percentage}%</span>
               </div>
 
               {/* Subtasks count */}
@@ -230,20 +234,20 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
 
             {/* Show subtasks preview when in progress */}
             {task.status === 'in_progress' && task.subtasks && task.subtasks.length > 0 && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                <h5 className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <div className="mt-3 p-3 bg-gradient-to-r from-primary-subtle to-primary-subtle/50 rounded-lg border border-primary/20">
+                <h5 className="text-xs font-medium text-primary mb-2 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
                   {language === 'en' ? 'Subtasks' : 'Subtareas'} ({completedSubtasks}/{totalSubtasks})
                 </h5>
                 <div className="space-y-1">
                   {task.subtasks.slice(0, 3).map((subtask) => (
                     <div key={subtask.id} className="flex items-center gap-2 text-xs">
-                      <div className={`w-2 h-2 rounded border ${
+                      <div className={`w-2 h-2 rounded border transition-all duration-200 ${
                         subtask.completed 
-                          ? 'bg-green-500 border-green-500' 
-                          : 'border-gray-300'
+                          ? 'bg-gradient-to-r from-secondary to-secondary-glow border-secondary animate-scale-in' 
+                          : 'border-muted-foreground/30'
                       }`} />
-                      <span className={`${subtask.completed ? 'line-through text-gray-500' : 'text-gray-700'} truncate`}>
+                      <span className={`${subtask.completed ? 'line-through text-muted-foreground' : 'text-foreground'} truncate`}>
                         {subtask.title}
                       </span>
                     </div>

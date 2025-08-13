@@ -184,7 +184,7 @@ const EnhancedProfile: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-gradient-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {/* Header */}
@@ -202,7 +202,7 @@ const EnhancedProfile: React.FC = () => {
               <ChevronLeft className="w-4 h-4 mr-2" />
               {t.backToDashboard}
             </Button>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
               {t.title}
             </h1>
             <p className="text-muted-foreground mt-1">{t.subtitle}</p>
@@ -219,12 +219,12 @@ const EnhancedProfile: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+          <Card className="mb-8 bg-gradient-primary/5 border-primary/20 shadow-card hover:shadow-elegant transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow animate-float">
+                    <User className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">{businessProfile.fullName}</h2>
@@ -247,19 +247,19 @@ const EnhancedProfile: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <BarChart3 className="w-6 h-6 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold">{profileCompleteness}%</div>
+                <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary-subtle rounded-lg border border-primary/20 hover:shadow-card transition-all duration-300">
+                  <BarChart3 className="w-6 h-6 mx-auto mb-2 text-primary animate-float" />
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">{profileCompleteness}%</div>
                   <div className="text-sm text-muted-foreground">{t.dataCompleteness}</div>
                 </div>
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <Users className="w-6 h-6 mx-auto mb-2 text-secondary" />
-                  <div className="text-2xl font-bold">{businessProfile.teamSize}</div>
+                <div className="text-center p-4 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-lg border border-secondary/20 hover:shadow-card transition-all duration-300">
+                  <Users className="w-6 h-6 mx-auto mb-2 text-secondary animate-float" style={{ animationDelay: '0.5s' }} />
+                  <div className="text-2xl font-bold bg-gradient-secondary bg-clip-text text-transparent">{businessProfile.teamSize}</div>
                   <div className="text-sm text-muted-foreground">{t.teamSize}</div>
                 </div>
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <Calendar className="w-6 h-6 mx-auto mb-2 text-accent" />
-                  <div className="text-2xl font-bold">{businessProfile.timeAvailability}</div>
+                <div className="text-center p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20 hover:shadow-card transition-all duration-300">
+                  <Calendar className="w-6 h-6 mx-auto mb-2 text-accent animate-float" style={{ animationDelay: '1s' }} />
+                  <div className="text-2xl font-bold bg-gradient-accent bg-clip-text text-transparent">{businessProfile.timeAvailability}</div>
                   <div className="text-sm text-muted-foreground">{t.timeAvailability}</div>
                 </div>
               </div>
@@ -280,11 +280,11 @@ const EnhancedProfile: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {((coordinatorMessage && typeof coordinatorMessage === 'object' && coordinatorMessage.message) || 
                 (typeof coordinatorMessage === 'string' && coordinatorMessage)) && (
-                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 shadow-card hover:shadow-glow transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Brain className="w-5 h-5 text-primary" />
+                      <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0 animate-glow-pulse">
+                        <Brain className="w-5 h-5 text-primary-foreground" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground mb-2">
@@ -303,11 +303,11 @@ const EnhancedProfile: React.FC = () => {
               )}
               
               {deliverables && deliverables.length > 0 && (
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 shadow-card hover:shadow-elegant transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      <div className="w-10 h-10 bg-gradient-secondary rounded-lg flex items-center justify-center flex-shrink-0 animate-float">
+                        <CheckCircle2 className="w-5 h-5 text-secondary-foreground" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-green-800 mb-2">
