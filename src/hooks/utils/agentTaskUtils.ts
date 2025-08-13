@@ -36,8 +36,8 @@ export const replaceGoalArrayInText = (text: any): string => {
   if (text === null || text === undefined) return '';
   const str = String(text);
   
-  // Enhanced regex to match ANY array format - JSON arrays, goal arrays, etc.
-  const pattern = /\[[^\]]+\]/g;
+// Ultra-robust regex to match ANY array format - JSON arrays, goal arrays, etc.
+  const pattern = /\[[^\]]*\]/g;
   
   return str.replace(pattern, (match) => {
     try {
@@ -50,38 +50,134 @@ export const replaceGoalArrayInText = (text: any): string => {
       }
       return match;
     } catch {
-      // If JSON.parse fails, manually extract values
-      const values = match.match(/[a-z_]+/g);
-      if (values) {
+      // Enhanced fallback: extract any words/keys from the array
+      const values = match.match(/[\w_]+/g);
+      if (values && values.length > 0) {
         return values
           .map(key => GOAL_LABELS[key] || toTitleCase(key.replace(/_/g, ' ')))
           .join(', ');
       }
       
-      // Last resort: remove the brackets entirely
-      return match.replace(/[\[\]'",]/g, '').replace(/_/g, ' ');
+      // Last resort: remove the brackets and clean up
+      return match.replace(/[\[\]'",]/g, '').replace(/_/g, ' ').trim();
     }
   });
 };
 
-// Format task titles for display - replace goal arrays with brand name
+// Generate intelligent brand name from business description
+const generateIntelligentBrandName = (businessDescription?: string): string => {
+  if (!businessDescription) return 'tu emprendimiento';
+  
+  const desc = businessDescription.toLowerCase();
+  
+  // Music industry patterns
+  if (desc.includes('música') || desc.includes('musical') || desc.includes('artista') || desc.includes('canciones') || desc.includes('album')) {
+    return 'tu sello musical';
+  }
+  if (desc.includes('producción musical') || desc.includes('productor') || desc.includes('producir música')) {
+    return 'tu productora musical';
+  }
+  if (desc.includes('estudio') && desc.includes('música')) {
+    return 'tu estudio musical';
+  }
+  
+  // Creative industries
+  if (desc.includes('artesanía') || desc.includes('artesanal') || desc.includes('hecho a mano')) {
+    return 'tu taller artesanal';
+  }
+  if (desc.includes('diseño') || desc.includes('creativo') || desc.includes('arte')) {
+    return 'tu estudio creativo';
+  }
+  
+  // Services
+  if (desc.includes('consultoría') || desc.includes('consultor') || desc.includes('asesoría')) {
+    return 'tu consultoría';
+  }
+  if (desc.includes('agencia') || desc.includes('marketing') || desc.includes('publicidad')) {
+    return 'tu agencia';
+  }
+  
+  // Tech/digital
+  if (desc.includes('app') || desc.includes('software') || desc.includes('tecnología') || desc.includes('digital')) {
+    return 'tu startup';
+  }
+  
+  // E-commerce/retail
+  if (desc.includes('tienda') || desc.includes('venta') || desc.includes('productos') || desc.includes('comercio')) {
+    return 'tu marca';
+  }
+  
+  // Default contextual fallbacks
+  if (desc.includes('servicio')) return 'tu servicio';
+  if (desc.includes('negocio')) return 'tu negocio';
+  if (desc.includes('empresa')) return 'tu empresa';
+  if (desc.includes('proyecto')) return 'tu proyecto';
+  
+  return 'tu emprendimiento';
+};
+
+// Get localStorage business data for context
+const getBusinessContext = (): { businessDescription?: string; brandName?: string } => {
+  try {
+    // Try multiple localStorage keys for different data sources
+    const sources = [
+      'fused_maturity_calculator_progress',
+      'enhanced_conversational_agent_progress',
+      'master_coordinator_progress'
+    ];
+    
+    for (const key of sources) {
+      const data = localStorage.getItem(key);
+      if (data) {
+        const parsed = JSON.parse(data);
+        const profileData = parsed.profileData || parsed.answers || parsed;
+        
+        const businessDescription = 
+          profileData?.businessDescription ||
+          profileData?.description ||
+          profileData?.whatDoes ||
+          profileData?.businessIdea ||
+          null;
+          
+        const brandName = 
+          profileData?.brandName ||
+          profileData?.businessName ||
+          profileData?.companyName ||
+          profileData?.projectName ||
+          null;
+          
+        if (businessDescription || brandName) {
+          return { businessDescription, brandName };
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Error getting business context from localStorage:', error);
+  }
+  
+  return {};
+};
+
+// Format task titles for display - replace goal arrays with intelligent brand name
 export const formatTaskTitleForDisplay = (title: string, brandName?: string): string => {
   // First, clean the title from any remaining JSON arrays or goal lists
   let cleanTitle = replaceGoalArrayInText(title);
   
-  // If no brand name, try to generate an intelligent one or use fallback
-  if (!brandName) {
-    // Look for common patterns and create smart fallbacks
-    if (cleanTitle.toLowerCase().includes('validación') || cleanTitle.toLowerCase().includes('validation')) {
-      return cleanTitle.replace(/\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi, 'tu proyecto');
-    }
-    return cleanTitle.replace(/\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi, 'tu emprendimiento');
-  }
+  // Get business context for intelligent brand name generation
+  const { businessDescription, brandName: localBrandName } = getBusinessContext();
+  const finalBrandName = brandName || localBrandName || generateIntelligentBrandName(businessDescription);
   
-  // Replace goal lists with brand name
+  // Replace goal lists and generic terms with intelligent brand name
   const goalPattern = /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi;
   
-  return cleanTitle.replace(goalPattern, brandName);
+  cleanTitle = cleanTitle.replace(goalPattern, finalBrandName);
+  
+  // Additional intelligent replacements for context
+  cleanTitle = cleanTitle
+    .replace(/\b(tu negocio|tu empresa|tu proyecto|tu emprendimiento)\b/gi, finalBrandName)
+    .replace(/\b(your business|your company|your project|your startup)\b/gi, finalBrandName);
+  
+  return cleanTitle;
 };
 
 // Helper function to convert database row to AgentTask
