@@ -35,7 +35,10 @@ const toTitleCase = (s: string) => s.replace(/\b\w/g, c => c.toUpperCase());
 export const replaceGoalArrayInText = (text: any): string => {
   if (text === null || text === undefined) return '';
   const str = String(text);
-  const pattern = /\["[a-z_]+(?:","[a-z_]+)*"\]/g;
+  
+  // Updated regex to match the actual JSON array format from database
+  const pattern = /\['[a-z_]+'(?:,'[a-z_]+')*\]|\["[a-z_]+"(?:,"[a-z_]+")*\]/g;
+  
   return str.replace(pattern, (match) => {
     try {
       const arr = JSON.parse(match) as string[];
@@ -46,6 +49,13 @@ export const replaceGoalArrayInText = (text: any): string => {
       }
       return match;
     } catch {
+      // If JSON.parse fails, try to extract the values manually
+      const values = match.match(/[a-z_]+/g);
+      if (values) {
+        return values
+          .map(key => GOAL_LABELS[key] || toTitleCase(key.replace(/_/g, ' ')))
+          .join(', ');
+      }
       return match;
     }
   });
@@ -53,14 +63,15 @@ export const replaceGoalArrayInText = (text: any): string => {
 
 // Format task titles for display - replace goal arrays with brand name
 export const formatTaskTitleForDisplay = (title: string, brandName?: string): string => {
-  if (!brandName) return title;
+  // First, clean the title from any remaining JSON arrays or goal lists
+  let cleanTitle = replaceGoalArrayInText(title);
   
-  // Replace patterns like "Mejora de la experiencia del usuario en Scale operations, Automate processes" 
-  // with "Mejora de la experiencia del usuario en [Brand Name]"
-  return title.replace(
-    /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/g,
-    brandName
-  );
+  if (!brandName) return cleanTitle;
+  
+  // Replace goal lists with brand name
+  const goalPattern = /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/g;
+  
+  return cleanTitle.replace(goalPattern, brandName);
 };
 
 // Helper function to convert database row to AgentTask
