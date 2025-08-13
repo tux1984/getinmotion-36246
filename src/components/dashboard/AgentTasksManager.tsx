@@ -23,7 +23,9 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
     loading, 
     updateTask, 
     deleteTask, 
-    startTaskDevelopment 
+    startTaskDevelopment,
+    archiveTask,
+    unarchiveTask
   } = useAgentTasks(agentId);
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set());
 
@@ -132,6 +134,8 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
               onCompleteTask={handleCompleteTask}
               onChatWithAgent={handleChatWithAgent}
               onDelete={handleDelete}
+              onArchive={archiveTask}
+              onUnarchive={unarchiveTask}
               isUpdating={updatingTasks.has(task.id)}
               allTasks={tasks}
             />

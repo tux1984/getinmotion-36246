@@ -34,6 +34,7 @@ export interface AgentTask {
   steps_completed: Record<string, boolean>;
   resources: TaskResource[];
   time_spent: number;
+  is_archived: boolean;
 }
 
 export interface PaginatedTasks {

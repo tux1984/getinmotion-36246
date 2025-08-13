@@ -189,6 +189,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          is_archived: boolean
           notes: string | null
           priority: number
           progress_percentage: number
@@ -210,6 +211,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_archived?: boolean
           notes?: string | null
           priority?: number
           progress_percentage?: number
@@ -231,6 +233,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_archived?: boolean
           notes?: string | null
           priority?: number
           progress_percentage?: number

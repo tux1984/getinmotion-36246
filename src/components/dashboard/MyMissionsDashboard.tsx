@@ -19,7 +19,9 @@ import {
   Trash2,
   TrendingUp,
   Timer,
-  AlertCircle
+  AlertCircle,
+  Archive,
+  ArchiveRestore
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
@@ -37,11 +39,11 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   const { user } = useAuth();
   const { t } = useTranslations();
   const navigate = useNavigate();
-  const { tasks, loading, startTaskDevelopment, deleteAllTasks } = useAgentTasks();
+  const { tasks, loading, startTaskDevelopment, deleteAllTasks, archiveTask, unarchiveTask, deleteTask } = useAgentTasks();
   const { activeTasksCount, completedTasksCount, remainingSlots, getProgressColor } = useTaskLimits(tasks);
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed' | 'archived'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | '1' | '2' | '3'>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [showClearAllDialog, setShowClearAllDialog] = useState(false);
@@ -52,9 +54,14 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
     return tasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || 
+                           (statusFilter === 'archived' && task.is_archived) ||
+                           (statusFilter !== 'archived' && task.status === statusFilter && !task.is_archived);
       const matchesPriority = priorityFilter === 'all' || task.priority.toString() === priorityFilter;
       const matchesAgent = agentFilter === 'all' || task.agent_id === agentFilter;
+      
+      // For 'all' filter, exclude archived tasks
+      if (statusFilter === 'all' && task.is_archived) return false;
       
       return matchesSearch && matchesStatus && matchesPriority && matchesAgent;
     });
@@ -110,8 +117,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
   };
 
 
-  const activeTasks = filteredTasks.filter(task => task.status === 'pending' || task.status === 'in_progress');
-  const completedTasks = filteredTasks.filter(task => task.status === 'completed');
+  const activeTasks = filteredTasks.filter(task => (task.status === 'pending' || task.status === 'in_progress') && !task.is_archived);
+  const completedTasks = filteredTasks.filter(task => task.status === 'completed' && !task.is_archived);
+  const archivedTasks = filteredTasks.filter(task => task.is_archived);
 
   if (loading) {
     return (
@@ -224,6 +232,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -270,7 +279,7 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
 
       {/* Modern Task Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-muted">
+        <TabsList className="grid w-full grid-cols-4 bg-muted">
           <TabsTrigger value="all" className="data-[state=active]:bg-background">
             All Tasks
           </TabsTrigger>
@@ -279,6 +288,9 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
           </TabsTrigger>
           <TabsTrigger value="completed" className="data-[state=active]:bg-background">
             Completed ({completedTasks.length})
+          </TabsTrigger>
+          <TabsTrigger value="archived" className="data-[state=active]:bg-background">
+            Archived ({archivedTasks.length})
           </TabsTrigger>
         </TabsList>
 
@@ -497,6 +509,100 @@ export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTask
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Review Task
                         </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })
+          )}
+        </TabsContent>
+
+        <TabsContent value="archived" className="space-y-3 mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Archived Tasks</h3>
+            {archivedTasks.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Bulk delete archived tasks
+                  archivedTasks.forEach(task => deleteTask(task.id));
+                  toast.success('All archived tasks deleted');
+                }}
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete All Archived
+              </Button>
+            )}
+          </div>
+          
+          {archivedTasks.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 px-8 text-center">
+                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Archive className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No archived tasks</h3>
+                <p className="text-muted-foreground">Archived tasks will appear here.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            archivedTasks.map((task, index) => {
+              const priorityBadge = getPriorityBadge(task.priority);
+              
+              return (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-gray-400 opacity-70">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Archive className="w-5 h-5 text-gray-500" />
+                            <h3 className="font-semibold text-lg text-gray-600">{task.title}</h3>
+                            <Badge variant="outline" className={priorityBadge.className}>
+                              {priorityBadge.text}
+                            </Badge>
+                            <Badge variant="outline" className="text-gray-500">
+                              Archived
+                            </Badge>
+                          </div>
+                          {task.description && (
+                            <p className="text-muted-foreground text-sm line-clamp-2">{task.description}</p>
+                          )}
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="font-medium">{task.agent_id}</span>
+                            <span>Archived {getTimeAgo(task.updated_at)}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => unarchiveTask(task.id)}
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          >
+                            <ArchiveRestore className="h-4 w-4 mr-2" />
+                            Unarchive
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              deleteTask(task.id);
+                              toast.success('Task deleted');
+                            }}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

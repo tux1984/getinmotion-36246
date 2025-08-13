@@ -18,7 +18,7 @@ export function useAgentTasks(agentId?: string) {
   const { fetchTasks, fetchPaginatedTasks } = useAgentTasksQueries(user, agentId);
 
   // Initialize operations hooks
-  const { createTask, updateTask, deleteTask, deleteAllTasks } = useAgentTasksOperations(
+  const { createTask, updateTask, deleteTask, deleteAllTasks, archiveTask, unarchiveTask } = useAgentTasksOperations(
     user, tasks, setTasks, setTotalCount
   );
 
@@ -96,6 +96,8 @@ export function useAgentTasks(agentId?: string) {
     updateTask,
     deleteTask,
     deleteAllTasks,
+    archiveTask,
+    unarchiveTask,
     fetchPaginatedTasks,
     refreshTasks,
     updateSubtasks,

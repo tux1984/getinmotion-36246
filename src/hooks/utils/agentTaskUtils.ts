@@ -51,6 +51,18 @@ export const replaceGoalArrayInText = (text: any): string => {
   });
 };
 
+// Format task titles for display - replace goal arrays with brand name
+export const formatTaskTitleForDisplay = (title: string, brandName?: string): string => {
+  if (!brandName) return title;
+  
+  // Replace patterns like "Mejora de la experiencia del usuario en Scale operations, Automate processes" 
+  // with "Mejora de la experiencia del usuario en [Brand Name]"
+  return title.replace(
+    /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/g,
+    brandName
+  );
+};
+
 // Helper function to convert database row to AgentTask
 export const convertToAgentTask = (data: any): AgentTask => ({
   ...data,
@@ -62,7 +74,8 @@ export const convertToAgentTask = (data: any): AgentTask => ({
   notes: data.notes || '',
   steps_completed: parseJsonField<Record<string, boolean>>(data.steps_completed, {}),
   resources: parseJsonField<TaskResource[]>(data.resources, []),
-  time_spent: data.time_spent || 0
+  time_spent: data.time_spent || 0,
+  is_archived: data.is_archived || false
 });
 
 // Helper function to convert AgentTask fields to database format

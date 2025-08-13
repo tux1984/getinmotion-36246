@@ -177,10 +177,74 @@ export function useAgentTasksOperations(
     }
   };
 
+  const archiveTask = async (taskId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_tasks')
+        .update({ is_archived: true })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      const typedTask = convertToAgentTask(data);
+      setTasks(prev => prev.map(task => task.id === taskId ? typedTask : task));
+      
+      toast({
+        title: 'Tarea archivada',
+        description: 'La tarea se ha archivado exitosamente.',
+      });
+      
+      return typedTask;
+    } catch (error) {
+      console.error('Error archiving task:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo archivar la tarea',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const unarchiveTask = async (taskId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_tasks')
+        .update({ is_archived: false })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      const typedTask = convertToAgentTask(data);
+      setTasks(prev => prev.map(task => task.id === taskId ? typedTask : task));
+      
+      toast({
+        title: 'Tarea desarchivada',
+        description: 'La tarea se ha desarchivado exitosamente.',
+      });
+      
+      return typedTask;
+    } catch (error) {
+      console.error('Error unarchiving task:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo desarchivar la tarea',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   return {
     createTask,
     updateTask,
     deleteTask,
-    deleteAllTasks
+    deleteAllTasks,
+    archiveTask,
+    unarchiveTask
   };
 }

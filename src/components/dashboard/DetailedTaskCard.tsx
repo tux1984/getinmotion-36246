@@ -18,7 +18,9 @@ import {
   Timer,
   MessageSquare,
   AlertCircle,
-  Check
+  Check,
+  Archive,
+  ArchiveRestore
 } from 'lucide-react';
 import { AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -30,6 +32,8 @@ interface DetailedTaskCardProps {
   onChatWithAgent?: (task: AgentTask) => void;
   onCompleteTask?: (task: AgentTask) => void;
   onDelete: (taskId: string) => void;
+  onArchive?: (taskId: string) => void;
+  onUnarchive?: (taskId: string) => void;
   isUpdating: boolean;
   allTasks?: AgentTask[];
 }
@@ -41,6 +45,8 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   onChatWithAgent,
   onCompleteTask,
   onDelete,
+  onArchive,
+  onUnarchive,
   isUpdating,
   allTasks = []
 }) => {
@@ -270,6 +276,31 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               </Button>
             )}
 
+            {/* Archive/Unarchive */}
+            {task.is_archived ? (
+              <Button 
+                onClick={() => onUnarchive?.(task.id)}
+                size="sm" 
+                variant="ghost"
+                className="h-8 px-2 text-blue-500 hover:text-blue-700"
+                disabled={isUpdating}
+                title={language === 'en' ? 'Unarchive' : 'Desarchivar'}
+              >
+                <ArchiveRestore className="w-3 h-3" />
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => onArchive?.(task.id)}
+                size="sm" 
+                variant="ghost"
+                className="h-8 px-2 text-gray-500 hover:text-gray-700"
+                disabled={isUpdating}
+                title={language === 'en' ? 'Archive' : 'Archivar'}
+              >
+                <Archive className="w-3 h-3" />
+              </Button>
+            )}
+
             {/* Delete */}
             <Button 
               onClick={() => setShowDeleteDialog(true)}
@@ -277,6 +308,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
               variant="ghost"
               className="h-8 px-2 text-red-500 hover:text-red-700"
               disabled={isUpdating}
+              title={language === 'en' ? 'Delete' : 'Eliminar'}
             >
               <Trash2 className="w-3 h-3" />
             </Button>

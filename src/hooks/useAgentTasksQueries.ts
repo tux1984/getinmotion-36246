@@ -11,7 +11,8 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
   const fetchTasks = useCallback(async (
     setTasks: React.Dispatch<React.SetStateAction<AgentTask[]>>,
     setTotalCount: React.Dispatch<React.SetStateAction<number>>,
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    includeArchived: boolean = false
   ) => {
     if (!user) {
       setTasks([]);
@@ -28,6 +29,10 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
 
       if (agentId) {
         query = query.eq('agent_id', agentId);
+      }
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
       }
 
       const { data, error, count } = await query.order('created_at', { ascending: false });
@@ -53,7 +58,7 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
   const fetchPaginatedTasks = useCallback(async (
     page: number = 1, 
     pageSize: number = 10, 
-    filter: 'all' | 'pending' | 'in_progress' | 'completed' = 'all'
+    filter: 'all' | 'pending' | 'in_progress' | 'completed' | 'archived' = 'all'
   ): Promise<PaginatedTasks> => {
     if (!user) {
       return { tasks: [], totalCount: 0, totalPages: 0, currentPage: page };
@@ -69,8 +74,12 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
         query = query.eq('agent_id', agentId);
       }
 
-      if (filter !== 'all') {
-        query = query.eq('status', filter);
+      if (filter === 'archived') {
+        query = query.eq('is_archived', true);
+      } else if (filter !== 'all') {
+        query = query.eq('status', filter).eq('is_archived', false);
+      } else {
+        query = query.eq('is_archived', false);
       }
 
       const from = (page - 1) * pageSize;
