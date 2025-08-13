@@ -117,6 +117,31 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     return models[businessProfile.businessModel] || businessProfile.businessModel;
   };
 
+  const getGoalLabel = (code: string) => {
+    const map = language === 'es'
+      ? {
+          increase_revenue: 'Aumentar ingresos',
+          automate_processes: 'Automatizar procesos',
+          scale_operations: 'Escalar operaciones',
+          build_brand: 'Construir marca',
+          expand_market: 'Expandir mercado',
+          reduce_costs: 'Reducir costos',
+          improve_ux: 'Mejorar experiencia',
+          launch_mvp: 'Lanzar MVP'
+        }
+      : {
+          increase_revenue: 'Increase revenue',
+          automate_processes: 'Automate processes',
+          scale_operations: 'Scale operations',
+          build_brand: 'Build brand',
+          expand_market: 'Expand market',
+          reduce_costs: 'Reduce costs',
+          improve_ux: 'Improve UX',
+          launch_mvp: 'Launch MVP'
+        };
+    return (map as Record<string, string>)[code] || code;
+  };
+
   const handleStartTask = async (taskId: string) => {
     const success = await startTaskJourney(taskId);
     if (success) {
@@ -374,9 +399,21 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                                       {labels.maturityLevel}: {maturityLevel}/10
                                     </Badge>
                                   </div>
-                                  <p className="text-white/80 text-sm">
-                                    📍 {businessProfile.businessDescription}
-                                  </p>
+                                  {Array.isArray(businessProfile?.primaryGoals) && businessProfile.primaryGoals.length > 0 && (
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                      {businessProfile.primaryGoals.map((goal: string, idx: number) => (
+                                        <Badge key={idx} className="bg-purple-400/20 text-purple-100 border-purple-400/30">
+                                          <Target className="w-3 h-3 mr-1" />
+                                          {getGoalLabel(goal)}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {typeof businessProfile.businessDescription === 'string' && businessProfile.businessDescription.trim().length > 0 && (
+                                    <p className="text-white/80 text-sm">
+                                      📍 {businessProfile.businessDescription}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </div>

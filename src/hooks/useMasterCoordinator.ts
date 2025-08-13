@@ -471,7 +471,8 @@ export const useMasterCoordinator = () => {
     try {
       const nextTask = getNextUnlockedTask();
       const completedCount = tasks.filter(t => t.status === 'completed').length;
-      const businessName = businessProfile?.brandName || businessProfile?.businessDescription || 'tu negocio';
+      const rawName = businessProfile?.brandName ?? businessProfile?.businessDescription;
+      const businessName = typeof rawName === 'string' && rawName.trim().length > 0 ? rawName : 'tu negocio';
       
       let result;
       if (!nextTask && completedCount === 0) {
