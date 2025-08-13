@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { useProfileSync } from '@/hooks/useProfileSync';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,9 @@ const EnhancedProfile: React.FC = () => {
   const { businessProfile, loading } = useUserBusinessProfile();
   const { currentScores } = useOptimizedMaturityScores();
   const { coordinatorMessage, deliverables } = useMasterCoordinator();
+  
+  // Sync profile data independently to avoid circular dependencies
+  useProfileSync();
 
   // Debug logging to understand data types
   console.log('🔍 EnhancedProfile: coordinatorMessage type:', typeof coordinatorMessage, coordinatorMessage);

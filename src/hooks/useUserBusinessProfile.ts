@@ -2,16 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { UserBusinessProfile, BusinessModel, BusinessStage } from '@/types/profile';
-import { useProfileSync } from './useProfileSync';
 
 export const useUserBusinessProfile = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserBusinessProfile | null>(null);
-  
-  // Auto-sync profile data
-  useProfileSync();
 
   // Derive business profile from various sources with enhanced field mapping
   const businessProfile = useMemo((): UserBusinessProfile | null => {
