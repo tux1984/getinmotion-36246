@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useTaskSteps } from '@/hooks/useTaskSteps';
 import { AgentTask } from '@/hooks/useAgentTasks';
+import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { 
   CheckCircle2, 
   Circle, 
@@ -35,6 +37,7 @@ export const TaskStepInterface: React.FC<TaskStepInterfaceProps> = ({
   onClose,
   onComplete
 }) => {
+  const { businessProfile } = useUserBusinessProfile();
   const { 
     steps, 
     loading, 
@@ -250,7 +253,7 @@ export const TaskStepInterface: React.FC<TaskStepInterfaceProps> = ({
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Target className="w-5 h-5 text-purple-600" />
-            {task.title}
+            {formatTaskTitleForDisplay(task.title, businessProfile?.brandName)}
           </DialogTitle>
         </DialogHeader>
 

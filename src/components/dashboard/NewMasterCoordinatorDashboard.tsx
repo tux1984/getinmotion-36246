@@ -213,7 +213,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     try {
       setStartingTask(task.id);
       
-      // Use the same flow as TaskManager: startTaskDevelopment + navigation
+      // Use the same flow as AgentTasksManager: startTaskDevelopment + navigation
       await startTaskDevelopment(task.id);
       
       toast({

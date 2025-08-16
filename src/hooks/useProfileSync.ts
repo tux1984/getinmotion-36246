@@ -52,59 +52,128 @@ export const useProfileSync = () => {
     if (!user) return;
 
     try {
-      // Get localStorage data
-      const maturityData = localStorage.getItem('fused_maturity_calculator_progress');
+      // First check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      // Get rich data from localStorage
+      const fusedMaturityData = localStorage.getItem('fused_maturity_calculator_progress');
       const conversationalData = localStorage.getItem('enhanced_conversational_agent_progress');
+      const calculatorData = localStorage.getItem('profileData');
       
-      let profileData = {};
-      if (maturityData) {
-        const parsed = JSON.parse(maturityData);
-        profileData = parsed.profileData || {};
+      let profileData: any = {};
+      let brandName = existingProfile?.brand_name || '';
+      let businessDescription = existingProfile?.business_description || '';
+      
+      // Extract comprehensive data from localStorage
+      if (fusedMaturityData) {
+        const data = JSON.parse(fusedMaturityData);
+        profileData = data.profileData || {};
+        brandName = brandName || profileData.brandName || '';
+        businessDescription = businessDescription || profileData.businessDescription || '';
       } else if (conversationalData) {
-        const parsed = JSON.parse(conversationalData);
-        profileData = parsed.profileData || {};
+        const data = JSON.parse(conversationalData);
+        profileData = data.profileData || {};
+        brandName = brandName || profileData.brandName || '';
+        businessDescription = businessDescription || profileData.businessDescription || '';
+      } else if (calculatorData) {
+        profileData = JSON.parse(calculatorData);
+        brandName = brandName || profileData.brandName || '';
+        businessDescription = businessDescription || profileData.businessDescription || '';
       }
 
-      // Extract brand name and business description intelligently
-      const extractedBrandName = 
-        (profileData as any)?.brandName || 
-        (profileData as any)?.businessName ||
-        (profileData as any)?.companyName ||
-        null;
+      // Auto-generate intelligent brand name if missing and we have business description
+      if (!brandName && businessDescription) {
+        brandName = generateIntelligentBrandName(businessDescription);
+        console.log('🎯 Auto-generated brand name:', brandName, 'from description:', businessDescription);
+      }
 
-      const businessDescription = 
-        (profileData as any)?.businessDescription ||
-        (profileData as any)?.description ||
-        (profileData as any)?.whatDoes ||
-        (profileData as any)?.businessIdea ||
-        null;
+      // Extract additional profile fields
+      const fullProfileUpdate = {
+        user_id: user.id,
+        brand_name: brandName,
+        business_description: businessDescription,
+        business_type: profileData.businessType || existingProfile?.business_type || null,
+        target_market: profileData.targetMarket || existingProfile?.target_market || null,
+        current_stage: profileData.currentStage || existingProfile?.current_stage || null,
+        business_goals: profileData.businessGoals ? [profileData.businessGoals] : existingProfile?.business_goals || null,
+        business_location: profileData.businessLocation || existingProfile?.business_location || null,
+        years_in_business: profileData.yearsInBusiness || existingProfile?.years_in_business || null,
+        monthly_revenue_goal: profileData.revenueGoal ? parseInt(profileData.revenueGoal) : existingProfile?.monthly_revenue_goal || null,
+        updated_at: new Date().toISOString()
+      };
 
-      // Auto-generate intelligent brand name if missing
-      const brandName = extractedBrandName || generateIntelligentBrandName(businessDescription);
+      // Sync to database (upsert)
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert(fullProfileUpdate, { 
+          onConflict: 'user_id' 
+        });
 
-      // Only update if we have meaningful data
-      if (brandName || businessDescription) {
-        const { error } = await supabase
-          .from('user_profiles')
-          .upsert({
-            user_id: user.id,
-            brand_name: brandName,
-            business_description: businessDescription,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
+      if (error) throw error;
+      
+      console.log('✅ Profile synced successfully', fullProfileUpdate);
 
-        if (error) {
-          console.error('Error syncing profile:', error);
-        } else {
-          console.log('✅ Profile synced successfully:', { brandName, businessDescription });
+      // Clean up task titles if brand name was just generated
+      if (brandName && !existingProfile?.brand_name) {
+        await cleanupTaskTitles(user.id, brandName);
+      }
+    } catch (error) {
+      console.error('❌ Error syncing profile:', error);
+    }
+  }, [user]);
+
+  // Function to clean up existing task titles
+  const cleanupTaskTitles = async (userId: string, brandName: string) => {
+    try {
+      console.log('🧹 Cleaning up task titles for user:', userId);
+      
+      // Get all tasks with array-like titles
+      const { data: tasks } = await supabase
+        .from('agent_tasks')
+        .select('id, title, description')
+        .eq('user_id', userId);
+
+      if (!tasks) return;
+
+      const tasksToUpdate = tasks.filter(task => 
+        task.title && (
+          task.title.includes('[') || 
+          task.title.includes('"') ||
+          task.title.includes('goal') ||
+          task.title.length > 100
+        )
+      );
+
+      console.log(`🎯 Found ${tasksToUpdate.length} tasks to clean up`);
+
+      for (const task of tasksToUpdate) {
+        const { formatTaskTitleForDisplay } = await import('./utils/agentTaskUtils');
+        const cleanTitle = formatTaskTitleForDisplay(task.title, brandName);
+        
+        if (cleanTitle !== task.title) {
+          const { error } = await supabase
+            .from('agent_tasks')
+            .update({ 
+              title: cleanTitle,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', task.id);
+
+          if (error) {
+            console.error('❌ Error updating task title:', error);
+          } else {
+            console.log('✅ Updated task title:', task.title, '→', cleanTitle);
+          }
         }
       }
     } catch (error) {
-      console.error('Error in syncProfileData:', error);
+      console.error('❌ Error cleaning up task titles:', error);
     }
-  }, [user]);
+  };
 
   // Auto-sync when component mounts or data changes
   useEffect(() => {

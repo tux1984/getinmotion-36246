@@ -54,8 +54,8 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
       const updatedTask = await startTaskDevelopment(task.id);
       
       if (updatedTask && onChatWithAgent) {
-        // Open chat immediately after starting development
-        onChatWithAgent(task.id, task.title);
+        const formattedTitle = formatTaskTitleForDisplay(task.title, businessProfile?.brandName);
+        onChatWithAgent(task.id, formattedTitle);
       }
     } catch (error) {
       console.error('Error starting task development:', error);
@@ -92,7 +92,8 @@ export const AgentTasksManager: React.FC<AgentTasksManagerProps> = ({
 
   const handleChatWithAgent = (task: AgentTask) => {
     if (onChatWithAgent) {
-      onChatWithAgent(task.id, task.title);
+      const formattedTitle = formatTaskTitleForDisplay(task.title, businessProfile?.brandName);
+      onChatWithAgent(task.id, formattedTitle);
     }
   };
 
