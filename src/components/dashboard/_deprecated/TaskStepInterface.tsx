@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useTaskSteps } from '@/hooks/useTaskSteps';
+import { useTaskSteps } from '@/hooks/_deprecated/useTaskSteps';
 import { AgentTask } from '@/hooks/useAgentTasks';
 import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TaskStep } from '@/hooks/types/taskStepTypes';
+import { TaskStep } from '@/hooks/_deprecated/types/taskStepTypes';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';

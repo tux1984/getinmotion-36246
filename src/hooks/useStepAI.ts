@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
-import { TaskStep } from './types/taskStepTypes';
+import { TaskStep } from './_deprecated/types/taskStepTypes';
 
 export interface StepAIMessage {
   role: 'user' | 'assistant';

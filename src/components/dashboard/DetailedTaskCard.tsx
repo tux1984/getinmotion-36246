@@ -8,7 +8,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { TaskDetailView } from './TaskDetailView';
-import { TaskStepInterface } from './TaskStepInterface';
+
 import { DeleteTaskDialog } from './DeleteTaskDialog';
 import { 
   CheckCircle2, 
@@ -63,7 +63,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
   const { t } = useTranslations();
   const { businessProfile } = useUserBusinessProfile();
   const [showTaskDetail, setShowTaskDetail] = useState(false);
-  const [showStepInterface, setShowStepInterface] = useState(false);
+  
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Format title with brand name
@@ -110,7 +110,7 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
     return {
       label: t.dashboard.continueTask,
       icon: MessageSquare,
-      onClick: () => setShowStepInterface(true),
+      onClick: handleChatWithAgent,
       variant: 'default' as const,
       className: 'bg-blue-600 hover:bg-blue-700 text-white'
     };
@@ -359,18 +359,6 @@ export const DetailedTaskCard: React.FC<DetailedTaskCardProps> = ({
           />
         )}
 
-        {/* Task Step Interface Modal */}
-        {showStepInterface && (
-          <TaskStepInterface
-            task={task}
-            language={language}
-            onClose={() => setShowStepInterface(false)}
-            onComplete={() => {
-              setShowStepInterface(false);
-              onCompleteTask?.(task);
-            }}
-          />
-        )}
 
         {/* Delete Task Confirmation Dialog */}
         <DeleteTaskDialog

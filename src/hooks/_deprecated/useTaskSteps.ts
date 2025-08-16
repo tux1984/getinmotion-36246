@@ -61,10 +61,30 @@ export function useTaskSteps(taskId: string) {
         }
       }
       
-      setSteps(data || []);
+      setSteps((data || []).map(step => ({
+        id: step.id,
+        task_id: step.task_id,
+        step_number: step.step_number,
+        title: step.title,
+        description: step.description,
+        input_type: step.input_type as TaskStep['input_type'],
+        expected_output: '',
+        ai_context_prompt: step.ai_context_prompt || '',
+        completion_status: step.completion_status as TaskStep['completion_status'],
+        user_input_data: step.user_input_data,
+        validation_notes: null,
+        validation_criteria: step.validation_criteria,
+        ai_assistance_log: step.ai_assistance_log,
+        created_at: step.created_at,
+        updated_at: step.updated_at
+      })));
       
       // Find first incomplete step
-      const firstIncomplete = data?.findIndex(step => step.completion_status !== 'completed') ?? 0;
+      const mappedSteps = (data || []).map(step => ({
+        ...step,
+        completion_status: step.completion_status as TaskStep['completion_status']
+      }));
+      const firstIncomplete = mappedSteps.findIndex(step => step.completion_status !== 'completed');
       setCurrentStepIndex(Math.max(0, firstIncomplete));
     } catch (error) {
       console.error('Error fetching task steps:', error);

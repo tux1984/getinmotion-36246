@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
-import { useTaskSteps } from '@/hooks/useTaskSteps';
+import { useTaskSteps } from '@/hooks/_deprecated/useTaskSteps';
 import { StepExecutionModule } from './StepExecutionModule';
 import { TaskContextCard } from './TaskContextCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

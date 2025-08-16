@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lightbulb, ArrowRight } from 'lucide-react';
-import { TaskStep } from '@/hooks/types/taskStepTypes';
+import { TaskStep } from '@/hooks/_deprecated/types/taskStepTypes';
 
 interface StepGuideCardProps {
   step: TaskStep;
