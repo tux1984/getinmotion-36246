@@ -239,8 +239,70 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     }
   };
 
-  const handleChatWithCoordinator = () => {
-    navigate('/dashboard/agent/master-coordinator');
+  const handleUnifiedCoordinatorAction = async () => {
+    if (isGeneratingTasks) return; // Prevenir múltiples llamadas
+    
+    // Si no hay perfil de negocio completo, capturar primero
+    if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
+      setShowProfileCapture(true);
+      return;
+    }
+    
+    // Si hay perfil pero no hay tareas activas, generar tareas
+    if (activeTasks.length === 0) {
+      console.log('🚀 Starting Master Coordinator flow');
+      setIsGeneratingTasks(true);
+      try {
+        await analyzeProfileAndGenerateTasks();
+        toast({
+          title: language === 'es' ? "¡Coordinador Activado!" : "Coordinator Activated!",
+          description: language === 'es' 
+            ? "He analizado tu perfil y generado tareas específicas para tu negocio."
+            : "I've analyzed your profile and generated specific tasks for your business.",
+        });
+      } catch (error) {
+        console.error('❌ Error starting coordinator:', error);
+        toast({
+          title: language === 'es' ? "Error" : "Error",
+          description: language === 'es' 
+            ? "Hubo un problema generando las tareas. Por favor, inténtalo de nuevo."
+            : "There was a problem generating tasks. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsGeneratingTasks(false);
+      }
+    } else {
+      // Si ya hay tareas activas, ir al chat del coordinador
+      navigate('/dashboard/agent/master-coordinator');
+    }
+  };
+
+  const getUnifiedButtonState = () => {
+    if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
+      return {
+        text: language === 'es' ? 'Configurar Coordinador' : 'Configure Coordinator',
+        description: language === 'es' ? 'Configurar perfil y activar coordinador' : 'Set up profile and activate coordinator',
+        icon: User,
+        color: 'bg-blue-600 hover:bg-blue-500'
+      };
+    }
+    
+    if (activeTasks.length === 0) {
+      return {
+        text: language === 'es' ? 'Activar Coordinador' : 'Activate Coordinator',
+        description: language === 'es' ? 'Generar tareas personalizadas' : 'Generate personalized tasks',
+        icon: isGeneratingTasks ? Zap : Lightbulb,
+        color: 'bg-yellow-600 hover:bg-yellow-500'
+      };
+    }
+    
+    return {
+      text: language === 'es' ? 'Hablar con Coordinador' : 'Talk to Coordinator',
+      description: language === 'es' ? `${activeTasks.length} tareas activas` : `${activeTasks.length} active tasks`,
+      icon: MessageCircle,
+      color: 'bg-green-600 hover:bg-green-500'
+    };
   };
 
   const labels = language === 'es' ? {
@@ -448,58 +510,42 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                            {language === 'es' ? 'Elige tu próxima acción:' : 'Choose your next action:'}
                          </p>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          {/* Conditional First Button: Start Now vs View Tasks */}
-                          {activeTasks.length === 0 ? (
-                            <Button
-                              variant="default"
-                              className="h-auto p-4 bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold"
-                              onClick={handleStartNow}
-                              disabled={isGeneratingTasks || coordinatorLoading}
-                            >
-                              <div className="flex items-center space-x-3 w-full">
-                                <div className="w-8 h-8 rounded-lg bg-purple-600/20 flex items-center justify-center">
-                                  {isGeneratingTasks ? (
-                                    <Zap className="w-4 h-4 text-purple-900 animate-pulse" />
-                                  ) : (
-                                    <Play className="w-4 h-4 text-purple-900" />
-                                  )}
+                        {/* Unified Master Coordinator Button */}
+                        <div className="mb-4">
+                          {(() => {
+                            const buttonState = getUnifiedButtonState();
+                            const IconComponent = buttonState.icon;
+                            
+                            return (
+                              <Button
+                                variant="default"
+                                className={`h-auto p-6 w-full ${buttonState.color} text-white font-bold text-lg`}
+                                onClick={handleUnifiedCoordinatorAction}
+                                disabled={isGeneratingTasks || coordinatorLoading}
+                              >
+                                <div className="flex items-center space-x-4 w-full">
+                                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <IconComponent className={`w-6 h-6 text-white ${isGeneratingTasks ? 'animate-pulse' : ''}`} />
+                                  </div>
+                                  <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                     <div className="font-bold truncate text-lg">
+                                       {isGeneratingTasks 
+                                         ? (language === 'es' ? 'Generando...' : 'Generating...')
+                                         : buttonState.text}
+                                     </div>
+                                     <div className="text-sm text-white/80 truncate">
+                                       {buttonState.description}
+                                     </div>
+                                  </div>
+                                  <ArrowRight className="w-5 h-5 text-white/80" />
                                 </div>
-                                <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                   <div className="font-medium truncate">
-                                     {isGeneratingTasks 
-                                       ? (language === 'es' ? 'Generando...' : 'Generating...')
-                                       : labels.startNow}
-                                   </div>
-                                   <div className="text-xs text-purple-700 truncate">
-                                     {labels.activateCoordinator}
-                                   </div>
-                                </div>
-                              </div>
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="default"
-                              className="h-auto p-4 bg-green-600 text-white hover:bg-green-500 font-bold"
-                              onClick={handleViewActiveTasks}
-                            >
-                              <div className="flex items-center space-x-3 w-full">
-                                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                                  <Target className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                   <div className="font-medium truncate">
-                                     {language === 'es' ? 'Ver Tareas Activas' : 'View Active Tasks'}
-                                   </div>
-                                   <div className="text-xs text-green-100 truncate">
-                                     {language === 'es' 
-                                       ? `${activeTasks.length} tareas esperándote`
-                                       : `${activeTasks.length} tasks waiting for you`}
-                                   </div>
-                                </div>
-                              </div>
-                            </Button>
-                          )}
+                              </Button>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Secondary Action Buttons */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
                           <Button
                             variant="outline"
@@ -543,16 +589,6 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                             </div>
                           </Button>
                         </div>
-
-                        {/* Chat Button */}
-                        <Button
-                          variant="ghost"
-                          onClick={handleChatWithCoordinator}
-                          className="w-full bg-white/10 border border-white/20 text-white hover:bg-white/30 transition-colors"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          {labels.chatWithMe}
-                        </Button>
 
                         {/* Quick Stats on Mobile */}
                         <div className="md:hidden flex space-x-2">
