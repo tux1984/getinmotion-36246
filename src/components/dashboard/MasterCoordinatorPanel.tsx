@@ -175,6 +175,17 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   const handleStartNow = async () => {
     if (isGeneratingTasks) return; // Prevenir múltiples llamadas
     
+    // Verificar si ya hay tareas activas
+    if (activeTasks.length > 0) {
+      toast({
+        title: language === 'es' ? "Ya tienes tareas activas" : "You already have active tasks",
+        description: language === 'es' 
+          ? "El coordinador ya está activo. Ve a tus tareas para continuar."
+          : "The coordinator is already active. Go to your tasks to continue.",
+      });
+      return;
+    }
+    
     console.log('🚀 Starting Master Coordinator flow');
     setIsGeneratingTasks(true);
     try {
@@ -197,6 +208,10 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     } finally {
       setIsGeneratingTasks(false);
     }
+  };
+
+  const handleViewActiveTasks = () => {
+    navigate('/dashboard/tasks');
   };
 
   const handleRecalculateMaturity = async () => {
@@ -245,6 +260,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     businessModel: 'Modelo de Negocio',
     startNow: 'Comenzar Ahora',
     activateCoordinator: 'Activar coordinador y generar tareas personalizadas',
+    viewActiveTasks: 'Ver Tareas Activas',
+    tasksWaitingForYou: 'tareas esperándote',
     talkAboutBusiness: 'Háblame de tu negocio',
     deepenProfile: 'Profundiza tu perfil con preguntas inteligentes',
     recalculateMaturity: 'Recalcular Madurez',
@@ -266,6 +283,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     businessModel: 'Business Model',
     startNow: 'Start Now',
     activateCoordinator: 'Activate coordinator and generate personalized tasks',
+    viewActiveTasks: 'View Active Tasks',
+    tasksWaitingForYou: 'tasks waiting for you',
     talkAboutBusiness: 'Tell me about your business',
     deepenProfile: 'Deepen your profile with intelligent questions',
     recalculateMaturity: 'Recalculate Maturity',
@@ -430,32 +449,57 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                          </p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <Button
-                            variant="default"
-                            className="h-auto p-4 bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold"
-                            onClick={handleStartNow}
-                            disabled={isGeneratingTasks || coordinatorLoading}
-                          >
-                            <div className="flex items-center space-x-3 w-full">
-                              <div className="w-8 h-8 rounded-lg bg-purple-600/20 flex items-center justify-center">
-                                {isGeneratingTasks ? (
-                                  <Zap className="w-4 h-4 text-purple-900 animate-pulse" />
-                                ) : (
-                                  <Play className="w-4 h-4 text-purple-900" />
-                                )}
+                          {/* Conditional First Button: Start Now vs View Tasks */}
+                          {activeTasks.length === 0 ? (
+                            <Button
+                              variant="default"
+                              className="h-auto p-4 bg-yellow-400 text-purple-900 hover:bg-yellow-300 font-bold"
+                              onClick={handleStartNow}
+                              disabled={isGeneratingTasks || coordinatorLoading}
+                            >
+                              <div className="flex items-center space-x-3 w-full">
+                                <div className="w-8 h-8 rounded-lg bg-purple-600/20 flex items-center justify-center">
+                                  {isGeneratingTasks ? (
+                                    <Zap className="w-4 h-4 text-purple-900 animate-pulse" />
+                                  ) : (
+                                    <Play className="w-4 h-4 text-purple-900" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                   <div className="font-medium truncate">
+                                     {isGeneratingTasks 
+                                       ? (language === 'es' ? 'Generando...' : 'Generating...')
+                                       : labels.startNow}
+                                   </div>
+                                   <div className="text-xs text-purple-700 truncate">
+                                     {labels.activateCoordinator}
+                                   </div>
+                                </div>
                               </div>
-                              <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                 <div className="font-medium truncate">
-                                   {isGeneratingTasks 
-                                     ? (language === 'es' ? 'Generando...' : 'Generating...')
-                                     : labels.startNow}
-                                 </div>
-                                 <div className="text-xs text-purple-700 truncate">
-                                   {labels.activateCoordinator}
-                                 </div>
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="default"
+                              className="h-auto p-4 bg-green-600 text-white hover:bg-green-500 font-bold"
+                              onClick={handleViewActiveTasks}
+                            >
+                              <div className="flex items-center space-x-3 w-full">
+                                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                                  <Target className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                   <div className="font-medium truncate">
+                                     {language === 'es' ? 'Ver Tareas Activas' : 'View Active Tasks'}
+                                   </div>
+                                   <div className="text-xs text-green-100 truncate">
+                                     {language === 'es' 
+                                       ? `${activeTasks.length} tareas esperándote`
+                                       : `${activeTasks.length} tasks waiting for you`}
+                                   </div>
+                                </div>
                               </div>
-                            </div>
-                          </Button>
+                            </Button>
+                          )}
 
                           <Button
                             variant="outline"

@@ -4,6 +4,7 @@ import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
 import { useUserBusinessProfile } from './useUserBusinessProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentTasks } from './useAgentTasks';
+import { useTaskLimits } from './useTaskLimits';
 import { useTaskGenerationControl } from './useTaskGenerationControl';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -51,6 +52,7 @@ export const useMasterCoordinator = () => {
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();
   const { tasks, createTask, updateTask, deleteTask, deleteAllTasks } = useAgentTasks();
+  const { isAtLimit, getLimitMessage } = useTaskLimits(tasks);
   const { allowAutoGeneration } = useTaskGenerationControl();
   
   const [coordinatorTasks, setCoordinatorTasks] = useState<CoordinatorTask[]>([]);
@@ -63,6 +65,17 @@ export const useMasterCoordinator = () => {
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
     if (!user || loading) {
       console.warn('🚫 Master Coordinator: No user available or already generating tasks');
+      return;
+    }
+
+    // Verificar límite de tareas activas
+    if (isAtLimit) {
+      console.warn('🚫 Master Coordinator: Active tasks limit reached');
+      toast({
+        title: "Límite de Tareas Alcanzado",
+        description: getLimitMessage('es'),
+        variant: "destructive"
+      });
       return;
     }
 
@@ -108,7 +121,7 @@ export const useMasterCoordinator = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, profileData, currentScores, businessProfile, toast]);
+  }, [user, profileData, currentScores, businessProfile, toast, isAtLimit, getLimitMessage]);
 
   // FASE 2: Generar preguntas inteligentes contextuales
   const generateIntelligentQuestions = useCallback(async () => {
