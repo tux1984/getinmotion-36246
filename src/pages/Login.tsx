@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
+import { LoginFeatureSlider } from '@/components/auth/LoginFeatureSlider';
 import { getUserProgressStatus } from '@/utils/userProgress';
 
 const Login = () => {
@@ -150,72 +151,82 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex flex-col">
-      <header className="p-4 flex justify-between items-center">
-        <MotionLogo variant="light" />
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950">
+      {/* Header with logo */}
+      <header className="absolute top-0 left-0 z-10 p-4 lg:p-6">
+        <MotionLogo variant="light" size="lg" />
       </header>
       
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md space-y-4">
-          <Card className="bg-indigo-900/40 border-indigo-800/30 text-white">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* Left side - Login Form */}
+        <div className="flex-1 lg:max-w-md xl:max-w-lg flex items-center justify-center p-4 lg:p-8">
+          <div className="w-full max-w-sm space-y-6">
+            <div className="text-center mb-8 lg:mb-12">
+              <h1 className="text-2xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-2">
                 {t.title}
-              </CardTitle>
-              <CardDescription className="text-indigo-200">
+              </h1>
+              <p className="text-indigo-200 text-sm lg:text-base">
                 {t.subtitle}
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t.email}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={t.emailPlaceholder}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t.password}</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t.passwordPlaceholder}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="bg-indigo-900/50 border-indigo-700 placeholder:text-indigo-400 text-indigo-100"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                  disabled={isLoading}
-                >
-                  {isLoading ? t.signingIn : t.signIn}
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDebug(!showDebug)}
-                  className="text-indigo-300 hover:text-white"
-                >
-                  {showDebug ? t.hideDebug : t.showDebug}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-          
-          {showDebug && <AuthDebugPanel />}
+              </p>
+            </div>
+
+            <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-4 pt-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-indigo-200">{t.email}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t.emailPlaceholder}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="bg-white/10 border-white/20 placeholder:text-indigo-400 text-white focus:border-pink-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-indigo-200">{t.password}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={t.passwordPlaceholder}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-white/10 border-white/20 placeholder:text-indigo-400 text-white focus:border-pink-400"
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-3 pb-6">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? t.signingIn : t.signIn}
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDebug(!showDebug)}
+                    className="text-indigo-300 hover:text-white hover:bg-white/10"
+                  >
+                    {showDebug ? t.hideDebug : t.showDebug}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+            
+            {showDebug && <AuthDebugPanel />}
+          </div>
+        </div>
+        
+        {/* Right side - Feature Slider */}
+        <div className="flex-1 relative overflow-hidden">
+          <LoginFeatureSlider />
         </div>
       </div>
     </div>
