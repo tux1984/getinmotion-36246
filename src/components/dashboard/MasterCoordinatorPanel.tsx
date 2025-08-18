@@ -545,28 +545,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                         </div>
 
                         {/* Secondary Action Buttons */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-                          <Button
-                            variant="outline"
-                            className="h-auto p-4 bg-white text-purple-600 hover:bg-white/90"
-                            onClick={handleTalkAboutBusiness}
-                            disabled={coordinatorLoading}
-                          >
-                            <div className="flex items-center space-x-3 w-full">
-                              <div className="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center">
-                                <MessageCircle className="w-4 h-4 text-purple-600" />
-                              </div>
-                              <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                 <div className="font-medium truncate">
-                                   {labels.talkAboutBusiness}
-                                 </div>
-                                 <div className="text-xs text-purple-500 truncate">
-                                   {labels.deepenProfile}
-                                 </div>
-                              </div>
-                            </div>
-                          </Button>
+                        <div className="flex justify-center">
 
                           <Button
                             variant="outline"
