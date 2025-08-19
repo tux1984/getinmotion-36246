@@ -625,6 +625,5 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           </AnimatePresence>
         </div>
       </div>
-    </div>
   );
 };
