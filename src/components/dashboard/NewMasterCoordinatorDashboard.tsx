@@ -435,12 +435,11 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   const t = translations[language];
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Master Coordinator Panel - Único y central */}
       <MasterCoordinatorPanel onTaskStart={handleTaskStartFromPanel} language={language} />
       
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
 
           {/* Key Performance Metrics */}
           <motion.div 
@@ -626,6 +625,6 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           </AnimatePresence>
         </div>
       </div>
-    </>
+    </div>
   );
 };

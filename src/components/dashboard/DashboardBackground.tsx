@@ -10,11 +10,13 @@ import { useNavigate } from 'react-router-dom';
 interface DashboardBackgroundProps {
   children: React.ReactNode;
   showGlobalComponents?: boolean;
+  showFloatingAgent?: boolean;
 }
 
 export const DashboardBackground: React.FC<DashboardBackgroundProps> = ({ 
   children, 
-  showGlobalComponents = true 
+  showGlobalComponents = true,
+  showFloatingAgent = true 
 }) => {
   const language = 'en'; // Fixed to English only
   const navigate = useNavigate();
@@ -83,16 +85,18 @@ export const DashboardBackground: React.FC<DashboardBackgroundProps> = ({
             </div>
             
             {/* Floating Master Agent - bottom right */}
-            <FloatingMasterAgent
-              language={language}
-              maturityScores={currentScores}
-              activeTasksCount={activeTasksCount}
-              completedTasksCount={completedTasksCount}
-              userActivityDays={userActivityDays}
-              onStartChat={handleStartChat}
-              onViewProgress={handleViewProgress}
-              onHelp={() => console.log('Help requested')}
-            />
+            {showFloatingAgent && (
+              <FloatingMasterAgent
+                language={language}
+                maturityScores={currentScores}
+                activeTasksCount={activeTasksCount}
+                completedTasksCount={completedTasksCount}
+                userActivityDays={userActivityDays}
+                onStartChat={handleStartChat}
+                onViewProgress={handleViewProgress}
+                onHelp={() => console.log('Help requested')}
+              />
+            )}
           </>
         )}
       </div>
