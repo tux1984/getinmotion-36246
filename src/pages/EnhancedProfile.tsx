@@ -3,8 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { useUserInsights } from '@/hooks/useUserInsights';
 import { useProfileSync } from '@/hooks/useProfileSync';
 import { useLanguage } from '@/context/LanguageContext';
+import { ActivityTimeline } from '@/components/profile/ActivityTimeline';
+import { AgentProgressMap } from '@/components/profile/AgentProgressMap';
+import { DeliverablesCenter } from '@/components/profile/DeliverablesCenter';
+import { IntelligentInsights } from '@/components/profile/IntelligentInsights';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,14 +44,12 @@ const EnhancedProfile: React.FC = () => {
   const { businessProfile, loading } = useUserBusinessProfile();
   const { currentScores } = useOptimizedMaturityScores();
   const { coordinatorMessage, deliverables } = useMasterCoordinator();
+  const { insights, loading: insightsLoading } = useUserInsights();
   
   // Sync profile data independently to avoid circular dependencies
   useProfileSync();
 
-  // Debug logging to understand data types
-  console.log('🔍 EnhancedProfile: coordinatorMessage type:', typeof coordinatorMessage, coordinatorMessage);
-  console.log('🔍 EnhancedProfile: deliverables type:', typeof deliverables, deliverables);
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedTab, setSelectedTab] = useState('activity');
 
   if (loading) {
     return (
@@ -103,10 +106,10 @@ const EnhancedProfile: React.FC = () => {
       subtitle: 'Your comprehensive business overview',
       backToDashboard: 'Back to Dashboard',
       editProfile: 'Edit Profile',
-      overview: 'Overview',
-      insights: 'Insights',
-      goals: 'Goals & Progress',
-      recommendations: 'Recommendations',
+      activity: 'Activity',
+      insights: 'Insights', 
+      agents: 'Agent Progress',
+      deliverables: 'Deliverables',
       businessInfo: 'Business Information',
       personalInfo: 'Personal Information',
       currentChannels: 'Current Channels',
@@ -132,10 +135,10 @@ const EnhancedProfile: React.FC = () => {
       subtitle: 'Tu visión integral del negocio',
       backToDashboard: 'Volver al Dashboard',
       editProfile: 'Editar Perfil',
-      overview: 'Resumen',
+      activity: 'Actividad',
       insights: 'Insights',
-      goals: 'Objetivos y Progreso',
-      recommendations: 'Recomendaciones',
+      agents: 'Progreso de Agentes',
+      deliverables: 'Entregables',
       businessInfo: 'Información del Negocio',
       personalInfo: 'Información Personal',
       currentChannels: 'Canales Actuales',
@@ -271,307 +274,48 @@ const EnhancedProfile: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Master Coordinator Integration */}
-        {((coordinatorMessage && typeof coordinatorMessage === 'object' && coordinatorMessage.message) || 
-          (typeof coordinatorMessage === 'string' && coordinatorMessage) || 
-          (deliverables && deliverables.length > 0)) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {((coordinatorMessage && typeof coordinatorMessage === 'object' && coordinatorMessage.message) || 
-                (typeof coordinatorMessage === 'string' && coordinatorMessage)) && (
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 shadow-card hover:shadow-glow transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0 animate-glow-pulse">
-                        <Brain className="w-5 h-5 text-primary-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-2">
-                          {language === ('es' as string) ? 'Análisis del Coordinador Maestro' : 'Master Coordinator Analysis'}
-                        </h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
-                            ? coordinatorMessage.message 
-                            : (typeof coordinatorMessage === 'string' ? coordinatorMessage : 'Analyzing your business profile...')
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {deliverables && deliverables.length > 0 && (
-                <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 shadow-card hover:shadow-elegant transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-gradient-secondary rounded-lg flex items-center justify-center flex-shrink-0 animate-float">
-                        <CheckCircle2 className="w-5 h-5 text-secondary-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-green-800 mb-2">
-                          {language === ('es' as string) ? 'Entregables Activos' : 'Active Deliverables'}
-                        </h3>
-                        <p className="text-sm text-green-600">
-                          {language === ('es' as string)
-                            ? `${deliverables.length} entregables en progreso para tu negocio`
-                            : `${deliverables.length} deliverables in progress for your business`
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </motion.div>
-        )}
-
         {/* Tabs Navigation */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-            <TabsTrigger value="overview">{t.overview}</TabsTrigger>
+            <TabsTrigger value="activity">{t.activity}</TabsTrigger>
             <TabsTrigger value="insights">{t.insights}</TabsTrigger>
-            <TabsTrigger value="goals">{t.goals}</TabsTrigger>
-            <TabsTrigger value="recommendations">{t.recommendations}</TabsTrigger>
+            <TabsTrigger value="agents">{t.agents}</TabsTrigger>
+            <TabsTrigger value="deliverables">{t.deliverables}</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Business Information */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Building2 className="w-5 h-5" />
-                      <span>{t.businessInfo}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">{t.currentChannels}</label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {businessProfile.currentChannels.map((channel) => (
-                          <Badge key={channel} variant="secondary">{channel}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">{t.desiredChannels}</label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {businessProfile.desiredChannels.map((channel) => (
-                          <Badge key={channel} variant="outline">{channel}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">{t.financialResources}</label>
-                      <div className="mt-1 text-lg font-semibold">{businessProfile.financialResources}</div>
-                    </div>
-                    {businessProfile.monthlyRevenueGoal && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">{t.monthlyGoal}</label>
-                        <div className="mt-1 text-lg font-semibold flex items-center">
-                          <DollarSign className="w-4 h-4 mr-1" />
-                          {businessProfile.monthlyRevenueGoal.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Goals & Challenges */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Target className="w-5 h-5" />
-                      <span>{t.primaryGoals}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">{t.primaryGoals}</label>
-                      <div className="mt-2 space-y-2">
-                        {businessProfile.primaryGoals.map((goal, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-500" />
-                            <span className="text-sm">{goal}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">{t.urgentNeeds}</label>
-                      <div className="mt-2 space-y-2">
-                        {businessProfile.urgentNeeds.map((need, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <Zap className="w-4 h-4 text-orange-500" />
-                            <span className="text-sm">{need}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-            </div>
+          {/* Activity Tab */}
+          <TabsContent value="activity" className="space-y-6">
+            {insights ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ActivityTimeline activities={insights.recent_activity} language={language} />
+                <IntelligentInsights insights={insights} language={language} />
+              </div>
+            ) : (
+              <div>Loading activity...</div>
+            )}
           </TabsContent>
 
           {/* Insights Tab */}
           <TabsContent value="insights" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Star className="w-5 h-5" />
-                      <span>{t.skillsExpertise}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {businessProfile.skillsAndExpertise.map((skill, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-secondary/10 rounded">
-                          <span className="text-sm">{skill}</span>
-                          <Badge variant="outline">Expert</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Lightbulb className="w-5 h-5" />
-                      <span>{t.currentChallenges}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {businessProfile.currentChallenges.map((challenge, index) => (
-                        <div key={index} className="p-3 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-900/10 rounded-r">
-                          <p className="text-sm">{challenge}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-            </div>
+            {insights ? (
+              <IntelligentInsights insights={insights} language={language} />
+            ) : (
+              <div>Loading insights...</div>
+            )}
           </TabsContent>
 
-          {/* Goals Tab */}
-          <TabsContent value="goals" className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="w-5 h-5" />
-                    <span>{t.profileStrength}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{t.dataCompleteness}</span>
-                      <span className="text-sm text-muted-foreground">{profileCompleteness}%</span>
-                    </div>
-                    <Progress value={profileCompleteness} className="h-2" />
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{t.maturityLevel}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel}/5
-                      </span>
-                    </div>
-                    <Progress value={((currentScores ? Math.round((currentScores.ideaValidation + currentScores.userExperience + currentScores.marketFit + currentScores.monetization) / 4) : businessProfile.maturityLevel) / 5) * 100} className="h-2" />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {/* Agents Tab */}
+          <TabsContent value="agents" className="space-y-6">
+            {insights ? (
+              <AgentProgressMap agents={insights.agent_insights} language={language} />
+            ) : (
+              <div>Loading agent progress...</div>
+            )}
           </TabsContent>
 
-          {/* Recommendations Tab */}
-          <TabsContent value="recommendations" className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Award className="w-5 h-5" />
-                    <span>{t.nextSteps}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 border border-primary/20 rounded-lg bg-primary/5">
-                      <div className="flex items-center space-x-3">
-                        <ArrowRight className="w-5 h-5 text-primary" />
-                        <div>
-                          <h4 className="font-semibold">Complete maturity assessment</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Get more precise recommendations by completing all assessment steps.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 border border-secondary/20 rounded-lg bg-secondary/5">
-                      <div className="flex items-center space-x-3">
-                        <ArrowRight className="w-5 h-5 text-secondary" />
-                        <div>
-                          <h4 className="font-semibold">Expand sales channels</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Consider adding new digital channels to increase your reach.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {/* Deliverables Tab */}
+          <TabsContent value="deliverables" className="space-y-6">
+            <DeliverablesCenter language={language} />
           </TabsContent>
 
         </Tabs>
