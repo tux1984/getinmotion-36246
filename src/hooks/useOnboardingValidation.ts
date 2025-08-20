@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getUserProgressStatus } from '@/utils/userProgress';
+import { getUserProgressStatusSync } from '@/utils/userProgress';
 
 export const useOnboardingValidation = () => {
   const { user } = useAuth();
@@ -14,9 +14,9 @@ export const useOnboardingValidation = () => {
       setIsValidating(true);
 
       try {
-        // Use the centralized progress status function
-        const progressStatus = getUserProgressStatus();
-        console.log('Onboarding validation using centralized status:', progressStatus);
+        // Use the synchronous progress status function for immediate results
+        const progressStatus = getUserProgressStatusSync();
+        console.log('Onboarding validation using sync status:', progressStatus);
 
         setHasCompletedOnboarding(progressStatus.shouldGoToDashboard);
         setIsValidating(false);

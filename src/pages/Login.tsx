@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
 import { LoginFeatureSlider } from '@/components/auth/LoginFeatureSlider';
-import { getUserProgressStatus } from '@/utils/userProgress';
+import { getUserProgressStatus, getUserProgressStatusSync } from '@/utils/userProgress';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -45,18 +45,42 @@ const Login = () => {
     hideDebug: "Hide Debug Info"
   };
   
-  // Get comprehensive user progress status
-  const getUserRedirectPath = () => {
-    const progressStatus = getUserProgressStatus();
-    console.log('Login: User progress status:', progressStatus);
-    
-    // Users with any progress should go to dashboard
-    if (progressStatus.shouldGoToDashboard) {
-      return '/dashboard';
+  // Get comprehensive user progress status with async Supabase verification
+  const getUserRedirectPath = async () => {
+    try {
+      console.log('🔍 Login: Determining redirect path for user:', user?.id);
+      
+      // First try synchronous check for immediate response
+      const syncStatus = getUserProgressStatusSync();
+      console.log('📊 Login: Sync progress check result:', syncStatus);
+      
+      // If sync check shows progress, use it immediately
+      if (syncStatus.shouldGoToDashboard) {
+        console.log('✅ Login: Sync check shows progress, redirecting to dashboard');
+        return '/dashboard';
+      }
+      
+      // If no clear progress from sync check and we have a user, verify with Supabase
+      if (user?.id) {
+        console.log('🔄 Login: Performing async Supabase verification...');
+        const asyncStatus = await getUserProgressStatus(user.id);
+        console.log('📊 Login: Async progress check result:', asyncStatus);
+        
+        if (asyncStatus.shouldGoToDashboard) {
+          console.log('✅ Login: Supabase verification shows progress, redirecting to dashboard');
+          return '/dashboard';
+        }
+      }
+      
+      // No progress found - new user
+      console.log('❌ Login: No progress found, redirecting to maturity calculator');
+      return '/maturity-calculator';
+      
+    } catch (error) {
+      console.error('💥 Login: Error determining redirect path:', error);
+      // Fallback to maturity calculator on error
+      return '/maturity-calculator';
     }
-    
-    // New users go to maturity calculator
-    return '/maturity-calculator';
   };
   
   // Redirect if already authenticated and authorized
@@ -65,20 +89,30 @@ const Login = () => {
     if (!loading && user && isAuthorized) {
       console.log('Login: User authenticated and authorized, preparing redirect');
       
-      // Add a small delay to ensure auth state is stable
-      const redirectTimer = setTimeout(() => {
-        // Get the appropriate redirect path based on user progress
-        let redirectTo = getUserRedirectPath();
-        
-        // Override with original intended destination if user has progress and was going somewhere specific
-        const from = location.state?.from?.pathname;
-        if (from && from !== '/login' && redirectTo === '/dashboard') {
-          redirectTo = from;
+      // Add a small delay to ensure auth state is stable, then determine redirect
+      const redirectTimer = setTimeout(async () => {
+        try {
+          console.log('🚀 Login: Starting redirect determination process...');
+          
+          // Get the appropriate redirect path based on user progress (async)
+          let redirectTo = await getUserRedirectPath();
+          
+          // Override with original intended destination if user has progress and was going somewhere specific
+          const from = location.state?.from?.pathname;
+          if (from && from !== '/login' && redirectTo === '/dashboard') {
+            console.log('📍 Login: Overriding redirect with original destination:', from);
+            redirectTo = from;
+          }
+          
+          console.log('🎯 Login: Final redirect destination:', redirectTo);
+          navigate(redirectTo, { replace: true });
+          
+        } catch (error) {
+          console.error('💥 Login: Error during redirect determination:', error);
+          // Fallback redirect
+          navigate('/maturity-calculator', { replace: true });
         }
-        
-        console.log('Login: Redirecting to:', redirectTo);
-        navigate(redirectTo, { replace: true });
-      }, 200); // Increased delay for better stability
+      }, 300); // Slightly increased delay for async operations
 
       return () => clearTimeout(redirectTimer);
     }
