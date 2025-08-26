@@ -5,6 +5,7 @@ import { useUserData } from '@/hooks/useUserData';
 import { AgentManagerHeader } from './AgentManagerHeader';
 import { AgentCategoryTabs } from './AgentCategoryTabs';
 import { useTranslations } from '@/hooks/useTranslations';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface AgentManagerProps {
   currentAgents: Agent[];
@@ -130,7 +131,7 @@ export const AgentManager: React.FC<AgentManagerProps> = ({
         getPriorityColor={getPriorityColor}
         getImpactColor={getImpactColor}
         translations={t.agentManager}
-        language={language}
+        language={mapToLegacyLanguage(language)}
       />
     </div>
   );

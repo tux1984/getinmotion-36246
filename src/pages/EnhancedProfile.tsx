@@ -10,6 +10,7 @@ import { ActivityTimeline } from '@/components/profile/ActivityTimeline';
 import { AgentProgressMap } from '@/components/profile/AgentProgressMap';
 import { DeliverablesCenter } from '@/components/profile/DeliverablesCenter';
 import { IntelligentInsights } from '@/components/profile/IntelligentInsights';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -161,7 +162,7 @@ const EnhancedProfile: React.FC = () => {
     }
   };
 
-  const t = translations[language];
+  const t = translations[mapToLegacyLanguage(language)];
 
   const getBusinessStageColor = (stage: string) => {
     switch (stage) {
@@ -287,8 +288,8 @@ const EnhancedProfile: React.FC = () => {
           <TabsContent value="activity" className="space-y-6">
             {insights ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ActivityTimeline activities={insights.recent_activity} language={language} />
-                <IntelligentInsights insights={insights} language={language} />
+                <ActivityTimeline activities={insights.recent_activity} language={mapToLegacyLanguage(language)} />
+                <IntelligentInsights insights={insights} language={mapToLegacyLanguage(language)} />
               </div>
             ) : (
               <div>Loading activity...</div>
@@ -298,7 +299,7 @@ const EnhancedProfile: React.FC = () => {
           {/* Insights Tab */}
           <TabsContent value="insights" className="space-y-6">
             {insights ? (
-              <IntelligentInsights insights={insights} language={language} />
+              <IntelligentInsights insights={insights} language={mapToLegacyLanguage(language)} />
             ) : (
               <div>Loading insights...</div>
             )}
@@ -307,7 +308,7 @@ const EnhancedProfile: React.FC = () => {
           {/* Agents Tab */}
           <TabsContent value="agents" className="space-y-6">
             {insights ? (
-              <AgentProgressMap agents={insights.agent_insights} language={language} />
+              <AgentProgressMap agents={insights.agent_insights} language={mapToLegacyLanguage(language)} />
             ) : (
               <div>Loading agent progress...</div>
             )}
@@ -315,7 +316,7 @@ const EnhancedProfile: React.FC = () => {
 
           {/* Deliverables Tab */}
           <TabsContent value="deliverables" className="space-y-6">
-            <DeliverablesCenter language={language} />
+            <DeliverablesCenter />
           </TabsContent>
 
         </Tabs>

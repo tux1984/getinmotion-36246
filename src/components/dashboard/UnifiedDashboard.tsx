@@ -2,6 +2,7 @@ import React from 'react';
 import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
 import { DashboardBackground } from './DashboardBackground';
 import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
@@ -11,7 +12,7 @@ export const UnifiedDashboard: React.FC = () => {
   // Disable FloatingMasterAgent on main dashboard to avoid duplication
   return (
     <DashboardBackground showFloatingAgent={false}>
-      <MasterCoordinatorDashboard language={language} />
+      <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
     </DashboardBackground>
   );
 };

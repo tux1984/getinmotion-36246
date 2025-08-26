@@ -5,6 +5,7 @@ import { AgentsList } from './AgentsList';
 import { Agent } from '@/types/dashboard';
 import { DashboardSummary } from './DashboardSummary';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface DashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -58,7 +59,7 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
       </div>
       
       {/* Dashboard summary */}
-      <DashboardSummary language={language} />
+      <DashboardSummary language={mapToLegacyLanguage(language)} />
       
       {/* Agents section */}
       <div>
@@ -71,7 +72,7 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({
           agents={agents} 
           onAgentAction={handleAgentAction} 
           addNewAgentText={t[language].addNewAgent}
-          language={language}
+          language={mapToLegacyLanguage(language)}
         />
       </div>
     </div>

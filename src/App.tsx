@@ -28,8 +28,8 @@ import Profile from './pages/Profile';
 function App() {
   return (
     <BrowserRouter>
-      <LanguageProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <LanguageProvider>
           <div className="min-h-screen">
           <Routes>
               <Route path="/" element={<Index />} />
@@ -126,8 +126,8 @@ function App() {
             </Routes>
           </div>
           <Toaster />
-        </AuthProvider>
-      </LanguageProvider>
+        </LanguageProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
