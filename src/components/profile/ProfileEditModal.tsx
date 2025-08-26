@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { UserBusinessProfile, BusinessModel, BusinessStage, SalesChannel, TimeAvailability, FinancialResources, TeamSize, BusinessGoal } from '@/types/profile';
 import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   onSave
 }) => {
   const { language } = useLanguage();
+  const currentLang = mapToLegacyLanguage(language);
   const [formData, setFormData] = useState({
     fullName: businessProfile.fullName,
     businessModel: businessProfile.businessModel,
@@ -145,13 +147,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t[language].editProfile}</DialogTitle>
+          <DialogTitle>{t[currentLang].editProfile}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Full Name */}
           <div>
-            <Label htmlFor="fullName">{t[language].fullName}</Label>
+            <Label htmlFor="fullName">{t[currentLang].fullName}</Label>
             <Input
               id="fullName"
               value={formData.fullName}
@@ -161,7 +163,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Business Model */}
           <div>
-            <Label>{t[language].businessModel}</Label>
+            <Label>{t[currentLang].businessModel}</Label>
             <Select
               value={formData.businessModel}
               onValueChange={(value: BusinessModel) => setFormData(prev => ({ ...prev, businessModel: value }))}
@@ -170,7 +172,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(t[language].businessModels).map(([key, label]) => (
+                {Object.entries(t[currentLang].businessModels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label}</SelectItem>
                 ))}
               </SelectContent>
@@ -179,7 +181,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Business Stage */}
           <div>
-            <Label>{t[language].businessStage}</Label>
+            <Label>{t[currentLang].businessStage}</Label>
             <Select
               value={formData.businessStage}
               onValueChange={(value: BusinessStage) => setFormData(prev => ({ ...prev, businessStage: value }))}
@@ -188,7 +190,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(t[language].stages).map(([key, label]) => (
+                {Object.entries(t[currentLang].stages).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label}</SelectItem>
                 ))}
               </SelectContent>
@@ -197,9 +199,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Current Channels */}
           <div>
-            <Label>{t[language].currentChannels}</Label>
+            <Label>{t[currentLang].currentChannels}</Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {Object.entries(t[language].channels).map(([key, label]) => (
+              {Object.entries(t[currentLang].channels).map(([key, label]) => (
                 <div key={key} className="flex items-center space-x-2">
                   <Checkbox
                     id={key}
@@ -226,7 +228,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Monthly Revenue Goal */}
           <div>
-            <Label htmlFor="revenueGoal">{t[language].monthlyRevenueGoal}</Label>
+            <Label htmlFor="revenueGoal">{t[currentLang].monthlyRevenueGoal}</Label>
             <Input
               id="revenueGoal"
               type="number"
@@ -240,7 +242,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
 
           {/* Urgent Needs */}
           <div>
-            <Label htmlFor="urgentNeeds">{t[language].urgentNeeds}</Label>
+            <Label htmlFor="urgentNeeds">{t[currentLang].urgentNeeds}</Label>
             <Textarea
               id="urgentNeeds"
               value={formData.urgentNeeds}
@@ -252,10 +254,10 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4">
             <Button onClick={handleSave} className="flex-1">
-              {t[language].save}
+              {t[currentLang].save}
             </Button>
             <Button onClick={onClose} variant="outline" className="flex-1">
-              {t[language].cancel}
+              {t[currentLang].cancel}
             </Button>
           </div>
         </div>

@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { isAgentRecommended } from '@/utils/agentUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from '@/hooks/useTranslations';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface ModernAgentManagerProps {
   currentAgents: Agent[];
@@ -104,7 +105,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
         categories={categories}
         onUpdateFilter={handleUpdateFilter}
         onToggleCategory={toggleCategory}
-        language={language}
+        language={mapToLegacyLanguage(language)}
       />
 
       {/* Simple Masonry Grid */}
@@ -133,7 +134,7 @@ export const ModernAgentManager: React.FC<ModernAgentManagerProps> = ({
                 isAgentRecommended={isAgentRecommended}
                 onToggleAgent={handleToggleAgent}
                 togglingAgents={togglingAgents}
-                language={language}
+                language={mapToLegacyLanguage(language)}
               />
             );
           })}

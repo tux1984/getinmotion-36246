@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CulturalAgent } from '@/data/agentsDatabase';
 import { getAgentTranslation } from '@/data/agentTranslations';
 import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface CompactAgentCardProps {
   agent: CulturalAgent;
@@ -33,7 +34,7 @@ export const CompactAgentCard: React.FC<CompactAgentCardProps> = ({
   translations
 }) => {
   const { language } = useLanguage();
-  const agentTranslation = getAgentTranslation(agent.id, language);
+  const agentTranslation = getAgentTranslation(agent.id, mapToLegacyLanguage(language));
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 shadow-md overflow-hidden bg-white relative h-full">

@@ -14,6 +14,7 @@ import { Search, Filter, X, Users, Target, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isAgentRecommended } from '@/utils/agentUtils';
 import { useTranslations } from '@/hooks/useTranslations';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface MobileAgentManagerProps {
   currentAgents: Agent[];
@@ -106,7 +107,8 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
         <h4 className="font-medium text-white mb-3">{t.agentManager.filterCategories}</h4>
         <div className="space-y-2">
           {categories.map(category => {
-            const translatedCategory = categoryTranslations[language][category as keyof typeof categoryTranslations[typeof language]] || category;
+            const mappedLang = mapToLegacyLanguage(language);
+            const translatedCategory = categoryTranslations[mappedLang][category as keyof typeof categoryTranslations[typeof mappedLang]] || category;
             return (
               <Badge
                 key={category}
@@ -258,7 +260,7 @@ export const MobileAgentManager: React.FC<MobileAgentManagerProps> = ({
                   isAgentRecommended={isAgentRecommended}
                   onToggleAgent={handleToggleAgent}
                   togglingAgents={togglingAgents}
-                  language={language}
+                  language={mapToLegacyLanguage(language)}
                 />
               </motion.div>
             );
