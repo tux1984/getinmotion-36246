@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -635,6 +635,7 @@ export type Database = {
           full_name: string | null
           id: string
           initial_investment_range: string | null
+          language_preference: string | null
           monthly_revenue_goal: number | null
           primary_skills: string[] | null
           sales_channels: string[] | null
@@ -659,6 +660,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           initial_investment_range?: string | null
+          language_preference?: string | null
           monthly_revenue_goal?: number | null
           primary_skills?: string[] | null
           sales_channels?: string[] | null
@@ -683,6 +685,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           initial_investment_range?: string | null
+          language_preference?: string | null
           monthly_revenue_goal?: number | null
           primary_skills?: string[] | null
           sales_channels?: string[] | null
@@ -780,18 +783,18 @@ export type Database = {
     }
     Functions: {
       disable_agent: {
-        Args: { p_user_id: string; p_agent_id: string }
+        Args: { p_agent_id: string; p_user_id: string }
         Returns: undefined
       }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }
         Returns: {
+          created_at: string
           idea_validation: number
-          user_experience: number
           market_fit: number
           monetization: number
-          created_at: string
           profile_data: Json
+          user_experience: number
         }[]
       }
       is_admin: {

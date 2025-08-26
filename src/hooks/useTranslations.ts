@@ -1,15 +1,18 @@
 import { getTranslations, getTranslation, type Translations } from '@/translations';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function useTranslations() {
+  const { language } = useLanguage();
+  
   return {
     t: getTranslations(),
-    language: 'en' as const,
+    language,
     getText: (path: string, fallback?: string) => getTranslation(path, fallback)
   };
 }
 
 export type UseTranslationsReturn = {
   t: Translations;
-  language: 'en';
+  language: string;
   getText: (path: string, fallback?: string) => string;
 };

@@ -1,20 +1,30 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-
-type Language = 'en';
+import { useLanguageSystem } from '@/hooks/useLanguageSystem';
+import { LanguageSelectionModal } from '@/components/language/LanguageSelectionModal';
+import { type Language } from '@/types/language';
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (language: Language) => void;
+  setLanguage: (language: Language) => Promise<void>;
+  isLoading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const language = 'en';
-  const setLanguage = () => {}; // No-op since we only support English
+  const { 
+    language, 
+    setLanguage, 
+    isLoading, 
+    needsLanguageSelection 
+  } = useLanguageSystem();
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, isLoading }}>
+      <LanguageSelectionModal
+        isOpen={needsLanguageSelection}
+        onLanguageSelect={setLanguage}
+      />
       {children}
     </LanguageContext.Provider>
   );

@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Deliverable {
   id: string;
@@ -21,17 +22,18 @@ interface Deliverable {
   created_at: string;
 }
 
-interface DeliverablesCenterProps {
-  language: 'en' | 'es';
-}
+interface DeliverablesCenterProps {}
 
-export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language }) => {
+export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = () => {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const { toast } = useToast();
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const normalizedLanguage = language === 'es' ? 'es' : 'en';
+  
   const t = {
     en: {
       title: "Deliverables Center",
@@ -72,7 +74,7 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
       console.error('Error fetching deliverables:', error);
       toast({
         title: 'Error',
-        description: language === 'es' 
+        description: normalizedLanguage === 'es' 
           ? 'No se pudieron cargar los entregables' 
           : 'Could not load deliverables',
         variant: 'destructive'
@@ -88,11 +90,11 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
 
   const getAgentName = (agentId: string) => {
     const names: Record<string, string> = {
-      'marketing-agent': language === 'es' ? 'Agente de Marketing' : 'Marketing Agent',
-      'financial-agent': language === 'es' ? 'Agente Financiero' : 'Financial Agent',
-      'cultural-agent': language === 'es' ? 'Agente Cultural' : 'Cultural Agent',
-      'operations-agent': language === 'es' ? 'Agente de Operaciones' : 'Operations Agent',
-      'strategy-agent': language === 'es' ? 'Agente Estratégico' : 'Strategy Agent'
+      'marketing-agent': normalizedLanguage === 'es' ? 'Agente de Marketing' : 'Marketing Agent',
+      'financial-agent': normalizedLanguage === 'es' ? 'Agente Financiero' : 'Financial Agent',
+      'cultural-agent': normalizedLanguage === 'es' ? 'Agente Cultural' : 'Cultural Agent',
+      'operations-agent': normalizedLanguage === 'es' ? 'Agente de Operaciones' : 'Operations Agent',
+      'strategy-agent': normalizedLanguage === 'es' ? 'Agente Estratégico' : 'Strategy Agent'
     };
     return names[agentId] || agentId;
   };
@@ -144,12 +146,12 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
     return (
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {t[language].title}
+          {t[normalizedLanguage].title}
         </h3>
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 mb-2">{t[language].empty}</p>
-          <p className="text-sm text-gray-500">{t[language].emptyDescription}</p>
+          <p className="text-gray-600 mb-2">{t[normalizedLanguage].empty}</p>
+          <p className="text-sm text-gray-500">{t[normalizedLanguage].emptyDescription}</p>
         </div>
       </Card>
     );
@@ -158,7 +160,7 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">
-        {t[language].title}
+        {t[normalizedLanguage].title}
       </h3>
       
       <div className="space-y-4">
@@ -193,7 +195,7 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
                         <Calendar className="w-3 h-3" />
                         {formatDistanceToNow(new Date(deliverable.created_at), {
                           addSuffix: true,
-                          locale: language === 'es' ? es : undefined
+                          locale: normalizedLanguage === 'es' ? es : undefined
                         })}
                       </div>
                     </div>
@@ -210,7 +212,7 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
                     onClick={() => handleDownload(deliverable)}
                   >
                     <Download className="w-3 h-3 mr-1" />
-                    {t[language].download}
+                    {t[normalizedLanguage].download}
                   </Button>
                   {deliverable.content && (
                     <Button
@@ -222,8 +224,8 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = ({ language
                     >
                       <Eye className="w-3 h-3 mr-1" />
                       {expandedId === deliverable.id 
-                        ? t[language].hideContent 
-                        : t[language].viewContent
+                        ? t[normalizedLanguage].hideContent 
+                        : t[normalizedLanguage].viewContent
                       }
                       {expandedId === deliverable.id 
                         ? <ChevronUp className="w-3 h-3 ml-1" />

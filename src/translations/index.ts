@@ -1,4 +1,6 @@
-// English-only translations
+import { type Language } from '@/types/language';
+
+// Multi-language translations
 export const translations = {
   // UI Common
   ui: {

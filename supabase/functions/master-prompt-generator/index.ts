@@ -19,6 +19,8 @@ serve(async (req) => {
 
   try {
     const { agentId, userId, language = 'es' } = await req.json();
+    
+    console.log(`🌐 Language parameter received: ${language}`);
     console.log('Generating master prompt for:', { agentId, userId, language });
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
