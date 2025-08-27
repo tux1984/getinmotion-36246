@@ -4,6 +4,7 @@ import { ProfileType, CategoryScore, RecommendedAgents } from '@/types/dashboard
 import { useLanguage } from '@/context/LanguageContext';
 import { StreamlinedOnboardingContent } from './components/StreamlinedOnboardingContent';
 import { OnboardingHeader } from './components/OnboardingHeader';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface StreamlinedOnboardingWizardProps {
   profileType: ProfileType;
@@ -15,6 +16,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
   onComplete 
 }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const [currentStep, setCurrentStep] = useState(0);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
   const [analysisType, setAnalysisType] = useState<'quick' | 'deep' | null>(null);
@@ -42,7 +44,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
     }
   };
 
-  const t = translations[language];
+  const t = translations[compatibleLanguage];
   const totalSteps = 4;
 
   const handleNext = () => {
@@ -113,7 +115,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
               {t.steps[currentStep]}
             </h2>
             <span className="text-sm text-gray-500">
-              {language === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
+              {compatibleLanguage === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
             </span>
           </div>
           
@@ -133,7 +135,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
         <StreamlinedOnboardingContent
           currentStep={currentStep}
           profileType={profileType}
-          language={language}
+          language={compatibleLanguage}
           maturityScores={maturityScores}
           analysisType={analysisType}
           basicRecommendations={basicRecommendations}

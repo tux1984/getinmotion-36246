@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { StreamlinedOnboardingContent } from './StreamlinedOnboardingContent';
 import { OnboardingHeader } from './OnboardingHeader';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface StreamlinedOnboardingWizardProps {
   profileType: ProfileType;
@@ -16,6 +17,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
   onComplete 
 }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState(0);
   const [maturityScores, setMaturityScores] = useState<CategoryScore | null>(null);
@@ -44,7 +46,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
     }
   };
 
-  const t = translations[language];
+  const t = translations[compatibleLanguage];
   const totalSteps = 4;
 
   const handleNext = () => {
@@ -117,7 +119,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
                 {t.steps[currentStep]}
               </h2>
               <span className="text-sm text-gray-500">
-                {language === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
+                {compatibleLanguage === 'en' ? `Step ${currentStep + 1} of ${totalSteps}` : `Paso ${currentStep + 1} de ${totalSteps}`}
               </span>
             </div>
             
@@ -138,7 +140,7 @@ export const StreamlinedOnboardingWizard: React.FC<StreamlinedOnboardingWizardPr
         <StreamlinedOnboardingContent
           currentStep={currentStep}
           profileType={profileType}
-          language={language}
+          language={compatibleLanguage}
           maturityScores={maturityScores}
           analysisType={analysisType}
           basicRecommendations={basicRecommendations}

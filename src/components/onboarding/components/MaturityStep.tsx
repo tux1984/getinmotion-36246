@@ -4,6 +4,7 @@ import { SimpleCulturalMaturityCalculator } from '@/components/cultural/SimpleCu
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface MaturityStepProps {
   showCalculator: boolean;
@@ -17,6 +18,7 @@ export const MaturityStep: React.FC<MaturityStepProps> = ({
   onComplete
 }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   
   return (
     <div className="w-full">
@@ -28,7 +30,7 @@ export const MaturityStep: React.FC<MaturityStepProps> = ({
           transition={{ duration: 0.5 }}
         >
           <SimpleCulturalMaturityCalculator 
-            language={language}
+            language={compatibleLanguage}
             onComplete={onComplete}
           />
         </motion.div>
@@ -41,10 +43,10 @@ export const MaturityStep: React.FC<MaturityStepProps> = ({
         >
           <div className="animate-spin w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full mb-6"></div>
           <p className="text-xl font-medium text-purple-800">
-            {language === 'en' ? "Processing your answers..." : "Procesando tus respuestas..."}
+            {compatibleLanguage === 'en' ? "Processing your answers..." : "Procesando tus respuestas..."}
           </p>
           <p className="text-gray-500 mt-2">
-            {language === 'en' ? "This will only take a moment" : "Esto solo tomará un momento"}
+            {compatibleLanguage === 'en' ? "This will only take a moment" : "Esto solo tomará un momento"}
           </p>
         </motion.div>
       )}

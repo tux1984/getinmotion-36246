@@ -9,6 +9,7 @@ import { QuestionCollector } from './QuestionCollector';
 import { AIDeliverableGenerator } from './AIDeliverableGenerator';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
 import { Brain, Target, CheckCircle } from 'lucide-react';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface IntelligentTaskInterfaceProps {
   task: AgentTask;
@@ -25,6 +26,7 @@ export const IntelligentTaskInterface: React.FC<IntelligentTaskInterfaceProps> =
 }) => {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const { toast } = useToast();
   
   const [phase, setPhase] = useState<TaskPhase>('intro');
@@ -54,7 +56,7 @@ export const IntelligentTaskInterface: React.FC<IntelligentTaskInterfaceProps> =
     }
   };
 
-  const t = translations[language];
+  const t = translations[compatibleLanguage];
 
   const getDeliverableDescription = (agentId: string): string => {
     const descriptions = {
@@ -74,8 +76,8 @@ export const IntelligentTaskInterface: React.FC<IntelligentTaskInterfaceProps> =
       }
     };
 
-    return descriptions[language][agentId as keyof typeof descriptions[typeof language]] || 
-           descriptions[language]['financial-management'];
+    return descriptions[compatibleLanguage][agentId as keyof typeof descriptions[typeof compatibleLanguage]] || 
+           descriptions[compatibleLanguage]['financial-management'];
   };
 
   const handleCollectionComplete = async (answers: Array<{question: string, answer: string}>) => {
@@ -102,14 +104,14 @@ export const IntelligentTaskInterface: React.FC<IntelligentTaskInterfaceProps> =
       onTaskComplete(task.id);
       
       toast({
-        title: language === 'en' ? 'Deliverable Generated' : 'Entregable Generado',
-        description: language === 'en' ? 'Your professional deliverable has been created successfully' : 'Tu entregable profesional ha sido creado exitosamente',
+        title: compatibleLanguage === 'en' ? 'Deliverable Generated' : 'Entregable Generado',
+        description: compatibleLanguage === 'en' ? 'Your professional deliverable has been created successfully' : 'Tu entregable profesional ha sido creado exitosamente',
       });
     } catch (error) {
       console.error('Error generating deliverable:', error);
       toast({
         title: 'Error',
-        description: language === 'en' ? 'Error generating deliverable' : 'Error al generar el entregable',
+        description: compatibleLanguage === 'en' ? 'Error generating deliverable' : 'Error al generar el entregable',
         variant: 'destructive',
       });
       setPhase('collecting');

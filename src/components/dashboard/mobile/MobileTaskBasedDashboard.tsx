@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useOptimizedRecommendedTasks } from '@/hooks/useOptimizedRecommendedTasks';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { MobileTaskCard } from './MobileTaskCard';
 import { MobileStatsCard } from './MobileStatsCard';
 import { MobileCollapsibleSection } from './MobileCollapsibleSection';
@@ -35,6 +36,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
   onMaturityCalculatorClick
 }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const allAgentIds = useMemo(() => culturalAgentsDatabase.map(agent => agent.id), []);
   const { tasks, loading, markTaskCompleted } = useOptimizedRecommendedTasks(maturityScores, profileData, allAgentIds);
 
@@ -86,17 +88,17 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-2xl font-bold text-white mb-2">
-          {t[language].welcomeTitle}
+          {t[compatibleLanguage].welcomeTitle}
         </h1>
         <p className="text-white/80">
-          {t[language].welcomeSubtitle}
+          {t[compatibleLanguage].welcomeSubtitle}
         </p>
       </motion.div>
 
       {/* Project Progress - Always visible on mobile */}
       {maturityScores && (
         <MobileStatsCard
-          title={t[language].projectProgress}
+          title={t[compatibleLanguage].projectProgress}
           icon={TrendingUp}
           iconColor="text-green-400"
           value={overallProgress}
@@ -112,7 +114,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
 
       {/* Priority Tasks - Collapsible */}
       <MobileCollapsibleSection
-        title={t[language].priorityTasks}
+        title={t[compatibleLanguage].priorityTasks}
         defaultOpen={true}
         badge={tasks.length > 0 ? `${tasks.length} tareas` : undefined}
       >
@@ -124,10 +126,10 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
         ) : tasks.length === 0 ? (
           <div className="text-center py-8">
             <Clock className="w-12 h-12 text-white/40 mx-auto mb-3" />
-            <h3 className="text-white font-medium mb-2">{t[language].noTasks}</h3>
-            <p className="text-white/60 text-sm mb-4">{t[language].noTasksDesc}</p>
+            <h3 className="text-white font-medium mb-2">{t[compatibleLanguage].noTasks}</h3>
+            <p className="text-white/60 text-sm mb-4">{t[compatibleLanguage].noTasksDesc}</p>
             <Button onClick={onMaturityCalculatorClick} className="bg-purple-600 hover:bg-purple-700" size="sm">
-              {t[language].retakeAssessment}
+              {t[compatibleLanguage].retakeAssessment}
             </Button>
           </div>
         ) : (
@@ -138,7 +140,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
                 task={task}
                 index={index}
                 onStartTask={handleStartTask}
-                language={language}
+                language={compatibleLanguage}
               />
             ))}
           </div>
@@ -147,7 +149,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
 
       {/* Active Agents - Collapsible */}
       <MobileCollapsibleSection
-        title={t[language].activeAgents}
+        title={t[compatibleLanguage].activeAgents}
         badge={activeAgents.length > 0 ? `${activeAgents.length}` : undefined}
       >
         {activeAgents.length === 0 ? (
@@ -183,7 +185,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
       </MobileCollapsibleSection>
 
       {/* Quick Actions - Collapsible */}
-      <MobileCollapsibleSection title={t[language].quickActions}>
+      <MobileCollapsibleSection title={t[compatibleLanguage].quickActions}>
         <div className="space-y-2">
           <Button 
             variant="ghost" 
@@ -191,7 +193,7 @@ export const MobileTaskBasedDashboard: React.FC<MobileTaskBasedDashboardProps> =
             onClick={onMaturityCalculatorClick}
           >
             <TrendingUp className="w-4 h-4 mr-3" />
-            {t[language].retakeAssessment}
+            {t[compatibleLanguage].retakeAssessment}
           </Button>
           <Button 
             variant="ghost" 
