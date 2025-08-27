@@ -8,10 +8,12 @@ import { MaturityProgressIndicator } from './MaturityProgressIndicator';
 import { useLanguage } from '@/context/LanguageContext';
 import { useMaturityScores } from '@/hooks/useMaturityScores';
 import { useUserData } from '@/hooks/useUserData';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 export const UserProgressDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const { currentScores, scoreHistory } = useMaturityScores();
   const { agents } = useUserData();
 
@@ -46,7 +48,7 @@ export const UserProgressDashboard: React.FC = () => {
     }
   };
 
-  const t = translations[language];
+  const t = translations[compatibleLanguage];
 
   const handleBackToDashboard = () => {
     navigate('/dashboard/home');
@@ -160,7 +162,7 @@ export const UserProgressDashboard: React.FC = () => {
               maturityScores={currentScores}
               completedTasksCount={totalUsageCount}
               totalTasksCount={Math.max(totalUsageCount + 5, 20)} // Estimated total
-              language={language}
+              language={compatibleLanguage}
             />
           </div>
 

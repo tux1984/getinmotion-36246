@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calculator, ArrowLeft, FileText, Printer, Download } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 type MaterialCost = {
   name: string;
@@ -25,6 +26,7 @@ type LaborCost = {
 
 export const CostCalculatorAgent = () => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const { toast } = useToast();
   const [step, setStep] = useState<'info' | 'materials' | 'labor' | 'overhead' | 'results'>('info');
   const [productName, setProductName] = useState('');
@@ -196,7 +198,7 @@ export const CostCalculatorAgent = () => {
   const handlePrint = () => {
     toast({
       title: "Printing",
-      description: language === 'en' 
+      description: compatibleLanguage === 'en' 
         ? "Preparing document for printing..."
         : "Preparando documento para imprimir..."
     });
@@ -206,7 +208,7 @@ export const CostCalculatorAgent = () => {
   const handleDownload = () => {
     toast({
       title: "Download Started",
-      description: language === 'en' 
+      description: compatibleLanguage === 'en' 
         ? "Your cost calculation PDF is being prepared for download."
         : "Tu PDF de cálculo de costos se está preparando para descargar."
     });
@@ -219,21 +221,21 @@ export const CostCalculatorAgent = () => {
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="productName">{t[language].productName}</Label>
+              <Label htmlFor="productName">{t[compatibleLanguage].productName}</Label>
               <Input
                 id="productName"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                placeholder={language === 'en' ? "e.g., Hand-woven textile bag" : "ej., Bolsa textil tejida a mano"}
+                placeholder={compatibleLanguage === 'en' ? "e.g., Hand-woven textile bag" : "ej., Bolsa textil tejida a mano"}
               />
             </div>
             <div>
-              <Label htmlFor="productDescription">{t[language].productDescription}</Label>
+              <Label htmlFor="productDescription">{t[compatibleLanguage].productDescription}</Label>
               <Textarea
                 id="productDescription"
                 value={productDescription}
                 onChange={(e) => setProductDescription(e.target.value)}
-                placeholder={language === 'en' ? "Describe your product..." : "Describe tu producto..."}
+                placeholder={compatibleLanguage === 'en' ? "Describe your product..." : "Describe tu producto..."}
                 rows={4}
               />
             </div>
@@ -246,7 +248,7 @@ export const CostCalculatorAgent = () => {
             {materials.map((material, index) => (
               <div key={index} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-4">
-                  <Label>{index === 0 ? t[language].materialName : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].materialName : ''}</Label>
                   <Input
                     value={material.name}
                     onChange={(e) => {
@@ -257,7 +259,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].quantity : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].quantity : ''}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -269,7 +271,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].unitPrice : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].unitPrice : ''}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -282,7 +284,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].total : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].total : ''}</Label>
                   <Input
                     type="number"
                     value={material.total.toFixed(2)}
@@ -305,7 +307,7 @@ export const CostCalculatorAgent = () => {
               </div>
             ))}
             <Button variant="outline" onClick={addMaterial}>
-              {t[language].buttons.addMaterial}
+              {t[compatibleLanguage].buttons.addMaterial}
             </Button>
           </div>
         );
@@ -316,7 +318,7 @@ export const CostCalculatorAgent = () => {
             {labor.map((laborItem, index) => (
               <div key={index} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-6">
-                  <Label>{index === 0 ? t[language].laborDescription : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].laborDescription : ''}</Label>
                   <Input
                     value={laborItem.description}
                     onChange={(e) => {
@@ -327,7 +329,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].hours : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].hours : ''}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -340,7 +342,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].hourlyRate : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].hourlyRate : ''}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -353,7 +355,7 @@ export const CostCalculatorAgent = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label>{index === 0 ? t[language].total : ''}</Label>
+                  <Label>{index === 0 ? t[compatibleLanguage].total : ''}</Label>
                   <Input
                     type="number"
                     value={laborItem.total.toFixed(2)}
@@ -376,7 +378,7 @@ export const CostCalculatorAgent = () => {
               </div>
             ))}
             <Button variant="outline" onClick={addLabor}>
-              {t[language].buttons.addLabor}
+              {t[compatibleLanguage].buttons.addLabor}
             </Button>
           </div>
         );
@@ -385,7 +387,7 @@ export const CostCalculatorAgent = () => {
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="overhead">{t[language].overheadCosts}</Label>
+              <Label htmlFor="overhead">{t[compatibleLanguage].overheadCosts}</Label>
               <Input
                 id="overhead"
                 type="number"
@@ -394,7 +396,7 @@ export const CostCalculatorAgent = () => {
                 value={overhead}
                 onChange={(e) => setOverhead(parseFloat(e.target.value) || 0)}
               />
-              <p className="text-sm text-gray-500 mt-1">{t[language].overheadDescription}</p>
+              <p className="text-sm text-gray-500 mt-1">{t[compatibleLanguage].overheadDescription}</p>
             </div>
           </div>
         );
@@ -405,19 +407,19 @@ export const CostCalculatorAgent = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">{t[language].results.totalMaterials}</p>
+                <p className="text-sm text-gray-500">{t[compatibleLanguage].results.totalMaterials}</p>
                 <p className="text-xl font-bold">${results.materialCost.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">{t[language].results.totalLabor}</p>
+                <p className="text-sm text-gray-500">{t[compatibleLanguage].results.totalLabor}</p>
                 <p className="text-xl font-bold">${results.laborCost.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">{t[language].results.totalOverhead}</p>
+                <p className="text-sm text-gray-500">{t[compatibleLanguage].results.totalOverhead}</p>
                 <p className="text-xl font-bold">${results.overheadCost.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">{t[language].results.totalCost}</p>
+                <p className="text-sm text-gray-500">{t[compatibleLanguage].results.totalCost}</p>
                 <p className="text-xl font-bold">${results.totalCost.toFixed(2)}</p>
               </div>
             </div>
@@ -425,11 +427,11 @@ export const CostCalculatorAgent = () => {
             <div className="border-t border-b py-4 my-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">{t[language].results.suggestedPrice}</p>
+                  <p className="text-sm text-gray-500">{t[compatibleLanguage].results.suggestedPrice}</p>
                   <p className="text-2xl font-bold text-green-600">${results.suggestedPrice.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">{t[language].results.profitMargin}</p>
+                  <p className="text-sm text-gray-500">{t[compatibleLanguage].results.profitMargin}</p>
                   <p className="text-2xl font-bold text-blue-600">{results.profitMargin.toFixed(1)}%</p>
                 </div>
               </div>
@@ -438,11 +440,11 @@ export const CostCalculatorAgent = () => {
             <div className="flex flex-wrap gap-2 justify-center">
               <Button onClick={handlePrint} variant="outline" className="flex gap-2 items-center">
                 <Printer className="w-4 h-4" />
-                {t[language].buttons.print}
+                {t[compatibleLanguage].buttons.print}
               </Button>
               <Button onClick={handleDownload} className="flex gap-2 items-center">
                 <Download className="w-4 h-4" />
-                {t[language].buttons.download}
+                {t[compatibleLanguage].buttons.download}
               </Button>
             </div>
           </div>
@@ -461,18 +463,18 @@ export const CostCalculatorAgent = () => {
             <Calculator className="w-5 h-5" />
           </div>
           <div>
-            <CardTitle>{t[language].title}</CardTitle>
-            <CardDescription>{t[language].description}</CardDescription>
+            <CardTitle>{t[compatibleLanguage].title}</CardTitle>
+            <CardDescription>{t[compatibleLanguage].description}</CardDescription>
           </div>
         </div>
         
         <div className="flex justify-between mt-4 border-b pb-2">
-          {Object.keys(t[language].steps).map((stepKey) => (
+          {Object.keys(t[compatibleLanguage].steps).map((stepKey) => (
             <div 
               key={stepKey} 
               className={`text-sm px-2 py-1 ${step === stepKey ? 'font-bold border-b-2 border-blue-500' : 'text-gray-500'}`}
             >
-              {t[language].steps[stepKey as keyof typeof t[typeof language]['steps']]}
+              {t[compatibleLanguage].steps[stepKey as keyof typeof t[typeof compatibleLanguage]['steps']]}
             </div>
           ))}
         </div>
@@ -486,17 +488,17 @@ export const CostCalculatorAgent = () => {
         {step !== 'info' && (
           <Button variant="ghost" onClick={handleBack} className="flex items-center">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            {t[language].buttons.back}
+            {t[compatibleLanguage].buttons.back}
           </Button>
         )}
         <div className="flex-1"></div>
         {step !== 'results' ? (
           <Button onClick={handleNext}>
-            {t[language].buttons.next}
+            {t[compatibleLanguage].buttons.next}
           </Button>
         ) : (
           <Button variant="default" onClick={() => setStep('info')}>
-            {t[language].buttons.finish}
+            {t[compatibleLanguage].buttons.finish}
           </Button>
         )}
       </CardFooter>

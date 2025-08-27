@@ -7,6 +7,8 @@ import { Agent, RecommendedAgents } from '@/types/dashboard';
 import { getAgentTranslation } from '@/data/agentTranslations';
 import { Bot, MessageCircle, Play, Pause, Settings } from 'lucide-react';
 import { useTranslations } from '@/hooks/useTranslations';
+import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface RecommendedAgentsSectionProps {
   agents: Agent[];
@@ -19,7 +21,9 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
   recommendedAgents,
   onSelectAgent
 }) => {
-  const { t, language } = useTranslations();
+  const { t } = useTranslations();
+  const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
 
   // Filter agents based on recommendations
   const getFilteredAgents = (agentList: string[] | undefined) => {
@@ -48,7 +52,7 @@ export const RecommendedAgentsSection: React.FC<RecommendedAgentsSectionProps> =
   };
 
   const AgentCard = ({ agent }: { agent: Agent }) => {
-    const agentTranslation = getAgentTranslation(agent.id, language);
+    const agentTranslation = getAgentTranslation(agent.id, compatibleLanguage);
     
     return (
       <Card className="hover:shadow-md transition-all duration-200 border-purple-100">

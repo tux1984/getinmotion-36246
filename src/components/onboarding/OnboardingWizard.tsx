@@ -8,6 +8,7 @@ import { StepsHeader } from './components/StepsHeader';
 import { OnboardingContent } from './components/OnboardingContent';
 import { buildOnboardingSteps } from './utils/stepUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface OnboardingWizardProps {
   profileType: ProfileType;
@@ -16,6 +17,7 @@ interface OnboardingWizardProps {
 
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType, onComplete }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const isMobile = useIsMobile();
   const [showExtendedQuestions, setShowExtendedQuestions] = useState(false);
   
@@ -33,7 +35,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
   });
   
   // Build steps based on current state
-  const steps = buildOnboardingSteps(profileType, language, showExtendedQuestions);
+  const steps = buildOnboardingSteps(profileType, compatibleLanguage, showExtendedQuestions);
 
   return (
     <div className={`w-full mx-auto ${isMobile ? 'px-0 py-0' : 'max-w-4xl px-0 py-0'}`}>
@@ -45,7 +47,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ profileType,
         <OnboardingContent
           currentStep={currentStep}
           profileType={profileType}
-          language={language}
+          language={compatibleLanguage}
           showExtendedQuestions={showExtendedQuestions}
           maturityScores={maturityScores}
           initialRecommendations={initialRecommendations}

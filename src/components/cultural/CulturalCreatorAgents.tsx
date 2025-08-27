@@ -7,6 +7,7 @@ import { ProfileContent } from './ProfileContent';
 import { CreatorProfile } from './types';
 import { useAgentData } from './useAgentData';
 import { getTranslations } from './translations';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface CulturalCreatorAgentsProps {
   onSelectAgent: (id: string) => void;
@@ -14,10 +15,11 @@ interface CulturalCreatorAgentsProps {
 
 export const CulturalCreatorAgents: React.FC<CulturalCreatorAgentsProps> = ({ onSelectAgent }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const [selectedProfile, setSelectedProfile] = useState<CreatorProfile>('visual-artist');
   
-  const culturalAgents = useAgentData(language);
-  const t = getTranslations(language);
+  const culturalAgents = useAgentData(compatibleLanguage);
+  const t = getTranslations(compatibleLanguage);
 
   const handleProfileChange = (value: string) => {
     setSelectedProfile(value as CreatorProfile);

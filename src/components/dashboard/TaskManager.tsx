@@ -9,6 +9,7 @@ import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useAuth } from '@/context/AuthContext';
 import { DetailedTaskCard } from './DetailedTaskCard';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface TaskManagerProps {
   agentId?: string;
@@ -20,6 +21,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   onChatWithAgent
 }) => {
   const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
   const { user } = useAuth();
   const { toast } = useToast();
   const { businessProfile } = useUserBusinessProfile();
@@ -55,7 +57,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     }
   };
   
-  const t = translations[language];
+  const t = translations[compatibleLanguage];
 
   const handleStartDevelopment = async (task: any) => {
     setUpdatingTasks(prev => new Set(prev).add(task.id));
@@ -146,7 +148,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               <DetailedTaskCard
                 key={task.id}
                 task={task}
-                language={language}
+                language={compatibleLanguage}
                 onStartDevelopment={handleStartDevelopment}
                 onCompleteTask={handleCompleteTask}
                 onChatWithAgent={handleChatWithAgent}

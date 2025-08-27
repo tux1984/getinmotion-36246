@@ -7,6 +7,7 @@ import { useMaturityWizard } from './hooks/useMaturityWizard';
 import { WizardContent } from './components/WizardContent';
 import { UserProfileData } from './types/wizardTypes';
 import { useTaskGenerationControl } from '@/hooks/useTaskGenerationControl';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface AIQuestion {
   question: string;
@@ -28,6 +29,8 @@ export const CulturalMaturityWizard: React.FC<{
     onComplete(scores, recommendedAgents, profileData, aiQuestions);
   };
 
+  const compatibleLanguage = mapToLegacyLanguage(language);
+  
   const {
     currentStepId,
     profileData,
@@ -42,7 +45,7 @@ export const CulturalMaturityWizard: React.FC<{
     isCurrentStepValid,
     analysisType,
     handleAnalysisChoice
-  } = useMaturityWizard(handleMaturityComplete, language);
+  } = useMaturityWizard(handleMaturityComplete, compatibleLanguage);
 
   return (
     <WizardContent
@@ -50,7 +53,7 @@ export const CulturalMaturityWizard: React.FC<{
       currentStepNumber={currentStepNumber}
       totalSteps={totalSteps}
       profileData={profileData}
-      language={language}
+      language={compatibleLanguage}
       isCurrentStepValid={isCurrentStepValid}
       updateProfileData={updateProfileData}
       handleNext={handleNext}
