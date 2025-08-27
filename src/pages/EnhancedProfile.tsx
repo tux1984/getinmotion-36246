@@ -1,3 +1,4 @@
+import { LanguageProfileSection } from '@/components/profile/LanguageProfileSection';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
@@ -111,6 +112,7 @@ const EnhancedProfile: React.FC = () => {
       insights: 'Insights', 
       agents: 'Agent Progress',
       deliverables: 'Deliverables',
+      settings: 'Settings',
       businessInfo: 'Business Information',
       personalInfo: 'Personal Information',
       currentChannels: 'Current Channels',
@@ -140,6 +142,7 @@ const EnhancedProfile: React.FC = () => {
       insights: 'Insights',
       agents: 'Progreso de Agentes',
       deliverables: 'Entregables',
+      settings: 'Configuración',
       businessInfo: 'Información del Negocio',
       personalInfo: 'Información Personal',
       currentChannels: 'Canales Actuales',
@@ -277,11 +280,12 @@ const EnhancedProfile: React.FC = () => {
 
         {/* Tabs Navigation */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-5 w-full max-w-3xl">
             <TabsTrigger value="activity">{t.activity}</TabsTrigger>
             <TabsTrigger value="insights">{t.insights}</TabsTrigger>
             <TabsTrigger value="agents">{t.agents}</TabsTrigger>
             <TabsTrigger value="deliverables">{t.deliverables}</TabsTrigger>
+            <TabsTrigger value="settings">{t.settings}</TabsTrigger>
           </TabsList>
 
           {/* Activity Tab */}
@@ -317,6 +321,11 @@ const EnhancedProfile: React.FC = () => {
           {/* Deliverables Tab */}
           <TabsContent value="deliverables" className="space-y-6">
             <DeliverablesCenter />
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <LanguageProfileSection />
           </TabsContent>
 
         </Tabs>
