@@ -367,18 +367,21 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
           : "Analyzing your profile and generating intelligent tasks..."}
       />
 
-      {/* Master Coordinator Panel - Collapsible */}
-      <motion.div
-        initial={{ opacity: 0, height: 'auto' }}
-        animate={{ 
-          opacity: 1,
-          height: isExpanded ? 'auto' : '80px'
-        }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="w-full bg-background/95 backdrop-blur-lg border-b border-primary/20 shadow-lg overflow-hidden"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="border-none shadow-none bg-gradient-to-r from-purple-600/90 via-indigo-600/90 to-blue-600/90 text-white">
+      {/* Master Coordinator Panel - Floating Card */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20, scale: 0.95 }}
+          animate={{ 
+            opacity: 1, 
+            y: 0, 
+            scale: 1,
+            height: isExpanded ? 'auto' : '80px'
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="overflow-hidden"
+        >
+          <Card className="bg-gradient-to-r from-purple-600/90 via-indigo-600/90 to-blue-600/90 text-white shadow-xl border-0 backdrop-blur-xl rounded-2xl"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 
@@ -622,8 +625,8 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
               </AnimatePresence>
             </CardContent>
           </Card>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Business Profile Capture Modal */}
       <Dialog open={showProfileCapture} onOpenChange={setShowProfileCapture}>

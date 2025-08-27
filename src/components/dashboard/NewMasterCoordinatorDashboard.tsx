@@ -436,10 +436,10 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Master Coordinator Panel - Único y central */}
+      {/* Master Coordinator Panel - Floating within content */}
       <MasterCoordinatorPanel onTaskStart={handleTaskStartFromPanel} language={language} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 space-y-8">
 
           {/* Key Performance Metrics */}
           <motion.div 

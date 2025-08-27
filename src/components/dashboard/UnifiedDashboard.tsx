@@ -29,7 +29,7 @@ export const UnifiedDashboard: React.FC = () => {
         onAgentManagerClick={handleAgentManagerClick}
       />
       
-      <div className="flex-1 pt-20"> {/* Add padding-top for fixed header */}
+      <div className="flex-1 pt-24 pb-6"> {/* Increased padding-top to prevent overlap with header */}
         <DashboardBackground showFloatingAgent={false}>
           <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
         </DashboardBackground>
