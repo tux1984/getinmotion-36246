@@ -85,14 +85,14 @@ export function useAgentConversations(agentId: string) {
       const { data, error } = await supabase
         .from('agent_messages')
         .select('*')
-        .eq('conversation_id', conversationId)
+        .eq('conversation_id', conversationId as any)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
       
       console.log('Fetched messages:', data?.length || 0);
       
-      const typedMessages: AgentMessage[] = (data || []).map(msg => ({
+      const typedMessages: AgentMessage[] = (data || []).map((msg: any) => ({
         ...msg,
         message_type: msg.message_type as 'user' | 'agent'
       }));
@@ -139,30 +139,32 @@ export function useAgentConversations(agentId: string) {
         const { data: taskData } = await supabase
           .from('agent_tasks')
           .select('title')
-          .eq('id', taskId)
+          .eq('id', taskId as any)
           .single();
         
-        if (taskData) {
-          conversationData.title = `Tarea: ${taskData.title}`;
+        const taskResult = taskData as any;
+        if (taskResult) {
+          conversationData.title = `Tarea: ${taskResult.title}`;
         }
       }
 
       const { data: conversation, error: convError } = await supabase
         .from('agent_conversations')
-        .insert(conversationData)
+        .insert(conversationData as any)
         .select('*')
         .single();
 
       if (convError) throw convError;
+      const conversationResult = conversation as any;
 
-      console.log('Created new conversation:', conversation.id, taskId ? `for task: ${taskId}` : '');
+      console.log('Created new conversation:', conversationResult.id, taskId ? `for task: ${taskId}` : '');
       
       // Update state locally to show the new conversation immediately
-      setConversations(prev => [conversation, ...prev]);
-      setCurrentConversationId(conversation.id);
+      setConversations(prev => [conversationResult as AgentConversation, ...prev]);
+      setCurrentConversationId(conversationResult.id);
       setMessages([]); // Start with an empty message list for the new chat
       
-      return conversation.id;
+      return conversationResult.id;
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
@@ -185,8 +187,8 @@ export function useAgentConversations(agentId: string) {
       const { data: taskExists } = await supabase
         .from('agent_tasks')
         .select('id')
-        .eq('id', taskId)
-        .eq('user_id', user.id)
+        .eq('id', taskId as any)
+        .eq('user_id', user.id as any)
         .maybeSingle();
 
       if (!taskExists) {
@@ -215,9 +217,9 @@ export function useAgentConversations(agentId: string) {
       // Archive the conversation
       const { error: archiveError } = await supabase
         .from('agent_conversations')
-        .update({ is_archived: true })
-        .eq('id', conversationId)
-        .eq('user_id', user.id);
+        .update({ is_archived: true } as any)
+        .eq('id', conversationId as any)
+        .eq('user_id', user.id as any);
 
       if (archiveError) throw archiveError;
 
@@ -256,17 +258,18 @@ export function useAgentConversations(agentId: string) {
           conversation_id: conversationId,
           message_type: messageType,
           content: content
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
+      const messageResult = data as any;
       
-      console.log('Added message:', data.id);
+      console.log('Added message:', messageResult.id);
       
       const typedMessage: AgentMessage = {
-        ...data,
-        message_type: data.message_type as 'user' | 'agent',
+        ...(messageResult as any),
+        message_type: messageResult.message_type as 'user' | 'agent',
         suggested_actions: suggestedActions
       };
       
@@ -275,8 +278,8 @@ export function useAgentConversations(agentId: string) {
       // Update conversation timestamp
       await supabase
         .from('agent_conversations')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', conversationId);
+        .update({ updated_at: new Date().toISOString() } as any)
+        .eq('id', conversationId as any);
 
       // Refresh conversations order locally
       setConversations(prevConvs => {
@@ -312,14 +315,14 @@ export function useAgentConversations(agentId: string) {
           const { data, error } = await supabase
             .from('agent_conversations')
             .select('*')
-            .eq('user_id', user.id)
-            .eq('agent_id', agentId)
-            .eq('is_archived', false)
+            .eq('user_id', user.id as any)
+            .eq('agent_id', agentId as any)
+            .eq('is_archived', false as any)
             .order('updated_at', { ascending: false });
 
           if (error) throw error;
           
-          const convs = data || [];
+          const convs = (data as any) || [];
           setConversations(convs);
 
           // If there is no conversation selected, and we have conversations, select the most recent one.

@@ -17,16 +17,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     detectSessionInUrl: true,
     flowType: 'pkce'
   },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    },
-    heartbeatIntervalMs: 30000,
-    reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 30000),
-    // Force secure WebSocket connection
-    transport: 'websocket',
-    timeout: 20000
-  },
   global: {
     headers: {
       'Content-Type': 'application/json'
