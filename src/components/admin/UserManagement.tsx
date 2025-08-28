@@ -11,13 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Plus, UserCheck, UserX, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-interface AdminUser {
-  id: string;
-  email: string;
-  is_active: boolean;
-  created_at: string;
-  created_by: string | null;
-}
+import type { Database } from '@/integrations/supabase/types';
+
+type AdminUser = Database['public']['Tables']['admin_users']['Row'];
 
 // Security validation functions
 const validateEmail = (email: string): boolean => {
@@ -151,8 +147,8 @@ export const UserManagement = () => {
     try {
       const { error } = await supabase
         .from('admin_users')
-        .update({ is_active: !currentStatus })
-        .eq('id', userId);
+        .update({ is_active: !currentStatus } as any)
+        .eq('id', userId as any);
         
       if (error) throw error;
       

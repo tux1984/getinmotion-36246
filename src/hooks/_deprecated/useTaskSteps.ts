@@ -18,7 +18,7 @@ export function useTaskSteps(taskId: string) {
       const { data, error } = await supabase
         .from('task_steps')
         .select('*')
-        .eq('task_id', taskId)
+        .eq('task_id', taskId as any)
         .order('step_number', { ascending: true });
 
       if (error) throw error;
@@ -31,10 +31,11 @@ export function useTaskSteps(taskId: string) {
         const { data: task, error: taskError } = await supabase
           .from('agent_tasks')
           .select('status, title, description, agent_id')
-          .eq('id', taskId)
+          .eq('id', taskId as any)
           .single();
           
-        if (!taskError && task && task.status === 'in_progress') {
+        const taskData = task as any;
+        if (!taskError && taskData && taskData.status === 'in_progress') {
           console.log('🚀 Task is in progress but has no steps, attempting to create them');
           setLoading(true);
           
@@ -61,7 +62,7 @@ export function useTaskSteps(taskId: string) {
         }
       }
       
-      setSteps((data || []).map(step => ({
+      setSteps((data || []).map((step: any) => ({
         id: step.id,
         task_id: step.task_id,
         step_number: step.step_number,
@@ -80,11 +81,11 @@ export function useTaskSteps(taskId: string) {
       })));
       
       // Find first incomplete step
-      const mappedSteps = (data || []).map(step => ({
-        ...step,
+      const mappedSteps = (data || []).map((step: any) => ({
+        ...(step as any),
         completion_status: step.completion_status as TaskStep['completion_status']
       }));
-      const firstIncomplete = mappedSteps.findIndex(step => step.completion_status !== 'completed');
+      const firstIncomplete = mappedSteps.findIndex((step: any) => step.completion_status !== 'completed');
       setCurrentStepIndex(Math.max(0, firstIncomplete));
     } catch (error) {
       console.error('Error fetching task steps:', error);
@@ -106,8 +107,8 @@ export function useTaskSteps(taskId: string) {
           user_input_data: inputData,
           completion_status: 'in_progress',
           updated_at: new Date().toISOString()
-        })
-        .eq('id', stepId);
+        } as any)
+        .eq('id', stepId as any);
 
       if (error) throw error;
       
@@ -147,26 +148,27 @@ export function useTaskSteps(taskId: string) {
 
       const { data: validation, error: validationError } = await supabase
         .from('step_validations')
-        .insert(validationData)
+        .insert(validationData as any)
         .select()
         .single();
 
       if (validationError) throw validationError;
+      const validationResult = validation as any;
 
       // For now, manual validation always passes if user confirms
       if (validationType === 'manual' && userConfirmation) {
         const { error: updateError } = await supabase
           .from('step_validations')
-          .update({ validation_result: 'passed' })
-          .eq('id', validation.id);
+          .update({ validation_result: 'passed' } as any)
+          .eq('id', validationResult.id as any);
 
         if (updateError) throw updateError;
 
         // Mark step as completed
         await supabase
           .from('task_steps')
-          .update({ completion_status: 'completed' })
-          .eq('id', stepId);
+          .update({ completion_status: 'completed' } as any)
+          .eq('id', stepId as any);
 
         // Update local state
         setSteps(prev => prev.map(step => 

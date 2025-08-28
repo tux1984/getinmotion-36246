@@ -70,7 +70,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
             access_code: formData.accessCode,
             language: language
           }
-        ]);
+        ] as any);
       
       if (supabaseError) {
         console.error('Supabase error:', supabaseError);

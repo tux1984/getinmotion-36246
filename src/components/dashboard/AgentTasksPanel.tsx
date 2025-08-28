@@ -40,8 +40,8 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
       const { data: taskExists } = await supabase
         .from('agent_tasks')
         .select('id')
-        .eq('id', taskId)
-        .eq('user_id', user.id)
+        .eq('id', taskId as any)
+        .eq('user_id', user.id as any)
         .maybeSingle();
 
       if (!taskExists) {
@@ -53,12 +53,12 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
       const { data: existingConversation } = await supabase
         .from('agent_conversations')
         .select('id')
-        .eq('user_id', user.id)
-        .eq('agent_id', agentId)
-        .eq('task_id', taskId)
+        .eq('user_id', user.id as any)
+        .eq('agent_id', agentId as any)
+        .eq('task_id', taskId as any)
         .maybeSingle();
 
-      let conversationId = existingConversation?.id;
+      let conversationId = (existingConversation as any)?.id;
 
       // If no conversation exists, create one
       if (!conversationId) {
@@ -70,7 +70,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
             task_id: taskId,
             title: `Desarrollo: ${taskTitle}`,
             is_archived: false
-          })
+          } as any)
           .select('id')
           .single();
 
@@ -81,7 +81,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
           return;
         }
         
-        conversationId = newConversation.id;
+        conversationId = (newConversation as any)?.id;
 
         // Add initial context message about the task development
         const initialMessage = language === 'es' 
@@ -114,7 +114,7 @@ Are you ready to start? Tell me, is there any specific aspect of this task you'd
             conversation_id: conversationId,
             message_type: 'agent',
             content: initialMessage
-          });
+          } as any);
       }
 
       // Call the original handler with conversation context

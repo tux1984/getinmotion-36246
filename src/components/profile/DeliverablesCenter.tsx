@@ -65,11 +65,11 @@ export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = () => {
       const { data, error } = await supabase
         .from('agent_deliverables')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id as any)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDeliverables(data || []);
+      setDeliverables((data as any) || []);
     } catch (error) {
       console.error('Error fetching deliverables:', error);
       toast({

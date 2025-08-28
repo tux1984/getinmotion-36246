@@ -83,15 +83,17 @@ export const BusinessProfileCapture: React.FC<BusinessProfileCaptureProps> = ({ 
     
     setLoading(true);
     try {
+      const updateData = {
+        ...formData,
+        monthly_revenue_goal: formData.monthly_revenue_goal ? parseInt(formData.monthly_revenue_goal) : null,
+        years_in_business: formData.years_in_business ? parseInt(formData.years_in_business) : null,
+        updated_at: new Date().toISOString()
+      };
+      
       const { error } = await supabase
         .from('user_profiles')
-        .update({
-          ...formData,
-          monthly_revenue_goal: formData.monthly_revenue_goal ? parseInt(formData.monthly_revenue_goal) : null,
-          years_in_business: formData.years_in_business ? parseInt(formData.years_in_business) : null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+        .update(updateData as any)
+        .eq('user_id', user.id as any);
 
       if (error) throw error;
 

@@ -33,7 +33,7 @@ export const useAIAssistant = (stepContext: string, questionId: string, question
       role: message.role,
       step_context: stepContext,
       question_id: questionId
-    });
+    } as any);
     if (error) {
       console.error('Error saving chat message:', error);
     }

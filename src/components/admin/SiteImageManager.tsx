@@ -6,13 +6,9 @@ import { Loader2 } from 'lucide-react';
 import { ImageManagerLayout } from './image-manager/ImageManagerLayout';
 import { ImageGrid } from './image-manager/ImageGrid';
 
-interface SiteImage {
-  id: string;
-  context: string;
-  key: string;
-  image_url: string;
-  alt_text: string | null;
-}
+import type { Database } from '@/integrations/supabase/types';
+
+type SiteImage = Database['public']['Tables']['site_images']['Row'];
 
 interface StorageImage {
   name: string;
@@ -33,9 +29,9 @@ export const SiteImageManager: React.FC = () => {
       toast({ title: 'Error', description: 'No se pudieron cargar las imágenes del sitio.', variant: 'destructive' });
       console.error(error);
     } else {
-      setSiteImages(data || []);
+      setSiteImages((data as unknown as SiteImage[]) || []);
       if (data && data.length > 0) {
-        const contexts = [...new Set(data.map(img => img.context))];
+        const contexts = [...new Set((data as unknown as SiteImage[]).map(img => img.context))];
         if (contexts.length > 0 && !selectedContext) {
           setSelectedContext(contexts[0]);
         }
@@ -69,7 +65,13 @@ export const SiteImageManager: React.FC = () => {
 
   const handleImageUpdate = async (imageId: string, newImageUrl: string) => {
     setIsUpdating(imageId);
-    const { error } = await supabase.from('site_images').update({ image_url: newImageUrl, updated_at: new Date().toISOString() }).eq('id', imageId);
+    const { error } = await supabase
+      .from('site_images')
+      .update({ 
+        image_url: newImageUrl, 
+        updated_at: new Date().toISOString() 
+      } as any)
+      .eq('id', imageId as any);
     if (error) {
       toast({ title: 'Error', description: 'Error al actualizar la imagen.', variant: 'destructive' });
       console.error(error);

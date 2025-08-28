@@ -103,7 +103,7 @@ export const useFusedMaturityAgent = (
         .upsert({
           user_id: user.id,
           ...cleanUpdate
-        }, {
+        } as any, {
           onConflict: 'user_id'
         });
 
@@ -212,7 +212,7 @@ export const useFusedMaturityAgent = (
           .upsert({
             user_id: user.id,
             ...cleanUpdate
-          }, {
+          } as any, {
             onConflict: 'user_id'
           });
 

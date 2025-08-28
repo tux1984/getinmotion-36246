@@ -53,8 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data, error } = await supabase
         .from('admin_users')
         .select('email, is_active')
-        .eq('email', email)
-        .eq('is_active', true)
+        .eq('email', email as any)
+        .eq('is_active', true as any)
         .maybeSingle();
       
       if (error) {

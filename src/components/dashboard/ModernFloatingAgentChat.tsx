@@ -59,10 +59,10 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
       const { data: conversationData } = await supabase
         .from('agent_conversations')
         .select('task_id')
-        .eq('id', conversationId)
+        .eq('id', conversationId as any)
         .single();
       
-      const taskId = conversationData?.task_id;
+      const taskId = (conversationData as any)?.task_id;
       
       const requestBody: any = {
         messages: [{ role: 'user', content: messageContent }],

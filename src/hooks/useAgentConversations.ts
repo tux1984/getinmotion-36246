@@ -53,13 +53,13 @@ export function useAgentConversations(agentId: string) {
       const { data, error } = await supabase
         .from('agent_conversations')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('agent_id', agentId)
-        .eq('is_archived', false)
+        .eq('user_id', user.id as any)
+        .eq('agent_id', agentId as any)
+        .eq('is_archived', false as any)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setConversations(data || []);
+      setConversations((data as any) || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast({
