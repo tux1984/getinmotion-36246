@@ -24,6 +24,7 @@ import TwoPager from './pages/TwoPager';
 import ThreePager from './pages/ThreePager';
 import AgentsGallery from './pages/AgentsGallery';
 import Profile from './pages/Profile';
+import { BiomeConfigPage } from './pages/BiomeConfigPage';
 
 function App() {
   return (
@@ -119,6 +120,7 @@ function App() {
               />
               <Route path="/agents" element={<AgentsGallery />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/biome-config" element={<BiomeConfigPage />} />
               <Route path="/one-pager" element={<OnePager />} />
               <Route path="/two-pager" element={<TwoPager />} />
               <Route path="/three-pager" element={<ThreePager />} />
