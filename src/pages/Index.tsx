@@ -8,11 +8,14 @@ import { CollapsibleWaitlistForm } from '@/components/waitlist/CollapsibleWaitli
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/layout/Header';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 import { SEO_CONFIG } from '@/config/seo';
 
 const Index = () => {
-  const language = 'en'; // Fixed to English only
+  const { language: currentLanguage } = useLanguage();
+  const language = mapToLegacyLanguage(currentLanguage);
   const [showWaitlist, setShowWaitlist] = useState(false);
 
   // Scroll to top when component mounts

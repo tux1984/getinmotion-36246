@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { MotionLogo } from '@/components/MotionLogo';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 import { Button } from '@/components/ui/button';
 import { Menu, X, UserPlus, LogIn, Settings } from 'lucide-react';
@@ -31,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
             Agents
           </a>
           
+          <LanguageSwitcher />
 
           <Button
             onClick={() => window.location.href = '/login'}
@@ -79,6 +81,10 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
             <span>🤖</span>
             Agents
           </a>
+
+          <div className="px-4 py-2">
+            <LanguageSwitcher />
+          </div>
 
           <a 
             href="/login" 
