@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { translations } from './translations';
 import { useWaitlistForm } from './useWaitlistForm';
+import { useAccessCodeValidation } from './useAccessCodeValidation';
 import { WaitlistFormProps } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { WaitlistFormHeader } from './WaitlistFormHeader';
@@ -39,6 +40,8 @@ export const WaitlistForm = ({ onSubmit, onCodeSubmit, language, showWaitlist = 
     
     if (onSubmit) onSubmit();
   });
+
+  const { validateAccessCode, isValidating, validationError, clearValidationError } = useAccessCodeValidation();
   
   const [submitted, setSubmitted] = useState(false);
   const [showConnectionStatus, setShowConnectionStatus] = useState(false);
@@ -55,15 +58,26 @@ export const WaitlistForm = ({ onSubmit, onCodeSubmit, language, showWaitlist = 
     checkIfMockMode();
   }, []);
 
-  // Check if access code is valid on change
+  // Validate access code when it changes
   useEffect(() => {
-    if (formData.accessCode && formData.accessCode.trim() === "motionproject") {
-      setCodeValidated(true);
-      if (onCodeSubmit) onCodeSubmit(formData.accessCode);
-    } else {
-      setCodeValidated(false);
-    }
-  }, [formData.accessCode, onCodeSubmit]);
+    const validateCode = async () => {
+      if (formData.accessCode && formData.accessCode.trim()) {
+        clearValidationError();
+        const isValid = await validateAccessCode(formData.accessCode.trim());
+        setCodeValidated(isValid);
+        if (isValid && onCodeSubmit) {
+          onCodeSubmit(formData.accessCode);
+        }
+      } else {
+        setCodeValidated(false);
+        clearValidationError();
+      }
+    };
+
+    // Debounce validation to avoid too many requests
+    const debounceTimer = setTimeout(validateCode, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [formData.accessCode, validateAccessCode, clearValidationError, onCodeSubmit]);
 
   // Don't render anything if showWaitlist is false
   if (!showWaitlist) {

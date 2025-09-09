@@ -4,6 +4,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { translations } from './translations';
 import { useWaitlistForm } from './useWaitlistForm';
+import { useAccessCodeValidation } from './useAccessCodeValidation';
 import { CollapsibleWaitlistFormHeader } from './CollapsibleWaitlistFormHeader';
 import { CollapsibleWaitlistFormAlerts } from './CollapsibleWaitlistFormAlerts';
 import { CollapsibleWaitlistFormSections } from './CollapsibleWaitlistFormSections';
@@ -35,16 +36,27 @@ export const CollapsibleWaitlistForm: React.FC<CollapsibleWaitlistFormProps> = (
     }
   });
 
+  const { validateAccessCode, isValidating, validationError, clearValidationError } = useAccessCodeValidation();
+
   const t = translations[language];
 
-  // Check if access code is valid on change
+  // Validate access code when it changes
   React.useEffect(() => {
-    if (formData.accessCode && formData.accessCode.trim() === "motionproject") {
-      setCodeValidated(true);
-    } else {
-      setCodeValidated(false);
-    }
-  }, [formData.accessCode]);
+    const validateCode = async () => {
+      if (formData.accessCode && formData.accessCode.trim()) {
+        clearValidationError();
+        const isValid = await validateAccessCode(formData.accessCode.trim());
+        setCodeValidated(isValid);
+      } else {
+        setCodeValidated(false);
+        clearValidationError();
+      }
+    };
+
+    // Debounce validation to avoid too many requests
+    const debounceTimer = setTimeout(validateCode, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [formData.accessCode, validateAccessCode, clearValidationError]);
 
   // Listen for URL hash changes to open the form automatically
   useEffect(() => {

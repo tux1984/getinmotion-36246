@@ -40,9 +40,6 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
     setError(null); // Clear any previous errors
     
     try {
-      // Log the data being submitted
-      console.log('Submitting waitlist form:', formData);
-      
       if (!formData.email || !formData.fullName) {
         const errorMessage = language === 'en' 
           ? 'Please fill in required fields (name and email)'
@@ -72,9 +69,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
           }
         ] as any);
       
-      if (supabaseError) {
-        console.error('Supabase error:', supabaseError);
-        
+      if (supabaseError) {        
         // Show appropriate error message
         let errorMessage = '';
         if (supabaseError.code === '23505') { // Código para violación de restricción única
@@ -108,9 +103,7 @@ export const useWaitlistForm = (language: 'en' | 'es', onSubmitCallback?: (succe
         setFormData(initialFormData);
         if (onSubmitCallback) onSubmitCallback(true);
       }
-    } catch (error) {
-      console.error('Error submitting waitlist form:', error);
-      
+    } catch (error) {      
       // Show error message
       const errorMessage = language === 'en' 
         ? 'There was a problem submitting your information. Please try again.' 
