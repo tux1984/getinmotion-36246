@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
+import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +27,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const { recordFailedAttempt, recordSuccessfulLogin, isRateLimited } = useSecurityMonitoring();
   const [debugInfo, setDebugInfo] = useState({
     authStateChangeCount: 0,
     lastAuthEvent: null as string | null,
@@ -41,13 +44,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const email = userEmail || user?.email;
       if (!email) {
-        console.log('AuthContext: No email provided for authorization check');
+        logger.debug('No email provided for authorization check', { component: 'auth' });
         setIsAuthorized(false);
         return false;
       }
       
       updateDebugInfo('authorizationAttempts', debugInfo.authorizationAttempts + 1);
-      console.log(`AuthContext: Checking authorization for: ${email} (attempt ${retryCount + 1})`);
+      logger.debug(`Checking authorization (attempt ${retryCount + 1})`, { 
+        userEmail: email, 
+        component: 'auth' 
+      });
       
       // Use RLS-enabled query with retry logic
       const { data, error } = await supabase
@@ -58,7 +64,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .maybeSingle();
       
       if (error) {
-        console.error('AuthContext: Error checking authorization:', error);
+        logger.debug('Error checking authorization', { 
+          error: error.message, 
+          userEmail: email,
+          component: 'auth' 
+        });
         
         // Retry logic for transient errors
         if (retryCount < maxRetries && (
@@ -66,7 +76,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           error.message?.includes('timeout') ||
           error.code === 'PGRST301'
         )) {
-          console.log(`AuthContext: Retrying authorization check in ${(retryCount + 1) * 1000}ms...`);
+          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 1000}ms`, { 
+            userEmail: email,
+            component: 'auth' 
+          });
           await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
           return checkAuthorization(userEmail, retryCount + 1);
         }
@@ -76,15 +89,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       const authorized = !!data;
-      console.log('AuthContext: Authorization result:', authorized, data);
+      logger.debug('Authorization result', { 
+        authorized, 
+        userEmail: email,
+        component: 'auth' 
+      });
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      console.error('AuthContext: Exception checking authorization:', error);
+      logger.error('Exception checking authorization', error as Error, { 
+        userEmail: userEmail || user?.email,
+        component: 'auth' 
+      });
       
       // Retry for network errors
       if (retryCount < maxRetries) {
-        console.log(`AuthContext: Retrying authorization check due to exception...`);
+        logger.debug('Retrying authorization check due to exception', { 
+          userEmail: userEmail || user?.email,
+          component: 'auth' 
+        });
         await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
         return checkAuthorization(userEmail, retryCount + 1);
       }
@@ -95,7 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    console.log('AuthContext: Setting up auth listener');
+    logger.debug('Setting up auth listener', { component: 'auth' });
     
     let isMounted = true;
     
@@ -105,7 +128,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateDebugInfo('authStateChangeCount', debugInfo.authStateChangeCount + 1);
         updateDebugInfo('lastAuthEvent', event);
         
-        console.log('AuthContext: Auth state changed:', event, session?.user?.email || 'No session');
+        logger.debug('Auth state changed', { 
+          event, 
+          userEmail: session?.user?.email || 'No session',
+          component: 'auth' 
+        });
         
         if (!isMounted) return;
         
@@ -114,18 +141,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Check authorization for authenticated users with delay to prevent deadlocks
         if (session?.user?.email) {
-          console.log('AuthContext: Auth state change - checking authorization...');
+          logger.debug('Auth state change - checking authorization', { 
+            userEmail: session.user.email,
+            component: 'auth' 
+          });
           setTimeout(() => {
             if (isMounted) {
               checkAuthorization(session.user.email);
             }
           }, 100); // Increased delay to prevent potential issues
         } else {
-          console.log('AuthContext: Auth state change - no user, setting unauthorized');
+          logger.debug('Auth state change - no user, setting unauthorized', { component: 'auth' });
           setIsAuthorized(false);
         }
         
-        console.log('AuthContext: Auth state change complete, setting loading to false');
+        logger.debug('Auth state change complete, setting loading to false', { component: 'auth' });
         setLoading(false);
       }
     );
@@ -133,33 +163,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('AuthContext: Getting initial session...');
+        logger.debug('Getting initial session', { component: 'auth' });
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!isMounted) return;
         
         if (error) {
-          console.error('AuthContext: Error getting initial session:', error);
+          logger.error('Error getting initial session', error as Error, { component: 'auth' });
           setLoading(false);
           return;
         }
         
-        console.log('AuthContext: Initial session check:', session?.user?.email || 'No session');
+        logger.debug('Initial session check', { 
+          userEmail: session?.user?.email || 'No session',
+          component: 'auth' 
+        });
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user?.email) {
-          console.log('AuthContext: User found, checking authorization...');
+          logger.debug('User found, checking authorization', { 
+            userEmail: session.user.email,
+            component: 'auth' 
+          });
           await checkAuthorization(session.user.email);
         } else {
-          console.log('AuthContext: No user found, setting unauthorized');
+          logger.debug('No user found, setting unauthorized', { component: 'auth' });
           setIsAuthorized(false);
         }
         
-        console.log('AuthContext: Initial setup complete, setting loading to false');
+        logger.debug('Initial setup complete, setting loading to false', { component: 'auth' });
         setLoading(false);
       } catch (error) {
-        console.error('AuthContext: Exception getting initial session:', error);
+        logger.error('Exception getting initial session', error as Error, { component: 'auth' });
         if (isMounted) {
           setLoading(false);
         }
@@ -170,15 +206,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTimeout(getInitialSession, 50);
 
     return () => {
-      console.log('AuthContext: Cleaning up auth listener');
+      logger.debug('Cleaning up auth listener', { component: 'auth' });
       isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    console.log('AuthContext: Attempting sign in for:', email);
-    
     try {
       setLoading(true);
       
@@ -194,6 +228,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (password.length < 6) {
         return { error: { message: 'Password must be at least 6 characters' } };
       }
+
+      // Check rate limiting
+      if (isRateLimited(email)) {
+        logger.security.suspiciousActivity('Rate limited login attempt', { userEmail: email });
+        setLoading(false);
+        return { error: { message: 'Too many failed attempts. Please try again later.' } };
+      }
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
@@ -201,23 +242,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       if (error) {
-        console.error('AuthContext: Sign in error:', error);
+        logger.security.authError(error.message, email);
+        recordFailedAttempt(email);
         setLoading(false);
         return { error };
       }
       
-      console.log('AuthContext: Sign in successful for:', data.user?.email);
+      recordSuccessfulLogin(email);
+      logger.info('User signed in successfully', { userEmail: email, component: 'auth' });
       // Don't set loading to false here, let the auth state change handle it
       return { error: null };
     } catch (error) {
-      console.error('AuthContext: Sign in exception:', error);
+      logger.error('Sign in exception', error as Error, { userEmail: email, component: 'auth' });
+      recordFailedAttempt(email);
       setLoading(false);
       return { error };
     }
   };
 
   const signOut = async () => {
-    console.log('AuthContext: Signing out');
+    const userEmail = user?.email;
+    logger.info('User signing out', { userEmail, component: 'auth' });
     setLoading(true);
     await supabase.auth.signOut();
     setIsAuthorized(false);
