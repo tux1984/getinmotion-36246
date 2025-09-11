@@ -27,12 +27,14 @@ const Index = () => {
     en: {
       navAgents: "Agents",
       navAccess: "Get Access",
-      navLogin: "Login"
+      navLogin: "Login",
+      navShops: "Artisan Shops"
     },
     es: {
       navAgents: "Agentes",
       navAccess: "Obtener Acceso",
-      navLogin: "Iniciar Sesión"
+      navLogin: "Iniciar Sesión",
+      navShops: "Tiendas Artesanales"
     }
   };
 

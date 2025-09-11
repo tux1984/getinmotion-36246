@@ -35,6 +35,14 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
             Agents
           </a>
           
+          <a 
+            href="/tiendas" 
+            className="group flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-purple-600 font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200 hover:shadow-lg hover:scale-105 transform"
+          >
+            <span className="group-hover:scale-110 transition-transform duration-200">🏪</span>
+            Tiendas
+          </a>
+          
           <LanguageSwitcherButton onClick={openLanguageModal} />
 
           <Button
@@ -83,6 +91,15 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
           >
             <span>🤖</span>
             Agents
+          </a>
+
+          <a 
+            href="/tiendas" 
+            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-purple-600 font-medium transition-all duration-200 hover:bg-purple-50 rounded-xl"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <span>🏪</span>
+            Tiendas
           </a>
 
           <LanguageSwitcherButton 

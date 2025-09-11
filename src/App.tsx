@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -26,16 +27,25 @@ import AgentsGallery from './pages/AgentsGallery';
 import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
 import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
+import { PublicShopPage } from './pages/PublicShopPage';
+import { PublicProductPage } from './pages/PublicProductPage';
+import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <LanguageProvider>
+    <HelmetProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <LanguageProvider>
           <div className="min-h-screen">
           <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              
+              {/* Public shop routes */}
+              <Route path="/tiendas" element={<ShopDirectoryPage />} />
+              <Route path="/tienda/:shopSlug" element={<PublicShopPage />} />
+              <Route path="/tienda/:shopSlug/producto/:productId" element={<PublicProductPage />} />
               {/* Main dashboard route - Master Coordinator as entry point */}
               <Route 
                 path="/dashboard" 
@@ -136,10 +146,11 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
-          <Toaster />
-        </LanguageProvider>
-      </AuthProvider>
-    </BrowserRouter>
+            <Toaster />
+          </LanguageProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 
