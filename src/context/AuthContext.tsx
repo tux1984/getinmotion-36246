@@ -40,28 +40,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const checkAuthorization = async (userEmail?: string, retryCount = 0): Promise<boolean> => {
-    const maxRetries = 2; // Reduced retries for faster recovery
+    const maxRetries = 2;
     
     try {
-      const email = userEmail || user?.email;
-      if (!email) {
-        logger.debug('No email provided for authorization check', { component: 'auth' });
+      updateDebugInfo('authorizationAttempts', debugInfo.authorizationAttempts + 1);
+      
+      // Get current user to ensure session is properly established
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !currentUser?.email) {
+        logger.debug('No authenticated user found', { 
+          error: userError?.message,
+          component: 'auth' 
+        });
         setIsAuthorized(false);
         return false;
       }
-      
-      updateDebugInfo('authorizationAttempts', debugInfo.authorizationAttempts + 1);
+
+      const email = userEmail || currentUser.email;
       logger.debug(`Checking authorization (attempt ${retryCount + 1})`, { 
         userEmail: email, 
         component: 'auth' 
       });
       
-      // Use RLS-enabled query with retry logic
+      // Direct query to admin_users table - this bypasses RLS timing issues
       const { data, error } = await supabase
         .from('admin_users')
         .select('email, is_active')
-        .eq('email', email as any)
-        .eq('is_active', true as any)
+        .eq('email', email)
+        .eq('is_active', true)
         .maybeSingle();
       
       if (error) {
@@ -71,18 +78,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           component: 'auth' 
         });
         
-        // Retry logic for transient errors with faster recovery
+        // Retry logic for transient errors
         if (retryCount < maxRetries && (
           error.message?.includes('Failed to fetch') || 
           error.message?.includes('timeout') ||
           error.code === 'PGRST301' ||
-          error.message?.includes('JWT')
+          error.message?.includes('JWT') ||
+          error.message?.includes('permission denied')
         )) {
-          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 800}ms`, { 
+          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 500}ms`, { 
             userEmail: email,
             component: 'auth' 
           });
-          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 800)); // Faster retry
+          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
           return checkAuthorization(userEmail, retryCount + 1);
         }
         
@@ -94,23 +102,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       logger.debug('Authorization result', { 
         authorized, 
         userEmail: email,
+        adminUserFound: !!data,
         component: 'auth' 
       });
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
       logger.error('Exception checking authorization', error as Error, { 
-        userEmail: userEmail || user?.email,
+        userEmail: userEmail,
         component: 'auth' 
       });
       
-      // Retry for network errors with faster recovery
+      // Retry for network errors
       if (retryCount < maxRetries) {
         logger.debug('Retrying authorization check due to exception', { 
-          userEmail: userEmail || user?.email,
+          userEmail: userEmail,
           component: 'auth' 
         });
-        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 600)); // Faster retry
+        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
         return checkAuthorization(userEmail, retryCount + 1);
       }
       
@@ -141,7 +150,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check authorization for authenticated users with delay to prevent deadlocks
+        // Check authorization for authenticated users with delay to ensure session is established
         if (session?.user?.email) {
           logger.debug('Auth state change - checking authorization', { 
             userEmail: session.user.email,
@@ -151,7 +160,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (isMounted) {
               checkAuthorization(session.user.email);
             }
-          }, 100); // Increased delay to prevent potential issues
+          }, 200); // Increased delay to ensure session is fully established
         } else {
           logger.debug('Auth state change - no user, setting unauthorized', { component: 'auth' });
           setIsAuthorized(false);
