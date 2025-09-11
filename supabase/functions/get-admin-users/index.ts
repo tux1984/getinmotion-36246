@@ -77,6 +77,15 @@ serve(async (req) => {
 
     console.log('Fetching admin users...')
 
+    // Log admin data access for audit trail
+    console.log('AUDIT: Admin users data access', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      accessedBy: user.email,
+      action: 'view_admin_users',
+      resource: 'admin_users_table',
+      ip: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+    }));
+
     // Get all admin users (RLS policies will ensure only admins can access)
     const { data, error } = await supabaseClient
       .from('admin_users')

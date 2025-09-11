@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useSecurityHeaders } from '@/hooks/useSecurityHeaders';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
@@ -34,6 +35,9 @@ import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 
 function App() {
+  // Apply security headers
+  useSecurityHeaders();
+  
   return (
     <ErrorBoundary>
       <HelmetProvider>

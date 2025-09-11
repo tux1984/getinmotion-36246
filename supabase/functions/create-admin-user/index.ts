@@ -100,6 +100,15 @@ serve(async (req) => {
 
     console.log('Creating admin user:', email)
 
+    // Log admin action for audit trail
+    console.log('AUDIT: Admin user creation initiated', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      initiatedBy: user.email,
+      targetEmail: email,
+      action: 'create_admin_user',
+      ip: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+    }));
+
     // Create new admin user
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
@@ -147,6 +156,15 @@ serve(async (req) => {
     }
 
     console.log('Admin user added to admin_users table')
+
+    // Log successful admin user creation
+    console.log('AUDIT: Admin user creation completed successfully', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      initiatedBy: user.email,
+      targetEmail: email,
+      action: 'create_admin_user_success',
+      ip: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+    }));
 
     return new Response(
       JSON.stringify({ 
