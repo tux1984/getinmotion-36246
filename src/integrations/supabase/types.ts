@@ -375,10 +375,13 @@ export type Database = {
           contact_info: Json | null
           craft_type: string | null
           created_at: string
+          data_classification: Json | null
           description: string | null
           featured: boolean
           id: string
           logo_url: string | null
+          privacy_level: string | null
+          public_profile: Json | null
           region: string | null
           seo_data: Json | null
           shop_name: string
@@ -395,10 +398,13 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          data_classification?: Json | null
           description?: string | null
           featured?: boolean
           id?: string
           logo_url?: string | null
+          privacy_level?: string | null
+          public_profile?: Json | null
           region?: string | null
           seo_data?: Json | null
           shop_name: string
@@ -415,10 +421,13 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          data_classification?: Json | null
           description?: string | null
           featured?: boolean
           id?: string
           logo_url?: string | null
+          privacy_level?: string | null
+          public_profile?: Json | null
           region?: string | null
           seo_data?: Json | null
           shop_name?: string
@@ -454,6 +463,45 @@ export type Database = {
           image_url?: string
           is_active?: boolean
           step_name?: string
+        }
+        Relationships: []
+      }
+      data_access_audit: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string
+          success: boolean | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1110,6 +1158,12 @@ export type Database = {
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_public_profile: {
+        Args: {
+          shop_record: Database["public"]["Tables"]["artisan_shops"]["Row"]
+        }
+        Returns: Json
       }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }

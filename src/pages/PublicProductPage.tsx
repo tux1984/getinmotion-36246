@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Phone, Mail, Star, Package, Ruler, Timer, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
+import { useDataAudit } from '@/hooks/useDataAudit';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { logger } from '@/utils/logger';
 
 export const PublicProductPage: React.FC = () => {
   const { shopSlug, productId } = useParams<{ shopSlug: string; productId: string }>();
@@ -17,16 +20,47 @@ export const PublicProductPage: React.FC = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [rateLimited, setRateLimited] = useState(false);
+  const { logPublicDataAccess } = useDataAudit();
+  const { checkRateLimit } = useRateLimit();
 
   useEffect(() => {
     const fetchProductData = async () => {
       if (!shopSlug || !productId) return;
 
+      // Check rate limit
+      const rateCheck = checkRateLimit('shopView');
+      if (!rateCheck.allowed) {
+        setRateLimited(true);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // First get shop data
+        // First get shop data with privacy controls
         const { data: shopData, error: shopError } = await supabase
           .from('artisan_shops')
-          .select('*')
+          .select(`
+            id,
+            user_id,
+            shop_name,
+            shop_slug,
+            description,
+            banner_url,
+            logo_url,
+            craft_type,
+            region,
+            public_profile,
+            privacy_level,
+            contact_info,
+            social_links,
+            certifications,
+            active,
+            featured,
+            seo_data,
+            created_at,
+            updated_at
+          `)
           .eq('shop_slug', shopSlug)
           .eq('active', true)
           .single();

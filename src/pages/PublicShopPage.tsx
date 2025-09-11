@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Phone, Mail, ExternalLink, Instagram, Facebook, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
+import { useDataAudit } from '@/hooks/useDataAudit';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { logger } from '@/utils/logger';
 
 export const PublicShopPage: React.FC = () => {
   const { shopSlug } = useParams<{ shopSlug: string }>();
@@ -15,16 +18,53 @@ export const PublicShopPage: React.FC = () => {
   const [shop, setShop] = useState<ArtisanShop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rateLimited, setRateLimited] = useState(false);
+  const { logPublicDataAccess } = useDataAudit();
+  const { checkRateLimit } = useRateLimit();
 
   useEffect(() => {
     const fetchShopData = async () => {
       if (!shopSlug) return;
 
+      // Check rate limit
+      const rateCheck = checkRateLimit('shopView');
+      if (!rateCheck.allowed) {
+        setRateLimited(true);
+        setLoading(false);
+        logger.security.rateLimitExceeded(
+          'anonymous',
+          100,
+          '60s'
+        );
+        return;
+      }
+
       try {
-        // Fetch shop data
+        // Fetch shop data with privacy controls
         const { data: shopData, error: shopError } = await supabase
           .from('artisan_shops')
-          .select('*')
+          .select(`
+            id,
+            user_id,
+            shop_name,
+            shop_slug,
+            description,
+            story,
+            banner_url,
+            logo_url,
+            craft_type,
+            region,
+            public_profile,
+            privacy_level,
+            contact_info,
+            social_links,
+            certifications,
+            active,
+            featured,
+            seo_data,
+            created_at,
+            updated_at
+          `)
           .eq('shop_slug', shopSlug)
           .eq('active', true)
           .single();

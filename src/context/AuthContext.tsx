@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
+import { InputValidator } from '@/utils/inputValidation';
 
 interface AuthContextType {
   user: User | null;
@@ -213,48 +214,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    let sanitizedEmail = email; // Declare outside try block for catch access
+    
     try {
       setLoading(true);
       
-      // Input validation
-      if (!email || !password) {
-        return { error: { message: 'Email and password are required' } };
+      // Enhanced input validation using InputValidator
+      const emailValidation = InputValidator.validateEmail(email);
+      if (!emailValidation.isValid) {
+        return { error: { message: emailValidation.errors[0] } };
       }
       
-      if (!email.includes('@') || email.length < 3) {
-        return { error: { message: 'Invalid email format' } };
+      const passwordValidation = InputValidator.validatePassword(password);
+      if (!passwordValidation.isValid) {
+        return { error: { message: passwordValidation.errors[0] } };
       }
       
-      if (password.length < 6) {
-        return { error: { message: 'Password must be at least 6 characters' } };
-      }
+      sanitizedEmail = emailValidation.sanitizedValue || email;
 
       // Check rate limiting
-      if (isRateLimited(email)) {
-        logger.security.suspiciousActivity('Rate limited login attempt', { userEmail: email });
+      if (isRateLimited(sanitizedEmail)) {
+        logger.security.suspiciousActivity('Rate limited login attempt', { userEmail: sanitizedEmail });
         setLoading(false);
         return { error: { message: 'Too many failed attempts. Please try again later.' } };
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: sanitizedEmail,
         password
       });
       
       if (error) {
-        logger.security.authError(error.message, email);
-        recordFailedAttempt(email);
+        logger.security.authError(error.message, sanitizedEmail);
+        recordFailedAttempt(sanitizedEmail);
         setLoading(false);
         return { error };
       }
       
-      recordSuccessfulLogin(email);
-      logger.info('User signed in successfully', { userEmail: email, component: 'auth' });
+      recordSuccessfulLogin(sanitizedEmail);
+      logger.info('User signed in successfully', { userEmail: sanitizedEmail, component: 'auth' });
       // Don't set loading to false here, let the auth state change handle it
       return { error: null };
     } catch (error) {
-      logger.error('Sign in exception', error as Error, { userEmail: email, component: 'auth' });
-      recordFailedAttempt(email);
+      logger.error('Sign in exception', error as Error, { userEmail: sanitizedEmail, component: 'auth' });
+      recordFailedAttempt(sanitizedEmail);
       setLoading(false);
       return { error };
     }
