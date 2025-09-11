@@ -42,31 +42,8 @@ export function useAgentTasks(agentId?: string) {
     refreshTasks();
   }, [refreshTasks]);
 
-  // Realtime subscription for tasks
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel(`realtime-tasks-user-${user.id}-agent-${agentId || 'all'}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'agent_tasks',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('Task change detected, refreshing...', payload);
-          refreshTasks();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, agentId, refreshTasks]);
+  // Note: Realtime subscription temporarily disabled to fix SecurityError
+  // Manual refresh can be triggered via refreshTasks() function
 
   const hasSanitizedOnce = useRef(false);
   useEffect(() => {
