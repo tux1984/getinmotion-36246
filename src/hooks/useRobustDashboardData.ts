@@ -61,12 +61,21 @@ export const useRobustDashboardData = (): RobustDashboardData => {
           email: user.email || ''
         };
 
-        // Cargar datos adicionales de forma segura
-        let maturityScores = DEFAULT_SCORES;
-        let userAgents: any[] = [];
+        // Intentar cargar datos adicionales con timeout normal
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 10000)
+        );
 
         try {
-          const scoresResult = await supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id });
+          const [scoresResult, agentsResult] = await Promise.race([
+            Promise.all([
+              supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
+              supabase.from('user_agents').select('*').eq('user_id', user.id)
+            ]),
+            timeoutPromise
+          ]) as any[];
+
+          let maturityScores = DEFAULT_SCORES;
           if (scoresResult.data && scoresResult.data.length > 0) {
             const scores = scoresResult.data[0];
             maturityScores = {
@@ -76,24 +85,26 @@ export const useRobustDashboardData = (): RobustDashboardData => {
               monetization: scores.monetization || DEFAULT_SCORES.monetization
             };
           }
-        } catch (scoresError) {
-          console.log('Failed to load maturity scores, using defaults');
-        }
 
-        try {
-          const agentsResult = await supabase.from('user_agents').select('*').eq('user_id', user.id);
-          userAgents = agentsResult.data || [];
-        } catch (agentsError) {
-          console.log('Failed to load user agents');
-        }
+          setData({
+            profile: basicProfile,
+            maturityScores,
+            userAgents: agentsResult.data || [],
+            loading: false,
+            error: null
+          });
 
-        setData({
-          profile: basicProfile,
-          maturityScores,
-          userAgents,
-          loading: false,
-          error: null
-        });
+        } catch (fetchError) {
+          // Usar datos básicos si la carga falla
+          console.log('Using basic data due to fetch timeout');
+          setData({
+            profile: basicProfile,
+            maturityScores: DEFAULT_SCORES,
+            userAgents: [],
+            loading: false,
+            error: null
+          });
+        }
 
       } catch (error) {
         console.error('Error loading dashboard data:', error);

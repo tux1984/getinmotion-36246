@@ -86,9 +86,9 @@ export const useMasterCoordinator = () => {
       setLoading(true);
       setCoordinatorError(false);
       
-      // Add 5-second timeout to prevent hanging
+      // Add 30-second timeout for normal operation
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Coordinator timeout')), 5000)
+        setTimeout(() => reject(new Error('Coordinator timeout')), 30000)
       );
       
       const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
@@ -147,7 +147,7 @@ export const useMasterCoordinator = () => {
     
     try {
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Questions timeout')), 3000)
+        setTimeout(() => reject(new Error('Questions timeout')), 15000)
       );
       
       const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
@@ -382,7 +382,7 @@ export const useMasterCoordinator = () => {
         console.log('📝 Creating steps for task:', task.title);
         
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Steps timeout')), 3000)
+        setTimeout(() => reject(new Error('Steps timeout')), 15000)
       );
       
       const invokePromise = supabase.functions.invoke('master-agent-coordinator', {

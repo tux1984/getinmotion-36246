@@ -118,34 +118,8 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Show basic dashboard if we have any data available - immediate load
-  const hasBasicData = maturityScores || userAgents.length > 0 || tasks.length > 0 || profile;
-  
-  if (hasBasicData) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <NewDashboardHeader 
-          onMaturityCalculatorClick={handleMaturityCalculatorClick}
-          onAgentManagerClick={handleAgentManagerClick}
-        />
-        
-        <div className="flex-1"> {/* Removed padding-top since BasicDashboardFallback handles its own layout */}
-          <BasicDashboardFallback
-            onMaturityCalculatorClick={handleMaturityCalculatorClick}
-            onAgentManagerClick={handleAgentManagerClick}
-            tasks={tasks}
-            currentScores={currentScores || maturityScores}
-            completedTasksCount={completedTasksCount}
-            activeTasksCount={activeTasksCount}
-          />
-        </div>
-        
-        <DashboardFooter />
-      </div>
-    );
-  }
-
-  // Fallback to Master Coordinator only if no data is available
+  // Show Master Coordinator Dashboard as primary experience
+  // BasicDashboardFallback is now only used as error fallback
   return (
     <div className="min-h-screen flex flex-col">
       <NewDashboardHeader 
