@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
 import { DashboardBackground } from './DashboardBackground';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { DashboardFooter } from './DashboardFooter';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
+import { useAuth } from '@/context/AuthContext';
+import { DashboardErrorBoundary } from './DashboardErrorBoundary';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
   const { language } = useLanguage();
+  const { isAuthorized, loading, user, checkAuthorization } = useAuth();
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   
   const handleMaturityCalculatorClick = () => {
     // TODO: Navigate to maturity calculator or show modal
@@ -19,7 +24,88 @@ export const UnifiedDashboard: React.FC = () => {
     // TODO: Navigate to agent manager
     console.log('Agent Manager clicked');
   };
+
+  // Auto-retry authorization on failure
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (!loading && user && !isAuthorized && retryCount < 3) {
+      console.log(`Retrying authorization (attempt ${retryCount + 1})`);
+      setIsRetrying(true);
+      
+      timeoutId = setTimeout(async () => {
+        try {
+          await checkAuthorization();
+          setRetryCount(prev => prev + 1);
+        } catch (error) {
+          console.error('Authorization retry failed:', error);
+        } finally {
+          setIsRetrying(false);
+        }
+      }, (retryCount + 1) * 2000); // Progressive delay
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [loading, user, isAuthorized, retryCount, checkAuthorization]);
+
+  const handleRefreshAuth = async () => {
+    setIsRetrying(true);
+    try {
+      await checkAuthorization();
+      setRetryCount(0);
+    } catch (error) {
+      console.error('Manual auth refresh failed:', error);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
   
+  // Show loading while authentication is being processed
+  if (loading || isRetrying) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleMaturityCalculatorClick}
+          onAgentManagerClick={handleAgentManagerClick}
+        />
+        <div className="flex-1 pt-24 pb-6 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">
+              {isRetrying ? 'Reintentando autenticación...' : 'Cargando dashboard...'}
+            </p>
+          </div>
+        </div>
+        <DashboardFooter />
+      </div>
+    );
+  }
+
+  // Show recovery mode if not authorized after retries
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleMaturityCalculatorClick}
+          onAgentManagerClick={handleAgentManagerClick}
+        />
+        <div className="flex-1 pt-24 pb-6">
+          <DashboardBackground showFloatingAgent={false}>
+            <DashboardErrorBoundary
+              user={user}
+              onRefreshAuth={handleRefreshAuth}
+              isRetrying={isRetrying}
+              retryCount={retryCount}
+            />
+          </DashboardBackground>
+        </div>
+        <DashboardFooter />
+      </div>
+    );
+  }
+
   // Everything flows through the Master Coordinator - no more fragmentation
   // Disable FloatingMasterAgent on main dashboard to avoid duplication
   return (
@@ -31,7 +117,19 @@ export const UnifiedDashboard: React.FC = () => {
       
       <div className="flex-1 pt-24 pb-6"> {/* Increased padding-top to prevent overlap with header */}
         <DashboardBackground showFloatingAgent={false}>
-          <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
+          <DashboardErrorBoundary fallback={
+            <div className="text-center space-y-4 py-12">
+              <p className="text-muted-foreground">Error cargando el dashboard</p>
+              <button 
+                onClick={handleRefreshAuth}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                Reintentar
+              </button>
+            </div>
+          }>
+            <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
+          </DashboardErrorBoundary>
         </DashboardBackground>
       </div>
       

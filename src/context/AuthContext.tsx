@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const checkAuthorization = async (userEmail?: string, retryCount = 0): Promise<boolean> => {
-    const maxRetries = 3;
+    const maxRetries = 2; // Reduced retries for faster recovery
     
     try {
       const email = userEmail || user?.email;
@@ -71,17 +71,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           component: 'auth' 
         });
         
-        // Retry logic for transient errors
+        // Retry logic for transient errors with faster recovery
         if (retryCount < maxRetries && (
           error.message?.includes('Failed to fetch') || 
           error.message?.includes('timeout') ||
-          error.code === 'PGRST301'
+          error.code === 'PGRST301' ||
+          error.message?.includes('JWT')
         )) {
-          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 1000}ms`, { 
+          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 800}ms`, { 
             userEmail: email,
             component: 'auth' 
           });
-          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 800)); // Faster retry
           return checkAuthorization(userEmail, retryCount + 1);
         }
         
@@ -103,13 +104,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         component: 'auth' 
       });
       
-      // Retry for network errors
+      // Retry for network errors with faster recovery
       if (retryCount < maxRetries) {
         logger.debug('Retrying authorization check due to exception', { 
           userEmail: userEmail || user?.email,
           component: 'auth' 
         });
-        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 600)); // Faster retry
         return checkAuthorization(userEmail, retryCount + 1);
       }
       
