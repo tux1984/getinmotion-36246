@@ -28,6 +28,7 @@ import AgentsGallery from './pages/AgentsGallery';
 import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
 import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
+import { CreateShopPage } from './pages/CreateShopPage';
 import { PublicShopPage } from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
@@ -136,6 +137,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ArtisanDashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/create-shop" 
+                element={
+                  <ProtectedRoute>
+                    <CreateShopPage />
                   </ProtectedRoute>
                 } 
               />
