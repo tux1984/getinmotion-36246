@@ -72,7 +72,8 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     analyzeProfileAndGenerateTasks,
     generateIntelligentQuestions,
     startTaskJourney,
-    loading: coordinatorLoading
+    loading: coordinatorLoading,
+    coordinatorError
   } = useMasterCoordinator();
 
   // State management
@@ -139,7 +140,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     return [];
   }, [coordinatorTasks]);
 
-  // Loading state with timeout and progressive loading
+  // Loading state with timeout and progressive loading - Show basic dashboard if coordinator fails
   if (scoresLoading || tasksLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
@@ -157,10 +158,10 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           </motion.div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">
-              Coordinating your experience...
+              Loading your dashboard...
             </h2>
             <p className="text-muted-foreground">
-              Preparing your personalized dashboard
+              Preparing your personalized experience
             </p>
           </div>
         </motion.div>
@@ -168,8 +169,8 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     );
   }
 
-  // Show basic dashboard even if coordinator is still loading
-  const showBasicDashboard = !coordinatorLoading || currentScores !== null;
+  // Show basic dashboard even if coordinator has errors - don't block the user
+  const showBasicDashboard = !coordinatorLoading || currentScores !== null || coordinatorError;
 
   // FASE 3: Manejo del botón "Empezar ahora" funcional
   const handleStartNow = async () => {

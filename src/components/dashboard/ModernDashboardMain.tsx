@@ -26,8 +26,8 @@ export const ModernDashboardMain: React.FC<ModernDashboardMainProps> = (props) =
     isMobile
   });
 
-  // Show fallback if no basic data is available yet
-  if (!props.maturityScores && (!props.agents || props.agents.length === 0) && !props.profileData) {
+  // Show fallback if no basic data is available yet OR if coordinator has persistent errors
+  if ((!props.maturityScores && (!props.agents || props.agents.length === 0) && !props.profileData)) {
     console.log('ModernDashboardMain: Showing fallback - no data available');
     return (
       <SimpleDashboardFallback 

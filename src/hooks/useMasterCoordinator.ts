@@ -60,6 +60,7 @@ export const useMasterCoordinator = () => {
   const [deliverables, setDeliverables] = useState<TaskDeliverable[]>([]);
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [coordinatorError, setCoordinatorError] = useState(false);
 
   // FASE 1: Análisis inteligente del perfil para generar tareas personalizadas
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
@@ -83,8 +84,14 @@ export const useMasterCoordinator = () => {
     
     try {
       setLoading(true);
+      setCoordinatorError(false);
       
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+      // Add 5-second timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Coordinator timeout')), 5000)
+      );
+      
+      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'analyze_and_generate_tasks',
           userId: user.id,
@@ -93,6 +100,8 @@ export const useMasterCoordinator = () => {
           businessProfile: businessProfile || null
         }
       });
+
+      const { data, error } = await Promise.race([invokePromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('❌ Master Coordinator: Error from edge function:', error);
@@ -113,11 +122,18 @@ export const useMasterCoordinator = () => {
       }
     } catch (error) {
       console.error('❌ Master Coordinator: Error generating tasks:', error);
-      toast({
-        title: "Error al Generar Tareas",
-        description: "Hubo un problema generando tus tareas personalizadas. Intenta de nuevo.",
-        variant: "destructive"
-      });
+      setCoordinatorError(true);
+      
+      // Show user-friendly message but don't block the interface
+      if (error.message === 'Coordinator timeout') {
+        console.warn('⏰ Master Coordinator: Timeout - continuing with basic dashboard');
+      } else {
+        toast({
+          title: "Coordinador en Modo Básico",
+          description: "El coordinador inteligente no está disponible, pero puedes usar todas las funciones normalmente.",
+          variant: "default"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -130,7 +146,11 @@ export const useMasterCoordinator = () => {
     console.log('🤔 Master Coordinator: Generating intelligent contextual questions');
     
     try {
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Questions timeout')), 3000)
+      );
+      
+      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'generate_intelligent_questions',
           userId: user.id,
@@ -139,6 +159,8 @@ export const useMasterCoordinator = () => {
           businessProfile: businessProfile || null
         }
       });
+
+      const { data, error } = await Promise.race([invokePromise, timeoutPromise]) as any;
 
       if (error) throw error;
 
@@ -359,17 +381,23 @@ export const useMasterCoordinator = () => {
       if (!existingSteps || existingSteps.length === 0) {
         console.log('📝 Creating steps for task:', task.title);
         
-        const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
-          body: {
-            action: 'create_task_steps',
-            taskId,
-            taskData: task,
-            profileContext: { 
-              profileData: profileData || null, 
-              businessProfile: businessProfile || null 
-            }
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Steps timeout')), 3000)
+      );
+      
+      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'create_task_steps',
+          taskId,
+          taskData: task,
+          profileContext: { 
+            profileData: profileData || null, 
+            businessProfile: businessProfile || null 
           }
-        });
+        }
+      });
+
+      const { data, error } = await Promise.race([invokePromise, timeoutPromise]) as any;
 
         if (error) {
           console.error('❌ Error creating steps:', error);
@@ -583,6 +611,7 @@ export const useMasterCoordinator = () => {
     currentPath,
     deliverables,
     loading,
+    coordinatorError,
     coordinatorMessage: getCoordinatorMessage(),
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
