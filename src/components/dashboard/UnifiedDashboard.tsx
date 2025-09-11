@@ -3,10 +3,14 @@ import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
 import { DashboardBackground } from './DashboardBackground';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { DashboardFooter } from './DashboardFooter';
+import { BasicDashboardFallback } from './BasicDashboardFallback';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useAuth } from '@/context/AuthContext';
 import { DashboardErrorBoundary } from './DashboardErrorBoundary';
+import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
+import { useAgentTasks } from '@/hooks/useAgentTasks';
+import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
@@ -14,6 +18,14 @@ export const UnifiedDashboard: React.FC = () => {
   const { isAuthorized, loading, user, checkAuthorization } = useAuth();
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
+  
+  // Get basic dashboard data
+  const { profile, maturityScores, userAgents } = useRobustDashboardData();
+  const { tasks } = useAgentTasks();
+  const { currentScores } = useOptimizedMaturityScores();
+  
+  const completedTasksCount = tasks.filter(t => t.status === 'completed').length;
+  const activeTasksCount = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length;
   
   const handleMaturityCalculatorClick = () => {
     // TODO: Navigate to maturity calculator or show modal
@@ -106,8 +118,34 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Everything flows through the Master Coordinator - no more fragmentation
-  // Disable FloatingMasterAgent on main dashboard to avoid duplication
+  // Show basic dashboard if we have any data available - immediate load
+  const hasBasicData = maturityScores || userAgents.length > 0 || tasks.length > 0 || profile;
+  
+  if (hasBasicData) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NewDashboardHeader 
+          onMaturityCalculatorClick={handleMaturityCalculatorClick}
+          onAgentManagerClick={handleAgentManagerClick}
+        />
+        
+        <div className="flex-1"> {/* Removed padding-top since BasicDashboardFallback handles its own layout */}
+          <BasicDashboardFallback
+            onMaturityCalculatorClick={handleMaturityCalculatorClick}
+            onAgentManagerClick={handleAgentManagerClick}
+            tasks={tasks}
+            currentScores={currentScores || maturityScores}
+            completedTasksCount={completedTasksCount}
+            activeTasksCount={activeTasksCount}
+          />
+        </div>
+        
+        <DashboardFooter />
+      </div>
+    );
+  }
+
+  // Fallback to Master Coordinator only if no data is available
   return (
     <div className="min-h-screen flex flex-col">
       <NewDashboardHeader 
@@ -115,18 +153,17 @@ export const UnifiedDashboard: React.FC = () => {
         onAgentManagerClick={handleAgentManagerClick}
       />
       
-      <div className="flex-1 pt-24 pb-6"> {/* Increased padding-top to prevent overlap with header */}
+      <div className="flex-1 pt-24 pb-6">
         <DashboardBackground showFloatingAgent={false}>
           <DashboardErrorBoundary fallback={
-            <div className="text-center space-y-4 py-12">
-              <p className="text-muted-foreground">Error cargando el dashboard</p>
-              <button 
-                onClick={handleRefreshAuth}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              >
-                Reintentar
-              </button>
-            </div>
+            <BasicDashboardFallback
+              onMaturityCalculatorClick={handleMaturityCalculatorClick}
+              onAgentManagerClick={handleAgentManagerClick}
+              tasks={tasks}
+              currentScores={currentScores}
+              completedTasksCount={completedTasksCount}
+              activeTasksCount={activeTasksCount}
+            />
           }>
             <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
           </DashboardErrorBoundary>
