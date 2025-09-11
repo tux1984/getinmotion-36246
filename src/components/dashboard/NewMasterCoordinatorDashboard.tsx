@@ -50,6 +50,11 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Enhanced debugging
+  console.log('🎯 MasterCoordinatorDashboard: Rendering with language:', language);
+  console.log('🔐 User authenticated:', !!user);
+  
   const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
   
@@ -75,6 +80,18 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     loading: coordinatorLoading,
     coordinatorError
   } = useMasterCoordinator();
+
+  // Enhanced debugging for coordinator state
+  console.log('📊 MasterCoordinatorDashboard State:', {
+    scoresLoading,
+    profileLoading,
+    tasksLoading,
+    coordinatorLoading,
+    coordinatorError,
+    currentScores: !!currentScores,
+    tasksCount: tasks.length,
+    coordinatorTasksCount: coordinatorTasks.length
+  });
 
   // State management
   const [selectedSubAgent, setSelectedSubAgent] = useState<string | null>(null);
@@ -140,8 +157,9 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     return [];
   }, [coordinatorTasks]);
 
-  // Loading state with timeout and progressive loading - Show basic dashboard if coordinator fails
+  // Loading state with timeout and progressive loading - Always show dashboard if basic data is available
   if (scoresLoading || tasksLoading || profileLoading) {
+    console.log('⏳ MasterCoordinatorDashboard: Loading state - basic data not ready yet');
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <motion.div 
@@ -158,10 +176,10 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
           </motion.div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">
-              Loading your dashboard...
+              {language === 'es' ? 'Cargando tu dashboard...' : 'Loading your dashboard...'}
             </h2>
             <p className="text-muted-foreground">
-              Preparing your personalized experience
+              {language === 'es' ? 'Preparando tu experiencia personalizada' : 'Preparing your personalized experience'}
             </p>
           </div>
         </motion.div>
@@ -169,8 +187,13 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     );
   }
 
-  // Show basic dashboard even if coordinator has errors - don't block the user
-  const showBasicDashboard = !coordinatorLoading || currentScores !== null || coordinatorError;
+  // Always show dashboard - coordinator errors shouldn't block the interface
+  console.log('✅ MasterCoordinatorDashboard: Rendering main interface');
+  
+  // Show warning if coordinator has errors but continue rendering
+  if (coordinatorError) {
+    console.warn('⚠️ MasterCoordinatorDashboard: Coordinator error detected, but continuing with basic functionality');
+  }
 
   // FASE 3: Manejo del botón "Empezar ahora" funcional
   const handleStartNow = async () => {
