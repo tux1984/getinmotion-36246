@@ -139,8 +139,8 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
     return [];
   }, [coordinatorTasks]);
 
-  // Loading state with animation
-  if (scoresLoading || tasksLoading || profileLoading || coordinatorLoading) {
+  // Loading state with timeout and progressive loading
+  if (scoresLoading || tasksLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <motion.div 
@@ -167,6 +167,9 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
       </div>
     );
   }
+
+  // Show basic dashboard even if coordinator is still loading
+  const showBasicDashboard = !coordinatorLoading || currentScores !== null;
 
   // FASE 3: Manejo del botón "Empezar ahora" funcional
   const handleStartNow = async () => {

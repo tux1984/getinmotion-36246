@@ -83,9 +83,9 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
         });
 
       } catch (err) {
-        console.warn('useOptimizedMaturityScores: Using localStorage fallback');
+        console.warn('useOptimizedMaturityScores: RPC call failed, using fallback', err);
         
-        // Try localStorage fallback
+        // Try localStorage fallback first
         try {
           const localScores = localStorage.getItem('maturityScores');
           const localProfileData = localStorage.getItem('profileData');
@@ -94,6 +94,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
             const parsedScores = JSON.parse(localScores);
             const parsedProfileData = localProfileData ? JSON.parse(localProfileData) : null;
             
+            console.log('useOptimizedMaturityScores: Using cached data');
             setData({
               currentScores: parsedScores,
               profileData: parsedProfileData,
@@ -106,10 +107,18 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
           console.warn('useOptimizedMaturityScores: localStorage fallback failed');
         }
 
-        // Final fallback: empty data
+        // Provide default mock data for new users
+        const mockScores = {
+          ideaValidation: 1,
+          userExperience: 1,
+          marketFit: 1,
+          monetization: 1
+        };
+
+        console.log('useOptimizedMaturityScores: Using default mock data');
         setData({
-          currentScores: null,
-          profileData: null,
+          currentScores: mockScores,
+          profileData: { isNewUser: true },
           loading: false,
           error: null
         });
