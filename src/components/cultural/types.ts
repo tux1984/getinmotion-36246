@@ -1,5 +1,5 @@
 
-export type CreatorProfile = 'musician' | 'visual-artist' | 'textile-artisan' | 'indigenous-artisan';
+export type CreatorProfile = 'musician' | 'visual-artist' | 'textile-artisan' | 'indigenous-artisan' | 'ceramic-artisan' | 'jewelry-artisan' | 'woodwork-artisan' | 'leather-artisan';
 
 export interface CulturalAgent {
   id: string;
@@ -28,12 +28,20 @@ export interface CreatorProfilesTranslations {
     visualArtist: string;
     textileArtisan: string;
     indigenousArtisan: string;
+    ceramicArtisan: string;
+    jewelryArtisan: string;
+    woodworkArtisan: string;
+    leatherArtisan: string;
   };
   es: {
     musician: string;
     visualArtist: string;
     textileArtisan: string;
     indigenousArtisan: string;
+    ceramicArtisan: string;
+    jewelryArtisan: string;
+    woodworkArtisan: string;
+    leatherArtisan: string;
   };
 }
 

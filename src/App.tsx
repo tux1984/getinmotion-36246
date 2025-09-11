@@ -25,6 +25,7 @@ import ThreePager from './pages/ThreePager';
 import AgentsGallery from './pages/AgentsGallery';
 import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
+import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
 
 function App() {
   return (
@@ -115,6 +116,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TasksDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/artisan" 
+                element={
+                  <ProtectedRoute>
+                    <ArtisanDashboardPage />
                   </ProtectedRoute>
                 } 
               />

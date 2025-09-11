@@ -59,13 +59,21 @@ export const profileTranslations: CreatorProfilesTranslations = {
     musician: "Musician",
     visualArtist: "Visual Artist",
     textileArtisan: "Textile Artisan",
-    indigenousArtisan: "Indigenous Artisan"
+    indigenousArtisan: "Indigenous Artisan",
+    ceramicArtisan: "Ceramic Artisan",
+    jewelryArtisan: "Jewelry Artisan",
+    woodworkArtisan: "Woodwork Artisan",
+    leatherArtisan: "Leather Artisan"
   },
   es: {
     musician: "Músico",
     visualArtist: "Artista Visual",
     textileArtisan: "Artesano Textil",
-    indigenousArtisan: "Artesana Autóctona"
+    indigenousArtisan: "Artesana Autóctona",
+    ceramicArtisan: "Artesano Ceramista",
+    jewelryArtisan: "Artesano Joyero",
+    woodworkArtisan: "Artesano en Madera",
+    leatherArtisan: "Artesano en Cuero"
   }
 };
 
