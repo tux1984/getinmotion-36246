@@ -4,6 +4,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
@@ -33,12 +34,13 @@ import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 
 function App() {
   return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <LanguageProvider>
-          <div className="min-h-screen">
-          <Routes>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <LanguageProvider>
+              <div className="min-h-screen">
+                <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               
@@ -143,14 +145,15 @@ function App() {
               <Route path="/one-pager" element={<OnePager />} />
               <Route path="/two-pager" element={<TwoPager />} />
               <Route path="/three-pager" element={<ThreePager />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-            <Toaster />
-          </LanguageProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </HelmetProvider>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <Toaster />
+            </LanguageProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 
