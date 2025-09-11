@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { MotionLogo } from '@/components/MotionLogo';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { LanguageSwitcherButton } from '@/components/language/LanguageSwitcherButton';
+import { LanguageSwitcherModal } from '@/components/language/LanguageSwitcherModal';
+import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher';
 
 import { Button } from '@/components/ui/button';
 import { Menu, X, UserPlus, LogIn, Settings } from 'lucide-react';
@@ -13,6 +15,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isOpen: isLanguageModalOpen, openModal: openLanguageModal, closeModal: closeLanguageModal } = useLanguageSwitcher();
 
   return (
     <header className="fixed top-6 left-6 right-6 z-50">
@@ -32,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
             Agents
           </a>
           
-          <LanguageSwitcher />
+          <LanguageSwitcherButton onClick={openLanguageModal} />
 
           <Button
             onClick={() => window.location.href = '/login'}
@@ -82,9 +85,13 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
             Agents
           </a>
 
-          <div className="px-4 py-2">
-            <LanguageSwitcher />
-          </div>
+          <LanguageSwitcherButton 
+            variant="mobile" 
+            onClick={() => {
+              openLanguageModal();
+              setIsMenuOpen(false);
+            }} 
+          />
 
           <a 
             href="/login" 
@@ -118,6 +125,11 @@ export const Header: React.FC<HeaderProps> = ({ onAccessClick }) => {
           </a>
         </div>
       )}
+      
+      <LanguageSwitcherModal 
+        isOpen={isLanguageModalOpen} 
+        onClose={closeLanguageModal} 
+      />
     </header>
   );
 };

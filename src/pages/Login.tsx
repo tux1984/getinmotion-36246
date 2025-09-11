@@ -11,6 +11,9 @@ import { MotionLogo } from '@/components/MotionLogo';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
 import { LoginFeatureSlider } from '@/components/auth/LoginFeatureSlider';
 import { getUserProgressStatus, getUserProgressStatusSync } from '@/utils/userProgress';
+import { LanguageSwitcherButton } from '@/components/language/LanguageSwitcherButton';
+import { LanguageSwitcherModal } from '@/components/language/LanguageSwitcherModal';
+import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,8 +24,7 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  
+  const { isOpen: isLanguageModalOpen, openModal: openLanguageModal, closeModal: closeLanguageModal } = useLanguageSwitcher();
   
   
   const t = {
@@ -186,9 +188,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950">
-      {/* Header with logo */}
-      <header className="absolute top-0 left-0 z-10 p-4 lg:p-6">
-        <MotionLogo variant="light" size="lg" />
+      {/* Header with logo and language switcher */}
+      <header className="absolute top-0 left-0 right-0 z-10 p-4 lg:p-6">
+        <div className="flex items-center justify-between">
+          <MotionLogo variant="light" size="lg" />
+          <LanguageSwitcherButton 
+            variant="login" 
+            onClick={openLanguageModal}
+          />
+        </div>
       </header>
       
       <div className="min-h-screen flex flex-col lg:flex-row">
@@ -263,6 +271,11 @@ const Login = () => {
           <LoginFeatureSlider />
         </div>
       </div>
+      
+      <LanguageSwitcherModal 
+        isOpen={isLanguageModalOpen} 
+        onClose={closeLanguageModal} 
+      />
     </div>
   );
 };
