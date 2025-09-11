@@ -323,6 +323,113 @@ export type Database = {
         }
         Relationships: []
       }
+      artisan_analytics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          orders: number | null
+          products_added: number | null
+          revenue: number | null
+          shop_id: string
+          views: number | null
+          visitors: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          orders?: number | null
+          products_added?: number | null
+          revenue?: number | null
+          shop_id: string
+          views?: number | null
+          visitors?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          orders?: number | null
+          products_added?: number | null
+          revenue?: number | null
+          shop_id?: string
+          views?: number | null
+          visitors?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artisan_analytics_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "artisan_shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artisan_shops: {
+        Row: {
+          active: boolean
+          banner_url: string | null
+          certifications: Json | null
+          contact_info: Json | null
+          craft_type: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          logo_url: string | null
+          region: string | null
+          seo_data: Json | null
+          shop_name: string
+          shop_slug: string
+          social_links: Json | null
+          story: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          banner_url?: string | null
+          certifications?: Json | null
+          contact_info?: Json | null
+          craft_type?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          logo_url?: string | null
+          region?: string | null
+          seo_data?: Json | null
+          shop_name: string
+          shop_slug: string
+          social_links?: Json | null
+          story?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          banner_url?: string | null
+          certifications?: Json | null
+          contact_info?: Json | null
+          craft_type?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          logo_url?: string | null
+          region?: string | null
+          seo_data?: Json | null
+          shop_name?: string
+          shop_slug?: string
+          social_links?: Json | null
+          story?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calculator_images: {
         Row: {
           alt_text: string | null
@@ -349,6 +456,181 @@ export type Database = {
           step_name?: string
         }
         Relationships: []
+      }
+      orders: {
+        Row: {
+          billing_address: Json | null
+          created_at: string
+          currency: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          fulfillment_status: string | null
+          id: string
+          items: Json
+          notes: string | null
+          order_number: string
+          payment_id: string | null
+          payment_method: string | null
+          payment_status: string | null
+          shipping_address: Json
+          shipping_cost: number | null
+          shop_id: string
+          status: string
+          subtotal: number
+          tax: number | null
+          total: number
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          fulfillment_status?: string | null
+          id?: string
+          items: Json
+          notes?: string | null
+          order_number: string
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address: Json
+          shipping_cost?: number | null
+          shop_id: string
+          status?: string
+          subtotal: number
+          tax?: number | null
+          total: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          fulfillment_status?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: string
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address?: Json
+          shipping_cost?: number | null
+          shop_id?: string
+          status?: string
+          subtotal?: number
+          tax?: number | null
+          total?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "artisan_shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          category: string | null
+          compare_price: number | null
+          created_at: string
+          customizable: boolean | null
+          description: string | null
+          dimensions: Json | null
+          featured: boolean
+          id: string
+          images: Json | null
+          inventory: number | null
+          materials: Json | null
+          name: string
+          price: number
+          production_time: string | null
+          seo_data: Json | null
+          shop_id: string
+          short_description: string | null
+          sku: string | null
+          subcategory: string | null
+          tags: Json | null
+          techniques: Json | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          compare_price?: number | null
+          created_at?: string
+          customizable?: boolean | null
+          description?: string | null
+          dimensions?: Json | null
+          featured?: boolean
+          id?: string
+          images?: Json | null
+          inventory?: number | null
+          materials?: Json | null
+          name: string
+          price: number
+          production_time?: string | null
+          seo_data?: Json | null
+          shop_id: string
+          short_description?: string | null
+          sku?: string | null
+          subcategory?: string | null
+          tags?: Json | null
+          techniques?: Json | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          compare_price?: number | null
+          created_at?: string
+          customizable?: boolean | null
+          description?: string | null
+          dimensions?: Json | null
+          featured?: boolean
+          id?: string
+          images?: Json | null
+          inventory?: number | null
+          materials?: Json | null
+          name?: string
+          price?: number
+          production_time?: string | null
+          seo_data?: Json | null
+          shop_id?: string
+          short_description?: string | null
+          sku?: string | null
+          subcategory?: string | null
+          tags?: Json | null
+          techniques?: Json | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "artisan_shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_images: {
         Row: {
@@ -824,6 +1106,10 @@ export type Database = {
       disable_agent: {
         Args: { p_agent_id: string; p_user_id: string }
         Returns: undefined
+      }
+      generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }
