@@ -98,7 +98,7 @@ export function useAgentTasksOperations(
       const { data, error } = await supabase
         .from('agent_tasks')
         .update(dbUpdates)
-        .eq('id', taskId)
+        .eq('id', taskId as any)
         .select()
         .single();
 
@@ -124,7 +124,7 @@ export function useAgentTasksOperations(
       const { error } = await supabase
         .from('agent_tasks')
         .delete()
-        .eq('id', taskId);
+        .eq('id', taskId as any);
 
       if (error) throw error;
       
@@ -150,7 +150,7 @@ export function useAgentTasksOperations(
         .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId);
+        query = query.eq('agent_id', agentId as any);
       }
 
       const { error } = await query;
@@ -181,8 +181,8 @@ export function useAgentTasksOperations(
     try {
       const { data, error } = await supabase
         .from('agent_tasks')
-        .update({ is_archived: true })
-        .eq('id', taskId)
+        .update({ is_archived: true } as any)
+        .eq('id', taskId as any)
         .select()
         .single();
 
@@ -212,8 +212,8 @@ export function useAgentTasksOperations(
     try {
       const { data, error } = await supabase
         .from('agent_tasks')
-        .update({ is_archived: false })
-        .eq('id', taskId)
+        .update({ is_archived: false } as any)
+        .eq('id', taskId as any)
         .select()
         .single();
 

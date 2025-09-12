@@ -116,14 +116,14 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
         const { data: profile } = await supabase
           .from('user_profiles')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', user.id as any)
           .single();
 
         // Get master context
         const { data: masterContext } = await supabase
           .from('user_master_context')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', user.id as any)
           .single();
 
         // Call intelligent shop creation function
@@ -140,15 +140,15 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
           setCoordinatorMessage(shopSuggestions.coordinatorMessage || '✨ Tu tienda ha sido preconfigurada con tu información existente');
         } else {
           // Fallback to basic prefilling
-          const businessProfile = (masterContext?.business_profile as any) || {};
-          const socialMedia = (profile?.social_media_presence as any) || {};
+          const businessProfile = (masterContext as any)?.business_profile || {};
+          const socialMedia = (profile as any)?.social_media_presence || {};
 
           setFormData({
-            shop_name: profile?.brand_name || (typeof profile?.business_description === 'string' ? profile.business_description.split(' ').slice(0, 3).join(' ') : '') || '',
-            description: (profile?.business_description as string) || '',
+            shop_name: (profile as any)?.brand_name || (typeof (profile as any)?.business_description === 'string' ? (profile as any).business_description.split(' ').slice(0, 3).join(' ') : '') || '',
+            description: ((profile as any)?.business_description as string) || '',
             story: businessProfile.story || '',
             craft_type: craftType || 'other',
-            region: profile?.business_location || '',
+            region: (profile as any)?.business_location || '',
             contact_info: {
               phone: businessProfile.phone || '',
               email: user.email || '',

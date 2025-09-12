@@ -33,16 +33,16 @@ export function useAgentDeliverables(agentId?: string) {
       let query = supabase
         .from('agent_deliverables')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id as any);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId);
+        query = query.eq('agent_id', agentId as any);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDeliverables(data || []);
+      setDeliverables((data as any) || []);
     } catch (error) {
       console.error('Error fetching deliverables:', error);
       toast({
@@ -72,14 +72,14 @@ export function useAgentDeliverables(agentId?: string) {
           content: deliverableData.content,
           file_url: deliverableData.file_url,
           metadata: deliverableData.metadata || {}
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
       
-      setDeliverables(prev => [data, ...prev]);
-      return data;
+      setDeliverables(prev => [data as any, ...prev]);
+      return data as any;
     } catch (error) {
       console.error('Error creating deliverable:', error);
       toast({
@@ -95,17 +95,17 @@ export function useAgentDeliverables(agentId?: string) {
     try {
       const { data, error } = await supabase
         .from('agent_deliverables')
-        .update(updates)
-        .eq('id', deliverableId)
+        .update(updates as any)
+        .eq('id', deliverableId as any)
         .select()
         .single();
 
       if (error) throw error;
       
       setDeliverables(prev => prev.map(deliverable => 
-        deliverable.id === deliverableId ? data : deliverable
+        deliverable.id === deliverableId ? data as any : deliverable
       ));
-      return data;
+      return data as any;
     } catch (error) {
       console.error('Error updating deliverable:', error);
       toast({
@@ -122,7 +122,7 @@ export function useAgentDeliverables(agentId?: string) {
       const { error } = await supabase
         .from('agent_deliverables')
         .delete()
-        .eq('id', deliverableId);
+        .eq('id', deliverableId as any);
 
       if (error) throw error;
       
