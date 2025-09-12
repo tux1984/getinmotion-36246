@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { CategoryScore } from '@/types/dashboard';
 
 interface MaturityScoreRecord {
@@ -26,13 +25,13 @@ export const useMaturityScores = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase.rpc('get_latest_maturity_scores', {
+      const { data, error } = await safeSupabase.rpc('get_latest_maturity_scores', {
         user_uuid: user.id
       });
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data && Array.isArray(data) && data.length > 0) {
         const latest = data[0];
         setCurrentScores({
           ideaValidation: latest.idea_validation,
@@ -53,7 +52,7 @@ export const useMaturityScores = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_maturity_scores')
         .select('*')
         .eq('user_id', user.id)
@@ -61,7 +60,7 @@ export const useMaturityScores = () => {
         .limit(10);
 
       if (error) throw error;
-      setScoreHistory(data || []);
+      setScoreHistory(data as any || []);
     } catch (err) {
       console.error('Error fetching score history:', err);
     }
@@ -71,7 +70,7 @@ export const useMaturityScores = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_maturity_scores')
         .insert({
           user_id: user.id,
@@ -87,7 +86,7 @@ export const useMaturityScores = () => {
       if (error) throw error;
 
       setCurrentScores(scores);
-      setScoreHistory(prev => [data, ...prev]);
+      setScoreHistory(prev => [data as any, ...prev]);
       
       return data;
     } catch (err) {

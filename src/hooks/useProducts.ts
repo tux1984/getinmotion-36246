@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { Product } from '@/types/artisan';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -16,7 +16,7 @@ export const useProducts = (shopId?: string) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('products')
         .select('*')
         .eq('shop_id', shopId)
@@ -24,7 +24,7 @@ export const useProducts = (shopId?: string) => {
 
       if (error) throw error;
 
-      setProducts(data || []);
+      setProducts(data as any || []);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching products:', err);
@@ -39,7 +39,7 @@ export const useProducts = (shopId?: string) => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('products')
         .insert({
           ...productData,
@@ -50,7 +50,7 @@ export const useProducts = (shopId?: string) => {
 
       if (error) throw error;
 
-      setProducts(prev => [data, ...prev]);
+      setProducts(prev => [data as any, ...prev]);
       toast({
         title: "¡Producto creado!",
         description: "Tu producto ha sido agregado al catálogo.",
@@ -74,7 +74,7 @@ export const useProducts = (shopId?: string) => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('products')
         .update(updates)
         .eq('id', productId)
@@ -86,7 +86,7 @@ export const useProducts = (shopId?: string) => {
 
       setProducts(prev => 
         prev.map(product => 
-          product.id === productId ? data : product
+          product.id === productId ? (data as any) : product
         )
       );
 
@@ -113,7 +113,7 @@ export const useProducts = (shopId?: string) => {
     try {
       setLoading(true);
 
-      const { error } = await supabase
+      const { error } = await safeSupabase
         .from('products')
         .delete()
         .eq('id', productId)

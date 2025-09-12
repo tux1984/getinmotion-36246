@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAgentTasks } from './useAgentTasks';
 import { useTaskLimits } from './useTaskLimits';
 import { useTaskGenerationControl } from './useTaskGenerationControl';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 
 export interface CoordinatorTask {
   id: string;
@@ -92,7 +92,7 @@ export const useMasterCoordinator = () => {
         setTimeout(() => reject(new Error('Coordinator timeout')), 30000)
       );
       
-      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
+      const invokePromise = safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'analyze_and_generate_tasks',
           userId: user.id,
@@ -151,7 +151,7 @@ export const useMasterCoordinator = () => {
         setTimeout(() => reject(new Error('Questions timeout')), 15000)
       );
       
-      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
+      const invokePromise = safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'generate_intelligent_questions',
           userId: user.id,
@@ -284,7 +284,7 @@ export const useMasterCoordinator = () => {
     }
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('agent_deliverables')
         .select('*')
         .eq('user_id', user.id)
@@ -293,7 +293,7 @@ export const useMasterCoordinator = () => {
       if (error) throw error;
       
       // Transform database fields to match TaskDeliverable interface
-      const transformedDeliverables: TaskDeliverable[] = (data || []).map(item => ({
+      const transformedDeliverables: TaskDeliverable[] = (data || []).map((item: any) => ({
         id: item.id,
         taskId: item.task_id,
         title: item.title,
@@ -336,7 +336,7 @@ export const useMasterCoordinator = () => {
           throw new Error('Default task not found');
         }
 
-        const { data: newTask, error: createError } = await supabase
+        const { data: newTask, error: createError } = await safeSupabase
           .from('agent_tasks')
           .insert({
             user_id: user?.id,
@@ -353,8 +353,8 @@ export const useMasterCoordinator = () => {
         if (createError) throw createError;
         
         // Update the taskId to the newly created task
-        taskId = newTask.id;
-        console.log('✅ New task created:', newTask.id);
+        taskId = (newTask as any).id;
+        console.log('✅ New task created:', (newTask as any).id);
         
       } catch (error) {
         console.error('❌ Error creating task:', error);
@@ -375,7 +375,7 @@ export const useMasterCoordinator = () => {
 
     try {
       // Check if steps already exist for this task
-      const { data: existingSteps, error: stepsError } = await supabase
+      const { data: existingSteps, error: stepsError } = await safeSupabase
         .from('task_steps')
         .select('id')
         .eq('task_id', taskId);
@@ -390,7 +390,7 @@ export const useMasterCoordinator = () => {
         setTimeout(() => reject(new Error('Steps timeout')), 15000)
       );
       
-      const invokePromise = supabase.functions.invoke('master-agent-coordinator', {
+      const invokePromise = safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'create_task_steps',
           taskId,
@@ -415,7 +415,7 @@ export const useMasterCoordinator = () => {
       }
 
       // Update task status to in progress
-      const { error: updateError } = await supabase
+      const { error: updateError } = await safeSupabase
         .from('agent_tasks')
         .update({ 
           status: 'in_progress',
@@ -439,7 +439,7 @@ export const useMasterCoordinator = () => {
     try {
       console.log('✅ Master Coordinator: Completing step', stepId, 'for task', taskId);
       
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+      const { data, error } = await safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'complete_step',
           taskId,
@@ -485,7 +485,7 @@ export const useMasterCoordinator = () => {
     try {
       console.log('📄 Master Coordinator: Generating deliverable for task', taskId);
       
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+      const { data, error } = await safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'generate_deliverable',
           taskId,
