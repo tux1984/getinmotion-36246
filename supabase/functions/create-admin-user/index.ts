@@ -178,18 +178,28 @@ serve(async (req) => {
 
     let email, password;
     try {
-      // Multiple parsing strategies for maximum compatibility
-      let bodyText = '';
+    // Use modern fetch API approach for JSON parsing
+      console.log('📖 Reading request body...');
+      const requestClone = req.clone();
+      let parsedBody;
       
-      if (req.body) {
-        console.log('📖 Reading request body...');
-        bodyText = await req.text();
-        console.log('Raw body text length:', bodyText.length);
-        console.log('Raw body preview:', bodyText.substring(0, 100));
-      } else {
-        console.error('CRITICAL: Request body is null');
+      try {
+        parsedBody = await requestClone.json();
+        console.log('✅ Successfully parsed JSON body');
+        console.log('Parsed body structure:', Object.keys(parsedBody || {}));
+        console.log('Parsed body content:', { 
+          hasEmail: !!parsedBody?.email, 
+          hasPassword: !!parsedBody?.password,
+          emailType: typeof parsedBody?.email,
+          passwordType: typeof parsedBody?.password
+        });
+      } catch (parseError) {
+        console.error('CRITICAL: JSON parsing failed:', parseError);
         return new Response(
-          JSON.stringify({ error: 'Request body is required' }),
+          JSON.stringify({ 
+            error: 'Invalid JSON in request body',
+            details: parseError.message 
+          }),
           { 
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -197,9 +207,9 @@ serve(async (req) => {
         );
       }
 
-      // Validate body content
-      if (!bodyText || bodyText.trim() === '') {
-        console.error('CRITICAL: Request body is empty');
+      // Validate parsed body
+      if (!parsedBody) {
+        console.error('CRITICAL: Request body is empty after parsing');
         return new Response(
           JSON.stringify({ error: 'Request body cannot be empty' }),
           { 
@@ -209,17 +219,6 @@ serve(async (req) => {
         );
       }
 
-      // Parse JSON with detailed error handling
-      console.log('🔧 Parsing JSON...');
-      const parsedBody = JSON.parse(bodyText);
-      console.log('Parsed body structure:', Object.keys(parsedBody));
-      console.log('Parsed body content:', { 
-        hasEmail: !!parsedBody.email, 
-        hasPassword: !!parsedBody.password,
-        emailType: typeof parsedBody.email,
-        passwordType: typeof parsedBody.password
-      });
-      
       email = parsedBody.email;
       password = parsedBody.password;
 
