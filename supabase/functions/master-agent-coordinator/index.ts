@@ -210,23 +210,21 @@ async function getAITaskSuggestions(completedTasks: any[], maturityScores: any, 
   `;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 800
-      }),
-    });
-
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    // Use robust OpenAI API call with retries and validation
+    const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
     
-    return JSON.parse(aiResponse).map((suggestion: any) => ({
+    const baseRequest = {
+      messages: [{ role: 'user', content: prompt }],
+      max_completion_tokens: 800
+    };
+    
+    const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
+    const data = await callOpenAIWithRetry(openAIApiKey!, request);
+    
+    const aiResponse = data.choices[0].message.content;
+    const suggestions = await parseJSONResponse(aiResponse);
+    
+    return suggestions.map((suggestion: any) => ({
       ...suggestion,
       id: 'ai-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
     }));
@@ -434,20 +432,17 @@ Responde SOLO con un array JSON con esta estructura:
 }]
 `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 2000
-      }),
-    });
-
-    const data = await response.json();
+    // Use robust OpenAI API call with retries and validation
+    const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
+    
+    const baseRequest = {
+      messages: [{ role: 'user', content: prompt }],
+      max_completion_tokens: 2000
+    };
+    
+    const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
+    const data = await callOpenAIWithRetry(openAIApiKey!, request);
+    
     let aiResponse = data.choices[0].message.content;
     
     // Clean up the response to ensure it's valid JSON

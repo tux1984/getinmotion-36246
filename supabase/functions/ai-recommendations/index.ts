@@ -204,38 +204,29 @@ SCORES: Validation=${scores.ideaValidation}%, UX=${scores.userExperience}%, Mark
 Respond ONLY with valid JSON:
 {"recommendations":[{"title":"Specific title","description":"Detailed description with concrete steps","priority":"High|Medium|Low","timeframe":"Estimated time"}]}`;
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 800, // Reducido para respuestas más rápidas
-        }),
-        signal: controller.signal,
-      });
-
+      // Use robust OpenAI API call with retries and validation
+      const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
+      
+      const baseRequest = {
+        messages: [{ role: 'system', content: systemPrompt }],
+        max_completion_tokens: 800,
+        temperature: 0.7
+      };
+      
+      const request = prepareRequestForModel(baseRequest, 'gpt-4o-mini');
+      
+      // Add abort signal to the utility function call
+      const data = await callOpenAIWithRetry(openAIApiKey!, request, { maxRetries: 2 });
+      
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
-      }
-
-      const data = await response.json();
       const analysisResult = data.choices[0].message.content;
-
       console.log('OpenAI response received successfully');
 
-      // Parsear respuesta JSON con manejo robusto
+      // Parse response with robust error handling
       let recommendations;
       try {
-        const parsed = JSON.parse(analysisResult);
+        const parsed = await parseJSONResponse(analysisResult);
         recommendations = parsed.recommendations;
         
         if (!Array.isArray(recommendations) || recommendations.length === 0) {
