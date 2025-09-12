@@ -24,6 +24,16 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      // ANTI-LEGACY RULES - Prevent imports to deprecated/quarantine paths
+      "no-restricted-imports": ["error", {
+        "patterns": [
+          "*/_deprecated/*",
+          "*/_quarantine/*", 
+          "**/_deprecated/**",
+          "**/_quarantine/**"
+        ],
+        "message": "🚫 LEGACY CODE FORBIDDEN: Use current components/hooks only"
+      }],
     },
   }
 );
