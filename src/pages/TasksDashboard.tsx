@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -16,7 +16,7 @@ import { SEO_CONFIG } from '@/config/seo';
 const TasksDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { t } = useTranslations();
   const language = 'en'; // Fixed to English only
   const { tasks } = useAgentTasks();

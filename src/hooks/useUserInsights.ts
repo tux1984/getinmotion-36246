@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { useToast } from '@/hooks/use-toast';
 
@@ -33,7 +33,7 @@ interface UserInsights {
 }
 
 export function useUserInsights() {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [insights, setInsights] = useState<UserInsights | null>(null);
   const [loading, setLoading] = useState(true);

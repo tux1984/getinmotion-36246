@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,7 +28,7 @@ export const QuestionCollector: React.FC<QuestionCollectorProps> = ({
   onComplete,
   onBack
 }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
   

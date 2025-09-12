@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 import { MasterCoordinatorCommandCenter } from '@/components/master-coordinator/MasterCoordinatorCommandCenter';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { SEO_CONFIG } from '@/config/seo';
 
 const MasterCoordinatorChat = () => {
-  const { user, isAuthorized } = useAuth();
+  const { user, isAuthorized } = useRobustAuth();
   const language = 'en'; // Fixed to English only
   const navigate = useNavigate();
 

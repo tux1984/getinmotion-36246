@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { performCompleteMigration } from '@/utils/dataMigration';
 import { useToast } from '@/hooks/use-toast';
@@ -46,7 +46,7 @@ export interface UserMasterContext {
 }
 
 export const useUserBusinessContext = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [context, setContext] = useState<UserMasterContext | null>(null);
   const [loading, setLoading] = useState(true);

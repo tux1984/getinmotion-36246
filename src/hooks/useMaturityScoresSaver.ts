@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { CategoryScore } from '@/types/dashboard';
 
 export const useMaturityScoresSaver = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { UnifiedAgentHeader } from './chat/UnifiedAgentHeader';
 import { SimpleTaskInterface } from './SimpleTaskInterface';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 interface AgentTasksPanelProps {
   agentId: string;
@@ -23,7 +23,7 @@ export const AgentTasksPanel: React.FC<AgentTasksPanelProps> = ({
   onBack
 }) => {
   
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [processingTaskId, setProcessingTaskId] = useState<string | null>(null);
 

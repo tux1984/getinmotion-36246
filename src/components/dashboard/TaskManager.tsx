@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { formatTaskTitleForDisplay } from '@/hooks/utils/agentTaskUtils';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { DetailedTaskCard } from './DetailedTaskCard';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
@@ -22,7 +22,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 }) => {
   const { language } = useLanguage();
   const compatibleLanguage = mapToLegacyLanguage(language);
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const { businessProfile } = useUserBusinessProfile();
   const { 

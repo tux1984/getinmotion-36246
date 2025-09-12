@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 
 interface UserProfile {
@@ -40,7 +40,7 @@ interface AgentMetrics {
 }
 
 export const useUserData = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [projects, setProjects] = useState<UserProject[]>([]);
   const [agents, setAgents] = useState<UserAgent[]>([]);

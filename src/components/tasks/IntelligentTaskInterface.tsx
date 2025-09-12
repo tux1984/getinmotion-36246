@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,7 @@ export const IntelligentTaskInterface: React.FC<IntelligentTaskInterfaceProps> =
   onTaskComplete,
   onBack
 }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { language } = useLanguage();
   const compatibleLanguage = mapToLegacyLanguage(language);
   const { toast } = useToast();

@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { UserBusinessProfile, BusinessModel, BusinessStage } from '@/types/profile';
 import { useTaskTitleCleanup } from './useTaskTitleCleanup';
 
 export const useUserBusinessProfile = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserBusinessProfile | null>(null);

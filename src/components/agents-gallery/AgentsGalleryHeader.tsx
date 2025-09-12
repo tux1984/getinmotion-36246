@@ -3,7 +3,7 @@ import React from 'react';
 import { ArrowLeft, Grid3X3, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 interface AgentsGalleryHeaderProps {
   title: string;
@@ -17,7 +17,7 @@ export const AgentsGalleryHeader: React.FC<AgentsGalleryHeaderProps> = ({
   backToDashboard
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   return (
     <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,11 +8,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, RefreshCw, User, Shield, Clock } from 'lucide-react';
 
 export const AuthDebugPanel: React.FC = () => {
-  const { user, session, loading, isAuthorized, checkAuthorization } = useAuth();
+  const { user, session, loading, isAuthorized } = useRobustAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleForceAuthCheck = async () => {
-    await checkAuthorization();
+    // Auth check is handled automatically by useRobustAuth
+    console.log('Auth check triggered');
   };
 
   return (

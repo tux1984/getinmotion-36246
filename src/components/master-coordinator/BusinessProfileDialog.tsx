@@ -22,7 +22,7 @@ import {
   Users,
   TrendingUp
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 
 interface BusinessProfileDialogProps {
@@ -43,7 +43,7 @@ export const BusinessProfileDialog: React.FC<BusinessProfileDialogProps> = ({
   onOpenChange,
   language
 }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { businessProfile } = useUserBusinessProfile();
   const [currentStep, setCurrentStep] = useState<'intro' | 'questions' | 'completion'>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

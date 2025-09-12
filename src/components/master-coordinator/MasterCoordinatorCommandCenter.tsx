@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
@@ -43,7 +43,7 @@ export const MasterCoordinatorCommandCenter: React.FC<MasterCoordinatorCommandCe
   onBack
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [chatExpanded, setChatExpanded] = useState(false);
   const [activeView, setActiveView] = useState<'overview' | 'tasks' | 'progress' | 'chat'>('overview');
 

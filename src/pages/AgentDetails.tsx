@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { SEO_CONFIG } from '@/config/seo';
 
 const AgentDetails = () => {
   const { agentId } = useParams<{ agentId: string }>();
-  const { user, isAuthorized } = useAuth();
+  const { user, isAuthorized } = useRobustAuth();
   const navigate = useNavigate();
 
   

@@ -12,7 +12,7 @@ import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -44,7 +44,7 @@ interface MasterCoordinatorPanelProps {
 }
 
 export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ onTaskStart, language }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);

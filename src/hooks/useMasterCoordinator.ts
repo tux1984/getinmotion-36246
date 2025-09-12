@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
 import { useUserBusinessProfile } from './useUserBusinessProfile';
 import { useToast } from '@/hooks/use-toast';
@@ -47,7 +47,7 @@ export interface TaskDeliverable {
 }
 
 export const useMasterCoordinator = () => {
-  const { user, session } = useAuth();
+  const { user, session } = useRobustAuth();
   const { toast } = useToast();
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();

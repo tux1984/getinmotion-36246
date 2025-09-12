@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useArtisanShop } from '@/hooks/useArtisanShop';
 import { useArtisanDetection } from '@/hooks/useArtisanDetection';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Store, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
@@ -60,7 +60,7 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
   const [isPrefillingData, setIsPrefillingData] = useState(true);
   const [coordinatorMessage, setCoordinatorMessage] = useState('');
 
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { isArtisan, craftType } = useArtisanDetection();
   const { createShop, loading: shopLoading } = useArtisanShop();
   const { coordinatorMessage: masterMessage } = useMasterCoordinator();

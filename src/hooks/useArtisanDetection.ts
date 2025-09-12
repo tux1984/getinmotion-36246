@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { detectArtisanProfile, detectCraftType } from '@/utils/artisanDetection';
 import { CraftType } from '@/types/artisan';
@@ -8,7 +8,7 @@ export const useArtisanDetection = () => {
   const [isArtisan, setIsArtisan] = useState<boolean | null>(null);
   const [craftType, setCraftType] = useState<CraftType | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   useEffect(() => {
     const checkArtisanStatus = async () => {

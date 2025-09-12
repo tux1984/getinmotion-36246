@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { CategoryScore } from '@/types/dashboard';
 
@@ -15,7 +15,7 @@ interface MaturityScoreRecord {
 }
 
 export const useMaturityScores = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [currentScores, setCurrentScores] = useState<CategoryScore | null>(null);
   const [scoreHistory, setScoreHistory] = useState<MaturityScoreRecord[]>([]);
   const [loading, setLoading] = useState(true);

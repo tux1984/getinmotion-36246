@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 export const useTaskGenerationControl = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [allowAutoGeneration, setAllowAutoGeneration] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 

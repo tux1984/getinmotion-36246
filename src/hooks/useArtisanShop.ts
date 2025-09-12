@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { ArtisanShop } from '@/types/artisan';
 import { useToast } from '@/components/ui/use-toast';
 import { db } from '@/types/supabase-overrides';
@@ -8,7 +8,7 @@ export const useArtisanShop = () => {
   const [shop, setShop] = useState<ArtisanShop | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
 
   const fetchShop = async () => {

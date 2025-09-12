@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 interface AuthLoadingIndicatorProps {
   children: React.ReactNode;
 }
 
 export const AuthLoadingIndicator: React.FC<AuthLoadingIndicatorProps> = ({ children }) => {
-  const { loading } = useAuth();
+  const { loading } = useRobustAuth();
 
   if (loading) {
     return (
