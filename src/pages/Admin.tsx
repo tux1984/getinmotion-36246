@@ -12,14 +12,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { SiteImageManager } from '@/components/admin/SiteImageManager';
 
 const Admin = () => {
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user, session, signOut, loading, isAuthorized } = useAuth();
+  const { user, session, signOut, loading, isAuthorized } = useRobustAuth();
   
   // Load waitlist data when user is authorized
   useEffect(() => {
