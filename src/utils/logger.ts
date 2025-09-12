@@ -274,6 +274,52 @@ class Logger {
       });
     }
   };
+
+  // System monitoring and performance logging
+  system = {
+    info: (message: string, context?: LogContext) => {
+      this.info(`[SYSTEM] ${message}`, { ...context, component: 'system' });
+    },
+
+    warning: (message: string, context?: LogContext) => {
+      this.warn(`[SYSTEM] ${message}`, { ...context, component: 'system' });
+    },
+
+    error: (message: string, context?: LogContext) => {
+      this.error(`[SYSTEM] ${message}`, undefined, { ...context, component: 'system' });
+    },
+
+    critical: (message: string, context?: LogContext) => {
+      this.critical(`[SYSTEM] ${message}`, undefined, { ...context, component: 'system' });
+    },
+
+    alert: (message: string, context?: LogContext) => {
+      this.critical(`[ALERT] ${message}`, undefined, { ...context, component: 'system_alert' });
+    },
+
+    retry: (message: string, context?: LogContext) => {
+      this.info(`[RETRY] ${message}`, { ...context, component: 'system_retry' });
+    },
+
+    performance: (message: string, metrics: any, context?: LogContext) => {
+      this.info(`[PERFORMANCE] ${message}`, { 
+        ...context, 
+        component: 'performance',
+        metrics 
+      });
+    },
+
+    health: (status: 'healthy' | 'degraded' | 'unhealthy', details?: any) => {
+      const level = status === 'healthy' ? 'info' : status === 'degraded' ? 'warn' : 'error';
+      const method = level === 'info' ? this.info : level === 'warn' ? this.warn : this.error;
+      
+      method.call(this, `[HEALTH] System status: ${status}`, {
+        component: 'health_check',
+        status,
+        details
+      });
+    }
+  };
 }
 
 export const logger = new Logger();
