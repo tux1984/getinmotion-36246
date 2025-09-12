@@ -68,6 +68,16 @@ export const UserManagement = () => {
   const { toast } = useToast();
   const { isSessionHealthy, isChecking, checkSessionHealth, forceSessionRefresh } = useSessionHealth();
 
+  // Force session refresh if unhealthy
+  const handleSessionRefreshAndRetry = async () => {
+    const refreshed = await forceSessionRefresh();
+    if (refreshed) {
+      await fetchUsers();
+      return true;
+    }
+    return false;
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -395,13 +405,26 @@ export const UserManagement = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={forceSessionRefresh}
+                onClick={handleSessionRefreshAndRetry}
                 disabled={isChecking}
                 className="border-indigo-600 text-indigo-100 hover:bg-indigo-800/50"
-                title="Renovar sesión"
+                title="Renovar sesión y reintentar"
               >
                 <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
               </Button>
+              {!isSessionHealthy && (
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => {
+                    // Import useAuth here if not imported
+                    window.location.href = '/login';
+                  }}
+                  className="ml-2"
+                >
+                  Re-login
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
