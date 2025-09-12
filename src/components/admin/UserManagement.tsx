@@ -144,24 +144,39 @@ export const UserManagement = () => {
     try {
       const sanitizedEmail = sanitizeInput(newUserEmail);
       
-      console.log('Calling create-admin-user function...');
+      console.log('🔄 Creating admin user:', sanitizedEmail);
+      
+      // Get current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      }
+
+      console.log('🔑 Session token available, calling edge function...');
       
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
           email: sanitizedEmail,
           password: newUserPassword
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
       
+      console.log('📥 Edge function response:', { data, error });
+      
       if (error) {
-        console.error('Function error:', error);
-        throw error;
+        console.error('❌ Edge function error:', error);
+        throw new Error(`Error de conexión: ${error.message || 'Servicio no disponible'}`);
       }
       
       if (data?.error) {
+        console.error('❌ Function returned error:', data.error);
         throw new Error(data.error);
       }
       
+      console.log('✅ User created successfully');
       toast({
         title: 'Usuario creado',
         description: `Usuario ${sanitizedEmail} creado exitosamente.`,

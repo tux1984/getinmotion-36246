@@ -110,7 +110,7 @@ serve(async (req) => {
     }));
 
     // Create new admin user
-    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
       password: password,
       email_confirm: true,
@@ -119,10 +119,10 @@ serve(async (req) => {
       }
     })
 
-    if (userError) {
-      console.error('Error creating user:', userError)
+    if (createUserError) {
+      console.error('Error creating user:', createUserError)
       return new Response(
-        JSON.stringify({ error: userError.message }),
+        JSON.stringify({ error: createUserError.message }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
