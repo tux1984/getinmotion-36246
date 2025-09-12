@@ -193,11 +193,7 @@ export const MasterCoordinatorCommandCenter: React.FC<MasterCoordinatorCommandCe
                   <div className="flex-1">
                     <p className="font-medium text-primary mb-1">Master Coordinator</p>
                     <p className="text-sm leading-relaxed">
-                      {typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
-                        ? coordinatorMessage.message 
-                        : typeof coordinatorMessage === 'string' 
-                        ? coordinatorMessage 
-                        : t.contextualMessage}
+                      {coordinatorMessage || t.contextualMessage}
                     </p>
                     <Button 
                       size="sm" 

@@ -627,7 +627,7 @@ export const useMasterCoordinator = () => {
     deliverables,
     loading,
     coordinatorError,
-    coordinatorMessage: getCoordinatorMessage(),
+    coordinatorMessage: getCoordinatorMessage()?.message || 'Analyzing your business profile...',
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
     analyzeProfileAndGenerateTasks,

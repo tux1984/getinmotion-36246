@@ -452,16 +452,12 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                             <div className="space-y-3">
                               <p className="text-white leading-relaxed">
                                 {getTimeOfDayGreeting()} {(() => { const raw = (businessProfile as any)?.brandName ?? (businessProfile as any)?.businessDescription; return (typeof raw === 'string' && raw.trim().length > 0 && !raw.trim().startsWith('[')) ? `¡${raw}!` : '' })()}
-                                 {businessProfile?.businessDescription 
-                                   ? ` ${typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
-                                      ? coordinatorMessage.message 
-                                      : typeof coordinatorMessage === 'string' 
-                                      ? coordinatorMessage 
-                                      : 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
-                                     : (language === 'es' 
-                                       ? "Para ayudarte de la mejor manera, necesito saber más sobre tu negocio. ¿Puedes contarme a qué te dedicas?"
-                                       : "To help you in the best way, I need to know more about your business. Can you tell me what you do?")
-                                 }
+                                  {businessProfile?.businessDescription 
+                                    ? ` ${coordinatorMessage || 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
+                                      : (language === 'es' 
+                                        ? "Para ayudarte de la mejor manera, necesito saber más sobre tu negocio. ¿Puedes contarme a qué te dedicas?"
+                                        : "To help you in the best way, I need to know more about your business. Can you tell me what you do?")
+                                  }
                               </p>
                               
                               {/* Business Profile Quick View */}
