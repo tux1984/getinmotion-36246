@@ -152,7 +152,7 @@ function App() {
                 } 
               />
               <Route path="/agents" element={<AgentsGallery />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={<BypassProtectedRoute><Admin /></BypassProtectedRoute>} />
               <Route path="/biome-config" element={<BiomeConfigPage />} />
               <Route path="/one-pager" element={<OnePager />} />
               <Route path="/two-pager" element={<TwoPager />} />

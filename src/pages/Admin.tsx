@@ -19,19 +19,19 @@ const Admin = () => {
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user, session, signOut, loading, isAuthorized } = useRobustAuth();
+  const { user, session, signOut } = useRobustAuth();
   
-  // Load waitlist data when user is authorized
+  // Load waitlist data when user is available
   useEffect(() => {
-    if (isAuthorized && user && session) {
-      console.log('User is authorized, fetching waitlist data');
+    if (user && session) {
+      console.log('User is available, fetching waitlist data');
       fetchWaitlistData();
     }
-  }, [isAuthorized, user, session]);
+  }, [user, session]);
   
   const fetchWaitlistData = async () => {
-    if (!isAuthorized || !session) {
-      console.log('Not authorized or no session, skipping fetch');
+    if (!session) {
+      console.log('No session, skipping fetch');
       return;
     }
     
@@ -91,35 +91,8 @@ const Admin = () => {
     fetchWaitlistData();
   };
 
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Verificando permisos...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login form if not authenticated or not authorized
-  if (!user || !isAuthorized) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
-        <AdminHeader onLogout={handleLogout} isAuthenticated={!!user} />
-        
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto mt-16">
-            <AdminLogin />
-            <div className="mt-4">
-              <SupabaseStatus />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Admin component is now protected by BypassProtectedRoute
+  // No need for additional authorization checks here
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">

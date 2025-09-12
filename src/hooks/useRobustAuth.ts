@@ -90,39 +90,62 @@ export const useRobustAuth = () => {
   }, [toast]);
 
   const checkAuthorization = useCallback(async (session: Session | null): Promise<boolean> => {
-    if (!session?.user?.email) return false;
+    if (!session?.user?.email) {
+      console.log('🔍 Authorization: No session or email');
+      return false;
+    }
 
     try {
+      console.log('🔍 Authorization: Checking for user:', session.user.email);
       const result = await robustQuery(async () => 
         robustSupabase.rpc('is_authorized_user', { user_email: session.user.email })
       );
       
+      console.log('🔍 Authorization: Result:', result.data);
       return result.data === true;
     } catch (error) {
-      console.error('Authorization check error:', error);
+      console.error('🔍 Authorization check error:', error);
       return false;
     }
   }, []);
 
   const updateAuthState = useCallback(async (session: Session | null) => {
+    console.log('🔄 Updating auth state, session:', !!session);
     setAuthState(prev => ({ ...prev, loading: true }));
 
     const user = session?.user ?? null;
-    const isAuthorized = await checkAuthorization(session);
+    
+    try {
+      const isAuthorized = await Promise.race([
+        checkAuthorization(session),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5000)) // 5s timeout
+      ]);
 
-    setAuthState(prev => ({
-      ...prev,
-      user,
-      session,
-      isAuthorized,
-      loading: false
-    }));
+      setAuthState(prev => ({
+        ...prev,
+        user,
+        session,
+        isAuthorized,
+        loading: false
+      }));
 
-    // Check JWT integrity after state update
-    if (session) {
-      setTimeout(() => checkJWTIntegrity(), 100);
+      console.log('✅ Auth state updated:', { hasUser: !!user, isAuthorized });
+
+      // Check JWT integrity after state update
+      if (session) {
+        setTimeout(() => checkJWTIntegrity(), 100);
+      }
+    } catch (error) {
+      console.error('❌ Error updating auth state:', error);
+      setAuthState(prev => ({
+        ...prev,
+        user,
+        session,
+        isAuthorized: false,
+        loading: false
+      }));
     }
-  }, []);
+  }, [checkAuthorization]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
