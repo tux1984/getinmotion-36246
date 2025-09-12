@@ -14,7 +14,15 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     includeArchived: boolean = false
   ) => {
-    if (!user) {
+    console.log('🔍 fetchTasks called', {
+      hasUser: !!user,
+      userId: user?.id,
+      agentId,
+      includeArchived
+    });
+
+    if (!user?.id) {
+      console.log('🚫 fetchTasks: No user ID available');
       setTasks([]);
       setTotalCount(0);
       setLoading(false);
@@ -22,29 +30,48 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     }
 
     try {
+      console.log('🔍 fetchTasks: Building query for user:', user.id);
+      
       let query = supabase
         .from('agent_tasks')
         .select('*', { count: 'exact' })
         .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId as any);
+        console.log('🔍 fetchTasks: Filtering by agent_id:', agentId);
+        query = query.eq('agent_id', agentId);
       }
 
       if (!includeArchived) {
-        query = query.eq('is_archived', false as any);
+        console.log('🔍 fetchTasks: Excluding archived tasks');
+        query = query.eq('is_archived', false);
       }
 
-      const { data, error, count } = await query.order('created_at', { ascending: false });
+      query = query.order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('🔍 fetchTasks: Executing query...');
+      const { data, error, count } = await query;
+
+      console.log('🔍 fetchTasks: Query result', {
+        data: data?.length || 0,
+        count,
+        error: !!error
+      });
+
+      if (error) {
+        console.error('❌ fetchTasks: Query error:', error);
+        throw error;
+      }
       
       const typedTasks: AgentTask[] = (data || []).map(convertToAgentTask);
+      console.log('✅ fetchTasks: Converted tasks:', typedTasks.length);
       
       setTasks(typedTasks);
       setTotalCount(count || 0);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('❌ fetchTasks: Error fetching tasks:', error);
+      setTasks([]);
+      setTotalCount(0);
       toast({
         title: 'Error',
         description: 'No se pudieron cargar las tareas',
@@ -53,7 +80,7 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [user, agentId, toast]);
+  }, [user?.id, agentId, toast]);
 
   const fetchPaginatedTasks = useCallback(async (
     page: number = 1, 

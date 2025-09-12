@@ -51,7 +51,7 @@ export const useMasterCoordinator = () => {
   const { toast } = useToast();
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();
-  const { tasks, createTask, updateTask, deleteTask, deleteAllTasks } = useAgentTasks();
+  const { tasks, createTask, updateTask, deleteTask, deleteAllTasks, loading: tasksLoading } = useAgentTasks();
   const { isAtLimit, getLimitMessage } = useTaskLimits(tasks);
   const { allowAutoGeneration } = useTaskGenerationControl();
   
@@ -186,19 +186,36 @@ export const useMasterCoordinator = () => {
     return baseQuestions;
   }, [currentScores, businessProfile]);
 
-  // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
+  // Enhanced task transformation with better logging
   const transformToCoordinatorTasks = useMemo(() => {
-    // Validaciones para evitar errores de variables no inicializadas
-    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+    console.log('🔍 useMasterCoordinator: Transform called', {
+      hasUser: !!user?.id,
+      tasksArray: Array.isArray(tasks),
+      tasksCount: tasks?.length || 0
+    });
+
+    // Enhanced validation with detailed logging
+    if (!user?.id) {
+      console.log('🚫 useMasterCoordinator: No user ID for transformation');
+      return [];
+    }
+
+    if (!tasks || !Array.isArray(tasks)) {
+      console.log('🚫 useMasterCoordinator: Invalid tasks array');
+      return [];
+    }
+
+    if (tasks.length === 0) {
       console.log('🔍 useMasterCoordinator: No tasks available for transformation');
       return [];
     }
 
     try {
-      const validTasks = tasks.filter(task => task && task.id);
+      const validTasks = tasks.filter(task => task && task.id && task.title);
+      console.log('🔍 useMasterCoordinator: Valid tasks found:', validTasks.length);
       
       if (validTasks.length === 0) {
-        console.log('🔍 useMasterCoordinator: No valid tasks found');
+        console.log('🚫 useMasterCoordinator: No valid tasks after filtering');
         return [];
       }
       
@@ -213,49 +230,51 @@ export const useMasterCoordinator = () => {
         return (a.priority || 1) - (b.priority || 1);
       });
 
-      console.log('🔍 useMasterCoordinator: Transforming', sortedTasks.length, 'tasks');
+      console.log('✅ useMasterCoordinator: Transforming', sortedTasks.length, 'tasks');
 
-      return sortedTasks.slice(0, 15).map((task, index) => {
-        if (!task || !task.id) {
-          console.warn('🚫 useMasterCoordinator: Invalid task encountered:', task);
+      const coordinatorTasks = sortedTasks.slice(0, 15).map((task, index) => {
+        try {
+          return {
+            id: task.id,
+            title: task.title || 'Tarea sin título',
+            description: task.description || '',
+            agentId: task.agent_id || 'general',
+            agentName: getAgentName(task.agent_id || 'general'),
+            priority: task.priority || 1,
+            relevance: task.relevance || 'medium',
+            estimatedTime: getEstimatedTime(task.title || ''),
+            category: getTaskCategory(task.agent_id || 'general'),
+            isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
+            prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
+            steps: generateStepsForTask(task)
+          };
+        } catch (taskError) {
+          console.error('❌ Error transforming individual task:', task.id, taskError);
           return null;
         }
+      }).filter(Boolean);
 
-        return {
-          id: task.id,
-          title: task.title || 'Tarea sin título',
-          description: task.description || '',
-          agentId: task.agent_id || 'general',
-          agentName: getAgentName(task.agent_id || 'general'),
-          priority: task.priority || 1,
-          relevance: task.relevance || 'medium',
-          estimatedTime: getEstimatedTime(task.title || ''),
-          category: getTaskCategory(task.agent_id || 'general'),
-          isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
-          prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
-          steps: generateStepsForTask(task)
-        };
-      }).filter(Boolean); // Remove any null entries
+      console.log('✅ useMasterCoordinator: Successfully transformed to coordinator tasks:', coordinatorTasks.length);
+      return coordinatorTasks;
     } catch (error) {
-      console.error('❌ Error transforming tasks:', error);
+      console.error('❌ useMasterCoordinator: Error in task transformation:', error);
       return [];
     }
-  }, [tasks]);
+  }, [tasks, user?.id]);
 
-  // Generate initial tasks only when auto-generation is allowed (after maturity test)
+  // Simplified initial task generation - removed restrictive conditions
   const generateInitialTasks = useCallback(async () => {
-    if (!allowAutoGeneration || !user?.id || isInitialized || loading || tasks.length > 0) {
+    // Only skip if already loading to prevent duplicate calls
+    if (loading || !user?.id) {
       console.log('🚫 Skipping auto task generation:', { 
-        allowAutoGeneration, 
-        userId: user?.id, 
-        isInitialized, 
         loading, 
-        tasksCount: tasks.length 
+        userId: user?.id
       });
       return;
     }
 
-    console.log('🚀 Master Coordinator: Auto-generating initial tasks after maturity test completion');
+    // Allow generation even if tasks exist - user might want more tasks
+    console.log('🚀 Master Coordinator: Generating tasks for user');
     
     try {
       await analyzeProfileAndGenerateTasks();
@@ -263,7 +282,7 @@ export const useMasterCoordinator = () => {
     } catch (error) {
       console.error('❌ Error in initial task generation:', error);
     }
-  }, [allowAutoGeneration, user?.id, isInitialized, loading, tasks.length, analyzeProfileAndGenerateTasks]);
+  }, [user?.id, loading, analyzeProfileAndGenerateTasks]);
 
   // Auto-initialize only when conditions are met
   useEffect(() => {

@@ -7,6 +7,8 @@ import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
+import { useUserProfileCreation } from '@/hooks/useUserProfileCreation';
+import { TasksDebugPanel } from './TasksDebugPanel';
 import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { DeliverablesSection } from '@/components/master-coordinator/DeliverablesSection';
 import RecommendedTasksSection from './RecommendedTasksSection';
@@ -50,6 +52,9 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   const navigate = useNavigate();
   const { user, session, isAuthorized, jwtIntegrity } = useRobustAuth();
   const { toast } = useToast();
+  
+  // Ensure user profile exists
+  useUserProfileCreation();
   
   // Enhanced debugging
   console.log('🎯 MasterCoordinatorDashboard: Rendering with language:', language);
@@ -652,9 +657,11 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                   onPreview={handlePreviewDeliverable}
                 />
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          )}
+        </AnimatePresence>
       </div>
+      
+      <TasksDebugPanel />
+    </div>
   );
 };

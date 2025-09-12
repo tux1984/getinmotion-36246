@@ -14,8 +14,8 @@ export function useAgentTasks(agentId?: string) {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Guard: Don't proceed without valid session
-  const hasValidSession = user && session;
+  // Improved session validation
+  const hasValidSession = Boolean(user?.id && user?.id !== '');
 
   // Initialize query hooks
   const { fetchTasks, fetchPaginatedTasks } = useAgentTasksQueries(user, agentId);
@@ -35,16 +35,27 @@ export function useAgentTasks(agentId?: string) {
     updateTimeSpent
   } = useAgentTasksSpecialOperations(user, tasks, setTasks, updateTask);
 
-  // Wrapper for fetchTasks to handle state management
+  // Improved fetchTasks wrapper with detailed logging
   const refreshTasks = useCallback(() => {
+    console.log('🔍 useAgentTasks: Refresh attempt', {
+      hasUser: !!user,
+      userId: user?.id,
+      hasValidSession,
+      agentId
+    });
+    
     if (!hasValidSession) {
-      console.log('🔍 useAgentTasks: No valid session, skipping task fetch');
+      console.log('🚫 useAgentTasks: No valid session, clearing tasks');
+      setTasks([]);
+      setTotalCount(0);
       setLoading(false);
       return;
     }
+    
+    console.log('🔄 useAgentTasks: Fetching tasks for user:', user.id);
     setLoading(true);
     fetchTasks(setTasks, setTotalCount, setLoading);
-  }, [fetchTasks, hasValidSession]);
+  }, [fetchTasks, hasValidSession, user?.id, agentId]);
 
   useEffect(() => {
     refreshTasks();
