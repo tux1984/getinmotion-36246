@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
 import { useSessionDiagnostics } from '@/hooks/useSessionDiagnostics';
 import { useSessionMonitor } from '@/hooks/useSessionMonitor';
@@ -30,7 +30,7 @@ interface SessionSyncStatus {
 
 export const SessionSyncManager: React.FC = () => {
   const { toast } = useToast();
-  const { user, session, refreshAuth, syncStatus: authSyncStatus, lastSyncCheck } = useAuth();
+  const { user, session } = useRobustAuth();
   const { isSessionHealthy, isChecking, checkSessionHealth, forceSessionRefresh } = useSessionHealth();
   const { diagnostics, runDiagnostics, forceSessionSync } = useSessionDiagnostics();
   const sessionMonitor = useSessionMonitor();
@@ -173,7 +173,7 @@ export const SessionSyncManager: React.FC = () => {
       const refreshResult = await forceSessionRefresh();
       
       if (refreshResult) {
-        await refreshAuth();
+        // Session will be updated by auth state listeners
         const checkResult = await performComprehensiveCheck();
         
         if (checkResult?.syncStatus === 'synced') {
