@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 
 interface RobustDashboardData {
   profile: {
@@ -58,7 +58,7 @@ export const useRobustDashboardData = (): RobustDashboardData => {
     // Check if we have auth.uid() by testing a simple query
     const verifySession = async () => {
       try {
-        const { data: authTest, error } = await supabase.rpc('is_authorized_user', { 
+        const { data: authTest, error } = await safeSupabase.rpc('is_authorized_user', { 
           user_email: user.email || '' 
         });
         
@@ -97,8 +97,8 @@ export const useRobustDashboardData = (): RobustDashboardData => {
         try {
           const [scoresResult, agentsResult] = await Promise.race([
             Promise.all([
-              supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
-              supabase.from('user_agents').select('*').eq('user_id', user.id)
+              safeSupabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
+              safeSupabase.from('user_agents').select('*').eq('user_id', user.id)
             ]),
             timeoutPromise
           ]) as any[];

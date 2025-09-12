@@ -1,23 +1,35 @@
-
 import { useState, useEffect, useMemo } from 'react';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
   user_id: string;
-  full_name: string | null;
-  avatar_url: string | null;
+  full_name?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
+  business_description?: string;
+  brand_name?: string;
+  business_type?: string;
+  target_market?: string;
+  current_stage?: string;
+  business_goals?: string[];
+  time_availability?: string;
+  team_size?: string;
+  current_challenges?: string[];
+  sales_channels?: string[];
+  business_location?: string;
+  initial_investment_range?: string;
+  primary_skills?: string[];
 }
 
 interface UserProject {
   id: string;
   user_id: string;
   title: string;
-  description: string | null;
-  status: string;
+  description?: string;
+  status?: string;
   created_at: string;
   updated_at: string;
 }
@@ -27,8 +39,6 @@ interface UserAgent {
   user_id: string;
   agent_id: string;
   is_enabled: boolean;
-  last_used_at: string | null;
-  usage_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -54,12 +64,9 @@ export const useOptimizedUserData = (): OptimizedUserData => {
     error: null,
   });
 
-  // Simplified onboarding detection
   const hasOnboarding = useMemo(() => {
-    const completed = localStorage.getItem('onboardingCompleted');
-    const scores = localStorage.getItem('maturityScores');
-    return completed === 'true' || (scores && scores !== 'null');
-  }, []);
+    return !!(data.profile?.brand_name || data.profile?.business_description);
+  }, [data.profile]);
 
   useEffect(() => {
     if (!user) {
@@ -77,17 +84,17 @@ export const useOptimizedUserData = (): OptimizedUserData => {
         );
 
         const dataPromise = Promise.all([
-          supabase.from('user_profiles').select('*').eq('user_id', user.id).maybeSingle(),
-          supabase.from('user_projects').select('*').eq('user_id', user.id).limit(5),
-          supabase.from('user_agents').select('*').eq('user_id', user.id)
+          safeSupabase.from('user_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+          safeSupabase.from('user_projects').select('*').eq('user_id', user.id),
+          safeSupabase.from('user_agents').select('*').eq('user_id', user.id)
         ]);
 
         const [profileResult, projectsResult, agentsResult] = await Promise.race([
           dataPromise,
           timeoutPromise
-        ]) as any[];
+        ]) as any;
 
-        // Create fallback profile if needed
+        // Ensure profile exists, create fallback if needed
         let profile = profileResult.data;
         if (!profile) {
           profile = {
@@ -127,7 +134,7 @@ export const useOptimizedUserData = (): OptimizedUserData => {
           projects: [],
           agents: [],
           loading: false,
-          error: null,
+          error: null, // Use fallback instead of error
         });
       }
     };
