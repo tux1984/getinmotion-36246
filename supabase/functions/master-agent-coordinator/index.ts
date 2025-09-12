@@ -974,15 +974,20 @@ Responde con un documento en formato markdown profesional.
 
 async function startIntelligentConversation(userId: string, userProfile: any, conversationContext?: string) {
   if (!openAIApiKey) {
+    console.log('OpenAI API key not available, using local fallback');
     return new Response(
-      JSON.stringify({ error: 'OpenAI API key not configured' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        conversationId: 'local-' + Date.now(),
+        response: 'Hola! Soy tu coordinador maestro. Cuéntame sobre tu negocio y te ayudo a generar las tareas perfectas.',
+        context: 'local_fallback'
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
   try {
     // Obtener información del perfil del usuario
-    const { data: profile } = await supabase
+    const { data: profileData } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('user_id', userId)

@@ -436,28 +436,38 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                           })()}
                         </div>
 
-                        {/* Secondary Action Buttons */}
-                        <div className="flex justify-center">
-
+                        {/* Secondary Actions Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {/* Talk About Business */}
                           <Button
-                            variant="outline"
-                            className="h-auto p-4 bg-white text-purple-600 hover:bg-white/90"
-                            onClick={handleRecalculateMaturity}
-                            disabled={coordinatorLoading}
+                            onClick={handleTalkAboutBusiness}
+                            className="flex items-center justify-between p-4 h-auto bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 transition-all"
                           >
-                            <div className="flex items-center space-x-3 w-full">
-                              <div className="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center">
-                                <Calculator className="w-4 h-4 text-purple-600" />
-                              </div>
-                              <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                 <div className="font-medium truncate">
-                                   {labels.recalculateMaturity}
-                                 </div>
-                                 <div className="text-xs text-purple-500 truncate">
-                                   {labels.updateMaturityScores}
-                                 </div>
+                            <div className="flex items-center space-x-3">
+                              <User className="w-5 h-5 text-blue-300" />
+                              <div className="text-left">
+                                <p className="font-medium text-sm">{labels.talkAboutBusiness}</p>
+                                <p className="text-xs text-white/70">{labels.deepenProfile}</p>
                               </div>
                             </div>
+                            <ArrowRight className="w-4 h-4 text-white/60" />
+                          </Button>
+
+                          {/* View Active Tasks */}
+                          <Button
+                            onClick={handleViewActiveTasks}
+                            className="flex items-center justify-between p-4 h-auto bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 transition-all"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <CheckCircle2 className="w-5 h-5 text-green-300" />
+                              <div className="text-left">
+                                <p className="font-medium text-sm">{labels.viewActiveTasks}</p>
+                                <p className="text-xs text-white/70">
+                                  {activeTasks.length} {labels.tasksWaitingForYou}
+                                </p>
+                              </div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-white/60" />
                           </Button>
                         </div>
 
