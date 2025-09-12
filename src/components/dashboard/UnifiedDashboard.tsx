@@ -122,19 +122,12 @@ export const UnifiedDashboard: React.FC = () => {
             activeTasksCount={activeTasksCount}
           />
         }>
-          {/* Enhanced Dashboard with Shop Hero Section */}
+          {/* Master Coordinator Dashboard as Primary Experience */}
           <div className="space-y-8">
             {(profile as any)?.user_type === 'artisan' && (
               <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
             )}
-            <BasicDashboardFallback
-              onMaturityCalculatorClick={handleMaturityCalculatorClick}
-              onAgentManagerClick={handleAgentManagerClick}
-              tasks={tasks}
-              currentScores={currentScores}
-              completedTasksCount={completedTasksCount}
-              activeTasksCount={activeTasksCount}
-            />
+            <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
           </div>
         </DashboardErrorBoundary>
       </DashboardBackground>
