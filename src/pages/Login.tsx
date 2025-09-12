@@ -14,6 +14,7 @@ import { getUserProgressStatus, getUserProgressStatusSync } from '@/utils/userPr
 import { LanguageSwitcherButton } from '@/components/language/LanguageSwitcherButton';
 import { LanguageSwitcherModal } from '@/components/language/LanguageSwitcherModal';
 import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -153,11 +154,44 @@ const Login = () => {
           variant: "destructive",
         });
       } else {
-        console.log('Login: Sign in successful');
-        toast({
-          title: t.welcomeBack,
-          description: t.loginSuccessful,
-        });
+        console.log('Login: Sign in successful, verifying session...');
+        
+        // POST-LOGIN VERIFICATION: Ensure session is properly established
+        let sessionVerified = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (!sessionVerified && retryCount < maxRetries) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for session to propagate
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session?.access_token && session?.user) {
+              console.log('✅ Login: Session verified successfully');
+              sessionVerified = true;
+              
+              toast({
+                title: t.welcomeBack,
+                description: t.loginSuccessful,
+              });
+            } else {
+              retryCount++;
+              console.warn(`⚠️ Login: Session not ready, retry ${retryCount}/${maxRetries}`);
+            }
+          } catch (verifyError) {
+            retryCount++;
+            console.error(`❌ Login: Session verification error ${retryCount}/${maxRetries}:`, verifyError);
+          }
+        }
+        
+        if (!sessionVerified) {
+          console.error('❌ Login: Failed to verify session after login');
+          toast({
+            title: "Session Error",
+            description: "Login successful but session failed to establish. Please try again.",
+            variant: "destructive",
+          });
+        }
         
         // The redirect will be handled by the useEffect above
       }
