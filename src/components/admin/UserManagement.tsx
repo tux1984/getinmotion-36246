@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, UserCheck, UserX, RefreshCw, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, UserCheck, UserX, RefreshCw, Edit, Trash2, Loader2, Wifi, WifiOff } from 'lucide-react';
+import { useSessionHealth } from '@/hooks/useSessionHealth';
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,7 @@ export const UserManagement = () => {
   const [editUserPassword, setEditUserPassword] = useState('');
   const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string}>({});
   const { toast } = useToast();
+  const { isSessionHealthy, isChecking, checkSessionHealth, forceSessionRefresh } = useSessionHealth();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -141,62 +143,103 @@ export const UserManagement = () => {
     
     setIsCreating(true);
     
-    try {
-      const sanitizedEmail = sanitizeInput(newUserEmail);
-      
-      console.log('🔄 Creating admin user:', sanitizedEmail);
-      
-      // Get current session for authentication
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
-      }
-
-      console.log('🔑 Session token available, calling edge function...');
-      
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        body: {
-          email: sanitizedEmail,
-          password: newUserPassword
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+    const maxRetries = 3;
+    let attempt = 0;
+    
+    while (attempt < maxRetries) {
+      try {
+        attempt++;
+        console.log(`🔄 Intento ${attempt}/${maxRetries} - Creating admin user:`, newUserEmail);
+        
+        // Force session refresh to ensure token is valid
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('📋 Session check:', { 
+          hasSession: !!session, 
+          hasToken: !!session?.access_token,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+          sessionError
+        });
+        
+        if (sessionError || !session?.access_token) {
+          console.log('🔄 Refreshing session...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError || !refreshData.session?.access_token) {
+            throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          }
+          console.log('✅ Session refreshed successfully');
         }
-      });
-      
-      console.log('📥 Edge function response:', { data, error });
-      
-      if (error) {
-        console.error('❌ Edge function error:', error);
-        throw new Error(`Error de conexión: ${error.message || 'Servicio no disponible'}`);
+
+        const currentSession = session || (await supabase.auth.getSession()).data.session;
+        if (!currentSession?.access_token) {
+          throw new Error('No se pudo obtener token de autenticación');
+        }
+
+        console.log('🔑 Calling edge function with valid token...');
+        
+        const { data, error } = await supabase.functions.invoke('create-admin-user', {
+          body: {
+            email: sanitizeInput(newUserEmail),
+            password: newUserPassword
+          },
+          headers: {
+            Authorization: `Bearer ${currentSession.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('📥 Edge function response:', { data, error });
+        
+        if (error) {
+          // Check if it's a network/connection error that might be retryable
+          if (error.message?.includes('503') || error.message?.includes('network') || error.message?.includes('fetch')) {
+            if (attempt < maxRetries) {
+              console.log(`⚠️ Retryable error on attempt ${attempt}, retrying in 2s...`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue;
+            }
+          }
+          console.error('❌ Edge function error:', error);
+          throw new Error(`Error de conexión: ${error.message || 'Servicio no disponible'}`);
+        }
+        
+        if (data?.error) {
+          console.error('❌ Function returned error:', data.error);
+          throw new Error(data.error);
+        }
+        
+        console.log('✅ Usuario creado exitosamente');
+        toast({
+          title: 'Usuario creado',
+          description: `Usuario ${newUserEmail} creado exitosamente.`,
+        });
+        
+        setNewUserEmail('');
+        setNewUserPassword('');
+        setValidationErrors({});
+        setDialogOpen(false);
+        fetchUsers();
+        return; // Success - exit retry loop
+        
+      } catch (error: any) {
+        console.error(`❌ Error en intento ${attempt}:`, error);
+        
+        if (attempt >= maxRetries) {
+          // Final attempt failed
+          toast({
+            title: 'Error',
+            description: error.message || 'Error al crear usuario después de varios intentos',
+            variant: 'destructive',
+          });
+        } else {
+          // Will retry
+          console.log(`⏱️ Esperando antes del siguiente intento...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
       }
-      
-      if (data?.error) {
-        console.error('❌ Function returned error:', data.error);
-        throw new Error(data.error);
-      }
-      
-      console.log('✅ User created successfully');
-      toast({
-        title: 'Usuario creado',
-        description: `Usuario ${sanitizedEmail} creado exitosamente.`,
-      });
-      
-      setNewUserEmail('');
-      setNewUserPassword('');
-      setValidationErrors({});
-      setDialogOpen(false);
-      fetchUsers();
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo crear el usuario.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsCreating(false);
     }
+    
+    setIsCreating(false);
   };
 
   const handleEditUser = (user: AdminUser) => {
@@ -334,9 +377,33 @@ export const UserManagement = () => {
     <Card className="bg-indigo-900/40 border-indigo-800/30 text-white">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
-            Gestión de Usuarios
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
+              Gestión de Usuarios
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge 
+                variant={isSessionHealthy ? "default" : "destructive"}
+                className={`${isSessionHealthy ? 'bg-green-600' : 'bg-red-600'} text-white`}
+              >
+                {isSessionHealthy ? (
+                  <><Wifi className="h-3 w-3 mr-1" /> Conectado</>
+                ) : (
+                  <><WifiOff className="h-3 w-3 mr-1" /> Desconectado</>
+                )}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={forceSessionRefresh}
+                disabled={isChecking}
+                className="border-indigo-600 text-indigo-100 hover:bg-indigo-800/50"
+                title="Renovar sesión"
+              >
+                <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button
               onClick={fetchUsers}

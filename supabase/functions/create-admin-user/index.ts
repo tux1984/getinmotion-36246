@@ -8,14 +8,24 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests FIRST, before any processing
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    console.log('CORS preflight request received');
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
+    console.log('Processing request:', req.method, req.url);
+
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (!authHeader) {
+      console.error('Missing authorization header');
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { 
@@ -25,56 +35,7 @@ serve(async (req) => {
       )
     }
 
-    // Create Supabase client with the user's token for admin verification
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    )
-
-    // Verify the user is authenticated and is an admin
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    
-    if (userError || !user) {
-      console.error('Authentication error:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Check if user is admin
-    const { data: isAdmin, error: adminError } = await supabaseClient.rpc('is_admin');
-    
-    if (adminError) {
-      console.error('Admin check error:', adminError);
-      return new Response(
-        JSON.stringify({ error: 'Authorization check failed' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    if (!isAdmin) {
-      return new Response(
-        JSON.stringify({ error: 'Insufficient permissions. Admin access required.' }),
-        { 
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Create admin client for user creation
+    // Create admin client first for more reliable auth
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -85,6 +46,56 @@ serve(async (req) => {
         }
       }
     )
+
+    // Create client with user's token for verification
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    )
+
+    // Verify the user is authenticated
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    console.log('User verification:', { userId: user?.id, email: user?.email, error: userError });
+    
+    if (userError || !user) {
+      console.error('Authentication error:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - invalid session' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Alternative admin check using direct database query instead of RPC
+    console.log('Checking admin status for:', user.email);
+    const { data: adminCheck, error: adminError } = await supabaseAdmin
+      .from('admin_users')
+      .select('is_active')
+      .eq('email', user.email)
+      .eq('is_active', true)
+      .single();
+    
+    console.log('Admin check result:', { adminCheck, adminError });
+    
+    if (adminError || !adminCheck) {
+      console.error('Admin check failed:', adminError);
+      return new Response(
+        JSON.stringify({ error: 'Insufficient permissions. Admin access required.' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // We already have supabaseAdmin from above
 
     const { email, password } = await req.json()
 
