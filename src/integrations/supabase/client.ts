@@ -15,11 +15,22 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: 'pkce',
+    storageKey: 'supabase-auth-token',
+    debug: process.env.NODE_ENV === 'development',
+    // Enhanced session persistence settings
+    refreshAheadTime: 300, // Refresh 5 minutes before expiry
+    refreshOnFocus: true,
+    refreshOnVisibilityChange: true
   },
   global: {
     headers: {
       'Content-Type': 'application/json'
+    }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 2
     }
   }
 });
