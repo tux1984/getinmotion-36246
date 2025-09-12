@@ -14,7 +14,7 @@ import { BypassProtectedRoute } from '@/components/auth/BypassProtectedRoute';
 import Index from './pages/Index';
 
 import DashboardHome from './pages/DashboardHome';
-import AgentManager from './pages/AgentManager';
+
 import AgentDetails from './pages/AgentDetails';
 import MaturityCalculator from './pages/MaturityCalculator';
 import UserProgress from './pages/UserProgress';
@@ -69,14 +69,6 @@ function App() {
                 element={
                   <BypassProtectedRoute>
                     <DashboardHome />
-                  </BypassProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/agents" 
-                element={
-                  <BypassProtectedRoute>
-                    <AgentManager />
                   </BypassProtectedRoute>
                 } 
               />

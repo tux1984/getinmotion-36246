@@ -56,7 +56,6 @@ const MaturityCalculator = () => {
 
       <NewDashboardHeader 
         onMaturityCalculatorClick={() => navigate('/maturity-calculator')}
-        onAgentManagerClick={handleBackToDashboard}
       />
 
       <div className="pt-36">

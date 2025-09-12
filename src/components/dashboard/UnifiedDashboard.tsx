@@ -46,10 +46,6 @@ export const UnifiedDashboard: React.FC = () => {
     console.log('Maturity Calculator clicked');
   };
 
-  const handleAgentManagerClick = () => {
-    // TODO: Navigate to agent manager
-    console.log('Agent Manager clicked');
-  };
 
   const handleMasterAgentChat = () => {
     setShowMasterAgentChat(true);
@@ -70,7 +66,6 @@ export const UnifiedDashboard: React.FC = () => {
       <div className="min-h-screen flex flex-col">
         <NewDashboardHeader 
           onMaturityCalculatorClick={handleMaturityCalculatorClick}
-          onAgentManagerClick={handleAgentManagerClick}
         />
         <div className="flex-1 pt-24 pb-6 flex items-center justify-center">
           <div className="text-center space-y-4">
@@ -113,7 +108,6 @@ export const UnifiedDashboard: React.FC = () => {
       <DashboardJWTStatusBar />
       <NewDashboardHeader 
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
-        onAgentManagerClick={handleAgentManagerClick}
       />
       
       <DashboardBackground>
