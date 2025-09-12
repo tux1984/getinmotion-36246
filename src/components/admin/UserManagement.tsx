@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, UserCheck, UserX, RefreshCw, Edit, Trash2, Loader2, Wifi, WifiOff } from 'lucide-react';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
+import { useSessionDiagnostics } from '@/hooks/useSessionDiagnostics';
 import {
   Dialog,
   DialogContent,
@@ -67,6 +68,7 @@ export const UserManagement = () => {
   const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string}>({});
   const { toast } = useToast();
   const { isSessionHealthy, isChecking, checkSessionHealth, forceSessionRefresh } = useSessionHealth();
+  const { diagnostics, isChecking: isDiagnosing, runDiagnostics, forceSessionSync } = useSessionDiagnostics();
 
   // Force session refresh if unhealthy
   const handleSessionRefreshAndRetry = async () => {
@@ -159,41 +161,68 @@ export const UserManagement = () => {
     while (attempt < maxRetries) {
       try {
         attempt++;
-        console.log(`🔄 Intento ${attempt}/${maxRetries} - Creating admin user:`, newUserEmail);
+        console.log(`=== USER CREATION ATTEMPT ${attempt}/${maxRetries} ===`);
+        console.log('Target email:', newUserEmail);
         
-        // Force session refresh to ensure token is valid
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('📋 Session check:', { 
+        // STEP 1: Comprehensive session validation
+        console.log('🔍 STEP 1: Session validation...');
+        let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        console.log('Initial session state:', { 
           hasSession: !!session, 
           hasToken: !!session?.access_token,
           userId: session?.user?.id,
           email: session?.user?.email,
-          sessionError
+          tokenExpiry: session?.expires_at,
+          sessionError: sessionError?.message
         });
         
+        // STEP 2: Force session refresh if needed
         if (sessionError || !session?.access_token) {
-          console.log('🔄 Refreshing session...');
+          console.log('🔄 STEP 2: Forcing session refresh...');
           const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          console.log('Session refresh result:', {
+            success: !!refreshData.session,
+            hasNewToken: !!refreshData.session?.access_token,
+            refreshError: refreshError?.message
+          });
+          
           if (refreshError || !refreshData.session?.access_token) {
             throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
           }
+          
+          session = refreshData.session;
           console.log('✅ Session refreshed successfully');
         }
 
-        const currentSession = session || (await supabase.auth.getSession()).data.session;
-        if (!currentSession?.access_token) {
-          throw new Error('No se pudo obtener token de autenticación');
+        // STEP 3: Final validation
+        console.log('🔒 STEP 3: Final session validation...');
+        if (!session?.access_token) {
+          throw new Error('No se pudo obtener token de autenticación válido');
         }
 
-        console.log('🔑 Calling edge function with valid token...');
+        // STEP 4: Prepare request payload
+        console.log('📦 STEP 4: Preparing request...');
+        const requestPayload = {
+          email: sanitizeInput(newUserEmail),
+          password: newUserPassword
+        };
+        
+        console.log('Request payload prepared:', {
+          email: requestPayload.email,
+          hasPassword: !!requestPayload.password,
+          passwordLength: requestPayload.password?.length
+        });
+
+        // STEP 5: Call edge function with comprehensive logging
+        console.log('🚀 STEP 5: Calling edge function...');
+        console.log('Function URL will be:', 'https://ylooqmqmoufqtxvetxuj.supabase.co/functions/v1/create-admin-user');
         
         const { data, error } = await supabase.functions.invoke('create-admin-user', {
-          body: {
-            email: sanitizeInput(newUserEmail),
-            password: newUserPassword
-          },
+          body: requestPayload,
           headers: {
-            Authorization: `Bearer ${currentSession.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -413,17 +442,25 @@ export const UserManagement = () => {
                 <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
               </Button>
               {!isSessionHealthy && (
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  onClick={() => {
-                    // Import useAuth here if not imported
-                    window.location.href = '/login';
-                  }}
-                  className="ml-2"
-                >
-                  Re-login
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => runDiagnostics()}
+                    disabled={isDiagnosing}
+                    className="ml-2 border-blue-600 text-blue-100 hover:bg-blue-800/50"
+                  >
+                    {isDiagnosing ? 'Diagnosticando...' : 'Diagnosticar'}
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => forceSessionSync()}
+                    className="ml-2"
+                  >
+                    Re-login Completo
+                  </Button>
+                </>
               )}
             </div>
           </div>

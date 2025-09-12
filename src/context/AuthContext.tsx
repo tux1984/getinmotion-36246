@@ -60,16 +60,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const refreshAuth = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('🔄 Refreshing auth, session:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
+      console.log('🔄 AuthProvider: Starting complete auth refresh...');
       
-      if (session?.user?.email) {
-        await checkAuthorization(session.user.email);
+      // Force session refresh first
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('❌ AuthProvider: Refresh session failed:', refreshError);
+        // Fall back to getting current session
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+      } else {
+        console.log('✅ AuthProvider: Session refreshed successfully');
+        setSession(refreshData.session);
+        setUser(refreshData.session?.user ?? null);
+      }
+      
+      const currentSession = refreshData?.session || (await supabase.auth.getSession()).data.session;
+      
+      if (currentSession?.user?.email) {
+        console.log('🔍 AuthProvider: Checking authorization after refresh...');
+        await checkAuthorization(currentSession.user.email);
+      } else {
+        console.log('🚫 AuthProvider: No valid session after refresh');
+        setIsAuthorized(false);
       }
     } catch (error) {
-      console.error('❌ Auth refresh failed:', error);
+      console.error('❌ AuthProvider: Complete auth refresh failed:', error);
+      setIsAuthorized(false);
     }
   };
 

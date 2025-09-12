@@ -18,14 +18,17 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== CREATE ADMIN USER REQUEST START ===');
     console.log('Processing request:', req.method, req.url);
+    console.log('All headers:', Object.fromEntries(req.headers.entries()));
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
     console.log('Auth header present:', !!authHeader);
+    console.log('Auth header preview:', authHeader ? `${authHeader.substring(0, 20)}...` : 'none');
     
     if (!authHeader) {
-      console.error('Missing authorization header');
+      console.error('CRITICAL: Missing authorization header');
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { 
@@ -35,7 +38,7 @@ serve(async (req) => {
       )
     }
 
-    // Create admin client first for more reliable auth
+    // Create admin client for user creation
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -58,14 +61,27 @@ serve(async (req) => {
       }
     )
 
-    // Verify the user is authenticated
+    // Verify the user is authenticated with comprehensive logging
+    console.log('🔍 Starting user verification...');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    console.log('User verification:', { userId: user?.id, email: user?.email, error: userError });
+    
+    console.log('User verification result:', { 
+      userId: user?.id, 
+      email: user?.email, 
+      hasError: !!userError,
+      errorMessage: userError?.message,
+      userAud: user?.aud,
+      userRole: user?.role
+    });
     
     if (userError || !user) {
-      console.error('Authentication error:', userError);
+      console.error('CRITICAL: Authentication verification failed');
+      console.error('User error details:', userError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized - invalid session' }),
+        JSON.stringify({ 
+          error: 'Unauthorized - invalid session',
+          details: userError?.message || 'No user found'
+        }),
         { 
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -73,28 +89,31 @@ serve(async (req) => {
       )
     }
 
-    // TEMPORARY: Skip admin validation to test session issues
-    // TODO: Re-enable after session is fixed
-    console.log('Skipping admin validation temporarily for:', user.email);
+    console.log('✅ User authenticated successfully:', user.email);
 
-    // We already have supabaseAdmin from above
-
-    // Log request details for debugging
+    // Parse request body with comprehensive error handling
+    console.log('📥 Starting request body parsing...');
     const contentType = req.headers.get('Content-Type');
     const contentLength = req.headers.get('Content-Length');
-    console.log('Request details:', {
+    console.log('Content details:', {
       method: req.method,
       contentType,
       contentLength,
       hasBody: !!req.body
     });
 
-    // Robust JSON parsing with detailed error handling
     let email, password;
     try {
-      // Check if request has a body
-      if (!req.body) {
-        console.error('Request body is null or undefined');
+      // Multiple parsing strategies for maximum compatibility
+      let bodyText = '';
+      
+      if (req.body) {
+        console.log('📖 Reading request body...');
+        bodyText = await req.text();
+        console.log('Raw body text length:', bodyText.length);
+        console.log('Raw body preview:', bodyText.substring(0, 100));
+      } else {
+        console.error('CRITICAL: Request body is null');
         return new Response(
           JSON.stringify({ error: 'Request body is required' }),
           { 
@@ -104,14 +123,9 @@ serve(async (req) => {
         );
       }
 
-      // First get the body as text to inspect it
-      const bodyText = await req.text();
-      console.log('Raw body text:', bodyText);
-      console.log('Body length:', bodyText.length);
-
-      // Check if body is empty
+      // Validate body content
       if (!bodyText || bodyText.trim() === '') {
-        console.error('Request body is empty');
+        console.error('CRITICAL: Request body is empty');
         return new Response(
           JSON.stringify({ error: 'Request body cannot be empty' }),
           { 
@@ -121,16 +135,24 @@ serve(async (req) => {
         );
       }
 
-      // Parse the JSON
+      // Parse JSON with detailed error handling
+      console.log('🔧 Parsing JSON...');
       const parsedBody = JSON.parse(bodyText);
-      console.log('Parsed body:', parsedBody);
+      console.log('Parsed body structure:', Object.keys(parsedBody));
+      console.log('Parsed body content:', { 
+        hasEmail: !!parsedBody.email, 
+        hasPassword: !!parsedBody.password,
+        emailType: typeof parsedBody.email,
+        passwordType: typeof parsedBody.password
+      });
       
       email = parsedBody.email;
       password = parsedBody.password;
 
     } catch (jsonError) {
-      console.error('JSON parsing error:', jsonError);
-      console.error('Error details:', {
+      console.error('CRITICAL: JSON parsing failed');
+      console.error('JSON error details:', {
+        name: jsonError.name,
         message: jsonError.message,
         stack: jsonError.stack
       });
@@ -147,11 +169,25 @@ serve(async (req) => {
       );
     }
 
-    // Validate required fields
+    // Validate required fields with detailed logging
+    console.log('✅ Validating required fields...');
     if (!email || !password) {
-      console.error('Missing required fields:', { email: !!email, password: !!password });
+      console.error('CRITICAL: Missing required fields');
+      console.error('Field validation:', { 
+        email: email || 'MISSING', 
+        hasPassword: !!password,
+        emailLength: email?.length || 0,
+        passwordLength: password?.length || 0
+      });
+      
       return new Response(
-        JSON.stringify({ error: 'Email and password are required' }),
+        JSON.stringify({ 
+          error: 'Email and password are required',
+          missing: {
+            email: !email,
+            password: !password
+          }
+        }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
