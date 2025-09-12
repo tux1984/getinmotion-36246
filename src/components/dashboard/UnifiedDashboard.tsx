@@ -6,17 +6,23 @@ import { DashboardFooter } from './DashboardFooter';
 import { BasicDashboardFallback } from './BasicDashboardFallback';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { DashboardErrorBoundary } from './DashboardErrorBoundary';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
-import { useSessionSync } from '@/hooks/useSessionSync';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
   const { language } = useLanguage();
-  const { isAuthorized, loading, user, session, checkAuthorization } = useAuth();
+  const { 
+    user, 
+    session, 
+    loading, 
+    isAuthorized, 
+    jwtIntegrity, 
+    recoverJWT 
+  } = useRobustAuth();
   
   console.log('🎯 UnifiedDashboard: State check', {
     hasUser: !!user,
@@ -29,7 +35,6 @@ export const UnifiedDashboard: React.FC = () => {
   const { profile, maturityScores, userAgents } = useRobustDashboardData();
   const { tasks } = useAgentTasks();
   const { currentScores } = useOptimizedMaturityScores();
-  const { isSyncing, forceSessionSync } = useSessionSync();
   
   const completedTasksCount = tasks.filter(t => t.status === 'completed').length;
   const activeTasksCount = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length;
@@ -44,13 +49,13 @@ export const UnifiedDashboard: React.FC = () => {
     console.log('Agent Manager clicked');
   };
 
-  const handleRefreshAuth = async () => {
-    try {
-      await forceSessionSync();
-    } catch (error) {
-      console.error('Manual auth refresh failed:', error);
+  // Handle JWT corruption recovery
+  useEffect(() => {
+    if (jwtIntegrity === 'corrupted') {
+      console.log('🔧 JWT corruption detected in dashboard, triggering recovery...');
+      recoverJWT();
     }
-  };
+  }, [jwtIntegrity, recoverJWT]);
   
   // Show loading while authentication is being processed
   if (loading) {
@@ -71,15 +76,21 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Force session refresh on dashboard access to prevent desync
-  useEffect(() => {
-    if (user && session && !loading) {
-      checkAuthorization().catch(console.error);
-    }
-  }, [user, session, loading, checkAuthorization]);
+  // Show recovery UI if JWT is being recovered
+  if (jwtIntegrity === 'recovering') {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-foreground font-medium">Recuperando autenticación...</p>
+          <p className="text-muted-foreground text-sm">Reparando sesión corrompida</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Redirect to login if no valid session (user + session required, authorization optional)
-  if (!user || !session) {
+  // Redirect if no valid session or if JWT is corrupted and can't be recovered
+  if (!user || !session || (jwtIntegrity === 'corrupted')) {
     console.log('🚫 UnifiedDashboard: Invalid session, redirecting to login');
     window.location.href = '/login';
     return null;

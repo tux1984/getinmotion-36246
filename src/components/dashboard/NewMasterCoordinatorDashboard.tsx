@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateDefaultTasks } from '@/utils/generateDefaultTasks';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { AgentTask } from '@/hooks/types/agentTaskTypes';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
@@ -48,7 +48,7 @@ interface MasterCoordinatorDashboardProps {
 
 export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProps> = ({ language }) => {
   const navigate = useNavigate();
-  const { user, session } = useAuth();
+  const { user, session, isAuthorized, jwtIntegrity } = useRobustAuth();
   const { toast } = useToast();
   
   // Enhanced debugging
