@@ -46,8 +46,9 @@ export const useLanguageSystem = (): LanguageSystemHook => {
             setLanguageState(context.language_preference as Language);
             setNeedsLanguageSelection(false);
           } else {
-            // No language preference found - need selection
-            setNeedsLanguageSelection(true);
+            // No language preference found - use default and skip selection for now
+            setLanguageState(DEFAULT_LANGUAGE);
+            setNeedsLanguageSelection(false);
           }
         }
       } catch (error) {

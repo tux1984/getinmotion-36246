@@ -52,7 +52,7 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
   const currentText = welcomeTexts[selectedLanguage];
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center space-y-4">
           <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
