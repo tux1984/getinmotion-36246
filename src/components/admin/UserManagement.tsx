@@ -244,6 +244,12 @@ export const UserManagement = () => {
         
         if (data?.error) {
           console.error('❌ Function returned error:', data.error);
+          
+          // Handle specific admin authorization errors
+          if (data.error?.includes('Insufficient privileges') || data.error?.includes('Admin verification failed')) {
+            throw new Error('Error de autorización admin. Verifica tu sesión con el diagnóstico de emergencia.');
+          }
+          
           throw new Error(data.error);
         }
         

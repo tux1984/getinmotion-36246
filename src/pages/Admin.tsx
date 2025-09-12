@@ -3,6 +3,7 @@ import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { EmergencySessionReset } from '@/components/admin/EmergencySessionReset';
+import { SessionDiagnostics } from '@/components/admin/SessionDiagnostics';
 import { ImageManager } from '@/components/admin/ImageManager';
 import { CompanyDocuments } from '@/components/admin/CompanyDocuments';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -175,6 +176,7 @@ const Admin = () => {
             
             <TabsContent value="users" className="mt-6">
               <div className="space-y-4">
+                <SessionDiagnostics />
                 <EmergencySessionReset />
                 <UserManagement />
               </div>

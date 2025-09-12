@@ -91,6 +91,80 @@ serve(async (req) => {
 
     console.log('✅ User authenticated successfully:', user.email);
 
+    // Step 2: Admin Authorization Check (BYPASS RPC - Direct Table Validation)
+    console.log('🔑 Checking admin authorization via direct table lookup...');
+    
+    try {
+      // Extract email from the authenticated user instead of relying on auth.uid()
+      const userEmail = user?.email;
+      
+      if (!userEmail) {
+        console.error('❌ No email found in authenticated user');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid authentication',
+            details: 'User email not found in token'
+          }),
+          { 
+            status: 401, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      console.log(`🔍 Checking admin status for email: ${userEmail}`);
+
+      // Direct table query to admin_users instead of using is_admin RPC
+      const { data: adminCheck, error: adminError } = await supabaseAdmin
+        .from('admin_users')
+        .select('email, is_active')
+        .eq('email', userEmail)
+        .eq('is_active', true)
+        .single();
+
+      if (adminError && adminError.code !== 'PGRST116') {
+        console.error('❌ Admin table query failed:', adminError);
+        return new Response(
+          JSON.stringify({ 
+            error: `Admin verification failed: ${adminError.message}`,
+            details: 'Could not query admin users table'
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      if (!adminCheck) {
+        console.log('🚫 User is not an active admin');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Insufficient privileges',
+            details: 'Active admin access required'
+          }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      console.log('✅ Admin authorization confirmed via direct table lookup');
+    } catch (authCheckError) {
+      console.error('💥 Exception during admin check:', authCheckError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Authorization system error',
+          details: authCheckError.message
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     // Parse request body with comprehensive error handling
     console.log('📥 Starting request body parsing...');
     const contentType = req.headers.get('Content-Type');
