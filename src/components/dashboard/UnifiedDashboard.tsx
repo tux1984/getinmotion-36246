@@ -15,9 +15,14 @@ import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
   const { language } = useLanguage();
-  const { isAuthorized, loading, user, checkAuthorization } = useAuth();
-  const [retryCount, setRetryCount] = useState(0);
-  const [isRetrying, setIsRetrying] = useState(false);
+  const { isAuthorized, loading, user, session, checkAuthorization } = useAuth();
+  
+  console.log('🎯 UnifiedDashboard: State check', {
+    hasUser: !!user,
+    hasSession: !!session,
+    isAuthorized,
+    loading
+  });
   
   // Get basic dashboard data
   const { profile, maturityScores, userAgents } = useRobustDashboardData();
@@ -37,45 +42,16 @@ export const UnifiedDashboard: React.FC = () => {
     console.log('Agent Manager clicked');
   };
 
-  // Auto-retry authorization on failure
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    if (!loading && user && !isAuthorized && retryCount < 3) {
-      console.log(`Retrying authorization (attempt ${retryCount + 1})`);
-      setIsRetrying(true);
-      
-      timeoutId = setTimeout(async () => {
-        try {
-          await checkAuthorization();
-          setRetryCount(prev => prev + 1);
-        } catch (error) {
-          console.error('Authorization retry failed:', error);
-        } finally {
-          setIsRetrying(false);
-        }
-      }, (retryCount + 1) * 2000); // Progressive delay
-    }
-    
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [loading, user, isAuthorized, retryCount, checkAuthorization]);
-
   const handleRefreshAuth = async () => {
-    setIsRetrying(true);
     try {
       await checkAuthorization();
-      setRetryCount(0);
     } catch (error) {
       console.error('Manual auth refresh failed:', error);
-    } finally {
-      setIsRetrying(false);
     }
   };
   
   // Show loading while authentication is being processed
-  if (loading || isRetrying) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <NewDashboardHeader 
@@ -85,9 +61,7 @@ export const UnifiedDashboard: React.FC = () => {
         <div className="flex-1 pt-24 pb-6 flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">
-              {isRetrying ? 'Reintentando autenticación...' : 'Cargando dashboard...'}
-            </p>
+            <p className="text-muted-foreground">Verificando autenticación...</p>
           </div>
         </div>
         <DashboardFooter />
@@ -95,27 +69,11 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Show recovery mode if not authorized after retries
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <NewDashboardHeader 
-          onMaturityCalculatorClick={handleMaturityCalculatorClick}
-          onAgentManagerClick={handleAgentManagerClick}
-        />
-        <div className="flex-1 pt-24 pb-6">
-          <DashboardBackground showFloatingAgent={false}>
-            <DashboardErrorBoundary
-              user={user}
-              onRefreshAuth={handleRefreshAuth}
-              isRetrying={isRetrying}
-              retryCount={retryCount}
-            />
-          </DashboardBackground>
-        </div>
-        <DashboardFooter />
-      </div>
-    );
+  // Redirect to login if no valid session
+  if (!user || !session || !isAuthorized) {
+    console.log('🚫 UnifiedDashboard: Invalid session or not authorized, redirecting to login');
+    window.location.href = '/login';
+    return null;
   }
 
   // Show Master Coordinator Dashboard as primary experience

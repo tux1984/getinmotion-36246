@@ -31,7 +31,7 @@ const DEFAULT_SCORES = {
 };
 
 export const useRobustDashboardData = (): RobustDashboardData => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [data, setData] = useState<RobustDashboardData>({
     profile: {
       name: 'Usuario',
@@ -44,7 +44,9 @@ export const useRobustDashboardData = (): RobustDashboardData => {
   });
 
   useEffect(() => {
-    if (!user) {
+    // Check both user AND session to ensure valid authentication
+    if (!user || !session) {
+      console.log('🔍 useRobustDashboardData: No valid user/session, setting defaults');
       setData(prev => ({
         ...prev,
         loading: false,
@@ -53,7 +55,33 @@ export const useRobustDashboardData = (): RobustDashboardData => {
       return;
     }
 
+    // Check if we have auth.uid() by testing a simple query
+    const verifySession = async () => {
+      try {
+        const { data: authTest, error } = await supabase.rpc('is_authorized_user', { 
+          user_email: user.email || '' 
+        });
+        
+        if (error) {
+          console.error('🚫 useRobustDashboardData: Session verification failed:', error);
+          setData(prev => ({ ...prev, loading: false }));
+          return false;
+        }
+        
+        console.log('✅ useRobustDashboardData: Session verified successfully');
+        return true;
+      } catch (error) {
+        console.error('🚫 useRobustDashboardData: Session test failed:', error);
+        setData(prev => ({ ...prev, loading: false }));
+        return false;
+      }
+    };
+
     const loadData = async () => {
+      // First verify session is working
+      const sessionValid = await verifySession();
+      if (!sessionValid) return;
+
       try {
         // Datos básicos del usuario - SIEMPRE disponibles
         const basicProfile = {
@@ -117,7 +145,7 @@ export const useRobustDashboardData = (): RobustDashboardData => {
     };
 
     loadData();
-  }, [user]);
+  }, [user, session]);
 
   return data;
 };

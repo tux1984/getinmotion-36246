@@ -9,10 +9,13 @@ import { useAgentTasksSpecialOperations } from './useAgentTasksSpecialOperations
 import { replaceGoalArrayInText } from './utils/agentTaskUtils';
 
 export function useAgentTasks(agentId?: string) {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Guard: Don't proceed without valid session
+  const hasValidSession = user && session;
 
   // Initialize query hooks
   const { fetchTasks, fetchPaginatedTasks } = useAgentTasksQueries(user, agentId);
@@ -34,9 +37,14 @@ export function useAgentTasks(agentId?: string) {
 
   // Wrapper for fetchTasks to handle state management
   const refreshTasks = useCallback(() => {
+    if (!hasValidSession) {
+      console.log('🔍 useAgentTasks: No valid session, skipping task fetch');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetchTasks(setTasks, setTotalCount, setLoading);
-  }, [fetchTasks]);
+  }, [fetchTasks, hasValidSession]);
 
   useEffect(() => {
     refreshTasks();
@@ -44,7 +52,7 @@ export function useAgentTasks(agentId?: string) {
 
   // Realtime subscription for tasks
   useEffect(() => {
-    if (!user) return;
+    if (!hasValidSession) return;
 
     const channel = supabase
       .channel(`realtime-tasks-user-${user.id}-agent-${agentId || 'all'}`)

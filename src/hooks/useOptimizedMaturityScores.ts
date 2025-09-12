@@ -14,7 +14,7 @@ interface OptimizedMaturityData {
 const FETCH_TIMEOUT = 4000;
 
 export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [data, setData] = useState<OptimizedMaturityData>({
     currentScores: null,
     profileData: null,
@@ -23,7 +23,8 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
   });
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !session) {
+      console.log('🔍 useOptimizedMaturityScores: No valid user/session');
       setData(prev => ({ ...prev, loading: false }));
       return;
     }
@@ -126,7 +127,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
     };
 
     fetchMaturityScores();
-  }, [user]);
+  }, [user, session]);
 
   return data;
 };
