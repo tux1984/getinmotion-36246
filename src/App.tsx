@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useSecurityHeaders } from '@/hooks/useSecurityHeaders';
 
-import { AuthProvider } from '@/context/AuthContext';
+
 import { LanguageProvider } from '@/context/LanguageContext';
 import { BypassProtectedRoute } from '@/components/auth/BypassProtectedRoute';
 import Index from './pages/Index';
@@ -41,9 +41,8 @@ function App() {
   return (
     <ErrorBoundary>
       <HelmetProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <LanguageProvider>
+      <BrowserRouter>
+        <LanguageProvider>
               <div className="min-h-screen">
                 <Routes>
               <Route path="/" element={<Index />} />
@@ -162,9 +161,8 @@ function App() {
                 </Routes>
               </div>
               <Toaster />
-            </LanguageProvider>
-          </AuthProvider>
-        </BrowserRouter>
+          </LanguageProvider>
+      </BrowserRouter>
       </HelmetProvider>
     </ErrorBoundary>
   );

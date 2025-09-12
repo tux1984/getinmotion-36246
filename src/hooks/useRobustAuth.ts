@@ -67,9 +67,7 @@ export const useRobustAuth = () => {
           description: 'Sesión reparada exitosamente',
         });
         
-        // Force refresh of auth state
-        const { data: { session } } = await robustSupabase.auth.getSession();
-        updateAuthState(session);
+        // Session will be updated by auth state change listener
         
         return true;
       } else {
@@ -124,7 +122,7 @@ export const useRobustAuth = () => {
     if (session) {
       setTimeout(() => checkJWTIntegrity(), 100);
     }
-  }, [checkAuthorization, checkJWTIntegrity]);
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -176,20 +174,53 @@ export const useRobustAuth = () => {
 
   // Initialize auth state and set up listeners
   useEffect(() => {
+    let mounted = true;
+    
+    const initializeAuth = async () => {
+      try {
+        console.log('🚀 RobustAuth: Initializing authentication...');
+        
+        // Get current session first
+        const { data: { session }, error } = await robustSupabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ RobustAuth: Session error:', error);
+          if (mounted) {
+            setAuthState(prev => ({ ...prev, loading: false }));
+          }
+          return;
+        }
+
+        console.log('📋 RobustAuth: Initial session', { hasSession: !!session });
+        
+        if (mounted) {
+          await updateAuthState(session);
+        }
+      } catch (error) {
+        console.error('❌ RobustAuth: Initialization error:', error);
+        if (mounted) {
+          setAuthState(prev => ({ ...prev, loading: false }));
+        }
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = robustSupabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔐 Auth state change:', event, { hasSession: !!session });
-        await updateAuthState(session);
+        if (mounted) {
+          await updateAuthState(session);
+        }
       }
     );
 
-    // Check for existing session
-    robustSupabase.auth.getSession().then(({ data: { session } }) => {
-      updateAuthState(session);
-    });
+    // Initialize auth state
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [updateAuthState]);
 
   // Periodic JWT integrity check for active sessions
