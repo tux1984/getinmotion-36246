@@ -19,8 +19,12 @@ export const useUnifiedTaskRecommendations = ({
   const [needsMoreInfo, setNeedsMoreInfo] = useState(false);
 
   const generateIntelligentRecommendations = useCallback(async () => {
-    if (!user || !maturityScores) return;
+    if (!user || !maturityScores) {
+      console.log('🧠 Cannot generate recommendations - missing user or scores');
+      return;
+    }
 
+    console.log('🧠 Starting recommendation generation with scores:', maturityScores);
     setLoading(true);
     try {
       // ALWAYS use local fallback recommendations - NO EDGE FUNCTIONS
@@ -37,13 +41,19 @@ export const useUnifiedTaskRecommendations = ({
   }, [user, maturityScores, language]);
 
   const generateFallbackRecommendations = useCallback(() => {
-    if (!maturityScores) return;
+    if (!maturityScores) {
+      console.log('🚨 Cannot generate fallback - no maturity scores');
+      return;
+    }
 
+    console.log('🎯 Generating fallback recommendations with scores:', maturityScores);
     const average = Object.values(maturityScores).reduce((a, b) => a + b, 0) / 4;
     let maturityLevel: 'explorador' | 'constructor' | 'estratega' | 'visionario' = 'explorador';
     if (average >= 80) maturityLevel = 'visionario';
     else if (average >= 60) maturityLevel = 'estratega';
     else if (average >= 40) maturityLevel = 'constructor';
+    
+    console.log('🎯 Calculated maturity level:', maturityLevel, 'with average:', average);
 
     const tasksByLevel = {
       'explorador': [
@@ -122,6 +132,7 @@ export const useUnifiedTaskRecommendations = ({
       isRealAgent: true
     }));
 
+    console.log('🎯 Generated', fallbackTasks.length, 'fallback tasks:', fallbackTasks.map(t => t.title));
     setRecommendations(fallbackTasks);
   }, [maturityScores]);
 
@@ -144,8 +155,12 @@ export const useUnifiedTaskRecommendations = ({
   }, []);
 
   useEffect(() => {
+    console.log('🎯 useUnifiedTaskRecommendations - Effect triggered:', { maturityScores, hasUser: !!user });
     if (maturityScores && user) {
+      console.log('🎯 Generating recommendations with scores:', maturityScores);
       generateIntelligentRecommendations();
+    } else {
+      console.log('🎯 Not generating recommendations - missing:', { maturityScores: !!maturityScores, user: !!user });
     }
   }, [maturityScores, user, generateIntelligentRecommendations]);
 

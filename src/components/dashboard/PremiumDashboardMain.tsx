@@ -6,7 +6,7 @@ import { CollapsibleMoreTools } from './CollapsibleMoreTools';
 import QuickActionsPanel from './QuickActionsPanel';
 import { TaskManagementInterface } from './TaskManagementInterface';
 import { ModernAgentsGrid } from './ModernAgentsGrid';
-import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
+import RecommendedTasksSection from './RecommendedTasksSection';
 
 interface PremiumDashboardMainProps {
   onSelectAgent: (id: string) => void;
@@ -44,7 +44,13 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
           {/* Left Column - Primary Content (Takes more space) */}
           <div className="xl:col-span-3 space-y-6">
-            {/* Task Management Interface - Priority Section */}
+            {/* Recommended Tasks Section - HIGH PRIORITY */}
+            <RecommendedTasksSection
+              language="es"
+              maturityScores={maturityScores}
+            />
+            
+            {/* Task Management Interface - Secondary Section */}
             <TaskManagementInterface 
               language="es"
               maturityScores={maturityScores}
