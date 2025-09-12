@@ -21,29 +21,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  console.log('🔄 AuthProvider: Current state', { 
+    hasUser: !!user, 
+    hasSession: !!session, 
+    isAuthorized, 
+    loading 
+  });
+
   const checkAuthorization = async (userEmail?: string): Promise<boolean> => {
-    const emailToCheck = userEmail || user?.email;
-    if (!emailToCheck) {
+    if (!userEmail) {
+      console.log('🚫 AuthProvider: No email provided for authorization check');
       setIsAuthorized(false);
       return false;
     }
 
     try {
-      console.log('🔍 Checking authorization for:', emailToCheck);
-      const { data, error } = await supabase
-        .rpc('is_authorized_user', { user_email: emailToCheck });
-
+      console.log('🔍 AuthProvider: Checking authorization for', userEmail);
+      const { data: isAuth, error } = await supabase.rpc('is_authorized_user', { 
+        user_email: userEmail 
+      });
+      
       if (error) {
-        console.error('❌ Authorization check error:', error);
+        console.error('❌ AuthProvider: Authorization check failed:', error);
+        setIsAuthorized(false);
         return false;
       }
-
-      const authorized = Boolean(data);
-      console.log('✅ Authorization result:', authorized);
+      
+      const authorized = Boolean(isAuth);
+      console.log('✅ AuthProvider: Authorization result:', authorized);
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      console.error('❌ Authorization check failed:', error);
+      console.error('❌ AuthProvider: Authorization check error:', error);
+      setIsAuthorized(false);
       return false;
     }
   };
@@ -63,85 +73,68 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Check authorization when user changes
+  // SIMPLIFIED AUTH STATE MANAGEMENT
   useEffect(() => {
-    if (user?.email) {
-      console.log('👤 User changed, checking authorization for:', user.email);
-      checkAuthorization(user.email);
-    } else {
-      setIsAuthorized(false);
-    }
-  }, [user?.email]);
-
-  // ROBUST AUTH STATE MANAGEMENT - Fixed race condition
-  useEffect(() => {
-    console.log('🚀 Setting up auth listener with robust session handling');
+    console.log('🎧 AuthProvider: Setting up auth state listener');
     
-    let isInitialized = false;
-    let isCleaningUp = false;
-
-    // Set up listener for auth changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (isCleaningUp) return;
+      (event, session) => {
+        console.log('🔔 AuthProvider: Auth state changed', { event, hasSession: !!session });
         
-        console.log('🔔 Auth state changed:', event, session?.user?.email);
-        
-        // CRITICAL: Update state synchronously 
+        // ONLY synchronous state updates here - NO async calls
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Only mark loading as false after initial setup
-        if (!isInitialized) {
-          isInitialized = true;
-          setLoading(false);
-        }
-        
-        // Handle authorization check asynchronously
-        if (session?.user?.email) {
-          // Small delay to ensure state is updated
-          setTimeout(() => {
-            if (!isCleaningUp) {
-              checkAuthorization(session.user.email);
-            }
-          }, 100);
-        } else {
+        // If no session, clear everything immediately
+        if (!session) {
           setIsAuthorized(false);
+          setLoading(false);
+          return;
         }
       }
     );
 
-    // Get initial session AFTER setting up the listener
-    const initializeSession = async () => {
+    // Initialize session once
+    const initializeAuth = async () => {
       try {
+        console.log('🚀 AuthProvider: Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
-          console.error('❌ Error getting initial session:', error);
-        } else {
-          console.log('🏁 Initial session loaded:', session?.user?.email);
-          // The onAuthStateChange will handle the state updates
-          if (!session && !isInitialized) {
-            isInitialized = true;
-            setLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Failed to get initial session:', error);
-        if (!isInitialized) {
-          isInitialized = true;
+          console.error('❌ AuthProvider: Session error:', error);
           setLoading(false);
+          return;
         }
+
+        console.log('📋 AuthProvider: Initial session', { hasSession: !!session });
+        
+        if (session?.user?.email) {
+          const authorized = await checkAuthorization(session.user.email);
+          console.log('✅ AuthProvider: Initial authorization complete:', authorized);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ AuthProvider: Init error:', error);
+        setLoading(false);
       }
     };
 
-    initializeSession();
+    initializeAuth();
 
     return () => {
-      console.log('🧹 Cleaning up auth subscription');
-      isCleaningUp = true;
+      console.log('🧹 AuthProvider: Cleaning up');
       subscription.unsubscribe();
     };
   }, []);
+
+  // Separate effect for handling authorization when session changes
+  useEffect(() => {
+    if (session?.user?.email && !loading) {
+      console.log('🔍 AuthProvider: Checking authorization for session change');
+      checkAuthorization(session.user.email);
+    }
+  }, [session?.user?.email, loading]);
 
   const signIn = async (email: string, password: string) => {
     if (!email || !password) {

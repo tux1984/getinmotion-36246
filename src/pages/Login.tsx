@@ -123,15 +123,16 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+
+    console.log('🔑 Login: Starting login process for:', email);
     setIsLoading(true);
-    
-    console.log('Login: Attempting login for:', email);
-    
+
     try {
       const { error } = await signIn(email, password);
       
       if (error) {
-        console.error('Login: Error during sign in:', error);
+        console.error('❌ Login: Sign in failed:', error);
         
         // Better error handling based on error type
         let errorTitle = t.errorOccurred;
@@ -153,50 +154,24 @@ const Login = () => {
           description: errorDescription,
           variant: "destructive",
         });
-      } else {
-        console.log('Login: Sign in successful, verifying session...');
-        
-        // POST-LOGIN VERIFICATION: Ensure session is properly established
-        let sessionVerified = false;
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (!sessionVerified && retryCount < maxRetries) {
-          try {
-            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for session to propagate
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (session?.access_token && session?.user) {
-              console.log('✅ Login: Session verified successfully');
-              sessionVerified = true;
-              
-              toast({
-                title: t.welcomeBack,
-                description: t.loginSuccessful,
-              });
-            } else {
-              retryCount++;
-              console.warn(`⚠️ Login: Session not ready, retry ${retryCount}/${maxRetries}`);
-            }
-          } catch (verifyError) {
-            retryCount++;
-            console.error(`❌ Login: Session verification error ${retryCount}/${maxRetries}:`, verifyError);
-          }
-        }
-        
-        if (!sessionVerified) {
-          console.error('❌ Login: Failed to verify session after login');
-          toast({
-            title: "Session Error",
-            description: "Login successful but session failed to establish. Please try again.",
-            variant: "destructive",
-          });
-        }
-        
-        // The redirect will be handled by the useEffect above
+        return;
       }
+
+      console.log('✅ Login: Sign in successful');
+      toast({
+        title: t.welcomeBack,
+        description: t.loginSuccessful,
+      });
+      
+      // Immediate redirect - AuthProvider will handle session validation
+      const redirectPath = await getUserRedirectPath();
+      const targetPath = redirectPath || (location.state as any)?.from?.pathname || '/dashboard';
+      
+      console.log('📍 Login: Redirecting to:', targetPath);
+      navigate(targetPath, { replace: true });
+      
     } catch (error) {
-      console.error('Login: Exception during sign in:', error);
+      console.error('❌ Login: Unexpected error:', error);
       toast({
         title: t.errorOccurred,
         description: error instanceof Error ? error.message : 'Unknown error',
