@@ -65,7 +65,22 @@ export function useAgentTasksOperations(
           });
           return null;
         }
-        throw error;
+      // Manejar errores específicos del límite de tareas
+      if (error.message && error.message.includes('TASK_LIMIT_EXCEEDED')) {
+        const isSpanish = true; // Obtener del contexto de usuario si está disponible
+        const userMessage = isSpanish 
+          ? error.message.split(':')[1]?.trim() || 'Has alcanzado el límite de tareas activas.'
+          : 'You have reached the active tasks limit. Complete some tasks first.';
+        
+        toast({
+          title: isSpanish ? 'Límite alcanzado' : 'Limit reached',
+          description: userMessage,
+          variant: 'destructive',
+        });
+        return null;
+      }
+      
+      throw error;
       }
       
       const typedTask = convertToAgentTask(data);

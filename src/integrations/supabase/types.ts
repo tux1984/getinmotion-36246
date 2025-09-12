@@ -1151,6 +1151,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_obsolete_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       disable_agent: {
         Args: { p_agent_id: string; p_user_id: string }
         Returns: undefined
@@ -1183,6 +1187,14 @@ export type Database = {
       is_authorized_user: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      sync_active_task_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action_taken: string
+          active_count: number
+          user_id: string
+        }[]
       }
     }
     Enums: {
