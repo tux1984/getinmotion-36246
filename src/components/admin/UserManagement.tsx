@@ -220,7 +220,7 @@ export const UserManagement = () => {
         console.log('Function URL will be:', 'https://ylooqmqmoufqtxvetxuj.supabase.co/functions/v1/create-admin-user');
         
         const { data, error } = await supabase.functions.invoke('create-admin-user', {
-          body: requestPayload,
+          body: JSON.stringify(requestPayload),
           headers: {
             Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'

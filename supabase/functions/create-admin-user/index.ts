@@ -165,7 +165,7 @@ serve(async (req) => {
       );
     }
 
-    // Parse request body with comprehensive error handling
+    // Parse request body with improved error handling
     console.log('📥 Starting request body parsing...');
     const contentType = req.headers.get('Content-Type');
     const contentLength = req.headers.get('Content-Length');
@@ -177,28 +177,18 @@ serve(async (req) => {
     });
 
     let email, password;
+    let parsedBody;
+    
     try {
-    // Use modern fetch API approach for JSON parsing
       console.log('📖 Reading request body...');
-      const requestClone = req.clone();
-      let parsedBody;
       
-      try {
-        parsedBody = await requestClone.json();
-        console.log('✅ Successfully parsed JSON body');
-        console.log('Parsed body structure:', Object.keys(parsedBody || {}));
-        console.log('Parsed body content:', { 
-          hasEmail: !!parsedBody?.email, 
-          hasPassword: !!parsedBody?.password,
-          emailType: typeof parsedBody?.email,
-          passwordType: typeof parsedBody?.password
-        });
-      } catch (parseError) {
-        console.error('CRITICAL: JSON parsing failed:', parseError);
+      // Check if body exists and has content
+      if (!req.body) {
+        console.error('CRITICAL: Request body is null/undefined');
         return new Response(
           JSON.stringify({ 
-            error: 'Invalid JSON in request body',
-            details: parseError.message 
+            error: 'Request body is required',
+            details: 'No request body provided' 
           }),
           { 
             status: 400,
@@ -206,6 +196,52 @@ serve(async (req) => {
           }
         );
       }
+
+      // Check content length
+      if (contentLength === '0') {
+        console.error('CRITICAL: Request body is empty (Content-Length: 0)');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Request body cannot be empty',
+            details: 'Content-Length is 0' 
+          }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      // Parse JSON with error handling
+      parsedBody = await req.json();
+      console.log('✅ Successfully parsed JSON body');
+      console.log('Parsed body structure:', Object.keys(parsedBody || {}));
+      console.log('Parsed body content:', { 
+        hasEmail: !!parsedBody?.email, 
+        hasPassword: !!parsedBody?.password,
+        emailType: typeof parsedBody?.email,
+        passwordType: typeof parsedBody?.password
+      });
+
+    } catch (parseError) {
+      console.error('CRITICAL: JSON parsing failed:', parseError);
+      console.error('Parse error details:', {
+        name: parseError.name,
+        message: parseError.message,
+        stack: parseError.stack
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid JSON in request body',
+          details: parseError.message 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
       // Validate parsed body
       if (!parsedBody) {
