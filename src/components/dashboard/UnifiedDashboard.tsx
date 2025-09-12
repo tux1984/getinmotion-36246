@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
+import { MasterCoordinatorDashboard } from './MasterCoordinatorDashboard';
 import { DashboardBackground } from './DashboardBackground';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { DashboardFooter } from './DashboardFooter';
@@ -26,6 +26,8 @@ export const UnifiedDashboard: React.FC = () => {
     recoverJWT 
   } = useRobustAuth();
   
+  const [showMasterAgentChat, setShowMasterAgentChat] = useState(false);
+  
   console.log('🎯 UnifiedDashboard: State check', {
     hasUser: !!user,
     hasSession: !!session,
@@ -49,6 +51,11 @@ export const UnifiedDashboard: React.FC = () => {
   const handleAgentManagerClick = () => {
     // TODO: Navigate to agent manager
     console.log('Agent Manager clicked');
+  };
+
+  const handleMasterAgentChat = () => {
+    setShowMasterAgentChat(true);
+    console.log('Master Agent Chat opened');
   };
 
   // Handle JWT corruption recovery
@@ -127,7 +134,12 @@ export const UnifiedDashboard: React.FC = () => {
             {(profile as any)?.user_type === 'artisan' && (
               <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
             )}
-            <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
+            <MasterCoordinatorDashboard 
+              language={mapToLegacyLanguage(language)}
+              maturityScores={currentScores || maturityScores}
+              onMasterAgentChat={handleMasterAgentChat}
+              activeTasks={activeTasksCount}
+            />
           </div>
         </DashboardErrorBoundary>
       </DashboardBackground>

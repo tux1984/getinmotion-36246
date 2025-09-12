@@ -33,39 +33,14 @@ export const CreateShopQuickAction: React.FC<CreateShopQuickActionProps> = ({
   const t = translations[language];
 
   return (
-    <div
-      className="p-4 bg-card border border-border rounded-lg cursor-pointer hover:border-emerald-300 transition-colors"
-      onClick={() => navigate('/dashboard/create-shop')}
-    >
-      <div className="flex items-center space-x-3 mb-3">
-        <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center">
-          <Store className="w-4 h-4 text-white" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-foreground">{t.createShop}</h3>
-            <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs rounded">
-              {t.new}
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground">{t.shopDesc}</p>
-          {craftType && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-              🎨 {craftType}
-            </p>
-          )}
-        </div>
+    <div className="p-3 bg-background border border-border rounded-md hover:border-primary/50 transition-colors cursor-pointer"
+         onClick={() => navigate('/dashboard/create-shop')}>
+      <div className="flex items-center gap-2 mb-2">
+        <Store className="w-5 h-5 text-primary" />
+        <h4 className="font-medium text-sm">{t.createShop}</h4>
       </div>
-      
-      <Button 
-        size="sm"
-        className="w-full"
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate('/dashboard/create-shop');
-        }}
-      >
-        <Store className="w-4 h-4 mr-2" />
+      <p className="text-xs text-muted-foreground mb-3">{t.shopDesc}</p>
+      <Button size="sm" variant="default" className="w-full text-xs">
         {t.createMyShop}
       </Button>
     </div>
