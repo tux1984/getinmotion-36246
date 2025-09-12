@@ -124,9 +124,6 @@ export const UnifiedDashboard: React.FC = () => {
           )}
           <MasterCoordinatorDashboard 
             language={mapToLegacyLanguage(language)}
-            maturityScores={currentScores || maturityScores}
-            onMasterAgentChat={handleMasterAgentChat}
-            activeTasks={activeTasksCount}
           />
         </div>
       </DashboardBackground>
