@@ -73,26 +73,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user?.email]);
 
-  // Set up auth state change listener
+  // Set up auth state change listener - SIMPLIFIED FOR RELIABILITY
   useEffect(() => {
     console.log('🚀 Setting up auth listener');
     
+    // First, get initial session synchronously
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('❌ Error getting initial session:', error);
+        } else {
+          console.log('🏁 Initial session loaded:', session?.user?.email);
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('❌ Failed to get initial session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Set up listener for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('🔔 Auth state changed:', event, session?.user?.email);
+        
+        // CRITICAL: Only synchronous operations here
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
+        
+        // If this is after initial load, authorization check can be deferred
+        if (session?.user?.email && !loading) {
+          setTimeout(() => {
+            checkAuthorization(session.user.email);
+          }, 0);
+        }
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('🏁 Initial session:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Load initial session
+    getInitialSession();
 
     return () => {
       console.log('🧹 Cleaning up auth subscription');

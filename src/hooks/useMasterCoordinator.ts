@@ -47,7 +47,7 @@ export interface TaskDeliverable {
 }
 
 export const useMasterCoordinator = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();
@@ -64,8 +64,9 @@ export const useMasterCoordinator = () => {
 
   // FASE 1: Análisis inteligente del perfil para generar tareas personalizadas
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
-    if (!user || loading) {
-      console.warn('🚫 Master Coordinator: No user available or already generating tasks');
+    // CRITICAL: Verify session before coordinator operations
+    if (!user?.id || !session?.access_token || loading) {
+      console.warn('🚫 Master Coordinator: No valid session available or already generating tasks');
       return;
     }
 
@@ -137,7 +138,7 @@ export const useMasterCoordinator = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, profileData, currentScores, businessProfile, toast, isAtLimit, getLimitMessage]);
+  }, [user?.id, session?.access_token, profileData, currentScores, businessProfile, toast, isAtLimit, getLimitMessage]);
 
   // FASE 2: Generar preguntas inteligentes contextuales
   const generateIntelligentQuestions = useCallback(async () => {
@@ -276,7 +277,11 @@ export const useMasterCoordinator = () => {
   }, [user]);
 
   const loadDeliverables = async () => {
-    if (!user) return;
+    // CRITICAL: Verify session before database operations
+    if (!user?.id || !session?.access_token) {
+      console.log('🚫 Master Coordinator: No valid session for loading deliverables');
+      return;
+    }
     
     try {
       const { data, error } = await supabase
