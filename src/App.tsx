@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { NotificationContainer } from '@/components/EnhancedNotifications';
 import { useSecurityHeaders } from '@/hooks/useSecurityHeaders';
 
 
@@ -161,6 +162,7 @@ function App() {
                 </Routes>
               </div>
               <Toaster />
+              <NotificationContainer />
           </LanguageProvider>
       </BrowserRouter>
       </HelmetProvider>
