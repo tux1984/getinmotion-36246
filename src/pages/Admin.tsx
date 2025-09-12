@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { UserManagement } from '@/components/admin/UserManagement';
+import { EmergencySessionReset } from '@/components/admin/EmergencySessionReset';
 import { ImageManager } from '@/components/admin/ImageManager';
 import { CompanyDocuments } from '@/components/admin/CompanyDocuments';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -173,7 +174,10 @@ const Admin = () => {
             </TabsContent>
             
             <TabsContent value="users" className="mt-6">
-              <UserManagement />
+              <div className="space-y-4">
+                <EmergencySessionReset />
+                <UserManagement />
+              </div>
             </TabsContent>
 
             <TabsContent value="images" className="mt-6">
