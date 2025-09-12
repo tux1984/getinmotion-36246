@@ -1151,6 +1151,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      audit_data_inconsistencies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          affected_count: number
+          issue_description: string
+          issue_type: string
+          severity: string
+          table_name: string
+        }[]
+      }
       cleanup_obsolete_tasks: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1180,6 +1190,10 @@ export type Database = {
           user_experience: number
         }[]
       }
+      get_validation_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1188,6 +1202,18 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
+      repair_data_inconsistencies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action_taken: string
+          details: string
+          records_affected: number
+        }[]
+      }
+      sanitize_text_input: {
+        Args: { max_length?: number; text_input: string }
+        Returns: string
+      }
       sync_active_task_limits: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1195,6 +1221,18 @@ export type Database = {
           active_count: number
           user_id: string
         }[]
+      }
+      validate_date_range: {
+        Args: { end_date: string; start_date: string }
+        Returns: boolean
+      }
+      validate_email_format: {
+        Args: { email_input: string }
+        Returns: boolean
+      }
+      validate_json_structure: {
+        Args: { json_input: Json; required_keys: string[] }
+        Returns: boolean
       }
     }
     Enums: {
