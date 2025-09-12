@@ -25,16 +25,20 @@ const MaturityCalculator = () => {
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData?: any) => {
-    console.log('MaturityCalculator: Assessment completed with full integration', { scores, recommendedAgents, profileData });
+    console.log('✅ MaturityCalculator: Assessment completed with full integration', { scores, recommendedAgents, profileData });
     
-    // Store completion flag for dashboard integration
+    // CRITICAL: Set all required flags for task generation
     localStorage.setItem('maturity_assessment_completed', 'true');
+    localStorage.setItem('onboardingCompleted', 'true');
+    localStorage.setItem('allowTaskAutoGeneration', 'true');
     localStorage.setItem('assessment_completion_time', new Date().toISOString());
+    
+    console.log('🎯 Task generation flags activated - tasks will now generate automatically');
     
     // Navigate to dashboard after coordinator activation
     setTimeout(() => {
       navigate('/dashboard/home');
-    }, 3000); // Slightly longer to allow coordinator to fully activate
+    }, 2000);
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator?.en || {

@@ -2,8 +2,8 @@
 import React from 'react';
 import { Agent, CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { AgentMiniDashboard } from './AgentMiniDashboard';
-import { AgentQuickActions } from './AgentQuickActions';
 import { CollapsibleMoreTools } from './CollapsibleMoreTools';
+import QuickActionsPanel from './QuickActionsPanel';
 import { TaskManagementInterface } from './TaskManagementInterface';
 import { ModernAgentsGrid } from './ModernAgentsGrid';
 import { PremiumDashboardHero } from './premium/PremiumDashboardHero';
@@ -43,57 +43,50 @@ export const PremiumDashboardMain: React.FC<PremiumDashboardMainProps> = ({
           onMaturityCalculatorClick={onMaturityCalculatorClick}
         />
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-12 gap-6 mt-8">
+        {/* Main Dashboard Grid - Redesigned Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
           {/* Left Column - Primary Content */}
-          <div className="col-span-12 lg:col-span-8 space-y-6">
-            {/* Task Management - Now properly positioned */}
-            <div className="relative z-10">
-              <TaskManagementInterface 
-                language="es"
-                onTaskCreate={() => {}}
-                onTaskUpdate={() => {}}
-              />
-            </div>
+          <div className="lg:col-span-8 space-y-6">
+            {/* Task Management Interface - Priority Section */}
+            <TaskManagementInterface 
+              language="es"
+              maturityScores={maturityScores}
+              profileData={profileData}
+              onTaskCreate={() => {}}
+              onTaskUpdate={() => {}}
+            />
             
-            {/* Agents Grid */}
-            <div className="relative z-0">
-              <ModernAgentsGrid 
-                agents={agents}
-                recommendedAgents={recommendedAgents}
-                maturityScores={maturityScores}
-                onSelectAgent={onSelectAgent}
-                onAgentManagerClick={onAgentManagerClick}
-                language="es"
-              />
-            </div>
+            {/* Agents Grid - Secondary Section */}
+            <ModernAgentsGrid 
+              agents={agents}
+              recommendedAgents={recommendedAgents}
+              maturityScores={maturityScores}
+              onSelectAgent={onSelectAgent}
+              onAgentManagerClick={onAgentManagerClick}
+              language="es"
+            />
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            {/* Mini Dashboard */}
-            <div className="h-[300px]">
-              <AgentMiniDashboard 
-                agentId="general" 
-                language="es" 
-              />
-            </div>
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Actions Panel - Most Important */}
+            <QuickActionsPanel 
+              language="es"
+              onMasterAgentChat={() => {}}
+              activeTasks={0}
+            />
             
-            {/* Quick Actions */}
-            <div className="h-[250px]">
-              <AgentQuickActions 
-                agentId="general" 
-                language="es" 
-              />
-            </div>
+            {/* Mini Dashboard - Compact Stats */}
+            <AgentMiniDashboard 
+              agentId="general" 
+              language="es" 
+            />
             
-            {/* More Tools */}
-            <div className="h-[200px]">
-              <CollapsibleMoreTools 
-                language="es" 
-                agentId="general" 
-              />
-            </div>
+            {/* More Tools - Collapsed by Default */}
+            <CollapsibleMoreTools 
+              language="es" 
+              agentId="general" 
+            />
           </div>
         </div>
       </div>
