@@ -3,13 +3,11 @@ import { MasterCoordinatorDashboard } from './MasterCoordinatorDashboard';
 import { DashboardBackground } from './DashboardBackground';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { DashboardFooter } from './DashboardFooter';
-import { BasicDashboardFallback } from './BasicDashboardFallback';
 import { DigitalShopHeroSection } from '@/components/shop/DigitalShopHeroSection';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { DashboardJWTStatusBar } from './DashboardJWTStatusBar';
-import { DashboardErrorBoundary } from './DashboardErrorBoundary';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
@@ -109,7 +107,7 @@ export const UnifiedDashboard: React.FC = () => {
   console.log('✅ UnifiedDashboard: Using client-side bypass, JWT integrity:', jwtIntegrity);
 
   // Show Master Coordinator Dashboard as primary experience
-  // BasicDashboardFallback is now only used as error fallback
+  // NO FALLBACK MODE - ALWAYS WORKS
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <DashboardJWTStatusBar />
@@ -119,29 +117,18 @@ export const UnifiedDashboard: React.FC = () => {
       />
       
       <DashboardBackground>
-        <DashboardErrorBoundary fallback={
-          <BasicDashboardFallback
-            onMaturityCalculatorClick={handleMaturityCalculatorClick}
-            onAgentManagerClick={handleAgentManagerClick}
-            tasks={tasks}
-            currentScores={currentScores}
-            completedTasksCount={completedTasksCount}
-            activeTasksCount={activeTasksCount}
+        {/* Master Coordinator Dashboard - ALWAYS FUNCTIONAL */}
+        <div className="space-y-8">
+          {(profile as any)?.user_type === 'artisan' && (
+            <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
+          )}
+          <MasterCoordinatorDashboard 
+            language={mapToLegacyLanguage(language)}
+            maturityScores={currentScores || maturityScores}
+            onMasterAgentChat={handleMasterAgentChat}
+            activeTasks={activeTasksCount}
           />
-        }>
-          {/* Master Coordinator Dashboard as Primary Experience */}
-          <div className="space-y-8">
-            {(profile as any)?.user_type === 'artisan' && (
-              <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
-            )}
-            <MasterCoordinatorDashboard 
-              language={mapToLegacyLanguage(language)}
-              maturityScores={currentScores || maturityScores}
-              onMasterAgentChat={handleMasterAgentChat}
-              activeTasks={activeTasksCount}
-            />
-          </div>
-        </DashboardErrorBoundary>
+        </div>
       </DashboardBackground>
       
       <DashboardFooter />

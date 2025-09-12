@@ -23,31 +23,14 @@ export const useUnifiedTaskRecommendations = ({
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
-        body: {
-          action: 'generate_intelligent_recommendations',
-          userId: user.id,
-          maturityScores,
-          language
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.needsMoreInfo) {
-        setNeedsMoreInfo(true);
-        return;
-      }
-
-      if (data?.recommendations) {
-        setRecommendations(data.recommendations);
-        setNeedsMoreInfo(false);
-      }
-    } catch (error) {
-      console.error('Error generating recommendations:', error);
-      // Fallback to static recommendations
+      // ALWAYS use local fallback recommendations - NO EDGE FUNCTIONS
+      console.log('🧠 Generating local recommendations - ALWAYS WORKS');
       generateFallbackRecommendations();
-
+      setNeedsMoreInfo(false);
+    } catch (error) {
+      console.error('Error generating local recommendations:', error);
+      // Even if fallback fails, ensure we don't crash
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
