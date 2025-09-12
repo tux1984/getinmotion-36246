@@ -64,7 +64,7 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   // Allow dashboard access with valid user/session (remove restrictive auth check)
   console.log('✅ MasterCoordinatorDashboard: User and session valid, proceeding with dashboard');
   
-  const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
+  const { currentScores, loading: scoresLoading, refresh: refreshScores } = useOptimizedMaturityScores();
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
   
   // Task management

@@ -13,7 +13,20 @@ interface OptimizedMaturityData {
 
 const FETCH_TIMEOUT = 4000;
 
-export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
+// Global refresh trigger for forcing updates after maturity test completion
+let refreshTrigger = 0;
+const triggerRefresh = () => {
+  refreshTrigger += 1;
+  // Clear localStorage to force fresh fetch
+  localStorage.removeItem('maturityScores');
+  localStorage.removeItem('profileData');
+  console.log('🔄 Forced refresh triggered for maturity scores');
+};
+
+// Export for external use
+export const refreshMaturityScores = triggerRefresh;
+
+export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh: () => void } => {
   const { user, session } = useRobustAuth();
   const [data, setData] = useState<OptimizedMaturityData>({
     currentScores: null,
@@ -21,6 +34,12 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
     loading: false,
     error: null,
   });
+  const [forceRefresh, setForceRefresh] = useState(0);
+
+  const manualRefresh = () => {
+    setForceRefresh(prev => prev + 1);
+    triggerRefresh();
+  };
 
   useEffect(() => {
     if (!user || !session) {
@@ -127,7 +146,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
     };
 
     fetchMaturityScores();
-  }, [user, session]);
+  }, [user, session, forceRefresh, refreshTrigger]);
 
-  return data;
+  return { ...data, refresh: manualRefresh };
 };

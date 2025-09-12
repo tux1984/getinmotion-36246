@@ -225,6 +225,16 @@ export const useFusedMaturityAgent = (
         // Save maturity scores
         await saveMaturityScores(scores, profileData);
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
+        
+        // CRITICAL: Force refresh of maturity scores in dashboard
+        try {
+          const { refreshMaturityScores } = await import('@/hooks/useOptimizedMaturityScores');
+          refreshMaturityScores();
+          console.log('🔄 Triggered maturity scores refresh after test completion');
+        } catch (err) {
+          console.warn('Could not trigger refresh:', err);
+        }
+        
         markOnboardingComplete(scores, recommendedAgents);
 
         // ACTIVATE MASTER COORDINATOR with complete profile data
