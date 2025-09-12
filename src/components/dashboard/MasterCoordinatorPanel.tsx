@@ -7,7 +7,6 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BusinessProfileCapture } from '@/components/business-profile/BusinessProfileCapture';
 import { BusinessProfileDialog } from '@/components/master-coordinator/BusinessProfileDialog';
-import { LoadingIndicator } from './LoadingIndicator';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
@@ -25,17 +24,13 @@ import {
   Target,
   PlayCircle,
   CheckCircle2,
-  Clock,
   ArrowRight,
   User,
-  Zap,
   Brain,
   TrendingUp,
   Calculator,
   BarChart3,
-  Star,
-  Play,
-  Lightbulb
+  Star
 } from 'lucide-react';
 
 interface MasterCoordinatorPanelProps {
@@ -51,7 +46,6 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   const [showProfileCapture, setShowProfileCapture] = useState(false);
   const [showBusinessDialog, setShowBusinessDialog] = useState(false);
   const [conversationData, setConversationData] = useState<any>(null);
-  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   
   const { businessProfile, loading: profileLoading } = useUserBusinessProfile();
   const { currentScores, loading: scoresLoading } = useOptimizedMaturityScores();
@@ -169,44 +163,6 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     }
   };
 
-  const handleStartNow = async () => {
-    if (isGeneratingTasks) return; // Prevenir múltiples llamadas
-    
-    // Verificar si ya hay tareas activas
-    if (activeTasks.length > 0) {
-      toast({
-        title: language === 'es' ? "Ya tienes tareas activas" : "You already have active tasks",
-        description: language === 'es' 
-          ? "El coordinador ya está activo. Ve a tus tareas para continuar."
-          : "The coordinator is already active. Go to your tasks to continue.",
-      });
-      return;
-    }
-    
-    console.log('🚀 Starting Master Coordinator flow');
-    setIsGeneratingTasks(true);
-    try {
-      await analyzeProfileAndGenerateTasks();
-      toast({
-        title: language === 'es' ? "¡Coordinador Activado!" : "Coordinator Activated!",
-        description: language === 'es' 
-          ? "He analizado tu perfil y generado tareas específicas para tu negocio."
-          : "I've analyzed your profile and generated specific tasks for your business.",
-      });
-    } catch (error) {
-      console.error('❌ Error starting coordinator:', error);
-      toast({
-        title: language === 'es' ? "Error" : "Error",
-        description: language === 'es' 
-          ? "Hubo un problema generando las tareas. Por favor, inténtalo de nuevo."
-          : "There was a problem generating tasks. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGeneratingTasks(false);
-    }
-  };
-
   const handleViewActiveTasks = () => {
     navigate('/dashboard/tasks');
   };
@@ -220,83 +176,33 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     setShowBusinessDialog(true);
   };
 
-  const handleActionButton = async (action: string) => {
-    switch (action) {
-      case 'start_tasks':
-        await handleStartNow();
-        break;
-      case 'business_details':
-        setShowProfileCapture(true);
-        break;
-      case 'explain_more':
-        await startIntelligentConversation();
-        break;
-      default:
-        break;
-    }
-  };
-
   const handleUnifiedCoordinatorAction = async () => {
-    if (isGeneratingTasks) return; // Prevenir múltiples llamadas
-    
     // Si no hay perfil de negocio completo, capturar primero
     if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
-      setShowProfileCapture(true);
+      setShowBusinessDialog(true);
       return;
     }
     
-    // Si hay perfil pero no hay tareas activas, generar tareas
-    if (activeTasks.length === 0) {
-      console.log('🚀 Starting Master Coordinator flow');
-      setIsGeneratingTasks(true);
-      try {
-        await analyzeProfileAndGenerateTasks();
-        toast({
-          title: language === 'es' ? "¡Coordinador Activado!" : "Coordinator Activated!",
-          description: language === 'es' 
-            ? "He analizado tu perfil y generado tareas específicas para tu negocio."
-            : "I've analyzed your profile and generated specific tasks for your business.",
-        });
-      } catch (error) {
-        console.error('❌ Error starting coordinator:', error);
-        toast({
-          title: language === 'es' ? "Error" : "Error",
-          description: language === 'es' 
-            ? "Hubo un problema generando las tareas. Por favor, inténtalo de nuevo."
-            : "There was a problem generating tasks. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsGeneratingTasks(false);
-      }
-    } else {
-      // Si ya hay tareas activas, ir al chat del coordinador
-      navigate('/dashboard/agent/master-coordinator');
-    }
+    // Si hay perfil, ir directamente al chat del coordinador
+    // Las tareas se generan automáticamente en background
+    navigate('/dashboard/agent/master-coordinator');
   };
 
   const getUnifiedButtonState = () => {
     if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
       return {
         text: language === 'es' ? 'Configurar Coordinador' : 'Configure Coordinator',
-        description: language === 'es' ? 'Configurar perfil y activar coordinador' : 'Set up profile and activate coordinator',
+        description: language === 'es' ? 'Configurar perfil para comenzar' : 'Set up profile to get started',
         icon: User,
         color: 'bg-blue-600 hover:bg-blue-500'
       };
     }
     
-    if (activeTasks.length === 0) {
-      return {
-        text: language === 'es' ? 'Activar Coordinador' : 'Activate Coordinator',
-        description: language === 'es' ? 'Generar tareas personalizadas' : 'Generate personalized tasks',
-        icon: isGeneratingTasks ? Zap : Lightbulb,
-        color: 'bg-yellow-600 hover:bg-yellow-500'
-      };
-    }
-    
     return {
       text: language === 'es' ? 'Hablar con Coordinador' : 'Talk to Coordinator',
-      description: language === 'es' ? `${activeTasks.length} tareas activas` : `${activeTasks.length} active tasks`,
+      description: language === 'es' ? 
+        (activeTasks.length > 0 ? `${activeTasks.length} tareas activas` : 'Tu asistente está listo') :
+        (activeTasks.length > 0 ? `${activeTasks.length} active tasks` : 'Your assistant is ready'),
       icon: MessageCircle,
       color: 'bg-green-600 hover:bg-green-500'
     };
@@ -356,14 +262,6 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
 
   return (
     <>
-      {/* Loading Indicator */}
-      <LoadingIndicator 
-        isVisible={isGeneratingTasks} 
-        message={language === 'es' 
-          ? "Analizando tu perfil y generando tareas inteligentes..."
-          : "Analyzing your profile and generating intelligent tasks..."}
-      />
-
       {/* Master Coordinator Panel - Floating Card */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <motion.div
@@ -512,31 +410,29 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                             const buttonState = getUnifiedButtonState();
                             const IconComponent = buttonState.icon;
                             
-                            return (
-                              <Button
-                                variant="default"
-                                className={`h-auto p-6 w-full ${buttonState.color} text-white font-bold text-lg`}
-                                onClick={handleUnifiedCoordinatorAction}
-                                disabled={isGeneratingTasks || coordinatorLoading}
-                              >
-                                <div className="flex items-center space-x-4 w-full">
-                                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                    <IconComponent className={`w-6 h-6 text-white ${isGeneratingTasks ? 'animate-pulse' : ''}`} />
-                                  </div>
-                                  <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                     <div className="font-bold truncate text-lg">
-                                       {isGeneratingTasks 
-                                         ? (language === 'es' ? 'Generando...' : 'Generating...')
-                                         : buttonState.text}
-                                     </div>
-                                     <div className="text-sm text-white/80 truncate">
-                                       {buttonState.description}
-                                     </div>
-                                  </div>
-                                  <ArrowRight className="w-5 h-5 text-white/80" />
-                                </div>
-                              </Button>
-                            );
+                             return (
+                               <Button
+                                 variant="default"
+                                 className={`h-auto p-6 w-full ${buttonState.color} text-white font-bold text-lg`}
+                                 onClick={handleUnifiedCoordinatorAction}
+                                 disabled={coordinatorLoading}
+                               >
+                                 <div className="flex items-center space-x-4 w-full">
+                                   <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                     <IconComponent className="w-6 h-6 text-white" />
+                                   </div>
+                                   <div className="flex-1 text-left min-w-0 overflow-hidden">
+                                      <div className="font-bold truncate text-lg">
+                                        {buttonState.text}
+                                      </div>
+                                      <div className="text-sm text-white/80 truncate">
+                                        {buttonState.description}
+                                      </div>
+                                   </div>
+                                   <ArrowRight className="w-5 h-5 text-white/80" />
+                                 </div>
+                               </Button>
+                             );
                           })()}
                         </div>
 
