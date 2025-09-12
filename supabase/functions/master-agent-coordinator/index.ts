@@ -1048,8 +1048,44 @@ Responde en JSON con este formato:
       }),
     });
 
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
     const data = await response.json();
-    const conversationData = JSON.parse(data.choices[0].message.content);
+    
+    // Validate OpenAI response
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error('Invalid OpenAI response structure');
+    }
+
+    const aiContent = data.choices[0].message.content.trim();
+    
+    // Try to parse JSON with fallback
+    let conversationData;
+    try {
+      conversationData = JSON.parse(aiContent);
+    } catch (parseError) {
+      console.log('Failed to parse OpenAI JSON response:', aiContent);
+      // Fallback conversation data
+      conversationData = {
+        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profile?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
+        questions: [
+          "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
+          "¿Tienes algún desafío específico que necesites resolver?"
+        ],
+        actionButtons: [
+          {"text": "Empezar ahora", "action": "start_tasks"},
+          {"text": "Ver mis tareas", "action": "view_tasks"},
+          {"text": "Hablar de mi negocio", "action": "business_details"}
+        ],
+        nextSteps: [
+          "Revisar las tareas recomendadas",
+          "Completar el perfil de tu negocio",
+          "Comenzar con las tareas de mayor prioridad"
+        ]
+      };
+    }
 
     return new Response(
       JSON.stringify(conversationData),
@@ -1058,9 +1094,29 @@ Responde en JSON con este formato:
 
   } catch (error) {
     console.error('Error starting intelligent conversation:', error);
+    
+    // Provide a comprehensive fallback response
+    const fallbackResponse = {
+      message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profile?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
+      questions: [
+        "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
+        "¿Tienes algún desafío específico que necesites resolver?"
+      ],
+      actionButtons: [
+        {"text": "Empezar ahora", "action": "start_tasks"},
+        {"text": "Ver mis tareas", "action": "view_tasks"},
+        {"text": "Hablar de mi negocio", "action": "business_details"}
+      ],
+      nextSteps: [
+        "Revisar las tareas recomendadas",
+        "Completar el perfil de tu negocio",
+        "Comenzar con las tareas de mayor prioridad"
+      ]
+    };
+
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify(fallbackResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 }

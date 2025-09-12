@@ -49,7 +49,7 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4">
-        <div className={`grid grid-cols-1 ${isArtisan || detectionLoading ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
           
           {/* AI Expert Chat Action */}
           <motion.div
