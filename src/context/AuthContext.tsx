@@ -7,10 +7,14 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAuthorized: boolean;
+  syncStatus: 'healthy' | 'desynced' | 'checking' | 'error';
+  lastSyncCheck: Date | null;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   checkAuthorization: (userEmail?: string) => Promise<boolean>;
   refreshAuth: () => Promise<void>;
+  forceAuthRefresh: () => Promise<boolean>;
+  validateAuthState: (session: Session | null) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +24,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'healthy' | 'desynced' | 'checking' | 'error'>('checking');
+  const [lastSyncCheck, setLastSyncCheck] = useState<Date | null>(null);
 
   console.log('🔄 AuthProvider: Current state', { 
     hasUser: !!user, 
@@ -58,38 +64,64 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const refreshAuth = async () => {
+  const forceAuthRefresh = async (): Promise<boolean> => {
     try {
-      console.log('🔄 AuthProvider: Starting complete auth refresh...');
+      console.log('🔄 AuthProvider: Force auth refresh...');
+      setSyncStatus('checking');
       
-      // Force session refresh first
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       
       if (refreshError) {
         console.error('❌ AuthProvider: Refresh session failed:', refreshError);
-        // Fall back to getting current session
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
-      } else {
-        console.log('✅ AuthProvider: Session refreshed successfully');
-        setSession(refreshData.session);
-        setUser(refreshData.session?.user ?? null);
+        setSyncStatus('error');
+        return false;
       }
       
-      const currentSession = refreshData?.session || (await supabase.auth.getSession()).data.session;
-      
-      if (currentSession?.user?.email) {
-        console.log('🔍 AuthProvider: Checking authorization after refresh...');
-        await checkAuthorization(currentSession.user.email);
-      } else {
-        console.log('🚫 AuthProvider: No valid session after refresh');
-        setIsAuthorized(false);
+      if (refreshData.session?.user?.email) {
+        const authorized = await checkAuthorization(refreshData.session.user.email);
+        setSyncStatus(authorized ? 'healthy' : 'desynced');
+        setLastSyncCheck(new Date());
+        return authorized;
       }
+      
+      setSyncStatus('error');
+      return false;
     } catch (error) {
-      console.error('❌ AuthProvider: Complete auth refresh failed:', error);
-      setIsAuthorized(false);
+      console.error('❌ AuthProvider: Force refresh failed:', error);
+      setSyncStatus('error');
+      return false;
     }
+  };
+
+  const validateAuthState = async (session: Session | null): Promise<any> => {
+    try {
+      if (!session?.access_token) {
+        return { clientValid: false, serverValid: false, isAdmin: false };
+      }
+
+      // Test server-side validation
+      const { data: adminCheck, error: adminError } = await supabase.rpc('is_admin');
+      
+      const result = {
+        clientValid: !!session.access_token,
+        serverValid: !adminError,
+        isAdmin: !!adminCheck,
+        tokenExpired: session.expires_at ? session.expires_at < Date.now() / 1000 : false
+      };
+
+      setSyncStatus(result.clientValid && result.serverValid ? 'healthy' : 'desynced');
+      setLastSyncCheck(new Date());
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Auth validation error:', error);
+      setSyncStatus('error');
+      return { clientValid: false, serverValid: false, isAdmin: false };
+    }
+  };
+
+  const refreshAuth = async () => {
+    await forceAuthRefresh();
   };
 
   // SIMPLIFIED AUTH STATE MANAGEMENT
@@ -192,10 +224,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       session,
       loading,
       isAuthorized,
+      syncStatus,
+      lastSyncCheck,
       signIn,
       signOut,
       checkAuthorization,
-      refreshAuth
+      refreshAuth,
+      forceAuthRefresh,
+      validateAuthState
     }}>
       {children}
     </AuthContext.Provider>
