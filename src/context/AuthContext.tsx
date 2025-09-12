@@ -9,7 +9,7 @@ interface AuthContextType {
   isAuthorized: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
-  checkAuthorization: () => Promise<boolean>;
+  checkAuthorization: (userEmail?: string) => Promise<boolean>;
   refreshAuth: () => Promise<void>;
 }
 
@@ -21,25 +21,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const checkAuthorization = async (): Promise<boolean> => {
-    if (!user?.email) {
+  const checkAuthorization = async (userEmail?: string): Promise<boolean> => {
+    const emailToCheck = userEmail || user?.email;
+    if (!emailToCheck) {
+      setIsAuthorized(false);
       return false;
     }
 
     try {
+      console.log('🔍 Checking authorization for:', emailToCheck);
       const { data, error } = await supabase
-        .rpc('is_authorized_user', { user_email: user.email });
+        .rpc('is_authorized_user', { user_email: emailToCheck });
 
       if (error) {
-        console.error('Authorization check error:', error);
+        console.error('❌ Authorization check error:', error);
         return false;
       }
 
       const authorized = Boolean(data);
+      console.log('✅ Authorization result:', authorized);
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      console.error('Authorization check failed:', error);
+      console.error('❌ Authorization check failed:', error);
       return false;
     }
   };
@@ -47,47 +51,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshAuth = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔄 Refreshing auth, session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        await checkAuthorization();
+      if (session?.user?.email) {
+        await checkAuthorization(session.user.email);
       }
     } catch (error) {
-      console.error('Auth refresh failed:', error);
+      console.error('❌ Auth refresh failed:', error);
     }
   };
 
+  // Check authorization when user changes
+  useEffect(() => {
+    if (user?.email) {
+      console.log('👤 User changed, checking authorization for:', user.email);
+      checkAuthorization(user.email);
+    } else {
+      setIsAuthorized(false);
+    }
+  }, [user?.email]);
+
   // Set up auth state change listener
   useEffect(() => {
+    console.log('🚀 Setting up auth listener');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('🔔 Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await checkAuthorization();
-        } else {
-          setIsAuthorized(false);
-        }
-        
         setLoading(false);
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('🏁 Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        checkAuthorization().finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
