@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { DEFAULT_LANGUAGE, type Language } from '@/types/language';
+import { safeSupabase } from '@/utils/supabase-safe';
 
 interface LanguageSystemHook {
   language: Language;
@@ -25,24 +25,24 @@ export const useLanguageSystem = (): LanguageSystemHook => {
 
       try {
         // Check user profile first
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await safeSupabase
           .from('user_profiles')
           .select('language_preference')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (profile?.language_preference) {
+        if (!profileError && profile?.language_preference) {
           setLanguageState(profile.language_preference as Language);
           setNeedsLanguageSelection(false);
         } else {
           // Check master context as fallback
-          const { data: context } = await supabase
+          const { data: context, error: contextError } = await safeSupabase
             .from('user_master_context')
             .select('language_preference')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-          if (context?.language_preference) {
+          if (!contextError && context?.language_preference) {
             setLanguageState(context.language_preference as Language);
             setNeedsLanguageSelection(false);
           } else {
@@ -65,7 +65,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
 
     try {
       // Update or create master context
-      const { error } = await supabase
+      const { error } = await safeSupabase
         .from('user_master_context')
         .upsert({
           user_id: user.id,
@@ -78,7 +78,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
       if (error) throw error;
 
       // Notify Master Coordinator about language change
-      await supabase.functions.invoke('contexto-maestro', {
+      await safeSupabase.functions.invoke('contexto-maestro', {
         body: {
           action: 'update',
           userId: user.id,
@@ -100,7 +100,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
     setIsLoading(true);
     try {
       // Update user profile
-      const { error: profileError } = await supabase
+      const { error: profileError } = await safeSupabase
         .from('user_profiles')
         .upsert({
           user_id: user.id,

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { ArtisanShop } from '@/types/artisan';
 import { useToast } from '@/components/ui/use-toast';
+import { db } from '@/types/supabase-overrides';
 
 export const useArtisanShop = () => {
   const [shop, setShop] = useState<ArtisanShop | null>(null);
@@ -18,17 +18,13 @@ export const useArtisanShop = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('artisan_shops')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await db.selectSingle('artisan_shops', '*', { user_id: user.id });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error;
       }
 
-      setShop(data);
+      setShop(data || null);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching artisan shop:', err);
@@ -54,26 +50,17 @@ export const useArtisanShop = () => {
       
       // Check if slug exists
       while (true) {
-        const { data } = await supabase
-          .from('artisan_shops')
-          .select('id')
-          .eq('shop_slug', slug)
-          .single();
-        
+        const { data } = await db.selectSingle('artisan_shops', 'id', { shop_slug: slug });
         if (!data) break;
         slug = `${baseSlug}-${counter}`;
         counter++;
       }
 
-      const { data, error } = await supabase
-        .from('artisan_shops')
-        .insert({
-          ...shopData,
-          user_id: user.id,
-          shop_slug: slug,
-        })
-        .select()
-        .single();
+      const { data, error } = await db.insert('artisan_shops', {
+        ...shopData,
+        user_id: user.id,
+        shop_slug: slug,
+      });
 
       if (error) throw error;
 
@@ -103,13 +90,10 @@ export const useArtisanShop = () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('artisan_shops')
-        .update(updates)
-        .eq('id', shop.id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+      const { data, error } = await db.update('artisan_shops', updates, {
+        id: shop.id,
+        user_id: user.id
+      });
 
       if (error) throw error;
 

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { useAuth } from '@/context/AuthContext';
+import { safeSupabase } from '@/utils/supabase-safe';
 
 interface AuditLogEntry {
   resource_type: string;
@@ -25,15 +25,15 @@ export const useDataAudit = () => {
       };
 
       // Log to audit table
-      const { error } = await supabase
+      const { error } = await safeSupabase
         .from('data_access_audit')
         .insert({
           user_id: user?.id || null,
           resource_type: entry.resource_type,
-          resource_id: entry.resource_id,
+          resource_id: entry.resource_id || null,
           action: entry.action,
-          ip_address: clientInfo.ip_address,
-          user_agent: clientInfo.user_agent,
+          ip_address: clientInfo.ip_address || null,
+          user_agent: clientInfo.user_agent || null,
           success: entry.success ?? true,
           metadata: entry.metadata || {}
         });
