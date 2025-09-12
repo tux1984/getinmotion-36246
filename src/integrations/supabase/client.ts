@@ -9,28 +9,4 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    storageKey: 'supabase-auth-token',
-    debug: process.env.NODE_ENV === 'development',
-    // Enhanced session persistence settings
-    refreshAheadTime: 300, // Refresh 5 minutes before expiry
-    refreshOnFocus: true,
-    refreshOnVisibilityChange: true
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 2
-    }
-  }
-});
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

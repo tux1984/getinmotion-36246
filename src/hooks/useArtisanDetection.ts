@@ -22,12 +22,12 @@ export const useArtisanDetection = () => {
         const { data: shopData } = await supabase
           .from('artisan_shops')
           .select('craft_type')
-          .eq('user_id', user.id)
+          .eq('user_id', user.id as any)
           .single();
 
         if (shopData) {
           setIsArtisan(true);
-          setCraftType(shopData.craft_type as CraftType);
+          setCraftType((shopData as any).craft_type as CraftType);
           setLoading(false);
           return;
         }
@@ -37,17 +37,17 @@ export const useArtisanDetection = () => {
           supabase
             .from('user_profiles')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', user.id as any)
             .single(),
           supabase
             .from('user_master_context')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', user.id as any)
             .single()
         ]);
 
-        const profileData = profileResult.data;
-        const contextData = contextResult.data;
+        const profileData = profileResult.data as any;
+        const contextData = contextResult.data as any;
 
         // Combine all user data for detection
         const combinedData = {

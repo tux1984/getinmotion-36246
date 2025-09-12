@@ -28,11 +28,11 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
         .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId);
+        query = query.eq('agent_id', agentId as any);
       }
 
       if (!includeArchived) {
-        query = query.eq('is_archived', false);
+        query = query.eq('is_archived', false as any);
       }
 
       const { data, error, count } = await query.order('created_at', { ascending: false });
@@ -71,15 +71,15 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
         .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId);
+        query = query.eq('agent_id', agentId as any);
       }
 
       if (filter === 'archived') {
-        query = query.eq('is_archived', true);
+        query = query.eq('is_archived', true as any);
       } else if (filter !== 'all') {
-        query = query.eq('status', filter).eq('is_archived', false);
+        query = query.eq('status', filter as any).eq('is_archived', false as any);
       } else {
-        query = query.eq('is_archived', false);
+        query = query.eq('is_archived', false as any);
       }
 
       const from = (page - 1) * pageSize;

@@ -16,10 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <div className="space-y-2">
-            <p className="text-foreground font-medium">Verificando autenticación...</p>
-            <p className="text-muted-foreground text-sm">Comprobando permisos de administrador</p>
-          </div>
+          <p className="text-foreground font-medium">Verificando autenticación...</p>
         </div>
       </div>
     );
