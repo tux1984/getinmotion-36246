@@ -66,15 +66,12 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
     loading: coordinatorLoading
   } = useMasterCoordinator();
 
-  // Verificar si necesita capturar perfil de negocio
+  // Solo iniciar conversación inteligente si hay perfil (sin modal automático)
   useEffect(() => {
     if (!user || profileLoading) return;
     
-    // Si no tiene información del negocio, mostrar captura
-    if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
-      setShowProfileCapture(true);
-    } else {
-      // Si tiene perfil, iniciar conversación inteligente
+    // Solo iniciar conversación si tiene perfil, pero NO abrir modals automáticamente
+    if (businessProfile?.businessDescription || businessProfile?.brandName) {
       startIntelligentConversation();
     }
   }, [user, businessProfile, profileLoading]);

@@ -23,7 +23,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { useUserBusinessContext } from '@/hooks/useUserBusinessContext';
 
 interface BusinessProfileDialogProps {
   open: boolean;
@@ -44,7 +44,8 @@ export const BusinessProfileDialog: React.FC<BusinessProfileDialogProps> = ({
   language
 }) => {
   const { user } = useRobustAuth();
-  const { businessProfile } = useUserBusinessProfile();
+  const { context, updateFromMaturityCalculator } = useUserBusinessContext();
+  const businessProfile = context?.business_profile;
   const [currentStep, setCurrentStep] = useState<'intro' | 'questions' | 'completion'>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -239,19 +240,17 @@ export const BusinessProfileDialog: React.FC<BusinessProfileDialogProps> = ({
   };
 
   const handleCompletion = async () => {
-    // Save answers to user profile
+    // Save answers to user profile using useUserBusinessContext
     try {
-      const updatedProfile = {
-        ...businessProfile,
-        specificAnswers: {
-          ...businessProfile?.specificAnswers,
-          businessDeepDive: answers,
-          lastDeepDiveDate: new Date().toISOString()
-        }
+      const profileData = {
+        businessDeepDive: answers,
+        lastDeepDiveDate: new Date().toISOString(),
+        // Merge additional profile data from answers
+        specificAnswers: answers
       };
 
-      // Save to localStorage for immediate use
-      localStorage.setItem('businessDeepDiveAnswers', JSON.stringify(answers));
+      // Update the business profile using the proper hook
+      await updateFromMaturityCalculator(profileData, [], language);
       
       setCurrentStep('completion');
     } catch (error) {
