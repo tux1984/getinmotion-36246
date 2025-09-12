@@ -1,10 +1,11 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Target, MessageCircle, ArrowRight, Store } from 'lucide-react';
+import { Crown, Target, MessageCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useArtisanDetection } from '@/hooks/useArtisanDetection';
+import { CreateShopQuickAction } from './CreateShopQuickAction';
 
 interface QuickActionsPanelProps {
   language: 'en' | 'es';
@@ -118,88 +119,12 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
             </div>
           </motion.div>
 
-          {/* Create Digital Shop Action - Enhanced for artisans */}
+          {/* Create Digital Shop Action - Simplified and stable */}
           {(isArtisan || detectionLoading) && (
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-              className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/20 via-teal-600/15 to-cyan-500/20 p-6 group cursor-pointer border border-emerald-200 dark:border-emerald-800 shadow-lg"
-              onClick={() => navigate('/dashboard/create-shop')}
-            >
-              {/* Animated background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 opacity-0 group-hover:opacity-100 transition-all duration-500" />
-              
-              {/* Sparkle decoration */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute top-2 right-2 w-4 h-4 text-emerald-400 opacity-60"
-              >
-                ✨
-              </motion.div>
-              
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Store className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-foreground text-lg">{t.createShop}</h3>
-                        <span className="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-full">
-                          ¡Nuevo!
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground font-medium">{t.shopDesc}</p>
-                      {craftType && (
-                        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                          {language === 'es' ? '🎨 ' : '🎨 '}{craftType}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Feature highlights */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                    IA automática
-                  </div>
-                  <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                    Alcance global
-                  </div>
-                </div>
-                
-                <Button 
-                  size="sm"
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/dashboard/create-shop');
-                  }}
-                >
-                  <Store className="w-4 h-4 mr-2" />
-                  {language === 'es' ? 'Crear Mi Tienda' : 'Create My Shop'}
-                  <motion.div
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="ml-2"
-                  >
-                    →
-                  </motion.div>
-                </Button>
-              </div>
-            </motion.div>
+            <CreateShopQuickAction
+              language={language}
+              craftType={craftType}
+            />
           )}
 
         </div>
