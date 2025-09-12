@@ -31,6 +31,7 @@ import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
 import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
 import { CreateShopPage } from './pages/CreateShopPage';
+import { CreateShopLandingPage } from './pages/CreateShopLandingPage';
 import { PublicShopPage } from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
@@ -152,6 +153,8 @@ function App() {
                   </BypassProtectedRoute>
                 } 
               />
+              {/* Standalone Shop Creation Landing Page */}
+              <Route path="/crear-tienda" element={<CreateShopLandingPage />} />
               <Route path="/agents" element={<AgentsGallery />} />
               <Route path="/admin" element={<BypassProtectedRoute><Admin /></BypassProtectedRoute>} />
               <Route path="/biome-config" element={<BiomeConfigPage />} />

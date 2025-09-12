@@ -396,39 +396,112 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
   );
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
-        <p className="text-muted-foreground">{t.subtitle}</p>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="max-w-4xl mx-auto p-6 py-12">
+        {/* Enhanced Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-3 mb-6">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 10, -10, 0]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-xl"
+            >
+              <Store className="w-8 h-8 text-white" />
+            </motion.div>
+            <div className="text-left">
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{t.title}</h1>
+              <p className="text-lg text-emerald-600 dark:text-emerald-400 font-medium">{t.subtitle}</p>
+            </div>
+          </div>
+          
+          {/* Progress indicator */}
+          <div className="flex justify-center items-center gap-2 mb-8">
+            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+              ['loading', 'preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
+              ['preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+              ['preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
+              ['review', 'creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+              ['review', 'creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
+              ['creating', 'complete'].indexOf(step) >= 0 
+                ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+              step === 'complete' ? 'bg-emerald-500' : 'bg-gray-300'
+            }`} />
+          </div>
+        </motion.div>
+
+        {/* Enhanced Card */}
+        <Card className="border-emerald-200 dark:border-emerald-800 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 rounded-t-lg">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <Store className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-gray-900 dark:text-white">
+                  {step === 'loading' && 'Analizando tu Perfil'}
+                  {step === 'preconfigured' && 'Configuración Inteligente'}
+                  {step === 'review' && 'Revisión Final'}
+                  {step === 'creating' && 'Creando tu Tienda'}
+                  {step === 'complete' && '¡Tienda Creada!'}
+                </div>
+                <CardDescription className="text-base">
+                  {step === 'loading' && 'El Coordinador Maestro está analizando tu información...'}
+                  {step === 'preconfigured' && 'Revisa y ajusta los datos pre-llenados'}
+                  {step === 'review' && 'Última revisión antes de crear tu tienda'}
+                  {step === 'creating' && 'Configurando tu tienda digital...'}
+                  {step === 'complete' && '¡Tu tienda digital está lista!'}
+                </CardDescription>
+              </div>
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="p-8">
+            {step === 'loading' && renderLoadingStep()}
+            {step === 'preconfigured' && renderPreconfiguredStep()}
+            {step === 'review' && renderReviewStep()}
+            {step === 'creating' && renderCreatingStep()}
+            {step === 'complete' && renderCompleteStep()}
+          </CardContent>
+        </Card>
+
+        {/* Bottom decoration */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="text-center mt-12 text-gray-500 dark:text-gray-400"
+        >
+          <p className="text-sm">✨ Potenciado por Inteligencia Artificial para Artesanos ✨</p>
+        </motion.div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Store className="w-5 h-5" />
-            {step === 'loading' && 'Analizando Perfil'}
-            {step === 'preconfigured' && 'Configuración Inteligente'}
-            {step === 'review' && 'Revisión Final'}
-            {step === 'creating' && 'Creando Tienda'}
-            {step === 'complete' && 'Tienda Creada'}
-          </CardTitle>
-          <CardDescription>
-            {step === 'loading' && 'El Coordinador Maestro está analizando tu información...'}
-            {step === 'preconfigured' && 'Revisa y ajusta los datos pre-llenados'}
-            {step === 'review' && 'Última revisión antes de crear tu tienda'}
-            {step === 'creating' && 'Configurando tu tienda digital...'}
-            {step === 'complete' && '¡Tu tienda digital está lista!'}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {step === 'loading' && renderLoadingStep()}
-          {step === 'preconfigured' && renderPreconfiguredStep()}
-          {step === 'review' && renderReviewStep()}
-          {step === 'creating' && renderCreatingStep()}
-          {step === 'complete' && renderCompleteStep()}
-        </CardContent>
-      </Card>
     </div>
   );
 };

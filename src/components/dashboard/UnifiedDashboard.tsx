@@ -4,6 +4,7 @@ import { DashboardBackground } from './DashboardBackground';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { DashboardFooter } from './DashboardFooter';
 import { BasicDashboardFallback } from './BasicDashboardFallback';
+import { DigitalShopHeroSection } from '@/components/shop/DigitalShopHeroSection';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
@@ -121,7 +122,20 @@ export const UnifiedDashboard: React.FC = () => {
             activeTasksCount={activeTasksCount}
           />
         }>
-          <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
+          {/* Enhanced Dashboard with Shop Hero Section */}
+          <div className="space-y-8">
+            {(profile as any)?.user_type === 'artisan' && (
+              <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
+            )}
+            <BasicDashboardFallback
+              onMaturityCalculatorClick={handleMaturityCalculatorClick}
+              onAgentManagerClick={handleAgentManagerClick}
+              tasks={tasks}
+              currentScores={currentScores}
+              completedTasksCount={completedTasksCount}
+              activeTasksCount={activeTasksCount}
+            />
+          </div>
         </DashboardErrorBoundary>
       </DashboardBackground>
       
