@@ -11,6 +11,7 @@ import { DashboardErrorBoundary } from './DashboardErrorBoundary';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
+import { useSessionSync } from '@/hooks/useSessionSync';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
@@ -28,6 +29,7 @@ export const UnifiedDashboard: React.FC = () => {
   const { profile, maturityScores, userAgents } = useRobustDashboardData();
   const { tasks } = useAgentTasks();
   const { currentScores } = useOptimizedMaturityScores();
+  const { isSyncing, forceSessionSync } = useSessionSync();
   
   const completedTasksCount = tasks.filter(t => t.status === 'completed').length;
   const activeTasksCount = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length;
@@ -44,7 +46,7 @@ export const UnifiedDashboard: React.FC = () => {
 
   const handleRefreshAuth = async () => {
     try {
-      await checkAuthorization();
+      await forceSessionSync();
     } catch (error) {
       console.error('Manual auth refresh failed:', error);
     }
@@ -69,9 +71,16 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Redirect to login if no valid session
-  if (!user || !session || !isAuthorized) {
-    console.log('🚫 UnifiedDashboard: Invalid session or not authorized, redirecting to login');
+  // Force session refresh on dashboard access to prevent desync
+  useEffect(() => {
+    if (user && session && !loading) {
+      checkAuthorization().catch(console.error);
+    }
+  }, [user, session, loading, checkAuthorization]);
+
+  // Redirect to login if no valid session (user + session required, authorization optional)
+  if (!user || !session) {
+    console.log('🚫 UnifiedDashboard: Invalid session, redirecting to login');
     window.location.href = '/login';
     return null;
   }
