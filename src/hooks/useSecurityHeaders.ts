@@ -16,11 +16,11 @@ export const useSecurityHeaders = () => {
     // Content Security Policy
     setMetaTag('Content-Security-Policy', 
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ylooqmqmoufqtxvetxuj.supabase.co; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ylooqmqmoufqtxvetxuj.supabase.co https://ce8310d2-4cb9-4865-a8e3-9274d5cd98f4.sandbox.lovable.dev blob:; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: https: blob:; " +
-      "connect-src 'self' https://ylooqmqmoufqtxvetxuj.supabase.co https://api.openai.com; " +
+      "connect-src 'self' https://ylooqmqmoufqtxvetxuj.supabase.co https://api.openai.com wss://ylooqmqmoufqtxvetxuj.supabase.co; " +
       "frame-ancestors 'none'; " +
       "base-uri 'self'; " +
       "form-action 'self';"

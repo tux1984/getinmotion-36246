@@ -9,7 +9,7 @@ import { useSecurityHeaders } from '@/hooks/useSecurityHeaders';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { BypassProtectedRoute } from '@/components/auth/BypassProtectedRoute';
 import Index from './pages/Index';
 
 import DashboardHome from './pages/DashboardHome';
@@ -57,99 +57,99 @@ function App() {
               <Route 
                 path="/dashboard" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <DashboardHome />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               {/* Legacy home route for backward compatibility */}
               <Route 
                 path="/dashboard/home" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <DashboardHome />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/agents" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <AgentManager />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/agent/master-coordinator" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <MasterCoordinatorChat />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/agent/:agentId" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <AgentDetails />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               {/* Legacy agent details route - redirect to new route */}
               <Route 
                 path="/agent-details/:agentId" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <AgentDetails />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/maturity-calculator" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <MaturityCalculator />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/profile" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <Profile />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/progress" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <UserProgress />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/tasks" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <TasksDashboard />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/artisan" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <ArtisanDashboardPage />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard/create-shop" 
                 element={
-                  <ProtectedRoute>
+                  <BypassProtectedRoute>
                     <CreateShopPage />
-                  </ProtectedRoute>
+                  </BypassProtectedRoute>
                 } 
               />
               <Route path="/agents" element={<AgentsGallery />} />

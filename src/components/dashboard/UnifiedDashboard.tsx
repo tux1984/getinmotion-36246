@@ -7,6 +7,7 @@ import { BasicDashboardFallback } from './BasicDashboardFallback';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { DashboardJWTStatusBar } from './DashboardJWTStatusBar';
 import { DashboardErrorBoundary } from './DashboardErrorBoundary';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
@@ -102,28 +103,27 @@ export const UnifiedDashboard: React.FC = () => {
   // Show Master Coordinator Dashboard as primary experience
   // BasicDashboardFallback is now only used as error fallback
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gradient-subtle">
+      <DashboardJWTStatusBar />
       <NewDashboardHeader 
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
         onAgentManagerClick={handleAgentManagerClick}
       />
       
-      <div className="flex-1 pt-24 pb-6">
-        <DashboardBackground showFloatingAgent={false}>
-          <DashboardErrorBoundary fallback={
-            <BasicDashboardFallback
-              onMaturityCalculatorClick={handleMaturityCalculatorClick}
-              onAgentManagerClick={handleAgentManagerClick}
-              tasks={tasks}
-              currentScores={currentScores}
-              completedTasksCount={completedTasksCount}
-              activeTasksCount={activeTasksCount}
-            />
-          }>
-            <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
-          </DashboardErrorBoundary>
-        </DashboardBackground>
-      </div>
+      <DashboardBackground>
+        <DashboardErrorBoundary fallback={
+          <BasicDashboardFallback
+            onMaturityCalculatorClick={handleMaturityCalculatorClick}
+            onAgentManagerClick={handleAgentManagerClick}
+            tasks={tasks}
+            currentScores={currentScores}
+            completedTasksCount={completedTasksCount}
+            activeTasksCount={activeTasksCount}
+          />
+        }>
+          <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
+        </DashboardErrorBoundary>
+      </DashboardBackground>
       
       <DashboardFooter />
     </div>
