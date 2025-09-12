@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { Message } from '@/types/chat';
 
 export interface ChatResponse {
@@ -9,7 +9,7 @@ export interface ChatResponse {
 }
 
 export const useAIAgentWithTasks = (agentType: string, taskId?: string) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useToast } from '@/hooks/use-toast';
 
 interface SessionMonitorState {
@@ -11,7 +11,7 @@ interface SessionMonitorState {
 }
 
 export const useSessionMonitor = () => {
-  const { session, user, forceAuthRefresh, validateAuthState } = useAuth();
+  const { session, user } = useRobustAuth();
   const { toast } = useToast();
   const [monitorState, setMonitorState] = useState<SessionMonitorState>({
     isMonitoring: false,
@@ -49,15 +49,13 @@ export const useSessionMonitor = () => {
         }
       }
 
-      // 3. Additional validation with validateAuthState
-      const authValidation = await validateAuthState(session);
-      
-      return authValidation.serverValid && authValidation.clientValid;
+      // 3. If we get here without errors, session is valid
+      return true;
     } catch (error) {
       console.error('❌ Deep validation error:', error);
       return false;
     }
-  }, [session, user, validateAuthState]);
+  }, [session, user]);
 
   // Auto-recovery mechanism
   const attemptAutoRecovery = useCallback(async (): Promise<boolean> => {
@@ -73,10 +71,10 @@ export const useSessionMonitor = () => {
         description: 'Intentando restaurar la sesión...'
       });
 
-      // Try auth refresh first
-      const refreshSuccess = await forceAuthRefresh();
+      // Try session refresh
+      const { data, error } = await supabase.auth.refreshSession();
       
-      if (refreshSuccess) {
+      if (!error && data?.session) {
         // Validate after refresh
         const validationSuccess = await performDeepValidation();
         
@@ -102,7 +100,7 @@ export const useSessionMonitor = () => {
       console.error('❌ Auto-recovery failed:', error);
       return false;
     }
-  }, [monitorState.autoRecoveryEnabled, forceAuthRefresh, performDeepValidation, toast]);
+  }, [monitorState.autoRecoveryEnabled, performDeepValidation, toast]);
 
   // Enhanced monitoring check
   const runMonitoringCheck = useCallback(async () => {

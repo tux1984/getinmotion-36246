@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { formatTaskTitleForDisplay } from './utils/agentTaskUtils';
 
@@ -8,7 +8,7 @@ import { formatTaskTitleForDisplay } from './utils/agentTaskUtils';
  * This runs automatically when the user logs in and has a valid brand name
  */
 export const useTaskTitleCleanup = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   useEffect(() => {
     if (!user) return;

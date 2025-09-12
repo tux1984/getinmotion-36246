@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useToast } from '@/components/ui/use-toast';
 import { TaskStep, StepValidation, StepInputData } from './types/taskStepTypes';
 
 export function useTaskSteps(taskId: string) {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [steps, setSteps] = useState<TaskStep[]>([]);
   const [loading, setLoading] = useState(true);

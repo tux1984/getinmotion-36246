@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { logger } from '@/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 export const useSecureDataAccess = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   const logDataAccess = useCallback((
     resource: string, 

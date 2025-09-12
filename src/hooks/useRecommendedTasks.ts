@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { CategoryScore } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -25,7 +25,7 @@ interface AIRecommendation {
 }
 
 export const useRecommendedTasks = (maturityScores: CategoryScore | null) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [tasks, setTasks] = useState<RecommendedTask[]>([]);
   const [loading, setLoading] = useState(false);
 

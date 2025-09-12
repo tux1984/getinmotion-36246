@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { safeSupabase } from '@/utils/supabase-safe';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 import { TaskStep } from './_deprecated/types/taskStepTypes';
 
@@ -11,7 +11,7 @@ export interface StepAIMessage {
 }
 
 export const useStepAI = (step: TaskStep) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const language = 'en'; // Fixed to English only
   const [messages, setMessages] = useState<StepAIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);

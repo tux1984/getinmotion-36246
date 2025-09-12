@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export const useSessionSync = () => {
-  const { user, session, checkAuthorization } = useAuth();
+  const { user, session } = useRobustAuth();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncAttempts, setSyncAttempts] = useState(0);

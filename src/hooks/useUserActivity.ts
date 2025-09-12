@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { useToast } from '@/hooks/use-toast';
 import { AgentConversation } from './useAgentConversations';
 
 export function useUserActivity() {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [recentConversations, setRecentConversations] = useState<AgentConversation[]>([]);
   const [loading, setLoading] = useState(true);

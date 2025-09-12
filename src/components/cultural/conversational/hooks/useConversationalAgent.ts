@@ -4,7 +4,7 @@ import { getConversationBlocks } from '../data/conversationBlocks';
 import { UserProfileData } from '../../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { useUserBusinessContext } from '@/hooks/useUserBusinessContext';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
@@ -17,7 +17,7 @@ export const useConversationalAgent = (
   language: 'en' | 'es',
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData) => void
 ) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { saveMaturityScores } = useMaturityScoresSaver();
   const { updateFromMaturityCalculator } = useUserBusinessContext();
   const blocks = getConversationBlocks(language);

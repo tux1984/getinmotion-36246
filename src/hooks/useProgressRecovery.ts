@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { getUserProgressStatus } from '@/utils/userProgress';
 
 interface ProgressState {
@@ -11,7 +11,7 @@ interface ProgressState {
 }
 
 export const useProgressRecovery = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [progressState, setProgressState] = useState<ProgressState>({
     isRecovering: false,
     recoveryAttempted: false,

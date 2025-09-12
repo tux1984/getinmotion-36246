@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +21,7 @@ export interface AgentDeliverable {
 }
 
 export function useAgentDeliverables(agentId?: string) {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [deliverables, setDeliverables] = useState<AgentDeliverable[]>([]);
   const [loading, setLoading] = useState(true);

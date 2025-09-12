@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { safeSupabase } from '@/utils/supabase-safe';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 interface UserProfile {
   id: string;
@@ -57,7 +57,7 @@ interface OptimizedUserData {
 const FETCH_TIMEOUT = 5000;
 
 export const useOptimizedUserData = (): OptimizedUserData => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [data, setData] = useState<Omit<OptimizedUserData, 'hasOnboarding'>>({
     profile: null,
     projects: [],

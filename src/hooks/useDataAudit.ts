@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { logger } from '@/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 
 interface AuditLogEntry {
@@ -14,7 +14,7 @@ interface AuditLogEntry {
 }
 
 export const useDataAudit = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   const logDataAccess = useCallback(async (entry: AuditLogEntry) => {
     try {

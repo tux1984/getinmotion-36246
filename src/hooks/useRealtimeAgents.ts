@@ -1,14 +1,14 @@
 
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 
 interface UseRealtimeAgentsProps {
   onAgentChange: () => void;
 }
 
 export const useRealtimeAgents = ({ onAgentChange }: UseRealtimeAgentsProps) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   useEffect(() => {
     if (!user) return;

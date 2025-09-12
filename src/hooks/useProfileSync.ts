@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 
 // Generate intelligent brand name from business description
@@ -46,7 +46,7 @@ const generateIntelligentBrandName = (businessDescription?: string): string => {
 };
 
 export const useProfileSync = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   const syncProfileData = useCallback(async () => {
     if (!user) return;

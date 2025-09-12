@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { CategoryScore } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { AIRecommendation, OptimizedRecommendedTask } from './types/recommendedTasksTypes';
 import { getAvailableAgents } from './utils/taskGenerationUtils';
 
 export const useAIRecommendations = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [loading, setLoading] = useState(false);
 
   const fetchAIRecommendations = async (maturityScores: CategoryScore): Promise<AIRecommendation[]> => {

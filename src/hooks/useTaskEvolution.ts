@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { safeSupabase } from '@/utils/supabase-safe';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryScore } from '@/types/dashboard';
 import { AgentTask } from '@/hooks/useAgentTasks';
@@ -17,7 +17,7 @@ export interface TaskEvolutionSuggestion {
 }
 
 export const useTaskEvolution = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<TaskEvolutionSuggestion[]>([]);

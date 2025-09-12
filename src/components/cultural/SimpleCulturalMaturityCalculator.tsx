@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { CulturalMaturityWizard } from './CulturalMaturityWizard';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { UserProfileData } from './types/wizardTypes';
@@ -22,7 +22,7 @@ export const SimpleCulturalMaturityCalculator: React.FC<SimpleCulturalMaturityCa
   language,
   onComplete
 }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { saveMaturityScores, saving: savingScores } = useMaturityScoresSaver();
   const { enableAutoGeneration } = useTaskGenerationControl();
 

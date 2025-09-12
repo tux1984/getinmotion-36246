@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { CulturalMaturityWizard } from './CulturalMaturityWizard';
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { UserProfileData } from './types/wizardTypes';
@@ -24,7 +24,7 @@ export const MaturityCalculatorSimplified: React.FC<MaturityCalculatorSimplified
   language,
   onComplete
 }) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const { saveMaturityScores, saving: savingScores } = useMaturityScoresSaver();
   const { t } = useTranslations();
   const { updateFromMaturityCalculator } = useUserBusinessContext();

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AgentStats {
@@ -19,7 +19,7 @@ interface AgentStats {
 }
 
 export const useAgentStats = (agentId: string) => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [stats, setStats] = useState<AgentStats>({
     totalConversations: 0,
     totalMessages: 0,

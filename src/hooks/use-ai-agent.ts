@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Message } from '@/types/chat';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define agent types and their system prompts
@@ -33,7 +33,7 @@ export function useAIAgent(agentType: string = 'admin') {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
 
   const sendMessage = async (content: string): Promise<string | null> => {
     if (!content.trim()) return null;

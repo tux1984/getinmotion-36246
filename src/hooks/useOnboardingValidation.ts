@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { getUserProgressStatusSync } from '@/utils/userProgress';
 
 export const useOnboardingValidation = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
   const [isValidating, setIsValidating] = useState(true);
 

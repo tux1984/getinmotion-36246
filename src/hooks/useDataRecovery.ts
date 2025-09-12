@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
@@ -12,7 +12,7 @@ interface RecoveryStatus {
 }
 
 export const useDataRecovery = () => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [status, setStatus] = useState<RecoveryStatus>({
     needsRecovery: false,
     recovering: false,
