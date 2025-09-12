@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryScore } from '@/types/dashboard';
@@ -32,7 +32,7 @@ export const useTaskEvolution = () => {
     setLoading(true);
     try {
       // Call edge function for intelligent task evolution
-      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+      const { data, error } = await safeSupabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'evolve_tasks',
           completedTasks,
@@ -140,7 +140,7 @@ export const useTaskEvolution = () => {
 
     try {
       // Create the suggested task
-      const { error } = await supabase.from('agent_tasks').insert({
+      const { error } = await safeSupabase.from('agent_tasks').insert({
         user_id: user.id,
         agent_id: suggestion.agentId,
         title: suggestion.title,

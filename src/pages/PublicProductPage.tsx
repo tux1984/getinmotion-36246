@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,7 +38,7 @@ export const PublicProductPage: React.FC = () => {
 
       try {
         // First get shop data with privacy controls
-        const { data: shopData, error: shopError } = await supabase
+        const { data: shopData, error: shopError } = await safeSupabase
           .from('artisan_shops')
           .select(`
             id,
@@ -74,7 +74,7 @@ export const PublicProductPage: React.FC = () => {
         setShop(shopData);
 
         // Get product data
-        const { data: productData, error: productError } = await supabase
+        const { data: productData, error: productError } = await safeSupabase
           .from('products')
           .select('*')
           .eq('id', productId)
@@ -91,7 +91,7 @@ export const PublicProductPage: React.FC = () => {
         setProduct(productData);
 
         // Get related products (same shop, different product)
-        const { data: relatedData } = await supabase
+        const { data: relatedData } = await safeSupabase
           .from('products')
           .select('*')
           .eq('shop_id', shopData.id)

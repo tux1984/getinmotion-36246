@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { useToast } from '@/hooks/use-toast';
 
 interface AgentInsight {
@@ -48,7 +48,7 @@ export function useUserInsights() {
       setLoading(true);
 
       // Fetch task statistics
-      const { data: tasks, error: tasksError } = await supabase
+      const { data: tasks, error: tasksError } = await safeSupabase
         .from('agent_tasks')
         .select('agent_id, status, title, created_at')
         .eq('user_id', user.id)
@@ -57,7 +57,7 @@ export function useUserInsights() {
       if (tasksError) throw tasksError;
 
       // Fetch conversations
-      const { data: conversations, error: conversationsError } = await supabase
+      const { data: conversations, error: conversationsError } = await safeSupabase
         .from('agent_conversations')
         .select('agent_id, title, created_at, updated_at')
         .eq('user_id', user.id)
@@ -66,7 +66,7 @@ export function useUserInsights() {
       if (conversationsError) throw conversationsError;
 
       // Fetch deliverables
-      const { data: deliverables, error: deliverablesError } = await supabase
+      const { data: deliverables, error: deliverablesError } = await safeSupabase
         .from('agent_deliverables')
         .select('agent_id, title, created_at, file_type, task_id')
         .eq('user_id', user.id)
@@ -85,7 +85,7 @@ export function useUserInsights() {
       };
 
       // Initialize agent insights
-      tasks?.forEach(task => {
+      (tasks as any[])?.forEach(task => {
         if (!agentMap.has(task.agent_id)) {
           agentMap.set(task.agent_id, {
             agent_id: task.agent_id,
@@ -108,7 +108,7 @@ export function useUserInsights() {
       });
 
       // Add latest deliverables to agent insights
-      deliverables?.forEach(deliverable => {
+      (deliverables as any[])?.forEach(deliverable => {
         const insight = agentMap.get(deliverable.agent_id);
         if (insight && !insight.latest_deliverable) {
           insight.latest_deliverable = {
@@ -128,21 +128,21 @@ export function useUserInsights() {
 
       // Create recent activity timeline
       const recentActivity = [
-        ...(tasks?.slice(0, 5).map(task => ({
+        ...((tasks as any[])?.slice(0, 5).map(task => ({
           type: 'task' as const,
           title: task.title,
           agent_id: task.agent_id,
           created_at: task.created_at,
           description: `Estado: ${task.status}`
         })) || []),
-        ...(conversations?.slice(0, 3).map(conv => ({
+        ...((conversations as any[])?.slice(0, 3).map(conv => ({
           type: 'conversation' as const,
           title: conv.title || 'Conversación',
           agent_id: conv.agent_id,
           created_at: conv.updated_at,
           description: 'Conversación activa'
         })) || []),
-        ...(deliverables?.slice(0, 3).map(deliv => ({
+        ...((deliverables as any[])?.slice(0, 3).map(deliv => ({
           type: 'deliverable' as const,
           title: deliv.title,
           agent_id: deliv.agent_id,
@@ -153,10 +153,10 @@ export function useUserInsights() {
        .slice(0, 8);
 
       const processedInsights: UserInsights = {
-        total_tasks: tasks?.length || 0,
-        completed_tasks: tasks?.filter(t => t.status === 'completed').length || 0,
-        active_conversations: conversations?.length || 0,
-        total_deliverables: deliverables?.length || 0,
+        total_tasks: (tasks as any[])?.length || 0,
+        completed_tasks: (tasks as any[])?.filter(t => t.status === 'completed').length || 0,
+        active_conversations: (conversations as any[])?.length || 0,
+        total_deliverables: (deliverables as any[])?.length || 0,
         agent_insights: Array.from(agentMap.values()),
         recent_activity: recentActivity
       };

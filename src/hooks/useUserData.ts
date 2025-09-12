@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 
 interface UserProfile {
   id: string;
@@ -52,7 +52,7 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -64,7 +64,7 @@ export const useUserData = () => {
 
       if (!data) {
         // Create profile if it doesn't exist
-        const { data: newProfile, error: createError } = await supabase
+        const { data: newProfile, error: createError } = await safeSupabase
           .from('user_profiles')
           .insert({
             user_id: user.id,
@@ -74,9 +74,9 @@ export const useUserData = () => {
           .single();
 
         if (createError) throw createError;
-        setProfile(newProfile);
+        setProfile(newProfile as UserProfile);
       } else {
-        setProfile(data);
+        setProfile(data as UserProfile);
       }
     } catch (err) {
       console.error('Error fetching user profile:', err);
@@ -88,14 +88,14 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_projects')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      setProjects((data || []) as UserProject[]);
     } catch (err) {
       console.error('Error fetching user projects:', err);
       setError('Error al cargar los proyectos');
@@ -106,14 +106,14 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_agents')
         .select('*')
         .eq('user_id', user.id);
 
       if (error) throw error;
       console.log('Fetched user agents:', data);
-      setAgents(data || []);
+      setAgents((data || []) as UserAgent[]);
     } catch (err) {
       console.error('Error fetching user agents:', err);
       setError('Error al cargar los agentes');
@@ -124,7 +124,7 @@ export const useUserData = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('agent_usage_metrics')
         .select('session_duration, messages_count')
         .eq('user_id', user.id);
@@ -163,7 +163,7 @@ export const useUserData = () => {
       const sanitizedTitle = title.trim().substring(0, 255);
       const sanitizedDescription = description?.trim().substring(0, 1000);
 
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_projects')
         .insert({
           user_id: user.id,
@@ -196,7 +196,7 @@ export const useUserData = () => {
         sanitizedUpdates.description = sanitizedUpdates.description.trim().substring(0, 1000);
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_projects')
         .update(sanitizedUpdates)
         .eq('id', id)
@@ -218,7 +218,7 @@ export const useUserData = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      const { error } = await supabase
+      const { error } = await safeSupabase
         .from('user_projects')
         .delete()
         .eq('id', id)
@@ -244,7 +244,7 @@ export const useUserData = () => {
 
       console.log('Enabling agent:', agentId, 'for user:', user.id);
       
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_agents')
         .upsert({
           user_id: user.id,
@@ -292,7 +292,7 @@ export const useUserData = () => {
 
       console.log('Disabling agent:', agentId, 'for user:', user.id);
       
-      const { data, error } = await supabase
+      const { data, error } = await safeSupabase
         .from('user_agents')
         .update({
           is_enabled: false,
@@ -342,7 +342,7 @@ export const useUserData = () => {
       }
 
       // Record usage metrics
-      await supabase
+      await safeSupabase
         .from('agent_usage_metrics')
         .insert({
           user_id: user.id,
@@ -352,7 +352,7 @@ export const useUserData = () => {
         });
 
       // Update agent last used time - the trigger will handle usage_count increment
-      const { error: updateError } = await supabase
+      const { error: updateError } = await safeSupabase
         .from('user_agents')
         .update({
           last_used_at: new Date().toISOString()

@@ -41,6 +41,8 @@ interface UserAgent {
   is_enabled: boolean;
   created_at: string;
   updated_at: string;
+  usage_count?: number;
+  last_used_at?: string;
 }
 
 interface OptimizedUserData {

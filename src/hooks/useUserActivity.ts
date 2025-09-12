@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { useToast } from '@/hooks/use-toast';
 import { AgentConversation } from './useAgentConversations';
 
@@ -20,7 +20,7 @@ export function useUserActivity() {
     const fetchActivity = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        const { data, error } = await safeSupabase
           .from('agent_conversations')
           .select('*')
           .eq('user_id', user.id)
@@ -32,7 +32,7 @@ export function useUserActivity() {
             throw error;
         }
 
-        setRecentConversations(data || []);
+        setRecentConversations((data || []) as AgentConversation[]);
       } catch (error) {
         console.error('Error fetching user activity:', error);
         toast({

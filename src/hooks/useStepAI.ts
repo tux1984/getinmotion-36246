@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { useAuth } from '@/context/AuthContext';
 
 import { TaskStep } from './_deprecated/types/taskStepTypes';
@@ -29,7 +29,7 @@ export const useStepAI = (step: TaskStep) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('step-ai-assistant', {
+      const { data, error } = await safeSupabase.functions.invoke('step-ai-assistant', {
         body: { 
           message: content,
           step: {
@@ -56,7 +56,7 @@ export const useStepAI = (step: TaskStep) => {
       setMessages(prev => [...prev, assistantMessage]);
 
       // Log AI assistance
-      await supabase
+      await safeSupabase
         .from('task_steps')
         .update({
           ai_assistance_log: [

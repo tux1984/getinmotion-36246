@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { safeSupabase } from '@/utils/supabase-safe';
 import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,7 +41,7 @@ export const PublicShopPage: React.FC = () => {
 
       try {
         // Fetch shop data with privacy controls
-        const { data: shopData, error: shopError } = await supabase
+        const { data: shopData, error: shopError } = await safeSupabase
           .from('artisan_shops')
           .select(`
             id,
@@ -78,7 +78,7 @@ export const PublicShopPage: React.FC = () => {
         setShop(shopData);
 
         // Fetch products
-        const { data: productsData, error: productsError } = await supabase
+        const { data: productsData, error: productsError } = await safeSupabase
           .from('products')
           .select('*')
           .eq('shop_id', shopData.id)
@@ -91,7 +91,7 @@ export const PublicShopPage: React.FC = () => {
         }
 
         // Track shop view
-        await supabase
+        await safeSupabase
           .from('artisan_analytics')
           .upsert({
             shop_id: shopData.id,
