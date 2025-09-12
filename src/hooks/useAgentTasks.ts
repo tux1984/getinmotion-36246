@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { AgentTask, PaginatedTasks } from './types/agentTaskTypes';
 import { useAgentTasksQueries } from './useAgentTasksQueries';
@@ -9,7 +9,7 @@ import { useAgentTasksSpecialOperations } from './useAgentTasksSpecialOperations
 import { replaceGoalArrayInText } from './utils/agentTaskUtils';
 
 export function useAgentTasks(agentId?: string) {
-  const { user, session } = useAuth();
+  const { user, session } = useRobustAuth();
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoryScore } from '@/types/dashboard';
 
@@ -14,7 +14,7 @@ interface OptimizedMaturityData {
 const FETCH_TIMEOUT = 4000;
 
 export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
-  const { user, session } = useAuth();
+  const { user, session } = useRobustAuth();
   const [data, setData] = useState<OptimizedMaturityData>({
     currentScores: null,
     profileData: null,

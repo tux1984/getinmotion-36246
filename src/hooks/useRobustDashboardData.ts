@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { safeSupabase } from '@/utils/supabase-safe';
 
 interface RobustDashboardData {
@@ -31,7 +31,7 @@ const DEFAULT_SCORES = {
 };
 
 export const useRobustDashboardData = (): RobustDashboardData => {
-  const { user, session } = useAuth();
+  const { user, session } = useRobustAuth();
   const [data, setData] = useState<RobustDashboardData>({
     profile: {
       name: 'Usuario',

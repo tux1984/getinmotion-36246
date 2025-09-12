@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { toast } from 'sonner';
 import { DEFAULT_LANGUAGE, type Language } from '@/types/language';
 import { safeSupabase } from '@/utils/supabase-safe';
@@ -13,7 +13,7 @@ interface LanguageSystemHook {
 }
 
 export const useLanguageSystem = (): LanguageSystemHook => {
-  const { user } = useAuth();
+  const { user } = useRobustAuth();
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLoading, setIsLoading] = useState(false);
   const [needsLanguageSelection, setNeedsLanguageSelection] = useState(false);

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
@@ -21,7 +21,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const { signIn, user, isAuthorized, loading } = useAuth();
+  const { signIn, user, isAuthorized, loading } = useRobustAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();

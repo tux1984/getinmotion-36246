@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calculator, Settings, LogOut, Users, ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useRobustAuth } from '@/hooks/useRobustAuth';
 import { useLocation } from 'react-router-dom';
 import { MotionLogo } from '@/components/MotionLogo';
 
@@ -15,7 +15,7 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
   onMaturityCalculatorClick,
   onAgentManagerClick
 }) => {
-  const { signOut } = useAuth();
+  const { signOut } = useRobustAuth();
   const location = useLocation();
 
   const isOnAgentManager = location.pathname.includes('/dashboard/agents');
