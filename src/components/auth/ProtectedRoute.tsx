@@ -34,11 +34,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   // Simple validation: user + session + authorization
-  if (!user || !session?.access_token || !isAuthorized) {
+  if (!user || !session?.access_token) {
     console.log('🚫 ProtectedRoute: Access denied, redirecting to login', {
       missingUser: !user,
-      missingSession: !session?.access_token,
-      notAuthorized: !isAuthorized
+      missingSession: !session?.access_token
     });
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
