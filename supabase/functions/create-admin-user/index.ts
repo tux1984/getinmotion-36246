@@ -79,9 +79,77 @@ serve(async (req) => {
 
     // We already have supabaseAdmin from above
 
-    const { email, password } = await req.json()
+    // Log request details for debugging
+    const contentType = req.headers.get('Content-Type');
+    const contentLength = req.headers.get('Content-Length');
+    console.log('Request details:', {
+      method: req.method,
+      contentType,
+      contentLength,
+      hasBody: !!req.body
+    });
 
+    // Robust JSON parsing with detailed error handling
+    let email, password;
+    try {
+      // Check if request has a body
+      if (!req.body) {
+        console.error('Request body is null or undefined');
+        return new Response(
+          JSON.stringify({ error: 'Request body is required' }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      // First get the body as text to inspect it
+      const bodyText = await req.text();
+      console.log('Raw body text:', bodyText);
+      console.log('Body length:', bodyText.length);
+
+      // Check if body is empty
+      if (!bodyText || bodyText.trim() === '') {
+        console.error('Request body is empty');
+        return new Response(
+          JSON.stringify({ error: 'Request body cannot be empty' }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      // Parse the JSON
+      const parsedBody = JSON.parse(bodyText);
+      console.log('Parsed body:', parsedBody);
+      
+      email = parsedBody.email;
+      password = parsedBody.password;
+
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      console.error('Error details:', {
+        message: jsonError.message,
+        stack: jsonError.stack
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid JSON format in request body',
+          details: jsonError.message 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Validate required fields
     if (!email || !password) {
+      console.error('Missing required fields:', { email: !!email, password: !!password });
       return new Response(
         JSON.stringify({ error: 'Email and password are required' }),
         { 
