@@ -243,40 +243,20 @@ serve(async (req) => {
       );
     }
 
-      // Validate parsed body
-      if (!parsedBody) {
-        console.error('CRITICAL: Request body is empty after parsing');
-        return new Response(
-          JSON.stringify({ error: 'Request body cannot be empty' }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      email = parsedBody.email;
-      password = parsedBody.password;
-
-    } catch (jsonError) {
-      console.error('CRITICAL: JSON parsing failed');
-      console.error('JSON error details:', {
-        name: jsonError.name,
-        message: jsonError.message,
-        stack: jsonError.stack
-      });
-      
+    // Validate parsed body
+    if (!parsedBody) {
+      console.error('CRITICAL: Request body is empty after parsing');
       return new Response(
-        JSON.stringify({ 
-          error: 'Invalid JSON format in request body',
-          details: jsonError.message 
-        }),
+        JSON.stringify({ error: 'Request body cannot be empty' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
+
+    email = parsedBody.email;
+    password = parsedBody.password;
 
     // Validate required fields with detailed logging
     console.log('✅ Validating required fields...');
