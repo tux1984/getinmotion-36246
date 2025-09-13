@@ -1,5 +1,20 @@
-// Utility to clear all system cache for fresh start
+// Utility to clear selective system cache
 export const clearSystemCache = () => {
+  try {
+    // Clear specific app cache keys but preserve auth tokens
+    localStorage.removeItem('maturity-scores-cache');
+    localStorage.removeItem('user-data-cache');
+    localStorage.removeItem('tasks-cache');
+    localStorage.removeItem('coordinator-cache');
+    
+    console.log('✅ System cache cleared successfully (preserving auth)');
+  } catch (error) {
+    console.error('❌ Error clearing system cache:', error);
+  }
+};
+
+// Clear all cache including auth (only for explicit logout)
+export const clearAllCache = () => {
   try {
     // Clear all Supabase related data
     const keys = Object.keys(localStorage);
@@ -10,14 +25,11 @@ export const clearSystemCache = () => {
     });
     
     // Clear specific app cache keys
-    localStorage.removeItem('maturity-scores-cache');
-    localStorage.removeItem('user-data-cache');
-    localStorage.removeItem('tasks-cache');
-    localStorage.removeItem('coordinator-cache');
+    clearSystemCache();
     
-    console.log('✅ System cache cleared successfully');
+    console.log('✅ All cache cleared successfully');
   } catch (error) {
-    console.error('❌ Error clearing system cache:', error);
+    console.error('❌ Error clearing all cache:', error);
   }
 };
 

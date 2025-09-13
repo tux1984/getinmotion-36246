@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { clearSystemCache } from '@/utils/localStorage';
+import { clearSystemCache, clearAllCache } from '@/utils/localStorage';
 
 interface RobustAuthState {
   user: User | null;
@@ -149,13 +149,8 @@ export const useRobustAuth = () => {
       
       await supabase.auth.signOut();
       
-      // Clear system cache on logout
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.includes('supabase') || key.includes('auth') || key.includes('cache')) {
-          localStorage.removeItem(key);
-        }
-      });
+      // Clear ALL cache on explicit logout
+      clearAllCache();
       
       setAuthState({
         user: null,
@@ -214,7 +209,6 @@ export const useRobustAuth = () => {
         console.log('🔄 Auth state changed:', { event, hasSession: !!session });
         if (mounted) {
           if (event === 'SIGNED_OUT') {
-            clearSystemCache();
             setAuthState({
               user: null,
               session: null,
@@ -225,7 +219,11 @@ export const useRobustAuth = () => {
               lastIntegrityCheck: new Date()
             });
           } else if (event === 'SIGNED_IN') {
-            clearSystemCache(); // Clear cache on login too for fresh start
+            // Only clear app cache, not auth tokens
+            clearSystemCache();
+            await updateAuthState(session);
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('🔄 Token refreshed successfully');
             await updateAuthState(session);
           } else {
             await updateAuthState(session);
