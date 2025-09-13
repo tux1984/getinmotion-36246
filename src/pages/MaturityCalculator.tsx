@@ -35,10 +35,8 @@ const MaturityCalculator = () => {
     
     console.log('🎯 Task generation flags activated - tasks will now generate automatically');
     
-    // Navigate to dashboard after coordinator activation
-    setTimeout(() => {
-      navigate('/dashboard/home');
-    }, 2000);
+    // Navigate to dashboard immediately after completion
+    navigate('/dashboard/home');
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator?.en || {
