@@ -1165,6 +1165,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_secure_admin_user: {
+        Args: { invited_by_admin_email: string; user_email: string }
+        Returns: Json
+      }
       disable_agent: {
         Args: { p_agent_id: string; p_user_id: string }
         Returns: undefined
