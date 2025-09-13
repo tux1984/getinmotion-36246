@@ -281,19 +281,20 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
   const getUnifiedButtonState = () => {
     if (!businessProfile?.businessDescription && !businessProfile?.brandName) {
       return {
-        text: language === 'es' ? 'Configurar Coordinador' : 'Configure Coordinator',
-        description: language === 'es' ? 'Configurar perfil y activar coordinador' : 'Set up profile and activate coordinator',
+        text: language === 'es' ? 'Configurar Mi Negocio' : 'Configure My Business',
+        description: language === 'es' ? 'Configurar perfil para comenzar' : 'Set up profile to get started',
         icon: User,
         color: 'bg-blue-600 hover:bg-blue-500'
       };
     }
     
-    if (activeTasks.length === 0) {
+    // Auto-generate tasks if profile exists but no tasks
+    if (activeTasks.length === 0 && businessProfile?.businessDescription) {
       return {
-        text: language === 'es' ? 'Activar Coordinador' : 'Activate Coordinator',
+        text: language === 'es' ? 'Ver Mis Tareas' : 'View My Tasks',
         description: language === 'es' ? 'Generar tareas personalizadas' : 'Generate personalized tasks',
-        icon: isGeneratingTasks ? Zap : Lightbulb,
-        color: 'bg-yellow-600 hover:bg-yellow-500'
+        icon: isGeneratingTasks ? Zap : Target,
+        color: 'bg-emerald-600 hover:bg-emerald-500'
       };
     }
     
@@ -451,17 +452,19 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                           <div className="flex-1">
                             <div className="space-y-3">
                               <p className="text-white leading-relaxed">
-                                {getTimeOfDayGreeting()} {(() => { const raw = (businessProfile as any)?.brandName ?? (businessProfile as any)?.businessDescription; return (typeof raw === 'string' && raw.trim().length > 0 && !raw.trim().startsWith('[')) ? `¡${raw}!` : '' })()}
-                                 {businessProfile?.businessDescription 
-                                   ? ` ${typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
-                                      ? coordinatorMessage.message 
-                                      : typeof coordinatorMessage === 'string' 
-                                      ? coordinatorMessage 
-                                      : 'I\'ve analyzed your profile and have specific tasks to grow your business.'}`
+                                {getTimeOfDayGreeting()}{businessProfile?.brandName ? ` ¡${businessProfile.brandName}!` : ''}
+                                {businessProfile?.businessDescription 
+                                  ? ` ${typeof coordinatorMessage === 'object' && coordinatorMessage?.message 
+                                     ? coordinatorMessage.message 
+                                     : typeof coordinatorMessage === 'string' 
+                                     ? coordinatorMessage 
                                      : (language === 'es' 
-                                       ? "Para ayudarte de la mejor manera, necesito saber más sobre tu negocio. ¿Puedes contarme a qué te dedicas?"
-                                       : "To help you in the best way, I need to know more about your business. Can you tell me what you do?")
-                                 }
+                                       ? 'He analizado tu perfil y tengo tareas específicas para hacer crecer tu negocio.'
+                                       : 'I\'ve analyzed your profile and have specific tasks to grow your business.')}`
+                                    : (language === 'es' 
+                                      ? " Para ayudarte de la mejor manera, necesito saber más sobre tu negocio. ¿Puedes contarme a qué te dedicas?"
+                                      : " To help you in the best way, I need to know more about your business. Can you tell me what you do?")
+                                }
                               </p>
                               
                               {/* Business Profile Quick View */}
@@ -547,30 +550,52 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                           })()}
                         </div>
 
-                        {/* Secondary Action Buttons */}
-                        <div className="flex justify-center">
+                         {/* Quick Actions for Business Enhancement */}
+                         <div className="grid grid-cols-1 gap-3">
+                           {/* Enhanced Business Profile Button */}
+                           <Button
+                             variant="outline"
+                             className="h-auto p-5 w-full border-2 border-purple-400/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-white"
+                             onClick={() => setShowBusinessDialog(true)}
+                           >
+                             <div className="flex items-center space-x-4 w-full">
+                               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                                 <Brain className="w-6 h-6 text-purple-300" />
+                               </div>
+                               <div className="flex-1 text-left">
+                                 <div className="font-bold text-lg">
+                                   {language === 'es' ? '🧠 Mejorar Mi Perfil' : '🧠 Enhance My Profile'}
+                                 </div>
+                                 <div className="text-sm text-white/80">
+                                   {language === 'es' ? 'Preguntas inteligentes para conocer mejor tu negocio' : 'Smart questions to better understand your business'}
+                                 </div>
+                               </div>
+                               <ArrowRight className="w-5 h-5 text-white/60" />
+                             </div>
+                           </Button>
 
-                          <Button
-                            variant="outline"
-                            className="h-auto p-4 bg-white text-purple-600 hover:bg-white/90"
-                            onClick={handleRecalculateMaturity}
-                            disabled={coordinatorLoading}
-                          >
-                            <div className="flex items-center space-x-3 w-full">
-                              <div className="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center">
-                                <Calculator className="w-4 h-4 text-purple-600" />
-                              </div>
-                              <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                 <div className="font-medium truncate">
+                           {/* Maturity Calculator */}
+                           <Button
+                             variant="outline"
+                             className="h-auto p-4 w-full border-2 border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                             onClick={() => navigate('/maturity-calculator')}
+                           >
+                             <div className="flex items-center space-x-3 w-full">
+                               <div className="w-10 h-10 rounded-lg bg-blue-400/20 flex items-center justify-center">
+                                 <Calculator className="w-5 h-5 text-blue-300" />
+                               </div>
+                               <div className="flex-1 text-left">
+                                 <div className="font-semibold">
                                    {labels.recalculateMaturity}
                                  </div>
-                                 <div className="text-xs text-purple-500 truncate">
+                                 <div className="text-sm text-white/70">
                                    {labels.updateMaturityScores}
                                  </div>
-                              </div>
-                            </div>
-                          </Button>
-                        </div>
+                               </div>
+                               <ArrowRight className="w-4 h-4 text-white/60" />
+                             </div>
+                           </Button>
+                         </div>
 
                         {/* Quick Stats on Mobile */}
                         <div className="md:hidden flex space-x-2">
