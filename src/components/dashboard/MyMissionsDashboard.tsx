@@ -25,7 +25,7 @@ import {
   ArchiveRestore
 } from 'lucide-react';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 import { useTranslations } from '@/hooks/useTranslations';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
@@ -40,7 +40,7 @@ interface MyMissionsDashboardProps {
 }
 
 export const MyMissionsDashboard: React.FC<MyMissionsDashboardProps> = ({ onTaskSelect }) => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { t } = useTranslations();
   const { businessProfile } = useUserBusinessProfile();
   const navigate = useNavigate();

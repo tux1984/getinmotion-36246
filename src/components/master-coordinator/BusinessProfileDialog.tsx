@@ -22,8 +22,8 @@ import {
   Users,
   TrendingUp
 } from 'lucide-react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { useUserBusinessContext } from '@/hooks/useUserBusinessContext';
+import { useAuth } from '@/context/AuthContext';
+import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
 
 interface BusinessProfileDialogProps {
   open: boolean;
@@ -43,9 +43,8 @@ export const BusinessProfileDialog: React.FC<BusinessProfileDialogProps> = ({
   onOpenChange,
   language
 }) => {
-  const { user } = useRobustAuth();
-  const { context, updateFromMaturityCalculator } = useUserBusinessContext();
-  const businessProfile = context?.business_profile;
+  const { user } = useAuth();
+  const { businessProfile } = useUserBusinessProfile();
   const [currentStep, setCurrentStep] = useState<'intro' | 'questions' | 'completion'>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -240,17 +239,19 @@ export const BusinessProfileDialog: React.FC<BusinessProfileDialogProps> = ({
   };
 
   const handleCompletion = async () => {
-    // Save answers to user profile using useUserBusinessContext
+    // Save answers to user profile
     try {
-      const profileData = {
-        businessDeepDive: answers,
-        lastDeepDiveDate: new Date().toISOString(),
-        // Merge additional profile data from answers
-        specificAnswers: answers
+      const updatedProfile = {
+        ...businessProfile,
+        specificAnswers: {
+          ...businessProfile?.specificAnswers,
+          businessDeepDive: answers,
+          lastDeepDiveDate: new Date().toISOString()
+        }
       };
 
-      // Update the business profile using the proper hook
-      await updateFromMaturityCalculator(profileData, [], language);
+      // Save to localStorage for immediate use
+      localStorage.setItem('businessDeepDiveAnswers', JSON.stringify(answers));
       
       setCurrentStep('completion');
     } catch (error) {

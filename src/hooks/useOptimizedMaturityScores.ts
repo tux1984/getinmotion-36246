@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoryScore } from '@/types/dashboard';
 
@@ -13,37 +13,17 @@ interface OptimizedMaturityData {
 
 const FETCH_TIMEOUT = 4000;
 
-// Global refresh trigger for forcing updates after maturity test completion
-let refreshTrigger = 0;
-const triggerRefresh = () => {
-  refreshTrigger += 1;
-  // Clear localStorage to force fresh fetch
-  localStorage.removeItem('maturityScores');
-  localStorage.removeItem('profileData');
-  console.log('🔄 Forced refresh triggered for maturity scores');
-};
-
-// Export for external use
-export const refreshMaturityScores = triggerRefresh;
-
-export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh: () => void } => {
-  const { user, session } = useRobustAuth();
+export const useOptimizedMaturityScores = (): OptimizedMaturityData => {
+  const { user } = useAuth();
   const [data, setData] = useState<OptimizedMaturityData>({
     currentScores: null,
     profileData: null,
     loading: false,
     error: null,
   });
-  const [forceRefresh, setForceRefresh] = useState(0);
-
-  const manualRefresh = () => {
-    setForceRefresh(prev => prev + 1);
-    triggerRefresh();
-  };
 
   useEffect(() => {
-    if (!user || !session) {
-      console.log('🔍 useOptimizedMaturityScores: No valid user/session');
+    if (!user) {
       setData(prev => ({ ...prev, loading: false }));
       return;
     }
@@ -103,9 +83,9 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh:
         });
 
       } catch (err) {
-        console.warn('useOptimizedMaturityScores: RPC call failed, using fallback', err);
+        console.warn('useOptimizedMaturityScores: Using localStorage fallback');
         
-        // Try localStorage fallback first
+        // Try localStorage fallback
         try {
           const localScores = localStorage.getItem('maturityScores');
           const localProfileData = localStorage.getItem('profileData');
@@ -114,7 +94,6 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh:
             const parsedScores = JSON.parse(localScores);
             const parsedProfileData = localProfileData ? JSON.parse(localProfileData) : null;
             
-            console.log('useOptimizedMaturityScores: Using cached data');
             setData({
               currentScores: parsedScores,
               profileData: parsedProfileData,
@@ -127,18 +106,10 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh:
           console.warn('useOptimizedMaturityScores: localStorage fallback failed');
         }
 
-        // Provide default mock data for new users
-        const mockScores = {
-          ideaValidation: 1,
-          userExperience: 1,
-          marketFit: 1,
-          monetization: 1
-        };
-
-        console.log('useOptimizedMaturityScores: Using default mock data');
+        // Final fallback: empty data
         setData({
-          currentScores: mockScores,
-          profileData: { isNewUser: true },
+          currentScores: null,
+          profileData: null,
           loading: false,
           error: null
         });
@@ -146,7 +117,7 @@ export const useOptimizedMaturityScores = (): OptimizedMaturityData & { refresh:
     };
 
     fetchMaturityScores();
-  }, [user, session, forceRefresh, refreshTrigger]);
+  }, [user]);
 
-  return { ...data, refresh: manualRefresh };
+  return data;
 };

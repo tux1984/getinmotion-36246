@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useOptimizedMaturityScores } from './useOptimizedMaturityScores';
 import { useUserBusinessProfile } from './useUserBusinessProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentTasks } from './useAgentTasks';
 import { useTaskLimits } from './useTaskLimits';
 import { useTaskGenerationControl } from './useTaskGenerationControl';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CoordinatorTask {
   id: string;
@@ -47,11 +47,11 @@ export interface TaskDeliverable {
 }
 
 export const useMasterCoordinator = () => {
-  const { user, session } = useRobustAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { currentScores, profileData } = useOptimizedMaturityScores();
   const { businessProfile } = useUserBusinessProfile();
-  const { tasks, createTask, updateTask, deleteTask, deleteAllTasks, loading: tasksLoading } = useAgentTasks();
+  const { tasks, createTask, updateTask, deleteTask, deleteAllTasks } = useAgentTasks();
   const { isAtLimit, getLimitMessage } = useTaskLimits(tasks);
   const { allowAutoGeneration } = useTaskGenerationControl();
   
@@ -60,13 +60,11 @@ export const useMasterCoordinator = () => {
   const [deliverables, setDeliverables] = useState<TaskDeliverable[]>([]);
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [coordinatorError, setCoordinatorError] = useState(false);
 
-  // FASE 1: Generación local de tareas - SIEMPRE FUNCIONA
+  // FASE 1: Análisis inteligente del perfil para generar tareas personalizadas
   const analyzeProfileAndGenerateTasks = useCallback(async () => {
-    // CRITICAL: Verify session before coordinator operations
-    if (!user?.id || !session?.access_token || loading) {
-      console.warn('🚫 Master Coordinator: No valid session available or already generating tasks');
+    if (!user || loading) {
+      console.warn('🚫 Master Coordinator: No user available or already generating tasks');
       return;
     }
 
@@ -81,141 +79,93 @@ export const useMasterCoordinator = () => {
       return;
     }
 
-    console.log('🧠 Master Coordinator: Generating local intelligent tasks - ALWAYS WORKS');
+    console.log('🧠 Master Coordinator: Analyzing COMPLETE profile and generating INTELLIGENT tasks');
     
     try {
       setLoading(true);
-      setCoordinatorError(false);
       
-      // Generate local tasks based on maturity scores - NO EDGE FUNCTIONS
-      const localTasks = generateLocalTasksFromMaturity();
-      
-      if (localTasks && localTasks.length > 0) {
-        console.log(`✅ Master Coordinator: Generated ${localTasks.length} local intelligent tasks`);
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'analyze_and_generate_tasks',
+          userId: user.id,
+          userProfile: profileData || null,
+          maturityScores: currentScores || null,
+          businessProfile: businessProfile || null
+        }
+      });
+
+      if (error) {
+        console.error('❌ Master Coordinator: Error from edge function:', error);
+        throw error;
+      }
+
+      if (data?.tasks) {
+        console.log(`✅ Master Coordinator: Generated ${data.tasks.length} ultra-personalized tasks`);
         
         toast({
           title: "¡Tareas Inteligentes Generadas!",
-          description: `He creado ${localTasks.length} tareas específicas basadas en tu perfil.`,
+          description: `He creado ${data.tasks.length} tareas específicas basadas en tu perfil completo.`,
         });
         
-        return localTasks;
+        return data.tasks;
+      } else {
+        console.warn('⚠️ Master Coordinator: No tasks returned from edge function');
       }
     } catch (error) {
-      console.error('❌ Master Coordinator: Error generating local tasks:', error);
-      // Even if there's an error, don't set coordinator error to prevent fallback mode
+      console.error('❌ Master Coordinator: Error generating tasks:', error);
+      toast({
+        title: "Error al Generar Tareas",
+        description: "Hubo un problema generando tus tareas personalizadas. Intenta de nuevo.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
-  }, [user?.id, session?.access_token, currentScores, toast, isAtLimit, getLimitMessage]);
+  }, [user, profileData, currentScores, businessProfile, toast, isAtLimit, getLimitMessage]);
 
-  // FASE 2: Generar preguntas locales inteligentes - SIEMPRE FUNCIONA
+  // FASE 2: Generar preguntas inteligentes contextuales
   const generateIntelligentQuestions = useCallback(async () => {
     if (!user?.id) return [];
 
-    console.log('🤔 Master Coordinator: Generating local intelligent questions - ALWAYS WORKS');
+    console.log('🤔 Master Coordinator: Generating intelligent contextual questions');
     
-    // Generate local questions based on current state - NO EDGE FUNCTIONS
-    const localQuestions = generateLocalQuestionsFromProfile();
-    console.log(`✅ Generated ${localQuestions.length} local intelligent questions`);
-    return localQuestions;
-  }, [user?.id, currentScores, businessProfile]);
-  
-  // Generate local tasks from maturity scores
-  const generateLocalTasksFromMaturity = useCallback(() => {
-    if (!currentScores) return [];
-    
-    const average = Object.values(currentScores).reduce((a, b) => a + b, 0) / 4;
-    
-    const baseTasks = [
-      {
-        title: "Validar Concepto de Negocio",
-        description: "Obtén validación experta sobre tu idea de negocio y potencial de mercado",
-        agentId: "cultural-consultant",
-        priority: 1,
-        relevance: "high" as const,
-        category: "Validación"
-      },
-      {
-        title: "Calcular Costos de Inicio",
-        description: "Analiza costos y crea proyecciones financieras para tu negocio",
-        agentId: "cost-calculator", 
-        priority: 2,
-        relevance: "high" as const,
-        category: "Finanzas"
-      },
-      {
-        title: "Estrategia de Marketing Digital",
-        description: "Crea un plan integral de marketing digital",
-        agentId: "marketing-advisor",
-        priority: 3,
-        relevance: average >= 40 ? "high" : "medium" as const,
-        category: "Marketing"
-      }
-    ];
-    
-    return baseTasks.map((task, index) => ({
-      ...task,
-      id: `local-task-${Date.now()}-${index}`
-    }));
-  }, [currentScores]);
-  
-  // Generate local questions from profile
-  const generateLocalQuestionsFromProfile = useCallback(() => {
-    const baseQuestions = [
-      {
-        id: "q1",
-        question: "¿Cuál es tu principal objetivo de negocio para los próximos 6 meses?",
-        type: "text",
-        category: "business_goals"
-      },
-      {
-        id: "q2", 
-        question: "¿Qué te motiva más en tu emprendimiento?",
-        type: "multiple_choice",
-        options: ["Impacto social", "Libertad financiera", "Innovación", "Crecimiento personal"],
-        category: "motivation"
-      },
-      {
-        id: "q3",
-        question: "¿Cuál es tu mayor desafío actual?",
-        type: "text", 
-        category: "challenges"
-      }
-    ];
-    
-    return baseQuestions;
-  }, [currentScores, businessProfile]);
+    try {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+        body: {
+          action: 'generate_intelligent_questions',
+          userId: user.id,
+          userProfile: profileData || null,
+          maturityScores: currentScores || null,
+          businessProfile: businessProfile || null
+        }
+      });
 
-  // Enhanced task transformation with better logging
+      if (error) throw error;
+
+      if (data?.questions) {
+        console.log(`✅ Generated ${data.questions.length} intelligent questions`);
+        return data.questions;
+      }
+      return [];
+    } catch (error) {
+      console.error('❌ Error generating intelligent questions:', error);
+      return [];
+    }
+  }, [user?.id, profileData, currentScores, businessProfile]);
+
+  // Convertir tareas normales a tareas del coordinador con lógica de desbloqueo
   const transformToCoordinatorTasks = useMemo(() => {
-    console.log('🔍 useMasterCoordinator: Transform called', {
-      hasUser: !!user?.id,
-      tasksArray: Array.isArray(tasks),
-      tasksCount: tasks?.length || 0
-    });
-
-    // Enhanced validation with detailed logging
-    if (!user?.id) {
-      console.log('🚫 useMasterCoordinator: No user ID for transformation');
-      return [];
-    }
-
-    if (!tasks || !Array.isArray(tasks)) {
-      console.log('🚫 useMasterCoordinator: Invalid tasks array');
-      return [];
-    }
-
-    if (tasks.length === 0) {
+    // Validaciones para evitar errores de variables no inicializadas
+    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
       console.log('🔍 useMasterCoordinator: No tasks available for transformation');
       return [];
     }
 
     try {
-      const validTasks = tasks.filter(task => task && task.id && task.title);
-      console.log('🔍 useMasterCoordinator: Valid tasks found:', validTasks.length);
+      const validTasks = tasks.filter(task => task && task.id);
       
       if (validTasks.length === 0) {
-        console.log('🚫 useMasterCoordinator: No valid tasks after filtering');
+        console.log('🔍 useMasterCoordinator: No valid tasks found');
         return [];
       }
       
@@ -230,51 +180,49 @@ export const useMasterCoordinator = () => {
         return (a.priority || 1) - (b.priority || 1);
       });
 
-      console.log('✅ useMasterCoordinator: Transforming', sortedTasks.length, 'tasks');
+      console.log('🔍 useMasterCoordinator: Transforming', sortedTasks.length, 'tasks');
 
-      const coordinatorTasks = sortedTasks.slice(0, 15).map((task, index) => {
-        try {
-          return {
-            id: task.id,
-            title: task.title || 'Tarea sin título',
-            description: task.description || '',
-            agentId: task.agent_id || 'general',
-            agentName: getAgentName(task.agent_id || 'general'),
-            priority: task.priority || 1,
-            relevance: task.relevance || 'medium',
-            estimatedTime: getEstimatedTime(task.title || ''),
-            category: getTaskCategory(task.agent_id || 'general'),
-            isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
-            prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
-            steps: generateStepsForTask(task)
-          };
-        } catch (taskError) {
-          console.error('❌ Error transforming individual task:', task.id, taskError);
+      return sortedTasks.slice(0, 15).map((task, index) => {
+        if (!task || !task.id) {
+          console.warn('🚫 useMasterCoordinator: Invalid task encountered:', task);
           return null;
         }
-      }).filter(Boolean);
 
-      console.log('✅ useMasterCoordinator: Successfully transformed to coordinator tasks:', coordinatorTasks.length);
-      return coordinatorTasks;
+        return {
+          id: task.id,
+          title: task.title || 'Tarea sin título',
+          description: task.description || '',
+          agentId: task.agent_id || 'general',
+          agentName: getAgentName(task.agent_id || 'general'),
+          priority: task.priority || 1,
+          relevance: task.relevance || 'medium',
+          estimatedTime: getEstimatedTime(task.title || ''),
+          category: getTaskCategory(task.agent_id || 'general'),
+          isUnlocked: index === 0 || validTasks.slice(0, index).some(t => t.status === 'completed'),
+          prerequisiteTasks: index > 0 && sortedTasks[index - 1] ? [sortedTasks[index - 1].id] : [],
+          steps: generateStepsForTask(task)
+        };
+      }).filter(Boolean); // Remove any null entries
     } catch (error) {
-      console.error('❌ useMasterCoordinator: Error in task transformation:', error);
+      console.error('❌ Error transforming tasks:', error);
       return [];
     }
-  }, [tasks, user?.id]);
+  }, [tasks]);
 
-  // Simplified initial task generation - removed restrictive conditions
+  // Generate initial tasks only when auto-generation is allowed (after maturity test)
   const generateInitialTasks = useCallback(async () => {
-    // Only skip if already loading to prevent duplicate calls
-    if (loading || !user?.id) {
+    if (!allowAutoGeneration || !user?.id || isInitialized || loading || tasks.length > 0) {
       console.log('🚫 Skipping auto task generation:', { 
+        allowAutoGeneration, 
+        userId: user?.id, 
+        isInitialized, 
         loading, 
-        userId: user?.id
+        tasksCount: tasks.length 
       });
       return;
     }
 
-    // Allow generation even if tasks exist - user might want more tasks
-    console.log('🚀 Master Coordinator: Generating tasks for user');
+    console.log('🚀 Master Coordinator: Auto-generating initial tasks after maturity test completion');
     
     try {
       await analyzeProfileAndGenerateTasks();
@@ -282,7 +230,7 @@ export const useMasterCoordinator = () => {
     } catch (error) {
       console.error('❌ Error in initial task generation:', error);
     }
-  }, [user?.id, loading, analyzeProfileAndGenerateTasks]);
+  }, [allowAutoGeneration, user?.id, isInitialized, loading, tasks.length, analyzeProfileAndGenerateTasks]);
 
   // Auto-initialize only when conditions are met
   useEffect(() => {
@@ -306,14 +254,10 @@ export const useMasterCoordinator = () => {
   }, [user]);
 
   const loadDeliverables = async () => {
-    // CRITICAL: Verify session before database operations
-    if (!user?.id || !session?.access_token) {
-      console.log('🚫 Master Coordinator: No valid session for loading deliverables');
-      return;
-    }
+    if (!user) return;
     
     try {
-      const { data, error } = await safeSupabase
+      const { data, error } = await supabase
         .from('agent_deliverables')
         .select('*')
         .eq('user_id', user.id)
@@ -322,7 +266,7 @@ export const useMasterCoordinator = () => {
       if (error) throw error;
       
       // Transform database fields to match TaskDeliverable interface
-      const transformedDeliverables: TaskDeliverable[] = (data || []).map((item: any) => ({
+      const transformedDeliverables: TaskDeliverable[] = (data || []).map(item => ({
         id: item.id,
         taskId: item.task_id,
         title: item.title,
@@ -365,7 +309,7 @@ export const useMasterCoordinator = () => {
           throw new Error('Default task not found');
         }
 
-        const { data: newTask, error: createError } = await safeSupabase
+        const { data: newTask, error: createError } = await supabase
           .from('agent_tasks')
           .insert({
             user_id: user?.id,
@@ -382,8 +326,8 @@ export const useMasterCoordinator = () => {
         if (createError) throw createError;
         
         // Update the taskId to the newly created task
-        taskId = (newTask as any).id;
-        console.log('✅ New task created:', (newTask as any).id);
+        taskId = newTask.id;
+        console.log('✅ New task created:', newTask.id);
         
       } catch (error) {
         console.error('❌ Error creating task:', error);
@@ -404,7 +348,7 @@ export const useMasterCoordinator = () => {
 
     try {
       // Check if steps already exist for this task
-      const { data: existingSteps, error: stepsError } = await safeSupabase
+      const { data: existingSteps, error: stepsError } = await supabase
         .from('task_steps')
         .select('id')
         .eq('task_id', taskId);
@@ -415,23 +359,17 @@ export const useMasterCoordinator = () => {
       if (!existingSteps || existingSteps.length === 0) {
         console.log('📝 Creating steps for task:', task.title);
         
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Steps timeout')), 15000)
-      );
-      
-      const invokePromise = safeSupabase.functions.invoke('master-agent-coordinator', {
-        body: {
-          action: 'create_task_steps',
-          taskId,
-          taskData: task,
-          profileContext: { 
-            profileData: profileData || null, 
-            businessProfile: businessProfile || null 
+        const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
+          body: {
+            action: 'create_task_steps',
+            taskId,
+            taskData: task,
+            profileContext: { 
+              profileData: profileData || null, 
+              businessProfile: businessProfile || null 
+            }
           }
-        }
-      });
-
-      const { data, error } = await Promise.race([invokePromise, timeoutPromise]) as any;
+        });
 
         if (error) {
           console.error('❌ Error creating steps:', error);
@@ -444,7 +382,7 @@ export const useMasterCoordinator = () => {
       }
 
       // Update task status to in progress
-      const { error: updateError } = await safeSupabase
+      const { error: updateError } = await supabase
         .from('agent_tasks')
         .update({ 
           status: 'in_progress',
@@ -468,7 +406,7 @@ export const useMasterCoordinator = () => {
     try {
       console.log('✅ Master Coordinator: Completing step', stepId, 'for task', taskId);
       
-      const { data, error } = await safeSupabase.functions.invoke('master-agent-coordinator', {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'complete_step',
           taskId,
@@ -514,7 +452,7 @@ export const useMasterCoordinator = () => {
     try {
       console.log('📄 Master Coordinator: Generating deliverable for task', taskId);
       
-      const { data, error } = await safeSupabase.functions.invoke('master-agent-coordinator', {
+      const { data, error } = await supabase.functions.invoke('master-agent-coordinator', {
         body: {
           action: 'generate_deliverable',
           taskId,
@@ -645,8 +583,7 @@ export const useMasterCoordinator = () => {
     currentPath,
     deliverables,
     loading,
-    coordinatorError,
-    coordinatorMessage: getCoordinatorMessage()?.message || 'Analyzing your business profile...',
+    coordinatorMessage: getCoordinatorMessage(),
     nextUnlockedTask: getNextUnlockedTask(),
     regenerateTasksFromProfile,
     analyzeProfileAndGenerateTasks,

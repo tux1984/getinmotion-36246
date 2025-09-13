@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { supabase } from '@/integrations/supabase/client';
 import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,9 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Phone, Mail, ExternalLink, Instagram, Facebook, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
-import { useDataAudit } from '@/hooks/useDataAudit';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { logger } from '@/utils/logger';
 
 export const PublicShopPage: React.FC = () => {
   const { shopSlug } = useParams<{ shopSlug: string }>();
@@ -18,53 +15,16 @@ export const PublicShopPage: React.FC = () => {
   const [shop, setShop] = useState<ArtisanShop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [rateLimited, setRateLimited] = useState(false);
-  const { logPublicDataAccess } = useDataAudit();
-  const { checkRateLimit } = useRateLimit();
 
   useEffect(() => {
     const fetchShopData = async () => {
       if (!shopSlug) return;
 
-      // Check rate limit
-      const rateCheck = checkRateLimit('shopView');
-      if (!rateCheck.allowed) {
-        setRateLimited(true);
-        setLoading(false);
-        logger.security.rateLimitExceeded(
-          'anonymous',
-          100,
-          '60s'
-        );
-        return;
-      }
-
       try {
-        // Fetch shop data with privacy controls
-        const { data: shopData, error: shopError } = await safeSupabase
+        // Fetch shop data
+        const { data: shopData, error: shopError } = await supabase
           .from('artisan_shops')
-          .select(`
-            id,
-            user_id,
-            shop_name,
-            shop_slug,
-            description,
-            story,
-            banner_url,
-            logo_url,
-            craft_type,
-            region,
-            public_profile,
-            privacy_level,
-            contact_info,
-            social_links,
-            certifications,
-            active,
-            featured,
-            seo_data,
-            created_at,
-            updated_at
-          `)
+          .select('*')
           .eq('shop_slug', shopSlug)
           .eq('active', true)
           .single();
@@ -78,7 +38,7 @@ export const PublicShopPage: React.FC = () => {
         setShop(shopData);
 
         // Fetch products
-        const { data: productsData, error: productsError } = await safeSupabase
+        const { data: productsData, error: productsError } = await supabase
           .from('products')
           .select('*')
           .eq('shop_id', shopData.id)
@@ -91,7 +51,7 @@ export const PublicShopPage: React.FC = () => {
         }
 
         // Track shop view
-        await safeSupabase
+        await supabase
           .from('artisan_analytics')
           .upsert({
             shop_id: shopData.id,

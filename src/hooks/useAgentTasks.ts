@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AgentTask, PaginatedTasks } from './types/agentTaskTypes';
 import { useAgentTasksQueries } from './useAgentTasksQueries';
@@ -9,13 +9,10 @@ import { useAgentTasksSpecialOperations } from './useAgentTasksSpecialOperations
 import { replaceGoalArrayInText } from './utils/agentTaskUtils';
 
 export function useAgentTasks(agentId?: string) {
-  const { user, session } = useRobustAuth();
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
-
-  // Improved session validation
-  const hasValidSession = Boolean(user?.id && user?.id !== '');
 
   // Initialize query hooks
   const { fetchTasks, fetchPaginatedTasks } = useAgentTasksQueries(user, agentId);
@@ -35,27 +32,11 @@ export function useAgentTasks(agentId?: string) {
     updateTimeSpent
   } = useAgentTasksSpecialOperations(user, tasks, setTasks, updateTask);
 
-  // Improved fetchTasks wrapper with detailed logging
+  // Wrapper for fetchTasks to handle state management
   const refreshTasks = useCallback(() => {
-    console.log('🔍 useAgentTasks: Refresh attempt', {
-      hasUser: !!user,
-      userId: user?.id,
-      hasValidSession,
-      agentId
-    });
-    
-    if (!hasValidSession) {
-      console.log('🚫 useAgentTasks: No valid session, clearing tasks');
-      setTasks([]);
-      setTotalCount(0);
-      setLoading(false);
-      return;
-    }
-    
-    console.log('🔄 useAgentTasks: Fetching tasks for user:', user.id);
     setLoading(true);
     fetchTasks(setTasks, setTotalCount, setLoading);
-  }, [fetchTasks, hasValidSession, user?.id, agentId]);
+  }, [fetchTasks]);
 
   useEffect(() => {
     refreshTasks();
@@ -63,7 +44,7 @@ export function useAgentTasks(agentId?: string) {
 
   // Realtime subscription for tasks
   useEffect(() => {
-    if (!hasValidSession) return;
+    if (!user) return;
 
     const channel = supabase
       .channel(`realtime-tasks-user-${user.id}-agent-${agentId || 'all'}`)

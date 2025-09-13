@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { UserBusinessProfile, BusinessModel, BusinessStage } from '@/types/profile';
 import { useTaskTitleCleanup } from './useTaskTitleCleanup';
 
 export const useUserBusinessProfile = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserBusinessProfile | null>(null);
@@ -119,7 +119,7 @@ export const useUserBusinessProfile = () => {
 
     const fetchProfile = async () => {
       try {
-        const { data, error } = await safeSupabase
+        const { data, error } = await supabase
           .from('user_profiles')
           .select('*')
           .eq('user_id', user.id)

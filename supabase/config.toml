@@ -20,6 +20,3 @@ verify_jwt = true
 
 [functions.validate-access-code]
 verify_jwt = false
-
-[functions.master-agent-coordinator]
-verify_jwt = false

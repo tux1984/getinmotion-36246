@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useArtisanShop } from '@/hooks/useArtisanShop';
 import { useArtisanDetection } from '@/hooks/useArtisanDetection';
 import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Store, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
@@ -60,7 +60,7 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
   const [isPrefillingData, setIsPrefillingData] = useState(true);
   const [coordinatorMessage, setCoordinatorMessage] = useState('');
 
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { isArtisan, craftType } = useArtisanDetection();
   const { createShop, loading: shopLoading } = useArtisanShop();
   const { coordinatorMessage: masterMessage } = useMasterCoordinator();
@@ -116,14 +116,14 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
         const { data: profile } = await supabase
           .from('user_profiles')
           .select('*')
-          .eq('user_id', user.id as any)
+          .eq('user_id', user.id)
           .single();
 
         // Get master context
         const { data: masterContext } = await supabase
           .from('user_master_context')
           .select('*')
-          .eq('user_id', user.id as any)
+          .eq('user_id', user.id)
           .single();
 
         // Call intelligent shop creation function
@@ -140,15 +140,15 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
           setCoordinatorMessage(shopSuggestions.coordinatorMessage || '✨ Tu tienda ha sido preconfigurada con tu información existente');
         } else {
           // Fallback to basic prefilling
-          const businessProfile = (masterContext as any)?.business_profile || {};
-          const socialMedia = (profile as any)?.social_media_presence || {};
+          const businessProfile = (masterContext?.business_profile as any) || {};
+          const socialMedia = (profile?.social_media_presence as any) || {};
 
           setFormData({
-            shop_name: (profile as any)?.brand_name || (typeof (profile as any)?.business_description === 'string' ? (profile as any).business_description.split(' ').slice(0, 3).join(' ') : '') || '',
-            description: ((profile as any)?.business_description as string) || '',
+            shop_name: profile?.brand_name || (typeof profile?.business_description === 'string' ? profile.business_description.split(' ').slice(0, 3).join(' ') : '') || '',
+            description: (profile?.business_description as string) || '',
             story: businessProfile.story || '',
             craft_type: craftType || 'other',
-            region: (profile as any)?.business_location || '',
+            region: profile?.business_location || '',
             contact_info: {
               phone: businessProfile.phone || '',
               email: user.email || '',
@@ -396,112 +396,39 @@ export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWiza
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-4xl mx-auto p-6 py-12">
-        {/* Enhanced Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-3 mb-6">
-            <motion.div
-              animate={{ 
-                scale: [1, 1.1, 1],
-                rotate: [0, 10, -10, 0]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-xl"
-            >
-              <Store className="w-8 h-8 text-white" />
-            </motion.div>
-            <div className="text-left">
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{t.title}</h1>
-              <p className="text-lg text-emerald-600 dark:text-emerald-400 font-medium">{t.subtitle}</p>
-            </div>
-          </div>
-          
-          {/* Progress indicator */}
-          <div className="flex justify-center items-center gap-2 mb-8">
-            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              ['loading', 'preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
-              ['preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              ['preconfigured', 'review', 'creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
-              ['review', 'creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              ['review', 'creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-8 h-1 rounded-full transition-colors duration-300 ${
-              ['creating', 'complete'].indexOf(step) >= 0 
-                ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-            <div className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              step === 'complete' ? 'bg-emerald-500' : 'bg-gray-300'
-            }`} />
-          </div>
-        </motion.div>
-
-        {/* Enhanced Card */}
-        <Card className="border-emerald-200 dark:border-emerald-800 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 rounded-t-lg">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                <Store className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <div className="text-gray-900 dark:text-white">
-                  {step === 'loading' && 'Analizando tu Perfil'}
-                  {step === 'preconfigured' && 'Configuración Inteligente'}
-                  {step === 'review' && 'Revisión Final'}
-                  {step === 'creating' && 'Creando tu Tienda'}
-                  {step === 'complete' && '¡Tienda Creada!'}
-                </div>
-                <CardDescription className="text-base">
-                  {step === 'loading' && 'El Coordinador Maestro está analizando tu información...'}
-                  {step === 'preconfigured' && 'Revisa y ajusta los datos pre-llenados'}
-                  {step === 'review' && 'Última revisión antes de crear tu tienda'}
-                  {step === 'creating' && 'Configurando tu tienda digital...'}
-                  {step === 'complete' && '¡Tu tienda digital está lista!'}
-                </CardDescription>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="p-8">
-            {step === 'loading' && renderLoadingStep()}
-            {step === 'preconfigured' && renderPreconfiguredStep()}
-            {step === 'review' && renderReviewStep()}
-            {step === 'creating' && renderCreatingStep()}
-            {step === 'complete' && renderCompleteStep()}
-          </CardContent>
-        </Card>
-
-        {/* Bottom decoration */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="text-center mt-12 text-gray-500 dark:text-gray-400"
-        >
-          <p className="text-sm">✨ Potenciado por Inteligencia Artificial para Artesanos ✨</p>
-        </motion.div>
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
+        <p className="text-muted-foreground">{t.subtitle}</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Store className="w-5 h-5" />
+            {step === 'loading' && 'Analizando Perfil'}
+            {step === 'preconfigured' && 'Configuración Inteligente'}
+            {step === 'review' && 'Revisión Final'}
+            {step === 'creating' && 'Creando Tienda'}
+            {step === 'complete' && 'Tienda Creada'}
+          </CardTitle>
+          <CardDescription>
+            {step === 'loading' && 'El Coordinador Maestro está analizando tu información...'}
+            {step === 'preconfigured' && 'Revisa y ajusta los datos pre-llenados'}
+            {step === 'review' && 'Última revisión antes de crear tu tienda'}
+            {step === 'creating' && 'Configurando tu tienda digital...'}
+            {step === 'complete' && '¡Tu tienda digital está lista!'}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          {step === 'loading' && renderLoadingStep()}
+          {step === 'preconfigured' && renderPreconfiguredStep()}
+          {step === 'review' && renderReviewStep()}
+          {step === 'creating' && renderCreatingStep()}
+          {step === 'complete' && renderCompleteStep()}
+        </CardContent>
+      </Card>
     </div>
   );
 };

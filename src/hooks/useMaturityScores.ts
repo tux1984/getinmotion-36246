@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { CategoryScore } from '@/types/dashboard';
 
 interface MaturityScoreRecord {
@@ -15,7 +16,7 @@ interface MaturityScoreRecord {
 }
 
 export const useMaturityScores = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [currentScores, setCurrentScores] = useState<CategoryScore | null>(null);
   const [scoreHistory, setScoreHistory] = useState<MaturityScoreRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,13 +26,13 @@ export const useMaturityScores = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await safeSupabase.rpc('get_latest_maturity_scores', {
+      const { data, error } = await supabase.rpc('get_latest_maturity_scores', {
         user_uuid: user.id
       });
 
       if (error) throw error;
 
-      if (data && Array.isArray(data) && data.length > 0) {
+      if (data && data.length > 0) {
         const latest = data[0];
         setCurrentScores({
           ideaValidation: latest.idea_validation,
@@ -52,7 +53,7 @@ export const useMaturityScores = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await safeSupabase
+      const { data, error } = await supabase
         .from('user_maturity_scores')
         .select('*')
         .eq('user_id', user.id)
@@ -60,7 +61,7 @@ export const useMaturityScores = () => {
         .limit(10);
 
       if (error) throw error;
-      setScoreHistory(data as any || []);
+      setScoreHistory(data || []);
     } catch (err) {
       console.error('Error fetching score history:', err);
     }
@@ -70,7 +71,7 @@ export const useMaturityScores = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await safeSupabase
+      const { data, error } = await supabase
         .from('user_maturity_scores')
         .insert({
           user_id: user.id,
@@ -86,7 +87,7 @@ export const useMaturityScores = () => {
       if (error) throw error;
 
       setCurrentScores(scores);
-      setScoreHistory(prev => [data as any, ...prev]);
+      setScoreHistory(prev => [data, ...prev]);
       
       return data;
     } catch (err) {

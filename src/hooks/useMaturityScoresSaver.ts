@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { CategoryScore } from '@/types/dashboard';
 
 export const useMaturityScoresSaver = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +21,7 @@ export const useMaturityScoresSaver = () => {
       
       console.log('Saving maturity scores to database:', { userId: user.id, scores });
 
-      const { data, error: supabaseError } = await safeSupabase
+      const { data, error: supabaseError } = await supabase
         .from('user_maturity_scores')
         .insert({
           user_id: user.id,

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { MotionLogo } from '@/components/MotionLogo';
 import { AuthDebugPanel } from '@/components/auth/AuthDebugPanel';
@@ -14,14 +14,13 @@ import { getUserProgressStatus, getUserProgressStatusSync } from '@/utils/userPr
 import { LanguageSwitcherButton } from '@/components/language/LanguageSwitcherButton';
 import { LanguageSwitcherModal } from '@/components/language/LanguageSwitcherModal';
 import { useLanguageSwitcher } from '@/hooks/useLanguageSwitcher';
-import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const { signIn, user, isAuthorized, loading, authorizationLoading } = useRobustAuth();
+  const { signIn, user, isAuthorized, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,8 +88,7 @@ const Login = () => {
   // Redirect if already authenticated and authorized
   useEffect(() => {
     // Only redirect if we're not loading and have a clear auth state
-    // Wait for both auth loading and authorization loading to complete
-    if (!loading && !authorizationLoading && user && isAuthorized === true) {
+    if (!loading && user && isAuthorized) {
       console.log('Login: User authenticated and authorized, preparing redirect');
       
       // Add a small delay to ensure auth state is stable, then determine redirect
@@ -120,20 +118,19 @@ const Login = () => {
 
       return () => clearTimeout(redirectTimer);
     }
-  }, [user, isAuthorized, loading, authorizationLoading, navigate, location]);
+  }, [user, isAuthorized, loading, navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
-
-    console.log('🔑 Login: Starting login process for:', email);
     setIsLoading(true);
-
+    
+    console.log('Login: Attempting login for:', email);
+    
     try {
       const { error } = await signIn(email, password);
       
       if (error) {
-        console.error('❌ Login: Sign in failed:', error);
+        console.error('Login: Error during sign in:', error);
         
         // Better error handling based on error type
         let errorTitle = t.errorOccurred;
@@ -155,24 +152,17 @@ const Login = () => {
           description: errorDescription,
           variant: "destructive",
         });
-        return;
+      } else {
+        console.log('Login: Sign in successful');
+        toast({
+          title: t.welcomeBack,
+          description: t.loginSuccessful,
+        });
+        
+        // The redirect will be handled by the useEffect above
       }
-
-      console.log('✅ Login: Sign in successful');
-      toast({
-        title: t.welcomeBack,
-        description: t.loginSuccessful,
-      });
-      
-      // Immediate redirect - AuthProvider will handle session validation
-      const redirectPath = await getUserRedirectPath();
-      const targetPath = redirectPath || (location.state as any)?.from?.pathname || '/dashboard';
-      
-      console.log('📍 Login: Redirecting to:', targetPath);
-      navigate(targetPath, { replace: true });
-      
     } catch (error) {
-      console.error('❌ Login: Unexpected error:', error);
+      console.error('Login: Exception during sign in:', error);
       toast({
         title: t.errorOccurred,
         description: error instanceof Error ? error.message : 'Unknown error',
@@ -183,16 +173,14 @@ const Login = () => {
     }
   };
 
-  // Show loading state while checking auth or authorization
-  if (loading || (user && authorizationLoading)) {
-    console.log('Login: Showing loading state', { loading, authorizationLoading });
+  // Show loading state with timeout
+  if (loading) {
+    console.log('Login: Showing loading state');
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex items-center justify-center">
         <div className="text-white flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <div>
-            {loading ? 'Checking session...' : 'Verifying authorization...'}
-          </div>
+          <div>Checking session...</div>
         </div>
       </div>
     );

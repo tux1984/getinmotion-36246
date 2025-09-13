@@ -16,17 +16,12 @@ interface RecommendedTasksSectionProps {
 
 const RecommendedTasksSection: React.FC<RecommendedTasksSectionProps> = ({
   language,
-  maturityScores
+  maturityScores = {}
 }) => {
   const [isHidden, setIsHidden] = useState(false);
   const [convertingTasks, setConvertingTasks] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const { createTask } = useAgentTasks();
-
-  // Early return if no maturity scores provided
-  if (!maturityScores) {
-    return null;
-  }
 
   const { 
     recommendations: recommendedTasks, 

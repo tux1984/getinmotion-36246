@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RobustDashboardData {
   profile: {
@@ -31,7 +31,7 @@ const DEFAULT_SCORES = {
 };
 
 export const useRobustDashboardData = (): RobustDashboardData => {
-  const { user, session } = useRobustAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<RobustDashboardData>({
     profile: {
       name: 'Usuario',
@@ -44,9 +44,7 @@ export const useRobustDashboardData = (): RobustDashboardData => {
   });
 
   useEffect(() => {
-    // Check both user AND session to ensure valid authentication
-    if (!user || !session) {
-      console.log('🔍 useRobustDashboardData: No valid user/session, setting defaults');
+    if (!user) {
       setData(prev => ({
         ...prev,
         loading: false,
@@ -55,33 +53,7 @@ export const useRobustDashboardData = (): RobustDashboardData => {
       return;
     }
 
-    // Check if we have auth.uid() by testing a simple query
-    const verifySession = async () => {
-      try {
-        const { data: authTest, error } = await safeSupabase.rpc('is_authorized_user', { 
-          user_email: user.email || '' 
-        });
-        
-        if (error) {
-          console.error('🚫 useRobustDashboardData: Session verification failed:', error);
-          setData(prev => ({ ...prev, loading: false }));
-          return false;
-        }
-        
-        console.log('✅ useRobustDashboardData: Session verified successfully');
-        return true;
-      } catch (error) {
-        console.error('🚫 useRobustDashboardData: Session test failed:', error);
-        setData(prev => ({ ...prev, loading: false }));
-        return false;
-      }
-    };
-
     const loadData = async () => {
-      // First verify session is working
-      const sessionValid = await verifySession();
-      if (!sessionValid) return;
-
       try {
         // Datos básicos del usuario - SIEMPRE disponibles
         const basicProfile = {
@@ -89,16 +61,16 @@ export const useRobustDashboardData = (): RobustDashboardData => {
           email: user.email || ''
         };
 
-        // Intentar cargar datos adicionales con timeout normal
+        // Intentar cargar datos adicionales con timeout corto
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 10000)
+          setTimeout(() => reject(new Error('Timeout')), 2000)
         );
 
         try {
           const [scoresResult, agentsResult] = await Promise.race([
             Promise.all([
-              safeSupabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
-              safeSupabase.from('user_agents').select('*').eq('user_id', user.id)
+              supabase.rpc('get_latest_maturity_scores', { user_uuid: user.id }),
+              supabase.from('user_agents').select('*').eq('user_id', user.id)
             ]),
             timeoutPromise
           ]) as any[];
@@ -145,7 +117,7 @@ export const useRobustDashboardData = (): RobustDashboardData => {
     };
 
     loadData();
-  }, [user, session]);
+  }, [user]);
 
   return data;
 };

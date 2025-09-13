@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { DEFAULT_LANGUAGE, type Language } from '@/types/language';
-import { safeSupabase } from '@/utils/supabase-safe';
 
 interface LanguageSystemHook {
   language: Language;
@@ -13,7 +13,7 @@ interface LanguageSystemHook {
 }
 
 export const useLanguageSystem = (): LanguageSystemHook => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLoading, setIsLoading] = useState(false);
   const [needsLanguageSelection, setNeedsLanguageSelection] = useState(false);
@@ -25,30 +25,29 @@ export const useLanguageSystem = (): LanguageSystemHook => {
 
       try {
         // Check user profile first
-        const { data: profile, error: profileError } = await safeSupabase
+        const { data: profile } = await supabase
           .from('user_profiles')
           .select('language_preference')
           .eq('user_id', user.id)
-          .maybeSingle();
+          .single();
 
-        if (!profileError && profile?.language_preference) {
+        if (profile?.language_preference) {
           setLanguageState(profile.language_preference as Language);
           setNeedsLanguageSelection(false);
         } else {
           // Check master context as fallback
-          const { data: context, error: contextError } = await safeSupabase
+          const { data: context } = await supabase
             .from('user_master_context')
             .select('language_preference')
             .eq('user_id', user.id)
-            .maybeSingle();
+            .single();
 
-          if (!contextError && context?.language_preference) {
+          if (context?.language_preference) {
             setLanguageState(context.language_preference as Language);
             setNeedsLanguageSelection(false);
           } else {
-            // No language preference found - use default and skip selection for now
-            setLanguageState(DEFAULT_LANGUAGE);
-            setNeedsLanguageSelection(false);
+            // No language preference found - need selection
+            setNeedsLanguageSelection(true);
           }
         }
       } catch (error) {
@@ -66,7 +65,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
 
     try {
       // Update or create master context
-      const { error } = await safeSupabase
+      const { error } = await supabase
         .from('user_master_context')
         .upsert({
           user_id: user.id,
@@ -79,7 +78,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
       if (error) throw error;
 
       // Notify Master Coordinator about language change
-      await safeSupabase.functions.invoke('contexto-maestro', {
+      await supabase.functions.invoke('contexto-maestro', {
         body: {
           action: 'update',
           userId: user.id,
@@ -101,7 +100,7 @@ export const useLanguageSystem = (): LanguageSystemHook => {
     setIsLoading(true);
     try {
       // Update user profile
-      const { error: profileError } = await safeSupabase
+      const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
           user_id: user.id,

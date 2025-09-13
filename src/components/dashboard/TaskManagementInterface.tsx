@@ -132,122 +132,108 @@ export const TaskManagementInterface: React.FC<TaskManagementInterfaceProps> = (
 
   return (
     <>
-      <Card className="bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 relative z-10">
         {/* Header */}
-        <div className="p-6 border-b border-border/20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Target className="w-5 h-5 text-primary" />
-                {t[language].taskManagement}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Tareas generadas automáticamente basadas en tu perfil
-              </p>
-            </div>
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              className="shrink-0"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t[language].newTask}
-            </Button>
-          </div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Target className="w-5 h-5 text-purple-400" />
+            {t[language].taskManagement}
+          </h2>
+          <Button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {t[language].newTask}
+          </Button>
         </div>
 
         {/* Task Statistics */}
-        <div className="p-6 pb-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-background rounded-lg p-3 text-center border border-border/50">
-              <div className="text-2xl font-bold text-foreground">{taskStats.total}</div>
-              <div className="text-xs text-muted-foreground">{t[language].allTasks}</div>
-            </div>
-            <div className="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-200">
-              <div className="text-2xl font-bold text-yellow-700">{taskStats.pending}</div>
-              <div className="text-xs text-yellow-600">{t[language].pending}</div>
-            </div>
-            <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
-              <div className="text-2xl font-bold text-blue-700">{taskStats.inProgress}</div>
-              <div className="text-xs text-blue-600">{t[language].inProgress}</div>
-            </div>
-            <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200">
-              <div className="text-2xl font-bold text-green-700">{taskStats.completed}</div>
-              <div className="text-xs text-green-600">{t[language].completed}</div>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-white">{taskStats.total}</div>
+            <div className="text-xs text-white/70">{t[language].allTasks}</div>
+          </div>
+          <div className="bg-yellow-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-yellow-300">{taskStats.pending}</div>
+            <div className="text-xs text-yellow-200">{t[language].pending}</div>
+          </div>
+          <div className="bg-blue-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-blue-300">{taskStats.inProgress}</div>
+            <div className="text-xs text-blue-200">{t[language].inProgress}</div>
+          </div>
+          <div className="bg-green-500/20 rounded-lg p-3 text-center">
+            <div className="text-lg font-bold text-green-300">{taskStats.completed}</div>
+            <div className="text-xs text-green-200">{t[language].completed}</div>
           </div>
         </div>
 
         {/* Recent Tasks */}
-        <div className="px-6 pb-6">
-          {recentTasks.length === 0 ? (
-            <div className="text-center py-12">
-              <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-              <h3 className="text-lg font-medium mb-2">{t[language].noTasks}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t[language].createFirst}</p>
-              <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 max-w-md mx-auto">
-                💡 Las tareas se generan automáticamente después de completar la calculadora de madurez
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-4 rounded-lg bg-background border border-border hover:border-primary/50 transition-all duration-200 cursor-pointer border-l-4 ${getPriorityColor(task.priority)}`}
-                  onClick={() => setSelectedTask(task)}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate">
-                        {task.title}
-                      </h4>
-                      {task.description && (
-                        <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
-                          {task.description}
-                        </p>
-                      )}
+        {recentTasks.length === 0 ? (
+          <div className="text-center py-8 text-white/60">
+            <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">{t[language].noTasks}</p>
+            <p className="text-xs opacity-75">{t[language].createFirst}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentTasks.map((task) => (
+              <div
+                key={task.id}
+                className={`p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer border-l-4 ${getPriorityColor(task.priority)}`}
+                onClick={() => setSelectedTask(task)}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-white text-sm font-medium truncate">
+                      {task.title}
+                    </h4>
+                    {task.description && (
+                      <p className="text-white/70 text-xs mt-1 line-clamp-1">
+                        {task.description}
+                      </p>
+                    )}
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-white/60 hover:text-white h-6 w-6 p-0">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Progress Bar */}
+                {task.progress_percentage > 0 && (
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-white/60">{t[language].progress}</span>
+                      <span className="text-xs text-white/60">{task.progress_percentage}%</span>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    <Progress value={task.progress_percentage} className="h-1 bg-white/20" />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className={`text-xs ${getStatusColor(task.status)}`}>
+                      {t[language][task.status] || task.status}
+                    </Badge>
+                    
+                    {task.due_date && (
+                      <div className="flex items-center gap-1 text-xs text-white/60">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Progress Bar */}
-                  {task.progress_percentage > 0 && (
-                    <div className="mb-3">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-muted-foreground">{t[language].progress}</span>
-                        <span className="text-xs font-medium">{task.progress_percentage}%</span>
-                      </div>
-                      <Progress value={task.progress_percentage} className="h-2" />
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className={`text-xs ${getStatusColor(task.status)}`}>
-                        {t[language][task.status] || task.status}
-                      </Badge>
-                      
-                      {task.due_date && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <User className="w-3 h-3" />
-                      <span>General</span>
-                    </div>
+                  <div className="flex items-center gap-1 text-xs text-white/60">
+                    <User className="w-3 h-3" />
+                    <span>General</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Create Task Modal */}

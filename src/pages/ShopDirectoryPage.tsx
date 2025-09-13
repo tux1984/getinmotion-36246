@@ -9,9 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapPin, Star, Search, Filter, ShoppingBag } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { useDataAudit } from '@/hooks/useDataAudit';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { logger } from '@/utils/logger';
 
 export const ShopDirectoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,9 +20,6 @@ export const ShopDirectoryPage: React.FC = () => {
   const [selectedCraft, setSelectedCraft] = useState(searchParams.get('craft') || 'all');
   const [selectedRegion, setSelectedRegion] = useState(searchParams.get('region') || 'all');
   const [featuredOnly, setFeaturedOnly] = useState(searchParams.get('featured') === 'true');
-  const [rateLimited, setRateLimited] = useState(false);
-  const { logPublicDataAccess } = useDataAudit();
-  const { checkRateLimit } = useRateLimit();
 
   const craftTypes: { value: CraftType; label: string }[] = [
     { value: 'textiles', label: 'Textiles' },
@@ -61,63 +55,18 @@ export const ShopDirectoryPage: React.FC = () => {
 
   useEffect(() => {
     const fetchShops = async () => {
-      // Check rate limit
-      const rateCheck = checkRateLimit('publicApi');
-      if (!rateCheck.allowed) {
-        setRateLimited(true);
-        setLoading(false);
-        return;
-      }
-
       try {
         const { data, error } = await supabase
           .from('artisan_shops')
-          .select(`
-            id,
-            user_id,
-            shop_name,
-            shop_slug,
-            description,
-            banner_url,
-            logo_url,
-            craft_type,
-            region,
-            public_profile,
-            privacy_level,
-            featured,
-            created_at,
-            contact_info,
-            social_links,
-            certifications,
-            active,
-            seo_data,
-            updated_at
-          `)
+          .select('*')
           .eq('active', true)
           .order('featured', { ascending: false })
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-
-        // Log directory access
-        await logPublicDataAccess('shops_directory', 'all', 'view');
-
-        // Process shops based on privacy settings
-        const processedShops: ArtisanShop[] = data?.map(shop => {
-          const publicProfile = typeof shop.public_profile === 'object' && shop.public_profile !== null ? shop.public_profile as any : {};
-          
-          return {
-            ...shop,
-            // Use public_profile data for shops with restricted privacy
-            contact_info: shop.privacy_level === 'public' ? shop.contact_info : undefined,
-            displayName: publicProfile?.shop_name || shop.shop_name,
-            displayLocation: publicProfile?.location || (shop.privacy_level === 'public' ? shop.region : 'Ubicación privada')
-          } as ArtisanShop;
-        }) || [];
-
-        setShops(processedShops);
+        setShops(data || []);
       } catch (error) {
-        logger.error('Error fetching shops', error as Error);
+        console.error('Error fetching shops:', error);
       } finally {
         setLoading(false);
       }

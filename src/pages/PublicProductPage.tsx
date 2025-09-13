@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { supabase } from '@/integrations/supabase/client';
 import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,9 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Phone, Mail, Star, Package, Ruler, Timer, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
-import { useDataAudit } from '@/hooks/useDataAudit';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { logger } from '@/utils/logger';
 
 export const PublicProductPage: React.FC = () => {
   const { shopSlug, productId } = useParams<{ shopSlug: string; productId: string }>();
@@ -20,47 +17,16 @@ export const PublicProductPage: React.FC = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [rateLimited, setRateLimited] = useState(false);
-  const { logPublicDataAccess } = useDataAudit();
-  const { checkRateLimit } = useRateLimit();
 
   useEffect(() => {
     const fetchProductData = async () => {
       if (!shopSlug || !productId) return;
 
-      // Check rate limit
-      const rateCheck = checkRateLimit('shopView');
-      if (!rateCheck.allowed) {
-        setRateLimited(true);
-        setLoading(false);
-        return;
-      }
-
       try {
-        // First get shop data with privacy controls
-        const { data: shopData, error: shopError } = await safeSupabase
+        // First get shop data
+        const { data: shopData, error: shopError } = await supabase
           .from('artisan_shops')
-          .select(`
-            id,
-            user_id,
-            shop_name,
-            shop_slug,
-            description,
-            banner_url,
-            logo_url,
-            craft_type,
-            region,
-            public_profile,
-            privacy_level,
-            contact_info,
-            social_links,
-            certifications,
-            active,
-            featured,
-            seo_data,
-            created_at,
-            updated_at
-          `)
+          .select('*')
           .eq('shop_slug', shopSlug)
           .eq('active', true)
           .single();
@@ -74,7 +40,7 @@ export const PublicProductPage: React.FC = () => {
         setShop(shopData);
 
         // Get product data
-        const { data: productData, error: productError } = await safeSupabase
+        const { data: productData, error: productError } = await supabase
           .from('products')
           .select('*')
           .eq('id', productId)
@@ -91,7 +57,7 @@ export const PublicProductPage: React.FC = () => {
         setProduct(productData);
 
         // Get related products (same shop, different product)
-        const { data: relatedData } = await safeSupabase
+        const { data: relatedData } = await supabase
           .from('products')
           .select('*')
           .eq('shop_id', shopData.id)

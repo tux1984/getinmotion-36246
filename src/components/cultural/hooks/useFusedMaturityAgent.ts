@@ -3,7 +3,7 @@ import { ConversationBlock, MaturityLevel, PersonalizedTask } from '../conversat
 import { UserProfileData } from '../types/wizardTypes';
 import { CategoryScore } from '@/components/maturity/types';
 import { RecommendedAgents } from '@/types/dashboard';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useMaturityScoresSaver } from '@/hooks/useMaturityScoresSaver';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
 import { generateMaturityBasedRecommendations } from '@/utils/maturityRecommendations';
@@ -15,7 +15,7 @@ export const useFusedMaturityAgent = (
   language: 'en' | 'es',
   onComplete: (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData: UserProfileData) => void
 ) => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { saveMaturityScores } = useMaturityScoresSaver();
   const blocks = getFusedConversationBlocks(language);
   
@@ -225,21 +225,6 @@ export const useFusedMaturityAgent = (
         // Save maturity scores
         await saveMaturityScores(scores, profileData);
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
-        
-        // CRITICAL: Force refresh of maturity scores in dashboard
-        try {
-          const { refreshMaturityScores } = await import('@/hooks/useOptimizedMaturityScores');
-          refreshMaturityScores();
-          
-          // Clear all cached data to force fresh state
-          localStorage.removeItem('coordinatorTasks');
-          localStorage.removeItem('userBusinessProfile');
-          localStorage.removeItem('cachedRecommendations');
-          console.log('🔄 Triggered maturity scores refresh + cleared cache after test completion');
-        } catch (err) {
-          console.warn('Could not trigger refresh:', err);
-        }
-        
         markOnboardingComplete(scores, recommendedAgents);
 
         // ACTIVATE MASTER COORDINATOR with complete profile data

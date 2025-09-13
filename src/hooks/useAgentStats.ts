@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AgentStats {
@@ -19,7 +19,7 @@ interface AgentStats {
 }
 
 export const useAgentStats = (agentId: string) => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<AgentStats>({
     totalConversations: 0,
     totalMessages: 0,
@@ -40,20 +40,20 @@ export const useAgentStats = (agentId: string) => {
         const { count: conversationsCount } = await supabase
           .from('agent_conversations')
           .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id as any)
-          .eq('agent_id', agentId as any)
-          .eq('is_archived', false as any);
+          .eq('user_id', user.id)
+          .eq('agent_id', agentId)
+          .eq('is_archived', false);
 
         // Fetch messages count
         const { data: conversations } = await supabase
           .from('agent_conversations')
           .select('id')
-          .eq('user_id', user.id as any)
-          .eq('agent_id', agentId as any);
+          .eq('user_id', user.id)
+          .eq('agent_id', agentId);
 
         let messagesCount = 0;
         if (conversations && conversations.length > 0) {
-          const conversationIds = (conversations as any).map((c: any) => c.id);
+          const conversationIds = conversations.map(c => c.id);
           const { count } = await supabase
             .from('agent_messages')
             .select('*', { count: 'exact', head: true })
@@ -65,29 +65,29 @@ export const useAgentStats = (agentId: string) => {
         const { data: tasks } = await supabase
           .from('agent_tasks')
           .select('*')
-          .eq('user_id', user.id as any)
-          .eq('agent_id', agentId as any);
+          .eq('user_id', user.id)
+          .eq('agent_id', agentId);
 
-        const activeTasks = (tasks as any)?.filter((t: any) => t.status !== 'completed').length || 0;
-        const completedTasks = (tasks as any)?.filter((t: any) => t.status === 'completed').length || 0;
+        const activeTasks = tasks?.filter(t => t.status !== 'completed').length || 0;
+        const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
 
         // Fetch deliverables count
         const { count: deliverablesCount } = await supabase
           .from('agent_deliverables')
           .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id as any)
-          .eq('agent_id', agentId as any);
+          .eq('user_id', user.id)
+          .eq('agent_id', agentId);
 
         // Fetch usage metrics for avg session time
         const { data: metrics } = await supabase
           .from('agent_usage_metrics')
           .select('session_duration')
-          .eq('user_id', user.id as any)
-          .eq('agent_id', agentId as any)
+          .eq('user_id', user.id)
+          .eq('agent_id', agentId)
           .not('session_duration', 'is', null);
 
         const avgSessionTime = metrics && metrics.length > 0
-          ? (metrics as any).reduce((sum: number, m: any) => sum + (m.session_duration || 0), 0) / metrics.length
+          ? metrics.reduce((sum, m) => sum + (m.session_duration || 0), 0) / metrics.length
           : 0;
 
         // Create recent activity from available data
@@ -97,11 +97,11 @@ export const useAgentStats = (agentId: string) => {
           const { data: recentMessages } = await supabase
             .from('agent_messages')
             .select('content, created_at, conversation_id')
-            .in('conversation_id', (conversations as any).map((c: any) => c.id))
+            .in('conversation_id', conversations.map(c => c.id))
             .order('created_at', { ascending: false })
             .limit(3);
 
-          (recentMessages as any)?.forEach((msg: any) => {
+          recentMessages?.forEach(msg => {
             recentActivity.push({
               id: `msg-${Math.random()}`,
               type: 'message' as const,
@@ -112,7 +112,7 @@ export const useAgentStats = (agentId: string) => {
         }
 
         if (tasks && tasks.length > 0) {
-          (tasks as any).slice(0, 2).forEach((task: any) => {
+          tasks.slice(0, 2).forEach(task => {
             recentActivity.push({
               id: `task-${task.id}`,
               type: 'task' as const,

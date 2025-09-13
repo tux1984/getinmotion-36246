@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface SiteImage {
   id: string;
@@ -20,7 +20,7 @@ export const useSiteImages = (context: string) => {
       setIsLoading(true);
       setError(null);
       
-      const { data, error: fetchError } = await safeSupabase
+      const { data, error: fetchError } = await supabase
         .from('site_images')
         .select('*')
         .eq('context', context)
@@ -31,7 +31,7 @@ export const useSiteImages = (context: string) => {
         console.error(`Error fetching images for context "${context}":`, fetchError);
         setError(fetchError);
       } else {
-        setImages((data || []) as SiteImage[]);
+        setImages(data || []);
       }
       
       setIsLoading(false);

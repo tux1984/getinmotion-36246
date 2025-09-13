@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { performCompleteMigration } from '@/utils/dataMigration';
 import { useToast } from '@/hooks/use-toast';
 
@@ -46,7 +46,7 @@ export interface UserMasterContext {
 }
 
 export const useUserBusinessContext = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [context, setContext] = useState<UserMasterContext | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ export const useUserBusinessContext = () => {
     }
 
     try {
-      const { data, error } = await safeSupabase
+      const { data, error } = await supabase
         .from('user_master_context')
         .select('*')
         .eq('user_id', user.id)
@@ -79,7 +79,7 @@ export const useUserBusinessContext = () => {
           if (migrationSuccess) {
             console.log('Migration completed successfully - refetching context');
             // Refetch after migration
-            const { data: newData, error: refetchError } = await safeSupabase
+            const { data: newData, error: refetchError } = await supabase
               .from('user_master_context')
               .select('*')
               .eq('user_id', user.id)
@@ -89,7 +89,7 @@ export const useUserBusinessContext = () => {
               console.error('Error refetching context after migration:', refetchError);
               setContext(null);
             } else {
-              setContext(newData as UserMasterContext);
+              setContext(newData);
             }
           } else {
             console.error('Migration failed');
@@ -99,9 +99,9 @@ export const useUserBusinessContext = () => {
           console.error('Migration process failed:', migrationError);
           setContext(null);
         }
-        } else {
-          setContext(data as UserMasterContext);
-        }
+      } else {
+        setContext(data);
+      }
     } catch (error) {
       console.error('Error fetching user business context:', error);
       toast({
@@ -120,7 +120,7 @@ export const useUserBusinessContext = () => {
 
     try {
       // First try to update existing record
-      const { data: existing } = await safeSupabase
+      const { data: existing } = await supabase
         .from('user_master_context')
         .select('id')
         .eq('user_id', user.id)
@@ -130,7 +130,7 @@ export const useUserBusinessContext = () => {
 
       if (existing) {
         // Update existing record
-        ({ data, error } = await safeSupabase
+        ({ data, error } = await supabase
           .from('user_master_context')
           .update(updates)
           .eq('user_id', user.id)
@@ -138,7 +138,7 @@ export const useUserBusinessContext = () => {
           .single());
       } else {
         // Insert new record
-        ({ data, error } = await safeSupabase
+        ({ data, error } = await supabase
           .from('user_master_context')
           .insert({ user_id: user.id, ...updates })
           .select()

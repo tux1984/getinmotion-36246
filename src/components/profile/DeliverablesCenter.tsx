@@ -4,7 +4,7 @@ import { FileText, Download, Eye, Calendar, User, ChevronDown, ChevronUp } from 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,7 +25,7 @@ interface Deliverable {
 interface DeliverablesCenterProps {}
 
 export const DeliverablesCenter: React.FC<DeliverablesCenterProps> = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);

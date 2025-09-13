@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 
 export const useTaskGenerationControl = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [allowAutoGeneration, setAllowAutoGeneration] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,21 +22,10 @@ export const useTaskGenerationControl = () => {
       
       console.log('🔍 Checking task generation status:', { localStatus, hasCompletedMaturity });
       
-      // Force activation if maturity has been completed but auto-generation not enabled
-      if (hasCompletedMaturity && localStatus !== 'true') {
-        console.log('⚡ Force-enabling task generation after maturity completion');
-        localStorage.setItem('allowTaskAutoGeneration', 'true');
-        setAllowAutoGeneration(true);
-        setIsLoading(false);
-        return;
-      }
-      
       // Allow auto-generation only if maturity test has been completed
       const shouldAllow = localStatus === 'true' && hasCompletedMaturity;
       setAllowAutoGeneration(shouldAllow);
       setIsLoading(false);
-      
-      console.log('📊 Task generation status result:', { shouldAllow, localStatus, hasCompletedMaturity });
     } catch (error) {
       console.error('Error checking auto-generation status:', error);
       setAllowAutoGeneration(false);

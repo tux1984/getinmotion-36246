@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { useTaskLimits } from '@/hooks/useTaskLimits';
 import { useTranslations } from '@/hooks/useTranslations';
 import { DashboardBackground } from '@/components/dashboard/DashboardBackground';
 import { MyMissionsDashboard } from '@/components/dashboard/MyMissionsDashboard';
+import { IntelligentTaskInterface } from '@/components/tasks/IntelligentTaskInterface';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle, Clock, Target } from 'lucide-react';
@@ -15,7 +16,7 @@ import { SEO_CONFIG } from '@/config/seo';
 const TasksDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { t } = useTranslations();
   const language = 'en'; // Fixed to English only
   const { tasks } = useAgentTasks();
@@ -78,18 +79,13 @@ const TasksDashboard = () => {
 
             {/* Task Execution Content */}
             <div className="max-w-7xl mx-auto px-6 py-6">
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Task execution temporarily unavailable</h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Use the Master Coordinator for task execution instead.
-                  </p>
-                  <Button onClick={() => navigate('/dashboard')} variant="default">
-                    Go to Coordinator
-                  </Button>
-                </div>
-              </div>
+              <IntelligentTaskInterface 
+                task={selectedTask} 
+                onTaskComplete={() => {
+                  setSelectedTask(null);
+                }}
+                onBack={() => setSelectedTask(null)}
+              />
             </div>
           </div>
         </DashboardBackground>

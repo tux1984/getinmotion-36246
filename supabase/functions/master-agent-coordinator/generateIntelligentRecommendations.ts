@@ -105,19 +105,27 @@ Respond ONLY with a JSON array with exactly 3 recommendations:
 }]
 `;
 
-    // Use robust OpenAI API call with retries and validation
-    const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1500
+      }),
+    });
+
+    const data = await response.json();
+    let aiResponse = data.choices[0].message.content;
     
-    const baseRequest = {
-      messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: 1500
-    };
+    // Clean up the response
+    aiResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
-    const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
-    const data = await callOpenAIWithRetry(openAIApiKey!, request);
-    
-    const aiResponse = data.choices[0].message.content;
-    const recommendations = await parseJSONResponse(aiResponse);
+    const recommendations = JSON.parse(aiResponse);
 
     // Transform recommendations to include IDs and proper format
     const transformedRecommendations = recommendations.map((rec: any) => ({

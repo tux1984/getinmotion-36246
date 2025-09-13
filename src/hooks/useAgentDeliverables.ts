@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +21,7 @@ export interface AgentDeliverable {
 }
 
 export function useAgentDeliverables(agentId?: string) {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [deliverables, setDeliverables] = useState<AgentDeliverable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,16 +33,16 @@ export function useAgentDeliverables(agentId?: string) {
       let query = supabase
         .from('agent_deliverables')
         .select('*')
-        .eq('user_id', user.id as any);
+        .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId as any);
+        query = query.eq('agent_id', agentId);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDeliverables((data as any) || []);
+      setDeliverables(data || []);
     } catch (error) {
       console.error('Error fetching deliverables:', error);
       toast({
@@ -72,14 +72,14 @@ export function useAgentDeliverables(agentId?: string) {
           content: deliverableData.content,
           file_url: deliverableData.file_url,
           metadata: deliverableData.metadata || {}
-        } as any)
+        })
         .select()
         .single();
 
       if (error) throw error;
       
-      setDeliverables(prev => [data as any, ...prev]);
-      return data as any;
+      setDeliverables(prev => [data, ...prev]);
+      return data;
     } catch (error) {
       console.error('Error creating deliverable:', error);
       toast({
@@ -95,17 +95,17 @@ export function useAgentDeliverables(agentId?: string) {
     try {
       const { data, error } = await supabase
         .from('agent_deliverables')
-        .update(updates as any)
-        .eq('id', deliverableId as any)
+        .update(updates)
+        .eq('id', deliverableId)
         .select()
         .single();
 
       if (error) throw error;
       
       setDeliverables(prev => prev.map(deliverable => 
-        deliverable.id === deliverableId ? data as any : deliverable
+        deliverable.id === deliverableId ? data : deliverable
       ));
-      return data as any;
+      return data;
     } catch (error) {
       console.error('Error updating deliverable:', error);
       toast({
@@ -122,7 +122,7 @@ export function useAgentDeliverables(agentId?: string) {
       const { error } = await supabase
         .from('agent_deliverables')
         .delete()
-        .eq('id', deliverableId as any);
+        .eq('id', deliverableId);
 
       if (error) throw error;
       

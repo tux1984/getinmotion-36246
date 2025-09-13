@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { StablePremiumDashboardHero } from './StablePremiumDashboardHero';
 import { SafeTaskManagementInterface } from './SafeTaskManagementInterface';
@@ -16,7 +16,7 @@ import { useAgentTasks } from '@/hooks/useAgentTasks';
 
 export const RobustPremiumDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { profile, maturityScores, userAgents, loading, error } = useRobustDashboardData();
   const { tasks, createTask } = useAgentTasks();
   const [showMasterChat, setShowMasterChat] = useState(false);

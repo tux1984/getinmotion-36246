@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LogOut, Users, Grid3X3 } from 'lucide-react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Link } from 'react-router-dom';
 
 interface DashboardHeaderProps {
@@ -10,7 +10,7 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ language }) => {
-  const { signOut } = useRobustAuth();
+  const { signOut } = useAuth();
 
   const translations = {
     en: {

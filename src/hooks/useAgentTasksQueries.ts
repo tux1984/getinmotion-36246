@@ -14,15 +14,7 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     includeArchived: boolean = false
   ) => {
-    console.log('🔍 fetchTasks called', {
-      hasUser: !!user,
-      userId: user?.id,
-      agentId,
-      includeArchived
-    });
-
-    if (!user?.id) {
-      console.log('🚫 fetchTasks: No user ID available');
+    if (!user) {
       setTasks([]);
       setTotalCount(0);
       setLoading(false);
@@ -30,48 +22,29 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     }
 
     try {
-      console.log('🔍 fetchTasks: Building query for user:', user.id);
-      
       let query = supabase
         .from('agent_tasks')
         .select('*', { count: 'exact' })
         .eq('user_id', user.id);
 
       if (agentId) {
-        console.log('🔍 fetchTasks: Filtering by agent_id:', agentId);
         query = query.eq('agent_id', agentId);
       }
 
       if (!includeArchived) {
-        console.log('🔍 fetchTasks: Excluding archived tasks');
         query = query.eq('is_archived', false);
       }
 
-      query = query.order('created_at', { ascending: false });
+      const { data, error, count } = await query.order('created_at', { ascending: false });
 
-      console.log('🔍 fetchTasks: Executing query...');
-      const { data, error, count } = await query;
-
-      console.log('🔍 fetchTasks: Query result', {
-        data: data?.length || 0,
-        count,
-        error: !!error
-      });
-
-      if (error) {
-        console.error('❌ fetchTasks: Query error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
       const typedTasks: AgentTask[] = (data || []).map(convertToAgentTask);
-      console.log('✅ fetchTasks: Converted tasks:', typedTasks.length);
       
       setTasks(typedTasks);
       setTotalCount(count || 0);
     } catch (error) {
-      console.error('❌ fetchTasks: Error fetching tasks:', error);
-      setTasks([]);
-      setTotalCount(0);
+      console.error('Error fetching tasks:', error);
       toast({
         title: 'Error',
         description: 'No se pudieron cargar las tareas',
@@ -80,7 +53,7 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, agentId, toast]);
+  }, [user, agentId, toast]);
 
   const fetchPaginatedTasks = useCallback(async (
     page: number = 1, 
@@ -98,15 +71,15 @@ export function useAgentTasksQueries(user: any, agentId?: string) {
         .eq('user_id', user.id);
 
       if (agentId) {
-        query = query.eq('agent_id', agentId as any);
+        query = query.eq('agent_id', agentId);
       }
 
       if (filter === 'archived') {
-        query = query.eq('is_archived', true as any);
+        query = query.eq('is_archived', true);
       } else if (filter !== 'all') {
-        query = query.eq('status', filter as any).eq('is_archived', false as any);
+        query = query.eq('status', filter).eq('is_archived', false);
       } else {
-        query = query.eq('is_archived', false as any);
+        query = query.eq('is_archived', false);
       }
 
       const from = (page - 1) * pageSize;

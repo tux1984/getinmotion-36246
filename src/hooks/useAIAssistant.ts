@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +10,7 @@ export interface ChatMessage {
 }
 
 export const useAIAssistant = (stepContext: string, questionId: string, questionTitle?: string) => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const language = 'en'; // Fixed to English only
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);

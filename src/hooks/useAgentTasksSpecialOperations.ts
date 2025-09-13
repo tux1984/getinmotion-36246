@@ -47,8 +47,8 @@ export function useAgentTasksSpecialOperations(
       for (const otherTask of otherActiveTasks) {
         await supabase
           .from('agent_tasks')
-          .update({ status: 'pending' } as any)
-          .eq('id', otherTask.id as any);
+          .update({ status: 'pending' })
+          .eq('id', otherTask.id);
       }
 
       // Activate the selected task
@@ -57,8 +57,8 @@ export function useAgentTasksSpecialOperations(
         .update({ 
           status: 'in_progress',
           progress_percentage: Math.max(10, task.progress_percentage || 0)
-        } as any)
-        .eq('id', taskId as any)
+        })
+        .eq('id', taskId)
         .select()
         .single();
 

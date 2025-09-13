@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { WaitlistTable } from '@/components/admin/WaitlistTable';
 import { UserManagement } from '@/components/admin/UserManagement';
-import { EmergencySessionReset } from '@/components/admin/EmergencySessionReset';
-import { SessionDiagnostics } from '@/components/admin/SessionDiagnostics';
-import { SessionSyncManager } from '@/components/admin/SessionSyncManager';
 import { ImageManager } from '@/components/admin/ImageManager';
 import { CompanyDocuments } from '@/components/admin/CompanyDocuments';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -12,26 +9,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { SupabaseStatus } from '@/components/waitlist/SupabaseStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { SiteImageManager } from '@/components/admin/SiteImageManager';
 
 const Admin = () => {
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user, session, signOut } = useRobustAuth();
+  const { user, session, signOut, loading, isAuthorized } = useAuth();
   
-  // Load waitlist data when user is available
+  // Load waitlist data when user is authorized
   useEffect(() => {
-    if (user && session) {
-      console.log('User is available, fetching waitlist data');
+    if (isAuthorized && user && session) {
+      console.log('User is authorized, fetching waitlist data');
       fetchWaitlistData();
     }
-  }, [user, session]);
+  }, [isAuthorized, user, session]);
   
   const fetchWaitlistData = async () => {
-    if (!session) {
-      console.log('No session, skipping fetch');
+    if (!isAuthorized || !session) {
+      console.log('Not authorized or no session, skipping fetch');
       return;
     }
     
@@ -91,8 +88,35 @@ const Admin = () => {
     fetchWaitlistData();
   };
 
-  // Admin component is now protected by BypassProtectedRoute
-  // No need for additional authorization checks here
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Verificando permisos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated or not authorized
+  if (!user || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
+        <AdminHeader onLogout={handleLogout} isAuthenticated={!!user} />
+        
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto mt-16">
+            <AdminLogin />
+            <div className="mt-4">
+              <SupabaseStatus />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-950 text-white">
@@ -149,12 +173,7 @@ const Admin = () => {
             </TabsContent>
             
             <TabsContent value="users" className="mt-6">
-              <div className="space-y-4">
-                <SessionSyncManager />
-                <SessionDiagnostics />
-                <EmergencySessionReset />
-                <UserManagement />
-              </div>
+              <UserManagement />
             </TabsContent>
 
             <TabsContent value="images" className="mt-6">

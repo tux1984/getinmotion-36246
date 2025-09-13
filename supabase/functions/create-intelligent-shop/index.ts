@@ -191,27 +191,34 @@ Respond only in JSON with this structure:
 }
 `;
 
-  // Use robust OpenAI API call with retries and validation
-  const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
-  
-  const baseRequest = {
-    messages: [
-      {
-        role: 'system',
-        content: language === 'es' 
-          ? 'Eres un experto en crear tiendas digitales para artesanos. Generas contenido optimizado y culturalmente apropiado para Colombia.'
-          : 'You are an expert in creating digital shops for artisans. You generate optimized and culturally appropriate content for Colombia.'
-      },
-      { role: 'user', content: prompt }
-    ],
-    max_completion_tokens: 800,
-    response_format: { type: "json_object" }
-  };
-  
-  const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
-  const data = await callOpenAIWithRetry(openAIApiKey!, request);
-  
-  const result = await parseJSONResponse(data.choices[0].message.content);
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-5-2025-08-07',
+      messages: [
+        {
+          role: 'system',
+          content: language === 'es' 
+            ? 'Eres un experto en crear tiendas digitales para artesanos. Generas contenido optimizado y culturalmente apropiado para Colombia.'
+            : 'You are an expert in creating digital shops for artisans. You generate optimized and culturally appropriate content for Colombia.'
+        },
+        { role: 'user', content: prompt }
+      ],
+      max_completion_tokens: 800,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const result = JSON.parse(data.choices[0].message.content);
   
   return result;
 }
@@ -277,22 +284,25 @@ Respond in JSON:
 }
 `;
 
-  // Use robust OpenAI API call with retries and validation
-  const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
-  
-  const baseRequest = {
-    messages: [
-      { role: 'system', content: 'You are an expert in artisan product marketing and e-commerce.' },
-      { role: 'user', content: prompt }
-    ],
-    max_completion_tokens: 1000,
-    response_format: { type: "json_object" }
-  };
-  
-  const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
-  const data = await callOpenAIWithRetry(openAIApiKey!, request);
-  
-  return await parseJSONResponse(data.choices[0].message.content);
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-5-2025-08-07',
+      messages: [
+        { role: 'system', content: 'You are an expert in artisan product marketing and e-commerce.' },
+        { role: 'user', content: prompt }
+      ],
+      max_completion_tokens: 1000,
+      response_format: { type: "json_object" }
+    }),
+  });
+
+  const data = await response.json();
+  return JSON.parse(data.choices[0].message.content);
 }
 
 function generateFallbackShopData(profile: any, masterContext: any) {

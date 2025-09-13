@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { formatTaskTitleForDisplay } from './utils/agentTaskUtils';
 
 /**
@@ -8,7 +8,7 @@ import { formatTaskTitleForDisplay } from './utils/agentTaskUtils';
  * This runs automatically when the user logs in and has a valid brand name
  */
 export const useTaskTitleCleanup = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
@@ -16,7 +16,7 @@ export const useTaskTitleCleanup = () => {
     const cleanupTaskTitles = async () => {
       try {
         // Get user profile to check for brand name
-        const { data: profile } = await safeSupabase
+        const { data: profile } = await supabase
           .from('user_profiles')
           .select('brand_name, business_description')
           .eq('user_id', user.id)
@@ -25,7 +25,7 @@ export const useTaskTitleCleanup = () => {
         if (!profile?.brand_name) return; // Skip if no brand name
 
         // Get all tasks that might need cleaning
-        const { data: tasks } = await safeSupabase
+        const { data: tasks } = await supabase
           .from('agent_tasks')
           .select('id, title')
           .eq('user_id', user.id);
@@ -51,7 +51,7 @@ export const useTaskTitleCleanup = () => {
           const cleanedTitle = formatTaskTitleForDisplay(task.title, profile.brand_name);
           
           if (cleanedTitle !== task.title) {
-            await safeSupabase
+            await supabase
               .from('agent_tasks')
               .update({ 
                 title: cleanedTitle,

@@ -25,18 +25,16 @@ const MaturityCalculator = () => {
   };
 
   const handleComplete = (scores: CategoryScore, recommendedAgents: RecommendedAgents, profileData?: any) => {
-    console.log('✅ MaturityCalculator: Assessment completed with full integration', { scores, recommendedAgents, profileData });
+    console.log('MaturityCalculator: Assessment completed with full integration', { scores, recommendedAgents, profileData });
     
-    // CRITICAL: Set all required flags for task generation
+    // Store completion flag for dashboard integration
     localStorage.setItem('maturity_assessment_completed', 'true');
-    localStorage.setItem('onboardingCompleted', 'true');
-    localStorage.setItem('allowTaskAutoGeneration', 'true');
     localStorage.setItem('assessment_completion_time', new Date().toISOString());
     
-    console.log('🎯 Task generation flags activated - tasks will now generate automatically');
-    
-    // Navigate to dashboard immediately after completion
-    navigate('/dashboard/home');
+    // Navigate to dashboard after coordinator activation
+    setTimeout(() => {
+      navigate('/dashboard/home');
+    }, 3000); // Slightly longer to allow coordinator to fully activate
   };
 
   const seoData = SEO_CONFIG.pages.maturityCalculator?.en || {
@@ -58,6 +56,7 @@ const MaturityCalculator = () => {
 
       <NewDashboardHeader 
         onMaturityCalculatorClick={() => navigate('/maturity-calculator')}
+        onAgentManagerClick={handleBackToDashboard}
       />
 
       <div className="pt-36">

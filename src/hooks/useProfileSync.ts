@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Generate intelligent brand name from business description
 const generateIntelligentBrandName = (businessDescription?: string): string => {
@@ -46,14 +46,14 @@ const generateIntelligentBrandName = (businessDescription?: string): string => {
 };
 
 export const useProfileSync = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
 
   const syncProfileData = useCallback(async () => {
     if (!user) return;
 
     try {
       // First check if profile exists
-      const { data: existingProfile } = await safeSupabase
+      const { data: existingProfile } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -107,7 +107,7 @@ export const useProfileSync = () => {
       };
 
       // Sync to database (upsert)
-      const { error } = await safeSupabase
+      const { error } = await supabase
         .from('user_profiles')
         .upsert(fullProfileUpdate, { 
           onConflict: 'user_id' 
@@ -132,7 +132,7 @@ export const useProfileSync = () => {
       console.log('🧹 Cleaning up task titles for user:', userId);
       
       // Get all tasks with array-like titles
-      const { data: tasks } = await safeSupabase
+      const { data: tasks } = await supabase
         .from('agent_tasks')
         .select('id, title, description')
         .eq('user_id', userId);
@@ -155,7 +155,7 @@ export const useProfileSync = () => {
         const cleanTitle = formatTaskTitleForDisplay(task.title, brandName);
         
         if (cleanTitle !== task.title) {
-          const { error } = await safeSupabase
+          const { error } = await supabase
             .from('agent_tasks')
             .update({ 
               title: cleanTitle,

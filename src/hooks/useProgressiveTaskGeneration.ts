@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 
 import { useToast } from '@/hooks/use-toast';
 
 export const useProgressiveTaskGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const language = 'en'; // Fixed to English only
   const { toast } = useToast();
 

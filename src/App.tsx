@@ -5,16 +5,14 @@ import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { NotificationContainer } from '@/components/EnhancedNotifications';
-import { useSecurityHeaders } from '@/hooks/useSecurityHeaders';
 
-
+import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import Index from './pages/Index';
 
 import DashboardHome from './pages/DashboardHome';
-
+import AgentManager from './pages/AgentManager';
 import AgentDetails from './pages/AgentDetails';
 import MaturityCalculator from './pages/MaturityCalculator';
 import UserProgress from './pages/UserProgress';
@@ -31,20 +29,17 @@ import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
 import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
 import { CreateShopPage } from './pages/CreateShopPage';
-import { CreateShopLandingPage } from './pages/CreateShopLandingPage';
 import { PublicShopPage } from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 
 function App() {
-  // Apply security headers
-  useSecurityHeaders();
-  
   return (
     <ErrorBoundary>
       <HelmetProvider>
-      <BrowserRouter>
-        <LanguageProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <LanguageProvider>
               <div className="min-h-screen">
                 <Routes>
               <Route path="/" element={<Index />} />
@@ -69,6 +64,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardHome />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/agents" 
+                element={
+                  <ProtectedRoute>
+                    <AgentManager />
                   </ProtectedRoute>
                 } 
               />
@@ -145,10 +148,8 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              {/* Standalone Shop Creation Landing Page */}
-              <Route path="/crear-tienda" element={<CreateShopLandingPage />} />
               <Route path="/agents" element={<AgentsGallery />} />
-              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/biome-config" element={<BiomeConfigPage />} />
               <Route path="/one-pager" element={<OnePager />} />
               <Route path="/two-pager" element={<TwoPager />} />
@@ -157,9 +158,9 @@ function App() {
                 </Routes>
               </div>
               <Toaster />
-              <NotificationContainer />
-          </LanguageProvider>
-      </BrowserRouter>
+            </LanguageProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </HelmetProvider>
     </ErrorBoundary>
   );

@@ -80,9 +80,10 @@ Responde SOLO con un array JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1000
+        temperature: 0.8,
+        max_tokens: 1000
       }),
     });
 
@@ -166,9 +167,10 @@ Responde SOLO con un array JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1500
+        temperature: 0.7,
+        max_tokens: 1500
       }),
     });
 
@@ -328,9 +330,10 @@ Responde con un documento en formato markdown profesional.
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 2000
+        temperature: 0.7,
+        max_tokens: 2000
       }),
     });
 

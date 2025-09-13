@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { safeSupabase } from '@/utils/supabase-safe';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { CategoryScore, RecommendedAgents } from '@/types/dashboard';
 import { createUserAgentsFromRecommendations, markOnboardingComplete } from '@/utils/onboardingUtils';
 
@@ -12,7 +12,7 @@ interface RecoveryStatus {
 }
 
 export const useDataRecovery = () => {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const [status, setStatus] = useState<RecoveryStatus>({
     needsRecovery: false,
     recovering: false,
@@ -103,7 +103,7 @@ export const useDataRecovery = () => {
       console.log('Starting comprehensive data check and repair...');
       
       // Verificar maturity scores
-      const { data: scores, error: scoresError } = await safeSupabase.rpc('get_latest_maturity_scores', {
+      const { data: scores, error: scoresError } = await supabase.rpc('get_latest_maturity_scores', {
         user_uuid: user.id
       });
 
@@ -114,7 +114,7 @@ export const useDataRecovery = () => {
       }
 
       // Verificar agentes habilitados
-      const { data: userAgents, error: agentsError } = await safeSupabase
+      const { data: userAgents, error: agentsError } = await supabase
         .from('user_agents')
         .select('*')
         .eq('user_id', user.id)
@@ -126,14 +126,14 @@ export const useDataRecovery = () => {
         return;
       }
 
-      const hasScores = scores && Array.isArray(scores) && scores.length > 0;
-      const hasUsefulAgents = userAgents && Array.isArray(userAgents) && userAgents.length > 1; // Más de 1 agente
+      const hasScores = scores && scores.length > 0;
+      const hasUsefulAgents = userAgents && userAgents.length > 1; // Más de 1 agente
 
       console.log('Data check results:', {
         hasScores,
         hasUsefulAgents,
-        scoresCount: Array.isArray(scores) ? scores.length : 0,
-        agentsCount: Array.isArray(userAgents) ? userAgents.length : 0
+        scoresCount: scores?.length || 0,
+        agentsCount: userAgents?.length || 0
       });
 
       // Si tiene scores pero no agentes útiles, auto-reparar
@@ -200,7 +200,7 @@ export const useDataRecovery = () => {
       console.log('Creating emergency recovery data:', { emergencyScores, emergencyAgents });
 
       // Upsert user profile to ensure it exists
-      const { error: profileError } = await safeSupabase
+      const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
           user_id: user.id,
@@ -214,7 +214,7 @@ export const useDataRecovery = () => {
       }
 
       // Save maturity scores to DB
-      const { error: scoresError } = await safeSupabase
+      const { error: scoresError } = await supabase
         .from('user_maturity_scores')
         .insert({
           user_id: user.id,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,7 +36,7 @@ export interface AgentMessage {
 }
 
 export function useAgentConversations(agentId: string) {
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<AgentConversation[]>([]);
   const [messages, setMessages] = useState<AgentMessage[]>([]);

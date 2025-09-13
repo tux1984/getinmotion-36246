@@ -11,7 +11,7 @@ import { getAgentTranslation } from '@/data/agentTranslations';
 import { getAgentById } from '@/data/agentsDatabase';
 import { ChatAction } from '@/hooks/useAgentConversations';
 import { supabase } from '@/integrations/supabase/client';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 
 interface ModernFloatingAgentChatProps {
   agentId: string;
@@ -44,7 +44,7 @@ export const ModernFloatingAgentChat: React.FC<ModernFloatingAgentChatProps> = (
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const { toast } = useToast();
-  const { user } = useRobustAuth();
+  const { user } = useAuth();
   const agentTranslation = getAgentTranslation(agentId, language);
   const agent = getAgentById(agentId);
   

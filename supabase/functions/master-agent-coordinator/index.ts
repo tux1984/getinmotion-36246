@@ -210,22 +210,24 @@ async function getAITaskSuggestions(completedTasks: any[], maturityScores: any, 
   `;
 
   try {
-    // Use robust OpenAI API call with retries and validation
-    const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
-    
-    const baseRequest = {
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 800,
-      temperature: 0.7
-    };
-    
-    const request = prepareRequestForModel(baseRequest, 'gpt-4o-mini');
-    const data = await callOpenAIWithRetry(openAIApiKey!, request);
-    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 800
+      }),
+    });
+
+    const data = await response.json();
     const aiResponse = data.choices[0].message.content;
-    const suggestions = await parseJSONResponse(aiResponse);
     
-    return suggestions.map((suggestion: any) => ({
+    return JSON.parse(aiResponse).map((suggestion: any) => ({
       ...suggestion,
       id: 'ai-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
     }));
@@ -433,18 +435,21 @@ Responde SOLO con un array JSON con esta estructura:
 }]
 `;
 
-    // Use robust OpenAI API call with retries and validation
-    const { callOpenAIWithRetry, parseJSONResponse, prepareRequestForModel } = await import('./openai-utils.ts');
-    
-    const baseRequest = {
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 2000,
-      temperature: 0.7
-    };
-    
-    const request = prepareRequestForModel(baseRequest, 'gpt-4o-mini');
-    const data = await callOpenAIWithRetry(openAIApiKey!, request);
-    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 2000
+      }),
+    });
+
+    const data = await response.json();
     let aiResponse = data.choices[0].message.content;
     
     // Clean up the response to ensure it's valid JSON
@@ -611,8 +616,8 @@ Responde SOLO con un array JSON:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1000,
-        temperature: 0.7
+        temperature: 0.8,
+        max_tokens: 1000
       }),
     });
 
@@ -724,8 +729,8 @@ Responde SOLO con un array JSON:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1500,
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 1500
       }),
     });
 
@@ -933,8 +938,8 @@ Responde con un documento en formato markdown profesional.
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 2000,
-        temperature: 0.7
+        temperature: 0.7,
+        max_tokens: 2000
       }),
     });
 
@@ -979,20 +984,15 @@ Responde con un documento en formato markdown profesional.
 
 async function startIntelligentConversation(userId: string, userProfile: any, conversationContext?: string) {
   if (!openAIApiKey) {
-    console.log('OpenAI API key not available, using local fallback');
     return new Response(
-      JSON.stringify({ 
-        conversationId: 'local-' + Date.now(),
-        response: 'Hola! Soy tu coordinador maestro. Cuéntame sobre tu negocio y te ayudo a generar las tareas perfectas.',
-        context: 'local_fallback'
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'OpenAI API key not configured' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
   try {
     // Obtener información del perfil del usuario
-    const { data: profileData } = await supabase
+    const { data: profile } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('user_id', userId)
@@ -1005,16 +1005,16 @@ async function startIntelligentConversation(userId: string, userProfile: any, co
       .order('created_at', { ascending: false })
       .limit(5);
 
-    const businessInfo = profileData?.business_description || 'No definido';
+    const businessInfo = profile?.business_description || 'No definido';
     const completedTasks = tasks?.filter(t => t.status === 'completed') || [];
     const pendingTasks = tasks?.filter(t => t.status === 'pending') || [];
 
     const prompt = `
-Eres el Master Coordinator, un guía empresarial empático y conversacional. Tu trabajo es hablar con ${profileData?.full_name || 'el usuario'} sobre su negocio de forma natural y personalizada.
+Eres el Master Coordinator, un guía empresarial empático y conversacional. Tu trabajo es hablar con ${profile?.full_name || 'el usuario'} sobre su negocio de forma natural y personalizada.
 
 INFORMACIÓN DEL NEGOCIO:
 Descripción: ${businessInfo}
-Nombre de marca: ${profileData?.brand_name || 'Sin definir'}
+Nombre de marca: ${profile?.brand_name || 'Sin definir'}
 Tareas completadas: ${completedTasks.length}
 Tareas pendientes: ${pendingTasks.length}
 
@@ -1054,51 +1054,13 @@ Responde en JSON con este formato:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1000,
-        temperature: 0.7
+        temperature: 0.8,
+        max_tokens: 1000
       }),
     });
 
-    if (!response.ok) {
-      console.error(`OpenAI API error: ${response.status} ${response.statusText}`);
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-    }
-
     const data = await response.json();
-    
-    // Validate OpenAI response
-    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-      console.error('Invalid OpenAI response structure:', data);
-      throw new Error('Invalid OpenAI response structure');
-    }
-
-    const aiContent = data.choices[0].message.content.trim();
-    
-    // Try to parse JSON with fallback
-    let conversationData;
-    try {
-      conversationData = JSON.parse(aiContent);
-    } catch (parseError) {
-      console.log('Failed to parse OpenAI JSON response:', aiContent);
-      // Fallback conversation data
-      conversationData = {
-        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profileData?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
-        questions: [
-          "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
-          "¿Tienes algún desafío específico que necesites resolver?"
-        ],
-        actionButtons: [
-          {"text": "Empezar ahora", "action": "start_tasks"},
-          {"text": "Ver mis tareas", "action": "view_tasks"},
-          {"text": "Hablar de mi negocio", "action": "business_details"}
-        ],
-        nextSteps: [
-          "Revisar las tareas recomendadas",
-          "Completar el perfil de tu negocio",
-          "Comenzar con las tareas de mayor prioridad"
-        ]
-      };
-    }
+    const conversationData = JSON.parse(data.choices[0].message.content);
 
     return new Response(
       JSON.stringify(conversationData),
@@ -1107,29 +1069,9 @@ Responde en JSON con este formato:
 
   } catch (error) {
     console.error('Error starting intelligent conversation:', error);
-    
-    // Provide a comprehensive fallback response
-    const fallbackResponse = {
-      message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profileData?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
-      questions: [
-        "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
-        "¿Tienes algún desafío específico que necesites resolver?"
-      ],
-      actionButtons: [
-        {"text": "Empezar ahora", "action": "start_tasks"},
-        {"text": "Ver mis tareas", "action": "view_tasks"},
-        {"text": "Hablar de mi negocio", "action": "business_details"}
-      ],
-      nextSteps: [
-        "Revisar las tareas recomendadas",
-        "Completar el perfil de tu negocio",
-        "Comenzar con las tareas de mayor prioridad"
-      ]
-    };
-
     return new Response(
-      JSON.stringify(fallbackResponse),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 }
@@ -1218,8 +1160,8 @@ Responde SOLO con un array JSON:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: hasContext ? 500 : 1000,
-        temperature: 0.7
+        temperature: 0.8,
+        max_tokens: hasContext ? 500 : 1000
       }),
     });
 

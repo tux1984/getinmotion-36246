@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useRobustAuth } from '@/hooks/useRobustAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +8,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, RefreshCw, User, Shield, Clock } from 'lucide-react';
 
 export const AuthDebugPanel: React.FC = () => {
-  const { user, session, loading, isAuthorized } = useRobustAuth();
+  const { user, session, loading, isAuthorized, debugInfo, checkAuthorization } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleForceAuthCheck = async () => {
-    // Auth check is handled automatically by useRobustAuth
-    console.log('Auth check triggered');
+    await checkAuthorization();
   };
 
   return (
@@ -70,18 +69,20 @@ export const AuthDebugPanel: React.FC = () => {
               <div className="space-y-2">
                 <h4 className="font-medium flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  Auth Status
+                  Debug Info
                 </h4>
                 <div className="text-sm space-y-1">
                   <div className="flex justify-between">
-                    <span>Authorization:</span>
-                    <Badge variant={isAuthorized ? "default" : "destructive"}>
-                      {isAuthorized ? "Authorized" : "Not Authorized"}
-                    </Badge>
+                    <span>Auth State Changes:</span>
+                    <span className="font-mono">{debugInfo.authStateChangeCount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Admin Access:</span>
-                    <span className="font-mono text-xs">{isAuthorized ? 'Granted' : 'Denied'}</span>
+                    <span>Last Auth Event:</span>
+                    <span className="font-mono text-xs">{debugInfo.lastAuthEvent || 'None'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Auth Attempts:</span>
+                    <span className="font-mono">{debugInfo.authorizationAttempts}</span>
                   </div>
                 </div>
               </div>
