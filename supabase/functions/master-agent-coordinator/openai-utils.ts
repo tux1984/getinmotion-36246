@@ -289,7 +289,7 @@ export const MODEL_CONFIGS = {
 };
 
 export function prepareRequestForModel(baseRequest: any, model: string): OpenAIRequest {
-  const config = MODEL_CONFIGS[model] || MODEL_CONFIGS['gpt-5-2025-08-07'];
+  const config = MODEL_CONFIGS[model] || MODEL_CONFIGS['gpt-4o-mini'];
   
   const request: OpenAIRequest = {
     model,

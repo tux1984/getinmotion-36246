@@ -215,10 +215,11 @@ async function getAITaskSuggestions(completedTasks: any[], maturityScores: any, 
     
     const baseRequest = {
       messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: 800
+      max_tokens: 800,
+      temperature: 0.7
     };
     
-    const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
+    const request = prepareRequestForModel(baseRequest, 'gpt-4o-mini');
     const data = await callOpenAIWithRetry(openAIApiKey!, request);
     
     const aiResponse = data.choices[0].message.content;
@@ -437,10 +438,11 @@ Responde SOLO con un array JSON con esta estructura:
     
     const baseRequest = {
       messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: 2000
+      max_tokens: 2000,
+      temperature: 0.7
     };
     
-    const request = prepareRequestForModel(baseRequest, 'gpt-5-2025-08-07');
+    const request = prepareRequestForModel(baseRequest, 'gpt-4o-mini');
     const data = await callOpenAIWithRetry(openAIApiKey!, request);
     
     let aiResponse = data.choices[0].message.content;
@@ -607,9 +609,10 @@ Responde SOLO con un array JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1000
+        max_tokens: 1000,
+        temperature: 0.7
       }),
     });
 
@@ -719,9 +722,10 @@ Responde SOLO con un array JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1500
+        max_tokens: 1500,
+        temperature: 0.7
       }),
     });
 
@@ -927,9 +931,10 @@ Responde con un documento en formato markdown profesional.
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 2000
+        max_tokens: 2000,
+        temperature: 0.7
       }),
     });
 
@@ -1047,13 +1052,15 @@ Responde en JSON con este formato:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1000
+        max_tokens: 1000,
+        temperature: 0.7
       }),
     });
 
     if (!response.ok) {
+      console.error(`OpenAI API error: ${response.status} ${response.statusText}`);
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
@@ -1061,6 +1068,7 @@ Responde en JSON con este formato:
     
     // Validate OpenAI response
     if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      console.error('Invalid OpenAI response structure:', data);
       throw new Error('Invalid OpenAI response structure');
     }
 
@@ -1074,7 +1082,7 @@ Responde en JSON con este formato:
       console.log('Failed to parse OpenAI JSON response:', aiContent);
       // Fallback conversation data
       conversationData = {
-        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profile?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
+        message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profileData?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
         questions: [
           "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
           "¿Tienes algún desafío específico que necesites resolver?"
@@ -1102,7 +1110,7 @@ Responde en JSON con este formato:
     
     // Provide a comprehensive fallback response
     const fallbackResponse = {
-      message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profile?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
+      message: `¡Hola! He analizado tu perfil completo y generé tareas específicas para ${profileData?.business_description || 'tu negocio'}. Estas son las recomendaciones exactas que necesitas para hacer crecer tu emprendimiento. ¡Vamos paso a paso!`,
       questions: [
         "¿Qué aspecto de tu negocio te gustaría mejorar primero?",
         "¿Tienes algún desafío específico que necesites resolver?"
@@ -1208,9 +1216,10 @@ Responde SOLO con un array JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: hasContext ? 500 : 1000
+        max_tokens: hasContext ? 500 : 1000,
+        temperature: 0.7
       }),
     });
 
