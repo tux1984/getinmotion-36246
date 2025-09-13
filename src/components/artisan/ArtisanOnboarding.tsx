@@ -59,7 +59,7 @@ interface ArtisanOnboardingProps {
 }
 
 export const ArtisanOnboarding: React.FC<ArtisanOnboardingProps> = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // Start with choice screen
   const [formData, setFormData] = useState({
     shop_name: '',
     description: '',
@@ -146,56 +146,112 @@ export const ArtisanOnboarding: React.FC<ArtisanOnboardingProps> = ({ onComplete
         </p>
       </div>
 
-      {/* Progress indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {[1, 2, 3, 4].map((step) => (
-            <div
-              key={step}
-              className={`flex items-center ${
-                step < 4 ? 'flex-1' : ''
-              }`}
+      {/* Intelligent Creation Options */}
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 border-emerald-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-emerald-700">
+              <Store className="w-5 h-5" />
+              Creación Inteligente
+            </CardTitle>
+            <CardDescription>
+              El Coordinador Maestro crea tu tienda automáticamente usando tu perfil existente
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate('/dashboard/create-shop?mode=conversational')}
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
             >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step <= currentStep
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-              >
-                {step}
-              </div>
-              {step < 4 && (
-                <div
-                  className={`h-1 flex-1 mx-2 ${
-                    step < currentStep ? 'bg-primary' : 'bg-gray-200'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+              ✨ Crear con IA
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Store className="w-5 h-5" />
+              Creación Manual
+            </CardTitle>
+            <CardDescription>
+              Completa el formulario paso a paso para personalizar cada detalle
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setCurrentStep(1)}
+              variant="outline"
+              className="w-full"
+            >
+              📝 Crear Manualmente
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {currentStep === 1 && <Store className="w-5 h-5" />}
-            {currentStep === 2 && <MapPin className="w-5 h-5" />}
-            {currentStep === 3 && <Image className="w-5 h-5" />}
-            {currentStep === 4 && <Award className="w-5 h-5" />}
-            {currentStep === 1 && 'Información Básica'}
-            {currentStep === 2 && 'Especialidad y Ubicación'}
-            {currentStep === 3 && 'Contacto y Redes'}
-            {currentStep === 4 && 'Certificaciones'}
-          </CardTitle>
-          <CardDescription>
-            {currentStep === 1 && 'Cuéntanos sobre tu tienda y productos'}
-            {currentStep === 2 && 'Define tu especialidad artesanal'}
-            {currentStep === 3 && 'Cómo pueden contactarte los clientes'}
-            {currentStep === 4 && 'Certificaciones y reconocimientos'}
-          </CardDescription>
-        </CardHeader>
+      {currentStep === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">
+            Elige tu método preferido para crear tu tienda digital
+          </p>
+        </div>
+      )}
+
+      {/* Progress indicator - only show for manual mode */}
+      {currentStep > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            {[1, 2, 3, 4].map((step) => (
+              <div
+                key={step}
+                className={`flex items-center ${
+                  step < 4 ? 'flex-1' : ''
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step <= currentStep
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {step}
+                </div>
+                {step < 4 && (
+                  <div
+                    className={`h-1 flex-1 mx-2 ${
+                      step < currentStep ? 'bg-primary' : 'bg-gray-200'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Manual creation form - only show when currentStep > 0 */}
+      {currentStep > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {currentStep === 1 && <Store className="w-5 h-5" />}
+              {currentStep === 2 && <MapPin className="w-5 h-5" />}
+              {currentStep === 3 && <Image className="w-5 h-5" />}
+              {currentStep === 4 && <Award className="w-5 h-5" />}
+              {currentStep === 1 && 'Información Básica'}
+              {currentStep === 2 && 'Especialidad y Ubicación'}
+              {currentStep === 3 && 'Contacto y Redes'}
+              {currentStep === 4 && 'Certificaciones'}
+            </CardTitle>
+            <CardDescription>
+              {currentStep === 1 && 'Cuéntanos sobre tu tienda y productos'}
+              {currentStep === 2 && 'Define tu especialidad artesanal'}
+              {currentStep === 3 && 'Cómo pueden contactarte los clientes'}
+              {currentStep === 4 && 'Certificaciones y reconocimientos'}
+            </CardDescription>
+          </CardHeader>
 
         <CardContent className="space-y-4">
           {currentStep === 1 && (
@@ -388,35 +444,39 @@ export const ArtisanOnboarding: React.FC<ArtisanOnboardingProps> = ({ onComplete
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      <div className="flex justify-between mt-6">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 1}
-        >
-          Anterior
-        </Button>
+      {/* Navigation buttons - only show for manual mode */}
+      {currentStep > 0 && (
+        <div className="flex justify-between mt-6">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+          >
+            Anterior
+          </Button>
 
-        {currentStep < 4 ? (
-          <Button
-            onClick={handleNext}
-            disabled={!isStepValid()}
-          >
-            Siguiente
-          </Button>
-        ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Crear Tienda
-          </Button>
-        )}
-      </div>
+          {currentStep < 4 ? (
+            <Button
+              onClick={handleNext}
+              disabled={!isStepValid()}
+            >
+              Siguiente
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Crear Tienda
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

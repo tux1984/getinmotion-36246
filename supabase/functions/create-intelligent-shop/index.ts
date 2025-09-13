@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { analyzeProfileForConversation, processConversationStep } from './conversational-functions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,15 @@ serve(async (req) => {
 
     if (action === 'generate_product_suggestions') {
       return await generateProductSuggestions(supabase, userId, language);
+    }
+
+    if (action === 'analyze_profile') {
+      return await analyzeProfileForConversation(supabase, userId, language);
+    }
+
+    if (action === 'process_conversation') {
+      const { userResponse, currentQuestion, conversationHistory, shopData } = await req.json();
+      return await processConversationStep(supabase, userId, language, userResponse, currentQuestion, conversationHistory, shopData);
     }
 
     throw new Error('Invalid action');

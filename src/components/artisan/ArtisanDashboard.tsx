@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useArtisanShop } from '@/hooks/useArtisanShop';
 import { useProducts } from '@/hooks/useProducts';
 import { ArtisanOnboarding } from './ArtisanOnboarding';
+import { AIProductUpload } from '@/components/shop/AIProductUpload';
 import { 
   Store, 
   Package, 
@@ -13,14 +14,19 @@ import {
   Plus, 
   Eye,
   AlertCircle,
-  Target
+  Target,
+  Sparkles
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const ArtisanDashboard: React.FC = () => {
   const { shop, loading } = useArtisanShop();
   const { products } = useProducts(shop?.id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Check if AI product upload flow is requested
+  const flowMode = searchParams.get('flow');
 
   if (loading) {
     return (
@@ -32,6 +38,11 @@ export const ArtisanDashboard: React.FC = () => {
 
   if (!shop) {
     return <ArtisanOnboarding />;
+  }
+
+  // Show AI Product Upload flow if requested
+  if (flowMode === 'ai-product-upload') {
+    return <AIProductUpload />;
   }
 
   const stats = [
@@ -71,8 +82,15 @@ export const ArtisanDashboard: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Agregar Producto',
-      description: 'Sube un nuevo producto a tu catálogo',
+      title: 'Agregar Producto con IA',
+      description: 'Crea productos optimizados con asistencia de IA',
+      icon: Sparkles,
+      action: () => navigate('/dashboard/artisan?flow=ai-product-upload'),
+      color: 'bg-gradient-to-r from-purple-500 to-purple-600',
+    },
+    {
+      title: 'Agregar Producto Manual',
+      description: 'Sube un nuevo producto manualmente',
       icon: Plus,
       action: () => navigate('/dashboard/artisan/products/new'),
       color: 'bg-gradient-to-r from-blue-500 to-blue-600',
