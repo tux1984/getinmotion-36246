@@ -21,7 +21,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const { signIn, user, isAuthorized, loading } = useRobustAuth();
+  const { signIn, user, isAuthorized, loading, authorizationLoading } = useRobustAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,7 +89,8 @@ const Login = () => {
   // Redirect if already authenticated and authorized
   useEffect(() => {
     // Only redirect if we're not loading and have a clear auth state
-    if (!loading && user && isAuthorized) {
+    // Wait for both auth loading and authorization loading to complete
+    if (!loading && !authorizationLoading && user && isAuthorized === true) {
       console.log('Login: User authenticated and authorized, preparing redirect');
       
       // Add a small delay to ensure auth state is stable, then determine redirect
@@ -119,7 +120,7 @@ const Login = () => {
 
       return () => clearTimeout(redirectTimer);
     }
-  }, [user, isAuthorized, loading, navigate, location]);
+  }, [user, isAuthorized, loading, authorizationLoading, navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,14 +183,16 @@ const Login = () => {
     }
   };
 
-  // Show loading state with timeout
-  if (loading) {
-    console.log('Login: Showing loading state');
+  // Show loading state while checking auth or authorization
+  if (loading || (user && authorizationLoading)) {
+    console.log('Login: Showing loading state', { loading, authorizationLoading });
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 to-purple-950 flex items-center justify-center">
         <div className="text-white flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <div>Checking session...</div>
+          <div>
+            {loading ? 'Checking session...' : 'Verifying authorization...'}
+          </div>
         </div>
       </div>
     );

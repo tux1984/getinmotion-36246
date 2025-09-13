@@ -8,7 +8,8 @@ interface RobustAuthState {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  isAuthorized: boolean;
+  isAuthorized: boolean | null; // null means not calculated yet
+  authorizationLoading: boolean;
   jwtIntegrity: 'checking' | 'valid' | 'corrupted' | 'recovering';
   lastIntegrityCheck: Date | null;
 }
@@ -18,7 +19,8 @@ export const useRobustAuth = () => {
     user: null,
     session: null,
     loading: true,
-    isAuthorized: false,
+    isAuthorized: null, // null means not calculated yet
+    authorizationLoading: false,
     jwtIntegrity: 'valid', // Always valid now
     lastIntegrityCheck: new Date()
   });
@@ -72,32 +74,49 @@ export const useRobustAuth = () => {
 
   const updateAuthState = useCallback(async (session: Session | null) => {
     console.log('🔄 Updating auth state, session:', !!session);
-    setAuthState(prev => ({ ...prev, loading: true }));
-
+    
     const user = session?.user ?? null;
     
-    try {
-      const isAuthorized = session ? await checkAuthorization(session) : false;
+    // First, update basic auth state immediately
+    setAuthState(prev => ({ 
+      ...prev, 
+      user,
+      session,
+      loading: false, // Basic auth state is ready
+      authorizationLoading: !!session // Only loading authorization if we have a session
+    }));
 
+    // Then calculate authorization if we have a session
+    if (session) {
+      try {
+        console.log('🔍 Checking authorization for user:', session.user?.email);
+        const isAuthorized = await checkAuthorization(session);
+        
+        setAuthState(prev => ({
+          ...prev,
+          isAuthorized,
+          authorizationLoading: false,
+          jwtIntegrity: 'valid',
+          lastIntegrityCheck: new Date()
+        }));
+
+        console.log('✅ Authorization check complete:', { hasUser: !!user, isAuthorized });
+      } catch (error) {
+        console.error('❌ Error checking authorization:', error);
+        setAuthState(prev => ({
+          ...prev,
+          isAuthorized: false,
+          authorizationLoading: false,
+          jwtIntegrity: 'valid',
+          lastIntegrityCheck: new Date()
+        }));
+      }
+    } else {
+      // No session means not authorized
       setAuthState(prev => ({
         ...prev,
-        user,
-        session,
-        isAuthorized,
-        loading: false,
-        jwtIntegrity: 'valid',
-        lastIntegrityCheck: new Date()
-      }));
-
-      console.log('✅ Auth state updated:', { hasUser: !!user, isAuthorized });
-    } catch (error) {
-      console.error('❌ Error updating auth state:', error);
-      setAuthState(prev => ({
-        ...prev,
-        user,
-        session,
         isAuthorized: false,
-        loading: false,
+        authorizationLoading: false,
         jwtIntegrity: 'valid',
         lastIntegrityCheck: new Date()
       }));
@@ -143,6 +162,7 @@ export const useRobustAuth = () => {
         session: null,
         loading: false,
         isAuthorized: false,
+        authorizationLoading: false,
         jwtIntegrity: 'valid',
         lastIntegrityCheck: new Date()
       });
@@ -162,7 +182,12 @@ export const useRobustAuth = () => {
         if (error) {
           console.error('❌ Session error:', error);
           if (mounted) {
-            setAuthState(prev => ({ ...prev, loading: false }));
+            setAuthState(prev => ({ 
+              ...prev, 
+              loading: false, 
+              isAuthorized: false, 
+              authorizationLoading: false 
+            }));
           }
           return;
         }
@@ -173,7 +198,12 @@ export const useRobustAuth = () => {
       } catch (error) {
         console.error('❌ Auth initialization error:', error);
         if (mounted) {
-          setAuthState(prev => ({ ...prev, loading: false }));
+          setAuthState(prev => ({ 
+            ...prev, 
+            loading: false, 
+            isAuthorized: false, 
+            authorizationLoading: false 
+          }));
         }
       }
     };
@@ -190,6 +220,7 @@ export const useRobustAuth = () => {
               session: null,
               loading: false,
               isAuthorized: false,
+              authorizationLoading: false,
               jwtIntegrity: 'valid',
               lastIntegrityCheck: new Date()
             });
