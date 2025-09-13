@@ -116,7 +116,7 @@ const generateIntelligentBrandName = (businessDescription?: string): string => {
   return 'tu emprendimiento';
 };
 
-// Get localStorage business data for context
+// Get localStorage business data for context (keeping sync for compatibility)
 const getBusinessContext = (): { businessDescription?: string; brandName?: string } => {
   try {
     // Try multiple localStorage keys for different data sources
@@ -158,6 +158,35 @@ const getBusinessContext = (): { businessDescription?: string; brandName?: strin
   return {};
 };
 
+// Async version for enhanced context with Supabase fallback
+const getBusinessContextEnhanced = async (): Promise<{ businessDescription?: string; brandName?: string }> => {
+  try {
+    // First try to get from Supabase (most reliable source)
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: userProfiles } = await supabase
+      .from('user_profiles')
+      .select('business_description, brand_name')
+      .limit(1);
+      
+    if (userProfiles && userProfiles.length > 0) {
+      const profile = userProfiles[0];
+      if (profile.business_description || profile.brand_name) {
+        console.log('🎯 Using Supabase business context:', profile);
+        return {
+          businessDescription: profile.business_description || undefined,
+          brandName: profile.brand_name || undefined
+        };
+      }
+    }
+
+    // Fallback to localStorage
+    return getBusinessContext();
+  } catch (error) {
+    console.warn('Error getting enhanced business context:', error);
+    return getBusinessContext();
+  }
+};
+
 // Format task titles for display - replace goal arrays with intelligent brand name
 export const formatTaskTitleForDisplay = (title: string, brandName?: string): string => {
   // First, clean the title from any remaining JSON arrays or goal lists
@@ -175,7 +204,35 @@ export const formatTaskTitleForDisplay = (title: string, brandName?: string): st
   // Additional intelligent replacements for context
   cleanTitle = cleanTitle
     .replace(/\b(tu negocio|tu empresa|tu proyecto|tu emprendimiento)\b/gi, finalBrandName)
-    .replace(/\b(your business|your company|your project|your startup)\b/gi, finalBrandName);
+    .replace(/\b(your business|your company|your project|your startup)\b/gi, finalBrandName)
+    .replace(/\bnull Business\b/gi, finalBrandName)
+    .replace(/\bundefined Business\b/gi, finalBrandName);
+  
+  return cleanTitle;
+};
+
+// Enhanced async version for when Supabase data is available
+export const formatTaskTitleForDisplayEnhanced = async (title: string, brandName?: string): Promise<string> => {
+  // First, clean the title from any remaining JSON arrays or goal lists
+  let cleanTitle = replaceGoalArrayInText(title);
+  
+  // Get enhanced business context for intelligent brand name generation
+  const { businessDescription, brandName: localBrandName } = await getBusinessContextEnhanced();
+  const finalBrandName = brandName || localBrandName || generateIntelligentBrandName(businessDescription);
+  
+  // Replace goal lists and generic terms with intelligent brand name
+  const goalPattern = /\b(Scale operations|Automate processes|Expand market|Improve efficiency|Build brand|Increase revenue|Reduce costs|Improve UX|Launch MVP)(?:,\s*[A-Z][a-z\s,]+)*\b/gi;
+  
+  cleanTitle = cleanTitle.replace(goalPattern, finalBrandName);
+  
+  // Additional intelligent replacements for context
+  cleanTitle = cleanTitle
+    .replace(/\b(tu negocio|tu empresa|tu proyecto|tu emprendimiento)\b/gi, finalBrandName)
+    .replace(/\b(your business|your company|your project|your startup)\b/gi, finalBrandName)
+    .replace(/\bnull Business\b/gi, finalBrandName)
+    .replace(/\bundefined Business\b/gi, finalBrandName);
+  
+  console.log('🔄 Enhanced formatted task title:', { original: title, cleaned: cleanTitle, brandUsed: finalBrandName });
   
   return cleanTitle;
 };
@@ -183,7 +240,22 @@ export const formatTaskTitleForDisplay = (title: string, brandName?: string): st
 // Helper function to convert database row to AgentTask
 export const convertToAgentTask = (data: any): AgentTask => ({
   ...data,
-  title: replaceGoalArrayInText(data.title),
+  title: formatTaskTitleForDisplay(data.title),
+  description: replaceGoalArrayInText(data.description || ''),
+  relevance: data.relevance as 'low' | 'medium' | 'high',
+  status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+  subtasks: parseJsonField<TaskSubtask[]>(data.subtasks, []),
+  notes: data.notes || '',
+  steps_completed: parseJsonField<Record<string, boolean>>(data.steps_completed, {}),
+  resources: parseJsonField<TaskResource[]>(data.resources, []),
+  time_spent: data.time_spent || 0,
+  is_archived: data.is_archived || false
+});
+
+// Enhanced async version for when Supabase data is available
+export const convertToAgentTaskEnhanced = async (data: any): Promise<AgentTask> => ({
+  ...data,
+  title: await formatTaskTitleForDisplayEnhanced(data.title),
   description: replaceGoalArrayInText(data.description || ''),
   relevance: data.relevance as 'low' | 'medium' | 'high',
   status: data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',

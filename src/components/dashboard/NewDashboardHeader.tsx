@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calculator, Settings, LogOut, Users, ArrowLeft } from 'lucide-react';
+import { Calculator, Settings, LogOut, Users, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { MotionLogo } from '@/components/MotionLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { BusinessProfileDialog } from '@/components/master-coordinator/BusinessProfileDialog';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface NewDashboardHeaderProps {
   onMaturityCalculatorClick: () => void;
@@ -17,7 +19,9 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
   onAgentManagerClick
 }) => {
   const { signOut } = useAuth();
+  const { language } = useLanguage();
   const location = useLocation();
+  const [showBusinessProfileDialog, setShowBusinessProfileDialog] = useState(false);
 
   const isOnAgentManager = location.pathname.includes('/dashboard/agents');
 
@@ -40,6 +44,16 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
           
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowBusinessProfileDialog(true)}
+            className="group flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
+          >
+            <MessageCircle className="w-4 h-4 group-hover:bounce transition-transform duration-200" />
+            <span className="hidden sm:inline font-medium">Mejorar Perfil</span>
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -80,6 +94,12 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
           </Button>
         </div>
       </div>
+
+      <BusinessProfileDialog
+        open={showBusinessProfileDialog}
+        onOpenChange={setShowBusinessProfileDialog}
+        language={language === 'pt' || language === 'fr' ? 'es' : (language as 'en' | 'es')}
+      />
     </header>
   );
 };

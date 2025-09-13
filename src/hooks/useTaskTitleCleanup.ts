@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { formatTaskTitleForDisplay } from './utils/agentTaskUtils';
+import { formatTaskTitleForDisplayEnhanced } from './utils/agentTaskUtils';
 
 /**
  * Hook to automatically clean up task titles with JSON arrays
@@ -48,7 +48,7 @@ export const useTaskTitleCleanup = () => {
 
         // Clean each task title
         for (const task of tasksToClean) {
-          const cleanedTitle = formatTaskTitleForDisplay(task.title, profile.brand_name);
+          const cleanedTitle = await formatTaskTitleForDisplayEnhanced(task.title, profile.brand_name);
           
           if (cleanedTitle !== task.title) {
             await supabase

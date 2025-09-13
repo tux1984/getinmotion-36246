@@ -184,6 +184,47 @@ export const useFusedMaturityAgent = (
         await createUserAgentsFromRecommendations(user.id, recommendedAgents);
         markOnboardingComplete(scores, recommendedAgents);
 
+        // CRITICAL: Save profile data to Supabase user_profiles table
+        try {
+          console.log('💾 FusedMaturityAgent: Saving complete profile to Supabase...', profileData);
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .upsert({
+              user_id: user.id,
+              full_name: (profileData as any).fullName || user.email?.split('@')[0] || 'Usuario',
+              business_description: profileData.businessDescription || '',
+              brand_name: profileData.brandName || '',
+              business_location: profileData.businessLocation || '',
+              years_in_business: profileData.yearsInBusiness || null,
+              business_type: businessType,
+              business_goals: profileData.businessGoals ? [profileData.businessGoals] : null,
+              time_availability: profileData.timeAvailability || 'part_time',
+              team_size: profileData.teamSize || 'solo',
+              current_challenges: profileData.mainObstacles || null,
+              sales_channels: profileData.promotionChannels || null,
+              initial_investment_range: (profileData as any).initialInvestmentRange || '',
+              primary_skills: profileData.experience ? [profileData.experience] : null,
+              social_media_presence: (profileData as any).socialMediaPresence || {},
+              language_preference: language,
+              updated_at: new Date().toISOString()
+            } as any, { 
+              onConflict: 'user_id',
+              ignoreDuplicates: false 
+            });
+
+          if (profileError) {
+            console.error('❌ Error saving profile to Supabase:', profileError);
+          } else {
+            console.log('✅ Profile data saved successfully to Supabase');
+            
+            // Clear old localStorage to force refresh from Supabase
+            localStorage.removeItem('profileData');
+            localStorage.removeItem('maturityScores');
+          }
+        } catch (profileSaveError) {
+          console.error('❌ Failed to save profile data:', profileSaveError);
+        }
+
         // ACTIVATE MASTER COORDINATOR with complete profile data
         try {
           console.log('🚀 FusedMaturityAgent: Activating Master Coordinator with full profile...');
