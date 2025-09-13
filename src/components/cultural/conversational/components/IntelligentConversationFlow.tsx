@@ -31,7 +31,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Reset question index when block changes
   useEffect(() => {
@@ -41,7 +40,6 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     });
     setCurrentQuestionIndex(0);
     setShowExplanation(false);
-    setIsProcessing(false);
   }, [block.id]);
 
 

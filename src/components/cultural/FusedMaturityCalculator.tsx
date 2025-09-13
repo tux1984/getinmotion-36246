@@ -39,7 +39,8 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
     loadProgress,
     completeAssessment,
     getBlockProgress,
-    businessType
+    businessType,
+    isProcessing
   } = useFusedMaturityAgent(compatibleLanguage, onComplete);
 
   const [showResults, setShowResults] = useState(false);
