@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { safeSupabase } from '@/utils/supabase-safe';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
 
@@ -56,7 +56,7 @@ interface OptimizedUserData {
 
 const FETCH_TIMEOUT = 5000;
 
-export const useOptimizedUserData = (): OptimizedUserData => {
+export const useOptimizedUserData = (): OptimizedUserData & { refetch: () => void } => {
   const { user } = useRobustAuth();
   const [data, setData] = useState<Omit<OptimizedUserData, 'hasOnboarding'>>({
     profile: null,
@@ -70,13 +70,11 @@ export const useOptimizedUserData = (): OptimizedUserData => {
     return !!(data.profile?.brand_name || data.profile?.business_description);
   }, [data.profile]);
 
-  useEffect(() => {
+  const fetchUserData = useCallback(async () => {
     if (!user) {
       setData(prev => ({ ...prev, loading: false }));
       return;
     }
-
-    const fetchUserData = async () => {
       console.log('useOptimizedUserData: Starting fetch');
       setData(prev => ({ ...prev, loading: true, error: null }));
 
@@ -139,13 +137,19 @@ export const useOptimizedUserData = (): OptimizedUserData => {
           error: null, // Use fallback instead of error
         });
       }
-    };
-
-    fetchUserData();
   }, [user]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  const refetch = useCallback(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   return {
     ...data,
-    hasOnboarding
+    hasOnboarding,
+    refetch
   };
 };
