@@ -15,6 +15,7 @@ interface IntelligentConversationFlowProps {
   onPrevious: () => void;
   updateProfileData: (data: Partial<UserProfileData>) => void;
   businessType?: string;
+  isProcessing?: boolean;
 }
 
 export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowProps> = ({
@@ -25,10 +26,12 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
   onNext,
   onPrevious,
   updateProfileData,
-  businessType = 'creative'
+  businessType = 'creative',
+  isProcessing = false
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Reset question index when block changes
   useEffect(() => {
@@ -38,6 +41,7 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
     });
     setCurrentQuestionIndex(0);
     setShowExplanation(false);
+    setIsProcessing(false);
   }, [block.id]);
 
 
@@ -46,13 +50,17 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
       next: "Next",
       previous: "Previous", 
       whatIsThis: "What is this?",
-      lastQuestion: "Continue to next section"
+      lastQuestion: "Continue to next section",
+      finalizeAssessment: "Finalize Assessment",
+      processingResults: "Processing results..."
     },
     es: {
       next: "Siguiente",
       previous: "Anterior",
       whatIsThis: "¿Qué es esto?",
-      lastQuestion: "Continuar a la siguiente sección"
+      lastQuestion: "Continuar a la siguiente sección",
+      finalizeAssessment: "Finalizar Evaluación",
+      processingResults: "Procesando resultados..."
     }
   };
 
@@ -303,11 +311,20 @@ export const IntelligentConversationFlow: React.FC<IntelligentConversationFlowPr
             )}
             <Button
               onClick={handleNext}
-              disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion)}
+              disabled={currentQuestion.required && !isQuestionAnswered(currentQuestion) || isProcessing}
               className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLastQuestion ? t.lastQuestion : t.next}
-              <ArrowRight className="w-4 h-4" />
+              {isProcessing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t.processingResults}
+                </>
+              ) : (
+                <>
+                  {isLastQuestion ? t.finalizeAssessment : t.next}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </div>
         </div>

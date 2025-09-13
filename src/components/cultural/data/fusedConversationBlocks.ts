@@ -132,8 +132,13 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             fieldName: 'salesConsistency',
             explanation: 'Consistent sales indicate market validation and business maturity.',
             required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            },
             options: [
-              { id: 'never', label: 'Never sold anything yet', value: 'never' },
               { id: 'rarely', label: 'Very rarely', value: 'rarely' },
               { id: 'occasionally', label: 'Occasionally', value: 'occasionally' },
               { id: 'regularly', label: 'Regularly', value: 'regularly' },
@@ -147,6 +152,12 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             fieldName: 'pricingMethod',
             explanation: 'Your pricing method affects profitability and scalability.',
             required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            },
             options: [
               { id: 'hourly', label: 'By the hour', value: 'hourly', description: 'I charge per hour worked' },
               { id: 'project', label: 'Fixed project prices', value: 'project', description: 'One price per complete project' },
@@ -164,7 +175,35 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             max: 5,
             step: 1,
             explanation: 'Understanding profitability is essential for smart business decisions.',
-            required: true
+            required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            }
+          },
+          {
+            id: 'validation_steps',
+            question: 'What steps have you taken to validate your business idea?',
+            type: 'multiple-choice' as const,
+            fieldName: 'validationSteps',
+            explanation: 'Validation helps reduce risk and increases chances of success.',
+            required: true,
+            // Only show if they haven't sold anything yet
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: false
+            },
+            options: [
+              { id: 'market_research', label: 'Market research', value: 'market_research' },
+              { id: 'competitor_analysis', label: 'Competitor analysis', value: 'competitor_analysis' },
+              { id: 'customer_interviews', label: 'Customer interviews', value: 'customer_interviews' },
+              { id: 'prototype_testing', label: 'Prototype testing', value: 'prototype_testing' },
+              { id: 'landing_page', label: 'Created landing page', value: 'landing_page' },
+              { id: 'none', label: 'Haven\'t started validation yet', value: 'none' }
+            ]
           }
         ]
       },
@@ -537,8 +576,13 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             fieldName: 'salesConsistency',
             explanation: 'Las ventas consistentes indican validación del mercado y madurez del negocio.',
             required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            },
             options: [
-              { id: 'never', label: 'Nunca he vendido nada aún', value: 'never' },
               { id: 'rarely', label: 'Muy raramente', value: 'rarely' },
               { id: 'occasionally', label: 'Ocasionalmente', value: 'occasionally' },
               { id: 'regularly', label: 'Regularmente', value: 'regularly' },
@@ -552,6 +596,12 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             fieldName: 'pricingMethod',
             explanation: 'Tu método de precios afecta la rentabilidad y escalabilidad.',
             required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            },
             options: [
               { id: 'hourly', label: 'Por hora', value: 'hourly', description: 'Cobro por hora trabajada' },
               { id: 'project', label: 'Precios fijos por proyecto', value: 'project', description: 'Un precio por proyecto completo' },
@@ -569,7 +619,35 @@ export const getFusedConversationBlocks = (language: 'en' | 'es'): ConversationB
             max: 5,
             step: 1,
             explanation: 'Entender la rentabilidad es esencial para decisiones inteligentes de negocio.',
-            required: true
+            required: true,
+            // Only show if they have sold something
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: true
+            }
+          },
+          {
+            id: 'validation_steps',
+            question: '¿Qué pasos has tomado para validar tu idea de negocio?',
+            type: 'multiple-choice' as const,
+            fieldName: 'validationSteps',
+            explanation: 'La validación ayuda a reducir el riesgo y aumenta las posibilidades de éxito.',
+            required: true,
+            // Only show if they haven't sold anything yet
+            showIf: {
+              field: 'hasSold',
+              operator: 'equals' as const,
+              value: false
+            },
+            options: [
+              { id: 'market_research', label: 'Investigación de mercado', value: 'market_research' },
+              { id: 'competitor_analysis', label: 'Análisis de competencia', value: 'competitor_analysis' },
+              { id: 'customer_interviews', label: 'Entrevistas con clientes', value: 'customer_interviews' },
+              { id: 'prototype_testing', label: 'Prueba de prototipos', value: 'prototype_testing' },
+              { id: 'landing_page', label: 'Creé una página de aterrizaje', value: 'landing_page' },
+              { id: 'none', label: 'No he empezado la validación aún', value: 'none' }
+            ]
           }
         ]
       },

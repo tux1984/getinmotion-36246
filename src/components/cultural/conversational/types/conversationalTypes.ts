@@ -26,6 +26,13 @@ export interface ConversationQuestion {
   step?: number;
   explanation: string;
   required: boolean;
+  // New conditional logic properties
+  showIf?: {
+    field: string;
+    operator: 'equals' | 'not_equals' | 'includes' | 'greater_than' | 'less_than' | 'exists' | 'not_exists';
+    value: any;
+  };
+  skipTo?: string; // Skip to specific question/block based on answer
 }
 
 export interface ConversationBlock {

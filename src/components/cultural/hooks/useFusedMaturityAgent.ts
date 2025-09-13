@@ -22,6 +22,7 @@ export const useFusedMaturityAgent = (
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [profileData, setProfileData] = useState<UserProfileData>({} as UserProfileData);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [businessType, setBusinessType] = useState<'creative' | 'service' | 'product' | 'tech' | 'other'>('creative');
 
   const currentBlock = blocks[currentBlockIndex];
@@ -125,50 +126,6 @@ export const useFusedMaturityAgent = (
     }
   }, [currentBlock, updateProfileData]);
 
-  const goToNextBlock = useCallback(() => {
-    if (currentBlockIndex < blocks.length - 1) {
-      setCurrentBlockIndex(prev => prev + 1);
-    } else {
-      completeAssessment();
-    }
-  }, [currentBlockIndex, blocks.length]);
-
-  const goToPreviousBlock = useCallback(() => {
-    if (currentBlockIndex > 0) {
-      setCurrentBlockIndex(prev => prev - 1);
-    }
-  }, [currentBlockIndex]);
-
-  const saveProgress = useCallback(() => {
-    try {
-      const progressData = {
-        currentBlockIndex,
-        profileData,
-        businessType,
-        lastUpdated: new Date().toISOString()
-      };
-      localStorage.setItem('fused_maturity_calculator_progress', JSON.stringify(progressData));
-      console.log('Fused Agent: Progress saved');
-    } catch (error) {
-      console.error('Failed to save progress:', error);
-    }
-  }, [currentBlockIndex, profileData, businessType]);
-
-  const loadProgress = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('fused_maturity_calculator_progress');
-      if (saved) {
-        const progressData = JSON.parse(saved);
-        setCurrentBlockIndex(progressData.currentBlockIndex || 0);
-        setProfileData(progressData.profileData || {});
-        setBusinessType(progressData.businessType || 'creative');
-        console.log('Fused Agent: Progress loaded', progressData);
-      }
-    } catch (error) {
-      console.error('Failed to load progress:', error);
-    }
-  }, []);
-
   const completeAssessment = useCallback(async () => {
     console.log('Fused Agent: Completing assessment with full integration', { profileData });
     
@@ -271,6 +228,7 @@ export const useFusedMaturityAgent = (
       }
       
       setIsCompleted(true);
+      setIsProcessing(false);
       localStorage.removeItem('fused_maturity_calculator_progress');
       
       // Wait a moment for the coordinator activation, then call completion
@@ -280,6 +238,7 @@ export const useFusedMaturityAgent = (
       
     } catch (error) {
       console.error('Failed to complete assessment:', error);
+      setIsProcessing(false);
       toast.error(
         language === 'es' 
           ? 'Error al completar la evaluación'
@@ -288,6 +247,20 @@ export const useFusedMaturityAgent = (
     }
   }, [profileData, businessType, user, saveMaturityScores, onComplete, language]);
 
+  const goToNextBlock = useCallback(() => {
+    if (currentBlockIndex < blocks.length - 1) {
+      setCurrentBlockIndex(prev => prev + 1);
+    } else {
+      // We're at the final block - show processing state
+      setIsProcessing(true);
+      
+      // Add a slight delay to show processing animation
+      setTimeout(() => {
+        completeAssessment();
+      }, 1500);
+    }
+  }, [currentBlockIndex, blocks.length, completeAssessment]);
+
   const getBlockProgress = useCallback(() => {
     return {
       current: currentBlockIndex + 1,
@@ -295,6 +268,43 @@ export const useFusedMaturityAgent = (
       percentage: Math.round(((currentBlockIndex + 1) / blocks.length) * 100)
     };
   }, [currentBlockIndex, blocks.length]);
+
+  const goToPreviousBlock = useCallback(() => {
+    if (currentBlockIndex > 0) {
+      setCurrentBlockIndex(prev => prev - 1);
+    }
+  }, [currentBlockIndex]);
+
+  const saveProgress = useCallback(() => {
+    try {
+      const progressData = {
+        currentBlockIndex,
+        profileData,
+        businessType,
+        lastUpdated: new Date().toISOString()
+      };
+      localStorage.setItem('fused_maturity_calculator_progress', JSON.stringify(progressData));
+      console.log('Fused Agent: Progress saved');
+    } catch (error) {
+      console.error('Failed to save progress:', error);
+    }
+  }, [currentBlockIndex, profileData, businessType]);
+
+  const loadProgress = useCallback(() => {
+    try {
+      const saved = localStorage.getItem('fused_maturity_calculator_progress');
+      if (saved) {
+        const progressData = JSON.parse(saved);
+        setCurrentBlockIndex(progressData.currentBlockIndex || 0);
+        setProfileData(progressData.profileData || {});
+        setBusinessType(progressData.businessType || 'creative');
+        console.log('Fused Agent: Progress loaded', progressData);
+      }
+    } catch (error) {
+      console.error('Failed to load progress:', error);
+    }
+  }, []);
+
 
   return {
     currentBlock,
@@ -310,7 +320,8 @@ export const useFusedMaturityAgent = (
     loadProgress,
     completeAssessment,
     getBlockProgress,
-    businessType
+    businessType,
+    isProcessing // Add processing state
   };
 };
 

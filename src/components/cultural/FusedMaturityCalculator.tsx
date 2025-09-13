@@ -119,6 +119,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
               onPrevious={goToPreviousBlock}
               updateProfileData={updateProfileData}
               businessType={businessType}
+              isProcessing={isProcessing}
             />
         </AnimatePresence>
       </div>

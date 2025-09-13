@@ -148,7 +148,7 @@ export const getEnhancedConversationBlocks = (language: 'en' | 'es'): Conversati
             required: true,
             showIf: {
               field: 'salesExperience',
-              operator: 'not_equals',
+              operator: 'not_equals' as const,
               value: 'never_sold'
             }
           }
@@ -377,7 +377,7 @@ export const getEnhancedConversationBlocks = (language: 'en' | 'es'): Conversati
             required: true,
             showIf: {
               field: 'salesExperience',
-              operator: 'not_equals',
+              operator: 'not_equals' as const,
               value: 'never_sold'
             }
           }
@@ -462,5 +462,5 @@ export const getEnhancedConversationBlocks = (language: 'en' | 'es'): Conversati
     ]
   };
   
-  return blocks[language];
+  return blocks[language] || blocks.en;
 };
