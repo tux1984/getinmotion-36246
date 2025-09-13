@@ -230,7 +230,12 @@ export const useFusedMaturityAgent = (
         try {
           const { refreshMaturityScores } = await import('@/hooks/useOptimizedMaturityScores');
           refreshMaturityScores();
-          console.log('🔄 Triggered maturity scores refresh after test completion');
+          
+          // Clear all cached data to force fresh state
+          localStorage.removeItem('coordinatorTasks');
+          localStorage.removeItem('userBusinessProfile');
+          localStorage.removeItem('cachedRecommendations');
+          console.log('🔄 Triggered maturity scores refresh + cleared cache after test completion');
         } catch (err) {
           console.warn('Could not trigger refresh:', err);
         }

@@ -572,10 +572,12 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <RecommendedTasksSection
-                  language={language}
-                  maturityScores={currentScores || {}}
-                />
+                {currentScores && (
+                  <RecommendedTasksSection
+                    language={language}
+                    maturityScores={currentScores}
+                  />
+                )}
               </motion.div>
             </div>
 
