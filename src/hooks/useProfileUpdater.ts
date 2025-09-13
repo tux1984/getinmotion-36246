@@ -26,13 +26,15 @@ export const useProfileUpdater = () => {
       localStorage.removeItem('maturityScores');
       console.log('🧹 Cleared all cached data');
 
-      // Update user_profiles table
+      // Update user_profiles table with TriMedias data
       const { error: profileError } = await safeSupabase
         .from('user_profiles')
         .update({
           brand_name: 'TriMedias',
-          business_description: 'Empresa especializada en producción de medias de alta calidad',
-          business_type: 'manufacturing',
+          business_description: 'Empresa de medios digitales especializada en contenido multimedia y marketing digital',
+          business_type: 'Medios y Marketing Digital',
+          target_market: 'Empresas que necesitan contenido digital y marketing',
+          current_stage: 'Crecimiento',
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
@@ -42,6 +44,23 @@ export const useProfileUpdater = () => {
         throw profileError;
       }
 
+      // Also update user_maturity_scores with TriMedias brand name
+      const { error: maturityError } = await safeSupabase
+        .from('user_maturity_scores')
+        .update({
+          profile_data: {
+            brandName: 'TriMedias',
+            businessDescription: 'Empresa de medios digitales especializada en contenido multimedia y marketing digital',
+            businessType: 'Medios y Marketing Digital',
+            lastUpdated: new Date().toISOString()
+          }
+        })
+        .eq('user_id', user.id);
+
+      if (maturityError) {
+        console.warn('Error updating maturity scores:', maturityError);
+      }
+
       // Update user_master_context table
       const { error: contextError } = await safeSupabase
         .from('user_master_context')
@@ -49,8 +68,8 @@ export const useProfileUpdater = () => {
           user_id: user.id,
           business_profile: {
             brandName: 'TriMedias',
-            businessDescription: 'Empresa especializada en producción de medias de alta calidad',
-            businessType: 'manufacturing',
+            businessDescription: 'Empresa de medios digitales especializada en contenido multimedia y marketing digital',
+            businessType: 'Medios y Marketing Digital',
             lastUpdated: new Date().toISOString()
           },
           last_assessment_date: new Date().toISOString(),

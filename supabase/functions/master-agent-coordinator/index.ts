@@ -1000,16 +1000,16 @@ async function startIntelligentConversation(userId: string, userProfile: any, co
       .order('created_at', { ascending: false })
       .limit(5);
 
-    const businessInfo = profile?.business_description || 'No definido';
+    const businessInfo = profileData?.business_description || 'No definido';
     const completedTasks = tasks?.filter(t => t.status === 'completed') || [];
     const pendingTasks = tasks?.filter(t => t.status === 'pending') || [];
 
     const prompt = `
-Eres el Master Coordinator, un guía empresarial empático y conversacional. Tu trabajo es hablar con ${profile?.full_name || 'el usuario'} sobre su negocio de forma natural y personalizada.
+Eres el Master Coordinator, un guía empresarial empático y conversacional. Tu trabajo es hablar con ${profileData?.full_name || 'el usuario'} sobre su negocio de forma natural y personalizada.
 
 INFORMACIÓN DEL NEGOCIO:
 Descripción: ${businessInfo}
-Nombre de marca: ${profile?.brand_name || 'Sin definir'}
+Nombre de marca: ${profileData?.brand_name || 'Sin definir'}
 Tareas completadas: ${completedTasks.length}
 Tareas pendientes: ${pendingTasks.length}
 
