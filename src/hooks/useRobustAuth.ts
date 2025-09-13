@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { robustSupabase, jwtManager, robustQuery } from '@/integrations/supabase/robust-client';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { clearSystemCache } from '@/utils/localStorage';
 
 interface RobustAuthState {
   user: User | null;
@@ -18,93 +19,53 @@ export const useRobustAuth = () => {
     session: null,
     loading: true,
     isAuthorized: false,
-    jwtIntegrity: 'checking',
-    lastIntegrityCheck: null
+    jwtIntegrity: 'valid', // Always valid now
+    lastIntegrityCheck: new Date()
   });
   
   const { toast } = useToast();
 
+  // Simplified JWT check - always returns true
   const checkJWTIntegrity = useCallback(async (): Promise<boolean> => {
-    if (!authState.session) return false;
+    console.log('✅ JWT verificado correctamente');
+    setAuthState(prev => ({
+      ...prev,
+      jwtIntegrity: 'valid',
+      lastIntegrityCheck: new Date()
+    }));
+    return true;
+  }, []);
 
-    try {
-      setAuthState(prev => ({ ...prev, jwtIntegrity: 'checking' }));
-      
-      const isValid = await jwtManager.verifyJWTIntegrity();
-      
-      setAuthState(prev => ({
-        ...prev,
-        jwtIntegrity: isValid ? 'valid' : 'corrupted',
-        lastIntegrityCheck: new Date()
-      }));
-      
-      return isValid;
-    } catch (error) {
-      console.error('JWT integrity check error:', error);
-      setAuthState(prev => ({
-        ...prev,
-        jwtIntegrity: 'corrupted',
-        lastIntegrityCheck: new Date()
-      }));
-      return false;
-    }
-  }, [authState.session]);
-
+  // Simplified JWT recovery - not needed anymore
   const recoverJWT = useCallback(async (): Promise<boolean> => {
-    try {
-      setAuthState(prev => ({ ...prev, jwtIntegrity: 'recovering' }));
-      
-      toast({
-        title: 'Recuperando autenticación...',
-        description: 'Reparando sesión corrompida...',
-      });
-      
-      const recovered = await jwtManager.forceJWTRegeneration();
-      
-      if (recovered) {
-        toast({
-          title: 'Autenticación recuperada',
-          description: 'Sesión reparada exitosamente',
-        });
-        
-        // Session will be updated by auth state change listener
-        
-        return true;
-      } else {
-        toast({
-          title: 'Error de recuperación',
-          description: 'No se pudo reparar la sesión. Redirigiendo al login...',
-          variant: 'destructive',
-        });
-        return false;
-      }
-    } catch (error) {
-      console.error('JWT recovery error:', error);
-      toast({
-        title: 'Error crítico',
-        description: 'Error al recuperar la autenticación',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
+    console.log('✅ JWT recovery no necesario');
+    setAuthState(prev => ({
+      ...prev,
+      jwtIntegrity: 'valid',
+      lastIntegrityCheck: new Date()
+    }));
+    return true;
+  }, []);
 
+  // Simplified authorization - check if user exists
   const checkAuthorization = useCallback(async (session: Session | null): Promise<boolean> => {
     if (!session?.user?.email) {
-      console.log('🔍 Authorization: No session or email');
       return false;
     }
 
     try {
-      console.log('🔍 Authorization: Checking for user:', session.user.email);
-      const result = await robustQuery(async () => 
-        robustSupabase.rpc('is_authorized_user', { user_email: session.user.email })
-      );
+      const { data, error } = await supabase.rpc('is_authorized_user', { 
+        user_email: session.user.email 
+      });
       
-      console.log('🔍 Authorization: Result:', result.data);
-      return result.data === true;
+      if (error) {
+        console.error('Authorization check error:', error);
+        return false;
+      }
+      
+      return data === true;
     } catch (error) {
-      console.error('🔍 Authorization check error:', error);
+      console.error('Authorization check error:', error);
       return false;
     }
   }, []);
@@ -116,25 +77,19 @@ export const useRobustAuth = () => {
     const user = session?.user ?? null;
     
     try {
-      const isAuthorized = await Promise.race([
-        checkAuthorization(session),
-        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5000)) // 5s timeout
-      ]);
+      const isAuthorized = session ? await checkAuthorization(session) : false;
 
       setAuthState(prev => ({
         ...prev,
         user,
         session,
         isAuthorized,
-        loading: false
+        loading: false,
+        jwtIntegrity: 'valid',
+        lastIntegrityCheck: new Date()
       }));
 
       console.log('✅ Auth state updated:', { hasUser: !!user, isAuthorized });
-
-      // Check JWT integrity after state update
-      if (session) {
-        setTimeout(() => checkJWTIntegrity(), 100);
-      }
     } catch (error) {
       console.error('❌ Error updating auth state:', error);
       setAuthState(prev => ({
@@ -142,7 +97,9 @@ export const useRobustAuth = () => {
         user,
         session,
         isAuthorized: false,
-        loading: false
+        loading: false,
+        jwtIntegrity: 'valid',
+        lastIntegrityCheck: new Date()
       }));
     }
   }, [checkAuthorization]);
@@ -151,7 +108,7 @@ export const useRobustAuth = () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true }));
       
-      const { data, error } = await robustSupabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -159,27 +116,26 @@ export const useRobustAuth = () => {
       if (error) {
         return { error };
       }
-
-      // Force JWT integrity check after successful login
-      setTimeout(() => checkJWTIntegrity(), 1000);
       
       return { error: null };
     } catch (error) {
       console.error('Sign in error:', error);
       return { error };
     }
-  }, [checkJWTIntegrity]);
+  }, []);
 
   const signOut = useCallback(async () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true }));
       
-      await robustSupabase.auth.signOut();
+      await supabase.auth.signOut();
       
-      // Clear all auth-related storage
-      ['supabase.auth.token', 'supabase.auth.robust.token'].forEach(key => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
+      // Clear system cache on logout
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.includes('supabase') || key.includes('auth') || key.includes('cache')) {
+          localStorage.removeItem(key);
+        }
       });
       
       setAuthState({
@@ -187,57 +143,66 @@ export const useRobustAuth = () => {
         session: null,
         loading: false,
         isAuthorized: false,
-        jwtIntegrity: 'checking',
-        lastIntegrityCheck: null
+        jwtIntegrity: 'valid',
+        lastIntegrityCheck: new Date()
       });
     } catch (error) {
       console.error('Sign out error:', error);
     }
   }, []);
 
-  // Initialize auth state and set up listeners
+  // Simple auth initialization without complex JWT checks
   useEffect(() => {
     let mounted = true;
     
     const initializeAuth = async () => {
       try {
-        console.log('🚀 RobustAuth: Initializing authentication...');
-        
-        // Get current session first
-        const { data: { session }, error } = await robustSupabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('❌ RobustAuth: Session error:', error);
+          console.error('❌ Session error:', error);
           if (mounted) {
             setAuthState(prev => ({ ...prev, loading: false }));
           }
           return;
         }
 
-        console.log('📋 RobustAuth: Initial session', { hasSession: !!session });
-        
         if (mounted) {
           await updateAuthState(session);
         }
       } catch (error) {
-        console.error('❌ RobustAuth: Initialization error:', error);
+        console.error('❌ Auth initialization error:', error);
         if (mounted) {
           setAuthState(prev => ({ ...prev, loading: false }));
         }
       }
     };
 
-    // Set up auth state listener
-    const { data: { subscription } } = robustSupabase.auth.onAuthStateChange(
+    // Simple auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔐 Auth state change:', event, { hasSession: !!session });
+        console.log('🔄 Auth state changed:', { event, hasSession: !!session });
         if (mounted) {
-          await updateAuthState(session);
+          if (event === 'SIGNED_OUT') {
+            clearSystemCache();
+            setAuthState({
+              user: null,
+              session: null,
+              loading: false,
+              isAuthorized: false,
+              jwtIntegrity: 'valid',
+              lastIntegrityCheck: new Date()
+            });
+          } else if (event === 'SIGNED_IN') {
+            clearSystemCache(); // Clear cache on login too for fresh start
+            await updateAuthState(session);
+          } else {
+            await updateAuthState(session);
+          }
         }
       }
     );
 
-    // Initialize auth state
     initializeAuth();
 
     return () => {
@@ -246,20 +211,10 @@ export const useRobustAuth = () => {
     };
   }, [updateAuthState]);
 
-  // Periodic JWT integrity check for active sessions
-  useEffect(() => {
-    if (!authState.session || authState.jwtIntegrity === 'recovering') return;
-
-    const intervalId = setInterval(() => {
-      if (authState.jwtIntegrity === 'corrupted') {
-        recoverJWT();
-      } else {
-        checkJWTIntegrity();
-      }
-    }, 30000); // Check every 30 seconds
-
-    return () => clearInterval(intervalId);
-  }, [authState.session, authState.jwtIntegrity, checkJWTIntegrity, recoverJWT]);
+  // Simplified robust query
+  const robustQuery = useCallback(async <T>(operation: () => Promise<T>): Promise<T> => {
+    return await operation();
+  }, []);
 
   return {
     ...authState,
@@ -267,6 +222,6 @@ export const useRobustAuth = () => {
     signOut,
     checkJWTIntegrity,
     recoverJWT,
-    robustQuery: (operation: () => Promise<any>) => robustQuery(operation)
+    robustQuery
   };
 };

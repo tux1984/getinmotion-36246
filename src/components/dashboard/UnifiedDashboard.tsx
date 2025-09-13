@@ -7,10 +7,10 @@ import { DigitalShopHeroSection } from '@/components/shop/DigitalShopHeroSection
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useRobustAuth } from '@/hooks/useRobustAuth';
-import { DashboardJWTStatusBar } from './DashboardJWTStatusBar';
 import { useRobustDashboardData } from '@/hooks/useRobustDashboardData';
 import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useOptimizedMaturityScores } from '@/hooks/useOptimizedMaturityScores';
+import { clearSystemCache } from '@/utils/localStorage';
 
 // Single, unified dashboard component that replaces all fragmented experiences
 export const UnifiedDashboard: React.FC = () => {
@@ -19,9 +19,7 @@ export const UnifiedDashboard: React.FC = () => {
     user, 
     session, 
     loading, 
-    isAuthorized, 
-    jwtIntegrity, 
-    recoverJWT 
+    isAuthorized
   } = useRobustAuth();
   
   const [showMasterAgentChat, setShowMasterAgentChat] = useState(false);
@@ -52,13 +50,10 @@ export const UnifiedDashboard: React.FC = () => {
     console.log('Master Agent Chat opened');
   };
 
-  // Handle JWT corruption recovery
+  // Clear cache on component mount for fresh data
   useEffect(() => {
-    if (jwtIntegrity === 'corrupted') {
-      console.log('🔧 JWT corruption detected in dashboard, triggering recovery...');
-      recoverJWT();
-    }
-  }, [jwtIntegrity, recoverJWT]);
+    clearSystemCache();
+  }, []);
   
   // Show loading while authentication is being processed
   if (loading) {
@@ -78,40 +73,23 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  // Show recovery UI if JWT is being recovered
-  if (jwtIntegrity === 'recovering') {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-foreground font-medium">Recuperando autenticación...</p>
-          <p className="text-muted-foreground text-sm">Reparando sesión corrompida</p>
-        </div>
-      </div>
-    );
-  }
-
-  // BYPASS: Skip server-side JWT validation temporarily
-  // Only check client-side session while we fix Supabase configuration
+  // Simple auth check - no bypass needed
   if (!user || !session) {
-    console.log('🚫 UnifiedDashboard: No client session, redirecting to login');
+    console.log('🚫 UnifiedDashboard: No session, redirecting to login');
     window.location.href = '/login';
     return null;
   }
 
-  console.log('✅ UnifiedDashboard: Using client-side bypass, JWT integrity:', jwtIntegrity);
+  console.log('✅ UnifiedDashboard: User authenticated, loading dashboard');
 
-  // Show Master Coordinator Dashboard as primary experience
-  // NO FALLBACK MODE - ALWAYS WORKS
+  // Clean dashboard without bypass complexity
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      <DashboardJWTStatusBar />
       <NewDashboardHeader 
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
       />
       
       <DashboardBackground>
-        {/* Master Coordinator Dashboard - ALWAYS FUNCTIONAL */}
         <div className="space-y-8">
           {(profile as any)?.user_type === 'artisan' && (
             <DigitalShopHeroSection language={mapToLegacyLanguage(language)} />
