@@ -5,6 +5,7 @@ import { Calculator, Settings, LogOut, Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { MotionLogo } from '@/components/MotionLogo';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface NewDashboardHeaderProps {
   onMaturityCalculatorClick: () => void;
@@ -37,6 +38,8 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
         </div>
         
         <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
+          
           <Button
             variant="outline"
             size="sm"
@@ -65,7 +68,6 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
               </>
             )}
           </Button>
-          
           
           <Button
             variant="ghost"

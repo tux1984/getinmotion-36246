@@ -21,9 +21,13 @@ export const LanguageSwitcher = () => {
           </div>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-background border border-border shadow-lg z-[9999]">
         {SUPPORTED_LANGUAGES.map((lang) => (
-          <SelectItem key={lang.code} value={lang.code}>
+          <SelectItem 
+            key={lang.code} 
+            value={lang.code}
+            className="hover:bg-accent focus:bg-accent"
+          >
             <div className="flex items-center gap-2">
               <span>{lang.flag}</span>
               <span>{lang.nativeName}</span>

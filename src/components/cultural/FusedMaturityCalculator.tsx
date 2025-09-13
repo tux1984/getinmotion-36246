@@ -7,6 +7,8 @@ import { AgentHeader } from './conversational/components/AgentHeader';
 import { IntelligentConversationFlow } from './conversational/components/IntelligentConversationFlow';
 import { CreativeResultsDisplay } from './conversational/components/CreativeResultsDisplay';
 import { useFusedMaturityAgent } from './hooks/useFusedMaturityAgent';
+import { useLanguage } from '@/context/LanguageContext';
+import { mapToLegacyLanguage } from '@/utils/languageMapper';
 
 interface AIQuestion {
   question: string;
@@ -20,6 +22,9 @@ interface FusedMaturityCalculatorProps {
 export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = ({
   onComplete
 }) => {
+  const { language } = useLanguage();
+  const compatibleLanguage = mapToLegacyLanguage(language);
+  
   const {
     currentBlock,
     profileData,
@@ -35,7 +40,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
     completeAssessment,
     getBlockProgress,
     businessType
-  } = useFusedMaturityAgent('en', onComplete);
+  } = useFusedMaturityAgent(compatibleLanguage, onComplete);
 
   const [showResults, setShowResults] = useState(false);
 
@@ -75,14 +80,14 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
 
   if (showResults) {
     return (
-      <CreativeResultsDisplay
-        profileData={profileData}
-        maturityLevel={maturityLevel}
-        personalizedTasks={personalizedTasks}
-        language="en"
-        businessType={businessType}
-        onComplete={completeAssessment}
-      />
+        <CreativeResultsDisplay
+          profileData={profileData}
+          maturityLevel={maturityLevel}
+          personalizedTasks={personalizedTasks}
+          language={compatibleLanguage}
+          businessType={businessType}
+          onComplete={completeAssessment}
+        />
     );
   }
 
@@ -95,7 +100,7 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
     >
       {/* Clean Agent Header */}
       <AgentHeader
-        language="en"
+        language={compatibleLanguage}
         currentBlock={currentBlock}
         progress={getBlockProgress().percentage}
         businessType={businessType}
@@ -104,17 +109,17 @@ export const FusedMaturityCalculator: React.FC<FusedMaturityCalculatorProps> = (
       {/* Main Intelligent Conversation Flow */}
       <div className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-border/50">
         <AnimatePresence mode="wait">
-          <IntelligentConversationFlow
-            key={currentBlock.id}
-            block={currentBlock}
-            profileData={profileData}
-            language="en"
-            onAnswer={answerQuestion}
-            onNext={goToNextBlock}
-            onPrevious={goToPreviousBlock}
-            updateProfileData={updateProfileData}
-            businessType={businessType}
-          />
+            <IntelligentConversationFlow
+              key={currentBlock.id}
+              block={currentBlock}
+              profileData={profileData}
+              language={compatibleLanguage}
+              onAnswer={answerQuestion}
+              onNext={goToNextBlock}
+              onPrevious={goToPreviousBlock}
+              updateProfileData={updateProfileData}
+              businessType={businessType}
+            />
         </AnimatePresence>
       </div>
     </motion.div>
