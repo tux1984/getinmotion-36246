@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { BusinessProfileDialog } from '@/components/master-coordinator/BusinessProfileDialog';
+import { FloatingMasterAgent } from './FloatingMasterAgent';
 import { useLanguage } from '@/context/LanguageContext';
 import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useUserBusinessProfile } from '@/hooks/useUserBusinessProfile';
+import { useMasterCoordinator } from '@/hooks/useMasterCoordinator';
+import { useAgentTasks } from '@/hooks/useAgentTasks';
 import { useNavigate } from 'react-router-dom';
 
 // Simplified unified dashboard - minimal containers
@@ -12,7 +15,10 @@ export const UnifiedDashboard: React.FC = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { businessProfile } = useUserBusinessProfile();
+  const { coordinatorMessage } = useMasterCoordinator();
+  const { tasks } = useAgentTasks();
   const [showBusinessDialog, setShowBusinessDialog] = useState(false);
+  const [showMasterChat, setShowMasterChat] = useState(false);
   
   const handleMaturityCalculatorClick = () => {
     navigate('/maturity-calculator');
@@ -23,6 +29,21 @@ export const UnifiedDashboard: React.FC = () => {
   };
 
   const isProfileComplete = !!(businessProfile?.businessDescription && businessProfile?.brandName);
+  
+  const activeTasks = tasks.filter(task => task.status === 'in_progress').length;
+  const completedTasks = tasks.filter(task => task.status === 'completed').length;
+
+  const handleStartChat = () => {
+    setShowMasterChat(true);
+  };
+
+  const handleViewProgress = () => {
+    navigate('/dashboard/tasks');
+  };
+
+  const handleHelp = () => {
+    navigate('/dashboard/agents');
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -53,6 +74,18 @@ export const UnifiedDashboard: React.FC = () => {
           <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
         </div>
       </main>
+
+      {/* Floating Master Agent - Always Visible */}
+      <FloatingMasterAgent
+        language={mapToLegacyLanguage(language)}
+        maturityScores={null}
+        activeTasksCount={activeTasks}
+        completedTasksCount={completedTasks}
+        userActivityDays={0}
+        onStartChat={handleStartChat}
+        onViewProgress={handleViewProgress}
+        onHelp={handleHelp}
+      />
       
       {/* Business Profile Dialog */}
       <BusinessProfileDialog

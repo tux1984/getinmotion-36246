@@ -48,9 +48,9 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={() => setShowBusinessProfileDialog(true)}
-            className="group flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
+            className="group flex items-center gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors"
           >
-            <MessageCircle className="w-4 h-4 group-hover:bounce transition-transform duration-200" />
+            <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline font-medium">Mejorar Perfil</span>
           </Button>
 
@@ -58,9 +58,9 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={onMaturityCalculatorClick}
-            className="group flex items-center gap-2 bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-violet-100 hover:border-purple-300 hover:text-purple-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
+            className="group flex items-center gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 transition-colors"
           >
-            <Calculator className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
+            <Calculator className="w-4 h-4" />
             <span className="hidden sm:inline font-medium">Maturity Calculator</span>
           </Button>
           
@@ -68,16 +68,16 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={handleAgentManagerClick}
-            className="group flex items-center gap-2 bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200 text-violet-700 hover:from-violet-100 hover:to-purple-100 hover:border-violet-300 hover:text-violet-800 transition-all duration-300 hover:scale-110 hover:shadow-lg rounded-xl transform"
+            className="group flex items-center gap-2 border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800 transition-colors"
           >
             {isOnAgentManager ? (
               <>
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+                <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline font-medium">Back to Dashboard</span>
               </>
             ) : (
               <>
-                <Users className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                <Users className="w-4 h-4" />
                 <span className="hidden sm:inline font-medium">Agent Manager</span>
               </>
             )}
@@ -87,9 +87,9 @@ export const NewDashboardHeader: React.FC<NewDashboardHeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-300 hover:scale-110 rounded-xl transform"
+            className="group flex items-center gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
-            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+            <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline font-medium">Sign Out</span>
           </Button>
         </div>
