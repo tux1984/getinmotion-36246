@@ -2,19 +2,28 @@
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
-// Detect vague responses that need clarification
+// ENHANCED: Detect vague responses that need clarification - FOCUSED ON E-COMMERCE
 function isVagueResponse(response: string): boolean {
   const vaguePhrases = [
+    // CRITICAL: Profile data issues
+    'el mismo que yo tenía', 'la misma que ya tenía', 'la misma que yo tenía',
+    'el mismo que ya tenía', 'como ya tenía', 'lo que ya tenía',
     'el mismo que', 'la misma que', 'como antes', 'igual que antes',
     'lo mismo', 'como siempre', 'como ya dije', 'ya lo mencioné',
-    'pues', 'eh', 'este', 'bueno', 'si', 'sí', 'ok', 'vale',
-    'normal', 'básico', 'común', 'típico', 'tradicional'
+    
+    // Generic non-specific responses
+    'pues', 'eh', 'este', 'bueno', 'si', 'sí', 'ok', 'vale', 'no sé',
+    'normal', 'básico', 'común', 'típico', 'tradicional', 'regular',
+    'cualquier cosa', 'lo que sea', 'no importa', 'da igual',
+    
+    // Non-product responses for e-commerce
+    'cositas', 'cositas lindas', 'cosas bonitas', 'artesanías', 'manualidades'
   ];
   
   const normalizedResponse = response.toLowerCase().trim();
   
-  // Check if response is too short (less than 3 words)
-  if (normalizedResponse.split(' ').length < 3) return true;
+  // Check if response is too short (less than 4 words for products)
+  if (normalizedResponse.split(' ').length < 4) return true;
   
   // Check for vague phrases
   return vaguePhrases.some(phrase => normalizedResponse.includes(phrase));
@@ -26,8 +35,8 @@ async function generateIntelligentQuestion(userResponse: string, currentQuestion
     return getDefaultContextualQuestion(currentQuestion, language);
   }
 
-  const prompt = language === 'es' ? `
-Eres el Coordinador Maestro, un asistente IA especializado en crear tiendas digitales para artesanos colombianos.
+const prompt = language === 'es' ? `
+Eres el Coordinador Maestro, un asistente IA especializado en crear TIENDAS ONLINE para artesanos colombianos que quieren VENDER PRODUCTOS.
 
 CONTEXT DEL USUARIO:
 - Pregunta actual: ${currentQuestion}
@@ -35,17 +44,18 @@ CONTEXT DEL USUARIO:
 - Historial de conversación: ${JSON.stringify(conversationHistory.slice(-3))}
 - Perfil disponible: ${JSON.stringify(userProfile)}
 
-SITUACIÓN: La respuesta del usuario "${userResponse}" es vaga o insuficiente. 
+SITUACIÓN CRÍTICA: La respuesta "${userResponse}" es vaga e inútil para crear una tienda de productos.
 
-TU MISIÓN: Generar una pregunta inteligente, específica y conversacional que:
-1. Detecte qué información concreta necesitas
-2. Sea amigable y natural, no robótica
-3. Incluya ejemplos relevantes para artesanos colombianos
-4. Ayude al usuario a dar una respuesta más específica
+TU MISIÓN ESPECÍFICA: Generar una pregunta que RECHACE la respuesta vaga y EXIJA información específica sobre PRODUCTOS PARA VENDER:
 
-EJEMPLOS DE BUENAS PREGUNTAS:
-- Si dice "El mismo que yo tenía" → "Entiendo que ya tenías un negocio antes. ¿Podrías contarme específicamente qué productos vendías? Por ejemplo: ¿eran bolsos de cuero, cerámicas, tejidos, joyería?"
-- Si dice "Pues normal" → "Claro, quiero entender mejor. ¿Podrías ser más específico? Por ejemplo, ¿es una ciudad grande como Bogotá o Medellín, o un pueblo más pequeño?"
+EJEMPLOS CRÍTICOS:
+- Si dice "El mismo que yo tenía" → "No puedo usar esa información para crear tu tienda online. Necesito saber exactamente QUÉ PRODUCTOS vas a vender. Por ejemplo: ¿bolsos de cuero, collares, cerámicas, canastas tejidas? Dime los productos específicos que tienes listos para vender."
+
+- Si dice "Cositas lindas" → "Para crear tu tienda necesito productos específicos, no descripciones generales. ¿Qué productos artesanales concretos vendes? Por ejemplo: aretes de plata, libretas encuadernadas, macetas de barro, bolsos tejidos?"
+
+- Si dice "Artesanías" → "¿Qué tipo exacto de artesanías? Necesito productos específicos para configurar tu tienda. Por ejemplo: ¿trabajas joyería en plata, tejidos en lana, cerámica decorativa, productos en cuero?"
+
+ENFOQUE: PRODUCTOS ESPECÍFICOS PARA VENDER ONLINE, no conceptos generales.
 
 Responde SOLO con la pregunta, sin explicaciones adicionales.
 ` : `
@@ -94,20 +104,24 @@ Respond ONLY with the question, no additional explanations.
   }
 }
 
-// Fallback contextual questions
+// ENHANCED: E-commerce focused contextual questions
 function getDefaultContextualQuestion(currentQuestion: string, language: string): string {
   const questions = {
     es: {
-      business_name: 'Entiendo. ¿Podrías contarme específicamente cuál es el nombre de tu marca o negocio? Por ejemplo: "Artesanías Luna", "Cerámica Andina", etc.',
-      business_description: '¿Podrías ser más específico sobre los productos que vendes? Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera?',
-      business_location: 'Claro. ¿En qué ciudad específicamente? Por ejemplo: Bogotá, Medellín, Cartagena, o algún municipio particular.',
-      craft_type: 'Perfecto. ¿Podrías darme más detalles sobre el tipo de artesanía? Por ejemplo: ¿qué técnicas usas, qué materiales, qué tipo de productos específicos?'
+      business_name: 'Para crear tu tienda online necesito el nombre exacto de tu marca. ¿Cómo se llama tu negocio? Por ejemplo: "Tejidos Luna", "Cerámica Dorada", "Cueros del Valle".',
+      business_products: 'Necesito saber QUÉ PRODUCTOS ESPECÍFICOS vas a vender online. No me digas "artesanías" o "cositas". ¿Vendes collares, bolsos, macetas, libretas, aretes? Dime los productos exactos que tienes para vender.',
+      business_description: 'Para configurar tu tienda necesito productos específicos. ¿QUÉ vendes exactamente? Por ejemplo: ¿collares de semillas, bolsos de cuero, canastas tejidas, cerámicas decorativas?',
+      business_location: 'Para configurar envíos necesito tu ubicación exacta. ¿En qué ciudad estás? Por ejemplo: Bogotá, Medellín, Cartagena, Bucaramanga.',
+      product_prices: '¿Cuáles son los precios promedio de tus productos? Por ejemplo: collares $25.000, bolsos $80.000, cerámicas $15.000.',
+      product_photos: '¿Tienes fotos de tus productos listos para subir a la tienda? Es esencial para empezar a vender online.'
     },
     en: {
-      business_name: 'I understand. Could you tell me specifically what your brand or business name is? For example: "Luna Crafts", "Andean Ceramics", etc.',
-      business_description: 'Could you be more specific about the products you sell? For example: do you work with ceramics, textiles, jewelry, leather, wood?',
-      business_location: 'Of course. In which city specifically? For example: Bogotá, Medellín, Cartagena, or a particular municipality.',
-      craft_type: 'Perfect. Could you give me more details about the type of craftsmanship? For example: what techniques do you use, what materials, what specific types of products?'
+      business_name: 'To create your online store I need your exact brand name. What is your business called? For example: "Luna Textiles", "Golden Ceramics", "Valley Leathers".',
+      business_products: 'I need to know WHAT SPECIFIC PRODUCTS you will sell online. Don\'t tell me "crafts" or "things". Do you sell necklaces, bags, pots, notebooks, earrings? Tell me the exact products you have to sell.',
+      business_description: 'To configure your store I need specific products. What exactly do you sell? For example: seed necklaces, leather bags, woven baskets, decorative ceramics?',
+      business_location: 'To configure shipping I need your exact location. What city are you in? For example: Bogotá, Medellín, Cartagena, Bucaramanga.',
+      product_prices: 'What are the average prices of your products? For example: necklaces $25,000, bags $80,000, ceramics $15,000.',
+      product_photos: 'Do you have photos of your products ready to upload to the store? It\'s essential to start selling online.'
     }
   };
 
@@ -138,7 +152,7 @@ export async function analyzeProfileForConversation(supabase: any, userId: strin
     email: profile?.email
   };
 
-  // Check for vague responses in existing data
+  // CRITICAL: Enhanced vague data detection for e-commerce
   const hasVagueData = Object.entries(requiredFields).some(([key, value]) => {
     if (typeof value === 'string' && value.length > 0) {
       return isVagueResponse(value);
@@ -152,34 +166,38 @@ export async function analyzeProfileForConversation(supabase: any, userId: strin
     }
   });
 
-  // Determine if we have enough info to create shop automatically
-  const hasMinimumInfo = requiredFields.shop_name && requiredFields.description && requiredFields.craft_type && !hasVagueData;
-  const needsMoreInfo = missingInfo.length > 1 || !hasMinimumInfo || hasVagueData;
+  // ENHANCED: Strict validation for e-commerce readiness
+  const hasSpecificProducts = requiredFields.description && !isVagueResponse(requiredFields.description || '');
+  const hasValidName = requiredFields.shop_name && !isVagueResponse(requiredFields.shop_name || '');
+  const hasMinimumInfo = hasValidName && hasSpecificProducts && requiredFields.craft_type && !hasVagueData;
+  
+  // FORCE conversation if ANY vague data detected
+  const needsMoreInfo = missingInfo.length > 0 || !hasMinimumInfo || hasVagueData;
 
   let coordinatorMessage;
   let nextQuestion;
 
   if (!needsMoreInfo) {
-    // Can create automatically
+    // Can create automatically ONLY if we have SPECIFIC product info
     coordinatorMessage = language === 'es' 
-      ? `¡Perfecto! Tengo toda la información necesaria de tu perfil para crear tu tienda digital "${requiredFields.shop_name}". Voy a configurarla automáticamente con IA.`
-      : `Perfect! I have all the necessary information from your profile to create your digital shop "${requiredFields.shop_name}". I'll configure it automatically with AI.`;
+      ? `¡Perfecto! Tienes información específica sobre tus productos. Voy a crear tu tienda online "${requiredFields.shop_name}" lista para vender. La IA está configurando todo automáticamente.`
+      : `Perfect! You have specific information about your products. I'll create your online shop "${requiredFields.shop_name}" ready to sell. AI is configuring everything automatically.`;
   } else {
-    // Need intelligent conversation
+    // ENHANCED: E-commerce focused conversation flow
     if (!requiredFields.shop_name || isVagueResponse(requiredFields.shop_name || '')) {
       coordinatorMessage = language === 'es'
-        ? '¡Hola! Soy tu Coordinador Maestro IA 🤖 Voy a crear la tienda digital perfecta para tu negocio artesanal. Veo que ya tienes experiencia, pero necesito algunos detalles específicos. ¿Cuál es el nombre exacto de tu marca o negocio?'
-        : 'Hello! I\'m your Master AI Coordinator 🤖 I\'ll create the perfect digital shop for your artisan business. I see you have experience, but I need some specific details. What\'s the exact name of your brand or business?';
+        ? '¡Hola! 👋 Soy tu Coordinador Maestro IA. Voy a crear tu tienda online para que puedas vender tus productos artesanales. Para empezar necesito el nombre exacto de tu marca o negocio. ¿Cómo se llama?'
+        : 'Hello! 👋 I\'m your Master AI Coordinator. I\'ll create your online shop so you can sell your artisan products. To start I need the exact name of your brand or business. What is it called?';
       nextQuestion = 'business_name';
     } else if (!requiredFields.description || isVagueResponse(requiredFields.description || '')) {
       coordinatorMessage = language === 'es'
-        ? `Perfecto, "${requiredFields.shop_name}" es un excelente nombre. Ahora necesito entender mejor tu artesanía. ¿Qué productos específicos creas? Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera? Cuéntame los detalles.`
-        : `Perfect, "${requiredFields.shop_name}" is an excellent name. Now I need to better understand your craftsmanship. What specific products do you create? For example: do you work with ceramics, textiles, jewelry, leather, wood? Tell me the details.`;
-      nextQuestion = 'business_description';
+        ? `Perfecto, "${requiredFields.shop_name}" será tu tienda online. Ahora necesito saber QUÉ PRODUCTOS ESPECÍFICOS vas a vender. No me digas "artesanías" genéricamente. ¿Vendes collares, bolsos, cerámicas, tejidos? Dime los productos exactos que tienes listos para vender.`
+        : `Perfect, "${requiredFields.shop_name}" will be your online shop. Now I need to know WHAT SPECIFIC PRODUCTS you will sell. Don't tell me "crafts" generically. Do you sell necklaces, bags, ceramics, textiles? Tell me the exact products you have ready to sell.`;
+      nextQuestion = 'business_products';
     } else {
       coordinatorMessage = language === 'es'
-        ? 'Excelente información sobre tu artesanía. Para optimizar tu tienda para clientes locales, ¿en qué ciudad o región específica te encuentras? Esto me ayuda a configurar mejor las opciones de envío y marketing local.'
-        : 'Excellent information about your craftsmanship. To optimize your shop for local customers, what specific city or region are you in? This helps me better configure shipping options and local marketing.';
+        ? `Excelente, ya sé qué productos vendes. Para configurar envíos y pagos locales, ¿en qué ciudad exacta estás ubicado? Esto es importante para que tus clientes puedan encontrarte y recibir sus productos.`
+        : `Excellent, I know what products you sell. To configure shipping and local payments, what exact city are you located in? This is important so your customers can find you and receive their products.`;
       nextQuestion = 'business_location';
     }
   }
@@ -238,27 +256,50 @@ export async function processConversationStep(supabase: any, userId: string, lan
     });
   }
 
-  // INTELLIGENT PROCESSING OF SPECIFIC RESPONSES
+  // ENHANCED: E-commerce focused response processing
   switch (currentQuestion) {
     case 'business_name':
       updatedShopData.shop_name = userResponse.trim();
       
-      // Generate AI-powered follow-up if OpenAI available
+      // Generate AI-powered follow-up focused on PRODUCTS
       if (openAIApiKey) {
         try {
           message = await generateContextualResponse(userResponse, 'business_name_confirmation', language, updatedShopData);
         } catch (error) {
           console.error('AI response generation failed, using fallback');
           message = language === 'es'
-            ? `¡Excelente! "${userResponse}" será el nombre de tu tienda. Ahora cuéntame específicamente qué productos artesanales creas. Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera?`
-            : `Excellent! "${userResponse}" will be your shop name. Now tell me specifically what artisan products you create. For example: do you work with ceramics, textiles, jewelry, leather, wood?`;
+            ? `¡Perfecto! "${userResponse}" será tu tienda online. Ahora necesito saber QUÉ PRODUCTOS ESPECÍFICOS vas a vender. No digas solo "artesanías". ¿Vendes collares, bolsos, cerámicas, tejidos? Dime los productos exactos que tienes para vender.`
+            : `Perfect! "${userResponse}" will be your online shop. Now I need to know WHAT SPECIFIC PRODUCTS you will sell. Don't just say "crafts". Do you sell necklaces, bags, ceramics, textiles? Tell me the exact products you have to sell.`;
         }
       } else {
         message = language === 'es'
-          ? `¡Excelente! "${userResponse}" será el nombre de tu tienda. Ahora cuéntame específicamente qué productos artesanales creas.`
-          : `Excellent! "${userResponse}" will be your shop name. Now tell me specifically what artisan products you create.`;
+          ? `¡Perfecto! "${userResponse}" será tu tienda online. Ahora dime qué productos específicos vas a vender.`
+          : `Perfect! "${userResponse}" will be your online shop. Now tell me what specific products you will sell.`;
       }
-      nextQuestion = 'business_description';
+      nextQuestion = 'business_products';
+      break;
+      
+    case 'business_products':
+    case 'business_description':
+      const detectedCraftType = detectCraftTypeFromText(userResponse);
+      updatedShopData.craft_type = detectedCraftType;
+      updatedShopData.description = userResponse.trim();
+      
+      if (openAIApiKey) {
+        try {
+          message = await generateContextualResponse(userResponse, 'products_confirmation', language, { ...updatedShopData, detectedCraftType });
+        } catch (error) {
+          console.error('AI response generation failed, using fallback');
+          message = language === 'es'
+            ? `¡Excelente! Detecté que vendes ${detectedCraftType}. Para configurar envíos y que tus clientes locales te encuentren, ¿en qué ciudad exacta estás ubicado?`
+            : `Excellent! I detected that you sell ${detectedCraftType}. To configure shipping and for local customers to find you, what exact city are you located in?`;
+        }
+      } else {
+        message = language === 'es'
+          ? `¡Perfecto! Detecté que vendes ${detectedCraftType}. ¿En qué ciudad estás ubicado?`
+          : `Perfect! I detected that you sell ${detectedCraftType}. What city are you located in?`;
+      }
+      nextQuestion = 'business_location';
       break;
 
     case 'business_description':

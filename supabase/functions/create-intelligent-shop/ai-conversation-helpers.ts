@@ -12,75 +12,104 @@ export async function generateContextualResponse(userResponse: string, responseT
     business_name_confirmation: language === 'es' ? `
 El usuario me dijo que su negocio se llama "${userResponse}". 
 
-Como Coordinador Maestro IA, genera una respuesta entusiasta y contextual que:
-1. Confirme el nombre de forma positiva
-2. Haga la siguiente pregunta sobre productos específicos
-3. Incluya ejemplos relevantes para artesanos colombianos
-4. Sea conversacional y cálida, no robótica
+Como Coordinador Maestro IA especializado en TIENDAS ONLINE, genera una respuesta que:
+1. Confirme el nombre del negocio
+2. Haga la siguiente pregunta ESPECÍFICA sobre QUÉ PRODUCTOS va a vender online
+3. RECHACE respuestas vagas como "artesanías" y EXIJA productos específicos
+4. Incluya ejemplos concretos: collares, bolsos, cerámicas, tejidos, etc.
+
+Ejemplo: "¡Perfecto! '${userResponse}' será tu tienda online. Ahora necesito saber QUÉ PRODUCTOS ESPECÍFICOS vas a vender. No digas solo 'artesanías' - dime exactamente: ¿vendes collares, bolsos, cerámicas, canastas tejidas? ¿Cuáles son tus productos listos para vender?"
 
 Responde SOLO con el mensaje, máximo 2 oraciones.
     ` : `
 The user told me their business is called "${userResponse}".
 
-As Master AI Coordinator, generate an enthusiastic and contextual response that:
-1. Confirms the name positively  
-2. Asks the next question about specific products
-3. Includes relevant examples for Colombian artisans
-4. Is conversational and warm, not robotic
+As Master AI Coordinator specialized in ONLINE SHOPS, generate a response that:
+1. Confirms the business name
+2. Asks the next SPECIFIC question about WHAT PRODUCTS they will sell online
+3. REJECTS vague responses like "crafts" and DEMANDS specific products
+4. Includes concrete examples: necklaces, bags, ceramics, textiles, etc.
 
 Respond ONLY with the message, maximum 2 sentences.
     `,
-
-    craft_confirmation: language === 'es' ? `
-El usuario describió su artesanía como: "${userResponse}"
+    
+    products_confirmation: language === 'es' ? `
+El usuario describió sus productos como: "${userResponse}"
 Detecté que trabaja con: ${shopData.detectedCraftType}
 
-Como Coordinador Maestro IA, genera una respuesta que:
-1. Confirme inteligentemente lo que detectaste
-2. Haga la siguiente pregunta sobre ubicación
-3. Explique brevemente por qué necesitas la ubicación (envíos, marketing local)
-4. Sea específica y útil
+Como Coordinador Maestro IA enfocado en VENTA ONLINE, genera una respuesta que:
+1. Confirme inteligentemente los productos específicos detectados
+2. Haga la siguiente pregunta sobre ubicación para envíos
+3. Explique que la ubicación es para configurar envíos y clientes locales
+4. Sea entusiasta sobre crear la tienda para VENDER
 
 Responde SOLO con el mensaje, máximo 2 oraciones.
     ` : `
-The user described their craftsmanship as: "${userResponse}"
+The user described their products as: "${userResponse}"
 I detected they work with: ${shopData.detectedCraftType}
 
-As Master AI Coordinator, generate a response that:
-1. Intelligently confirms what you detected
-2. Asks the next question about location
-3. Briefly explains why you need location (shipping, local marketing)
-4. Is specific and useful
+As Master AI Coordinator focused on ONLINE SALES, generate a response that:
+1. Intelligently confirms the specific products detected
+2. Asks the next question about location for shipping
+3. Explains that location is to configure shipping and local customers
+4. Is enthusiastic about creating the shop to SELL
+
+Respond ONLY with the message, maximum 2 sentences.
+    `,
+    
+    products_confirmation: language === 'es' ? `
+El usuario describió sus productos como: "${userResponse}"
+Detecté que trabaja con: ${shopData.detectedCraftType}
+
+Como Coordinador Maestro IA enfocado en VENTA ONLINE, genera una respuesta que:
+1. Confirme inteligentemente los productos específicos detectados
+2. Haga la siguiente pregunta sobre ubicación para envíos
+3. Explique que la ubicación es para configurar envíos y clientes locales
+4. Sea entusiasta sobre crear la tienda para VENDER
+
+Responde SOLO con el mensaje, máximo 2 oraciones.
+    ` : `
+The user described their products as: "${userResponse}"
+I detected they work with: ${shopData.detectedCraftType}
+
+As Master AI Coordinator focused on ONLINE SALES, generate a response that:
+1. Intelligently confirms the specific products detected
+2. Asks the next question about location for shipping
+3. Explains that location is to configure shipping and local customers
+4. Is enthusiastic about creating the shop to SELL
 
 Respond ONLY with the message, maximum 2 sentences.
     `,
 
+
     location_confirmation: language === 'es' ? `
 El usuario me dijo que está en: "${userResponse}"
-Información de la tienda hasta ahora:
+Información de la tienda online hasta ahora:
 - Nombre: ${shopData.shop_name}
-- Artesanía: ${shopData.craft_type}
+- Productos: ${shopData.craft_type}
 - Ubicación: ${userResponse}
 
-Como Coordinador Maestro IA, genera una respuesta final entusiasta que:
-1. Confirme que tienes toda la información necesaria
-2. Mencione que vas a crear la tienda automáticamente con IA
-3. Sea emocionante y profesional
-4. Indique que la creación empieza ahora
+Como Coordinador Maestro IA especializado en E-COMMERCE, genera una respuesta final entusiasta que:
+1. Confirme que tienes toda la información para crear la TIENDA ONLINE
+2. Mencione que vas a configurar la tienda LISTA PARA VENDER con IA
+3. Sea emocionante sobre empezar a vender productos online
+4. Indique que la creación de la tienda E-COMMERCE empieza ahora
+
+Ejemplo: "¡Perfecto! Con ${shopData.shop_name} en ${userResponse} vendiendo ${shopData.craft_type}, tengo todo para crear tu tienda online. La IA está configurando tu e-commerce ahora - ¡pronto podrás subir tus productos y empezar a vender!"
 
 Responde SOLO con el mensaje, máximo 2 oraciones.
     ` : `
 The user told me they are in: "${userResponse}"
-Shop information so far:
+Online shop information so far:
 - Name: ${shopData.shop_name}
-- Craft: ${shopData.craft_type}
+- Products: ${shopData.craft_type}
 - Location: ${userResponse}
 
-As Master AI Coordinator, generate an enthusiastic final response that:
-1. Confirms you have all necessary information
-2. Mentions you'll create the shop automatically with AI
-3. Is exciting and professional
-4. Indicates creation starts now
+As Master AI Coordinator specialized in E-COMMERCE, generate an enthusiastic final response that:
+1. Confirms you have all information to create the ONLINE SHOP
+2. Mentions you'll configure the shop READY TO SELL with AI
+3. Is exciting about starting to sell products online
+4. Indicates the E-COMMERCE shop creation starts now
 
 Respond ONLY with the message, maximum 2 sentences.
     `
