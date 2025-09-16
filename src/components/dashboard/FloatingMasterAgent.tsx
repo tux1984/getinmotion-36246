@@ -99,10 +99,7 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
   };
 
   const getStatusColor = () => {
-    if (userActivityDays >= 3) return "bg-amber-500";
-    if (activeTasksCount >= 12) return "bg-red-500";
-    if (completedTasksCount > 0) return "bg-green-500";
-    return "bg-blue-500";
+    return "bg-purple-600 hover:bg-purple-700";
   };
 
   const getIconForStatus = () => {
