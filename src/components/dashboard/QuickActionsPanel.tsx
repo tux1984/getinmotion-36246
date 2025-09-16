@@ -46,20 +46,57 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       
-      {/* AI Expert Chat Action */}
+      {/* Create Digital Shop Action - FIRST POSITION - Universal Access */}
       <div
-        className="border border-border rounded-lg p-4 hover:bg-muted/50 cursor-pointer transition-colors"
-        onClick={onMasterAgentChat}
+        className="border-2 border-success bg-success/5 rounded-lg p-6 hover:bg-success/10 cursor-pointer transition-all transform hover:scale-105 shadow-lg"
+        onClick={() => navigate('/dashboard/create-shop')}
       >
-        <div className="flex items-center space-x-3 mb-3">
-          <Crown className="w-5 h-5 text-primary" />
+        <div className="flex items-center space-x-3 mb-4">
+          <Store className="w-6 h-6 text-success animate-pulse" />
           <div>
-            <h3 className="font-semibold text-sm">{t.getGuidance}</h3>
-            <p className="text-xs text-muted-foreground">{t.guidanceDesc}</p>
+            <h3 className="font-bold text-base text-success">{t.createShop}</h3>
+            <p className="text-sm text-success/80">{t.shopDesc}</p>
+            {craftType && (
+              <p className="text-sm text-success font-bold bg-success/20 px-2 py-1 rounded mt-1">
+                {language === 'es' ? 'Especialidad: ' : 'Specialty: '}{craftType}
+              </p>
+            )}
+            {/* DEBUG INDICATOR */}
+            <div className="text-xs bg-red-500 text-white px-2 py-1 rounded mt-1">
+              DEBUG: CREAR TIENDA VISIBLE ✓
+            </div>
           </div>
         </div>
         <button 
-          className="w-full bg-primary text-primary-foreground px-3 py-2 rounded-md text-sm hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
+          className="w-full bg-success text-success-foreground px-4 py-3 rounded-md text-base font-bold hover:bg-success/90 transition-colors inline-flex items-center justify-center gap-2 shadow-md"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate('/dashboard/create-shop');
+          }}
+        >
+          <Store className="w-4 h-4" />
+          {language === 'es' ? '🚀 CREAR AHORA' : '🚀 CREATE NOW'}
+        </button>
+      </div>
+
+      {/* AI Expert Chat Action */}
+      <div
+        className="border-2 border-primary bg-primary/5 rounded-lg p-4 hover:bg-primary/10 cursor-pointer transition-all"
+        onClick={onMasterAgentChat}
+      >
+        <div className="flex items-center space-x-3 mb-3">
+          <Crown className="w-5 h-5 text-primary animate-bounce" />
+          <div>
+            <h3 className="font-semibold text-sm">{t.getGuidance}</h3>
+            <p className="text-xs text-muted-foreground">{t.guidanceDesc}</p>
+            {/* DEBUG INDICATOR */}
+            <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded mt-1">
+              DEBUG: CHAT IA VISIBLE ✓
+            </div>
+          </div>
+        </div>
+        <button 
+          className="w-full bg-primary text-primary-foreground px-3 py-2 rounded-md text-sm font-bold hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
           onClick={(e) => {
             e.stopPropagation();
             onMasterAgentChat();
@@ -72,7 +109,7 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
 
       {/* View All Tasks Action */}
       <div
-        className="border border-border rounded-lg p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+        className="border border-secondary bg-secondary/5 rounded-lg p-4 hover:bg-secondary/10 cursor-pointer transition-all"
         onClick={() => navigate('/dashboard/tasks')}
       >
         <div className="flex items-center space-x-3 mb-3">
@@ -81,12 +118,16 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-sm">{t.viewTasks}</h3>
               {activeTasks > 0 && (
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-secondary rounded-full">
+                <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-secondary rounded-full animate-pulse">
                   {activeTasks}
                 </span>
               )}
             </div>
             <p className="text-xs text-muted-foreground">{t.tasksDesc}</p>
+            {/* DEBUG INDICATOR */}
+            <div className="text-xs bg-yellow-500 text-white px-2 py-1 rounded mt-1">
+              DEBUG: TAREAS VISIBLE ✓
+            </div>
           </div>
         </div>
         <button 
@@ -98,35 +139,6 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
         >
           <ArrowRight className="w-3 h-3" />
           {t.viewAll}
-        </button>
-      </div>
-
-      {/* Create Digital Shop Action - Universal Access */}
-      <div
-        className="border border-border rounded-lg p-4 hover:bg-muted/50 cursor-pointer transition-colors"
-        onClick={() => navigate('/dashboard/create-shop')}
-      >
-        <div className="flex items-center space-x-3 mb-3">
-          <Store className="w-5 h-5 text-success" />
-          <div>
-            <h3 className="font-semibold text-sm">{t.createShop}</h3>
-            <p className="text-xs text-muted-foreground">{t.shopDesc}</p>
-            {craftType && (
-              <p className="text-xs text-success font-medium">
-                {language === 'es' ? 'Especialidad: ' : 'Specialty: '}{craftType}
-              </p>
-            )}
-          </div>
-        </div>
-        <button 
-          className="w-full bg-success text-success-foreground px-3 py-2 rounded-md text-sm hover:bg-success/90 transition-colors inline-flex items-center justify-center gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate('/dashboard/create-shop');
-          }}
-        >
-          <Store className="w-3 h-3" />
-          {language === 'es' ? 'Crear Ahora' : 'Create Now'}
         </button>
       </div>
 
