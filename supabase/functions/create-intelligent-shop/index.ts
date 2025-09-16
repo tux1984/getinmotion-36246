@@ -50,6 +50,13 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in create-intelligent-shop function:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      userId: userId || 'unknown',
+      action: action || 'unknown'
+    });
+    
     return new Response(JSON.stringify({ 
       error: error.message,
       shopData: getDefaultShopData(),
@@ -91,10 +98,15 @@ async function preconfigureShop(supabase: any, userId: string, language: string)
   let aiSuggestions = null;
   if (openAIApiKey) {
     try {
+      console.log('Generating AI suggestions for user context:', { businessDescription: userContext.businessDescription, craftType: userContext.businessProfile?.craft_type });
       aiSuggestions = await generateShopSuggestions(userContext, language);
+      console.log('AI suggestions generated successfully:', aiSuggestions ? 'Yes' : 'No');
     } catch (error) {
       console.error('AI generation failed:', error);
+      console.error('Falling back to manual shop data generation');
     }
+  } else {
+    console.log('OpenAI API key not available, using fallback data');
   }
 
   // Prepare shop data (AI-enhanced or fallback)
@@ -208,7 +220,7 @@ Respond only in JSON with this structure:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-2025-08-07',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -218,7 +230,8 @@ Respond only in JSON with this structure:
         },
         { role: 'user', content: prompt }
       ],
-      max_completion_tokens: 800,
+      max_tokens: 800,
+      temperature: 0.7,
       response_format: { type: "json_object" }
     }),
   });
@@ -301,12 +314,13 @@ Respond in JSON:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-2025-08-07',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: 'You are an expert in artisan product marketing and e-commerce.' },
         { role: 'user', content: prompt }
       ],
-      max_completion_tokens: 1000,
+      max_tokens: 1000,
+      temperature: 0.7,
       response_format: { type: "json_object" }
     }),
   });
