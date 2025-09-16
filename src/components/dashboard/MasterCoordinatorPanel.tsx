@@ -24,10 +24,11 @@ import {
   Sparkles, 
   Target,
   PlayCircle,
-  CheckCircle2,
+  CheckCircle,
   Clock,
   ArrowRight,
   User,
+  UserCog,
   Zap,
   Brain,
   TrendingUp,
@@ -35,7 +36,8 @@ import {
   BarChart3,
   Star,
   Play,
-  Lightbulb
+  Lightbulb,
+  Store
 } from 'lucide-react';
 
 interface MasterCoordinatorPanelProps {
@@ -418,7 +420,7 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                     {progressPercentage}% {labels.progress}
                   </Badge>
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    <CheckCircle className="w-3 h-3 mr-1" />
                     {completedTasks.length} {labels.completedTasks}
                   </Badge>
                 </div>
@@ -510,105 +512,84 @@ export const MasterCoordinatorPanel: React.FC<MasterCoordinatorPanelProps> = ({ 
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
+                      {/* Action Buttons - Horizontal Layout */}
                       <div className="space-y-3">
-                         <p className="text-sm font-medium text-white/90 mb-3">
-                           {language === 'es' ? 'Elige tu próxima acción:' : 'Choose your next action:'}
-                         </p>
+                        <p className="text-sm font-medium text-white/90 mb-3">
+                          {language === 'es' ? 'Elige tu próxima acción:' : 'Choose your next action:'}
+                        </p>
                         
-                        {/* Unified Master Coordinator Button */}
-                        <div className="mb-4">
-                          {(() => {
-                            const buttonState = getUnifiedButtonState();
-                            const IconComponent = buttonState.icon;
-                            
-                            return (
-                              <Button
-                                variant="default"
-                                className={`h-auto p-6 w-full ${buttonState.color} text-white font-bold text-lg`}
-                                onClick={handleUnifiedCoordinatorAction}
-                                disabled={isGeneratingTasks || coordinatorLoading}
-                              >
-                                <div className="flex items-center space-x-4 w-full">
-                                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                                    <IconComponent className={`w-6 h-6 text-white ${isGeneratingTasks ? 'animate-pulse' : ''}`} />
-                                  </div>
-                                  <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                     <div className="font-bold truncate text-lg">
-                                       {isGeneratingTasks 
-                                         ? (language === 'es' ? 'Generando...' : 'Generating...')
-                                         : buttonState.text}
-                                     </div>
-                                     <div className="text-sm text-white/80 truncate">
-                                       {buttonState.description}
-                                     </div>
-                                  </div>
-                                  <ArrowRight className="w-5 h-5 text-white/80" />
-                                </div>
-                              </Button>
-                            );
-                          })()}
+                        {/* Compact Horizontal Buttons */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {/* Ver Tareas */}
+                          <motion.button
+                            onClick={() => navigate('/dashboard/tasks')}
+                            className="flex flex-col items-center gap-2 px-3 py-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors border border-purple-200 dark:border-purple-700"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <CheckCircle className="h-5 w-5" />
+                            <span className="text-xs font-medium text-center">
+                              {language === 'es' ? 'Ver Tareas' : 'View Tasks'}
+                            </span>
+                          </motion.button>
+
+                          {/* Generar Tareas */}
+                          <motion.button
+                            onClick={handleUnifiedCoordinatorAction}
+                            disabled={isGeneratingTasks || coordinatorLoading}
+                            className="flex flex-col items-center gap-2 px-3 py-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-blue-200 dark:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            {isGeneratingTasks ? (
+                              <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600/30 border-t-blue-600" />
+                            ) : (
+                              <Sparkles className="h-5 w-5" />
+                            )}
+                            <span className="text-xs font-medium text-center">
+                              {language === 'es' ? 'Generar Tareas' : 'Generate Tasks'}
+                            </span>
+                          </motion.button>
+
+                          {/* Mejorar Perfil */}
+                          <motion.button
+                            onClick={() => setShowBusinessDialog(true)}
+                            className="flex flex-col items-center gap-2 px-3 py-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border border-green-200 dark:border-green-700"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <UserCog className="h-5 w-5" />
+                            <span className="text-xs font-medium text-center">
+                              {language === 'es' ? 'Mejorar Perfil' : 'Enhance Profile'}
+                            </span>
+                          </motion.button>
+
+                          {/* Generar Tienda */}
+                          <motion.button
+                            onClick={() => navigate('/dashboard/create-shop')}
+                            className="flex flex-col items-center gap-2 px-3 py-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors border border-orange-200 dark:border-orange-700"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <Store className="h-5 w-5" />
+                            <span className="text-xs font-medium text-center">
+                              {language === 'es' ? 'Generar Tienda' : 'Generate Store'}
+                            </span>
+                          </motion.button>
                         </div>
+                      </div>
 
-                         {/* Quick Actions for Business Enhancement */}
-                         <div className="grid grid-cols-1 gap-3">
-                           {/* Enhanced Business Profile Button */}
-                           <Button
-                             variant="outline"
-                             className="h-auto p-5 w-full border-2 border-purple-400/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-white"
-                             onClick={() => setShowBusinessDialog(true)}
-                           >
-                             <div className="flex items-center space-x-4 w-full">
-                               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                                 <Brain className="w-6 h-6 text-purple-300" />
-                               </div>
-                               <div className="flex-1 text-left">
-                                 <div className="font-bold text-lg">
-                                   {language === 'es' ? '🧠 Mejorar Mi Perfil' : '🧠 Enhance My Profile'}
-                                 </div>
-                                 <div className="text-sm text-white/80">
-                                   {language === 'es' ? 'Preguntas inteligentes para conocer mejor tu negocio' : 'Smart questions to better understand your business'}
-                                 </div>
-                               </div>
-                               <ArrowRight className="w-5 h-5 text-white/60" />
-                             </div>
-                           </Button>
-
-                           {/* Maturity Calculator */}
-                           <Button
-                             variant="outline"
-                             className="h-auto p-4 w-full border-2 border-white/20 bg-white/5 hover:bg-white/10 text-white"
-                             onClick={() => navigate('/maturity-calculator')}
-                           >
-                             <div className="flex items-center space-x-3 w-full">
-                               <div className="w-10 h-10 rounded-lg bg-blue-400/20 flex items-center justify-center">
-                                 <Calculator className="w-5 h-5 text-blue-300" />
-                               </div>
-                               <div className="flex-1 text-left">
-                                 <div className="font-semibold">
-                                   {labels.recalculateMaturity}
-                                 </div>
-                                 <div className="text-sm text-white/70">
-                                   {labels.updateMaturityScores}
-                                 </div>
-                               </div>
-                               <ArrowRight className="w-4 h-4 text-white/60" />
-                             </div>
-                           </Button>
-                         </div>
-
-                        {/* Quick Stats on Mobile */}
-                        <div className="md:hidden flex space-x-2">
-                          <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                            {progressPercentage}%
-                          </Badge>
-                          <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                            {completedTasks.length} ✓
-                          </Badge>
-                          <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                            {activeTasks.length} {labels.activeTasks}
-                          </Badge>
-                        </div>
+                      {/* Quick Stats on Mobile */}
+                      <div className="md:hidden flex space-x-2">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          {progressPercentage}%
+                        </Badge>
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          {completedTasks.length} ✓
+                        </Badge>
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          {activeTasks.length} {labels.activeTasks}
+                        </Badge>
                       </div>
 
                       {/* Next Tasks Preview */}
