@@ -46,12 +46,7 @@ export const UnifiedDashboard: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
-      {/* DEBUG VISUAL INDICATOR FOR DASHBOARD */}
-      <div className="bg-red-500 text-white p-2 text-center font-bold">
-        🔴 DEBUG: UNIFIED DASHBOARD ACTIVO - FloatingMasterAgent RESTAURADO
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10">
       <NewDashboardHeader 
         onMaturityCalculatorClick={handleMaturityCalculatorClick}
         onAgentManagerClick={handleAgentManagerClick}
@@ -80,7 +75,7 @@ export const UnifiedDashboard: React.FC = () => {
         </div>
       </main>
 
-      {/* Floating Master Agent - Always Visible with DEBUG */}
+      {/* Floating Master Agent */}
       <FloatingMasterAgent
         language={mapToLegacyLanguage(language)}
         maturityScores={null}
@@ -91,15 +86,6 @@ export const UnifiedDashboard: React.FC = () => {
         onViewProgress={handleViewProgress}
         onHelp={handleHelp}
       />
-      
-      {/* ADDITIONAL DEBUG INDICATOR FOR FLOATING AGENT */}
-      <div className="fixed bottom-4 left-4 bg-green-500 text-white p-3 rounded-lg z-50 font-bold shadow-lg animate-pulse">
-        ✅ FloatingMasterAgent: VISIBLE
-        <br />
-        📊 Tareas Activas: {activeTasks}
-        <br />
-        ✅ Tareas Completadas: {completedTasks}
-      </div>
       
       {/* Business Profile Dialog */}
       <BusinessProfileDialog
