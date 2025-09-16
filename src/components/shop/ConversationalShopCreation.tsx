@@ -737,27 +737,7 @@ export const ConversationalShopCreation: React.FC = () => {
       </motion.div>
     </div>
   );
-        <p className="text-muted-foreground text-lg mb-6">
-          Configurando todo automáticamente con inteligencia artificial...
-        </p>
-        
-        {/* Progress steps */}
-        <div className="space-y-3 max-w-md mx-auto">
-          {[
-            '🏗️ Estructurando la tienda',
-            '🎨 Diseñando la identidad visual',
-            '📝 Generando contenido optimizado',
-            '🔧 Configurando funcionalidades'
-          ].map((step, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-        >
-          El Coordinador Maestro está trabajando su magia... 🪄
-        </motion.p>
-      </motion.div>
-    </div>
-  );
+
 
   const renderCompletePhase = () => (
     <div className="text-center py-12">
