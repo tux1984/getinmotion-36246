@@ -68,7 +68,8 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
               </div>
               <Button 
                 size="sm"
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
+                variant="default"
+                className="w-full"
                 onClick={(e) => {
                   e.stopPropagation();
                   onMasterAgentChat();
@@ -142,7 +143,8 @@ const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({
                 </div>
                 <Button 
                   size="sm"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                  variant="success"
+                  className="w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate('/dashboard/create-shop');

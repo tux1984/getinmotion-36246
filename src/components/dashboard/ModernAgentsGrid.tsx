@@ -176,7 +176,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
       }`}>
         {isRecommended && (
           <div className="absolute -top-2 -right-2 z-10">
-            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
+            <Badge variant="recommended">
               <Zap className="w-3 h-3 mr-1" />
               {t.recommended}
             </Badge>
@@ -185,7 +185,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         
         {agent.isRecentlyEnabled && (
           <div className="absolute -top-2 -left-2 z-10">
-            <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-black border-0 font-medium animate-pulse">
+            <Badge variant="success" className="animate-pulse">
               {t.justEnabled}
             </Badge>
           </div>
@@ -193,7 +193,7 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
         
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">
+            <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0 text-primary-foreground">
               <AgentIcon icon={agent.icon} />
             </div>
             <div className="min-w-0 flex-1">
@@ -240,7 +240,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
             <>
               <Button 
                 onClick={() => handleAgentClick(agent.id)}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white border-0 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+                variant="premium"
+                className="flex-1 rounded-xl font-medium transition-all duration-200 hover:scale-105"
                 size="sm"
                 disabled={loading || isToggling}
               >
@@ -264,7 +265,8 @@ export const ModernAgentsGrid: React.FC<ModernAgentsGridProps> = ({
           ) : (
             <Button 
               onClick={() => handleEnableAgent(agent.id)}
-              className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+              variant="success"
+              className="flex-1 rounded-xl font-medium transition-all duration-200 hover:scale-105"
               size="sm"
               disabled={isToggling}
             >

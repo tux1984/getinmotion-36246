@@ -72,7 +72,7 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
     }`}>
       {isRecommended && (
         <div className="absolute -top-2 -right-2 z-10">
-          <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-0 font-medium">
+          <Badge variant="recommended">
             {t.recommended}
           </Badge>
         </div>
@@ -80,7 +80,7 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
       
       <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg shadow-lg flex-shrink-0">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-lg shadow-lg flex-shrink-0 text-primary-foreground">
             {agent.icon}
           </div>
           <div className="min-w-0 flex-1">
@@ -117,7 +117,8 @@ export const MediumAgentCard: React.FC<MediumAgentCardProps> = ({
       {!agent.isEnabled && (
         <Button 
           onClick={() => onEnable(agent.id)}
-          className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 rounded-lg font-medium transition-all duration-200 hover:scale-105"
+          variant="success"
+          className="w-full rounded-lg font-medium transition-all duration-200 hover:scale-105"
           size="sm"
           disabled={isToggling}
         >

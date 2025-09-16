@@ -50,7 +50,7 @@ export const BusinessProfileCard: React.FC<BusinessProfileCardProps> = ({
             </p>
             <Button
               onClick={onOpenProfile}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+              variant="premium"
             >
               {content.cta}
               <ArrowRight className="w-4 h-4 ml-2" />
