@@ -103,7 +103,7 @@ export const RobustPremiumDashboard: React.FC = () => {
   }
 
   return (
-    <DashboardBackground showGlobalComponents={true}>
+    <DashboardBackground>
       <div className="min-h-screen">
         {/* Hero Section */}
         <StablePremiumDashboardHero 

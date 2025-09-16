@@ -435,195 +435,124 @@ export const MasterCoordinatorDashboard: React.FC<MasterCoordinatorDashboardProp
   const t = translations[language];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Master Coordinator Panel - Floating within content */}
-      <MasterCoordinatorPanel onTaskStart={handleTaskStartFromPanel} language={language} />
-      
+    <div className="min-h-screen bg-background">
+      {/* Key Performance Metrics - Simplified */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 space-y-8">
-
-          {/* Key Performance Metrics */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-          >
-            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200/50 dark:from-blue-950/20 dark:to-cyan-950/20 dark:border-blue-800/30">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {activeTasksCount}/15
-                  </div>
-                </div>
-                <div className="text-sm text-blue-700 dark:text-blue-300">
-                  {t.activeSlots}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200/50 dark:from-green-950/20 dark:to-emerald-950/20 dark:border-green-800/30">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {completedTasksCount}
-                  </div>
-                </div>
-                <div className="text-sm text-green-700 dark:text-green-300">
-                  {t.completedTasks}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200/50 dark:from-purple-950/20 dark:to-indigo-950/20 dark:border-purple-800/30">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {getMaturityLevel()}/5
-                  </div>
-                </div>
-                <div className="text-sm text-purple-700 dark:text-purple-300">
-                  {t.maturityLevel}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200/50 dark:from-orange-950/20 dark:to-amber-950/20 dark:border-orange-800/30">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <BarChart3 className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {progressPercentage}%
-                  </div>
-                </div>
-                <div className="text-sm text-orange-700 dark:text-orange-300">
-                  {t.successRate}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Left Column: Recommendations */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Top Priority Tasks Section */}
-              <TopPriorityTasksSection
-                tasks={tasks}
-                language={language}
-                onStartDevelopment={async (task) => {
-                  console.log('🚀 Starting task through master coordinator:', task.id);
-                  await handleTaskStart(task);
-                }}
-                onChatWithAgent={(task) => {
-                  console.log('💬 Opening chat with agent through coordinator:', task.agent_id);
-                  navigate(`/dashboard/tasks`, { state: { selectedTaskId: task.id } });
-                }}
-                onCompleteTask={async (task) => {
-                  console.log('✅ Completing task through master coordinator:', task.id);
-                  await handleCompleteTask(task);
-                }}
-                startingTask={startingTask}
-              />
-
-              {/* Compact Priority Recommendations */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <RecommendedTasksSection
-                  language={language}
-                  maturityScores={currentScores || {}}
-                />
-              </motion.div>
+        
+        {/* Stats Grid - No Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="border-l-4 border-primary bg-primary/5 p-4 rounded-r-lg">
+            <div className="flex items-center space-x-2 mb-1">
+              <Target className="w-5 h-5 text-primary" />
+              <span className="text-2xl font-bold text-primary">{activeTasksCount}/15</span>
             </div>
-
-            {/* Right Column: Quick Actions Panel */}
-            <div className="space-y-6">
-              
-              {/* Unified Quick Actions Panel */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <QuickActionsPanel
-                  language={language}
-                  onMasterAgentChat={handleMasterAgentChat}
-                  activeTasks={activeTasksCount}
-                />
-              </motion.div>
-
-              {/* Profile & Settings Panel */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Card className="bg-gradient-to-br from-card to-card/80 border-primary/20">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {language === 'es' ? 'Mi Perfil' : 'My Profile'}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {language === 'es' ? 'Gestiona tu información' : 'Manage your information'}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button
-                      onClick={handleEditProfile}
-                      className="w-full bg-primary/10 hover:bg-primary/20 text-primary border-primary/30"
-                      variant="outline"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      {language === 'es' ? 'Ver Mi Perfil' : 'View My Profile'}
-                    </Button>
-                    <Button
-                      onClick={handleRecalculateMaturity}
-                      className="w-full bg-purple-50 hover:bg-purple-100 text-purple-600 border-purple-200"
-                      variant="outline"
-                    >
-                      <Calculator className="w-4 h-4 mr-2" />
-                      {language === 'es' ? 'Calculadora de Madurez' : 'Maturity Calculator'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-            </div>
+            <p className="text-sm text-muted-foreground">{t.activeSlots}</p>
           </div>
 
-          {/* Deliverables Section - Conditionally Rendered */}
-          <AnimatePresence>
-            {showDeliverables && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="overflow-hidden"
-              >
-                <DeliverablesSection
-                  deliverables={deliverables}
-                  onDownload={handleDownloadDeliverable}
-                  onPreview={handlePreviewDeliverable}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="border-l-4 border-success bg-success/5 p-4 rounded-r-lg">
+            <div className="flex items-center space-x-2 mb-1">
+              <CheckCircle2 className="w-5 h-5 text-success" />
+              <span className="text-2xl font-bold text-success">{completedTasksCount}</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{t.completedTasks}</p>
+          </div>
+
+          <div className="border-l-4 border-secondary bg-secondary/5 p-4 rounded-r-lg">
+            <div className="flex items-center space-x-2 mb-1">
+              <TrendingUp className="w-5 h-5 text-secondary" />
+              <span className="text-2xl font-bold text-secondary">{getMaturityLevel()}/5</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{t.maturityLevel}</p>
+          </div>
+
+          <div className="border-l-4 border-warning bg-warning/5 p-4 rounded-r-lg">
+            <div className="flex items-center space-x-2 mb-1">
+              <BarChart3 className="w-5 h-5 text-warning" />
+              <span className="text-2xl font-bold text-warning">{progressPercentage}%</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{t.successRate}</p>
+          </div>
         </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Tasks */}
+          <div className="lg:col-span-2 space-y-6">
+            <TopPriorityTasksSection
+              tasks={tasks}
+              language={language}
+              onStartDevelopment={async (task) => {
+                console.log('🚀 Starting task through master coordinator:', task.id);
+                await handleTaskStart(task);
+              }}
+              onChatWithAgent={(task) => {
+                console.log('💬 Opening chat with agent through coordinator:', task.agent_id);
+                navigate(`/dashboard/tasks`, { state: { selectedTaskId: task.id } });
+              }}
+              onCompleteTask={async (task) => {
+                console.log('✅ Completing task through master coordinator:', task.id);
+                await handleCompleteTask(task);
+              }}
+              startingTask={startingTask}
+            />
+
+            <RecommendedTasksSection
+              language={language}
+              maturityScores={currentScores || {}}
+            />
+          </div>
+
+          {/* Right Column: Quick Actions */}
+          <div className="space-y-6">
+            <QuickActionsPanel
+              language={language}
+              onMasterAgentChat={handleMasterAgentChat}
+              activeTasks={activeTasksCount}
+            />
+
+            {/* Profile Settings - Simplified */}
+            <div className="border border-border rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">
+                    {language === 'es' ? 'Mi Perfil' : 'My Profile'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'es' ? 'Gestiona tu información' : 'Manage your information'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleEditProfile}
+                className="w-full border border-primary text-primary px-3 py-2 rounded-md text-sm hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <User className="w-4 h-4" />
+                {language === 'es' ? 'Ver Mi Perfil' : 'View My Profile'}
+              </button>
+              <button
+                onClick={handleRecalculateMaturity}
+                className="w-full border border-secondary text-secondary px-3 py-2 rounded-md text-sm hover:bg-secondary hover:text-secondary-foreground transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <Calculator className="w-4 h-4" />
+                {language === 'es' ? 'Calculadora de Madurez' : 'Maturity Calculator'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Deliverables Section */}
+        {showDeliverables && (
+          <DeliverablesSection
+            deliverables={deliverables}
+            onDownload={handleDownloadDeliverable}
+            onPreview={handlePreviewDeliverable}
+          />
+        )}
       </div>
+    </div>
   );
 };

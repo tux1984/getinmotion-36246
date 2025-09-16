@@ -48,7 +48,7 @@ const TasksDashboard = () => {
           noIndex={true}
         />
         
-        <DashboardBackground showGlobalComponents={false}>
+        <DashboardBackground>
           <div className="min-h-screen bg-background">
             {/* Compact Header */}
             <div className="border-b bg-card">
@@ -104,7 +104,7 @@ const TasksDashboard = () => {
         noIndex={true}
       />
       
-      <DashboardBackground showGlobalComponents={false}>
+      <DashboardBackground>
         <div className="min-h-screen bg-background">
           {/* Compact Modern Header */}
           <div className="border-b bg-card">
