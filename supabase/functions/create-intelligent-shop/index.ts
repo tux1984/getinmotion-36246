@@ -19,7 +19,8 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, language = 'es', action } = await req.json();
+    const requestBody = await req.json();
+    const { userId, language = 'es', action, userResponse, currentQuestion, conversationHistory, shopData } = requestBody;
     
     if (!userId) {
       throw new Error('User ID is required');
@@ -42,7 +43,6 @@ serve(async (req) => {
     }
 
     if (action === 'process_conversation') {
-      const { userResponse, currentQuestion, conversationHistory, shopData } = await req.json();
       return await processConversationStep(supabase, userId, language, userResponse, currentQuestion, conversationHistory, shopData);
     }
 

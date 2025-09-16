@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
-// Master Coordinator integration will be added here
-import { Loader2, Store, Sparkles, ArrowRight, MessageCircle } from 'lucide-react';
+import { Loader2, Store, Sparkles, ArrowRight, MessageCircle, Bot, User, Wand2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ConversationalMessage {
@@ -17,6 +16,7 @@ interface ConversationalMessage {
   content: string;
   data?: any;
   timestamp: Date;
+  isTyping?: boolean;
 }
 
 interface ShopCreationState {
@@ -26,6 +26,7 @@ interface ShopCreationState {
   missingInfo: string[];
   conversation: ConversationalMessage[];
   currentQuestion?: string;
+  isCoordinatorThinking?: boolean;
 }
 
 export const ConversationalShopCreation: React.FC = () => {
@@ -36,10 +37,13 @@ export const ConversationalShopCreation: React.FC = () => {
     missingInfo: [],
     conversation: [],
     currentQuestion: undefined,
+    isCoordinatorThinking: false,
   });
   
   const [userInput, setUserInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [typingText, setTypingText] = useState('');
+  const conversationEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -163,12 +167,31 @@ export const ConversationalShopCreation: React.FC = () => {
     }
   };
 
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [state.conversation]);
+
+  // Typing animation effect
+  const simulateTyping = async (text: string, callback: () => void) => {
+    setState(prev => ({ ...prev, isCoordinatorThinking: true }));
+    
+    for (let i = 0; i <= text.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 30));
+      setTypingText(text.slice(0, i));
+    }
+    
+    setState(prev => ({ ...prev, isCoordinatorThinking: false }));
+    setTypingText('');
+    callback();
+  };
+
   const handleUserResponse = async (response: string) => {
     if (!response.trim()) return;
 
     setIsProcessing(true);
     
-    // Add user message to conversation
+    // Add user message to conversation with animation
     const userMessage: ConversationalMessage = {
       id: Date.now().toString(),
       type: 'user',
@@ -196,19 +219,22 @@ export const ConversationalShopCreation: React.FC = () => {
       });
 
       if (coordinatorResponse) {
-        const coordinatorMessage: ConversationalMessage = {
-          id: (Date.now() + 1).toString(),
-          type: 'coordinator',
-          content: coordinatorResponse.message,
-          timestamp: new Date()
-        };
+        // Simulate typing with realistic delay
+        await simulateTyping(coordinatorResponse.message, () => {
+          const coordinatorMessage: ConversationalMessage = {
+            id: (Date.now() + 1).toString(),
+            type: 'coordinator',
+            content: coordinatorResponse.message,
+            timestamp: new Date()
+          };
 
-        setState(prev => ({
-          ...prev,
-          conversation: [...prev.conversation, coordinatorMessage],
-          shopData: { ...prev.shopData, ...coordinatorResponse.updatedShopData },
-          currentQuestion: coordinatorResponse.nextQuestion
-        }));
+          setState(prev => ({
+            ...prev,
+            conversation: [...prev.conversation, coordinatorMessage],
+            shopData: { ...prev.shopData, ...coordinatorResponse.updatedShopData },
+            currentQuestion: coordinatorResponse.nextQuestion
+          }));
+        });
 
         // If ready to create shop
         if (coordinatorResponse.readyToCreate) {
@@ -237,92 +263,321 @@ export const ConversationalShopCreation: React.FC = () => {
   const renderAnalyzingPhase = () => (
     <div className="text-center py-12">
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        className="mx-auto w-16 h-16 mb-6"
+        animate={{ 
+          rotate: 360,
+          scale: [1, 1.1, 1],
+        }}
+        transition={{ 
+          rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+        }}
+        className="mx-auto w-20 h-20 mb-6 relative"
       >
-        <Sparkles className="w-16 h-16 text-emerald-500" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full opacity-20 animate-pulse" />
+        <Wand2 className="w-20 h-20 text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text" style={{
+          filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.5))'
+        }} />
       </motion.div>
-      <h3 className="text-xl font-semibold mb-2">Analizando tu perfil</h3>
-      <p className="text-muted-foreground">El Coordinador Maestro está revisando toda tu información para crear la tienda perfecta...</p>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Analizando tu perfil
+        </h3>
+        <p className="text-muted-foreground text-lg">
+          El Coordinador Maestro está revisando toda tu información para crear la tienda perfecta...
+        </p>
+      </motion.div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full opacity-60"
+            animate={{
+              x: [0, 100, -100, 0],
+              y: [0, -100, 100, 0],
+              scale: [1, 0.5, 1],
+            }}
+            transition={{
+              duration: 4 + i,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5,
+            }}
+            style={{
+              left: `${20 + i * 10}%`,
+              top: `${30 + i * 5}%`,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 
   const renderConversationPhase = () => (
     <div className="space-y-6">
       {/* Conversation Display */}
-      <div className="space-y-4 max-h-96 overflow-y-auto">
-        <AnimatePresence>
-          {state.conversation.map((message) => (
+      <div className="space-y-4 max-h-96 overflow-y-auto px-2" style={{ scrollBehavior: 'smooth' }}>
+        <AnimatePresence mode="popLayout">
+          {state.conversation.map((message, index) => (
             <motion.div
               key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ 
+                duration: 0.4,
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 100
+              }}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[80%] p-4 rounded-lg ${
-                message.type === 'coordinator' 
-                  ? 'bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800' 
-                  : 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 ml-auto'
-              }`}>
-                <div className="flex items-start gap-2">
-                  {message.type === 'coordinator' && (
-                    <MessageCircle className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  )}
+              <motion.div 
+                className={`max-w-[85%] rounded-2xl ${
+                  message.type === 'coordinator' 
+                    ? 'bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/50 dark:to-blue-950/50 border border-purple-200/50 dark:border-purple-800/50' 
+                    : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg ml-auto'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    {message.type === 'coordinator' && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                      >
+                        <Bot className="w-4 h-4 text-white" />
+                      </motion.div>
+                    )}
+                    {message.type === 'user' && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 order-2"
+                      >
+                        <User className="w-4 h-4 text-white" />
+                      </motion.div>
+                    )}
+                    <div className={message.type === 'user' ? 'order-1' : ''}>
+                      <p className={`font-semibold text-sm mb-1 ${
+                        message.type === 'coordinator' 
+                          ? 'text-purple-800 dark:text-purple-200' 
+                          : 'text-white/90'
+                      }`}>
+                        {message.type === 'coordinator' ? '🎯 Coordinador Maestro' : '👤 Tú'}
+                      </p>
+                      <motion.p 
+                        className={`leading-relaxed ${
+                          message.type === 'coordinator' 
+                            ? 'text-gray-700 dark:text-gray-200' 
+                            : 'text-white'
+                        }`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {message.content}
+                      </motion.p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
+        {/* Coordinator thinking indicator */}
+        <AnimatePresence>
+          {state.isCoordinatorThinking && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex justify-start"
+            >
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/50 dark:to-blue-950/50 border border-purple-200/50 dark:border-purple-800/50 rounded-2xl p-4 max-w-[85%]">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
                   <div>
-                    <p className={`font-medium text-sm ${
-                      message.type === 'coordinator' ? 'text-emerald-800 dark:text-emerald-200' : 'text-blue-800 dark:text-blue-200'
-                    }`}>
-                      {message.type === 'coordinator' ? 'Coordinador Maestro' : 'Tú'}
+                    <p className="font-semibold text-sm text-purple-800 dark:text-purple-200 mb-1">
+                      🎯 Coordinador Maestro
                     </p>
-                    <p className={`mt-1 ${
-                      message.type === 'coordinator' ? 'text-emerald-700 dark:text-emerald-300' : 'text-blue-700 dark:text-blue-300'
-                    }`}>
-                      {message.content}
-                    </p>
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
+                      <span>{typingText}</span>
+                      <motion.span
+                        animate={{ opacity: [1, 0] }}
+                        transition={{ duration: 0.8, repeat: Infinity }}
+                        className="w-2 h-4 bg-purple-500 inline-block"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </motion.div>
-          ))}
+          )}
         </AnimatePresence>
+        
+        <div ref={conversationEndRef} />
       </div>
 
       {/* User Input */}
-      <div className="flex gap-2">
-        <Textarea
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          placeholder="Escribe tu respuesta aquí..."
-          className="flex-1"
-          rows={2}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleUserResponse(userInput);
-            }
-          }}
-        />
-        <Button
-          onClick={() => handleUserResponse(userInput)}
-          disabled={!userInput.trim() || isProcessing}
-          size="lg"
-        >
-          {isProcessing ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <ArrowRight className="w-4 h-4" />
-          )}
-        </Button>
-      </div>
+      <motion.div 
+        className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 border shadow-sm"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <Textarea
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="💬 Escribe tu respuesta aquí... (Enter para enviar)"
+              className="border-0 resize-none bg-transparent focus:ring-2 focus:ring-purple-500/20 placeholder:text-gray-400"
+              rows={2}
+              disabled={isProcessing || state.isCoordinatorThinking}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleUserResponse(userInput);
+                }
+              }}
+            />
+            {userInput.trim() && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute bottom-2 right-2 text-xs text-gray-400"
+              >
+                Enter ↵
+              </motion.div>
+            )}
+          </div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              onClick={() => handleUserResponse(userInput)}
+              disabled={!userInput.trim() || isProcessing || state.isCoordinatorThinking}
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg h-auto px-6 py-3"
+            >
+              {isProcessing || state.isCoordinatorThinking ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Loader2 className="w-5 h-5" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  whileHover={{ x: 2 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </motion.div>
+              )}
+            </Button>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 
   const renderCreatingPhase = () => (
-    <div className="text-center py-12">
-      <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mx-auto mb-6" />
-      <h3 className="text-xl font-semibold mb-2">Creando tu tienda digital</h3>
-      <p className="text-muted-foreground">Configurando todo automáticamente...</p>
+    <div className="text-center py-16 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"
+            animate={{
+              x: [0, window.innerWidth || 800],
+              y: [Math.random() * 400, Math.random() * 400],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: i * 0.2,
+              ease: "easeInOut",
+            }}
+            style={{
+              left: -10,
+              top: `${20 + Math.random() * 60}%`,
+            }}
+          />
+        ))}
+      </div>
+      
+      <motion.div
+        animate={{ 
+          rotate: 360,
+          scale: [1, 1.2, 1],
+        }}
+        transition={{ 
+          rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+          scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+        }}
+        className="mx-auto w-24 h-24 mb-8 relative z-10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full opacity-30 animate-pulse" />
+        <Store className="w-24 h-24 text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text filter drop-shadow-lg" />
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="relative z-10"
+      >
+        <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          ✨ Creando tu tienda digital
+        </h3>
+        <p className="text-muted-foreground text-lg mb-6">
+          Configurando todo automáticamente con inteligencia artificial...
+        </p>
+        
+        {/* Progress steps */}
+        <div className="space-y-3 max-w-md mx-auto">
+          {[
+            '🏗️ Estructurando la tienda',
+            '🎨 Diseñando la identidad visual',
+            '📝 Generando contenido optimizado',
+            '🔧 Configurando funcionalidades'
+          ].map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + index * 0.3 }}
+              className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-300"
+            >
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
+              >
+                {step}
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 
