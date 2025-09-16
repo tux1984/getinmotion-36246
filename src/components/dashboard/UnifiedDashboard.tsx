@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MasterCoordinatorDashboard } from './NewMasterCoordinatorDashboard';
+import { MasterCoordinatorPanel } from './MasterCoordinatorPanel';
 import { NewDashboardHeader } from './NewDashboardHeader';
 import { BusinessProfileDialog } from '@/components/master-coordinator/BusinessProfileDialog';
 import { FloatingMasterAgent } from './FloatingMasterAgent';
@@ -69,6 +70,9 @@ export const UnifiedDashboard: React.FC = () => {
               </button>
             </div>
           )}
+          
+          {/* Master Coordinator Panel - Purple Panel from Image */}
+          <MasterCoordinatorPanel language={mapToLegacyLanguage(language)} />
           
           {/* Main Dashboard */}
           <MasterCoordinatorDashboard language={mapToLegacyLanguage(language)} />
