@@ -43,6 +43,8 @@ export const ConversationalShopCreation: React.FC = () => {
   const [userInput, setUserInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [typingText, setTypingText] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const conversationEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
@@ -172,18 +174,74 @@ export const ConversationalShopCreation: React.FC = () => {
     conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [state.conversation]);
 
-  // Typing animation effect
+  // Enhanced typing animation with realistic pauses
   const simulateTyping = async (text: string, callback: () => void) => {
     setState(prev => ({ ...prev, isCoordinatorThinking: true }));
     
-    for (let i = 0; i <= text.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 30));
-      setTypingText(text.slice(0, i));
+    const words = text.split(' ');
+    let currentText = '';
+    
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      
+      // Type each character of the word
+      for (let j = 0; j <= word.length; j++) {
+        const partialWord = word.slice(0, j);
+        const displayText = currentText + partialWord;
+        setTypingText(displayText);
+        
+        // Variable speed: slower for punctuation, faster for letters
+        const char = word[j];
+        const delay = char && /[.,!?]/.test(char) ? 150 : 
+                     char && /[áéíóúñü]/.test(char) ? 40 : 25;
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
+      currentText += word;
+      if (i < words.length - 1) {
+        currentText += ' ';
+        setTypingText(currentText);
+        
+        // Pause between words (longer for punctuation)
+        const lastChar = word[word.length - 1];
+        const wordPause = /[.,!?]/.test(lastChar) ? 300 : 80;
+        await new Promise(resolve => setTimeout(resolve, wordPause));
+      }
     }
+    
+    // Final pause before showing complete message
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     setState(prev => ({ ...prev, isCoordinatorThinking: false }));
     setTypingText('');
     callback();
+  };
+
+  // Generate contextual quick replies
+  const generateQuickReplies = (currentQuestion?: string) => {
+    const suggestions: Record<string, string[]> = {
+      business_name: [
+        'Artesanías [Tu Apellido]',
+        '[Tu Nombre] Handmade',
+        'Taller [Tu Especialidad]'
+      ],
+      business_description: [
+        'Trabajo con cerámica tradicional',
+        'Creo joyería artesanal en plata',
+        'Tejo productos en lana virgen',
+        'Trabajo cuero y marroquinería'
+      ],
+      business_location: [
+        'Bogotá',
+        'Medellín', 
+        'Cartagena',
+        'Cali',
+        'Bucaramanga'
+      ]
+    };
+
+    return suggestions[currentQuestion || ''] || [];
   };
 
   const handleUserResponse = async (response: string) => {
@@ -219,7 +277,11 @@ export const ConversationalShopCreation: React.FC = () => {
       });
 
       if (coordinatorResponse) {
-        // Simulate typing with realistic delay
+        // Generate contextual suggestions
+        const suggestions = generateQuickReplies(coordinatorResponse.nextQuestion);
+        setQuickReplies(suggestions);
+        
+        // Simulate typing with realistic delay and detect vague responses
         await simulateTyping(coordinatorResponse.message, () => {
           const coordinatorMessage: ConversationalMessage = {
             id: (Date.now() + 1).toString(),
@@ -234,6 +296,11 @@ export const ConversationalShopCreation: React.FC = () => {
             shopData: { ...prev.shopData, ...coordinatorResponse.updatedShopData },
             currentQuestion: coordinatorResponse.nextQuestion
           }));
+          
+          // Show suggestions for next input if not ready to create
+          if (!coordinatorResponse.readyToCreate) {
+            setShowSuggestions(true);
+          }
         });
 
         // If ready to create shop
@@ -433,18 +500,79 @@ export const ConversationalShopCreation: React.FC = () => {
         <div ref={conversationEndRef} />
       </div>
 
+      {/* Quick Reply Suggestions */}
+      <AnimatePresence>
+        {showSuggestions && quickReplies.length > 0 && !state.isCoordinatorThinking && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="flex flex-wrap gap-2 mb-4"
+          >
+            <p className="text-sm text-muted-foreground mb-2 w-full">✨ Sugerencias rápidas:</p>
+            {quickReplies.map((suggestion, index) => (
+              <motion.button
+                key={index}
+                onClick={() => {
+                  setUserInput(suggestion);
+                  setShowSuggestions(false);
+                }}
+                className="px-3 py-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full text-sm border border-purple-200/50 dark:border-purple-800/50 hover:shadow-md transition-all duration-200"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                {suggestion}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* User Input */}
       <motion.div 
-        className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 border shadow-sm"
+        className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 border shadow-sm relative overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <div className="flex gap-3">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full opacity-30"
+              animate={{
+                x: [0, 100, 0],
+                y: [0, -50, 0],
+                scale: [1, 0.5, 1],
+              }}
+              transition={{
+                duration: 5 + i,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 1.5,
+              }}
+              style={{
+                left: `${20 + i * 30}%`,
+                top: `${50}%`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="flex gap-3 relative z-10">
           <div className="flex-1 relative">
             <Textarea
               value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
+              onChange={(e) => {
+                setUserInput(e.target.value);
+                if (showSuggestions && e.target.value.length > 0) {
+                  setShowSuggestions(false);
+                }
+              }}
               placeholder="💬 Escribe tu respuesta aquí... (Enter para enviar)"
               className="border-0 resize-none bg-transparent focus:ring-2 focus:ring-purple-500/20 placeholder:text-gray-400"
               rows={2}
@@ -455,6 +583,7 @@ export const ConversationalShopCreation: React.FC = () => {
                   handleUserResponse(userInput);
                 }
               }}
+              onFocus={() => setShowSuggestions(true)}
             />
             {userInput.trim() && (
               <motion.div
@@ -499,56 +628,115 @@ export const ConversationalShopCreation: React.FC = () => {
   );
 
   const renderCreatingPhase = () => (
-    <div className="text-center py-16 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0">
+    <div className="text-center py-12 relative">
+      {/* Advanced animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"
+            className="absolute w-3 h-3 rounded-full opacity-40"
+            style={{
+              background: `linear-gradient(45deg, 
+                hsl(${240 + i * 10}, 70%, 60%), 
+                hsl(${300 + i * 15}, 80%, 70%))`,
+              left: `${10 + (i % 4) * 25}%`,
+              top: `${20 + Math.floor(i / 4) * 25}%`,
+            }}
             animate={{
-              x: [0, window.innerWidth || 800],
-              y: [Math.random() * 400, Math.random() * 400],
-              opacity: [0, 1, 0],
+              scale: [1, 1.5, 0.5, 1],
+              opacity: [0.4, 0.8, 0.2, 0.4],
+              rotate: [0, 180, 360],
+              x: [0, 30, -30, 0],
+              y: [0, -30, 30, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 4 + i * 0.5,
               repeat: Infinity,
-              delay: i * 0.2,
               ease: "easeInOut",
-            }}
-            style={{
-              left: -10,
-              top: `${20 + Math.random() * 60}%`,
+              delay: i * 0.2,
             }}
           />
         ))}
       </div>
-      
+
+      {/* Main creation animation */}
       <motion.div
         animate={{ 
-          rotate: 360,
-          scale: [1, 1.2, 1],
+          rotate: [0, 360],
+          scale: [1, 1.3, 1.1, 1],
         }}
         transition={{ 
-          rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-          scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+          rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
         }}
-        className="mx-auto w-24 h-24 mb-8 relative z-10"
+        className="mx-auto w-28 h-28 mb-8 relative"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full opacity-30 animate-pulse" />
-        <Store className="w-24 h-24 text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text filter drop-shadow-lg" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 rounded-full opacity-20 animate-pulse" />
+        <div className="absolute inset-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full opacity-30 animate-ping" />
+        <Store className="w-28 h-28 text-transparent bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text relative z-10" style={{
+          filter: 'drop-shadow(0 0 20px rgba(16, 185, 129, 0.5))'
+        }} />
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="relative z-10"
+        transition={{ delay: 0.5 }}
       >
-        <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          ✨ Creando tu tienda digital
+        <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          ✨ Creando tu tienda digital con IA
         </h3>
+        <div className="space-y-3 max-w-md mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1 }}
+            className="flex items-center gap-3 text-left"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full"
+            />
+            <span className="text-muted-foreground">Analizando tu información con IA...</span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 2 }}
+            className="flex items-center gap-3 text-left"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"
+            />
+            <span className="text-muted-foreground">Generando descripción optimizada...</span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 3 }}
+            className="flex items-center gap-3 text-left"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full"
+            />
+            <span className="text-muted-foreground">Configurando tu perfil artesanal...</span>
+          </motion.div>
+        </div>
+        <motion.p 
+          className="text-lg text-muted-foreground mt-6"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          El Coordinador Maestro está trabajando su magia... 🪄
+        </motion.p>
+      </motion.div>
+    </div>
+  );
         <p className="text-muted-foreground text-lg mb-6">
           Configurando todo automáticamente con inteligencia artificial...
         </p>
@@ -564,19 +752,9 @@ export const ConversationalShopCreation: React.FC = () => {
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + index * 0.3 }}
-              className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-300"
-            >
-              <motion.div
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
-              >
-                {step}
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
+        >
+          El Coordinador Maestro está trabajando su magia... 🪄
+        </motion.p>
       </motion.div>
     </div>
   );

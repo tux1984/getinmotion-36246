@@ -1,5 +1,120 @@
 // Conversational shop creation functions for Master Coordinator
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+// Detect vague responses that need clarification
+function isVagueResponse(response: string): boolean {
+  const vaguePhrases = [
+    'el mismo que', 'la misma que', 'como antes', 'igual que antes',
+    'lo mismo', 'como siempre', 'como ya dije', 'ya lo mencioné',
+    'pues', 'eh', 'este', 'bueno', 'si', 'sí', 'ok', 'vale',
+    'normal', 'básico', 'común', 'típico', 'tradicional'
+  ];
+  
+  const normalizedResponse = response.toLowerCase().trim();
+  
+  // Check if response is too short (less than 3 words)
+  if (normalizedResponse.split(' ').length < 3) return true;
+  
+  // Check for vague phrases
+  return vaguePhrases.some(phrase => normalizedResponse.includes(phrase));
+}
+
+// Generate intelligent contextual questions using OpenAI
+async function generateIntelligentQuestion(userResponse: string, currentQuestion: string, conversationHistory: any[], userProfile: any, language: string): Promise<string> {
+  if (!openAIApiKey) {
+    return getDefaultContextualQuestion(currentQuestion, language);
+  }
+
+  const prompt = language === 'es' ? `
+Eres el Coordinador Maestro, un asistente IA especializado en crear tiendas digitales para artesanos colombianos.
+
+CONTEXT DEL USUARIO:
+- Pregunta actual: ${currentQuestion}
+- Respuesta del usuario: "${userResponse}"
+- Historial de conversación: ${JSON.stringify(conversationHistory.slice(-3))}
+- Perfil disponible: ${JSON.stringify(userProfile)}
+
+SITUACIÓN: La respuesta del usuario "${userResponse}" es vaga o insuficiente. 
+
+TU MISIÓN: Generar una pregunta inteligente, específica y conversacional que:
+1. Detecte qué información concreta necesitas
+2. Sea amigable y natural, no robótica
+3. Incluya ejemplos relevantes para artesanos colombianos
+4. Ayude al usuario a dar una respuesta más específica
+
+EJEMPLOS DE BUENAS PREGUNTAS:
+- Si dice "El mismo que yo tenía" → "Entiendo que ya tenías un negocio antes. ¿Podrías contarme específicamente qué productos vendías? Por ejemplo: ¿eran bolsos de cuero, cerámicas, tejidos, joyería?"
+- Si dice "Pues normal" → "Claro, quiero entender mejor. ¿Podrías ser más específico? Por ejemplo, ¿es una ciudad grande como Bogotá o Medellín, o un pueblo más pequeño?"
+
+Responde SOLO con la pregunta, sin explicaciones adicionales.
+` : `
+You are the Master Coordinator, an AI assistant specialized in creating digital shops for Colombian artisans.
+
+USER CONTEXT:
+- Current question: ${currentQuestion}  
+- User response: "${userResponse}"
+- Conversation history: ${JSON.stringify(conversationHistory.slice(-3))}
+- Available profile: ${JSON.stringify(userProfile)}
+
+SITUATION: The user's response "${userResponse}" is vague or insufficient.
+
+YOUR MISSION: Generate an intelligent, specific and conversational question that:
+1. Detects what concrete information you need
+2. Is friendly and natural, not robotic
+3. Includes relevant examples for Colombian artisans
+4. Helps the user give a more specific response
+
+Respond ONLY with the question, no additional explanations.
+`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are an expert conversational AI that generates intelligent, specific questions to clarify vague responses.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 150,
+        temperature: 0.7
+      }),
+    });
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error generating intelligent question:', error);
+    return getDefaultContextualQuestion(currentQuestion, language);
+  }
+}
+
+// Fallback contextual questions
+function getDefaultContextualQuestion(currentQuestion: string, language: string): string {
+  const questions = {
+    es: {
+      business_name: 'Entiendo. ¿Podrías contarme específicamente cuál es el nombre de tu marca o negocio? Por ejemplo: "Artesanías Luna", "Cerámica Andina", etc.',
+      business_description: '¿Podrías ser más específico sobre los productos que vendes? Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera?',
+      business_location: 'Claro. ¿En qué ciudad específicamente? Por ejemplo: Bogotá, Medellín, Cartagena, o algún municipio particular.',
+      craft_type: 'Perfecto. ¿Podrías darme más detalles sobre el tipo de artesanía? Por ejemplo: ¿qué técnicas usas, qué materiales, qué tipo de productos específicos?'
+    },
+    en: {
+      business_name: 'I understand. Could you tell me specifically what your brand or business name is? For example: "Luna Crafts", "Andean Ceramics", etc.',
+      business_description: 'Could you be more specific about the products you sell? For example: do you work with ceramics, textiles, jewelry, leather, wood?',
+      business_location: 'Of course. In which city specifically? For example: Bogotá, Medellín, Cartagena, or a particular municipality.',
+      craft_type: 'Perfect. Could you give me more details about the type of craftsmanship? For example: what techniques do you use, what materials, what specific types of products?'
+    }
+  };
+
+  return questions[language as keyof typeof questions]?.[currentQuestion as keyof typeof questions.es] || 
+         'Could you provide more specific details about that?';
+}
+
 export async function analyzeProfileForConversation(supabase: any, userId: string, language: string) {
   // Fetch comprehensive user data
   const [profileResult, contextResult, maturityResult] = await Promise.all([
@@ -12,7 +127,7 @@ export async function analyzeProfileForConversation(supabase: any, userId: strin
   const masterContext = contextResult.data;
   const maturityScores = maturityResult.data;
 
-  // Analyze what information is missing for shop creation
+  // Analyze what information is missing for shop creation - WITH VAGUE DETECTION
   const missingInfo = [];
   const requiredFields = {
     shop_name: profile?.brand_name || profile?.business_description?.split(' ').slice(0, 3).join(' '),
@@ -23,15 +138,23 @@ export async function analyzeProfileForConversation(supabase: any, userId: strin
     email: profile?.email
   };
 
+  // Check for vague responses in existing data
+  const hasVagueData = Object.entries(requiredFields).some(([key, value]) => {
+    if (typeof value === 'string' && value.length > 0) {
+      return isVagueResponse(value);
+    }
+    return false;
+  });
+
   Object.entries(requiredFields).forEach(([key, value]) => {
-    if (!value || value === 'other') {
+    if (!value || value === 'other' || (typeof value === 'string' && isVagueResponse(value))) {
       missingInfo.push(key);
     }
   });
 
   // Determine if we have enough info to create shop automatically
-  const hasMinimumInfo = requiredFields.shop_name && requiredFields.description && requiredFields.craft_type;
-  const needsMoreInfo = missingInfo.length > 2 || !hasMinimumInfo;
+  const hasMinimumInfo = requiredFields.shop_name && requiredFields.description && requiredFields.craft_type && !hasVagueData;
+  const needsMoreInfo = missingInfo.length > 1 || !hasMinimumInfo || hasVagueData;
 
   let coordinatorMessage;
   let nextQuestion;
@@ -39,24 +162,24 @@ export async function analyzeProfileForConversation(supabase: any, userId: strin
   if (!needsMoreInfo) {
     // Can create automatically
     coordinatorMessage = language === 'es' 
-      ? `¡Perfecto! Tengo toda la información necesaria de tu perfil para crear tu tienda digital "${requiredFields.shop_name}". Voy a configurarla automáticamente.`
-      : `Perfect! I have all the necessary information from your profile to create your digital shop "${requiredFields.shop_name}". I'll configure it automatically.`;
+      ? `¡Perfecto! Tengo toda la información necesaria de tu perfil para crear tu tienda digital "${requiredFields.shop_name}". Voy a configurarla automáticamente con IA.`
+      : `Perfect! I have all the necessary information from your profile to create your digital shop "${requiredFields.shop_name}". I'll configure it automatically with AI.`;
   } else {
-    // Need conversation
-    if (!requiredFields.shop_name) {
+    // Need intelligent conversation
+    if (!requiredFields.shop_name || isVagueResponse(requiredFields.shop_name || '')) {
       coordinatorMessage = language === 'es'
-        ? '¡Hola! Soy tu Coordinador Maestro y te voy a ayudar a crear la tienda digital perfecta. Para empezar, ¿cuál es el nombre de tu negocio o marca?'
-        : 'Hello! I\'m your Master Coordinator and I\'ll help you create the perfect digital shop. To start, what\'s the name of your business or brand?';
+        ? '¡Hola! Soy tu Coordinador Maestro IA 🤖 Voy a crear la tienda digital perfecta para tu negocio artesanal. Veo que ya tienes experiencia, pero necesito algunos detalles específicos. ¿Cuál es el nombre exacto de tu marca o negocio?'
+        : 'Hello! I\'m your Master AI Coordinator 🤖 I\'ll create the perfect digital shop for your artisan business. I see you have experience, but I need some specific details. What\'s the exact name of your brand or business?';
       nextQuestion = 'business_name';
-    } else if (!requiredFields.description) {
+    } else if (!requiredFields.description || isVagueResponse(requiredFields.description || '')) {
       coordinatorMessage = language === 'es'
-        ? `Perfecto, ${requiredFields.shop_name} es un gran nombre. Ahora cuéntame, ¿qué tipo de productos vendes o qué servicios ofreces?`
-        : `Perfect, ${requiredFields.shop_name} is a great name. Now tell me, what type of products do you sell or what services do you offer?`;
+        ? `Perfecto, "${requiredFields.shop_name}" es un excelente nombre. Ahora necesito entender mejor tu artesanía. ¿Qué productos específicos creas? Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera? Cuéntame los detalles.`
+        : `Perfect, "${requiredFields.shop_name}" is an excellent name. Now I need to better understand your craftsmanship. What specific products do you create? For example: do you work with ceramics, textiles, jewelry, leather, wood? Tell me the details.`;
       nextQuestion = 'business_description';
     } else {
       coordinatorMessage = language === 'es'
-        ? 'Necesito algunos detalles más para optimizar tu tienda. ¿En qué ciudad o región te encuentras?'
-        : 'I need some more details to optimize your shop. What city or region are you located in?';
+        ? 'Excelente información sobre tu artesanía. Para optimizar tu tienda para clientes locales, ¿en qué ciudad o región específica te encuentras? Esto me ayuda a configurar mejor las opciones de envío y marketing local.'
+        : 'Excellent information about your craftsmanship. To optimize your shop for local customers, what specific city or region are you in? This helps me better configure shipping options and local marketing.';
       nextQuestion = 'business_location';
     }
   }
@@ -83,32 +206,100 @@ export async function processConversationStep(supabase: any, userId: string, lan
   let message;
   let readyToCreate = false;
 
-  // Process the user's response based on current question
+  console.log('Processing conversation step:', { currentQuestion, userResponse, isVague: isVagueResponse(userResponse) });
+
+  // INTELLIGENT VAGUE RESPONSE DETECTION
+  if (isVagueResponse(userResponse)) {
+    console.log('Detected vague response, generating intelligent question');
+    
+    // Get user profile for context
+    const { data: profile } = await supabase.from('user_profiles').select('*').eq('user_id', userId).single();
+    
+    message = await generateIntelligentQuestion(
+      userResponse, 
+      currentQuestion, 
+      conversationHistory, 
+      profile, 
+      language
+    );
+    
+    // Keep the same question for retry
+    nextQuestion = currentQuestion;
+    
+    return new Response(JSON.stringify({
+      message,
+      nextQuestion,
+      updatedShopData,
+      readyToCreate: false,
+      isVagueResponseDetected: true,
+      finalShopData: null
+    }), {
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
+    });
+  }
+
+  // INTELLIGENT PROCESSING OF SPECIFIC RESPONSES
   switch (currentQuestion) {
     case 'business_name':
       updatedShopData.shop_name = userResponse.trim();
-      message = language === 'es'
-        ? `¡Excelente! "${userResponse}" será el nombre de tu tienda. Ahora cuéntame, ¿qué tipo de productos vendes? Por ejemplo: textiles, cerámica, joyería, etc.`
-        : `Excellent! "${userResponse}" will be your shop name. Now tell me, what type of products do you sell? For example: textiles, ceramics, jewelry, etc.`;
-      nextQuestion = 'craft_type';
+      
+      // Generate AI-powered follow-up if OpenAI available
+      if (openAIApiKey) {
+        try {
+          message = await generateContextualResponse(userResponse, 'business_name_confirmation', language, updatedShopData);
+        } catch (error) {
+          console.error('AI response generation failed, using fallback');
+          message = language === 'es'
+            ? `¡Excelente! "${userResponse}" será el nombre de tu tienda. Ahora cuéntame específicamente qué productos artesanales creas. Por ejemplo: ¿trabajas con cerámica, textiles, joyería, cuero, madera?`
+            : `Excellent! "${userResponse}" will be your shop name. Now tell me specifically what artisan products you create. For example: do you work with ceramics, textiles, jewelry, leather, wood?`;
+        }
+      } else {
+        message = language === 'es'
+          ? `¡Excelente! "${userResponse}" será el nombre de tu tienda. Ahora cuéntame específicamente qué productos artesanales creas.`
+          : `Excellent! "${userResponse}" will be your shop name. Now tell me specifically what artisan products you create.`;
+      }
+      nextQuestion = 'business_description';
       break;
 
-    case 'craft_type':
+    case 'business_description':
       const detectedCraftType = detectCraftTypeFromText(userResponse);
       updatedShopData.craft_type = detectedCraftType;
       updatedShopData.description = userResponse.trim();
-      message = language === 'es'
-        ? `Perfecto, detecté que trabajas con ${detectedCraftType}. ¿En qué ciudad o región te encuentras? Esto me ayuda a optimizar tu tienda para clientes locales.`
-        : `Perfect, I detected that you work with ${detectedCraftType}. What city or region are you in? This helps me optimize your shop for local customers.`;
+      
+      if (openAIApiKey) {
+        try {
+          message = await generateContextualResponse(userResponse, 'craft_confirmation', language, { ...updatedShopData, detectedCraftType });
+        } catch (error) {
+          console.error('AI response generation failed, using fallback');
+          message = language === 'es'
+            ? `Perfecto, detecté que trabajas con ${detectedCraftType}. Para optimizar tu tienda, ¿en qué ciudad específica te encuentras? Esto me ayuda con envíos y marketing local.`
+            : `Perfect, I detected that you work with ${detectedCraftType}. To optimize your shop, what specific city are you in? This helps me with shipping and local marketing.`;
+        }
+      } else {
+        message = language === 'es'
+          ? `Perfecto, detecté que trabajas con ${detectedCraftType}. ¿En qué ciudad te encuentras?`
+          : `Perfect, I detected that you work with ${detectedCraftType}. What city are you in?`;
+      }
       nextQuestion = 'business_location';
       break;
 
     case 'business_location':
       updatedShopData.region = userResponse.trim();
-      message = language === 'es'
-        ? `¡Genial! Tengo toda la información esencial. ¿Tienes algún número de teléfono o WhatsApp donde los clientes puedan contactarte?`
-        : `Great! I have all the essential information. Do you have a phone number or WhatsApp where customers can contact you?`;
-      nextQuestion = 'contact_phone';
+      
+      if (openAIApiKey) {
+        try {
+          message = await generateContextualResponse(userResponse, 'location_confirmation', language, updatedShopData);
+        } catch (error) {
+          message = language === 'es'
+            ? `¡Excelente! Ya tengo toda la información esencial para crear tu tienda digital optimizada. La IA va a configurarla automáticamente con toda esta información.`
+            : `Excellent! I have all the essential information to create your optimized digital shop. AI will configure it automatically with all this information.`;
+        }
+      } else {
+        message = language === 'es'
+          ? `¡Perfecto! Ya tengo la información necesaria para crear tu tienda digital.`
+          : `Perfect! I have the necessary information to create your digital shop.`;
+      }
+      readyToCreate = true;
       break;
 
     case 'contact_phone':
@@ -118,31 +309,30 @@ export async function processConversationStep(supabase: any, userId: string, lan
         whatsapp: userResponse.trim()
       };
       message = language === 'es'
-        ? `¡Perfecto! Ya tengo toda la información necesaria para crear tu tienda digital optimizada. Voy a configurarla ahora con tu información.`
-        : `Perfect! I now have all the necessary information to create your optimized digital shop. I'll configure it now with your information.`;
+        ? `¡Perfecto! Ya tengo toda la información necesaria. La IA está creando tu tienda digital optimizada ahora mismo...`
+        : `Perfect! I have all the necessary information. AI is creating your optimized digital shop right now...`;
       readyToCreate = true;
-      break;
-
-    case 'business_description':
-      updatedShopData.description = userResponse.trim();
-      const craftFromDescription = detectCraftTypeFromText(userResponse);
-      updatedShopData.craft_type = craftFromDescription;
-      message = language === 'es'
-        ? `Entiendo, trabajas con ${craftFromDescription}. ¿En qué ciudad o región te encuentras?`
-        : `I understand, you work with ${craftFromDescription}. What city or region are you in?`;
-      nextQuestion = 'business_location';
       break;
 
     default:
       message = language === 'es'
-        ? 'Gracias por la información. ¿Hay algo más que quieras contarme sobre tu negocio?'
-        : 'Thanks for the information. Is there anything else you\'d like to tell me about your business?';
-      readyToCreate = Object.keys(updatedShopData).length >= 4;
+        ? 'Gracias por la información. ¿Hay algo más específico que quieras contarme sobre tu negocio?'
+        : 'Thanks for the information. Is there anything else specific you\'d like to tell me about your business?';
+      readyToCreate = Object.keys(updatedShopData).length >= 3;
   }
 
-  // Generate story if ready to create
+  // Generate intelligent story if ready to create
   if (readyToCreate) {
-    updatedShopData.story = generateStoryFromConversation(conversationHistory, updatedShopData, language);
+    // Import AI story generation
+    const { generateIntelligentStory } = await import('./ai-conversation-helpers.ts');
+    
+    try {
+      updatedShopData.story = await generateIntelligentStory(conversationHistory, updatedShopData, language);
+    } catch (error) {
+      console.error('AI story generation failed, using fallback');
+      updatedShopData.story = generateStoryFromConversation(conversationHistory, updatedShopData, language);
+    }
+    
     updatedShopData.shop_slug = updatedShopData.shop_name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'mi-tienda';
     
     // Set default contact info if not provided
@@ -208,6 +398,12 @@ function generateStoryFromConversation(conversation: any[], shopData: any, langu
   } else {
     return `At ${businessName}, we specialize in creating unique and high-quality ${businessType}. Located in ${location}, we combine traditional techniques with a modern touch to offer exceptional products. Each piece is made with love and dedication, reflecting our passion for art and craftsmanship. We work with the best materials to ensure each customer receives a unique product that will last over time.`;
   }
+}
+
+// Import AI helper function for contextual responses
+async function generateContextualResponse(userResponse: string, responseType: string, language: string, shopData: any): Promise<string> {
+  const { generateContextualResponse: aiHelper } = await import('./ai-conversation-helpers.ts');
+  return aiHelper(userResponse, responseType, language, shopData);
 }
 
 // Helper functions (reuse existing ones)
