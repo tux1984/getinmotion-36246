@@ -112,24 +112,26 @@ export const FloatingMasterAgent: React.FC<FloatingMasterAgentProps> = ({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[9999]">
       {/* Floating Button */}
       {!isExpanded && (
         <Button
           onClick={() => setIsExpanded(true)}
-          className={`relative rounded-full h-14 w-14 ${getStatusColor()} hover:scale-110 transition-all duration-300 shadow-lg`}
+          className={`relative rounded-full h-16 w-16 ${getStatusColor()} hover:scale-105 transition-all duration-200 shadow-xl ring-4 ring-white/20`}
           size="icon"
         >
-          <MessageCircle className="h-6 w-6 text-white" />
+          <MessageCircle className="h-7 w-7 text-white" />
           {shouldShowProactive && (
-            <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse" />
+            <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full animate-pulse ring-2 ring-white" />
           )}
+          {/* Always visible indicator */}
+          <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-400 rounded-full ring-2 ring-white" />
         </Button>
       )}
 
       {/* Expanded Panel */}
       {isExpanded && (
-        <Card className="w-80 shadow-2xl border-0 bg-card/95 backdrop-blur-sm">
+        <Card className="w-80 shadow-2xl border border-border/20 bg-card/98 backdrop-blur-md">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

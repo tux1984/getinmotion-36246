@@ -34,7 +34,7 @@ export const UnifiedDashboard: React.FC = () => {
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
 
   const handleStartChat = () => {
-    setShowMasterChat(true);
+    navigate('/dashboard/coordinator-chat');
   };
 
   const handleViewProgress = () => {
