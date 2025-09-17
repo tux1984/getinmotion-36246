@@ -20,23 +20,26 @@ interface ConversationalMessage {
 }
 
 interface ShopCreationState {
-  phase: 'analyzing' | 'conversing' | 'creating' | 'complete';
-  userProfile: any;
+  phase: 'conversing' | 'creating' | 'complete';
   shopData: any;
-  missingInfo: string[];
   conversation: ConversationalMessage[];
-  currentQuestion?: string;
+  currentQuestion: string;
+  questionIndex: number;
   isCoordinatorThinking?: boolean;
 }
 
 export const ConversationalShopCreation: React.FC = () => {
   const [state, setState] = useState<ShopCreationState>({
-    phase: 'analyzing',
-    userProfile: null,
+    phase: 'conversing',
     shopData: {},
-    missingInfo: [],
-    conversation: [],
-    currentQuestion: undefined,
+    conversation: [{
+      id: 'initial',
+      type: 'coordinator',
+      content: '¡Hola! 🎯 Soy tu Coordinador Maestro. Voy a crear tu tienda digital en 3 simples pasos. ¿Cuál es el nombre de tu tienda?',
+      timestamp: new Date()
+    }],
+    currentQuestion: 'shop_name',
+    questionIndex: 0,
     isCoordinatorThinking: false,
   });
   
@@ -51,102 +54,27 @@ export const ConversationalShopCreation: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Initial analysis and profile loading with loop protection
-  useEffect(() => {
-    let isAnalyzing = false;
-    let timeoutId: NodeJS.Timeout;
-
-    const analyzeUserProfile = async () => {
-      if (!user || isAnalyzing) return;
-      
-      isAnalyzing = true;
-      console.log('Starting profile analysis for user:', user.id);
-      
-      // Set timeout to prevent infinite waiting
-      timeoutId = setTimeout(() => {
-        console.log('Analysis timeout - falling back to conversation mode');
-        setState(prev => ({
-          ...prev,
-          phase: 'conversing',
-          conversation: [{
-            id: Date.now().toString(),
-            type: 'coordinator',
-            content: '¡Hola! Soy tu Coordinador Maestro. Vamos a crear tu tienda digital juntos. Para empezar, ¿cuál es el nombre de tu negocio?',
-            timestamp: new Date()
-          }],
-          currentQuestion: 'business_name'
-        }));
-        isAnalyzing = false;
-      }, 15000); // 15 second timeout
-
-      try {
-        // Call intelligent shop creation for analysis
-        const { data: analysisResult, error } = await supabase.functions.invoke('create-intelligent-shop', {
-          body: {
-            userId: user.id,
-            language: 'es',
-            action: 'analyze_profile'
-          }
-        });
-
-        clearTimeout(timeoutId);
-
-        if (error || !analysisResult) {
-          throw new Error(error?.message || 'Analysis failed');
-        }
-
-        if (analysisResult) {
-          const initialMessage: ConversationalMessage = {
-            id: Date.now().toString(),
-            type: 'coordinator',
-            content: analysisResult.coordinatorMessage || '¡Hola! Soy tu Coordinador Maestro. Voy a ayudarte a crear la tienda digital perfecta usando toda la información que ya tengo de ti.',
-            timestamp: new Date()
-          };
-
-          setState(prev => ({
-            ...prev,
-            phase: analysisResult.needsMoreInfo ? 'conversing' : 'creating',
-            userProfile: analysisResult.userContext,
-            shopData: analysisResult.shopData || {},
-            missingInfo: analysisResult.missingInfo || [],
-            conversation: [initialMessage],
-            currentQuestion: analysisResult.nextQuestion
-          }));
-
-          // If no missing info, proceed directly to creation
-          if (!analysisResult.needsMoreInfo) {
-            setTimeout(() => createShopAutomatically(analysisResult.shopData), 2000);
-          }
-        }
-      } catch (error) {
-        clearTimeout(timeoutId);
-        console.error('Error analyzing profile:', error);
-        // Fallback to basic conversation
-        setState(prev => ({
-          ...prev,
-          phase: 'conversing',
-          conversation: [{
-            id: Date.now().toString(),
-            type: 'coordinator',
-            content: '¡Hola! Soy tu Coordinador Maestro. Vamos a crear tu tienda digital juntos. Para empezar, ¿cuál es el nombre de tu negocio?',
-            timestamp: new Date()
-          }],
-          currentQuestion: 'business_name'
-        }));
-      } finally {
-        isAnalyzing = false;
-      }
-    };
-
-    if (state.phase === 'analyzing' && !isAnalyzing) {
-      analyzeUserProfile();
+  // Define the 3 essential questions
+  const questions = [
+    {
+      key: 'shop_name',
+      text: '¿Cuál es el nombre de tu tienda?',
+      suggestions: ['Artesanías Luna', 'Taller Creativo', 'Mi Marca Artesanal'],
+      examples: '💡 Ejemplo: "Tejidos Colombia", "Cerámica Bella", "Cueros del Valle"'
+    },
+    {
+      key: 'products',
+      text: '¿Qué productos específicos vendes?',
+      suggestions: ['Collares y aretes', 'Bolsos de cuero', 'Cerámicas decorativas', 'Textiles tejidos'],
+      examples: '💡 Sé específico: "collares de semillas", "bolsos de cuero", "macetas de barro"'
+    },
+    {
+      key: 'location',
+      text: '¿En qué ciudad estás ubicado?',
+      suggestions: ['Bogotá', 'Medellín', 'Cartagena', 'Cali'],
+      examples: '💡 Esto nos ayuda a configurar los envíos correctamente'
     }
-
-    return () => {
-      clearTimeout(timeoutId);
-      isAnalyzing = false;
-    };
-  }, [user, state.phase]);
+  ];
 
   const createShopAutomatically = async (shopData: any) => {
     setState(prev => ({
@@ -191,10 +119,10 @@ export const ConversationalShopCreation: React.FC = () => {
         description: "Tu tienda digital está lista. Ahora puedes agregar productos.",
       });
 
-      // Redirect to product upload after 3 seconds
+      // Redirect to product upload after 2 seconds
       setTimeout(() => {
-        navigate('/dashboard/artisan?flow=ai-product-upload');
-      }, 3000);
+        navigate('/productos/subir');
+      }, 2000);
 
     } catch (error) {
       console.error('Error creating shop:', error);
@@ -211,74 +139,26 @@ export const ConversationalShopCreation: React.FC = () => {
     conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [state.conversation]);
 
-  // Enhanced typing animation with realistic pauses
+  // Fast typing animation for quick flow
   const simulateTyping = async (text: string, callback: () => void) => {
     setState(prev => ({ ...prev, isCoordinatorThinking: true }));
+    setTypingText('');
     
-    const words = text.split(' ');
-    let currentText = '';
-    
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      
-      // Type each character of the word
-      for (let j = 0; j <= word.length; j++) {
-        const partialWord = word.slice(0, j);
-        const displayText = currentText + partialWord;
-        setTypingText(displayText);
-        
-        // Variable speed: slower for punctuation, faster for letters
-        const char = word[j];
-        const delay = char && /[.,!?]/.test(char) ? 150 : 
-                     char && /[áéíóúñü]/.test(char) ? 40 : 25;
-        
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-      
-      currentText += word;
-      if (i < words.length - 1) {
-        currentText += ' ';
-        setTypingText(currentText);
-        
-        // Pause between words (longer for punctuation)
-        const lastChar = word[word.length - 1];
-        const wordPause = /[.,!?]/.test(lastChar) ? 300 : 80;
-        await new Promise(resolve => setTimeout(resolve, wordPause));
-      }
+    // Fast typing - 10ms per character maximum
+    for (let i = 0; i <= text.length; i++) {
+      setTypingText(text.slice(0, i));
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
     
-    // Final pause before showing complete message
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
+    await new Promise(resolve => setTimeout(resolve, 300));
     setState(prev => ({ ...prev, isCoordinatorThinking: false }));
     setTypingText('');
     callback();
   };
 
-  // Generate contextual quick replies
-  const generateQuickReplies = (currentQuestion?: string) => {
-    const suggestions: Record<string, string[]> = {
-      business_name: [
-        'Artesanías [Tu Apellido]',
-        '[Tu Nombre] Handmade',
-        'Taller [Tu Especialidad]'
-      ],
-      business_description: [
-        'Trabajo con cerámica tradicional',
-        'Creo joyería artesanal en plata',
-        'Tejo productos en lana virgen',
-        'Trabajo cuero y marroquinería'
-      ],
-      business_location: [
-        'Bogotá',
-        'Medellín', 
-        'Cartagena',
-        'Cali',
-        'Bucaramanga'
-      ]
-    };
-
-    return suggestions[currentQuestion || ''] || [];
+  // Get current question suggestions
+  const getCurrentSuggestions = () => {
+    return questions[state.questionIndex]?.suggestions || [];
   };
 
   const handleUserResponse = async (response: string) => {
@@ -286,7 +166,7 @@ export const ConversationalShopCreation: React.FC = () => {
 
     setIsProcessing(true);
     
-    // Add user message to conversation with animation
+    // Add user message to conversation
     const userMessage: ConversationalMessage = {
       id: Date.now().toString(),
       type: 'user',
@@ -299,129 +179,95 @@ export const ConversationalShopCreation: React.FC = () => {
       conversation: [...prev.conversation, userMessage]
     }));
 
-    try {
-      // Process response with Master Coordinator
-      const { data: coordinatorResponse } = await supabase.functions.invoke('create-intelligent-shop', {
-        body: {
-          userId: user!.id,
-          language: 'es',
-          action: 'process_conversation',
-          userResponse: response,
-          currentQuestion: state.currentQuestion,
-          conversationHistory: state.conversation,
-          shopData: state.shopData
-        }
-      });
+    // Update shop data based on current question
+    const updatedShopData = { ...state.shopData };
+    const currentQ = questions[state.questionIndex];
+    
+    if (currentQ.key === 'shop_name') {
+      updatedShopData.shop_name = response.trim();
+    } else if (currentQ.key === 'products') {
+      updatedShopData.description = response.trim();
+      updatedShopData.craft_type = detectCraftTypeFromText(response);
+    } else if (currentQ.key === 'location') {
+      updatedShopData.region = response.trim();
+    }
 
-      if (coordinatorResponse) {
-        // Generate contextual suggestions
-        const suggestions = generateQuickReplies(coordinatorResponse.nextQuestion);
-        setQuickReplies(suggestions);
+    // Check if we have more questions
+    const nextIndex = state.questionIndex + 1;
+    
+    if (nextIndex < questions.length) {
+      // Move to next question
+      const nextQuestion = questions[nextIndex];
+      
+      await simulateTyping(`✅ Perfecto! ${nextQuestion.text}`, () => {
+        const coordinatorMessage: ConversationalMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'coordinator',
+          content: `✅ Perfecto! ${nextQuestion.text}\n\n${nextQuestion.examples}`,
+          timestamp: new Date()
+        };
+
+        setState(prev => ({
+          ...prev,
+          conversation: [...prev.conversation, coordinatorMessage],
+          shopData: updatedShopData,
+          currentQuestion: nextQuestion.key,
+          questionIndex: nextIndex
+        }));
         
-        // Simulate typing with realistic delay and detect vague responses
-        await simulateTyping(coordinatorResponse.message, () => {
-          const coordinatorMessage: ConversationalMessage = {
-            id: (Date.now() + 1).toString(),
-            type: 'coordinator',
-            content: coordinatorResponse.message,
-            timestamp: new Date()
-          };
-
-          setState(prev => ({
-            ...prev,
-            conversation: [...prev.conversation, coordinatorMessage],
-            shopData: { ...prev.shopData, ...coordinatorResponse.updatedShopData },
-            currentQuestion: coordinatorResponse.nextQuestion
-          }));
-          
-          // Show suggestions for next input if not ready to create
-          if (!coordinatorResponse.readyToCreate) {
-            setShowSuggestions(true);
-          }
-        });
-
-        // If ready to create shop
-        if (coordinatorResponse.readyToCreate) {
-          setTimeout(() => createShopAutomatically(coordinatorResponse.finalShopData), 1500);
-        }
-      }
-    } catch (error) {
-      console.error('Error processing conversation:', error);
-      const errorMessage: ConversationalMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'coordinator',
-        content: 'Perdón, tuve un problema procesando tu respuesta. ¿Puedes intentar de nuevo?',
-        timestamp: new Date()
+        setQuickReplies(nextQuestion.suggestions);
+        setShowSuggestions(true);
+      });
+    } else {
+      // All questions answered - create shop
+      const finalShopData = {
+        ...updatedShopData,
+        story: `Somos ${updatedShopData.shop_name}, especialistas en ${updatedShopData.description} desde ${updatedShopData.region}. Cada producto está hecho con amor y tradición artesanal colombiana.`,
+        contact_info: { email: user?.email },
+        social_links: {}
       };
 
-      setState(prev => ({
-        ...prev,
-        conversation: [...prev.conversation, errorMessage]
-      }));
+      await simulateTyping('🎉 ¡Excelente! Ya tengo toda la información. Creando tu tienda digital...', () => {
+        const coordinatorMessage: ConversationalMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'coordinator',
+          content: '🎉 ¡Excelente! Ya tengo toda la información. Creando tu tienda digital...',
+          timestamp: new Date()
+        };
+
+        setState(prev => ({
+          ...prev,
+          conversation: [...prev.conversation, coordinatorMessage],
+          shopData: finalShopData
+        }));
+        
+        setTimeout(() => createShopAutomatically(finalShopData), 1000);
+      });
     }
 
     setIsProcessing(false);
     setUserInput('');
   };
 
-  const renderAnalyzingPhase = () => (
-    <div className="text-center py-12">
-      <motion.div
-        animate={{ 
-          rotate: 360,
-          scale: [1, 1.1, 1],
-        }}
-        transition={{ 
-          rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-        }}
-        className="mx-auto w-20 h-20 mb-6 relative"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full opacity-20 animate-pulse" />
-        <Wand2 className="w-20 h-20 text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text" style={{
-          filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.5))'
-        }} />
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Analizando tu perfil
-        </h3>
-        <p className="text-muted-foreground text-lg">
-          El Coordinador Maestro está revisando toda tu información para crear la tienda perfecta...
-        </p>
-      </motion.div>
-      
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full opacity-60"
-            animate={{
-              x: [0, 100, -100, 0],
-              y: [0, -100, 100, 0],
-              scale: [1, 0.5, 1],
-            }}
-            transition={{
-              duration: 4 + i,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.5,
-            }}
-            style={{
-              left: `${20 + i * 10}%`,
-              top: `${30 + i * 5}%`,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  // Simple craft type detection
+  const detectCraftTypeFromText = (text: string): string => {
+    const craftTypes: Record<string, string[]> = {
+      'textiles': ['tejido', 'tela', 'lana', 'algodón', 'bordado', 'tapiz'],
+      'ceramica': ['cerámica', 'barro', 'arcilla', 'maceta', 'vasija'],
+      'joyeria': ['collar', 'arete', 'pulsera', 'anillo', 'joya', 'plata'],
+      'cuero': ['cuero', 'bolso', 'cartera', 'cinturón', 'marroquinería'],
+      'madera': ['madera', 'tallado', 'mueble', 'decorativo']
+    };
+
+    const lowerText = text.toLowerCase();
+    for (const [type, keywords] of Object.entries(craftTypes)) {
+      if (keywords.some(keyword => lowerText.includes(keyword))) {
+        return type;
+      }
+    }
+    return 'artesanias';
+  };
+
 
   const renderConversationPhase = () => (
     <div className="space-y-6">
@@ -807,21 +653,18 @@ export const ConversationalShopCreation: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Store className="w-5 h-5" />
-            {state.phase === 'analyzing' && 'Analizando tu Perfil'}
-            {state.phase === 'conversing' && 'Conversación Inteligente'}
+            {state.phase === 'conversing' && 'Conversación Rápida'}
             {state.phase === 'creating' && 'Creando tu Tienda'}
             {state.phase === 'complete' && '¡Tienda Creada!'}
           </CardTitle>
           <CardDescription>
-            {state.phase === 'analyzing' && 'Revisando toda tu información para una configuración óptima'}
-            {state.phase === 'conversing' && 'El Coordinador Maestro está recopilando la información necesaria'}
+            {state.phase === 'conversing' && '3 preguntas simples para crear tu tienda'}
             {state.phase === 'creating' && 'Configurando automáticamente tu tienda digital'}
             {state.phase === 'complete' && 'Tu tienda está lista. Sigamos con los productos.'}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          {state.phase === 'analyzing' && renderAnalyzingPhase()}
           {state.phase === 'conversing' && renderConversationPhase()}
           {state.phase === 'creating' && renderCreatingPhase()}
           {state.phase === 'complete' && renderCompletePhase()}
