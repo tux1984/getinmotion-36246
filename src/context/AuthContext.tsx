@@ -85,19 +85,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setSession(session);
         setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await checkAuthorization();
-        } else {
-          setIsAuthorized(false);
-        }
+        setLoading(false);
       } catch (error) {
         console.error('Failed to initialize auth:', error);
         if (mounted) {
           setIsAuthorized(false);
-        }
-      } finally {
-        if (mounted) {
           setLoading(false);
         }
       }
@@ -105,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!mounted) return;
 
         console.log('Auth state change:', event, session?.user?.email);
@@ -118,13 +110,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setSession(session);
         setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await checkAuthorization();
-        } else {
-          setIsAuthorized(false);
-        }
-
         setLoading(false);
       }
     );
@@ -136,6 +121,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       subscription.unsubscribe();
     };
   }, []);
+
+  // Separate useEffect for authorization checking
+  useEffect(() => {
+    if (user?.email) {
+      // Defer authorization check to avoid race conditions
+      const timeoutId = setTimeout(() => {
+        checkAuthorization();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    } else {
+      setIsAuthorized(false);
+    }
+  }, [user?.email]);
 
   const signIn = async (email: string, password: string) => {
     try {
