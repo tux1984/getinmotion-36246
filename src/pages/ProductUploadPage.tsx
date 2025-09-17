@@ -1,6 +1,6 @@
 import React from 'react';
-import { AIProductUpload } from '@/components/shop/AIProductUpload';
+import { AIProductUploadWizard } from '@/components/shop/ai-upload/AIProductUploadWizard';
 
 export const ProductUploadPage: React.FC = () => {
-  return <AIProductUpload />;
+  return <AIProductUploadWizard />;
 };
