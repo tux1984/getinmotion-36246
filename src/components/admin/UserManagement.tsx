@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, UserCheck, UserX, RefreshCw, Shield, Users, Store, User, Settings, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { UserCreationWizard } from './UserCreationWizard';
+import { CreateUserForm } from './CreateUserForm';
 import { UserClassificationModal } from './UserClassificationModal';
 
 interface AllUser {
@@ -44,6 +44,7 @@ export const UserManagement = () => {
 
       if (data?.success && data?.users) {
         console.log('Users fetched successfully:', data.users.length);
+        console.log('Full user data:', data.users);
         console.log('Users breakdown:', {
           admin: data.users.filter((u: AllUser) => u.user_type === 'admin').length,
           shop_owner: data.users.filter((u: AllUser) => u.user_type === 'shop_owner').length,
@@ -51,6 +52,7 @@ export const UserManagement = () => {
           unclassified: data.users.filter((u: AllUser) => u.user_type === 'unclassified').length
         });
         setUsers(data.users);
+        console.log('Users state updated, new length:', data.users.length);
       } else {
         throw new Error('No se pudieron obtener los usuarios');
       }
@@ -209,8 +211,8 @@ export const UserManagement = () => {
                   Crear Usuario
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-                <UserCreationWizard 
+              <DialogContent className="sm:max-w-md">
+                <CreateUserForm 
                   onSuccess={handleUserCreated}
                   onCancel={() => setDialogOpen(false)}
                 />
