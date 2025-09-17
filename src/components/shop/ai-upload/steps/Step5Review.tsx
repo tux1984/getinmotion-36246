@@ -30,9 +30,13 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
     setIsPublishing(true);
     
     try {
+      console.log('🚀 Iniciando publicación del producto...');
+      
       // Upload images first
       toast.info('Subiendo imágenes...');
+      console.log('📸 Subiendo imágenes:', wizardState.images.length);
       const imageUrls = await uploadImages(wizardState.images);
+      console.log('✅ Imágenes subidas exitosamente:', imageUrls);
       
       // Get user's shop
       const { data: { user } } = await supabase.auth.getUser();
@@ -40,68 +44,79 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         throw new Error('Usuario no autenticado');
       }
 
-      const { data: shop } = await supabase
+      console.log('👤 Usuario autenticado:', user.id);
+
+      const { data: shop, error: shopError } = await supabase
         .from('artisan_shops')
-        .select('id')
+        .select('id, shop_name')
         .eq('user_id', user.id)
         .single();
 
+      console.log('🏪 Resultado búsqueda tienda:', { shop, shopError });
+
       if (!shop) {
-        console.error('No shop found for user:', user.id);
+        console.error('❌ No shop found for user:', user.id);
         toast.error('No tienes una tienda creada', {
           description: 'Necesitas crear tu tienda antes de poder publicar productos',
           action: {
             label: 'Crear tienda',
-            onClick: () => window.location.href = '/dashboard/create-shop'
+            onClick: () => window.location.href = '/crear-tienda'
           }
         });
         throw new Error('No se encontró la tienda del usuario');
       }
 
+      console.log('✅ Tienda encontrada:', shop.shop_name, '(ID:', shop.id, ')');
+
       // Create product
       toast.info('Creando producto...');
-      const { error: productError } = await supabase
+      
+      const productData = {
+        shop_id: shop.id,
+        name: wizardState.name,
+        description: wizardState.description,
+        short_description: wizardState.shortDescription || wizardState.description.substring(0, 150),
+        price: wizardState.price!,
+        category: wizardState.category,
+        images: imageUrls,
+        tags: wizardState.tags,
+        inventory: wizardState.inventory || 1,
+        weight: wizardState.weight,
+        dimensions: wizardState.dimensions,
+        materials: wizardState.materials || [],
+        production_time: wizardState.productionTime,
+        active: true,
+      };
+
+      console.log('📦 Datos del producto a crear:', productData);
+
+      const { error: productError, data: createdProduct } = await supabase
         .from('products')
-        .insert([
-          {
-            shop_id: shop.id,
-            name: wizardState.name,
-            description: wizardState.description,
-            short_description: wizardState.shortDescription || wizardState.description.substring(0, 150),
-            price: wizardState.price!,
-            category: wizardState.category,
-            images: imageUrls,
-            tags: wizardState.tags,
-            inventory: wizardState.inventory || 1,
-            weight: wizardState.weight,
-            dimensions: wizardState.dimensions,
-            materials: wizardState.materials || [],
-            production_time: wizardState.productionTime,
-            active: true,
-          },
-        ]);
+        .insert([productData])
+        .select();
+
+      console.log('📦 Resultado creación producto:', { createdProduct, productError });
 
       if (productError) {
         throw new Error(`Error creando producto: ${productError.message}`);
       }
 
+      console.log('🎉 ¡Producto creado exitosamente!');
+      
       toast.success('¡Producto publicado exitosamente!', {
-        description: 'Tu producto ya está disponible en tu tienda',
-        action: {
-          label: 'Ver mi tienda',
-          onClick: () => window.location.href = '/mi-tienda'
-        }
+        description: 'Tu producto ya está disponible en tu tienda'
       });
+      
+      // Call onPublish to reset wizard state
+      onPublish();
       
       // Redirect to shop dashboard after successful publish
       setTimeout(() => {
         window.location.href = '/mi-tienda';
-      }, 2000);
-      
-      onPublish();
+      }, 1500);
       
     } catch (error) {
-      console.error('Error publishing product:', error);
+      console.error('❌ Error publishing product:', error);
       toast.error(error instanceof Error ? error.message : 'Error publicando producto');
     } finally {
       setIsPublishing(false);

@@ -125,8 +125,7 @@ export const AIProductUploadWizard: React.FC = () => {
             wizardState={wizardState}
             onEdit={(step) => setCurrentStep(step)}
             onPublish={() => {
-              // Handle publish logic
-              console.log('Publishing product:', wizardState);
+              // Reset wizard after successful publish
               resetWizard();
               setCurrentStep(0);
             }}
@@ -214,19 +213,6 @@ export const AIProductUploadWizard: React.FC = () => {
         {renderStepContent()}
       </motion.div>
 
-      {/* Navigation */}
-      {currentStep > 0 && (
-        <div className="flex justify-start">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Anterior
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
