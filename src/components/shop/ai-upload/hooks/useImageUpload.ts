@@ -70,17 +70,15 @@ export const useImageUpload = () => {
         ));
 
         try {
-          // Create a new File object to ensure it's not corrupted
-          const fileBlob = new Blob([image], { type: image.type });
-          const cleanFile = new File([fileBlob], fileName, { type: image.type });
-
           console.log(`Uploading image ${index + 1}: ${fileName} (${Math.round(image.size / 1024)}KB, ${image.type})`);
 
+          // Upload directly without recreating File object to preserve MIME type
           const { data, error } = await supabase.storage
             .from('images')
-            .upload(`products/${fileName}`, cleanFile, {
+            .upload(`products/${fileName}`, image, {
               cacheControl: '3600',
-              upsert: false
+              upsert: false,
+              contentType: image.type // Explicitly set content type
             });
 
           if (error) {

@@ -29,7 +29,7 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
               <div 
                 className={cn(
                   "absolute top-5 left-[calc(50%+12px)] right-[calc(50%-12px)] h-0.5",
-                  index < currentStep ? "bg-primary" : "bg-gray-300"
+                  index < currentStep ? "bg-primary" : "bg-muted"
                 )}
               />
             )}
@@ -39,10 +39,10 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
               className={cn(
                 "relative z-10 flex h-10 w-10 items-center justify-center rounded-full",
                 index < currentStep 
-                  ? "bg-primary text-white" 
+                  ? "bg-primary text-primary-foreground" 
                   : index === currentStep 
-                  ? "border-2 border-primary bg-white text-primary"
-                  : "border-2 border-gray-300 bg-white text-gray-300"
+                  ? "border-2 border-primary bg-background text-primary"
+                  : "border-2 border-muted bg-background text-muted-foreground"
               )}
             >
               {index < currentStep ? (
@@ -57,13 +57,13 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(
               <p 
                 className={cn(
                   "text-sm font-medium",
-                  index <= currentStep ? "text-gray-900" : "text-gray-500"
+                  index <= currentStep ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {step.title}
               </p>
               {step.description && (
-                <p className="text-xs text-gray-500 max-w-[12rem] mx-auto">
+                <p className="text-xs text-muted-foreground max-w-[12rem] mx-auto">
                   {step.description}
                 </p>
               )}

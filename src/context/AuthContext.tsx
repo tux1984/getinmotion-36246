@@ -27,187 +27,112 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const { recordFailedAttempt, recordSuccessfulLogin, isRateLimited } = useSecurityMonitoring();
   const [debugInfo, setDebugInfo] = useState({
     authStateChangeCount: 0,
     lastAuthEvent: null as string | null,
     authorizationAttempts: 0
   });
 
-  const updateDebugInfo = (field: string, value: any) => {
-    setDebugInfo(prev => ({ ...prev, [field]: value }));
-  };
+  // Simplified security monitoring
+  const { recordFailedAttempt, recordSuccessfulLogin, isRateLimited } = useSecurityMonitoring();
 
-  const checkAuthorization = async (userEmail?: string, retryCount = 0): Promise<boolean> => {
-    const maxRetries = 3;
-    
+  const checkAuthorization = async (): Promise<boolean> => {
+    if (!user?.email) {
+      setIsAuthorized(false);
+      return false;
+    }
+
     try {
-      const email = userEmail || user?.email;
-      if (!email) {
-        logger.debug('No email provided for authorization check', { component: 'auth' });
-        setIsAuthorized(false);
-        return false;
-      }
-      
-      updateDebugInfo('authorizationAttempts', debugInfo.authorizationAttempts + 1);
-      logger.debug(`Checking authorization (attempt ${retryCount + 1})`, { 
-        userEmail: email, 
-        component: 'auth' 
-      });
-      
-      // Use RLS-enabled query with retry logic
+      setDebugInfo(prev => ({ ...prev, authorizationAttempts: prev.authorizationAttempts + 1 }));
+
       const { data, error } = await supabase
         .from('admin_users')
         .select('email, is_active')
-        .eq('email', email as any)
-        .eq('is_active', true as any)
+        .eq('email', user.email)
+        .eq('is_active', true)
         .maybeSingle();
-      
+
       if (error) {
-        logger.debug('Error checking authorization', { 
-          error: error.message, 
-          userEmail: email,
-          component: 'auth' 
-        });
-        
-        // Retry logic for transient errors
-        if (retryCount < maxRetries && (
-          error.message?.includes('Failed to fetch') || 
-          error.message?.includes('timeout') ||
-          error.code === 'PGRST301'
-        )) {
-          logger.debug(`Retrying authorization check in ${(retryCount + 1) * 1000}ms`, { 
-            userEmail: email,
-            component: 'auth' 
-          });
-          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-          return checkAuthorization(userEmail, retryCount + 1);
-        }
-        
+        console.error('Authorization check error:', error);
         setIsAuthorized(false);
         return false;
       }
-      
+
       const authorized = !!data;
-      logger.debug('Authorization result', { 
-        authorized, 
-        userEmail: email,
-        component: 'auth' 
-      });
       setIsAuthorized(authorized);
       return authorized;
     } catch (error) {
-      logger.error('Exception checking authorization', error as Error, { 
-        userEmail: userEmail || user?.email,
-        component: 'auth' 
-      });
-      
-      // Retry for network errors
-      if (retryCount < maxRetries) {
-        logger.debug('Retrying authorization check due to exception', { 
-          userEmail: userEmail || user?.email,
-          component: 'auth' 
-        });
-        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-        return checkAuthorization(userEmail, retryCount + 1);
-      }
-      
+      console.error('Authorization check failed:', error);
       setIsAuthorized(false);
       return false;
     }
   };
 
   useEffect(() => {
-    logger.debug('Setting up auth listener', { component: 'auth' });
-    
-    let isMounted = true;
-    
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        updateDebugInfo('authStateChangeCount', debugInfo.authStateChangeCount + 1);
-        updateDebugInfo('lastAuthEvent', event);
-        
-        logger.debug('Auth state changed', { 
-          event, 
-          userEmail: session?.user?.email || 'No session',
-          component: 'auth' 
-        });
-        
-        if (!isMounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check authorization for authenticated users with delay to prevent deadlocks
-        if (session?.user?.email) {
-          logger.debug('Auth state change - checking authorization', { 
-            userEmail: session.user.email,
-            component: 'auth' 
-          });
-          setTimeout(() => {
-            if (isMounted) {
-              checkAuthorization(session.user.email);
-            }
-          }, 100); // Increased delay to prevent potential issues
-        } else {
-          logger.debug('Auth state change - no user, setting unauthorized', { component: 'auth' });
-          setIsAuthorized(false);
-        }
-        
-        logger.debug('Auth state change complete, setting loading to false', { component: 'auth' });
-        setLoading(false);
-      }
-    );
+    let mounted = true;
 
-    // Get initial session
-    const getInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
-        logger.debug('Getting initial session', { component: 'auth' });
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (!isMounted) return;
+        if (!mounted) return;
         
         if (error) {
-          logger.error('Error getting initial session', error as Error, { component: 'auth' });
+          console.error('Error getting session:', error);
           setLoading(false);
           return;
         }
-        
-        logger.debug('Initial session check', { 
-          userEmail: session?.user?.email || 'No session',
-          component: 'auth' 
-        });
+
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user?.email) {
-          logger.debug('User found, checking authorization', { 
-            userEmail: session.user.email,
-            component: 'auth' 
-          });
-          await checkAuthorization(session.user.email);
+
+        if (session?.user) {
+          await checkAuthorization();
         } else {
-          logger.debug('No user found, setting unauthorized', { component: 'auth' });
           setIsAuthorized(false);
         }
-        
-        logger.debug('Initial setup complete, setting loading to false', { component: 'auth' });
-        setLoading(false);
       } catch (error) {
-        logger.error('Exception getting initial session', error as Error, { component: 'auth' });
-        if (isMounted) {
+        console.error('Failed to initialize auth:', error);
+        if (mounted) {
+          setIsAuthorized(false);
+        }
+      } finally {
+        if (mounted) {
           setLoading(false);
         }
       }
     };
 
-    // Initialize with small delay to ensure DOM is ready
-    setTimeout(getInitialSession, 50);
+    // Auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state change:', event, session?.user?.email);
+        
+        setDebugInfo(prev => ({ 
+          ...prev, 
+          authStateChangeCount: prev.authStateChangeCount + 1,
+          lastAuthEvent: event 
+        }));
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await checkAuthorization();
+        } else {
+          setIsAuthorized(false);
+        }
+
+        setLoading(false);
+      }
+    );
+
+    initializeAuth();
 
     return () => {
-      logger.debug('Cleaning up auth listener', { component: 'auth' });
-      isMounted = false;
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -216,24 +141,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       
-      // Input validation
+      // Basic validation
       if (!email || !password) {
-        return { error: { message: 'Email and password are required' } };
-      }
-      
-      if (!email.includes('@') || email.length < 3) {
-        return { error: { message: 'Invalid email format' } };
-      }
-      
-      if (password.length < 6) {
-        return { error: { message: 'Password must be at least 6 characters' } };
+        return { error: { message: 'Email y contraseña son requeridos' } };
       }
 
-      // Check rate limiting
       if (isRateLimited(email)) {
-        logger.security.suspiciousActivity('Rate limited login attempt', { userEmail: email });
         setLoading(false);
-        return { error: { message: 'Too many failed attempts. Please try again later.' } };
+        return { error: { message: 'Demasiados intentos fallidos. Intenta más tarde.' } };
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -242,18 +157,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       if (error) {
-        logger.security.authError(error.message, email);
         recordFailedAttempt(email);
         setLoading(false);
         return { error };
       }
       
       recordSuccessfulLogin(email);
-      logger.info('User signed in successfully', { userEmail: email, component: 'auth' });
-      // Don't set loading to false here, let the auth state change handle it
       return { error: null };
     } catch (error) {
-      logger.error('Sign in exception', error as Error, { userEmail: email, component: 'auth' });
+      console.error('Sign in exception:', error);
       recordFailedAttempt(email);
       setLoading(false);
       return { error };
@@ -261,8 +173,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async () => {
-    const userEmail = user?.email;
-    logger.info('User signing out', { userEmail, component: 'auth' });
     setLoading(true);
     await supabase.auth.signOut();
     setIsAuthorized(false);
