@@ -91,190 +91,249 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
   };
 
   const handlePublish = async () => {
+    console.log('🚀 INICIANDO PROCESO DE PUBLICACIÓN ROBUSTO...');
+    
+    // Validación inicial
+    const validation = validateForPublishing();
+    if (!validation.isValid) {
+      console.error('❌ VALIDACIÓN FALLIDA:', validation.errors);
+      toast.error('Faltan datos obligatorios', {
+        description: validation.errors.join(', ')
+      });
+      return;
+    }
+    
     setIsPublishing(true);
     let uploadedImageUrls: string[] = [];
-    
-    try {
-      console.log('🚀 INICIANDO PUBLICACIÓN COMPLETA DEL PRODUCTO...');
-      
-      // PASO 1: Validación exhaustiva pre-publicación
-      const validation = validateForPublishing();
-      if (!validation.isValid) {
-        console.error('❌ VALIDACIÓN FALLIDA:', validation.errors);
-        toast.error('Faltan datos obligatorios', {
-          description: validation.errors.join(', ')
-        });
-        return;
-      }
-      
-      // PASO 2: Verificación de autenticación robusta
-      console.log('🔐 VERIFICANDO AUTENTICACIÓN...');
-      const authResult = await retryOperation(
-        () => supabase.auth.getUser()
-      );
-      
-      const { data: { user }, error: authError } = authResult;
-      
-      if (authError || !user) {
-        console.error('❌ ERROR DE AUTENTICACIÓN:', authError);
-        toast.error('Error de autenticación', {
-          description: 'Por favor, inicia sesión nuevamente',
-          action: {
-            label: 'Iniciar sesión',
-            onClick: () => window.location.href = '/auth'
-          }
-        });
-        throw new Error(`Error de autenticación: ${authError?.message || 'Usuario no encontrado'}`);
-      }
 
+    try {
+      // PASO 1: Verificar autenticación con detalles completos
+      console.log('🔐 VERIFICANDO AUTENTICACIÓN...');
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('❌ ERROR DE AUTENTICACIÓN:', authError);
+        throw new Error(`Error de autenticación: ${authError.message}`);
+      }
+      
+      if (!user) {
+        console.error('❌ USUARIO NO AUTENTICADO');
+        throw new Error('Usuario no autenticado. Por favor, inicia sesión.');
+      }
+      
       console.log('✅ USUARIO AUTENTICADO:', {
         id: user.id,
         email: user.email,
-        isAnonymous: user.is_anonymous
+        role: user.role || 'authenticated'
       });
 
-      // PASO 3: Verificación de tienda con reintentos
-      console.log('🏪 VERIFICANDO TIENDA...');
-      const shopResult = await retryOperation(
-        async () => {
-          const result = await supabase
-            .from('artisan_shops')
-            .select('id, shop_name, active, user_id')
-            .eq('user_id', user.id)
-            .eq('active', true)
-            .maybeSingle();
-          return result;
-        }
-      );
+      // PASO 2: Verificar tienda del usuario con logging detallado
+      console.log('🏪 VERIFICANDO TIENDA DEL USUARIO...');
+      const { data: shopData, error: shopError } = await supabase
+        .from('artisan_shops')
+        .select('id, shop_name, active, user_id')
+        .eq('user_id', user.id)
+        .eq('active', true)
+        .maybeSingle();
 
-      const { data: shop, error: shopError } = shopResult;
-      console.log('🏪 RESULTADO VERIFICACIÓN TIENDA:', { shop, shopError });
+      console.log('🏪 RESULTADO CONSULTA TIENDA:', { 
+        shopData, 
+        shopError,
+        userId: user.id 
+      });
 
-      if (shopError || !shop) {
-        console.error('❌ TIENDA NO ENCONTRADA O INACTIVA:', shopError);
-        toast.error('Problema con tu tienda', {
-          description: 'No se encontró una tienda activa para tu usuario',
+      if (shopError) {
+        console.error('❌ ERROR CONSULTANDO TIENDA:', shopError);
+        throw new Error(`Error verificando tienda: ${shopError.message}`);
+      }
+
+      if (!shopData) {
+        console.error('❌ TIENDA NO ENCONTRADA PARA USUARIO:', user.id);
+        toast.error('No tienes una tienda activa', {
+          description: 'Crea tu tienda antes de publicar productos',
           action: {
-            label: 'Ver tiendas',
-            onClick: () => window.location.href = '/mi-tienda'
+            label: 'Crear tienda',
+            onClick: () => window.location.href = '/crear-tienda'
           }
         });
-        throw new Error(`Error de tienda: ${shopError?.message || 'Tienda no encontrada'}`);
+        throw new Error('No tienes una tienda activa. Crea tu tienda primero.');
       }
 
       console.log('✅ TIENDA VERIFICADA:', {
-        id: shop.id,
-        name: shop.shop_name,
-        active: shop.active,
-        userId: shop.user_id
+        id: shopData.id,
+        name: shopData.shop_name,
+        user_id: shopData.user_id
       });
 
-      // PASO 4: Subida de imágenes con validación exhaustiva
-      console.log('📸 INICIANDO SUBIDA DE IMÁGENES...');
-      toast.info('Subiendo imágenes...', { description: `${wizardState.images.length} imagen(es) por subir` });
+      // PASO 3: Validar y subir imágenes
+      console.log('📸 PROCESANDO IMÁGENES...');
       
-      uploadedImageUrls = await retryOperation(
-        async () => {
-          console.log('📤 Subiendo imágenes:', wizardState.images.map(img => ({
-            name: img.name,
-            size: img.size,
-            type: img.type
-          })));
+      if (wizardState.images && wizardState.images.length > 0) {
+        console.log(`📤 SUBIENDO ${wizardState.images.length} IMÁGENES...`);
+        toast.info('Subiendo imágenes...', { 
+          description: `Procesando ${wizardState.images.length} imagen(es)` 
+        });
+        
+        try {
+          uploadedImageUrls = await uploadImages(wizardState.images);
+          console.log('✅ IMÁGENES SUBIDAS EXITOSAMENTE:', uploadedImageUrls);
           
-          const urls = await uploadImages(wizardState.images);
-          
-          if (!urls || urls.length === 0) {
-            throw new Error('No se pudieron subir las imágenes');
+          if (uploadedImageUrls.length === 0) {
+            throw new Error('No se pudieron generar URLs válidas para las imágenes');
           }
-          
-          console.log('✅ IMÁGENES SUBIDAS EXITOSAMENTE:', urls);
-          return urls;
+        } catch (uploadError) {
+          console.error('❌ ERROR SUBIENDO IMÁGENES:', uploadError);
+          throw new Error(`Error subiendo imágenes: ${uploadError instanceof Error ? uploadError.message : 'Error desconocido'}`);
         }
-      );
+      }
 
-      // PASO 5: Creación del producto con datos validados
-      console.log('📦 CREANDO PRODUCTO EN BASE DE DATOS...');
-      toast.info('Creando producto...', { description: 'Guardando en la base de datos' });
-      
+      // PASO 4: Preparar datos del producto con validación
+      console.log('📦 PREPARANDO DATOS DEL PRODUCTO...');
       const productData = {
-        shop_id: shop.id,
+        shop_id: shopData.id,
         name: wizardState.name.trim(),
-        description: wizardState.description.trim(),
-        short_description: wizardState.shortDescription?.trim() || wizardState.description.trim().substring(0, 150),
-        price: Number(wizardState.price),
-        category: wizardState.category.trim(),
-        images: uploadedImageUrls,
+        description: wizardState.description?.trim() || '',
+        short_description: wizardState.shortDescription?.trim() || wizardState.description?.trim().substring(0, 150) || '',
+        price: Number(wizardState.price) || 0,
+        category: wizardState.category?.trim() || '',
         tags: wizardState.tags || [],
+        images: uploadedImageUrls,
         inventory: wizardState.inventory || 1,
         weight: wizardState.weight || null,
         dimensions: wizardState.dimensions || null,
         materials: wizardState.materials || [],
         production_time: wizardState.productionTime || null,
         active: true,
+        featured: false
       };
 
-      console.log('📦 DATOS FINALES DEL PRODUCTO:', productData);
+      console.log('📝 DATOS FINALES DEL PRODUCTO:', {
+        shop_id: productData.shop_id,
+        name: productData.name,
+        price: productData.price,
+        category: productData.category,
+        images_count: productData.images.length,
+        user_id: user.id
+      });
 
-      const productResult = await retryOperation(
-        async () => {
-          const result = await supabase
-            .from('products')
-            .insert([productData])
-            .select('*')
-            .single();
-          return result;
-        }
-      );
+      // PASO 5: Insertar producto con manejo de errores RLS específico
+      console.log('💾 INSERTANDO PRODUCTO EN BASE DE DATOS...');
+      toast.info('Creando producto...', { 
+        description: 'Guardando en la base de datos' 
+      });
 
-      const { error: productError, data: createdProduct } = productResult;
-      console.log('📦 RESULTADO CREACIÓN PRODUCTO:', { createdProduct, productError });
+      const { data: createdProduct, error: productError } = await supabase
+        .from('products')
+        .insert([productData])
+        .select('*')
+        .single();
+
+      console.log('📦 RESULTADO INSERCIÓN:', { 
+        createdProduct, 
+        productError,
+        insertData: productData 
+      });
 
       if (productError) {
-        console.error('❌ ERROR CREANDO PRODUCTO:', productError);
+        console.error('❌ ERROR INSERTANDO PRODUCTO:', {
+          message: productError.message,
+          details: productError.details,
+          hint: productError.hint,
+          code: productError.code
+        });
+        
+        // Manejo específico de errores RLS
+        if (productError.message?.includes('row-level security') || 
+            productError.code === '42501' || 
+            productError.message?.includes('policy')) {
+          throw new Error('Error de permisos: No tienes autorización para crear productos en esta tienda');
+        }
+        
+        // Otros errores específicos
+        if (productError.code === '23503') {
+          throw new Error('Error de referencia: La tienda especificada no existe');
+        }
+        
+        if (productError.code === '23505') {
+          throw new Error('Error de duplicado: Ya existe un producto con esos datos');
+        }
+        
         throw new Error(`Error creando producto: ${productError.message}`);
       }
 
       if (!createdProduct) {
-        throw new Error('No se pudo crear el producto - respuesta vacía');
+        throw new Error('No se pudo crear el producto - respuesta vacía del servidor');
       }
 
-      // Verificar que el producto se insertó correctamente
+      // PASO 6: Verificar inserción con reintentos y timeout
       console.log('🔍 VERIFICANDO INSERCIÓN DEL PRODUCTO...');
-      const { data: verifyProduct, error: verifyError } = await supabase
-        .from('products')
-        .select('id, name, shop_id')
-        .eq('id', createdProduct.id)
-        .single();
       
-      if (verifyError || !verifyProduct) {
-        throw new Error('Error verificando la inserción del producto');
+      let verifyAttempts = 0;
+      const maxVerifyAttempts = 5;
+      let verificationSuccessful = false;
+      
+      while (verifyAttempts < maxVerifyAttempts && !verificationSuccessful) {
+        try {
+          const { data: verifyProduct, error: verifyError } = await supabase
+            .from('products')
+            .select('id, name, shop_id, active, created_at')
+            .eq('id', createdProduct.id)
+            .single();
+          
+          if (!verifyError && verifyProduct) {
+            console.log('✅ PRODUCTO VERIFICADO EXITOSAMENTE:', {
+              id: verifyProduct.id,
+              name: verifyProduct.name,
+              shop_id: verifyProduct.shop_id,
+              created_at: verifyProduct.created_at
+            });
+            verificationSuccessful = true;
+            break;
+          }
+          
+          verifyAttempts++;
+          console.log(`⏳ Intento de verificación ${verifyAttempts}/${maxVerifyAttempts}...`);
+          
+          if (verifyAttempts < maxVerifyAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        } catch (verifyError) {
+          console.error(`❌ Error en verificación ${verifyAttempts + 1}:`, verifyError);
+          verifyAttempts++;
+        }
+      }
+      
+      if (!verificationSuccessful) {
+        console.error('❌ NO SE PUDO VERIFICAR LA INSERCIÓN DEL PRODUCTO');
+        throw new Error('El producto se creó pero no se puede verificar en la base de datos. Revisa tu tienda manualmente.');
       }
 
-      console.log('🎉 PRODUCTO CREADO Y VERIFICADO EXITOSAMENTE:', {
+      // PASO 7: Éxito confirmado - mostrar notificación y limpiar estado
+      console.log('🎉 PRODUCTO PUBLICADO EXITOSAMENTE:', {
         id: createdProduct.id,
         name: createdProduct.name,
         shop_id: createdProduct.shop_id
       });
       
-      // PASO 6: Confirmación final y notificación
       toast.success('¡Producto publicado exitosamente!', {
         description: `"${productData.name}" ya está disponible en tu tienda`,
-        duration: 5000,
+        duration: 6000,
         action: {
-          label: 'Ver producto',
+          label: 'Ver tienda',
           onClick: () => {
-            onPublish(); // Reset wizard state
             window.location.href = '/mi-tienda';
           }
         }
       });
       
-      // PASO 7: Solo después de éxito completo - resetear wizard
+      // PASO 8: Resetear wizard después de confirmar éxito completo
       console.log('🏁 FINALIZANDO PUBLICACIÓN...');
-      console.log('✅ PRODUCTO PUBLICADO CORRECTAMENTE - ID:', createdProduct.id);
       
-      // Reset wizard state inmediatamente después del éxito
-      onPublish();
+      // Esperar un momento para que el usuario vea el toast de éxito
+      setTimeout(() => {
+        console.log('🔄 Reseteando wizard...');
+        onPublish(); // Reset wizard state
+      }, 2000);
       
     } catch (error) {
       console.error('❌ ERROR CRÍTICO EN PUBLICACIÓN:', {
@@ -284,23 +343,43 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         wizardState: {
           name: wizardState.name,
           price: wizardState.price,
-          imagesCount: wizardState.images?.length
+          category: wizardState.category,
+          images_count: wizardState.images?.length || 0
         }
       });
 
-      // Rollback: Si subimos imágenes pero falló la creación del producto, informar
+      // Rollback: limpiar imágenes subidas si el producto falló
       if (uploadedImageUrls.length > 0) {
-        console.log('⚠️ ROLLBACK: Imágenes subidas pero producto no creado');
-        toast.error('Error al crear el producto', {
-          description: 'Las imágenes se subieron correctamente, pero falló la creación del producto. Intenta nuevamente.',
-          duration: 8000
-        });
-      } else {
-        toast.error('Error en la publicación', {
-          description: error instanceof Error ? error.message : 'Error desconocido al publicar el producto',
-          duration: 8000
-        });
+        console.log('🗑️ INICIANDO ROLLBACK DE IMÁGENES...');
+        try {
+          const imageNames = uploadedImageUrls.map(url => {
+            const parts = url.split('/');
+            return parts[parts.length - 1];
+          });
+          
+          const { error: deleteError } = await supabase.storage
+            .from('images')
+            .remove(imageNames.map(name => `products/${name}`));
+          
+          if (deleteError) {
+            console.error('❌ ERROR EN ROLLBACK:', deleteError);
+          } else {
+            console.log('✅ ROLLBACK COMPLETADO - IMÁGENES ELIMINADAS');
+          }
+        } catch (cleanupError) {
+          console.error('❌ ERROR DURANTE ROLLBACK:', cleanupError);
+        }
       }
+
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error('Error al publicar producto', {
+        description: errorMessage,
+        duration: 10000,
+        action: {
+          label: 'Reintentar',
+          onClick: () => handlePublish()
+        }
+      });
     } finally {
       setIsPublishing(false);
     }
