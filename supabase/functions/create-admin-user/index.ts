@@ -124,7 +124,7 @@ serve(async (req) => {
     console.log('User created successfully:', userData.user?.email)
 
     // Add to admin_users table
-    const { error: adminError } = await supabaseAdmin
+    const { error: insertAdminError } = await supabaseAdmin
       .from('admin_users')
       .upsert({
         email: email,
@@ -135,10 +135,10 @@ serve(async (req) => {
         onConflict: 'email'
       })
 
-    if (adminError) {
-      console.error('Error adding to admin_users:', adminError)
+    if (insertAdminError) {
+      console.error('Error adding to admin_users:', insertAdminError)
       return new Response(
-        JSON.stringify({ error: adminError.message }),
+        JSON.stringify({ error: insertAdminError.message }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
