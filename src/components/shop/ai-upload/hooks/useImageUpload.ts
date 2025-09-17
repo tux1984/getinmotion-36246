@@ -70,19 +70,40 @@ export const useImageUpload = () => {
         ));
 
         try {
-          console.log(`Uploading image ${index + 1}: ${fileName} (${Math.round(image.size / 1024)}KB, ${image.type})`);
+          console.log(`🔄 Uploading image ${index + 1}: ${fileName}`);
+          console.log(`📊 Image details:`, {
+            size: Math.round(image.size / 1024) + 'KB',
+            type: image.type,
+            name: image.name,
+            fileName: fileName
+          });
 
-          // Upload directly without recreating File object to preserve MIME type
+          // Check authentication first
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            throw new Error('Usuario no autenticado - por favor inicia sesión');
+          }
+          console.log(`✅ User authenticated: ${user.id}`);
+
+          // Upload with explicit contentType to avoid MIME type issues
           const { data, error } = await supabase.storage
             .from('images')
             .upload(`products/${fileName}`, image, {
               cacheControl: '3600',
-              upsert: false
-              // Don't set contentType explicitly - let browser handle FormData headers
+              upsert: false,
+              contentType: image.type // Explicitly set content type
             });
 
           if (error) {
-            console.error(`Upload error for ${fileName}:`, error);
+            console.error(`❌ Storage upload error for ${fileName}:`, error);
+            console.error(`🔍 Error details:`, {
+              message: error.message,
+              bucket: 'images',
+              path: `products/${fileName}`,
+              userId: user.id,
+              fileType: image.type,
+              fileSize: image.size
+            });
             throw new Error(`Error subiendo ${image.name}: ${error.message}`);
           }
 
