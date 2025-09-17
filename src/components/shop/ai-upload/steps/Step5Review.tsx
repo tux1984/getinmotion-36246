@@ -47,6 +47,13 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         .single();
 
       if (!shop) {
+        toast.error('No tienes una tienda creada', {
+          description: 'Necesitas crear tu tienda antes de poder publicar productos',
+          action: {
+            label: 'Crear tienda',
+            onClick: () => window.location.href = '/crear-tienda'
+          }
+        });
         throw new Error('No se encontró la tienda del usuario');
       }
 

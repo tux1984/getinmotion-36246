@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Steps } from '@/components/ui/steps';
 import { Step1ImageUpload } from './steps/Step1ImageUpload';
@@ -7,8 +7,11 @@ import { Step3Description } from './steps/Step3Description';
 import { Step4PriceCategory } from './steps/Step4PriceCategory';
 import { Step5Review } from './steps/Step5Review';
 import { useWizardState } from './hooks/useWizardState';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const STEPS = [
   { title: 'Imágenes', description: 'Sube las fotos de tu producto' },
@@ -20,7 +23,38 @@ const STEPS = [
 
 export const AIProductUploadWizard: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [hasShop, setHasShop] = useState<boolean | null>(null);
+  const [isCheckingShop, setIsCheckingShop] = useState(true);
   const { wizardState, updateWizardState, resetWizard } = useWizardState();
+
+  // Check if user has a shop on component mount
+  useEffect(() => {
+    const checkUserShop = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setHasShop(false);
+          setIsCheckingShop(false);
+          return;
+        }
+
+        const { data: shop } = await supabase
+          .from('artisan_shops')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        setHasShop(!!shop);
+      } catch (error) {
+        console.error('Error checking shop:', error);
+        setHasShop(false);
+      } finally {
+        setIsCheckingShop(false);
+      }
+    };
+
+    checkUserShop();
+  }, []);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -103,6 +137,55 @@ export const AIProductUploadWizard: React.FC = () => {
         return null;
     }
   };
+
+  // Show loading while checking shop
+  if (isCheckingShop) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Verificando tu tienda...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show shop requirement if user doesn't have a shop
+  if (hasShop === false) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card className="p-8 text-center space-y-6">
+          <div className="space-y-4">
+            <Store className="w-16 h-16 mx-auto text-primary" />
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">¡Necesitas crear tu tienda primero!</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Para poder subir productos, primero debes crear tu tienda artesanal. 
+                Es rápido y fácil con nuestro asistente inteligente.
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <Button 
+              size="lg" 
+              onClick={() => window.location.href = '/crear-tienda'}
+              className="w-full max-w-sm"
+            >
+              <Store className="w-4 h-4 mr-2" />
+              Crear mi tienda ahora
+            </Button>
+            
+            <p className="text-sm text-muted-foreground">
+              Una vez creada tu tienda, podrás regresar aquí para subir tus productos
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
