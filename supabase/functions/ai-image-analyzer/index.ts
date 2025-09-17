@@ -21,11 +21,29 @@ serve(async (req) => {
     const { images } = await req.json();
 
     console.log('AI Image Analyzer request:', {
-      imageCount: images?.length
+      imageCount: images?.length,
+      firstImageType: images?.[0]?.substring(0, 50) + '...'
     });
 
     if (!images || images.length === 0) {
       throw new Error('No images provided');
+    }
+
+    // Validate image format
+    const validImages = images.filter((image: string) => {
+      if (typeof image !== 'string') {
+        console.error('Invalid image format: not a string');
+        return false;
+      }
+      if (!image.startsWith('data:image/')) {
+        console.error('Invalid image format: missing data:image/ prefix');
+        return false;
+      }
+      return true;
+    });
+
+    if (validImages.length === 0) {
+      throw new Error('No valid images provided - images must be base64 data URLs');
     }
 
     const messages = [
@@ -55,10 +73,11 @@ INSTRUCCIONES:
             type: 'text',
             text: 'Analiza estas imágenes del producto artesanal y proporciona las sugerencias en el formato JSON especificado:'
           },
-          ...images.slice(0, 3).map((image: string) => ({
+          ...validImages.slice(0, 3).map((image: string) => ({
             type: 'image_url',
             image_url: {
-              url: image
+              url: image,
+              detail: 'low'
             }
           }))
         ]

@@ -36,25 +36,32 @@ export const QuickPublishCard: React.FC = () => {
     setImagePreview(preview);
     setSelectedImage(file);
 
-    // Analyze image with AI
+    // Immediately set default data for quick testing
+    const defaultData = {
+      name: 'Producto Artesanal Único',
+      description: 'Hermoso producto artesanal elaborado cuidadosamente a mano con materiales de alta calidad. Esta pieza única combina técnicas tradicionales con un diseño contemporáneo, reflejando la pasión y dedicación del artesano.',
+      category: 'Artesanías',
+      tags: ['artesanal', 'hecho-a-mano', 'único', 'calidad-premium']
+    };
+    
+    setAiData(defaultData);
+
+    // Try AI analysis in background (optional enhancement)
     setIsAnalyzing(true);
     try {
+      console.log('🤖 Attempting AI analysis...');
       const analysis = await analyzeImages([file]);
+      console.log('✅ AI analysis successful:', analysis);
+      
       setAiData({
-        name: analysis.suggestedName || 'Producto Artesanal',
-        description: analysis.suggestedDescription || 'Hermoso producto artesanal hecho a mano',
-        category: analysis.detectedCategory || 'General',
-        tags: analysis.suggestedTags || []
+        name: analysis.suggestedName || defaultData.name,
+        description: analysis.suggestedDescription || defaultData.description,
+        category: analysis.detectedCategory || defaultData.category,
+        tags: analysis.suggestedTags || defaultData.tags
       });
     } catch (error) {
-      console.error('Error analyzing image:', error);
-      // Set default values
-      setAiData({
-        name: 'Producto Artesanal',
-        description: 'Hermoso producto artesanal hecho a mano con materiales de alta calidad',
-        category: 'General',
-        tags: ['artesanal', 'hecho-a-mano']
-      });
+      console.error('❌ AI analysis failed, using defaults:', error);
+      // Keep the default values already set
     } finally {
       setIsAnalyzing(false);
     }
@@ -175,8 +182,13 @@ export const QuickPublishCard: React.FC = () => {
             <div className="flex items-center gap-2">
               <Wand2 className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">
-                Datos generados por IA
+                {isAnalyzing ? 'Analizando con IA...' : 'Datos del producto'}
               </span>
+              {!isAnalyzing && (
+                <Badge variant="outline" className="text-xs">
+                  IA mejorada
+                </Badge>
+              )}
             </div>
             
             <div className="space-y-3">
@@ -259,7 +271,7 @@ export const QuickPublishCard: React.FC = () => {
 
         {aiData && (
           <p className="text-xs text-center text-muted-foreground">
-            La IA ha pre-llenado los datos. Puedes editarlos después de publicar.
+            Datos prellenados automáticamente. Puedes editarlos después de publicar.
           </p>
         )}
       </div>

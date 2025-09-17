@@ -56,16 +56,38 @@ export const useAIRefinement = () => {
     setError(null);
 
     try {
+      console.log('🔄 Starting image analysis for', images.length, 'images');
+      
+      // Validate files
+      for (const file of images) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error(`Image ${file.name} is too large (max 10MB)`);
+        }
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`File ${file.name} is not a valid image`);
+        }
+      }
+
       // Convert images to base64 for analysis
-      const imagePromises = images.slice(0, 3).map(async (image) => {
-        return new Promise<string>((resolve) => {
+      const imagePromises = images.slice(0, 3).map(async (image, index) => {
+        return new Promise<string>((resolve, reject) => {
+          console.log(`📷 Converting image ${index + 1}:`, image.name, image.type, image.size);
           const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
+          reader.onload = () => {
+            const result = reader.result as string;
+            console.log(`✅ Image ${index + 1} converted, size:`, result.length, 'chars');
+            resolve(result);
+          };
+          reader.onerror = () => {
+            console.error(`❌ Failed to convert image ${index + 1}:`, reader.error);
+            reject(new Error(`Failed to convert image ${image.name}`));
+          };
           reader.readAsDataURL(image);
         });
       });
 
       const base64Images = await Promise.all(imagePromises);
+      console.log('📤 Sending images to AI analyzer...');
 
       const { data, error } = await supabase.functions.invoke('ai-image-analyzer', {
         body: {
@@ -73,15 +95,29 @@ export const useAIRefinement = () => {
         }
       });
 
+      console.log('📥 AI analyzer response:', { data, error });
+
       if (error) {
+        console.error('🚨 Service error:', error);
         throw new Error(error.message);
       }
 
+      if (data?.error) {
+        console.error('🚨 Data error:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data?.analysis) {
+        console.error('🚨 No analysis data received:', data);
+        throw new Error('No analysis data received from AI service');
+      }
+
+      console.log('✅ Analysis completed successfully:', data.analysis);
       return data.analysis;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error analizando imágenes';
       setError(errorMessage);
-      console.error('AI Image Analysis error:', err);
+      console.error('❌ AI Image Analysis error:', err);
       return null;
     } finally {
       setIsRefining(false);
