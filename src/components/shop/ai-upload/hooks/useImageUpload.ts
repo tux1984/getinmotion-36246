@@ -87,16 +87,11 @@ export const useImageUpload = () => {
               lastModified: new Date(image.lastModified).toISOString()
             });
 
-            // Create a fresh FormData to ensure proper MIME type handling
-            const formData = new FormData();
-            formData.append('file', image, fileName);
-            
-            console.log(`📤 FormData created for ${fileName}`);
-
-            // Upload with minimal configuration to avoid header conflicts
+            // Upload with explicit contentType and minimal configuration
             const uploadResponse = await supabase.storage
               .from('images')
               .upload(`products/${fileName}`, image, {
+                contentType: image.type,
                 cacheControl: '3600',
                 upsert: false
               });
