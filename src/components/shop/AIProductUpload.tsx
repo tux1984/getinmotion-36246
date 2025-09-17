@@ -207,28 +207,64 @@ export const AIProductUpload: React.FC = () => {
         images_count: productData.images.length
       });
 
+      // Validaciones preventivas de imágenes
+      console.log('Validando imágenes antes de subir...');
+      const validatedImages = productData.images.map((image, index) => {
+        // Validar tamaño (máx 10MB)
+        if (image.size > 10 * 1024 * 1024) {
+          throw new Error(`La imagen ${index + 1} es muy grande (máx 10MB). Tamaño actual: ${Math.round(image.size / 1024 / 1024)}MB`);
+        }
+        
+        // Validar tipo MIME
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(image.type)) {
+          throw new Error(`La imagen ${index + 1} tiene un formato no válido. Usa JPG, PNG o WEBP. Formato actual: ${image.type}`);
+        }
+        
+        console.log(`Imagen ${index + 1} validada: ${image.name} (${Math.round(image.size / 1024)}KB, ${image.type})`);
+        return image;
+      });
+
       // Upload images to Supabase Storage
-      console.log('Subiendo imágenes...');
+      console.log('Subiendo imágenes validadas...');
       const imageUrls = await Promise.all(
-        productData.images.map(async (image, index) => {
-          const fileName = `${Date.now()}_${index}.${image.name.split('.').pop()}`;
-          console.log(`Subiendo imagen ${index + 1}: ${fileName}`);
+        validatedImages.map(async (image, index) => {
+          // Crear nombre de archivo seguro
+          const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const fileExtension = image.name.split('.').pop()?.toLowerCase() || 'jpg';
+          const fileName = `${Date.now()}_${index}_${sanitizedName.substring(0, 20)}.${fileExtension}`;
           
-          const { data, error } = await supabase.storage
-            .from('images')
-            .upload(`products/${fileName}`, image);
+          console.log(`Subiendo imagen ${index + 1}/${validatedImages.length}: ${fileName} (${Math.round(image.size / 1024)}KB)`);
           
-          if (error) {
-            console.error(`Error subiendo imagen ${index + 1}:`, error);
-            throw new Error(`Error al subir imagen ${index + 1}: ${error.message}`);
+          try {
+            const { data, error } = await supabase.storage
+              .from('images')
+              .upload(`products/${fileName}`, image, {
+                cacheControl: '3600',
+                upsert: false
+              });
+            
+            if (error) {
+              console.error(`Error específico subiendo imagen ${index + 1}:`, {
+                error,
+                fileName,
+                fileSize: image.size,
+                fileType: image.type
+              });
+              throw new Error(`Error al subir imagen "${image.name}": ${error.message}`);
+            }
+            
+            const { data: { publicUrl } } = supabase.storage
+              .from('images')
+              .getPublicUrl(data.path);
+            
+            console.log(`✅ Imagen ${index + 1} subida exitosamente:`, { fileName, url: publicUrl });
+            return publicUrl;
+            
+          } catch (uploadError) {
+            console.error(`Error en proceso de subida imagen ${index + 1}:`, uploadError);
+            throw new Error(`No se pudo subir la imagen "${image.name}". Verifica tu conexión e inténtalo de nuevo.`);
           }
-          
-          const { data: { publicUrl } } = supabase.storage
-            .from('images')
-            .getPublicUrl(data.path);
-          
-          console.log(`Imagen ${index + 1} subida exitosamente:`, publicUrl);
-          return publicUrl;
         })
       );
 
