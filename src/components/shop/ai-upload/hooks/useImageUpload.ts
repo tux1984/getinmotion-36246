@@ -77,8 +77,8 @@ export const useImageUpload = () => {
             .from('images')
             .upload(`products/${fileName}`, image, {
               cacheControl: '3600',
-              upsert: false,
-              contentType: image.type // Explicitly set content type
+              upsert: false
+              // Don't set contentType explicitly - let browser handle FormData headers
             });
 
           if (error) {
