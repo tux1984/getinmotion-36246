@@ -96,11 +96,19 @@ export const useProductPublish = () => {
           .select('id')
           .eq('user_id', user.id)
           .eq('active', true)
-          .single();
+          .maybeSingle();
         
-        if (error || !data) {
-          throw new Error('No se encontró tienda activa');
+        if (error) {
+          console.error('❌ Error checking shop:', error);
+          throw new Error(`Error verificando tienda: ${error.message}`);
         }
+        
+        if (!data) {
+          console.error('❌ No active shop found for user:', user.id);
+          throw new Error('No tienes una tienda activa. Crea una tienda primero.');
+        }
+        
+        console.log('✅ Shop found:', data);
         return data;
       });
       setPublishProgress(50);
@@ -126,35 +134,50 @@ export const useProductPublish = () => {
 
       // Insert product with retry
       const product = await retryOperation(async () => {
+        console.log('💾 Inserting product data:', productData);
+        
         const { data, error } = await supabase
           .from('products')
           .insert(productData)
           .select('id')
-          .single();
+          .maybeSingle();
 
         if (error) {
+          console.error('❌ Product insertion error:', error);
           throw new Error(`Error al guardar el producto: ${error.message}`);
         }
 
         if (!data) {
-          throw new Error('No se pudo crear el producto');
+          console.error('❌ No product data returned after insertion');
+          throw new Error('No se pudo crear el producto - sin datos retornados');
         }
 
+        console.log('✅ Product inserted successfully:', data);
         return data;
       }, retryAttempts);
       setPublishProgress(90);
 
       // Verify insertion
       await retryOperation(async () => {
+        console.log('🔍 Verifying product insertion for ID:', product.id);
+        
         const { data: verification, error } = await supabase
           .from('products')
           .select('id')
           .eq('id', product.id)
-          .single();
+          .maybeSingle();
         
-        if (error || !verification) {
-          throw new Error('Error en la verificación del producto');
+        if (error) {
+          console.error('❌ Verification error:', error);
+          throw new Error(`Error en la verificación del producto: ${error.message}`);
         }
+        
+        if (!verification) {
+          console.error('❌ Product not found during verification');
+          throw new Error('Producto no encontrado tras la inserción');
+        }
+        
+        console.log('✅ Product verification successful');
         return verification;
       });
       setPublishProgress(100);
