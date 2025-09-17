@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useArtisanShop } from '@/hooks/useArtisanShop';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Store, Sparkles, ArrowRight, MessageCircle, Bot, User, Wand2 } from 'lucide-react';
@@ -28,19 +29,48 @@ interface ShopCreationState {
   isCoordinatorThinking?: boolean;
 }
 
-export const ConversationalShopCreation: React.FC = () => {
-  const [state, setState] = useState<ShopCreationState>({
-    phase: 'conversing',
-    shopData: {},
-    conversation: [{
-      id: 'initial',
-      type: 'coordinator',
-      content: '¡Hola! 🎯 Soy tu Coordinador Maestro. Voy a crear tu tienda digital en 3 simples pasos. ¿Cuál es el nombre de tu tienda?',
-      timestamp: new Date()
-    }],
-    currentQuestion: 'shop_name',
-    questionIndex: 0,
-    isCoordinatorThinking: false,
+interface ConversationalShopCreationProps {
+  existingShop?: any;
+}
+
+export const ConversationalShopCreation: React.FC<ConversationalShopCreationProps> = ({ existingShop }) => {
+  const [state, setState] = useState<ShopCreationState>(() => {
+    // If continuing existing shop, load its data and start from appropriate step
+    if (existingShop) {
+      return {
+        phase: 'conversing',
+        shopData: {
+          shop_name: existingShop.shop_name || '',
+          description: existingShop.description || '',
+          craft_type: existingShop.craft_type || '',
+          region: existingShop.region || '',
+        },
+        conversation: [{
+          id: 'initial',
+          type: 'coordinator',
+          content: `¡Hola de nuevo! Veo que ya habías empezado a crear tu tienda "${existingShop.shop_name || 'sin nombre'}". Continuemos desde donde nos quedamos.`,
+          timestamp: new Date()
+        }],
+        currentQuestion: 'shop_name',
+        questionIndex: existingShop.creation_step || 0,
+        isCoordinatorThinking: false,
+      };
+    }
+    
+    // New shop creation
+    return {
+      phase: 'conversing',
+      shopData: {},
+      conversation: [{
+        id: 'initial',
+        type: 'coordinator',
+        content: '¡Hola! 🎯 Soy tu Coordinador Maestro. Voy a crear tu tienda digital en 3 simples pasos. ¿Cuál es el nombre de tu tienda?',
+        timestamp: new Date()
+      }],
+      currentQuestion: 'shop_name',
+      questionIndex: 0,
+      isCoordinatorThinking: false,
+    };
   });
   
   const [userInput, setUserInput] = useState('');
@@ -53,6 +83,7 @@ export const ConversationalShopCreation: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { createShop, updateShopProgress } = useArtisanShop();
 
   // Define the 3 essential questions
   const questions = [
@@ -89,19 +120,30 @@ export const ConversationalShopCreation: React.FC = () => {
     }));
 
     try {
-      const { error } = await supabase.from('artisan_shops').insert({
-        user_id: user!.id,
-        shop_name: shopData.shop_name,
-        shop_slug: shopData.shop_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        description: shopData.description,
-        story: shopData.story,
-        craft_type: shopData.craft_type,
-        region: shopData.region,
-        contact_info: shopData.contact_info,
-        social_links: shopData.social_links,
-      });
-
-      if (error) throw error;
+      let result;
+      if (existingShop) {
+        // Update existing shop
+        result = await updateShopProgress(existingShop.id, {
+          shop_name: shopData.shop_name,
+          description: shopData.description,
+          story: shopData.story,
+          craft_type: shopData.craft_type,
+          region: shopData.region,
+          contact_info: shopData.contact_info,
+          social_links: shopData.social_links,
+        }, 'complete', 0);
+      } else {
+        // Create new shop
+        result = await createShop({
+          shop_name: shopData.shop_name,
+          description: shopData.description,
+          story: shopData.story,
+          craft_type: shopData.craft_type,
+          region: shopData.region,
+          contact_info: shopData.contact_info,
+          social_links: shopData.social_links,
+        });
+      }
 
       setState(prev => ({
         ...prev,
@@ -109,20 +151,15 @@ export const ConversationalShopCreation: React.FC = () => {
         conversation: [...prev.conversation, {
           id: Date.now().toString(),
           type: 'coordinator',
-          content: '🎉 ¡Listo! Tu tienda digital ha sido creada exitosamente. Ahora te voy a ayudar a cargar tus primeros productos con IA.',
+          content: '🎉 ¡Listo! Tu tienda digital ha sido creada exitosamente. Ahora puedes ir al dashboard para gestionarla o empezar a cargar productos.',
           timestamp: new Date()
         }]
       }));
 
       toast({
         title: "¡Tienda creada!",
-        description: "Tu tienda digital está lista. Ahora puedes agregar productos.",
+        description: "Tu tienda digital está lista.",
       });
-
-      // Redirect to product upload after 2 seconds
-      setTimeout(() => {
-        navigate('/productos/subir');
-      }, 2000);
 
     } catch (error) {
       console.error('Error creating shop:', error);
@@ -627,16 +664,27 @@ export const ConversationalShopCreation: React.FC = () => {
       <Store className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
       <h3 className="text-xl font-semibold mb-2">¡Tienda creada exitosamente!</h3>
       <p className="text-muted-foreground mb-6">
-        Redirigiendo al asistente de carga de productos con IA...
+        Tu tienda digital está lista. ¿Qué quieres hacer ahora?
       </p>
-      <Button
-        onClick={() => navigate('/dashboard/artisan?flow=ai-product-upload')}
-        size="lg"
-        className="bg-emerald-600 hover:bg-emerald-700"
-      >
-        <ArrowRight className="w-4 h-4 mr-2" />
-        Continuar con Productos
-      </Button>
+      <div className="flex gap-4 justify-center">
+        <Button
+          onClick={() => navigate('/dashboard')}
+          size="lg"
+          className="bg-emerald-600 hover:bg-emerald-700"
+        >
+          <Store className="w-4 h-4 mr-2" />
+          Ver mi dashboard
+        </Button>
+        
+        <Button 
+          variant="outline"
+          size="lg" 
+          onClick={() => navigate('/productos/subir')}
+        >
+          <ArrowRight className="w-4 h-4 mr-2" />
+          Subir productos
+        </Button>
+      </div>
     </div>
   );
 

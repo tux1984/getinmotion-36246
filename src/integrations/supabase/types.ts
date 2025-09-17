@@ -375,6 +375,8 @@ export type Database = {
           contact_info: Json | null
           craft_type: string | null
           created_at: string
+          creation_status: string | null
+          creation_step: number | null
           data_classification: Json | null
           description: string | null
           featured: boolean
@@ -398,6 +400,8 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          creation_status?: string | null
+          creation_step?: number | null
           data_classification?: Json | null
           description?: string | null
           featured?: boolean
@@ -421,6 +425,8 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          creation_status?: string | null
+          creation_step?: number | null
           data_classification?: Json | null
           description?: string | null
           featured?: boolean

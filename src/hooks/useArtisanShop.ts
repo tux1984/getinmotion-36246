@@ -45,6 +45,16 @@ export const useArtisanShop = () => {
     try {
       setLoading(true);
       
+      // Check if user already has a shop
+      const existingShop = await checkExistingShop();
+      if (existingShop) {
+        if (existingShop.creation_status === 'complete') {
+          throw new Error('Ya tienes una tienda creada. Solo puedes tener una tienda.');
+        }
+        // Continue with existing shop
+        return updateShopProgress(existingShop.id, shopData, 'complete');
+      }
+      
       // Generate unique slug
       const baseSlug = shopData.shop_name?.toLowerCase()
         .replace(/[^a-z0-9]/g, '-')
@@ -73,6 +83,8 @@ export const useArtisanShop = () => {
           ...shopData,
           user_id: user.id,
           shop_slug: slug,
+          creation_status: 'complete',
+          creation_step: 0,
         })
         .select()
         .single();
@@ -90,12 +102,55 @@ export const useArtisanShop = () => {
       setError(err.message);
       toast({
         title: "Error",
-        description: "No se pudo crear la tienda. Inténtalo de nuevo.",
+        description: err.message.includes('Ya tienes una tienda') ? 
+          err.message : "No se pudo crear la tienda. Inténtalo de nuevo.",
         variant: "destructive",
       });
       throw err;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkExistingShop = async () => {
+    if (!user) return null;
+    
+    try {
+      const { data } = await supabase
+        .from('artisan_shops')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      return data;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const updateShopProgress = async (shopId: string, updates: any, status: string = 'incomplete', step: number = 0) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      const { data, error } = await supabase
+        .from('artisan_shops')
+        .update({
+          ...updates,
+          creation_status: status,
+          creation_step: step,
+        })
+        .eq('id', shopId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setShop(data);
+      return data;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
     }
   };
 
@@ -146,5 +201,7 @@ export const useArtisanShop = () => {
     createShop,
     updateShop,
     refreshShop: fetchShop,
+    checkExistingShop,
+    updateShopProgress,
   };
 };

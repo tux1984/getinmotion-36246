@@ -34,10 +34,12 @@ interface ShopFormData {
 
 interface IntelligentShopCreationWizardProps {
   language?: 'en' | 'es';
+  existingShop?: any;
 }
 
 export const IntelligentShopCreationWizard: React.FC<IntelligentShopCreationWizardProps> = ({ 
-  language = 'es' 
+  language = 'es',
+  existingShop
 }) => {
   const [step, setStep] = useState<'loading' | 'preconfigured' | 'review' | 'creating' | 'complete'>('loading');
   const [formData, setFormData] = useState<ShopFormData>({
