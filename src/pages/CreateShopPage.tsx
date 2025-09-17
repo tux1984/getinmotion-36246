@@ -7,7 +7,7 @@ import { mapToLegacyLanguage } from '@/utils/languageMapper';
 import { useArtisanShop } from '@/hooks/useArtisanShop';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Store, Loader2, ExternalLink } from 'lucide-react';
+import { Store, Loader2, ExternalLink, Package, Edit3 } from 'lucide-react';
 
 export const CreateShopPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -51,7 +51,7 @@ export const CreateShopPage: React.FC = () => {
     );
   }
 
-  // If user already has a complete shop, show shop management
+  // If user already has a complete shop, show edit options
   if (existingShop && existingShop.creation_status === 'complete') {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -59,30 +59,56 @@ export const CreateShopPage: React.FC = () => {
           <div className="space-y-4">
             <Store className="w-16 h-16 mx-auto text-primary" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">¡Ya tienes tu tienda creada!</h2>
+              <h2 className="text-2xl font-bold">Editando tu tienda</h2>
               <p className="text-lg font-medium text-primary">{existingShop.shop_name}</p>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Tu tienda digital está lista. Puedes gestionarla desde tu dashboard o continuar agregando productos.
+                Tu tienda digital está creada. Aquí puedes editarla o gestionar tus productos.
               </p>
             </div>
           </div>
           
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/mi-tienda')}
+              className="flex items-center gap-2"
             >
-              <Store className="w-4 h-4 mr-2" />
-              Ver Dashboard
+              <Store className="w-4 h-4" />
+              Ir a Mi Tienda
             </Button>
             
             <Button 
               variant="outline"
               size="lg" 
               onClick={() => navigate('/productos/subir')}
+              className="flex items-center gap-2"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <Package className="w-4 h-4" />
               Subir Productos
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="lg" 
+              onClick={() => navigate(`/tienda/${existingShop.shop_slug}`)}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Ver Tienda Pública
+            </Button>
+          </div>
+          
+          <div className="pt-6 border-t">
+            <p className="text-sm text-muted-foreground mb-4">
+              ¿Quieres modificar la información de tu tienda?
+            </p>
+            <Button 
+              variant="secondary"
+              onClick={() => setExistingShop({ ...existingShop, creation_status: 'incomplete' })}
+              className="flex items-center gap-2"
+            >
+              <Edit3 className="w-4 h-4" />
+              Editar Información de la Tienda
             </Button>
           </div>
         </Card>

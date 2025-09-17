@@ -47,11 +47,12 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         .single();
 
       if (!shop) {
+        console.error('No shop found for user:', user.id);
         toast.error('No tienes una tienda creada', {
           description: 'Necesitas crear tu tienda antes de poder publicar productos',
           action: {
             label: 'Crear tienda',
-            onClick: () => window.location.href = '/crear-tienda'
+            onClick: () => window.location.href = '/dashboard/create-shop'
           }
         });
         throw new Error('No se encontró la tienda del usuario');
@@ -84,7 +85,19 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         throw new Error(`Error creando producto: ${productError.message}`);
       }
 
-      toast.success('¡Producto publicado exitosamente!');
+      toast.success('¡Producto publicado exitosamente!', {
+        description: 'Tu producto ya está disponible en tu tienda',
+        action: {
+          label: 'Ver mi tienda',
+          onClick: () => window.location.href = '/mi-tienda'
+        }
+      });
+      
+      // Redirect to shop dashboard after successful publish
+      setTimeout(() => {
+        window.location.href = '/mi-tienda';
+      }, 2000);
+      
       onPublish();
       
     } catch (error) {

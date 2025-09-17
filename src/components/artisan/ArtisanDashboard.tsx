@@ -82,23 +82,23 @@ export const ArtisanDashboard: React.FC = () => {
 
   const quickActions = [
     {
+      title: "Mi Tienda",
+      description: "Gestiona tu tienda, productos y configuración",
+      icon: Store,
+      action: () => navigate('/mi-tienda'),
+      color: "bg-gradient-to-r from-blue-500 to-blue-600",
+    },
+    {
       title: 'Agregar Producto con IA',
       description: 'Crea productos optimizados con asistencia de IA',
       icon: Sparkles,
-      action: () => navigate('/dashboard/artisan?flow=ai-product-upload'),
+      action: () => navigate('/productos/subir'),
       color: 'bg-gradient-to-r from-purple-500 to-purple-600',
     },
     {
-      title: 'Agregar Producto Manual',
-      description: 'Sube un nuevo producto manualmente',
-      icon: Plus,
-      action: () => navigate('/dashboard/artisan/products/new'),
-      color: 'bg-gradient-to-r from-blue-500 to-blue-600',
-    },
-    {
-      title: 'Ver mi Tienda',
+      title: 'Ver mi Tienda Pública',
       description: 'Mira cómo se ve tu tienda online',
-      icon: Store,
+      icon: Eye,
       action: () => window.open(`/tienda/${shop.shop_slug}`, '_blank'),
       color: 'bg-gradient-to-r from-green-500 to-green-600',
     },
@@ -106,8 +106,8 @@ export const ArtisanDashboard: React.FC = () => {
       title: 'Gestionar Productos',
       description: 'Edita o elimina productos existentes',
       icon: Package,
-      action: () => navigate('/dashboard/artisan/products'),
-      color: 'bg-gradient-to-r from-purple-500 to-purple-600',
+      action: () => navigate('/mi-tienda'),
+      color: 'bg-gradient-to-r from-orange-500 to-orange-600',
     },
   ];
 

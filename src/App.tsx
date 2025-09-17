@@ -33,6 +33,7 @@ import { PublicShopPage } from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 import { ProductUploadPage } from './pages/ProductUploadPage';
+import { ShopDashboardPage } from './pages/ShopDashboardPage';
 
 function App() {
   return (
@@ -146,6 +147,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateShopPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/mi-tienda" 
+                element={
+                  <ProtectedRoute>
+                    <ShopDashboardPage />
                   </ProtectedRoute>
                 } 
               />

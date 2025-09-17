@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/artisan';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export const useProducts = (shopId?: string) => {
   const [products, setProducts] = useState<Product[]>([]);
