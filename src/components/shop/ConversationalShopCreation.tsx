@@ -51,20 +51,49 @@ export const ConversationalShopCreation: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Initial analysis and profile loading
+  // Initial analysis and profile loading with loop protection
   useEffect(() => {
+    let isAnalyzing = false;
+    let timeoutId: NodeJS.Timeout;
+
     const analyzeUserProfile = async () => {
-      if (!user) return;
+      if (!user || isAnalyzing) return;
+      
+      isAnalyzing = true;
+      console.log('Starting profile analysis for user:', user.id);
+      
+      // Set timeout to prevent infinite waiting
+      timeoutId = setTimeout(() => {
+        console.log('Analysis timeout - falling back to conversation mode');
+        setState(prev => ({
+          ...prev,
+          phase: 'conversing',
+          conversation: [{
+            id: Date.now().toString(),
+            type: 'coordinator',
+            content: '¡Hola! Soy tu Coordinador Maestro. Vamos a crear tu tienda digital juntos. Para empezar, ¿cuál es el nombre de tu negocio?',
+            timestamp: new Date()
+          }],
+          currentQuestion: 'business_name'
+        }));
+        isAnalyzing = false;
+      }, 15000); // 15 second timeout
 
       try {
         // Call intelligent shop creation for analysis
-        const { data: analysisResult } = await supabase.functions.invoke('create-intelligent-shop', {
+        const { data: analysisResult, error } = await supabase.functions.invoke('create-intelligent-shop', {
           body: {
             userId: user.id,
             language: 'es',
             action: 'analyze_profile'
           }
         });
+
+        clearTimeout(timeoutId);
+
+        if (error || !analysisResult) {
+          throw new Error(error?.message || 'Analysis failed');
+        }
 
         if (analysisResult) {
           const initialMessage: ConversationalMessage = {
@@ -90,6 +119,7 @@ export const ConversationalShopCreation: React.FC = () => {
           }
         }
       } catch (error) {
+        clearTimeout(timeoutId);
         console.error('Error analyzing profile:', error);
         // Fallback to basic conversation
         setState(prev => ({
@@ -103,12 +133,19 @@ export const ConversationalShopCreation: React.FC = () => {
           }],
           currentQuestion: 'business_name'
         }));
+      } finally {
+        isAnalyzing = false;
       }
     };
 
-    if (state.phase === 'analyzing') {
+    if (state.phase === 'analyzing' && !isAnalyzing) {
       analyzeUserProfile();
     }
+
+    return () => {
+      clearTimeout(timeoutId);
+      isAnalyzing = false;
+    };
   }, [user, state.phase]);
 
   const createShopAutomatically = async (shopData: any) => {

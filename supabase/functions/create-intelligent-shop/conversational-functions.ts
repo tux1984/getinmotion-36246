@@ -301,6 +301,9 @@ export async function processConversationStep(supabase: any, userId: string, lan
       }
       nextQuestion = 'business_location';
       break;
+
+    case 'business_description':
+      const detectedCraftType = detectCraftTypeFromText(userResponse);
       updatedShopData.craft_type = detectedCraftType;
       updatedShopData.description = userResponse.trim();
       
