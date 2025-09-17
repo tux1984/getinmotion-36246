@@ -9,11 +9,17 @@ export interface PublishData {
   category: string;
   images: string[];
   shortDescription?: string;
+  comparePrice?: number;
   inventory?: number;
   weight?: number;
+  sku?: string;
+  dimensions?: any;
   tags?: string[];
   materials?: string[];
+  techniques?: string[];
   productionTime?: string;
+  subcategory?: string;
+  customizable?: boolean;
 }
 
 export interface PublishOptions {
@@ -120,16 +126,31 @@ export const useProductPublish = () => {
         description: data.description.trim(),
         short_description: data.shortDescription?.trim() || data.description.substring(0, 100),
         price: Number(data.price),
+        compare_price: data.comparePrice ? Number(data.comparePrice) : null,
         category: data.category,
-        images: data.images,
-        tags: data.tags || [],
-        materials: data.materials || [],
-        production_time: data.productionTime,
+        subcategory: data.subcategory || null,
+        images: Array.isArray(data.images) ? data.images : [],
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        materials: Array.isArray(data.materials) ? data.materials : [],
+        techniques: Array.isArray(data.techniques) ? data.techniques : [],
+        production_time: data.productionTime || null,
         inventory: data.inventory || 0,
-        weight: data.weight,
+        weight: data.weight || null,
+        sku: data.sku || null,
+        dimensions: data.dimensions || null,
+        customizable: data.customizable || false,
         active: true,
         featured: false
       };
+      
+      console.log('💾 Prepared product data:', {
+        shop_id: productData.shop_id,
+        name: productData.name,
+        price: productData.price,
+        category: productData.category,
+        images_count: productData.images.length,
+        images: productData.images
+      });
       setPublishProgress(70);
 
       // Insert product with retry
