@@ -31,7 +31,7 @@ serve(async (req) => {
       console.error('Error fetching users:', usersError)
       
       // Check if it's an authentication/authorization error
-      if (usersError.message.includes('admin permissions required') || usersError.message.includes('Access denied')) {
+      if (usersError.message?.includes('admin permissions required') || usersError.message?.includes('Access denied')) {
         return new Response(
           JSON.stringify({ error: 'Acceso denegado - se requieren permisos de administrador' }), 
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -44,19 +44,33 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Retrieved ${allUsers.length} users total`)
+    // Transform data to match the expected interface format
+    const transformedUsers = allUsers.map(user => ({
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      user_type: user.user_type,
+      is_active: user.is_active,
+      created_at: user.created_at,
+      last_sign_in: null, // Not available from SQL function
+      shop_name: user.shop_name,
+      confirmed_at: null, // Not available from SQL function
+      email_confirmed_at: null // Not available from SQL function
+    }))
+
+    console.log(`Retrieved ${transformedUsers.length} users total`)
     console.log('Users by type:', {
-      admin: allUsers.filter(u => u.user_type === 'admin').length,
-      shop_owner: allUsers.filter(u => u.user_type === 'shop_owner').length,
-      regular: allUsers.filter(u => u.user_type === 'regular').length,
-      unclassified: allUsers.filter(u => u.user_type === 'unclassified').length
+      admin: transformedUsers.filter(u => u.user_type === 'admin').length,
+      shop_owner: transformedUsers.filter(u => u.user_type === 'shop_owner').length,
+      regular: transformedUsers.filter(u => u.user_type === 'regular').length,
+      unclassified: transformedUsers.filter(u => u.user_type === 'unclassified').length
     })
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        users: allUsers,
-        total: allUsers.length
+        users: transformedUsers,
+        total: transformedUsers.length
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
