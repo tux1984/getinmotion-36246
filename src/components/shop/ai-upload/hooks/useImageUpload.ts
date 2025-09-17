@@ -87,10 +87,10 @@ export const useImageUpload = () => {
               lastModified: new Date(image.lastModified).toISOString()
             });
 
-            // Upload with explicit contentType and minimal configuration
+            // Upload directly to root path to avoid subfolder permission issues
             const uploadResponse = await supabase.storage
               .from('images')
-              .upload(`products/${fileName}`, image, {
+              .upload(fileName, image, {
                 contentType: image.type,
                 cacheControl: '3600',
                 upsert: false
@@ -112,7 +112,7 @@ export const useImageUpload = () => {
                 console.error(`🔍 Full error context:`, {
                   message: uploadResponse.error.message,
                   bucket: 'images',
-                  path: `products/${fileName}`,
+                  path: fileName,
                   userId: user.id,
                   fileType: image.type,
                   fileSize: image.size,
