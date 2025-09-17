@@ -5,13 +5,15 @@ import { Zap, Package, Wand2 } from 'lucide-react';
 import { AIProductUploadWizard } from '@/components/shop/ai-upload/AIProductUploadWizard';
 import { QuickPublishCard } from '@/components/shop/quick-publish/QuickPublishCard';
 import { BatchUploadInterface } from '@/components/shop/batch-upload/BatchUploadInterface';
+import { ProductUploadHeader } from '@/components/shop/ProductUploadHeader';
 
 export const ProductUploadPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('wizard');
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-subtle">
+      <ProductUploadHeader />
+      <div className="max-w-6xl mx-auto p-4 space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
