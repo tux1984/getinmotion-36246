@@ -40,11 +40,17 @@
     --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
     --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(350 100% 75%));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--primary-subtle)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent) / 0.8));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--primary-subtle)));
+    --gradient-glass: linear-gradient(145deg, hsl(var(--background) / 0.8), hsl(var(--primary-subtle) / 0.4));
     
     /* Enhanced shadows */
     --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
     --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
     --shadow-card: 0 4px 20px hsl(var(--primary) / 0.08);
+    --shadow-hover: 0 20px 40px -10px hsl(var(--primary) / 0.15);
+    --shadow-glass: 0 8px 32px hsl(var(--primary) / 0.12);
+    --shadow-soft: 0 2px 8px hsl(var(--foreground) / 0.06);
     
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

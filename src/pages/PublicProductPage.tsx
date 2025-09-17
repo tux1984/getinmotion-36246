@@ -100,9 +100,17 @@ export const PublicProductPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-lg">Cargando producto...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        <div className="text-center animate-fade-in">
+          <div className="animate-float mb-4">
+            <ShoppingBag className="w-16 h-16 mx-auto text-primary/60" />
+          </div>
+          <div className="text-xl font-medium text-primary">Cargando producto...</div>
+          <div className="text-sm text-muted-foreground mt-2">Explorando arte colombiano</div>
+        </div>
       </div>
+    );
+  }
     );
   }
 
@@ -136,54 +144,67 @@ export const PublicProductPage: React.FC = () => {
         <link rel="canonical" href={`${window.location.origin}/tienda/${shop.shop_slug}/producto/${product.id}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-        {/* Navigation */}
-        <div className="border-b bg-background/80 backdrop-blur">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate(`/tienda/${shop.shop_slug}`)}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver a {shop.shop_name}
-              </Button>
-              <div className="text-sm text-muted-foreground">
-                <span>Tienda: </span>
-                <button 
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        {/* Enhanced Navigation */}
+        <div className="border-b bg-gradient-glass backdrop-blur-glass">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between animate-fade-in">
+              <div className="flex items-center gap-6">
+                <Button 
+                  variant="ghost" 
                   onClick={() => navigate(`/tienda/${shop.shop_slug}`)}
-                  className="text-primary hover:underline"
+                  className="bg-background/50 backdrop-blur-sm hover:bg-primary/10 transition-all duration-300"
                 >
-                  {shop.shop_name}
-                </button>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Volver a la tienda
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  <span>Artesano: </span>
+                  <button 
+                    onClick={() => navigate(`/tienda/${shop.shop_slug}`)}
+                    className="text-primary font-medium hover:underline transition-colors duration-300"
+                  >
+                    {shop.shop_name}
+                  </button>
+                </div>
               </div>
+              <Badge variant="outline" className="px-4 py-2 border-primary/30">
+                {shop.craft_type?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid lg:grid-cols-2 gap-8 mb-12">
-            {/* Product images */}
-            <div>
-              <div className="aspect-square bg-muted rounded-lg overflow-hidden mb-4">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+            {/* Enhanced Product images */}
+            <div className="animate-fade-in">
+              <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl overflow-hidden mb-6 shadow-glass">
                 {images.length > 0 ? (
                   <img 
                     src={images[selectedImage] || images[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingBag className="w-16 h-16 text-muted-foreground" />
+                    <div className="animate-float">
+                      <ShoppingBag className="w-20 h-20 text-primary/40" />
+                    </div>
                   </div>
                 )}
               </div>
               
               {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-4">
                   {images.map((image: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`aspect-square rounded-md overflow-hidden border-2 ${
-                        selectedImage === index ? 'border-primary' : 'border-transparent'
+                      className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${
+                        selectedImage === index 
+                          ? 'border-primary shadow-glow' 
+                          : 'border-transparent hover:border-primary/40'
                       }`}
                     >
                       <img 
@@ -197,114 +218,136 @@ export const PublicProductPage: React.FC = () => {
               )}
             </div>
 
-            {/* Product info */}
-            <div>
-              <div className="mb-4">
-                <Badge variant="outline" className="mb-2">
+            {/* Enhanced Product info */}
+            <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="mb-6">
+                <Badge variant="outline" className="mb-4 border-primary/30 text-primary/80">
                   {product.category || shop.craft_type?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </Badge>
-                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-2xl font-bold text-primary">
-                    {formatPrice(product.price)}
-                  </span>
-                  {product.compare_price && product.compare_price > product.price && (
-                    <span className="text-lg text-muted-foreground line-through">
-                      {formatPrice(product.compare_price)}
+                <h1 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+                  {product.name}
+                </h1>
+                <div className="flex items-center gap-6 mb-6 flex-wrap">
+                  <div className="flex flex-col">
+                    <span className="text-3xl font-bold text-primary">
+                      {formatPrice(product.price)}
                     </span>
-                  )}
+                    {product.compare_price && product.compare_price > product.price && (
+                      <span className="text-lg text-muted-foreground line-through">
+                        {formatPrice(product.compare_price)}
+                      </span>
+                    )}
+                  </div>
                   {product.featured && (
-                    <Badge variant="secondary">
-                      <Star className="w-3 h-3 mr-1" />
-                      Destacado
+                    <Badge className="bg-gradient-accent text-white border-0 shadow-glow animate-glow-pulse px-4 py-2">
+                      <Star className="w-4 h-4 mr-2 fill-current" />
+                      Producto Destacado
                     </Badge>
                   )}
                 </div>
               </div>
 
               {product.short_description && (
-                <p className="text-lg text-muted-foreground mb-6">{product.short_description}</p>
+                <p className="text-xl text-muted-foreground mb-8 leading-relaxed">{product.short_description}</p>
               )}
 
-              {/* Product details */}
-              <div className="space-y-4 mb-6">
-                {product.inventory !== undefined && (
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {product.inventory > 0 ? `${product.inventory} disponibles` : 'Agotado'}
-                    </span>
-                  </div>
-                )}
+              {/* Enhanced Product details */}
+              <div className="space-y-4 mb-8 p-6 bg-gradient-glass backdrop-blur-sm rounded-2xl border-0">
+                <h3 className="font-bold text-lg text-primary mb-4">Detalles del producto</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {product.inventory !== undefined && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Package className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm">
+                        {product.inventory > 0 ? `${product.inventory} disponibles` : 'Agotado'}
+                      </span>
+                    </div>
+                  )}
 
-                {product.production_time && (
-                  <div className="flex items-center gap-2">
-                    <Timer className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Tiempo de producción: {product.production_time}</span>
-                  </div>
-                )}
+                  {product.production_time && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Timer className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm">Tiempo: {product.production_time}</span>
+                    </div>
+                  )}
 
-                {(dimensions.length || dimensions.width || dimensions.height) && (
-                  <div className="flex items-center gap-2">
-                    <Ruler className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      Dimensiones: {dimensions.length}x{dimensions.width}x{dimensions.height} {dimensions.unit || 'cm'}
-                    </span>
-                  </div>
-                )}
+                  {(dimensions.length || dimensions.width || dimensions.height) && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Ruler className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm">
+                        {dimensions.length}×{dimensions.width}×{dimensions.height} {dimensions.unit || 'cm'}
+                      </span>
+                    </div>
+                  )}
 
-                {product.weight && (
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Peso: {product.weight}g</span>
-                  </div>
-                )}
+                  {product.weight && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Package className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm">Peso: {product.weight}g</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Contact buttons */}
-              <div className="space-y-3">
+              {/* Enhanced Contact buttons */}
+              <div className="space-y-4">
                 <Button 
                   onClick={handleContactShop}
-                  className="w-full"
+                  className="w-full h-14 text-lg bg-gradient-primary hover:shadow-glow transition-all duration-300 hover:scale-105"
                   size="lg"
                 >
-                  <Phone className="w-4 h-4 mr-2" />
+                  <Phone className="w-5 h-5 mr-3" />
                   Contactar para comprar
                 </Button>
                 
                 <Button 
                   variant="outline"
                   onClick={() => navigate(`/tienda/${shop.shop_slug}`)}
-                  className="w-full"
+                  className="w-full h-12 bg-background/50 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
                 >
-                  Ver más productos de {shop.shop_name}
+                  Ver más de {shop.shop_name}
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Product description and details */}
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          {/* Enhanced Product description and details */}
+          <div className="grid lg:grid-cols-3 gap-12 mb-16">
             <div className="lg:col-span-2">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Descripción</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {product.description || 'No hay descripción disponible para este producto.'}
-                  </p>
+              <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-glass animate-fade-in" style={{ animationDelay: '400ms' }}>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+                    Descripción detallada
+                  </h2>
+                  <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
+                    {product.description || 'Esta hermosa pieza artesanal representa la tradición y maestría de nuestros artesanos colombianos.'}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="space-y-6">
-              {/* Materials */}
+            <div className="space-y-8">
+              {/* Enhanced Materials */}
               {materials.length > 0 && (
-                <Card>
+                <Card className="bg-gradient-glass backdrop-blur-sm border-0 shadow-glass animate-fade-in" style={{ animationDelay: '500ms' }}>
                   <CardContent className="p-6">
-                    <h3 className="font-semibold mb-3">Materiales</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-bold mb-4 text-primary flex items-center gap-2">
+                      <div className="p-1 rounded bg-primary/10">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      Materiales
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
                       {materials.map((material: string, index: number) => (
-                        <Badge key={index} variant="outline" className="mr-2 mb-2">
+                        <Badge key={index} variant="outline" className="border-primary/30 text-primary/80">
                           {material}
                         </Badge>
                       ))}
@@ -313,14 +356,19 @@ export const PublicProductPage: React.FC = () => {
                 </Card>
               )}
 
-              {/* Techniques */}
+              {/* Enhanced Techniques */}
               {techniques.length > 0 && (
-                <Card>
+                <Card className="bg-gradient-glass backdrop-blur-sm border-0 shadow-glass animate-fade-in" style={{ animationDelay: '600ms' }}>
                   <CardContent className="p-6">
-                    <h3 className="font-semibold mb-3">Técnicas</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-bold mb-4 text-primary flex items-center gap-2">
+                      <div className="p-1 rounded bg-primary/10">
+                        <Star className="w-4 h-4" />
+                      </div>
+                      Técnicas artesanales
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
                       {techniques.map((technique: string, index: number) => (
-                        <Badge key={index} variant="outline" className="mr-2 mb-2">
+                        <Badge key={index} variant="outline" className="border-secondary/30 text-secondary/80">
                           {technique}
                         </Badge>
                       ))}
@@ -329,66 +377,71 @@ export const PublicProductPage: React.FC = () => {
                 </Card>
               )}
 
-              {/* Artisan info */}
-              <Card>
+              {/* Enhanced Artisan info */}
+              <Card className="bg-gradient-glass backdrop-blur-sm border-0 shadow-glass animate-fade-in" style={{ animationDelay: '700ms' }}>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-3">Artesano</h3>
-                  <div className="flex items-center gap-3 mb-3">
+                  <h3 className="font-bold mb-4 text-primary">Conoce al artesano</h3>
+                  <div className="flex items-center gap-4 mb-4">
                     {shop.logo_url && (
                       <img 
                         src={shop.logo_url}
                         alt={shop.shop_name}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-16 h-16 rounded-full object-cover shadow-card"
                       />
                     )}
                     <div>
-                      <p className="font-medium">{shop.shop_name}</p>
-                      <p className="text-sm text-muted-foreground capitalize">
+                      <p className="font-semibold text-lg">{shop.shop_name}</p>
+                      <p className="text-sm text-muted-foreground capitalize flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
                         {shop.region?.replace(/_/g, ' ')}
                       </p>
                     </div>
                   </div>
                   <Button 
                     variant="outline" 
-                    size="sm"
                     onClick={() => navigate(`/tienda/${shop.shop_slug}`)}
-                    className="w-full"
+                    className="w-full bg-background/50 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
                   >
-                    Ver tienda completa
+                    Explorar toda la tienda
                   </Button>
                 </CardContent>
               </Card>
             </div>
           </div>
 
-          {/* Related products */}
+          {/* Enhanced Related products */}
           {relatedProducts.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Más productos de {shop.shop_name}</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedProducts.map((relatedProduct) => (
+            <div className="animate-fade-in" style={{ animationDelay: '800ms' }}>
+              <h2 className="text-3xl font-bold mb-8 bg-gradient-primary bg-clip-text text-transparent">
+                Más creaciones de {shop.shop_name}
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {relatedProducts.map((relatedProduct, index) => (
                   <Card 
                     key={relatedProduct.id}
-                    className="group cursor-pointer hover:shadow-lg transition-shadow"
+                    className="group cursor-pointer bg-gradient-card backdrop-blur-sm border-0 shadow-card hover:shadow-hover transition-all duration-500 hover:-translate-y-2 animate-fade-in"
+                    style={{ animationDelay: `${800 + index * 100}ms` }}
                     onClick={() => navigate(`/tienda/${shop.shop_slug}/producto/${relatedProduct.id}`)}
                   >
-                    <CardContent className="p-0">
-                      <div className="aspect-square bg-muted overflow-hidden rounded-t-lg">
+                    <CardContent className="p-0 overflow-hidden">
+                      <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
                         {(relatedProduct.images as any)?.[0] ? (
                           <img 
                             src={(relatedProduct.images as any)[0]}
                             alt={relatedProduct.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <ShoppingBag className="w-8 h-8 text-muted-foreground" />
+                            <ShoppingBag className="w-12 h-12 text-primary/40 group-hover:scale-110 transition-transform duration-300" />
                           </div>
                         )}
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold mb-2 line-clamp-2">{relatedProduct.name}</h3>
-                        <span className="text-lg font-bold text-primary">
+                      <div className="p-6">
+                        <h3 className="font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                          {relatedProduct.name}
+                        </h3>
+                        <span className="text-xl font-bold text-primary">
                           {formatPrice(relatedProduct.price)}
                         </span>
                       </div>

@@ -123,9 +123,17 @@ export const ShopDirectoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-lg">Cargando tiendas...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        <div className="text-center animate-fade-in">
+          <div className="animate-float mb-4">
+            <ShoppingBag className="w-16 h-16 mx-auto text-primary/60" />
+          </div>
+          <div className="text-xl font-medium text-primary">Cargando directorio...</div>
+          <div className="text-sm text-muted-foreground mt-2">Descubriendo artesanos colombianos</div>
+        </div>
       </div>
+    );
+  }
     );
   }
 
@@ -141,93 +149,118 @@ export const ShopDirectoryPage: React.FC = () => {
         <link rel="canonical" href={`${window.location.origin}/tiendas`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-accent text-white py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Directorio de Artesanos
-            </h1>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Descubre las mejores artesanías colombianas directamente de los creadores
-            </p>
-            <div className="max-w-lg mx-auto">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Buscar artesanos o productos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white"
-                />
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-hero"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative container mx-auto px-4 py-20 text-center text-white">
+            <div className="animate-fade-in">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                Directorio de Artesanos
+              </h1>
+              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+                Descubre las mejores artesanías colombianas directamente de los maestros creadores
+              </p>
+              
+              {/* Enhanced Search */}
+              <div className="max-w-2xl mx-auto">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl backdrop-blur-glass"></div>
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-6 text-white/70 w-5 h-5 z-10" />
+                    <Input
+                      placeholder="Buscar artesanos, productos o técnicas..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-14 pr-6 py-6 bg-white/10 border-white/20 text-white placeholder:text-white/60 rounded-2xl text-lg backdrop-blur-glass focus:bg-white/20 transition-all duration-300"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          {/* Filters */}
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <Filter className="w-5 h-5 text-muted-foreground" />
-                <h2 className="text-lg font-semibold">Filtros</h2>
+          {/* Enhanced Filters */}
+          <Card className="mb-8 bg-gradient-glass backdrop-blur-glass shadow-glass border-0 animate-fade-in">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Filter className="w-5 h-5 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">Filtrar artesanos</h2>
                 {(selectedCraft !== 'all' || selectedRegion !== 'all' || featuredOnly) && (
-                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="ml-auto">
                     Limpiar filtros
                   </Button>
                 )}
               </div>
               
-              <div className="grid md:grid-cols-4 gap-4">
-                <Select value={selectedCraft} onValueChange={setSelectedCraft}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tipo de artesanía" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las artesanías</SelectItem>
-                    {craftTypes.map(craft => (
-                      <SelectItem key={craft.value} value={craft.value}>
-                        {craft.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Tipo de artesanía</label>
+                  <Select value={selectedCraft} onValueChange={setSelectedCraft}>
+                    <SelectTrigger className="bg-background/50 border-primary/20 hover:border-primary/40 transition-colors">
+                      <SelectValue placeholder="Todas las artesanías" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background/95 backdrop-blur-sm">
+                      <SelectItem value="all">Todas las artesanías</SelectItem>
+                      {craftTypes.map(craft => (
+                        <SelectItem key={craft.value} value={craft.value}>
+                          {craft.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Región" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las regiones</SelectItem>
-                    {regions.map(region => (
-                      <SelectItem key={region.value} value={region.value}>
-                        {region.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Región</label>
+                  <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                    <SelectTrigger className="bg-background/50 border-primary/20 hover:border-primary/40 transition-colors">
+                      <SelectValue placeholder="Todas las regiones" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background/95 backdrop-blur-sm">
+                      <SelectItem value="all">Todas las regiones</SelectItem>
+                      {regions.map(region => (
+                        <SelectItem key={region.value} value={region.value}>
+                          {region.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Button
-                  variant={featuredOnly ? "default" : "outline"}
-                  onClick={() => setFeaturedOnly(!featuredOnly)}
-                  className="justify-start"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  Solo destacados
-                </Button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Destacados</label>
+                  <Button
+                    variant={featuredOnly ? "default" : "outline"}
+                    onClick={() => setFeaturedOnly(!featuredOnly)}
+                    className="w-full justify-start h-10 bg-background/50 border-primary/20 hover:border-primary/40 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  >
+                    <Star className={`w-4 h-4 mr-2 ${featuredOnly ? 'fill-current' : ''}`} />
+                    Solo destacados
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Results header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">
-              {filteredShops.length} tienda{filteredShops.length !== 1 ? 's' : ''} encontrada{filteredShops.length !== 1 ? 's' : ''}
-            </h2>
-            <div className="text-sm text-muted-foreground">
-              Total: {shops.length} artesanos registrados
+          {/* Enhanced Results header */}
+          <div className="flex items-center justify-between mb-8 animate-fade-in">
+            <div>
+              <h2 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                {filteredShops.length} tienda{filteredShops.length !== 1 ? 's' : ''}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                {filteredShops.length !== 1 ? 'encontradas' : 'encontrada'} de {shops.length} artesanos registrados
+              </p>
             </div>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {shops.length} total
+            </Badge>
           </div>
 
           {/* Shop grid */}
@@ -243,62 +276,66 @@ export const ShopDirectoryPage: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredShops.map((shop) => (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredShops.map((shop, index) => (
                 <Card 
                   key={shop.id}
-                  className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="group cursor-pointer bg-gradient-card backdrop-blur-sm border-0 shadow-card hover:shadow-hover transition-all duration-500 hover:-translate-y-2 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => navigate(`/tienda/${shop.shop_slug}`)}
                 >
-                  <CardContent className="p-0">
-                    {/* Shop banner/logo */}
-                    <div className="relative h-48 bg-gradient-to-br from-primary/10 to-accent/10 overflow-hidden rounded-t-lg">
+                  <CardContent className="p-0 overflow-hidden">
+                    {/* Enhanced Shop banner/logo */}
+                    <div className="relative h-56 bg-gradient-to-br from-primary/20 via-accent/10 to-secondary/20 overflow-hidden">
                       {shop.banner_url ? (
-                        <img 
-                          src={shop.banner_url}
-                          alt={`Banner de ${shop.shop_name}`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                        <>
+                          <img 
+                            src={shop.banner_url}
+                            alt={`Banner de ${shop.shop_name}`}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+                        </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                          <ShoppingBag className="w-16 h-16 text-primary/60 group-hover:scale-110 transition-transform duration-300" />
                         </div>
                       )}
                       
-                      {/* Logo overlay */}
+                      {/* Logo overlay with glow effect */}
                       {shop.logo_url && (
-                        <div className="absolute bottom-4 left-4">
+                        <div className="absolute bottom-4 left-4 group-hover:scale-105 transition-transform duration-300">
                           <img 
                             src={shop.logo_url}
                             alt={`Logo de ${shop.shop_name}`}
-                            className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover"
+                            className="w-16 h-16 rounded-full border-4 border-white shadow-glow object-cover"
                           />
                         </div>
                       )}
 
-                      {/* Featured badge */}
+                      {/* Enhanced Featured badge */}
                       {shop.featured && (
-                        <div className="absolute top-4 right-4">
-                          <Badge variant="default" className="bg-accent">
-                            <Star className="w-3 h-3 mr-1" />
+                        <div className="absolute top-4 right-4 animate-glow-pulse">
+                          <Badge className="bg-gradient-accent text-white border-0 shadow-glow">
+                            <Star className="w-3 h-3 mr-1 fill-current" />
                             Destacado
                           </Badge>
                         </div>
                       )}
                     </div>
 
-                    {/* Shop info */}
-                    <div className="p-4">
-                      <div className="mb-2">
-                        <h3 className="font-bold text-lg line-clamp-1 mb-1">{shop.shop_name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {/* Enhanced Shop info */}
+                    <div className="p-6 bg-gradient-to-b from-background/80 to-background">
+                      <div className="mb-4">
+                        <h3 className="font-bold text-xl line-clamp-1 mb-2 group-hover:text-primary transition-colors duration-300">{shop.shop_name}</h3>
+                        <div className="flex items-center gap-3 flex-wrap">
                           {shop.craft_type && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-primary/30 text-primary/80">
                               {shop.craft_type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                             </Badge>
                           )}
                           {shop.region && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
                               <MapPin className="w-3 h-3" />
                               <span className="capitalize">{shop.region.replace(/_/g, ' ')}</span>
                             </div>
@@ -307,13 +344,16 @@ export const ShopDirectoryPage: React.FC = () => {
                       </div>
                       
                       {shop.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4 leading-relaxed">
                           {shop.description}
                         </p>
                       )}
 
-                      <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        Ver tienda
+                      <Button 
+                        variant="outline" 
+                        className="w-full group-hover:bg-gradient-primary group-hover:text-white group-hover:border-transparent transition-all duration-300 group-hover:shadow-glow"
+                      >
+                        <span className="group-hover:scale-105 transition-transform duration-300">Explorar tienda</span>
                       </Button>
                     </div>
                   </CardContent>

@@ -93,9 +93,17 @@ export const PublicShopPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-lg">Cargando tienda...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        <div className="text-center animate-fade-in">
+          <div className="animate-float mb-4">
+            <ShoppingBag className="w-16 h-16 mx-auto text-primary/60" />
+          </div>
+          <div className="text-xl font-medium text-primary">Cargando tienda...</div>
+          <div className="text-sm text-muted-foreground mt-2">Preparando experiencia artesanal</div>
+        </div>
       </div>
+    );
+  }
     );
   }
 
@@ -125,43 +133,49 @@ export const PublicShopPage: React.FC = () => {
         <link rel="canonical" href={`${window.location.origin}/tienda/${shop.shop_slug}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-        {/* Header with banner */}
-        <div className="relative h-64 bg-gradient-to-r from-primary/80 to-accent overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        {/* Enhanced Header with parallax banner */}
+        <div className="relative h-80 lg:h-96 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-hero"></div>
           {shop.banner_url && (
             <img 
               src={shop.banner_url} 
               alt={`Banner de ${shop.shop_name}`}
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
+              className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           
-          <div className="relative container mx-auto px-4 h-full flex items-end pb-8">
-            <div className="flex items-end gap-6">
+          <div className="relative container mx-auto px-4 h-full flex items-end pb-12">
+            <div className="flex items-end gap-8 animate-fade-in">
               {shop.logo_url && (
-                <img 
-                  src={shop.logo_url} 
-                  alt={`Logo de ${shop.shop_name}`}
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
-                />
+                <div className="relative group">
+                  <img 
+                    src={shop.logo_url} 
+                    alt={`Logo de ${shop.shop_name}`}
+                    className="w-28 h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-glow object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
               )}
-              <div className="text-white">
-                <h1 className="text-4xl font-bold mb-2">{shop.shop_name}</h1>
-                <div className="flex items-center gap-4 text-white/90">
-                  <Badge variant="secondary" className="bg-white/20 text-white">
+              <div className="text-white flex-1">
+                <h1 className="text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
+                  {shop.shop_name}
+                </h1>
+                <div className="flex items-center gap-6 text-white/90 flex-wrap">
+                  <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2">
                     {shop.craft_type?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </Badge>
                   {shop.region && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
+                    <div className="flex items-center gap-2 text-lg">
+                      <MapPin className="w-5 h-5" />
                       <span className="capitalize">{shop.region.replace(/_/g, ' ')}</span>
                     </div>
                   )}
                   {shop.featured && (
-                    <Badge variant="default" className="bg-accent">
-                      <Star className="w-3 h-3 mr-1" />
-                      Destacado
+                    <Badge className="bg-gradient-accent text-white border-0 animate-glow-pulse px-4 py-2">
+                      <Star className="w-4 h-4 mr-2 fill-current" />
+                      Artesano Destacado
                     </Badge>
                   )}
                 </div>
@@ -170,83 +184,108 @@ export const PublicShopPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid lg:grid-cols-4 gap-8">
-            {/* Main content */}
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid lg:grid-cols-4 gap-12">
+            {/* Enhanced Main content */}
             <div className="lg:col-span-3">
-              {/* About section */}
-              <Card className="mb-8">
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">Sobre {shop.shop_name}</h2>
-                  <p className="text-muted-foreground mb-4">{shop.description}</p>
+              {/* Enhanced About section */}
+              <Card className="mb-12 bg-gradient-card backdrop-blur-sm border-0 shadow-glass animate-fade-in">
+                <CardContent className="p-8">
+                  <h2 className="text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+                    Sobre {shop.shop_name}
+                  </h2>
+                  <p className="text-muted-foreground mb-6 text-lg leading-relaxed">{shop.description}</p>
                   {shop.story && (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Nuestra Historia</h3>
-                      <p className="text-muted-foreground">{shop.story}</p>
+                    <div className="border-t border-primary/20 pt-6">
+                      <h3 className="text-xl font-bold mb-4 text-primary">Nuestra Historia</h3>
+                      <p className="text-muted-foreground leading-relaxed">{shop.story}</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Products section */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Productos</h2>
-                  <Badge variant="outline">
+              {/* Enhanced Products section */}
+              <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                    Productos Artesanales
+                  </h2>
+                  <Badge variant="outline" className="px-4 py-2 text-sm border-primary/30">
                     {products.length} producto{products.length !== 1 ? 's' : ''}
                   </Badge>
                 </div>
 
                 {products.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Próximamente tendremos productos disponibles</p>
+                  <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-card">
+                    <CardContent className="p-12 text-center">
+                      <div className="animate-float">
+                        <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-primary/60" />
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">Productos en preparación</h3>
+                      <p className="text-muted-foreground">Pronto tendremos hermosas creaciones artesanales disponibles</p>
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {products.map((product) => (
+                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {products.map((product, index) => (
                       <Card 
                         key={product.id}
-                        className="group cursor-pointer hover:shadow-lg transition-shadow"
+                        className="group cursor-pointer bg-gradient-card backdrop-blur-sm border-0 shadow-card hover:shadow-hover transition-all duration-500 hover:-translate-y-2 animate-fade-in"
+                        style={{ animationDelay: `${index * 100}ms` }}
                         onClick={() => navigate(`/tienda/${shop.shop_slug}/producto/${product.id}`)}
                       >
-                        <CardContent className="p-0">
-                          <div className="aspect-square bg-muted overflow-hidden rounded-t-lg">
+                        <CardContent className="p-0 overflow-hidden">
+                          <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
                             {(product.images as any)?.[0] ? (
-                              <img 
-                                src={(product.images as any)[0]}
-                                alt={product.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
+                              <>
+                                <img 
+                                  src={(product.images as any)[0]}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                              </>
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+                                <ShoppingBag className="w-16 h-16 text-primary/40 group-hover:scale-110 transition-transform duration-300" />
+                              </div>
+                            )}
+                            {product.featured && (
+                              <div className="absolute top-4 right-4">
+                                <Badge className="bg-gradient-accent text-white border-0 shadow-glow animate-glow-pulse">
+                                  <Star className="w-3 h-3 mr-1 fill-current" />
+                                  Destacado
+                                </Badge>
                               </div>
                             )}
                           </div>
-                          <div className="p-4">
-                            <h3 className="font-semibold mb-2 line-clamp-2">{product.name}</h3>
+                          <div className="p-6">
+                            <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                              {product.name}
+                            </h3>
                             {product.short_description && (
-                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                                 {product.short_description}
                               </p>
                             )}
                             <div className="flex items-center justify-between">
-                              <div>
-                                <span className="text-lg font-bold text-primary">
+                              <div className="flex flex-col">
+                                <span className="text-xl font-bold text-primary">
                                   {formatPrice(product.price)}
                                 </span>
                                 {product.compare_price && product.compare_price > product.price && (
-                                  <span className="text-sm text-muted-foreground line-through ml-2">
+                                  <span className="text-sm text-muted-foreground line-through">
                                     {formatPrice(product.compare_price)}
                                   </span>
                                 )}
                               </div>
-                              {product.featured && (
-                                <Badge variant="secondary">Destacado</Badge>
-                              )}
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="group-hover:bg-gradient-primary group-hover:text-white group-hover:border-transparent transition-all duration-300"
+                              >
+                                Ver más
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
@@ -257,20 +296,22 @@ export const PublicShopPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Sidebar */}
+            {/* Enhanced Sidebar */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-8">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Contacto</h3>
+              <Card className="sticky top-8 bg-gradient-glass backdrop-blur-glass border-0 shadow-glass animate-fade-in" style={{ animationDelay: '300ms' }}>
+                <CardContent className="p-8">
+                  <h3 className="text-xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+                    Contactar Artesano
+                  </h3>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {contactInfo.email && (
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start"
+                        className="w-full justify-start h-12 bg-background/50 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
                         onClick={() => handleContactClick('email', contactInfo.email)}
                       >
-                        <Mail className="w-4 h-4 mr-2" />
+                        <Mail className="w-5 h-5 mr-3" />
                         Enviar email
                       </Button>
                     )}
@@ -278,35 +319,35 @@ export const PublicShopPage: React.FC = () => {
                     {contactInfo.phone && (
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start"
+                        className="w-full justify-start h-12 bg-background/50 border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
                         onClick={() => handleContactClick('phone', contactInfo.phone)}
                       >
-                        <Phone className="w-4 h-4 mr-2" />
-                        Llamar
+                        <Phone className="w-5 h-5 mr-3" />
+                        Llamar ahora
                       </Button>
                     )}
                     
                     {contactInfo.whatsapp && (
                       <Button 
-                        variant="default" 
-                        className="w-full justify-start bg-green-600 hover:bg-green-700"
+                        className="w-full justify-start h-12 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-glow transition-all duration-300 hover:scale-105"
                         onClick={() => handleContactClick('whatsapp', contactInfo.whatsapp)}
                       >
-                        <Phone className="w-4 h-4 mr-2" />
-                        WhatsApp
+                        <Phone className="w-5 h-5 mr-3" />
+                        WhatsApp Directo
                       </Button>
                     )}
                   </div>
 
-                  {/* Social links */}
+                  {/* Enhanced Social links */}
                   {(socialLinks.instagram || socialLinks.facebook) && (
-                    <div className="mt-6">
-                      <h4 className="font-medium mb-3">Redes Sociales</h4>
-                      <div className="flex gap-2">
+                    <div className="mt-8">
+                      <h4 className="font-semibold mb-4 text-primary">Síguenos</h4>
+                      <div className="flex gap-3">
                         {socialLinks.instagram && (
                           <Button 
                             variant="outline" 
                             size="sm"
+                            className="flex-1 bg-background/50 border-primary/20 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white hover:border-transparent transition-all duration-300"
                             onClick={() => window.open(socialLinks.instagram, '_blank')}
                           >
                             <Instagram className="w-4 h-4" />
@@ -316,6 +357,7 @@ export const PublicShopPage: React.FC = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
+                            className="flex-1 bg-background/50 border-primary/20 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all duration-300"
                             onClick={() => window.open(socialLinks.facebook, '_blank')}
                           >
                             <Facebook className="w-4 h-4" />
@@ -325,6 +367,7 @@ export const PublicShopPage: React.FC = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
+                            className="flex-1 bg-background/50 border-primary/20 hover:bg-primary hover:text-primary-foreground hover:border-transparent transition-all duration-300"
                             onClick={() => window.open(socialLinks.website, '_blank')}
                           >
                             <ExternalLink className="w-4 h-4" />
@@ -334,13 +377,13 @@ export const PublicShopPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Certifications */}
+                  {/* Enhanced Certifications */}
                   {shop.certifications && (shop.certifications as any).length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="font-medium mb-3">Certificaciones</h4>
+                    <div className="mt-8">
+                      <h4 className="font-semibold mb-4 text-primary">Certificaciones</h4>
                       <div className="space-y-2">
                         {(shop.certifications as any).map((cert: string, index: number) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className="text-xs border-primary/30 text-primary/80 w-full justify-center py-2">
                             {cert}
                           </Badge>
                         ))}
