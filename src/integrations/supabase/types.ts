@@ -375,10 +375,13 @@ export type Database = {
           contact_info: Json | null
           craft_type: string | null
           created_at: string
+          data_classification: Json | null
           description: string | null
           featured: boolean
           id: string
           logo_url: string | null
+          privacy_level: string | null
+          public_profile: Json | null
           region: string | null
           seo_data: Json | null
           shop_name: string
@@ -395,10 +398,13 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          data_classification?: Json | null
           description?: string | null
           featured?: boolean
           id?: string
           logo_url?: string | null
+          privacy_level?: string | null
+          public_profile?: Json | null
           region?: string | null
           seo_data?: Json | null
           shop_name: string
@@ -415,10 +421,13 @@ export type Database = {
           contact_info?: Json | null
           craft_type?: string | null
           created_at?: string
+          data_classification?: Json | null
           description?: string | null
           featured?: boolean
           id?: string
           logo_url?: string | null
+          privacy_level?: string | null
+          public_profile?: Json | null
           region?: string | null
           seo_data?: Json | null
           shop_name?: string
@@ -454,6 +463,45 @@ export type Database = {
           image_url?: string
           is_active?: boolean
           step_name?: string
+        }
+        Relationships: []
+      }
+      data_access_audit: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string
+          success: boolean | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1103,6 +1151,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      audit_data_inconsistencies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          affected_count: number
+          issue_description: string
+          issue_type: string
+          severity: string
+          table_name: string
+        }[]
+      }
+      cleanup_obsolete_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_secure_admin_user: {
+        Args: { invited_by_admin_email: string; user_email: string }
+        Returns: Json
+      }
       disable_agent: {
         Args: { p_agent_id: string; p_user_id: string }
         Returns: undefined
@@ -1110,6 +1176,12 @@ export type Database = {
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_public_profile: {
+        Args: {
+          shop_record: Database["public"]["Tables"]["artisan_shops"]["Row"]
+        }
+        Returns: Json
       }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }
@@ -1122,12 +1194,48 @@ export type Database = {
           user_experience: number
         }[]
       }
+      get_validation_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_authorized_user: {
         Args: { user_email: string }
+        Returns: boolean
+      }
+      repair_data_inconsistencies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action_taken: string
+          details: string
+          records_affected: number
+        }[]
+      }
+      sanitize_text_input: {
+        Args: { max_length?: number; text_input: string }
+        Returns: string
+      }
+      sync_active_task_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          action_taken: string
+          active_count: number
+          user_id: string
+        }[]
+      }
+      validate_date_range: {
+        Args: { end_date: string; start_date: string }
+        Returns: boolean
+      }
+      validate_email_format: {
+        Args: { email_input: string }
+        Returns: boolean
+      }
+      validate_json_structure: {
+        Args: { json_input: Json; required_keys: string[] }
         Returns: boolean
       }
     }
