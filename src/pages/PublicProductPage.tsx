@@ -5,7 +5,7 @@ import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Phone, Mail, Star, Package, Ruler, Timer, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, Star, Package, Ruler, Timer, ShoppingBag, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
 
@@ -109,8 +109,6 @@ export const PublicProductPage: React.FC = () => {
           <div className="text-sm text-muted-foreground mt-2">Explorando arte colombiano</div>
         </div>
       </div>
-    );
-  }
     );
   }
 

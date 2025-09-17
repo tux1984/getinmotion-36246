@@ -104,8 +104,6 @@ export const PublicShopPage: React.FC = () => {
       </div>
     );
   }
-    );
-  }
 
   if (!shop) {
     return (

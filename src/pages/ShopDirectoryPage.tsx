@@ -134,8 +134,6 @@ export const ShopDirectoryPage: React.FC = () => {
       </div>
     );
   }
-    );
-  }
 
   return (
     <>
