@@ -86,11 +86,40 @@ serve(async (req) => {
       }
     )
 
-    const { email, password } = await req.json()
+    const { email, password, fullName } = await req.json()
 
     if (!email || !password) {
+      console.error('Missing required fields:', { hasEmail: !!email, hasPassword: !!password })
       return new Response(
         JSON.stringify({ error: 'Email and password are required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+    if (!emailRegex.test(email)) {
+      console.error('Invalid email format:', email)
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Validar contraseña
+    if (password.length < 8 || 
+        !/[A-Z]/.test(password) || 
+        !/[a-z]/.test(password) || 
+        !/\d/.test(password)) {
+      console.error('Password does not meet requirements')
+      return new Response(
+        JSON.stringify({ error: 'Password must be at least 8 characters and include uppercase, lowercase, and number' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -102,11 +131,11 @@ serve(async (req) => {
 
     // Create new admin user
     const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email: email,
+      email: email.toLowerCase().trim(),
       password: password,
       email_confirm: true,
       user_metadata: {
-        full_name: 'Admin User'
+        full_name: fullName || 'Admin User'
       }
     })
 

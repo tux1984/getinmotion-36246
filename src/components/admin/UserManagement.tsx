@@ -1,45 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, UserCheck, UserX, RefreshCw } from 'lucide-react';
+import { Plus, UserCheck, UserX, RefreshCw, Shield, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CreateUserForm } from './CreateUserForm';
 
 import type { Database } from '@/integrations/supabase/types';
 
 type AdminUser = Database['public']['Tables']['admin_users']['Row'];
 
-// Security validation functions
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-  return emailRegex.test(email) && email.length <= 254;
-};
-
-const validatePassword = (password: string): boolean => {
-  return password.length >= 8 && 
-         /[A-Z]/.test(password) && 
-         /[a-z]/.test(password) && 
-         /\d/.test(password);
-};
-
-const sanitizeInput = (input: string): string => {
-  return input.trim().toLowerCase().replace(/[<>\"']/g, '');
-};
-
 export const UserManagement = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string}>({});
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -72,75 +50,9 @@ export const UserManagement = () => {
     }
   };
 
-  const validateForm = (): boolean => {
-    const errors: {email?: string; password?: string} = {};
-    
-    if (!newUserEmail) {
-      errors.email = 'Email es requerido';
-    } else if (!validateEmail(newUserEmail)) {
-      errors.email = 'Email inválido';
-    }
-    
-    if (!newUserPassword) {
-      errors.password = 'Contraseña es requerida';
-    } else if (!validatePassword(newUserPassword)) {
-      errors.password = 'La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula y número';
-    }
-    
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
-    setIsCreating(true);
-    
-    try {
-      const sanitizedEmail = sanitizeInput(newUserEmail);
-      
-      console.log('Calling create-admin-user function...');
-      
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        body: {
-          email: sanitizedEmail,
-          password: newUserPassword
-        }
-      });
-      
-      if (error) {
-        console.error('Function error:', error);
-        throw error;
-      }
-      
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      toast({
-        title: 'Usuario creado',
-        description: `Usuario ${sanitizedEmail} creado exitosamente.`,
-      });
-      
-      setNewUserEmail('');
-      setNewUserPassword('');
-      setValidationErrors({});
-      setDialogOpen(false);
-      fetchUsers();
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo crear el usuario.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsCreating(false);
-    }
+  const handleUserCreated = () => {
+    setDialogOpen(false);
+    fetchUsers();
   };
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
@@ -173,84 +85,46 @@ export const UserManagement = () => {
   }, []);
 
   return (
-    <Card className="bg-indigo-900/40 border-indigo-800/30 text-white">
+    <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
-            Gestión de Usuarios
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            <CardTitle className="text-xl">Gestión de Usuarios Admin</CardTitle>
+            <Badge variant="outline" className="ml-2">
+              <Users className="w-3 h-3 mr-1" />
+              {users.length}
+            </Badge>
+          </div>
           <div className="flex gap-2">
             <Button
               onClick={fetchUsers}
               variant="outline"
               size="sm"
               disabled={loading}
-              className="border-indigo-600 text-indigo-100 hover:bg-indigo-800/50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
             </Button>
             
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  Crear Usuario
+                  Crear Usuario Admin
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-indigo-900 border-indigo-700 text-white">
+              <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    Crear Nuevo Usuario Admin
+                  </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleCreateUser} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={newUserEmail}
-                      onChange={(e) => {
-                        setNewUserEmail(e.target.value);
-                        if (validationErrors.email) {
-                          setValidationErrors(prev => ({ ...prev, email: undefined }));
-                        }
-                      }}
-                      className="bg-indigo-800 border-indigo-600 text-white"
-                      placeholder="usuario@ejemplo.com"
-                      maxLength={254}
-                    />
-                    {validationErrors.email && (
-                      <p className="text-red-400 text-sm">{validationErrors.email}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Contraseña</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={newUserPassword}
-                      onChange={(e) => {
-                        setNewUserPassword(e.target.value);
-                        if (validationErrors.password) {
-                          setValidationErrors(prev => ({ ...prev, password: undefined }));
-                        }
-                      }}
-                      className="bg-indigo-800 border-indigo-600 text-white"
-                      placeholder="Mínimo 8 caracteres"
-                      minLength={8}
-                      maxLength={128}
-                    />
-                    {validationErrors.password && (
-                      <p className="text-red-400 text-sm">{validationErrors.password}</p>
-                    )}
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                    disabled={isCreating}
-                  >
-                    {isCreating ? 'Creando...' : 'Crear Usuario'}
-                  </Button>
-                </form>
+                <CreateUserForm 
+                  onSuccess={handleUserCreated}
+                  onCancel={() => setDialogOpen(false)}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -258,57 +132,69 @@ export const UserManagement = () => {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="text-center py-4">Cargando usuarios...</div>
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="w-6 h-6 animate-spin mr-2" />
+            Cargando usuarios...
+          </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-indigo-200">Email</TableHead>
-                <TableHead className="text-indigo-200">Estado</TableHead>
-                <TableHead className="text-indigo-200">Fecha Creación</TableHead>
-                <TableHead className="text-indigo-200">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="text-white">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={user.is_active ? "default" : "secondary"}
-                      className={user.is_active ? "bg-green-600" : "bg-gray-600"}
-                    >
-                      {user.is_active ? 'Activo' : 'Inactivo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-indigo-200">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleUserStatus(user.id, user.is_active)}
-                      className="border-indigo-600 text-indigo-100 hover:bg-indigo-800/50"
-                    >
-                      {user.is_active ? (
-                        <UserX className="w-4 h-4" />
-                      ) : (
-                        <UserCheck className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {users.length === 0 && (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-indigo-300 py-4">
-                    No hay usuarios creados
-                  </TableCell>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Fecha Creación</TableHead>
+                  <TableHead className="w-[100px]">Acciones</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.email}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={user.is_active ? "default" : "secondary"}
+                      >
+                        {user.is_active ? 'Activo' : 'Inactivo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(user.created_at).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleUserStatus(user.id, user.is_active)}
+                        title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+                      >
+                        {user.is_active ? (
+                          <UserX className="w-4 h-4" />
+                        ) : (
+                          <UserCheck className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {users.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8">
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <Users className="w-8 h-8" />
+                        <p>No hay usuarios administradores creados</p>
+                        <p className="text-sm">Haz clic en "Crear Usuario Admin" para añadir el primero</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
