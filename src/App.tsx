@@ -32,6 +32,7 @@ import { CreateShopPage } from './pages/CreateShopPage';
 import { PublicShopPage } from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
+import { ProductUploadPage } from './pages/ProductUploadPage';
 
 function App() {
   return (
@@ -145,6 +146,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateShopPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/productos/subir" 
+                element={
+                  <ProtectedRoute>
+                    <ProductUploadPage />
                   </ProtectedRoute>
                 } 
               />
