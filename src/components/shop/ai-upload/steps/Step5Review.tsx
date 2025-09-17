@@ -142,7 +142,7 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
             .select('id, shop_name, active, user_id')
             .eq('user_id', user.id)
             .eq('active', true)
-            .single();
+            .maybeSingle();
           return result;
         }
       );
@@ -220,7 +220,8 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
           const result = await supabase
             .from('products')
             .insert([productData])
-            .select('*');
+            .select('*')
+            .single();
           return result;
         }
       );
@@ -233,31 +234,47 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         throw new Error(`Error creando producto: ${productError.message}`);
       }
 
-      if (!createdProduct || createdProduct.length === 0) {
+      if (!createdProduct) {
         throw new Error('No se pudo crear el producto - respuesta vacía');
       }
 
-      console.log('🎉 PRODUCTO CREADO EXITOSAMENTE:', createdProduct[0]);
+      // Verificar que el producto se insertó correctamente
+      console.log('🔍 VERIFICANDO INSERCIÓN DEL PRODUCTO...');
+      const { data: verifyProduct, error: verifyError } = await supabase
+        .from('products')
+        .select('id, name, shop_id')
+        .eq('id', createdProduct.id)
+        .single();
+      
+      if (verifyError || !verifyProduct) {
+        throw new Error('Error verificando la inserción del producto');
+      }
+
+      console.log('🎉 PRODUCTO CREADO Y VERIFICADO EXITOSAMENTE:', {
+        id: createdProduct.id,
+        name: createdProduct.name,
+        shop_id: createdProduct.shop_id
+      });
       
       // PASO 6: Confirmación final y notificación
       toast.success('¡Producto publicado exitosamente!', {
         description: `"${productData.name}" ya está disponible en tu tienda`,
-        duration: 5000
+        duration: 5000,
+        action: {
+          label: 'Ver producto',
+          onClick: () => {
+            onPublish(); // Reset wizard state
+            window.location.href = '/mi-tienda';
+          }
+        }
       });
       
-      // PASO 7: Solo después de éxito completo - resetear wizard y navegar
+      // PASO 7: Solo después de éxito completo - resetear wizard
       console.log('🏁 FINALIZANDO PUBLICACIÓN...');
+      console.log('✅ PRODUCTO PUBLICADO CORRECTAMENTE - ID:', createdProduct.id);
       
-      // Esperar un momento para que el usuario vea el éxito
-      setTimeout(() => {
-        console.log('🔄 Reseteando wizard...');
-        onPublish(); // Reset wizard state
-        
-        setTimeout(() => {
-          console.log('🚀 Redirigiendo a mi tienda...');
-          window.location.href = '/mi-tienda';
-        }, 500);
-      }, 2000);
+      // Reset wizard state inmediatamente después del éxito
+      onPublish();
       
     } catch (error) {
       console.error('❌ ERROR CRÍTICO EN PUBLICACIÓN:', {
