@@ -1020,6 +1020,7 @@ export type Database = {
           time_availability: string | null
           updated_at: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"] | null
           years_in_business: number | null
         }
         Insert: {
@@ -1045,6 +1046,7 @@ export type Database = {
           time_availability?: string | null
           updated_at?: string
           user_id: string
+          user_type?: Database["public"]["Enums"]["user_type"] | null
           years_in_business?: number | null
         }
         Update: {
@@ -1070,6 +1072,7 @@ export type Database = {
           time_availability?: string | null
           updated_at?: string
           user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"] | null
           years_in_business?: number | null
         }
         Relationships: []
@@ -1167,12 +1170,26 @@ export type Database = {
           table_name: string
         }[]
       }
+      check_user_exists_and_type: {
+        Args: { user_email: string }
+        Returns: Json
+      }
       cleanup_obsolete_tasks: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
       create_secure_admin_user: {
         Args: { invited_by_admin_email: string; user_email: string }
+        Returns: Json
+      }
+      create_user_by_type: {
+        Args: {
+          additional_data?: Json
+          full_name: string
+          selected_user_type: Database["public"]["Enums"]["user_type"]
+          user_email: string
+          user_password: string
+        }
         Returns: Json
       }
       disable_agent: {
@@ -1246,7 +1263,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_type: "admin" | "shop_owner" | "regular"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1373,6 +1390,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["admin", "shop_owner", "regular"],
+    },
   },
 } as const
