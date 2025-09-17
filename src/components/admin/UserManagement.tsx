@@ -5,119 +5,55 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, UserCheck, UserX, RefreshCw, Shield, Users, Store, User } from 'lucide-react';
+import { Plus, UserCheck, UserX, RefreshCw, Shield, Users, Store, User, Settings, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { UserCreationWizard } from './UserCreationWizard';
+import { UserClassificationModal } from './UserClassificationModal';
 
-import type { Database } from '@/integrations/supabase/types';
-
-type AdminUser = Database['public']['Tables']['admin_users']['Row'];
-
-interface ExtendedUser extends AdminUser {
-  user_type: 'admin' | 'shop_owner' | 'regular';
-  full_name?: string;
-  is_shop_owner?: boolean;
+interface AllUser {
+  id: string;
+  email: string;
+  full_name: string;
+  user_type: 'admin' | 'shop_owner' | 'regular' | 'unclassified';
+  is_active: boolean;
+  created_at: string;
+  last_sign_in?: string;
+  shop_name?: string;
+  confirmed_at?: string;
+  email_confirmed_at?: string;
 }
 
 export const UserManagement = () => {
-  const [users, setUsers] = useState<ExtendedUser[]>([]);
+  const [users, setUsers] = useState<AllUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [classificationModalOpen, setClassificationModalOpen] = useState(false);
+  const [selectedUserForClassification, setSelectedUserForClassification] = useState<AllUser | null>(null);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      console.log('Fetching all users...');
-      const allUsers: ExtendedUser[] = [];
+      console.log('Fetching all users using get-all-users function...');
       
-      // Get admin users
-      const { data: adminUsers, error: adminError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!adminError && adminUsers) {
-        const enrichedAdmins = adminUsers.map(user => ({
-          ...user,
-          user_type: 'admin' as const,
-          full_name: 'Admin User'
-        }));
-        allUsers.push(...enrichedAdmins);
+      const { data, error } = await supabase.functions.invoke('get-all-users');
+      
+      if (error) {
+        throw error;
       }
 
-      // Get shop owners from user profiles joined with artisan shops
-      const { data: shopOwners, error: shopError } = await supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          user_id,
-          full_name,
-          created_at,
-          updated_at
-        `)
-        .eq('user_type', 'shop_owner')
-        .order('created_at', { ascending: false });
-
-      if (!shopError && shopOwners) {
-        const enrichedShopOwners = shopOwners.map(user => ({
-          id: user.id,
-          email: 'shop@example.com', // Placeholder - would need auth lookup
-          is_active: true,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          created_by: null,
-          user_type: 'shop_owner' as const,
-          full_name: user.full_name || 'Shop Owner',
-          is_shop_owner: true
-        }));
-        allUsers.push(...enrichedShopOwners);
+      if (data?.success && data?.users) {
+        console.log('Users fetched successfully:', data.users.length);
+        console.log('Users breakdown:', {
+          admin: data.users.filter((u: AllUser) => u.user_type === 'admin').length,
+          shop_owner: data.users.filter((u: AllUser) => u.user_type === 'shop_owner').length,
+          regular: data.users.filter((u: AllUser) => u.user_type === 'regular').length,
+          unclassified: data.users.filter((u: AllUser) => u.user_type === 'unclassified').length
+        });
+        setUsers(data.users);
+      } else {
+        throw new Error('No se pudieron obtener los usuarios');
       }
-
-      // Get regular users
-      const { data: regularUsers, error: regularError } = await supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          user_id,
-          full_name,
-          created_at,
-          updated_at
-        `)
-        .eq('user_type', 'regular')
-        .order('created_at', { ascending: false });
-
-      if (!regularError && regularUsers) {
-        const enrichedRegulars = regularUsers.map(user => ({
-          id: user.id,
-          email: 'user@example.com', // Placeholder - would need auth lookup
-          is_active: true,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          created_by: null,
-          user_type: 'regular' as const,
-          full_name: user.full_name || 'Regular User'
-        }));
-        allUsers.push(...enrichedRegulars);
-      }
-
-      // Fallback to just admin users if no extended query worked
-      if (allUsers.length === 0) {
-        console.log('Fallback: Using Edge Function...');
-        const { data, error } = await supabase.functions.invoke('get-admin-users');
-        
-        if (!error && data?.users) {
-          const fallbackUsers = data.users.map((user: any) => ({
-            ...user,
-            user_type: 'admin' as const,
-            full_name: 'Admin User'
-          }));
-          allUsers.push(...fallbackUsers);
-        }
-      }
-
-      console.log('Users fetched successfully:', allUsers.length);
-      setUsers(allUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -132,6 +68,17 @@ export const UserManagement = () => {
 
   const handleUserCreated = () => {
     setDialogOpen(false);
+    fetchUsers();
+  };
+
+  const handleClassifyUser = (user: AllUser) => {
+    setSelectedUserForClassification(user);
+    setClassificationModalOpen(true);
+  };
+
+  const handleClassificationSuccess = () => {
+    setClassificationModalOpen(false);
+    setSelectedUserForClassification(null);
     fetchUsers();
   };
 
@@ -175,6 +122,8 @@ export const UserManagement = () => {
         return <Store className="w-4 h-4" />;
       case 'regular':
         return <User className="w-4 h-4" />;
+      case 'unclassified':
+        return <AlertTriangle className="w-4 h-4" />;
       default:
         return <User className="w-4 h-4" />;
     }
@@ -188,6 +137,8 @@ export const UserManagement = () => {
         return 'Propietario de Tienda';
       case 'regular':
         return 'Usuario Regular';
+      case 'unclassified':
+        return 'Sin Clasificar';
       default:
         return 'Usuario';
     }
@@ -201,9 +152,19 @@ export const UserManagement = () => {
         return 'secondary' as const;
       case 'regular':
         return 'outline' as const;
+      case 'unclassified':
+        return 'default' as const;
       default:
         return 'outline' as const;
     }
+  };
+
+  const getStats = () => {
+    const admin = users.filter(u => u.user_type === 'admin').length;
+    const shopOwner = users.filter(u => u.user_type === 'shop_owner').length;
+    const regular = users.filter(u => u.user_type === 'regular').length;
+    const unclassified = users.filter(u => u.user_type === 'unclassified').length;
+    return { admin, shopOwner, regular, unclassified };
   };
 
   useEffect(() => {
@@ -214,13 +175,21 @@ export const UserManagement = () => {
     <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Shield className="w-5 h-5 text-primary" />
             <CardTitle className="text-xl">Gestión de Usuarios</CardTitle>
-            <Badge variant="outline" className="ml-2">
-              <Users className="w-3 h-3 mr-1" />
-              {users.length}
-            </Badge>
+            <div className="flex items-center gap-2 ml-2">
+              <Badge variant="outline">
+                <Users className="w-3 h-3 mr-1" />
+                {users.length} Total
+              </Badge>
+              {getStats().unclassified > 0 && (
+                <Badge variant="default">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  {getStats().unclassified} Sin Clasificar
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="flex gap-2">
             <Button
@@ -297,19 +266,32 @@ export const UserManagement = () => {
                       })}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleUserStatus(user.id, user.is_active, user.user_type)}
-                        title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-                        disabled={user.user_type !== 'admin'}
-                      >
-                        {user.is_active ? (
-                          <UserX className="w-4 h-4" />
+                      <div className="flex gap-1">
+                        {user.user_type === 'unclassified' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleClassifyUser(user)}
+                            title="Clasificar usuario"
+                          >
+                            <Settings className="w-4 h-4" />
+                          </Button>
                         ) : (
-                          <UserCheck className="w-4 h-4" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleUserStatus(user.id, user.is_active, user.user_type)}
+                            title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+                            disabled={user.user_type !== 'admin'}
+                          >
+                            {user.is_active ? (
+                              <UserX className="w-4 h-4" />
+                            ) : (
+                              <UserCheck className="w-4 h-4" />
+                            )}
+                          </Button>
                         )}
-                      </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -329,6 +311,19 @@ export const UserManagement = () => {
           </div>
         )}
       </CardContent>
+
+      {/* Classification Modal */}
+      {selectedUserForClassification && (
+        <UserClassificationModal
+          isOpen={classificationModalOpen}
+          onClose={() => {
+            setClassificationModalOpen(false);
+            setSelectedUserForClassification(null);
+          }}
+          user={selectedUserForClassification}
+          onSuccess={handleClassificationSuccess}
+        />
+      )}
     </Card>
   );
 };

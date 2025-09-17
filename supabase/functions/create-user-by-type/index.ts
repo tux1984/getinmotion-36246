@@ -75,17 +75,31 @@ serve(async (req) => {
       }
     )
 
-    const { email, password, fullName, userType, additionalData } = await req.json()
+    const { email, password, fullName, userType, additionalData, isClassification, userId } = await req.json()
 
-    if (!email || !password || !userType) {
-      console.error('Missing required fields:', { hasEmail: !!email, hasPassword: !!password, hasUserType: !!userType })
-      return new Response(
-        JSON.stringify({ error: 'Email, password, and user type are required' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+    // Validate based on operation type
+    if (isClassification) {
+      if (!email || !userType || !userId) {
+        console.error('Missing required fields for classification:', { hasEmail: !!email, hasUserType: !!userType, hasUserId: !!userId })
+        return new Response(
+          JSON.stringify({ error: 'Email, userId, and user type are required for classification' }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
+    } else {
+      if (!email || !password || !userType) {
+        console.error('Missing required fields:', { hasEmail: !!email, hasPassword: !!password, hasUserType: !!userType })
+        return new Response(
+          JSON.stringify({ error: 'Email, password, and user type are required' }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
     }
 
     // Validate email format
@@ -101,11 +115,11 @@ serve(async (req) => {
       )
     }
 
-    // Validate password
-    if (password.length < 8 || 
+    // Validate password only for new user creation
+    if (!isClassification && (password.length < 8 || 
         !/[A-Z]/.test(password) || 
         !/[a-z]/.test(password) || 
-        !/\d/.test(password)) {
+        !/\d/.test(password))) {
       console.error('Password does not meet requirements')
       return new Response(
         JSON.stringify({ error: 'Password must be at least 8 characters and include uppercase, lowercase, and number' }),
@@ -128,42 +142,49 @@ serve(async (req) => {
       )
     }
 
-    console.log('Creating user:', email, 'of type:', userType)
+    const operation = isClassification ? 'Classifying' : 'Creating';
+    console.log(`${operation} user:`, email, 'of type:', userType)
 
-    // Create new user in auth
-    const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email: email.toLowerCase().trim(),
-      password: password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName || 'User',
-        user_type: userType
-      }
-    })
+    let targetUserId = userId;
 
-    if (createUserError) {
-      console.error('Error creating user:', createUserError)
-      return new Response(
-        JSON.stringify({ error: createUserError.message }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // Create new user in auth only if not classifying existing user
+    if (!isClassification) {
+      const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
+        email: email.toLowerCase().trim(),
+        password: password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName || 'User',
+          user_type: userType
         }
-      )
-    }
+      })
 
-    console.log('User created successfully:', userData.user?.email)
+      if (createUserError) {
+        console.error('Error creating user:', createUserError)
+        return new Response(
+          JSON.stringify({ error: createUserError.message }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
 
-    const userId = userData.user?.id;
-    if (!userId) {
-      throw new Error('User ID not found after creation');
+      console.log('User created successfully:', userData.user?.email)
+      targetUserId = userData.user?.id;
+      
+      if (!targetUserId) {
+        throw new Error('User ID not found after creation');
+      }
+    } else {
+      console.log('Classifying existing user:', targetUserId)
     }
 
     // Create user profile with user type
     const { error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .upsert({
-        user_id: userId,
+        user_id: targetUserId,
         full_name: fullName || 'User',
         user_type: userType
       }, {
@@ -206,8 +227,8 @@ serve(async (req) => {
       
       const { error: insertShopError } = await supabaseAdmin
         .from('artisan_shops')
-        .insert({
-          user_id: userId,
+        .upsert({
+          user_id: targetUserId,
           shop_name: shopData.shopName || `${fullName || 'User'}'s Shop`,
           shop_slug: (shopData.shopName || `${fullName || 'user'}s-shop`).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           description: shopData.description || 'New artisan shop',
@@ -218,6 +239,8 @@ serve(async (req) => {
           creation_step: 0,
           active: false,
           featured: false
+        }, {
+          onConflict: 'user_id'
         })
 
       if (insertShopError) {
@@ -233,13 +256,14 @@ serve(async (req) => {
       console.log('Artisan shop created successfully')
     }
 
+    const actionMessage = isClassification ? 'classified' : 'created';
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} user created successfully`,
+        message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} user ${actionMessage} successfully`,
         email: email,
         userType: userType,
-        userId: userId
+        userId: targetUserId
       }),
       { 
         status: 200,
