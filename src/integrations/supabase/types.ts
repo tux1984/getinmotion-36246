@@ -1122,6 +1122,8 @@ export type Database = {
           problem_to_solve: string | null
           role: string | null
           sector: string | null
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
           city?: string | null
@@ -1137,6 +1139,8 @@ export type Database = {
           problem_to_solve?: string | null
           role?: string | null
           sector?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
           city?: string | null
@@ -1152,6 +1156,8 @@ export type Database = {
           problem_to_solve?: string | null
           role?: string | null
           sector?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

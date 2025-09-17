@@ -21,5 +21,8 @@ verify_jwt = true
 [functions.get-waitlist]
 verify_jwt = true
 
+[functions.approve-waitlist-user]
+verify_jwt = true
+
 [functions.validate-access-code]
 verify_jwt = false

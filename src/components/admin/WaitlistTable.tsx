@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Filter, Download, Search, Database } from 'lucide-react';
+import { Filter, Download, Search, Database, Check, X, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WaitlistEntry {
   id: string;
@@ -18,6 +19,8 @@ interface WaitlistEntry {
   sector?: string;
   created_at: string;
   language?: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  updated_at?: string;
 }
 
 interface WaitlistTableProps {
@@ -42,6 +45,8 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterField, setFilterField] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   
   const handleSearchChange = (value: string) => {
     const sanitized = sanitizeInput(value);
@@ -57,6 +62,11 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
   };
   
   const filteredData = data.filter(entry => {
+    // Filter by status first
+    if (statusFilter !== 'all' && entry.status !== statusFilter) {
+      return false;
+    }
+    
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
@@ -149,6 +159,69 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
       return 'Fecha inválida';
     }
   };
+
+  const handleApproveReject = async (waitlistId: string, action: 'approve' | 'reject') => {
+    if (processingIds.has(waitlistId)) return;
+    
+    setProcessingIds(prev => new Set(prev).add(waitlistId));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('approve-waitlist-user', {
+        body: { waitlistId, action }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: action === 'approve' ? 'Usuario Aprobado' : 'Usuario Rechazado',
+        description: data.message,
+      });
+
+      // Refresh the data
+      onRefresh();
+    } catch (error) {
+      console.error('Error processing user:', error);
+      toast({
+        title: 'Error',
+        description: `Error al ${action === 'approve' ? 'aprobar' : 'rechazar'} el usuario`,
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(waitlistId);
+        return newSet;
+      });
+    }
+  };
+
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'approved':
+        return (
+          <span className="inline-flex items-center gap-1 bg-green-500/20 text-green-200 text-xs rounded-full px-2 py-1">
+            <Check className="h-3 w-3" />
+            Aprobado
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center gap-1 bg-red-500/20 text-red-200 text-xs rounded-full px-2 py-1">
+            <X className="h-3 w-3" />
+            Rechazado
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-200 text-xs rounded-full px-2 py-1">
+            <Clock className="h-3 w-3" />
+            Pendiente
+          </span>
+        );
+    }
+  };
   
   return (
     <div className="space-y-4">
@@ -173,6 +246,21 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                 maxLength={100}
               />
             </div>
+            
+            <Select 
+              value={statusFilter} 
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-[120px] bg-indigo-900/40 border-indigo-700">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="pending">Pendientes</SelectItem>
+                <SelectItem value="approved">Aprobados</SelectItem>
+                <SelectItem value="rejected">Rechazados</SelectItem>
+              </SelectContent>
+            </Select>
             
             <Select 
               value={filterField} 
@@ -227,19 +315,21 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                 <TableHead className="text-indigo-200 font-medium">Teléfono</TableHead>
                 <TableHead className="text-indigo-200 font-medium">Rol</TableHead>
                 <TableHead className="text-indigo-200 font-medium">País</TableHead>
+                <TableHead className="text-indigo-200 font-medium">Estado</TableHead>
                 <TableHead className="text-indigo-200 font-medium">Fecha</TableHead>
+                <TableHead className="text-indigo-200 font-medium">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-indigo-300">
+                  <TableCell colSpan={8} className="h-24 text-center text-indigo-300">
                     Cargando datos...
                   </TableCell>
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-indigo-300">
+                  <TableCell colSpan={8} className="h-24 text-center text-indigo-300">
                     No se encontraron registros
                   </TableCell>
                 </TableRow>
@@ -247,11 +337,7 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                 filteredData.map((entry) => (
                   <TableRow 
                     key={entry.id} 
-                    className="hover:bg-indigo-900/30 cursor-pointer"
-                    onClick={() => {
-                      // Could implement a modal to show full details here
-                      console.log('Entry details:', entry);
-                    }}
+                    className="hover:bg-indigo-900/30"
                   >
                     <TableCell className="font-medium text-indigo-100">
                       {entry.full_name || 'N/A'}
@@ -272,8 +358,45 @@ export const WaitlistTable = ({ data, isLoading, onRefresh }: WaitlistTableProps
                     <TableCell className="text-indigo-300">
                       {entry.country || '-'}
                     </TableCell>
+                    <TableCell className="text-indigo-300">
+                      {getStatusBadge(entry.status)}
+                    </TableCell>
                     <TableCell className="text-indigo-300 text-sm">
                       {formatDate(entry.created_at)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {entry.status === 'pending' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApproveReject(entry.id, 'approve')}
+                              disabled={processingIds.has(entry.id)}
+                              className="border-green-700 text-green-200 hover:bg-green-800/50 hover:text-white h-8 px-2"
+                            >
+                              {processingIds.has(entry.id) ? (
+                                <span className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                              ) : (
+                                <Check className="h-3 w-3" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApproveReject(entry.id, 'reject')}
+                              disabled={processingIds.has(entry.id)}
+                              className="border-red-700 text-red-200 hover:bg-red-800/50 hover:text-white h-8 px-2"
+                            >
+                              {processingIds.has(entry.id) ? (
+                                <span className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                              ) : (
+                                <X className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
