@@ -26,98 +26,264 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
   const [isPublishing, setIsPublishing] = useState(false);
   const { uploadImages, uploadProgress, isUploading } = useImageUpload();
 
+  // Comprehensive validation before publishing
+  const validateForPublishing = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    console.log('🔍 VALIDACIÓN PRE-PUBLICACIÓN...');
+    console.log('📋 Estado del wizard:', {
+      imagesCount: wizardState.images.length,
+      name: wizardState.name,
+      description: wizardState.description?.length,
+      price: wizardState.price,
+      category: wizardState.category
+    });
+
+    if (!wizardState.images || wizardState.images.length === 0) {
+      errors.push('Debes subir al menos una imagen');
+    }
+    
+    if (!wizardState.name?.trim()) {
+      errors.push('El nombre del producto es obligatorio');
+    }
+    
+    if (!wizardState.description?.trim()) {
+      errors.push('La descripción del producto es obligatoria');
+    }
+    
+    if (!wizardState.price || wizardState.price <= 0) {
+      errors.push('Debes establecer un precio válido');
+    }
+    
+    if (!wizardState.category?.trim()) {
+      errors.push('Debes seleccionar una categoría');
+    }
+
+    console.log('✅ Validación completada:', { isValid: errors.length === 0, errors });
+    return { isValid: errors.length === 0, errors };
+  };
+
+  // Retry function with exponential backoff
+  const retryOperation = async <T,>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    delayMs: number = 1000
+  ): Promise<T> => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 Intento ${attempt}/${maxRetries}`);
+        const result = await operation();
+        console.log(`✅ Operación exitosa en intento ${attempt}`);
+        return result;
+      } catch (error) {
+        console.log(`❌ Intento ${attempt} falló:`, error);
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        const delay = delayMs * Math.pow(2, attempt - 1); // Exponential backoff
+        console.log(`⏰ Esperando ${delay}ms antes del próximo intento...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Máximo número de intentos alcanzado');
+  };
+
   const handlePublish = async () => {
     setIsPublishing(true);
+    let uploadedImageUrls: string[] = [];
     
     try {
-      console.log('🚀 Iniciando publicación del producto...');
+      console.log('🚀 INICIANDO PUBLICACIÓN COMPLETA DEL PRODUCTO...');
       
-      // Upload images first
-      toast.info('Subiendo imágenes...');
-      console.log('📸 Subiendo imágenes:', wizardState.images.length);
-      const imageUrls = await uploadImages(wizardState.images);
-      console.log('✅ Imágenes subidas exitosamente:', imageUrls);
-      
-      // Get user's shop
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('Usuario no autenticado');
+      // PASO 1: Validación exhaustiva pre-publicación
+      const validation = validateForPublishing();
+      if (!validation.isValid) {
+        console.error('❌ VALIDACIÓN FALLIDA:', validation.errors);
+        toast.error('Faltan datos obligatorios', {
+          description: validation.errors.join(', ')
+        });
+        return;
       }
-
-      console.log('👤 Usuario autenticado:', user.id);
-
-      const { data: shop, error: shopError } = await supabase
-        .from('artisan_shops')
-        .select('id, shop_name')
-        .eq('user_id', user.id)
-        .single();
-
-      console.log('🏪 Resultado búsqueda tienda:', { shop, shopError });
-
-      if (!shop) {
-        console.error('❌ No shop found for user:', user.id);
-        toast.error('No tienes una tienda creada', {
-          description: 'Necesitas crear tu tienda antes de poder publicar productos',
+      
+      // PASO 2: Verificación de autenticación robusta
+      console.log('🔐 VERIFICANDO AUTENTICACIÓN...');
+      const authResult = await retryOperation(
+        () => supabase.auth.getUser()
+      );
+      
+      const { data: { user }, error: authError } = authResult;
+      
+      if (authError || !user) {
+        console.error('❌ ERROR DE AUTENTICACIÓN:', authError);
+        toast.error('Error de autenticación', {
+          description: 'Por favor, inicia sesión nuevamente',
           action: {
-            label: 'Crear tienda',
-            onClick: () => window.location.href = '/crear-tienda'
+            label: 'Iniciar sesión',
+            onClick: () => window.location.href = '/auth'
           }
         });
-        throw new Error('No se encontró la tienda del usuario');
+        throw new Error(`Error de autenticación: ${authError?.message || 'Usuario no encontrado'}`);
       }
 
-      console.log('✅ Tienda encontrada:', shop.shop_name, '(ID:', shop.id, ')');
+      console.log('✅ USUARIO AUTENTICADO:', {
+        id: user.id,
+        email: user.email,
+        isAnonymous: user.is_anonymous
+      });
 
-      // Create product
-      toast.info('Creando producto...');
+      // PASO 3: Verificación de tienda con reintentos
+      console.log('🏪 VERIFICANDO TIENDA...');
+      const shopResult = await retryOperation(
+        async () => {
+          const result = await supabase
+            .from('artisan_shops')
+            .select('id, shop_name, active, user_id')
+            .eq('user_id', user.id)
+            .eq('active', true)
+            .single();
+          return result;
+        }
+      );
+
+      const { data: shop, error: shopError } = shopResult;
+      console.log('🏪 RESULTADO VERIFICACIÓN TIENDA:', { shop, shopError });
+
+      if (shopError || !shop) {
+        console.error('❌ TIENDA NO ENCONTRADA O INACTIVA:', shopError);
+        toast.error('Problema con tu tienda', {
+          description: 'No se encontró una tienda activa para tu usuario',
+          action: {
+            label: 'Ver tiendas',
+            onClick: () => window.location.href = '/mi-tienda'
+          }
+        });
+        throw new Error(`Error de tienda: ${shopError?.message || 'Tienda no encontrada'}`);
+      }
+
+      console.log('✅ TIENDA VERIFICADA:', {
+        id: shop.id,
+        name: shop.shop_name,
+        active: shop.active,
+        userId: shop.user_id
+      });
+
+      // PASO 4: Subida de imágenes con validación exhaustiva
+      console.log('📸 INICIANDO SUBIDA DE IMÁGENES...');
+      toast.info('Subiendo imágenes...', { description: `${wizardState.images.length} imagen(es) por subir` });
+      
+      uploadedImageUrls = await retryOperation(
+        async () => {
+          console.log('📤 Subiendo imágenes:', wizardState.images.map(img => ({
+            name: img.name,
+            size: img.size,
+            type: img.type
+          })));
+          
+          const urls = await uploadImages(wizardState.images);
+          
+          if (!urls || urls.length === 0) {
+            throw new Error('No se pudieron subir las imágenes');
+          }
+          
+          console.log('✅ IMÁGENES SUBIDAS EXITOSAMENTE:', urls);
+          return urls;
+        }
+      );
+
+      // PASO 5: Creación del producto con datos validados
+      console.log('📦 CREANDO PRODUCTO EN BASE DE DATOS...');
+      toast.info('Creando producto...', { description: 'Guardando en la base de datos' });
       
       const productData = {
         shop_id: shop.id,
-        name: wizardState.name,
-        description: wizardState.description,
-        short_description: wizardState.shortDescription || wizardState.description.substring(0, 150),
-        price: wizardState.price!,
-        category: wizardState.category,
-        images: imageUrls,
-        tags: wizardState.tags,
+        name: wizardState.name.trim(),
+        description: wizardState.description.trim(),
+        short_description: wizardState.shortDescription?.trim() || wizardState.description.trim().substring(0, 150),
+        price: Number(wizardState.price),
+        category: wizardState.category.trim(),
+        images: uploadedImageUrls,
+        tags: wizardState.tags || [],
         inventory: wizardState.inventory || 1,
-        weight: wizardState.weight,
-        dimensions: wizardState.dimensions,
+        weight: wizardState.weight || null,
+        dimensions: wizardState.dimensions || null,
         materials: wizardState.materials || [],
-        production_time: wizardState.productionTime,
+        production_time: wizardState.productionTime || null,
         active: true,
       };
 
-      console.log('📦 Datos del producto a crear:', productData);
+      console.log('📦 DATOS FINALES DEL PRODUCTO:', productData);
 
-      const { error: productError, data: createdProduct } = await supabase
-        .from('products')
-        .insert([productData])
-        .select();
+      const productResult = await retryOperation(
+        async () => {
+          const result = await supabase
+            .from('products')
+            .insert([productData])
+            .select('*');
+          return result;
+        }
+      );
 
-      console.log('📦 Resultado creación producto:', { createdProduct, productError });
+      const { error: productError, data: createdProduct } = productResult;
+      console.log('📦 RESULTADO CREACIÓN PRODUCTO:', { createdProduct, productError });
 
       if (productError) {
+        console.error('❌ ERROR CREANDO PRODUCTO:', productError);
         throw new Error(`Error creando producto: ${productError.message}`);
       }
 
-      console.log('🎉 ¡Producto creado exitosamente!');
+      if (!createdProduct || createdProduct.length === 0) {
+        throw new Error('No se pudo crear el producto - respuesta vacía');
+      }
+
+      console.log('🎉 PRODUCTO CREADO EXITOSAMENTE:', createdProduct[0]);
       
+      // PASO 6: Confirmación final y notificación
       toast.success('¡Producto publicado exitosamente!', {
-        description: 'Tu producto ya está disponible en tu tienda'
+        description: `"${productData.name}" ya está disponible en tu tienda`,
+        duration: 5000
       });
       
-      // Call onPublish to reset wizard state
-      onPublish();
+      // PASO 7: Solo después de éxito completo - resetear wizard y navegar
+      console.log('🏁 FINALIZANDO PUBLICACIÓN...');
       
-      // Redirect to shop dashboard after successful publish
+      // Esperar un momento para que el usuario vea el éxito
       setTimeout(() => {
-        window.location.href = '/mi-tienda';
-      }, 1500);
+        console.log('🔄 Reseteando wizard...');
+        onPublish(); // Reset wizard state
+        
+        setTimeout(() => {
+          console.log('🚀 Redirigiendo a mi tienda...');
+          window.location.href = '/mi-tienda';
+        }, 500);
+      }, 2000);
       
     } catch (error) {
-      console.error('❌ Error publishing product:', error);
-      toast.error(error instanceof Error ? error.message : 'Error publicando producto');
+      console.error('❌ ERROR CRÍTICO EN PUBLICACIÓN:', {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        uploadedImages: uploadedImageUrls.length,
+        wizardState: {
+          name: wizardState.name,
+          price: wizardState.price,
+          imagesCount: wizardState.images?.length
+        }
+      });
+
+      // Rollback: Si subimos imágenes pero falló la creación del producto, informar
+      if (uploadedImageUrls.length > 0) {
+        console.log('⚠️ ROLLBACK: Imágenes subidas pero producto no creado');
+        toast.error('Error al crear el producto', {
+          description: 'Las imágenes se subieron correctamente, pero falló la creación del producto. Intenta nuevamente.',
+          duration: 8000
+        });
+      } else {
+        toast.error('Error en la publicación', {
+          description: error instanceof Error ? error.message : 'Error desconocido al publicar el producto',
+          duration: 8000
+        });
+      }
     } finally {
       setIsPublishing(false);
     }
