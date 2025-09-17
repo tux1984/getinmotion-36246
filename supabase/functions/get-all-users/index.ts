@@ -15,109 +15,34 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { 
         auth: { persistSession: false },
         global: { headers: { Authorization: req.headers.get('Authorization')! } } 
       }
     )
 
-    // Verify the user is authenticated and is an admin
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
-    if (authError || !user) {
-      console.error('Authentication error:', authError)
-      return new Response(
-        JSON.stringify({ error: 'No autorizado' }), 
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    console.log('Fetching all users using SQL function')
 
-    // Check if user is admin
-    const { data: isAdminData, error: adminError } = await supabaseClient.rpc('is_admin')
-    if (adminError || !isAdminData) {
-      console.error('Admin check error:', adminError)
-      return new Response(
-        JSON.stringify({ error: 'Acceso denegado - se requieren permisos de administrador' }), 
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    console.log('Fetching all users with admin privileges')
-
-    // Get all users from auth.users with their profiles and admin status
-    const { data: authUsers, error: authUsersError } = await supabaseClient.auth.admin.listUsers()
+    // Call the SQL function that combines all user data
+    const { data: allUsers, error: usersError } = await supabaseClient.rpc('get_all_users_combined')
     
-    if (authUsersError) {
-      console.error('Error fetching auth users:', authUsersError)
+    if (usersError) {
+      console.error('Error fetching users:', usersError)
+      
+      // Check if it's an authentication/authorization error
+      if (usersError.message.includes('admin permissions required') || usersError.message.includes('Access denied')) {
+        return new Response(
+          JSON.stringify({ error: 'Acceso denegado - se requieren permisos de administrador' }), 
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       return new Response(
-        JSON.stringify({ error: 'Error al obtener usuarios de autenticación' }), 
+        JSON.stringify({ error: 'Error al obtener usuarios' }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    // Get admin users
-    const { data: adminUsers, error: adminUsersError } = await supabaseClient
-      .from('admin_users')
-      .select('email, is_active, created_at')
-
-    if (adminUsersError) {
-      console.error('Error fetching admin users:', adminUsersError)
-    }
-
-    // Get user profiles
-    const { data: userProfiles, error: profilesError } = await supabaseClient
-      .from('user_profiles')
-      .select('user_id, full_name, user_type, created_at')
-
-    if (profilesError) {
-      console.error('Error fetching user profiles:', profilesError)
-    }
-
-    // Get shop owners
-    const { data: shopOwners, error: shopsError } = await supabaseClient
-      .from('artisan_shops')
-      .select('user_id, shop_name, created_at')
-
-    if (shopsError) {
-      console.error('Error fetching shop owners:', shopsError)
-    }
-
-    // Combine all data
-    const allUsers = authUsers.users.map(authUser => {
-      const adminUser = adminUsers?.find(admin => admin.email === authUser.email)
-      const profile = userProfiles?.find(p => p.user_id === authUser.id)
-      const shop = shopOwners?.find(s => s.user_id === authUser.id)
-      
-      let userType = 'unclassified'
-      let isActive = true
-      let fullName = authUser.user_metadata?.full_name || authUser.email
-
-      if (adminUser) {
-        userType = 'admin'
-        isActive = adminUser.is_active
-      } else if (shop) {
-        userType = 'shop_owner'
-      } else if (profile?.user_type) {
-        userType = profile.user_type
-      }
-
-      if (profile?.full_name) {
-        fullName = profile.full_name
-      }
-
-      return {
-        id: authUser.id,
-        email: authUser.email,
-        full_name: fullName,
-        user_type: userType,
-        is_active: isActive,
-        created_at: authUser.created_at,
-        last_sign_in: authUser.last_sign_in_at,
-        shop_name: shop?.shop_name || null,
-        confirmed_at: authUser.confirmed_at,
-        email_confirmed_at: authUser.email_confirmed_at
-      }
-    })
 
     console.log(`Retrieved ${allUsers.length} users total`)
     console.log('Users by type:', {

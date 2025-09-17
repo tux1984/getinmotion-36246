@@ -1206,6 +1206,18 @@ export type Database = {
         }
         Returns: Json
       }
+      get_all_users_combined: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          shop_name: string
+          user_type: string
+        }[]
+      }
       get_latest_maturity_scores: {
         Args: { user_uuid: string }
         Returns: {
