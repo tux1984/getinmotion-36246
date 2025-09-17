@@ -155,10 +155,39 @@ export const AIProductUpload: React.FC = () => {
   };
 
   const handleCreateProduct = async () => {
-    if (!shop || !productData.name || productData.images.length === 0) {
+    // Validaciones mejoradas
+    if (!shop) {
+      console.error('Shop not available:', shop);
       toast({
-        title: "Información incompleta",
-        description: "Por favor completa el nombre y sube al menos una imagen.",
+        title: "Error de tienda",
+        description: "No se pudo obtener la información de tu tienda. Recarga la página.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!productData.name.trim()) {
+      toast({
+        title: "Nombre requerido",
+        description: "Por favor ingresa un nombre para el producto.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (productData.images.length === 0) {
+      toast({
+        title: "Imágenes requeridas",
+        description: "Por favor sube al menos una imagen del producto.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!productData.price || productData.price <= 0) {
+      toast({
+        title: "Precio inválido",
+        description: "Por favor ingresa un precio válido mayor a 0.",
         variant: "destructive"
       });
       return;
@@ -168,38 +197,71 @@ export const AIProductUpload: React.FC = () => {
     setCoordinatorMessage('🛠️ Creando tu producto y optimizando para SEO...');
 
     try {
+      console.log('=== DEBUG: Iniciando creación de producto ===');
+      console.log('Shop data:', { id: shop.id, name: shop.shop_name });
+      console.log('Product data antes de procesar:', {
+        name: productData.name,
+        price: productData.price,
+        category: productData.category,
+        tags: productData.tags,
+        images_count: productData.images.length
+      });
+
       // Upload images to Supabase Storage
+      console.log('Subiendo imágenes...');
       const imageUrls = await Promise.all(
         productData.images.map(async (image, index) => {
           const fileName = `${Date.now()}_${index}.${image.name.split('.').pop()}`;
+          console.log(`Subiendo imagen ${index + 1}: ${fileName}`);
+          
           const { data, error } = await supabase.storage
             .from('images')
             .upload(`products/${fileName}`, image);
           
-          if (error) throw error;
+          if (error) {
+            console.error(`Error subiendo imagen ${index + 1}:`, error);
+            throw new Error(`Error al subir imagen ${index + 1}: ${error.message}`);
+          }
           
           const { data: { publicUrl } } = supabase.storage
             .from('images')
             .getPublicUrl(data.path);
           
+          console.log(`Imagen ${index + 1} subida exitosamente:`, publicUrl);
           return publicUrl;
         })
       );
 
-      // Create product in database
-      const { error } = await supabase.from('products').insert({
+      console.log('Todas las imágenes subidas:', imageUrls);
+
+      // Preparar datos del producto con validaciones
+      const productToInsert = {
         shop_id: shop.id,
-        name: productData.name,
-        description: productData.description,
-        price: productData.price,
-        category: productData.category,
-        tags: productData.tags,
+        name: productData.name.trim(),
+        description: productData.description?.trim() || '',
+        price: Number(productData.price), // Asegurar que sea número
+        category: productData.category?.trim() || '',
+        tags: Array.isArray(productData.tags) ? productData.tags.filter(Boolean) : [], // Asegurar array válido
         images: imageUrls,
         inventory: 10, // Default inventory
         active: true
-      });
+      };
 
-      if (error) throw error;
+      console.log('Datos del producto a insertar:', productToInsert);
+
+      // Create product in database
+      console.log('Insertando producto en la base de datos...');
+      const { data: insertedProduct, error } = await supabase
+        .from('products')
+        .insert(productToInsert)
+        .select();
+
+      if (error) {
+        console.error('Error insertando producto:', error);
+        throw new Error(`Error al crear producto: ${error.message}`);
+      }
+
+      console.log('Producto creado exitosamente:', insertedProduct);
 
       setState(prev => ({ ...prev, phase: 'complete' }));
       setCoordinatorMessage('🎉 ¡Producto creado exitosamente! Tu producto ya está visible en tu tienda. ¿Quieres crear otro producto o ver tu tienda?');
@@ -210,10 +272,23 @@ export const AIProductUpload: React.FC = () => {
       });
 
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('=== ERROR COMPLETO ===', error);
+      
+      let errorMessage = "Hubo un problema al crear el producto.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('subir imagen')) {
+          errorMessage = "Error al subir las imágenes. Verifica que sean archivos válidos.";
+        } else if (error.message.includes('crear producto')) {
+          errorMessage = "Error al guardar el producto. Verifica que todos los datos sean correctos.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Hubo un problema al crear el producto. Inténtalo de nuevo.",
+        description: errorMessage,
         variant: "destructive"
       });
       setState(prev => ({ ...prev, phase: 'upload' }));
