@@ -1,5 +1,8 @@
 project_id = "ylooqmqmoufqtxvetxuj"
 
+[functions.get-all-users]
+verify_jwt = true
+
 [functions.contexto-maestro]
 verify_jwt = false
 
