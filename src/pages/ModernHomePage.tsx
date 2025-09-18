@@ -29,12 +29,16 @@ interface FeaturedProduct {
   name: string;
   description: string;
   price: number;
+  compare_price?: number;
   images: any;
-  shop_id: string;
-  featured: boolean;
+  category_id?: string;
   inventory: number;
   active: boolean;
+  featured: boolean;
+  shop_id: string;
   created_at: string;
+  short_description?: string;
+  tags?: any;
 }
 
 interface FeaturedShop {
