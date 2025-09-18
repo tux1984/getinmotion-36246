@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -1370,6 +1406,10 @@ export type Database = {
           table_name: string
         }[]
       }
+      check_admin_access: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_user_exists_and_type: {
         Args: { user_email: string }
         Returns: Json
@@ -1440,6 +1480,15 @@ export type Database = {
       is_authorized_user: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      log_admin_action: {
+        Args: {
+          action_type: string
+          details?: Json
+          resource_id?: string
+          resource_type: string
+        }
+        Returns: undefined
       }
       repair_data_inconsistencies: {
         Args: Record<PropertyKey, never>
