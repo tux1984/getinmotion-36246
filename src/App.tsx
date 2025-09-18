@@ -34,6 +34,7 @@ import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 import { ProductUploadPage } from './pages/ProductUploadPage';
 import { ShopDashboardPage } from './pages/ShopDashboardPage';
+import { LatestShopRedirect } from './components/shop/LatestShopRedirect';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
               
               {/* Public shop routes */}
               <Route path="/tiendas" element={<ShopDirectoryPage />} />
+              <Route path="/tienda/ultima" element={<LatestShopRedirect />} />
               <Route path="/tienda/:shopSlug" element={<PublicShopPage />} />
               <Route path="/tienda/:shopSlug/producto/:productId" element={<PublicProductPage />} />
               {/* Main dashboard route - Master Coordinator as entry point */}
