@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-// import { Header } from '@/components/layout/Header';
+import { ModernHeader } from '@/components/layout/ModernHeader';
+import { Footer } from '@/components/layout/Footer';
 import { ProductFilters } from '@/components/products/ProductFilters';
+import { ProductCard } from '@/components/products/ProductCard';
+import { TrustIndicators } from '@/components/ui/PromotionBanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -155,7 +158,7 @@ export const ShopPage: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-subtle">
-        {/* <Header /> */}
+        <ModernHeader showBreadcrumbs />
         
         <main className="container mx-auto px-4 py-8">
           <div className="mb-8">
@@ -202,122 +205,23 @@ export const ShopPage: React.FC = () => {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products.map((product) => (
-                    <Card 
-                      key={product.id} 
-                      className="glass-panel hover-glow group cursor-pointer transition-all duration-300"
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <div className="relative aspect-square overflow-hidden rounded-t-lg">
-                        <img
-                          src={product.images?.[0] || '/placeholder.svg'}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        {product.featured && (
-                          <Badge 
-                            variant="secondary" 
-                            className="absolute top-2 left-2"
-                          >
-                            Destacado
-                          </Badge>
-                        )}
-                        {product.inventory <= 0 && (
-                          <Badge 
-                            variant="destructive" 
-                            className="absolute top-2 right-2"
-                          >
-                            Sin stock
-                          </Badge>
-                        )}
-                        {product.compare_price && product.compare_price > product.price && (
-                          <Badge 
-                            variant="destructive" 
-                            className="absolute bottom-2 left-2"
-                          >
-                            -{Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}%
-                          </Badge>
-                        )}
-                        
-                        {/* Overlay Actions */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-                          <Button 
-                            size="icon" 
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleProductClick(product);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Add to wishlist functionality
-                            }}
-                          >
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold line-clamp-2 mb-2">
-                          {product.name}
-                        </h3>
-                        
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`h-4 w-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-muted-foreground'}`} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-muted-foreground">(4.0)</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-lg font-bold">
-                              {formatPrice(product.price)}
-                            </span>
-                            {product.compare_price && product.compare_price > product.price && (
-                              <span className="text-sm text-muted-foreground line-through ml-2">
-                                {formatPrice(product.compare_price)}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddToCart(product);
-                            }}
-                            disabled={product.inventory <= 0}
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-1" />
-                            Agregar
-                          </Button>
-                        </div>
-                        
-                        {product.inventory <= 5 && product.inventory > 0 && (
-                          <p className="text-xs text-orange-600 mt-2">
-                            ¡Solo quedan {product.inventory} unidades!
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onProductClick={handleProductClick}
+                      size="medium"
+                    />
                   ))}
                 </div>
               )}
             </div>
           </div>
+
+          {/* Trust Indicators */}
+          <TrustIndicators className="mt-12" />
         </main>
+
+        <Footer />
       </div>
     </>
   );
