@@ -27,7 +27,7 @@ import { Helmet } from 'react-helmet-async';
 interface FeaturedProduct {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   price: number;
   images: any;
   shop_id: string;
