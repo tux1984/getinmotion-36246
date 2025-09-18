@@ -685,6 +685,48 @@ export type Database = {
           },
         ]
       }
+      product_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          helpful_count: number | null
+          id: string
+          images: Json | null
+          product_id: string
+          rating: number
+          title: string | null
+          updated_at: string
+          user_id: string | null
+          verified_purchase: boolean | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          images?: Json | null
+          product_id: string
+          rating: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verified_purchase?: boolean | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          images?: Json | null
+          product_id?: string
+          rating?: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verified_purchase?: boolean | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           active: boolean
@@ -943,6 +985,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trust_badges: {
+        Row: {
+          badge_type: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          badge_type: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          badge_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
       }
       user_agents: {
         Row: {
@@ -1256,6 +1331,27 @@ export type Database = {
           sector?: string | null
           status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
         }
         Relationships: []
       }

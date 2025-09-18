@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/contexts/ShoppingCartContext';
+import { useWishlist } from '@/hooks/useWishlist';
+import { ProductRating } from '@/components/trust/ProductRating';
+import { StockBadge } from '@/components/trust/StockBadge';
 import { 
   Eye, 
   Heart, 
@@ -47,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   size = 'medium' 
 }) => {
   const { addToCart } = useCart();
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const formatPrice = (price: number) => 
