@@ -73,10 +73,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-    toast.success(isWishlisted ? 'Eliminado de favoritos' : 'Agregado a favoritos');
+    try {
+      const wasInWishlist = isInWishlist(product.id);
+      await toggleWishlist(product.id);
+      toast.success(wasInWishlist ? 'Eliminado de favoritos' : 'Agregado a favoritos');
+    } catch (error) {
+      toast.error('Error actualizando favoritos');
+    }
   };
 
   const images = Array.isArray(product.images) ? product.images : 
@@ -194,7 +199,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             onClick={handleWishlist}
             className="transform scale-90 group-hover:scale-100 transition-transform duration-300"
           >
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+            <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
           </Button>
           
           <Button 
