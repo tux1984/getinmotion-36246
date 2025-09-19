@@ -17,6 +17,7 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const PublicShopPage: React.FC = () => {
+  console.log('🚀 DIAGNOSTIC: PublicShopPage component loaded');
   const { shopSlug } = useParams<{ shopSlug: string }>();
   const navigate = useNavigate();
   const [shop, setShop] = useState<ArtisanShop | null>(null);
@@ -30,10 +31,12 @@ export const PublicShopPage: React.FC = () => {
 
   useEffect(() => {
     const fetchShopData = async () => {
+      console.log('🔍 DIAGNOSTIC: Starting fetch for shop slug:', shopSlug);
       if (!shopSlug) return;
 
       try {
         // Fetch shop data
+        console.log('🔍 DIAGNOSTIC: Fetching shop data...');
         const { data: shopData, error: shopError } = await supabase
           .from('artisan_shops')
           .select('*')
@@ -42,16 +45,19 @@ export const PublicShopPage: React.FC = () => {
           .single();
 
         if (shopError) {
+          console.error('❌ DIAGNOSTIC: Error fetching shop:', shopError);
           toast.error('Tienda no encontrada');
           navigate('/tiendas');
           return;
         }
 
+        console.log('✅ DIAGNOSTIC: Shop data received:', shopData);
         setShop(shopData);
 
         setLoading(false);
 
         // Fetch products with slight delay for better UX
+        console.log('🔍 DIAGNOSTIC: Fetching products for shop ID:', shopData.id);
         setProductsLoading(true);
         const { data: productsData, error: productsError } = await supabase
           .from('products')
@@ -61,7 +67,11 @@ export const PublicShopPage: React.FC = () => {
           .order('featured', { ascending: false })
           .order('created_at', { ascending: false });
 
-        if (!productsError) {
+        if (productsError) {
+          console.error('❌ DIAGNOSTIC: Error fetching products:', productsError);
+        } else {
+          console.log('✅ DIAGNOSTIC: Products data received:', productsData?.length || 0, 'products');
+          console.log('🔍 DIAGNOSTIC: Products details:', productsData);
           setProducts(productsData || []);
         }
         setProductsLoading(false);
