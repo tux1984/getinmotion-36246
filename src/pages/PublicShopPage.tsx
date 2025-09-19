@@ -5,9 +5,16 @@ import { ArtisanShop, Product } from '@/types/artisan';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Phone, Mail, ExternalLink, Instagram, Facebook, ShoppingBag } from 'lucide-react';
+import { MapPin, Star, Phone, Mail, ExternalLink, Instagram, Facebook, ShoppingBag, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { SocialShare } from '@/components/shop/SocialShare';
+import { ProductRating } from '@/components/trust/ProductRating';
+import { ProductSkeleton } from '@/components/shop/ProductSkeleton';
+import { LazyImage } from '@/components/shop/LazyImage';
+import { useWishlist } from '@/hooks/useWishlist';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const PublicShopPage: React.FC = () => {
   const { shopSlug } = useParams<{ shopSlug: string }>();
@@ -15,6 +22,11 @@ export const PublicShopPage: React.FC = () => {
   const [shop, setShop] = useState<ArtisanShop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: productsRef, isVisible: productsVisible } = useScrollAnimation({ threshold: 0.1 });
 
   useEffect(() => {
     const fetchShopData = async () => {
@@ -37,7 +49,10 @@ export const PublicShopPage: React.FC = () => {
 
         setShop(shopData);
 
-        // Fetch products
+        setLoading(false);
+
+        // Fetch products with slight delay for better UX
+        setProductsLoading(true);
         const { data: productsData, error: productsError } = await supabase
           .from('products')
           .select('*')
@@ -49,6 +64,7 @@ export const PublicShopPage: React.FC = () => {
         if (!productsError) {
           setProducts(productsData || []);
         }
+        setProductsLoading(false);
 
         // Track shop view
         await supabase
@@ -67,6 +83,7 @@ export const PublicShopPage: React.FC = () => {
         toast.error('Error al cargar la tienda');
       } finally {
         setLoading(false);
+        setProductsLoading(false);
       }
     };
 
@@ -132,8 +149,20 @@ export const PublicShopPage: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+        {/* Breadcrumb Navigation */}
+        <div className="container mx-auto px-4 pt-6">
+          <Breadcrumbs 
+            items={[
+              { label: 'Inicio', path: '/' },
+              { label: 'Tiendas', path: '/tiendas' },
+              { label: shop.shop_name }
+            ]}
+            className="animate-fade-in"
+          />
+        </div>
+
         {/* Enhanced Header with parallax banner */}
-        <div className="relative h-80 lg:h-96 overflow-hidden">
+        <div ref={heroRef} className={`relative h-80 lg:h-96 overflow-hidden transition-all duration-1000 ${heroVisible ? 'animate-fade-in' : 'opacity-0'}`}>
           <div className="absolute inset-0 bg-gradient-hero"></div>
           {shop.banner_url && (
             <img 
@@ -145,21 +174,30 @@ export const PublicShopPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           
           <div className="relative container mx-auto px-4 h-full flex items-end pb-12">
-            <div className="flex items-end gap-8 animate-fade-in">
+            <div className="flex items-end gap-8 w-full">
               {shop.logo_url && (
                 <div className="relative group">
-                  <img 
+                  <LazyImage
                     src={shop.logo_url} 
                     alt={`Logo de ${shop.shop_name}`}
                     className="w-28 h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-glow object-cover group-hover:scale-105 transition-transform duration-300"
+                    fallback={<ShoppingBag className="w-16 h-16 text-white/60" />}
                   />
                   <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               )}
               <div className="text-white flex-1">
-                <h1 className="text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
-                  {shop.shop_name}
-                </h1>
+                <div className="flex items-start justify-between mb-4">
+                  <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
+                    {shop.shop_name}
+                  </h1>
+                  <SocialShare 
+                    url={`/tienda/${shop.shop_slug}`}
+                    title={shop.shop_name}
+                    description={shop.description}
+                    className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                  />
+                </div>
                 <div className="flex items-center gap-6 text-white/90 flex-wrap">
                   <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-2">
                     {shop.craft_type?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -203,7 +241,11 @@ export const PublicShopPage: React.FC = () => {
               </Card>
 
               {/* Enhanced Products section */}
-              <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div 
+                ref={productsRef}
+                className={`transition-all duration-1000 ${productsVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'}`}
+                style={{ animationDelay: '200ms' }}
+              >
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     Productos Artesanales
@@ -213,7 +255,9 @@ export const PublicShopPage: React.FC = () => {
                   </Badge>
                 </div>
 
-                {products.length === 0 ? (
+                {productsLoading ? (
+                  <ProductSkeleton count={6} />
+                ) : products.length === 0 ? (
                   <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-card">
                     <CardContent className="p-12 text-center">
                       <div className="animate-float">
@@ -233,13 +277,14 @@ export const PublicShopPage: React.FC = () => {
                         onClick={() => navigate(`/tienda/${shop.shop_slug}/producto/${product.id}`)}
                       >
                         <CardContent className="p-0 overflow-hidden">
-                          <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
+                          <div className="relative aspect-square bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
                             {(product.images as any)?.[0] ? (
                               <>
-                                <img 
+                                <LazyImage
                                   src={(product.images as any)[0]}
                                   alt={product.name}
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                  fallback={<ShoppingBag className="w-16 h-16 text-primary/40" />}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                               </>
@@ -248,6 +293,22 @@ export const PublicShopPage: React.FC = () => {
                                 <ShoppingBag className="w-16 h-16 text-primary/40 group-hover:scale-110 transition-transform duration-300" />
                               </div>
                             )}
+                            
+                            {/* Wishlist button */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className={`absolute top-4 left-4 bg-background/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 hover:scale-110 ${
+                                isInWishlist(product.id) ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-red-500'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleWishlist(product.id);
+                              }}
+                            >
+                              <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                            </Button>
+
                             {product.featured && (
                               <div className="absolute top-4 right-4">
                                 <Badge className="bg-gradient-accent text-white border-0 shadow-glow animate-glow-pulse">
@@ -261,6 +322,16 @@ export const PublicShopPage: React.FC = () => {
                             <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                               {product.name}
                             </h3>
+                            
+                            {/* Product rating */}
+                            <div className="mb-3">
+                              <ProductRating 
+                                productId={product.id} 
+                                size="sm"
+                                showCount={true}
+                              />
+                            </div>
+                            
                             {product.short_description && (
                               <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                                 {product.short_description}
