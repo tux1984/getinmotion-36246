@@ -188,7 +188,7 @@ export default function PublicShopPageNew() {
                 <Card 
                   key={product.id} 
                   className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden bg-white border-0 shadow-md"
-                  onClick={() => navigate(`/producto/${product.slug || product.id}`)}
+                  onClick={() => navigate(`/tienda/${shop.shop_slug}/producto/${product.id}`)}
                 >
                   <div className="aspect-square overflow-hidden">
                     <LazyImage

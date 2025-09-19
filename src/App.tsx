@@ -53,6 +53,7 @@ function App() {
               <Route path="/tienda/mas-reciente" element={<LatestShopRedirect />} />
               <Route path="/tienda/:shopSlug" element={<PublicShopPage />} />
               <Route path="/tienda/:shopSlug/producto/:productId" element={<PublicProductPage />} />
+              <Route path="/producto/:productId" element={<PublicProductPage />} />
               {/* Main dashboard route - Master Coordinator as entry point */}
               <Route 
                 path="/dashboard" 
