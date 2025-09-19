@@ -29,7 +29,7 @@ import Profile from './pages/Profile';
 import { BiomeConfigPage } from './pages/BiomeConfigPage';
 import { ArtisanDashboardPage } from './pages/ArtisanDashboardPage';
 import { CreateShopPage } from './pages/CreateShopPage';
-import { PublicShopPage } from './pages/PublicShopPage';
+import PublicShopPage from './pages/PublicShopPage';
 import { PublicProductPage } from './pages/PublicProductPage';
 import { ShopDirectoryPage } from './pages/ShopDirectoryPage';
 import { ProductUploadPage } from './pages/ProductUploadPage';
