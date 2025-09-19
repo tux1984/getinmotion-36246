@@ -148,7 +148,12 @@ export const PublicShopPage: React.FC = () => {
         <link rel="canonical" href={`${window.location.origin}/tienda/${shop.shop_slug}`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-background via-primary-subtle to-secondary/10">
+      {/* 🚨 VISUAL DEBUGGING INDICATOR */}
+      <div className="fixed top-0 left-0 z-50 bg-red-500 text-white p-2 text-sm font-bold animate-pulse">
+        🚨 DEBUG: V2.0 - {new Date().toLocaleTimeString()} - CAMBIOS APLICADOS
+      </div>
+
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-orange-100">
         {/* Breadcrumb Navigation */}
         <div className="container mx-auto px-4 pt-6">
           <Breadcrumbs 
