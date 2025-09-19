@@ -57,7 +57,7 @@ export const OnboardingSteps: React.FC<{
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
         {steps.map((step, index) => (
-          <React.Fragment key={index}>
+          <div key={index}>
             <div className="flex flex-col items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 index <= currentStep ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
@@ -76,7 +76,7 @@ export const OnboardingSteps: React.FC<{
                 index < currentStep ? 'bg-indigo-600' : 'bg-gray-200'
               }`} />
             )}
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </div>

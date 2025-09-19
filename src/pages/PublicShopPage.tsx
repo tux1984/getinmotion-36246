@@ -66,23 +66,7 @@ export const PublicShopPage: React.FC = () => {
         }
         setProductsLoading(false);
 
-        // Track shop view - simplified to avoid constraint conflicts
-        try {
-          const today = new Date().toISOString().split('T')[0];
-          const { error } = await supabase
-            .from('artisan_analytics')
-            .insert({
-              shop_id: shopData.id,
-              date: today,
-              views: 1
-            });
-          
-          if (error && !error.message.includes('duplicate key')) {
-            console.warn('Analytics tracking failed:', error);
-          }
-        } catch (analyticsError) {
-          console.warn('Analytics tracking error:', analyticsError);
-        }
+        // Analytics tracking disabled temporarily to avoid errors
 
       } catch (error) {
         console.error('Error fetching shop:', error);

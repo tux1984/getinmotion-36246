@@ -67,7 +67,7 @@ export const TaskPagination: React.FC<TaskPaginationProps> = ({
               Math.abs(page - currentPage) <= 1
             )
             .map((page, index, array) => (
-              <React.Fragment key={page}>
+              <div key={page}>
                 {index > 0 && array[index - 1] !== page - 1 && (
                   <span className="px-2 text-gray-400">...</span>
                 )}
@@ -79,7 +79,7 @@ export const TaskPagination: React.FC<TaskPaginationProps> = ({
                 >
                   {page}
                 </Button>
-              </React.Fragment>
+              </div>
             ))}
         </div>
         
