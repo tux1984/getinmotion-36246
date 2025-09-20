@@ -1318,6 +1318,7 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          access_code: string | null
           city: string | null
           copilots_interest: string[] | null
           country: string | null
@@ -1335,6 +1336,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          access_code?: string | null
           city?: string | null
           copilots_interest?: string[] | null
           country?: string | null
@@ -1352,6 +1354,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          access_code?: string | null
           city?: string | null
           copilots_interest?: string[] | null
           country?: string | null
